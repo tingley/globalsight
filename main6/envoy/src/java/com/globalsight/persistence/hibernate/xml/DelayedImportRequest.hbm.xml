@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class
+		name="com.globalsight.everest.request.reimport.DelayedImportRequest"
+		table="DELAYED_IMPORT_REQUEST">
+		<id name="id" column="ID" type="long">
+			<generator class="foreign" >
+				<param name="property">request</param>
+			</generator>
+		</id>
+		
+		<property name="gxml" length="4000" column="GXML" type="string"
+			not-null="false" unique="false" />
+		
+		<property name="externalPageId" length="200"
+			column="EXTERNAL_PAGE_ID" type="string" not-null="true"
+			unique="false" />
+		
+		<many-to-one name="previousPage" column="PREVIOUS_PAGE_ID"
+			class="com.globalsight.everest.page.SourcePage" not-null="true" />
+		
+		<property name="dataSourceType" length="20"
+			column="DATA_SOURCE_TYPE" type="string" not-null="false"
+			unique="false" />
+		
+		<property name="sourceEncoding" length="30"
+			column="ORIGINAL_ENCODING" type="string" not-null="false"
+			unique="false" />
+		
+		<component name="time"
+			class="com.globalsight.everest.foundation.Timestamp">
+			<property name="date" column="REIMPORT_TIME" type="timestamp"
+				not-null="true" />
+		</component>
+		
+		<one-to-one name="request"
+			class="com.globalsight.everest.request.RequestImpl"
+			constrained="true" />
+	</class>
+</hibernate-mapping>

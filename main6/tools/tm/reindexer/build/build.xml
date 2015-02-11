@@ -1,0 +1,86 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *      Reindexer for GlobalSight 5.2.1 Build FILE              * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Reindexer" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="reindexer_src" value=".." />
+    <property name="reindexer_bin" value="reindexer_classes" />
+    <property name="reindexer_dist" value="dist" />
+    <property name="toolsLib" value="../../../lib/common" />
+    <property name="toolsLibNt" value="../../../lib/nt" />
+    <property name="toolsBuild" value="../../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+<!--
+    <property name="xerces" value="${toolsLib}/xerces1.4.4.jar" />
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    <property name="oracle" value="${toolsLibNt}/O817NTclasses12.zip" />
+-->
+    <property name="cap"
+        value="${toolsBuild}/capclasses/globalsight.ear/lib/classes" />
+    <property name="log4j" value="${toolsLib}/log4j.jar" />
+    <property name="oracle" value="${toolsLib}/classes12.zip" />
+    <property name="lucene" value="${toolsLib}/lucene-1.4.2.jar" />
+
+<!--
+    <property name="reindexer_classpath"
+        value="${xerces}:${regexp}:${cap}:${weblogic}:${ldap}:${oracle}" />
+-->
+    <property name="reindexer_classpath" value="${cap}:${log4j}:${oracle}:${lucene}" />
+
+    <property name="batch_file" value="Reindexer.bat"/>
+    <property name="sh_file" value="Reindexer.sh"/>
+    <property name="reindexer_jar" value="Reindexer.jar"/>
+    <property name="reindexer_zip"
+        value="${reindexer_dist}/Reindexer.zip"/>
+    <property name="reindexer_doc" value="Reindexer.README" />
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling reindexer tool..." />
+    <mkdir dir="${reindexer_bin}" />
+    <javac classpath="${reindexer_classpath}"
+	   destdir="${reindexer_bin}" >
+      <src path="${reindexer_src}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <mkdir dir="${reindexer_dist}" />
+    <jar jarfile="${reindexer_dist}/${reindexer_jar}"
+         basedir="${reindexer_bin}"
+	 includes="com/**" />
+
+    <copy file="${reindexer_src}/${batch_file}"
+         todir="${reindexer_dist}"/>
+    <copy file="${reindexer_src}/${sh_file}" todir="${reindexer_dist}"/>
+    <chmod file="${reindexer_dist}/${sh_file}" perm="ugo+rx"/>
+
+    <copy file="${reindexer_src}/${reindexer_doc}" todir="${reindexer_dist}"/>
+
+
+    <zip zipfile="${reindexer_zip}">
+        <zipfileset dir="${reindexer_dist}" includes="${reindexer_jar}, ${batch_file}, ${sh_file}, ${reindexer_doc}" prefix="globalsight_reindexer" />
+    </zip>
+   </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${reindexer_bin}" />
+    <delete dir="${reindexer_dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

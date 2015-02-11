@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.globalsight.everest.cvsconfig.modulemapping.ModuleMapping"
+        table="MODULE_MAPPING">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="sourceLocale" length="40"
+            column="SOURCE_LOCALE" type="string" not-null="true" />
+
+        <property name="sourceLocaleLong" length="100"
+            column="SOURCE_LOCALE_LONG" type="string" not-null="false" />
+
+        <property name="sourceModule" length="200"
+            column="SOURCE_MODULE" type="string" not-null="true" />
+
+        <property name="targetLocale" length="40"
+            column="TARGET_LOCALE" type="string" not-null="true" />
+
+        <property name="targetLocaleLong" length="100"
+            column="TARGET_LOCALE_LONG" type="string" not-null="false" />
+
+        <property name="targetModule" length="200"
+            column="TARGET_MODULE" type="string" not-null="true" />
+
+        <property name="companyId" length="20"
+            column="COMPANY_ID" type="long" not-null="true"/>
+
+        <property name="moduleId" length="20"
+            column="MODULE_ID" type="long" not-null="true"/>
+            
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" />
+            
+        <property name="subFolderMapped" column="SUB_FOLDER_MAPPED" type="string" length="2"
+            not-null="false" />
+
+		<set name="fileRenames"  inverse="true" cascade="save-update" lazy="false">
+			<key column="MODULE_MAPPING_ID" />
+			<one-to-many class="com.globalsight.everest.cvsconfig.modulemapping.ModuleMappingRename" />	     
+		</set>
+    </class>
+</hibernate-mapping>

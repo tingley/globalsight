@@ -1,0 +1,1 @@
+ALTER TABLE ms_office_ppt_filter ADD COLUMN EXTRACT_ALT CHAR(1) DEFAULT 'N';

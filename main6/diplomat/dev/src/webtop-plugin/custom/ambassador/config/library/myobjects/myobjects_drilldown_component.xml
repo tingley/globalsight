@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         Subscription List                                      -->
+<!-- File           myobjects_drilldown_component.xml                      -->
+<!-- Description    Columned list of subscription                          -->
+<!-- Created on     19 Sept 2001                                           -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   <scope>
+
+      <!-- the drilldown style of myobject list -->
+      <component id="myobjects_drilldown">
+
+         <!-- Description (not NLS'd) -->
+         <desc>
+            My Objects streamline view component: a viewer displaying objects
+            that have been checked out or recently modified by the current session user.
+         </desc>
+
+         <!-- Component Contract -->
+         <params>
+         </params>
+
+         <!-- Component Layout -->
+         <pages>
+            <start>/webcomponent/library/myobjects/myobjects_drilldown.jsp</start>
+         </pages>
+
+         <!-- Component Behavior -->
+         <class>com.documentum.webcomponent.library.myobjects.MyObjects</class>
+         <nlsbundle>com.documentum.ambassador.library.myobjects.MyObjectsNlsProp</nlsbundle>
+
+         <!-- If this component supports failover/replication, the failoverenabled needs to be set to true-->
+         <failoverenabled>true</failoverenabled>
+         
+         <!-- Component specific Configuration -->
+         <helpcontextid>myfiles_drilldown</helpcontextid>
+
+         <!-- visibility and order of attribute columns -->
+         <columns>
+            <column>
+               <attribute>object_name</attribute>
+               <label><nlsid>MSG_NAME</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>title</attribute>
+               <label><nlsid>MSG_TITLE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>authors</attribute>
+               <label><nlsid>MSG_AUTHORS</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>a_content_type</attribute>
+               <label><nlsid>MSG_FORMAT</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_content_size</attribute>
+               <label><nlsid>MSG_SIZE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>owner_name</attribute>
+               <label><nlsid>MSG_OWNER_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>group_name</attribute>
+               <label><nlsid>MSG_GROUP_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_creator_name</attribute>
+               <label><nlsid>MSG_CREATOR_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_object_type</attribute>
+               <label><nlsid>MSG_OBJECT_TYPE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_version_label</attribute>
+               <label><nlsid>MSG_VERSION_LABEL</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_creation_date</attribute>
+               <label><nlsid>MSG_CREATION_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_modify_date</attribute>
+               <label><nlsid>MSG_MODIFIED_DATE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_modifier</attribute>
+               <label><nlsid>MSG_MODIFIER</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_access_date</attribute>
+               <label><nlsid>MSG_ACCESS_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_lock_owner</attribute>
+               <label><nlsid>MSG_LOCK_OWNER</nlsid></label>
+               <visible>true</visible>
+            </column>
+             <column>
+               <attribute>topic_status</attribute>
+               <label><nlsid>MSG_DISCUSSION</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>room_status</attribute>
+               <label><nlsid>MSG_ROOM_ICON</nlsid></label>
+               <visible>true</visible>
+            </column>
+         </columns>
+
+         <!-- object type to display by default (e.g. dm_sysobject, dm_document) -->
+         <objecttype>dm_document</objecttype>
+
+         <!-- show folders by default -->
+         <showfolders>false</showfolders>
+
+         <!-- show objects modified within how many days  -->
+         <modifiedwithindays>7</modifiedwithindays>
+
+        <!-- Component level preferences -->
+        <preferences>
+          <preference id="objecttype">
+             <label><nlsid>PREF_LBL_OBJTYPE</nlsid></label>
+             <description><nlsid>PREF_DESC_OBJTYPE</nlsid></description>
+             <type>string</type>
+             <value>dm_document</value>
+          </preference>
+          <preference id="showfolders">
+             <label><nlsid>PREF_LBL_SHOWFLDRS</nlsid></label>
+             <description><nlsid>PREF_DESC_SHOWFLDRS</nlsid></description>
+             <type>boolean</type>
+          </preference>
+          <preference id="modifiedwithindays">
+             <label><nlsid>PREF_LBL_MODIFIED</nlsid></label>
+             <description><nlsid>PREF_DESC_MODIFIED</nlsid></description>
+             <type>int</type>
+             <value>7</value>
+          </preference>
+        </preferences>
+
+      </component>
+
+   </scope>
+</config>

@@ -1,0 +1,108 @@
+-- 
+--  This inserts the system's default calendar and it's related info.
+-- 
+
+--  Holiday
+INSERT INTO HOLIDAY VALUES (
+	1, 'Christmas Day', '',
+	'0 0 0 0 25 11', 1, 11, 25,
+	null, null, null, 'Y');
+INSERT INTO HOLIDAY VALUES (
+	2, 'New Year''s Day', '',
+	'0 0 0 0 1 0', 1, 0, 1,
+	null, null, null, 'Y');
+
+--  creation of a default calendar
+INSERT INTO CALENDAR VALUES (
+	1, 'Base Calendar',
+	8, '%%system_time_zone%%',
+	'system', 1, current_timestamp(), 'Y');
+
+
+INSERT INTO CALENDAR_HOLIDAY VALUES (1, 1);
+INSERT INTO CALENDAR_HOLIDAY VALUES (1, 2);
+      
+--  5 working days: Monday to Friday (2 to 6).
+INSERT INTO CALENDAR_WORKING_DAY VALUES (1, 1, 2);
+INSERT INTO CALENDAR_WORKING_DAY VALUES (2, 1, 3);
+INSERT INTO CALENDAR_WORKING_DAY VALUES (3, 1, 4);
+INSERT INTO CALENDAR_WORKING_DAY VALUES (4, 1, 5);
+INSERT INTO CALENDAR_WORKING_DAY VALUES (5, 1, 6);
+
+--  working hours for each working day: from 8 AM to 12 PM, and then from 1 PM to 5 PM.
+--  Working hours for Monday
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	1, 1, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-27:08:00:00');
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	2, 1, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-27:13:00:00');
+
+--  Working hours for Tuesday
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	3, 2, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-28:08:00:00');
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	4, 2, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-28:13:00:00');
+
+--  Working hours for Wednesday
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	5, 3, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-29:08:00:00');
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	6, 3, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-29:13:00:00');
+
+--  Working hours for Thursday
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	7, 4, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-30:08:00:00');
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	8, 4, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-30:13:00:00');
+
+--  Working hours for Friday
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	9, 5, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-31:08:00:00');
+INSERT INTO CALENDAR_WORKING_HOUR VALUES (
+	10, 5, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-31:13:00:00');
+
+
+--  creation of a user calendar (for system's default admin)
+INSERT INTO USER_CALENDAR VALUES (
+	1, 1, '%%system4_admin_username%%', 0, 
+	'%%system_time_zone%%', 
+	'system', current_timestamp());
+
+--  5 working days: Monday to Friday (2 to 6).
+INSERT INTO USER_CALENDAR_WORKING_DAY VALUES (1, 1, 2);
+INSERT INTO USER_CALENDAR_WORKING_DAY VALUES (2, 1, 3);
+INSERT INTO USER_CALENDAR_WORKING_DAY VALUES (3, 1, 4);
+INSERT INTO USER_CALENDAR_WORKING_DAY VALUES (4, 1, 5);
+INSERT INTO USER_CALENDAR_WORKING_DAY VALUES (5, 1, 6);
+
+--  working hours for each working day: from 8 AM to 12 PM, and then from 1 PM to 5 PM.
+--  Working hours for Monday
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	1, 1, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-27:08:00:00');
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	2, 1, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-27:13:00:00');
+
+--  Working hours for Tuesday
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	3, 2, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-28:08:00:00');
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	4, 2, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-28:13:00:00');
+
+--  Working hours for Wednesday
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	5, 3, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-29:08:00:00');
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	6, 3, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-29:13:00:00');
+
+--  Working hours for Thursday
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	7, 4, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-30:08:00:00');
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	8, 4, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-30:13:00:00');
+
+--  Working hours for Friday
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	9, 5, 1, 8, 0, 12, 0, '+4H+0m', '2003-10-31:08:00:00');
+INSERT INTO USER_CALENDAR_WORKING_HOUR VALUES (
+	10, 5, 2, 13, 0, 17, 0, '+4H+0m', '2003-10-31:13:00:00');
+	
+COMMIT;

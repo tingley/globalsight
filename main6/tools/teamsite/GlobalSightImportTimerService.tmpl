@@ -1,0 +1,39 @@
+#!%%teamsite_home%%/iw-perl/bin/iwperl -w
+my $iw_home = "%%teamsite_home%%";
+my $logfile="$iw_home/report/tmp/IW_GlobalSightImport.log";
+my $dir = "$iw_home/report/tmp/tasks";
+my $timeoutFile="$iw_home/properties/GlobalSightTimer.properties";
+
+my $TIMEOUT = 100;
+while (1) 
+{
+        open (DELAY, "< $timeoutFile") || log_entry  "cannot open $!\n";
+        while(<DELAY>)
+        {
+                unless (/^#/)
+                {
+                    $TIMEOUT = $_;
+                    chop($TIMEOUT);
+                    last;
+                }
+        }
+        close (DELAY);
+	sleep($TIMEOUT);
+	opendir(DIR,$dir) || die "can't opendir $dir: $!";
+	open(LOGFILE,">>$logfile") || die "$0:ERROR: can\'t open $logfile";
+	while(my $taskId = readdir(DIR)) 
+        {
+		if(($taskId ne ".") && ($taskId ne ".."))
+		{
+			if($taskId > 0)
+			{
+                                print LOGFILE "TIMEOUT interval is $TIMEOUT\n";
+				system("$iw_home/httpd/iw-bin/GlobalSightImportStatusReporter.ipl $taskId 0 ");
+				print LOGFILE "processed $taskId\n";
+				unlink qq($dir\\$taskId);
+			}
+		}
+	}
+	closedir DIR;
+	close (LOGFILE);
+}

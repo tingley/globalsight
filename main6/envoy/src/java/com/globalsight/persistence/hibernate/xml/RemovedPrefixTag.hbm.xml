@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.tuv.RemovedPrefixTag" table="REMOVED_PREFIX_TAG">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+			
+		<property name="string" column="STRING" type="string"
+			not-null="true" unique="false" />
+
+		<many-to-one name="tu" column="TU_ID"
+			class="com.globalsight.everest.tuv.TuImpl" not-null="true" />
+	</class>
+</hibernate-mapping>

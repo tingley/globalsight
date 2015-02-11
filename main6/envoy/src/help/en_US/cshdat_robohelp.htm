@@ -1,0 +1,395 @@
+<html>
+<head>
+<title>GlobalSight</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta name="generator" content="RoboHelp by eHelp Corporation   www.ehelp.com">
+<meta name "description" content="WebHelp 5.10">
+</head>
+<body>
+<script language="JavaScript">
+<!--
+
+var gArrayCsh = new Array();
+
+var gstrWindowOption = "";
+var gstrURL = "";
+var gbWithNavPane = false;
+
+function CshEntityItem(strAliasId, nTopicNum, strUrl) 
+{
+    this.strAliasId = strAliasId;
+    this.nTopicNum = nTopicNum;
+    this.strUrl = strUrl;
+}
+
+
+//Try to get to topic number from hash string
+function GetTopicNumberAuto(strMayBeNumber)
+{
+   var nNum = -1;
+   if (strMayBeNumber.length >= 1)
+   {
+		var strTmp = strMayBeNumber;
+		var iEnd = strTmp.length;
+		for (var i=0; i<iEnd; i++)
+		{
+			  var ch = strTmp.charAt(i);
+			  if (!((ch == "0") || (ch == "1") ||
+			        (ch == "2") || (ch == "3") ||
+			        (ch == "4") || (ch == "5") ||
+			        (ch == "6") || (ch == "7") ||
+			        (ch == "8") || (ch == "9")))
+			      return GetTopicNumberById(strTmp);
+		}
+		nNum = parseInt(strTmp);
+   }
+   return nNum;
+}
+
+function GetTopicNumber(strHashString)
+{
+	var nTopicEndPos = strHashString.indexOf(',')
+	if (nTopicEndPos == -1) { // no window option.
+		return GetTopicNumberOnly(strHashString);
+	}
+	else {
+		var strWindowOption = strHashString.substring(nTopicEndPos + 1, strHashString.length);
+		var strWithNavPane = 'withnavpane=true';
+		if (strWindowOption.toLowerCase().indexOf(strWithNavPane) == 0)
+		{
+			if (strWindowOption.length > strWithNavPane.length)
+				gstrWindowOption = strWindowOption.substring(strWithNavPane.length + 1);
+			else
+				gstrWindowOption = "";
+			gbWithNavPane = true;
+		}
+		else
+			gstrWindowOption = strWindowOption;
+		return GetTopicNumberOnly(strHashString.substring(0, nTopicEndPos));		
+	}
+}
+
+function GetTopicNumberOnly(strTopicString)
+{
+	var nEqualPos = strTopicString.indexOf('=');
+	if (nEqualPos == -1) {
+		return GetTopicNumberAuto(strTopicString);
+	}
+	else {
+		var strValue=strTopicString.substring(nEqualPos + 1, strTopicString.length);
+		if (strTopicString.toLowerCase().indexOf("topicnumber") == 0) {
+			return parseInt(strValue);
+		} else if (strTopicString.toLowerCase().indexOf("context") == 0) {
+			return GetTopicNumberById(strValue);
+		} else if (strTopicString.toLowerCase().indexOf("remoteurl") == 0) {
+			gstrURL = strValue;
+			return -1;
+		}
+
+	}
+}
+
+//Find HomePage of the WebHelp system
+// we try to get the topic from remote project if it exists.
+function RedirectToHomePage()
+{
+	if (parent && parent != this && parent.goNext)
+	{
+		var sHome = parent.goNext();
+		if (sHome != "")
+			RedirectTo(sHome);
+	}
+}
+
+function getHomePage()
+{
+	if (parent && parent != this && parent.getRelHomePage)
+	{
+		return parent.getRelHomePage(document.location.href);
+	}
+	return "";
+}
+
+function addRemoteProject(strPath)
+{
+	if (parent && parent != this && parent.addProject)
+	{
+		parent.addProject(strPath);
+	}
+}
+
+//Redirect page to...
+function RedirectTo(strUrl)
+{
+   if (gstrWindowOption.length != 0) {
+		var wnd = window.open(strUrl, "HelpStub", gstrWindowOption);
+		// close current window and rename the stub window to current window.
+		if (wnd)
+			wnd.focus();
+		if (parent)
+			parent.close();
+   }
+   else {
+	parent.document.location.href = strUrl;
+	window.focus();
+  }
+}
+
+//Prompt the user that we can not find...
+function FailToFind(strMsg)
+{
+    RedirectToHomePage();
+}
+
+//Find topic by topic number (defined in h file)
+function FindTopicByTopicNum(nTopicNum)
+{
+	var i = 0;
+	var iEnd = gArrayCsh.length;
+	for (i=0; i<iEnd; i++)
+	{
+		if (gArrayCsh[i].nTopicNum == nTopicNum)
+		{
+			var strURL = gArrayCsh[i].strUrl;
+			if (gbWithNavPane)
+			{
+				var strHomePage = getHomePage();
+				if (strHomePage.length != 0)
+					strURL = strHomePage + strURL;
+			}	
+			RedirectTo(strURL);
+			return true;
+		}
+	}
+	FailToFind("Fail to find topic assocaite with topic number: " + nTopicNum);
+	return false;
+}
+
+var oldPrefix = "HelpIdFromHTMLHelp_"
+//Find topic by topic id (alias id defined in ali file)
+function GetTopicNumberById(strTopicId)
+{
+   if (strTopicId.indexOf(oldPrefix) == 0)
+   {
+		strTopicId = strTopicId.substring(oldPrefix.length);
+   }
+
+   var i = 0;
+   var iEnd = gArrayCsh.length;
+   for (i=0; i<iEnd; i++)
+   {
+	if (gArrayCsh[i].strAliasId.toLowerCase() == strTopicId.toLowerCase())
+	{
+	    return gArrayCsh[i].nTopicNum;
+	 }
+   }
+   gstrURL = "";
+   return -1;
+}
+
+//Set Context-sensitive help entity...
+function SetCsh(n, strAliasId, nTopicNum, strUrl)
+{
+   gArrayCsh[n] = new CshEntityItem(strAliasId,nTopicNum,strUrl);
+}
+
+
+function getHash()
+{
+	if (parent && parent != this)
+		return parent.location.hash;
+	else
+		return "";
+}
+//-->
+</script>
+<script language="javascript">
+<!--
+  SetCsh(0,"4",0,"Glossary/Activity_Type.htm");
+  SetCsh(1,"29",1,"Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm");
+  SetCsh(2,"37",2,"Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm");
+  SetCsh(3,"95",3,"My_Jobs/Job_Details.htm");
+  SetCsh(4,"96",4,"Reports/Job_Details_Report.htm");
+  SetCsh(5,"108",5,"Glossary/Locale_Manager.htm");
+  SetCsh(6,"113",6,"Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm");
+  SetCsh(7,"117",7,"My_Activities/Main_Editor.htm#Unlock");
+  SetCsh(8,"126",8,"Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm");
+  SetCsh(9,"128",9,"Setup/Projects/Projects_Main_Screen.htm");
+  SetCsh(10,"141",10,"My_Activities/Segment_Editor_(Image).htm");
+  SetCsh(11,"154",11,"Glossary/Specific_Snippet.htm");
+  SetCsh(12,"158",12,"Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm");
+  SetCsh(13,"166",13,"My_Activities/Upload.htm");
+  SetCsh(14,"35",14,"Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm");
+  SetCsh(15,"83",15,"Setup/Workflows/Graphical_Workflow.htm");
+  SetCsh(16,"103",16,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Exporting Source Pages With Snippets");
+  SetCsh(17,"132",17,"My_Activities/Rejected_Activity_Tab.htm");
+  SetCsh(18,"36",18,"Data_Sources/Database_Profiles/DB_Preview_SQL.htm");
+  SetCsh(19,"42",19,"My_Activities/Download.htm");
+  SetCsh(20,"99",20,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Adding Snippets to Target Pages");
+  SetCsh(21,"122",21,"Appendix/Database_Integration/Pending_Records_Table.htm");
+  SetCsh(22,"127",22,"Glossary/Project.htm");
+  SetCsh(23,"133",23,"Reports/Reports_Main_Screen.htm");
+  SetCsh(24,"151",24,"Glossary/Snippet_Import_File.htm");
+  SetCsh(25,"167",25,"Setup/Support_Files/Upload_Support_Files.htm");
+  SetCsh(26,"6",26,"My_Jobs/Archived_Workflow_Tab.htm");
+  SetCsh(27,"39",27,"Data_Sources/Database_Profiles/DB_Write_SQL.htm");
+  SetCsh(28,"87",28,"Appendix/Locale_Content_Management/GS_Tag_Syntax.htm");
+  SetCsh(29,"98",29,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm");
+  SetCsh(30,"100",30,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Creating Snippets");
+  SetCsh(31,"143",31,"Data_Sources/Import/Select_Files_To_Import.htm");
+  SetCsh(32,"156",32,"Appendix/Supported_Data_Formats.htm");
+  SetCsh(33,"27",33,"Setup/Translation_Memory/Create_Modify_Translation_Memory.htm");
+  SetCsh(34,"45",34,"Data_Sources/Export_Locations/Export_Locations_Main_Screen.htm");
+  SetCsh(35,"168",35,"Setup/Users/User_Information.htm");
+  SetCsh(36,"33",36,"Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm");
+  SetCsh(37,"50",37,"My_Activities/Finished_Activity_Tab.htm");
+  SetCsh(38,"84",38,"Glossary/GS-tagged_Source_Page.htm");
+  SetCsh(39,"86",39,"Glossary/GS_Tag.htm");
+  SetCsh(40,"88",40,"Setup/Terminology/Import.htm");
+  SetCsh(41,"110",41,"Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm");
+  SetCsh(42,"147",42,"Glossary/Snippet.htm");
+  SetCsh(43,"150",43,"Setup/Snippet_Import/Import_Snippet_Files.htm");
+  SetCsh(44,"161",44,"Setup/Terminology/Terminology_Main_Screen.htm");
+  SetCsh(45,"169",45,"Setup/Users/Users_Main_Screen.htm");
+  SetCsh(46,"7",46,"Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm");
+  SetCsh(47,"14",47,"Setup/Locale_Pairs/Create_Locale_Pair.htm");
+  SetCsh(48,"22",48,"Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm");
+  SetCsh(49,"24",49,"Setup/Rates/Create_Modify_Rate.htm");
+  SetCsh(50,"40",50,"Setup/Terminology/Define_Termbase_Column.htm");
+  SetCsh(51,"41",51,"Glossary/Deletable_Content.htm");
+  SetCsh(52,"97",52,"Setup/Localization_Profiles/Job_Timers.htm");
+  SetCsh(53,"106",53,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Locale Manager Group");
+  SetCsh(54,"115",54,"Setup/Logs/Log_Files.htm");
+  SetCsh(55,"119",55,"My_Activities/My_Activities.htm");
+  SetCsh(56,"134",56,"Setup/Users/Edit_Roles.htm");
+  SetCsh(57,"146",57,"Setup/Setup.htm");
+  SetCsh(58,"17",58,"Data_Sources/Database_Profiles/Create_Modify_Column.htm");
+  SetCsh(59,"90",59,"Data_Sources/Import/Import_Main_Screen.htm");
+  SetCsh(60,"120",60,"Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm");
+  SetCsh(61,"124",61,"Glossary/Placeholder_Tags.htm");
+  SetCsh(62,"130",62,"My_Jobs/Ready_Workflow_Tab.htm");
+  SetCsh(63,"153",63,"Glossary/Snippet_Library.htm");
+  SetCsh(64,"160",64,"Glossary/Termbase.htm");
+  SetCsh(65,"172",65,"Reports/Workflow_Status_Report.htm");
+  SetCsh(66,"47",66,"My_Jobs/Exported_Workflow_Tab.htm");
+  SetCsh(67,"85",67,"Appendix/Locale_Content_Management/GS-Tagged_Source_Page_Example.htm");
+  SetCsh(68,"94",68,"Glossary/Job.htm");
+  SetCsh(69,"105",69,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Glossary of Terms");
+  SetCsh(70,"111",70,"Glossary/Localization_Profile.htm");
+  SetCsh(71,"144",71,"My_Activities/Select_Snippet.htm");
+  SetCsh(72,"145",72,"Setup/Terminology/Set_Import_Options_(Import_p.3).htm");
+  SetCsh(73,"152",73,"Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm");
+  SetCsh(74,"159",74,"Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm");
+  SetCsh(75,"170",75,"Setup/Terminology/Verify_CSV_Columns_(Import_p.2).htm");
+  SetCsh(76,"171",76,"Glossary/Workflow.htm");
+  SetCsh(77,"177",77,"Appendix/Writing_XML_Rules.htm");
+  SetCsh(78,"10",78,"Reports/Average_Percent_Complete_Report.htm");
+  SetCsh(79,"11",79,"Setup/Terminology/Browse_Termbase.htm");
+  SetCsh(80,"19",80,"Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm");
+  SetCsh(81,"81",81,"Glossary/Generic_Snippet.htm");
+  SetCsh(82,"91",82,"My_Activities/In_Progress_Activity_Details.htm");
+  SetCsh(83,"93",83,"My_Jobs/In_Progress_Workflow_Tab.htm");
+  SetCsh(84,"104",84,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Exporting Target Pages with Snippets");
+  SetCsh(85,"114",85,"My_Jobs/Localized_Workflow_Tab.htm");
+  SetCsh(86,"125",86,"Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm");
+  SetCsh(87,"163",87,"Glossary/TM_Matches.htm");
+  SetCsh(88,"164",88,"Reports/TM_Report.htm");
+  SetCsh(89,"2",89,"Glossary/Activity.htm");
+  SetCsh(90,"26",90,"Setup/Terminology/Create_Modify_Clone_Termbase.htm");
+  SetCsh(91,"30",91,"Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm");
+  SetCsh(92,"34",92,"Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm");
+  SetCsh(93,"48",93,"Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm");
+  SetCsh(94,"89",94,"My_Jobs/Import_Error.htm");
+  SetCsh(95,"92",95,"My_Activities/In_Progress_Activity_Tab.htm");
+  SetCsh(96,"107",96,"Glossary/Locale.htm");
+  SetCsh(97,"121",97,"Overview.htm");
+  SetCsh(98,"157",98,"Setup/System_Parameters/System_Parameters.htm");
+  SetCsh(99,"162",99,"Glossary/TM.htm");
+  SetCsh(100,"8",100,"My_Activities/Available_Activity_Details.htm");
+  SetCsh(101,"18",101,"Setup/Currency/Create_Modify_Currency.htm");
+  SetCsh(102,"102",102,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Enabling the Local Content Management Feature");
+  SetCsh(103,"116",103,"My_Activities/Main_Editor.htm");
+  SetCsh(104,"165",104,"Setup/Translation_Memory/Translation_Memory_Main_Screen.htm");
+  SetCsh(105,"176",105,"Appendix/Database_Integration/Writing_DB_Preview_Rules.htm");
+  SetCsh(106,"3",106,"Glossary/Activity_Status_Summary.htm");
+  SetCsh(107,"12",107,"Data_Sources/Database_Profiles/Columns.htm");
+  SetCsh(108,"16",108,"Setup/Activity_Types/Create_Modify_Activity_Type.htm");
+  SetCsh(109,"32",109,"Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm");
+  SetCsh(110,"49",110,"Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm");
+  SetCsh(111,"109",111,"Glossary/Locale_Pair.htm");
+  SetCsh(112,"112",112,"Setup/Localization_Profiles/Basic_Information_LP.htm");
+  SetCsh(113,"123",113,"My_Jobs/Pending_Workflow_Tab.htm");
+  SetCsh(114,"140",114,"Glossary/Segment.htm");
+  SetCsh(115,"148",115,"My_Activities/Snippet_and_Content_Editor.htm");
+  SetCsh(116,"178",116,"Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm");
+  SetCsh(117,"5",117,"Setup/Activity_Types/Activity_Types_Main_Screen.htm");
+  SetCsh(118,"21",118,"Data_Sources/File_Profiles/Create_Modify_File_Profile.htm");
+  SetCsh(119,"23",119,"Setup/Projects/Create_Modify_Project.htm");
+  SetCsh(120,"149",120,"My_Activities/Snippet_Editor.htm");
+  SetCsh(121,"155",121,"Setup/Support_Files/Support_Files_Main_Screen.htm");
+  SetCsh(122,"28",122,"Setup/Currency/Currency_Main_Screen.htm");
+  SetCsh(123,"44",123,"Appendix/Exclude_Item_Types.htm");
+  SetCsh(124,"101",124,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Deleting Snippets from Target Pages");
+  SetCsh(125,"174",125,"Setup/Workflows/Workflows.htm");
+  SetCsh(126,"1",126,"My_Account.htm");
+  SetCsh(127,"9",127,"My_Activities/Available_Activity_Tab.htm");
+  SetCsh(128,"25",128,"Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm");
+  SetCsh(129,"31",129,"Data_Sources/Data_Sources_Menu.htm");
+  SetCsh(130,"38",130,"Data_Sources/Database_Profiles/DB_Read_SQL.htm");
+  SetCsh(131,"129",131,"Setup/Rates/Rate_Main_Screen.htm");
+  SetCsh(132,"13",132,"Data_Sources/File_Extensions/Create_File_Extension.htm");
+  SetCsh(133,"20",133,"Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm");
+  SetCsh(134,"43",134,"Setup/Workflows/Basic_Information_Workflows.htm");
+  SetCsh(135,"142",135,"My_Activities/Segment_Editor_(Text).htm");
+  SetCsh(136,"173",136,"Glossary/Workflow_Status_Summary.htm");
+
+
+//-->
+</script>
+<script language="javascript">
+<!--
+//Find CSH according to hash string after this page
+if (getHash().length > 0)
+{
+   // VH 05/16/00 now support 
+   // TopicID=
+   // TopicNumber=
+   // RemoteURL=   
+   // and WindowsOptions
+   // with the format #a=xxx,b=xxx,c=xxx...
+   var strHashString = getHash().toString();
+   // change ? to : for remote URL. because java applet have some problem to pass a URL with two : inside the URL so we changed it. 
+   // so here need to change it back.
+   strHashString = strHashString.substring(1,strHashString.length);
+   strHashString = strHashString.replace("%072%057%057", "://");
+   var nTopicNum = GetTopicNumber(strHashString);
+
+   if (nTopicNum != -1)
+   {
+      FindTopicByTopicNum(nTopicNum);
+   }
+   else
+   {
+      if (gstrURL.length > 0) 
+	RedirectTo(gstrURL);
+      else
+      	RedirectToHomePage();
+   }
+}
+else
+{
+   RedirectToHomePage();
+}
+//-->
+</script>
+<noscript>
+ <p> Your browser does not support JavaScript. WebHelp Context-Sensitive Help requires JavaScript support to run.</p>
+</noscript>
+</body>
+</html>
+
+
+
+
+
+

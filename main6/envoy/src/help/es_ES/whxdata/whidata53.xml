@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="producción sencillo" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+</key>
+<key name="producción Traducidos" >
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+</key>
+<key name="producción.Cada proceso" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="produccións terminados" >
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+</key>
+<key name="producirlo" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="productividad" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="produzca entradas duplicadas" >
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+</key>
+<key name="programa didáctico" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="programas" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="prohibir" >
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+</key>
+<key name="promedio" >
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+</key>
+<key name="prompt" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="properties" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="propiedad" >
+  <topic name="Personalizar la configuración de segmentación" url="Ap_ndice/Customizing_Segmentation_Rules.htm" />
+  <topic name="TM" url="Glosario/TM.htm" />
+</key>
+<key name="propiedades" >
+  <topic name="Editor de fragmentos" url="Mis_actividades/Snippet_Editor.htm" />
+  <topic name="Formatos de datos compatibles" url="Ap_ndice/Supported_Data_Formats.htm" />
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="propiedades del fragmento" >
+  <topic name="Editor de fragmentos" url="Mis_actividades/Snippet_Editor.htm" />
+</key>
+<key name="Propiedades Java" >
+  <topic name="Formatos de datos compatibles" url="Ap_ndice/Supported_Data_Formats.htm" />
+</key>
+<key name="propio editor" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="propio editor pulsando" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="proporcionada" >
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="proporcionan contexto" >
+  <topic name="Columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Columns.htm" />
+</key>
+<key name="proporcionar" >
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+</key>
+<key name="provenir" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="próxima página del informe" >
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+  <topic name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+  <topic name="Informe Detalles del trabajo" url="Informes/Job_Details_Report.htm" />
+</key>
+<key name="Próximo segmento" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="proyecto" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="proyecto consta" >
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="proyecto utilice" >
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+</key>
+<key name="proyectos" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Crear/modificar reglas XML" url="Fuentes_de_datos/Reglas_XML/Create_Modify_XML_Rules.htm" />
+  <topic name="Crear/modificar tipo de actividad" url="Configuraci_n/Tipos_de_actividades/Create_Modify_Activity_Type.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  <topic name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="proyectos cuyo jefe" >
+  <topic name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+</key>
+<key name="proyectos del proyecto seleccionado" >
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+</key>
+<key name="proyectos está" >
+  <topic name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="proyectos pueden ver esta descripción" >
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+  <topic name="Crear/modificar reglas XML" url="Fuentes_de_datos/Reglas_XML/Create_Modify_XML_Rules.htm" />
+</key>
+<key name="proyectos seleccionado" >
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+</key>
+<key name="prueba" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+</key>
+<key name="publicación" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="publicar" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="Publicar páginas traducidas sólo" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+</key>
+<key name="pueda abrir" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="pueda modificar" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="puedan llevarse" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="puedan modificarlas" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="puedan modificarse" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="pueden almacenarse" >
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+</key>
+<key name="pueden añadirse" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="pueden añadirse estas etiquetas" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="pueden ayudar" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+</key>
+<key name="pueden copiarse" >
+  <topic name="Seleccionar fragmento" url="Mis_actividades/Select_Snippet.htm" />
+</key>
+<key name="pueden elegirse al exportar archivos" >
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+</key>
+<key name="pueden eliminarse" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+
+</indexdata>

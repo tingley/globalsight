@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.cxe.entity.exportlocation.ExportLocationImpl"
+        table="EXPORT_LOCATION">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="location" length="4000" column="LOCATION"
+            type="string" not-null="false" unique="false" />
+        <properties name="forUnique" unique="true">
+            <property name="companyId" column="COMPANY_ID" type="string"
+                not-null="true"/>
+            <property name="name" length="40" column="NAME"
+                type="string" not-null="true"/>
+        </properties>
+
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+    </class>
+</hibernate-mapping>

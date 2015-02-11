@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.AttributeSet"
+		table="ATTRIBUTE_SET">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="companyId" column="COMPANY_ID" type="string"
+			not-null="true" />
+
+		<set name="projects" inverse="true" cascade="save-update">
+			<key column="ATTRIBUTE_SET_ID" />
+			<one-to-many class="com.globalsight.everest.projecthandler.ProjectImpl" />
+		</set>
+
+		<set name="attributes" table="ATTRIBUTE_SET_ATTRIBUTE" cascade="save-update">
+			<key column="SET_ID" />
+			<many-to-many class="com.globalsight.cxe.entity.customAttribute.Attribute"
+				column="ATTRIBUTE_ID" />
+		</set>
+	</class>
+</hibernate-mapping>

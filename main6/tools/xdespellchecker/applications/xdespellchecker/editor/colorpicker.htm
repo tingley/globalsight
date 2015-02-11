@@ -1,0 +1,446 @@
+<html id="container">
+<!--
+Copyright 2003 XDE
+-------------------------------------------------------------
+$Id: colorpicker.htm,v 1.1 2009/04/14 15:42:51 yorkjin Exp $
+-------------------------------------------------------------
+$RCSfile: colorpicker.htm,v $
+$Author: yorkjin $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:51 $
+$Locker:  $
+$Name:  $
+------------------------------------------------------------
+-->
+<head><title>Color Palette</title>
+<style>
+body {background : white; margin: 10px; margin-top: 8px;}
+.color {width : 10px; height : 12px; font-size : 1pt; cursor: hand;}
+.basic {width : 10px; height : 15px; font-size : 1px; cursor: hand;}
+#colorImage	{width: 314; height: 160; border: 1px solid black; cursor: hand;}
+</style>
+<link rel="stylesheet" href="xdeStyleSheet.css" type="text/css">
+</head>
+<body onload="window.focus();" class="xdePopUpStyle">
+<table border="0">
+  <tr> 
+    <td class="xdeCaptionStyle">Selected Color:&nbsp;</td>
+    <td width="15" name="colorBox" id="colorBox" style="border: 1px solid black; width: 15px; height: 15px; font-size: 8pt; cursor: default;" class="xdeTableStyle">&nbsp;</td>
+    <td width="*" name="colorName" id="colorName" style="font-family: verdana, helvetica; font-size: 9pt; color: button-text; cursor: default;" class="xdeTableStyle">Color Name</td>
+  </tr>
+</table>
+
+<table onMouseOver="doOver()" style="WIDTH: 320px" onclick="doClick()" cellSpacing=2 cellPadding=0 class="xdeTableStyle">
+  <tr>
+<td class="basic" style="BORDER-RIGHT: lightgrey 1px solid; BORDER-TOP: lightgrey 1px solid; BORDER-LEFT: lightgrey 1px solid; BORDER-BOTTOM: lightgrey 1px solid; BACKGROUND-COLOR: white" 
+   >&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: yellow">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: green">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: cyan">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: blue">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: magenta">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: red">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: lightgrey">&nbsp;</td>
+</tr>
+<tr>
+<td class="basic" style="BACKGROUND-COLOR: black">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: brown">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: darkgreen">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: darkcyan">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: darkblue">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: darkmagenta">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: darkred">&nbsp;</td>
+<td class="basic" style="BACKGROUND-COLOR: gray">&nbsp;</td>
+</tr>
+</table>
+
+<table id="imageTable" style="WIDTH: 320px; display:none;" cellSpacing=2 cellPadding=0 class="xdeTableStyle">
+  <tr> 
+    <td> <IMG onmousemove="calculateRGB()" onselectstart="returnValue=false; window.event.cancelBubble=true;" onmousedown="calculateRGB()" id=colorImage title="Click to select color" src="./images/edit/color.jpg" > 
+    </td>
+  </tr>
+</table>
+
+<table id="rgbTable" onMouseOver="doOver()" style="WIDTH: 320px" onclick="doClick()" cellSpacing=2 cellPadding=0 class="xdeTableStyle">
+  <tr><td class="color" style="background-color: #000000">&nbsp;</td>
+<td class="color" style="background-color: #000033">&nbsp;</td>
+<td class="color" style="background-color: #000066">&nbsp;</td>
+<td class="color" style="background-color: #000099">&nbsp;</td>
+<td class="color" style="background-color: #0000CC">&nbsp;</td>
+<td class="color" style="background-color: #0000FF">&nbsp;</td>
+<td class="color" style="background-color: #003300">&nbsp;</td>
+<td class="color" style="background-color: #003333">&nbsp;</td>
+<td class="color" style="background-color: #003366">&nbsp;</td>
+<td class="color" style="background-color: #003399">&nbsp;</td>
+<td class="color" style="background-color: #0033CC">&nbsp;</td>
+<td class="color" style="background-color: #0033FF">&nbsp;</td>
+<td class="color" style="background-color: #006600">&nbsp;</td>
+<td class="color" style="background-color: #006633">&nbsp;</td>
+<td class="color" style="background-color: #006666">&nbsp;</td>
+<td class="color" style="background-color: #006699">&nbsp;</td>
+<td class="color" style="background-color: #0066CC">&nbsp;</td>
+<td class="color" style="background-color: #0066FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #330000">&nbsp;</td>
+<td class="color" style="background-color: #330033">&nbsp;</td>
+<td class="color" style="background-color: #330066">&nbsp;</td>
+<td class="color" style="background-color: #330099">&nbsp;</td>
+<td class="color" style="background-color: #3300CC">&nbsp;</td>
+<td class="color" style="background-color: #3300FF">&nbsp;</td>
+<td class="color" style="background-color: #333300">&nbsp;</td>
+<td class="color" style="background-color: #333333">&nbsp;</td>
+<td class="color" style="background-color: #333366">&nbsp;</td>
+<td class="color" style="background-color: #333399">&nbsp;</td>
+<td class="color" style="background-color: #3333CC">&nbsp;</td>
+<td class="color" style="background-color: #3333FF">&nbsp;</td>
+<td class="color" style="background-color: #336600">&nbsp;</td>
+<td class="color" style="background-color: #336633">&nbsp;</td>
+<td class="color" style="background-color: #336666">&nbsp;</td>
+<td class="color" style="background-color: #336699">&nbsp;</td>
+<td class="color" style="background-color: #3366CC">&nbsp;</td>
+<td class="color" style="background-color: #3366FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #660000">&nbsp;</td>
+<td class="color" style="background-color: #660033">&nbsp;</td>
+<td class="color" style="background-color: #660066">&nbsp;</td>
+<td class="color" style="background-color: #660099">&nbsp;</td>
+<td class="color" style="background-color: #6600CC">&nbsp;</td>
+<td class="color" style="background-color: #6600FF">&nbsp;</td>
+<td class="color" style="background-color: #663300">&nbsp;</td>
+<td class="color" style="background-color: #663333">&nbsp;</td>
+<td class="color" style="background-color: #663366">&nbsp;</td>
+<td class="color" style="background-color: #663399">&nbsp;</td>
+<td class="color" style="background-color: #6633CC">&nbsp;</td>
+<td class="color" style="background-color: #6633FF">&nbsp;</td>
+<td class="color" style="background-color: #666600">&nbsp;</td>
+<td class="color" style="background-color: #666633">&nbsp;</td>
+<td class="color" style="background-color: #666666">&nbsp;</td>
+<td class="color" style="background-color: #666699">&nbsp;</td>
+<td class="color" style="background-color: #6666CC">&nbsp;</td>
+<td class="color" style="background-color: #6666FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #990000">&nbsp;</td>
+<td class="color" style="background-color: #990033">&nbsp;</td>
+<td class="color" style="background-color: #990066">&nbsp;</td>
+<td class="color" style="background-color: #990099">&nbsp;</td>
+<td class="color" style="background-color: #9900CC">&nbsp;</td>
+<td class="color" style="background-color: #9900FF">&nbsp;</td>
+<td class="color" style="background-color: #993300">&nbsp;</td>
+<td class="color" style="background-color: #993333">&nbsp;</td>
+<td class="color" style="background-color: #993366">&nbsp;</td>
+<td class="color" style="background-color: #993399">&nbsp;</td>
+<td class="color" style="background-color: #9933CC">&nbsp;</td>
+<td class="color" style="background-color: #9933FF">&nbsp;</td>
+<td class="color" style="background-color: #996600">&nbsp;</td>
+<td class="color" style="background-color: #996633">&nbsp;</td>
+<td class="color" style="background-color: #996666">&nbsp;</td>
+<td class="color" style="background-color: #996699">&nbsp;</td>
+<td class="color" style="background-color: #9966CC">&nbsp;</td>
+<td class="color" style="background-color: #9966FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #CC0000">&nbsp;</td>
+<td class="color" style="background-color: #CC0033">&nbsp;</td>
+<td class="color" style="background-color: #CC0066">&nbsp;</td>
+<td class="color" style="background-color: #CC0099">&nbsp;</td>
+<td class="color" style="background-color: #CC00CC">&nbsp;</td>
+<td class="color" style="background-color: #CC00FF">&nbsp;</td>
+<td class="color" style="background-color: #CC3300">&nbsp;</td>
+<td class="color" style="background-color: #CC3333">&nbsp;</td>
+<td class="color" style="background-color: #CC3366">&nbsp;</td>
+<td class="color" style="background-color: #CC3399">&nbsp;</td>
+<td class="color" style="background-color: #CC33CC">&nbsp;</td>
+<td class="color" style="background-color: #CC33FF">&nbsp;</td>
+<td class="color" style="background-color: #CC6600">&nbsp;</td>
+<td class="color" style="background-color: #CC6633">&nbsp;</td>
+<td class="color" style="background-color: #CC6666">&nbsp;</td>
+<td class="color" style="background-color: #CC6699">&nbsp;</td>
+<td class="color" style="background-color: #CC66CC">&nbsp;</td>
+<td class="color" style="background-color: #CC66FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #FF0000">&nbsp;</td>
+<td class="color" style="background-color: #FF0033">&nbsp;</td>
+<td class="color" style="background-color: #FF0066">&nbsp;</td>
+<td class="color" style="background-color: #FF0099">&nbsp;</td>
+<td class="color" style="background-color: #FF00CC">&nbsp;</td>
+<td class="color" style="background-color: #FF00FF">&nbsp;</td>
+<td class="color" style="background-color: #FF3300">&nbsp;</td>
+<td class="color" style="background-color: #FF3333">&nbsp;</td>
+<td class="color" style="background-color: #FF3366">&nbsp;</td>
+<td class="color" style="background-color: #FF3399">&nbsp;</td>
+<td class="color" style="background-color: #FF33CC">&nbsp;</td>
+<td class="color" style="background-color: #FF33FF">&nbsp;</td>
+<td class="color" style="background-color: #FF6600">&nbsp;</td>
+<td class="color" style="background-color: #FF6633">&nbsp;</td>
+<td class="color" style="background-color: #FF6666">&nbsp;</td>
+<td class="color" style="background-color: #FF6699">&nbsp;</td>
+<td class="color" style="background-color: #FF66CC">&nbsp;</td>
+<td class="color" style="background-color: #FF66FF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #009900">&nbsp;</td>
+<td class="color" style="background-color: #009933">&nbsp;</td>
+<td class="color" style="background-color: #009966">&nbsp;</td>
+<td class="color" style="background-color: #009999">&nbsp;</td>
+<td class="color" style="background-color: #0099CC">&nbsp;</td>
+<td class="color" style="background-color: #0099FF">&nbsp;</td>
+<td class="color" style="background-color: #00CC00">&nbsp;</td>
+<td class="color" style="background-color: #00CC33">&nbsp;</td>
+<td class="color" style="background-color: #00CC66">&nbsp;</td>
+<td class="color" style="background-color: #00CC99">&nbsp;</td>
+<td class="color" style="background-color: #00CCCC">&nbsp;</td>
+<td class="color" style="background-color: #00CCFF">&nbsp;</td>
+<td class="color" style="background-color: #00FF00">&nbsp;</td>
+<td class="color" style="background-color: #00FF33">&nbsp;</td>
+<td class="color" style="background-color: #00FF66">&nbsp;</td>
+<td class="color" style="background-color: #00FF99">&nbsp;</td>
+<td class="color" style="background-color: #00FFCC">&nbsp;</td>
+<td class="color" style="background-color: #00FFFF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #339900">&nbsp;</td>
+<td class="color" style="background-color: #339933">&nbsp;</td>
+<td class="color" style="background-color: #339966">&nbsp;</td>
+<td class="color" style="background-color: #339999">&nbsp;</td>
+<td class="color" style="background-color: #3399CC">&nbsp;</td>
+<td class="color" style="background-color: #3399FF">&nbsp;</td>
+<td class="color" style="background-color: #33CC00">&nbsp;</td>
+<td class="color" style="background-color: #33CC33">&nbsp;</td>
+<td class="color" style="background-color: #33CC66">&nbsp;</td>
+<td class="color" style="background-color: #33CC99">&nbsp;</td>
+<td class="color" style="background-color: #33CCCC">&nbsp;</td>
+<td class="color" style="background-color: #33CCFF">&nbsp;</td>
+<td class="color" style="background-color: #33FF00">&nbsp;</td>
+<td class="color" style="background-color: #33FF33">&nbsp;</td>
+<td class="color" style="background-color: #33FF66">&nbsp;</td>
+<td class="color" style="background-color: #33FF99">&nbsp;</td>
+<td class="color" style="background-color: #33FFCC">&nbsp;</td>
+<td class="color" style="background-color: #33FFFF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #669900">&nbsp;</td>
+<td class="color" style="background-color: #669933">&nbsp;</td>
+<td class="color" style="background-color: #669966">&nbsp;</td>
+<td class="color" style="background-color: #669999">&nbsp;</td>
+<td class="color" style="background-color: #6699CC">&nbsp;</td>
+<td class="color" style="background-color: #6699FF">&nbsp;</td>
+<td class="color" style="background-color: #66CC00">&nbsp;</td>
+<td class="color" style="background-color: #66CC33">&nbsp;</td>
+<td class="color" style="background-color: #66CC66">&nbsp;</td>
+<td class="color" style="background-color: #66CC99">&nbsp;</td>
+<td class="color" style="background-color: #66CCCC">&nbsp;</td>
+<td class="color" style="background-color: #66CCFF">&nbsp;</td>
+<td class="color" style="background-color: #66FF00">&nbsp;</td>
+<td class="color" style="background-color: #66FF33">&nbsp;</td>
+<td class="color" style="background-color: #66FF66">&nbsp;</td>
+<td class="color" style="background-color: #66FF99">&nbsp;</td>
+<td class="color" style="background-color: #66FFCC">&nbsp;</td>
+<td class="color" style="background-color: #66FFFF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #999900">&nbsp;</td>
+<td class="color" style="background-color: #999933">&nbsp;</td>
+<td class="color" style="background-color: #999966">&nbsp;</td>
+<td class="color" style="background-color: #999999">&nbsp;</td>
+<td class="color" style="background-color: #9999CC">&nbsp;</td>
+<td class="color" style="background-color: #9999FF">&nbsp;</td>
+<td class="color" style="background-color: #99CC00">&nbsp;</td>
+<td class="color" style="background-color: #99CC33">&nbsp;</td>
+<td class="color" style="background-color: #99CC66">&nbsp;</td>
+<td class="color" style="background-color: #99CC99">&nbsp;</td>
+<td class="color" style="background-color: #99CCCC">&nbsp;</td>
+<td class="color" style="background-color: #99CCFF">&nbsp;</td>
+<td class="color" style="background-color: #99FF00">&nbsp;</td>
+<td class="color" style="background-color: #99FF33">&nbsp;</td>
+<td class="color" style="background-color: #99FF66">&nbsp;</td>
+<td class="color" style="background-color: #99FF99">&nbsp;</td>
+<td class="color" style="background-color: #99FFCC">&nbsp;</td>
+<td class="color" style="background-color: #99FFFF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #CC9900">&nbsp;</td>
+<td class="color" style="background-color: #CC9933">&nbsp;</td>
+<td class="color" style="background-color: #CC9966">&nbsp;</td>
+<td class="color" style="background-color: #CC9999">&nbsp;</td>
+<td class="color" style="background-color: #CC99CC">&nbsp;</td>
+<td class="color" style="background-color: #CC99FF">&nbsp;</td>
+<td class="color" style="background-color: #CCCC00">&nbsp;</td>
+<td class="color" style="background-color: #CCCC33">&nbsp;</td>
+<td class="color" style="background-color: #CCCC66">&nbsp;</td>
+<td class="color" style="background-color: #CCCC99">&nbsp;</td>
+<td class="color" style="background-color: #CCCCCC">&nbsp;</td>
+<td class="color" style="background-color: #CCCCFF">&nbsp;</td>
+<td class="color" style="background-color: #CCFF00">&nbsp;</td>
+<td class="color" style="background-color: #CCFF33">&nbsp;</td>
+<td class="color" style="background-color: #CCFF66">&nbsp;</td>
+<td class="color" style="background-color: #CCFF99">&nbsp;</td>
+<td class="color" style="background-color: #CCFFCC">&nbsp;</td>
+<td class="color" style="background-color: #CCFFFF">&nbsp;</td>
+</tr><tr><td class="color" style="background-color: #FF9900">&nbsp;</td>
+<td class="color" style="background-color: #FF9933">&nbsp;</td>
+<td class="color" style="background-color: #FF9966">&nbsp;</td>
+<td class="color" style="background-color: #FF9999">&nbsp;</td>
+<td class="color" style="background-color: #FF99CC">&nbsp;</td>
+<td class="color" style="background-color: #FF99FF">&nbsp;</td>
+<td class="color" style="background-color: #FFCC00">&nbsp;</td>
+<td class="color" style="background-color: #FFCC33">&nbsp;</td>
+<td class="color" style="background-color: #FFCC66">&nbsp;</td>
+<td class="color" style="background-color: #FFCC99">&nbsp;</td>
+<td class="color" style="background-color: #FFCCCC">&nbsp;</td>
+<td class="color" style="background-color: #FFCCFF">&nbsp;</td>
+<td class="color" style="background-color: #FFFF00">&nbsp;</td>
+<td class="color" style="background-color: #FFFF33">&nbsp;</td>
+<td class="color" style="background-color: #FFFF66">&nbsp;</td>
+<td class="color" style="background-color: #FFFF99">&nbsp;</td>
+<td class="color" style="background-color: #FFFFCC">&nbsp;</td>
+<td class="color" style="background-color: #FFFFFF; border: lightgrey solid 1px;">&nbsp;</td>
+</tr>
+</table>
+
+<table border="0" width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="right"><font size=1>
+<br><INPUT name="toggle" id="toggle" type="button" value="Advanced" style="width: 80px;" onclick="toggleColorTable();">
+</font></td>
+</tr>
+</table>
+<script type="text/javascript">
+function getQueryParm(pURL,ParmtoGet){
+	var StartPos=pURL.indexOf(ParmtoGet);
+	var ParmValue='';
+	if(StartPos>-1){
+		var lookfor='&';
+		var NextPos=pURL.indexOf(lookfor,StartPos);
+		if(NextPos==-1)NextPos=pURL.length;
+		ParmValue=pURL.substring(StartPos+ParmtoGet.length+1,NextPos);
+	}
+return ParmValue;
+}
+var iFrameName=getQueryParm(parent.document.location.toString(),"iFrameName");
+function doOver() {
+	var event=window.event || arguments.callee.caller.arguments[0];
+	if (event.target) el = event.target;
+	else if (event.srcElement) el = event.srcElement;
+	bgc = el.style.backgroundColor;
+	updateColorBox(bgc);
+
+}
+function updateColorBox(backGround){
+	if (backGround == "") 
+		return;
+	document.getElementById("colorBox").style.backgroundColor = backGround;
+	document.getElementById("colorName").innerHTML = backGround;
+
+}
+
+function doClick() {
+	var event=window.event || arguments.callee.caller.arguments[0];
+	if (event.target) el = event.target;
+	else if (event.srcElement) el = event.srcElement;
+
+	bgc = el.style.backgroundColor;
+	if (bgc != "") {
+		
+		updateColorBox(bgc);
+		window.parent.opener.editSetColor(iFrameName,bgc);
+		window.close();
+	}
+}
+
+// VBScript has a Hex() function but JScript does not.
+function hex(nmb)
+{
+	var r;
+	if (nmb > 0)
+		r = nmb.toString(16);
+	else
+		r = "00";
+	if (r.length < 2)
+		r = "0" + r;
+	return r;
+}
+
+function hsvToRgb(hsv) {
+	var rgb = new Object();
+	var i, f, p, q, t;
+
+
+	if (hsv.s == 0) {
+		// achromatic (grey)
+		rgb.r = rgb.g = rgb.b = hsv.v;
+		return rgb;
+	}
+	hsv.h /= 60;			// sector 0 to 5
+	i = Math.floor( hsv.h );
+	f = hsv.h - i;			// factorial part of h
+	p = hsv.v * ( 1 - hsv.s );
+	q = hsv.v * ( 1 - hsv.s * f );
+	t = hsv.v * ( 1 - hsv.s * ( 1 - f ) );
+	switch( i ) {
+		case 0:
+			rgb.r = hsv.v;
+			rgb.g = t;
+			rgb.b = p;
+			break;
+		case 1:
+			rgb.r = q;
+			rgb.g = hsv.v;
+			rgb.b = p;
+			break;
+		case 2:
+			rgb.r = p;
+			rgb.g = hsv.v;
+			rgb.b = t;
+			break;
+		case 3:
+			rgb.r = p;
+			rgb.g = q;
+			rgb.b = hsv.v;
+			break;
+		case 4:
+			rgb.r = t;
+			rgb.g = p;
+			rgb.b = hsv.v;
+			break;
+		default:		// case 5:
+			rgb.r = hsv.v;
+			rgb.g = p;
+			rgb.b = q;
+			break;
+	}
+	
+	return rgb;
+}
+
+function calculateRGB() {
+	var hsv = new Object();
+	var event=window.event || arguments.callee.caller.arguments[0];
+	if (event.target) el = event.target;
+	else if (event.srcElement) el = event.srcElement;
+	var h = el.offsetHeight;
+	var y = event.offsetY;
+	hsv.h = 360 * event.offsetX / el.offsetWidth;
+				
+	if (y > h/2) {
+		hsv.s = 1.0;
+		hsv.v = 2 * (h - y) / h;
+	}else {
+		hsv.v = 1.0;
+		hsv.s = y / (h/2);
+	}
+	var rgb = hsvToRgb(hsv);
+	var red   = Math.round(255*Math.min(1.0,rgb.r));
+	var green = Math.round(255*Math.min(1.0,rgb.g));
+	var blue  = Math.round(255*Math.min(1.0,rgb.b));
+	var color = "#" + hex(red) + hex(green) + hex(blue);
+	updateColorBox(color);
+	if (event.button == 1){
+		window.parent.opener.editSetColor(iFrameName,color);
+		window.close();
+		return;
+	}
+}
+
+function toggleColorTable(){
+var toggleValue=document.getElementById("toggle").value
+	if (toggleValue == "Advanced"){
+		document.getElementById("toggle").value = "Basic";
+		document.getElementById("imageTable").style.display = "block";
+		document.getElementById("rgbTable").style.display = "none";
+	}else{
+		document.getElementById("toggle").value = "Advanced";
+		document.getElementById("imageTable").style.display = "none";
+		document.getElementById("rgbTable").style.display = "block";
+	}
+}
+
+window.focus();
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,36 @@
+FORM {
+	DISPLAY: none
+}
+.noprint {
+	DISPLAY: none
+}
+H1 {
+	
+}
+H2 {
+	
+}
+H3 {
+	
+}
+H4 {
+	
+}
+DD {
+	
+}
+TABLE {
+	page-break-inside: avoid
+}
+TR {
+	page-break-inside: avoid
+}
+CAPTION {
+	
+}
+H2 {
+	PAGE-BREAK-BEFORE: always
+}
+H2.toc {
+	
+}

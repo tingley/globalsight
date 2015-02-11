@@ -1,0 +1,72 @@
+<%@ page import="java.util.*,com.globalsight.everest.util.system.SystemConfiguration,
+	    com.globalsight.everest.webapp.pagehandler.PageHandler,
+	    com.globalsight.mediasurface.CmsUserInfo,
+	    com.globalsight.util.modules.Modules,
+	    java.util.ResourceBundle"
+%><%!
+
+static boolean s_cms = Modules.isCmsAdapterInstalled();
+
+static StringBuffer cmsURL = new StringBuffer();
+static {
+	try
+	{
+	    SystemConfiguration sc = SystemConfiguration.getInstance();
+	    cmsURL.append("http://");
+	    cmsURL.append(sc.getStringParameter(sc.CMS_UI_HOST));
+	    cmsURL.append(":");
+	    cmsURL.append(sc.getStringParameter(sc.CMS_UI_PORT));
+	    cmsURL.append("/cmc/model");
+	}
+	catch (Throwable e)
+	{
+	    // failed to get host/port
+	}
+    }
+%><%
+	String cmsUsername = null;
+	String cmsPassword = null;
+	CmsUserInfo cui = (CmsUserInfo)session.getAttribute(WebAppConstants.CMS_USER_INFO);
+	if (cui != null)
+	{
+		cmsUsername = cui.getCmsUserId();
+		cmsPassword = cui.getCmsPassword();
+	}
+%>
+
+<SCRIPT LANGUAGE="JAVASCRIPT">
+function openCms()
+{
+      <%if (cmsUsername == null || cmsPassword == null)
+      {%>
+	alert("<%=mainMenuBundle.getString("jsmsg_cms_username_password_missing")%>");
+	return false;
+      <%}
+      else
+      {%>
+	cmsForm.submit();
+      <%}%>
+};
+</SCRIPT>
+<script type="text/javascript">
+//<![CDATA[
+
+<% if (s_cms) { %>
+var cmsMenu = new WebFXMenu;
+
+cmsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_cms_ui")%>", "javascript:openCms();", ""));
+
+
+var cmsButton = new WebFXMenuButton("<%=mainMenuBundle.getString("lb_cms")%>", null, "",  cmsMenu);
+menuBar.add(cmsButton);
+<%}%>
+//]]>
+</script>
+
+<FORM NAME="cmsForm" ACTION="<%= cmsURL.toString() %>" METHOD="POST" TARGET="CMS">
+<input type="hidden" name="gsUsername" value="<%= session.getAttribute("username") %>">
+<input type="hidden" name="username" value="<%= cmsUsername %>">
+<input type="hidden" name="password" value="<%= cmsPassword %>">
+<input type="hidden" name="view" value="ms-cmc">
+<input type="hidden" name="cmcaction" value="verifylogin">
+</FORM>

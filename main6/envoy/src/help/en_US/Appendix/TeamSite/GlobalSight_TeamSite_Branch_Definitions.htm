@@ -1,0 +1,883 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>GlobalSight TeamSite Branch Definitions</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Originator content=ImportDoc>
+<meta name=OriginalFile content="D:\PSO\help\442_TeamSite_Guide.doc">
+<meta name="build tags" content="Configuration">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=8219>
+<meta name=layout-width content=739>
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../../442_TeamSite_Guide_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../../442_TeamSite_Guide.css'>");}
+//-->
+</script>
+<!--(Style Sheet)===================================================-->
+
+<style>
+<!--
+
+A:visited {
+	color: #800080;
+}
+
+A:link {
+	color: #0000ff;
+}
+
+-->
+</style>
+
+
+<style type="text/css">
+<!--
+img_whs1 {width: 641px; height: 657px; border-style: none; border-style: none;}
+h3.whs2 {margin-left: .75in;}
+h3.whs3 {margin-left: 0in;}
+img_whs4 {width: 638px; height: 393px; border-style: none; border-style: none;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript">
+<!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4))
+{
+  var strNSS = "<style type='text/css'>";
+  strNSS += "h3.whs3 {margin-left:1; }";
+  strNSS +="</style>";
+  document.write(strNSS);
+}
+//-->
+</script>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body lang=EN-US style="text-justify-trim: punctuation;">
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nTeamSite\nGlobalSight TeamSite Branch Definitions");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1><span lang=EN-GB>GlobalSight TeamSite Branch Definitions</span></h1>
+
+<p class=BodyText>You need to determine if your implementation of TeamSite 
+ requires the definition of GlobalSight TeamSite Branch Definitions by answering 
+ yes to one of the following questions:</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Do you use the <i>same </i>TeamSite branch where you store 
+ your source content to store your localized files? If yes, then use the 
+ Default GlobalSight/TeamSite Export Operation.&nbsp; </p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Do you use a new TeamSite branch<span style="color: #ff0000;"> 
+ <font color=red ></font></span>to store your localized files? If yes, then use the Non-Default 
+ GlobalSight/TeamSite Export Operation.&nbsp; </p>
+
+<p class=BodyText>Before you can answer yes to one of the questions, however, 
+ you need to know how GlobalSight modifies the concept of TeamSite branches, 
+ and what are the default and non-default GlobalSight/TeamSite Export operations.</p>
+
+<h3>Default GlobalSight/TeamSite Export Operation</h3>
+
+<p class=BodyText>In your TeamSite application, you build <b>branches</b>, 
+ which are special TeamSite directories that contain working sub-directories 
+ and working files.&nbsp; GlobalSight adds to the concept of TeamSite branches 
+ by assigning TeamSite branches with one of the following GlobalSight branch 
+ names: </p>
+
+<p class=ListBullet2small><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>TeamSite <b><span style="color: #ff0000;"><font color=red >Combined</font></span></b> 
+ Branch (Default Mode)</p>
+
+<p class=ListBullet2small><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>TeamSite <b><span style="color: #ff0000;"><font color=red >Source</font></span></b> 
+ Branch (Non-Default Mode)</p>
+
+<p class=ListBullet2small><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>TeamSite <b><span style="color: #ff0000;"><font color=red >Target</font></span></b> 
+ Branch (Non-Default Mode)</p>
+
+<p class=BodyText>In the Default GlobalSight/TeamSite Export Operation, 
+ a TeamSite branch<b> </b>remains an unchanged directory structure as defined 
+ in TeamSite for regular work.&nbsp; GlobalSight treats this unchanged TeamSite 
+ directory structure as a source for the content to be localized.<br>
+<br>
+When you implement the Default GlobalSight/TeamSite Export Operation, GlobalSight 
+ understands the directory structure at the time of import into GlobalSight, 
+ and GlobalSight automatically creates a replicate of your Workarea directory 
+ structure under each TeamSite branch directory where you store content 
+ that is to be localized FOR THAT EXPORTED FILE.&nbsp; GlobalSight names 
+ the replicate directory with the name of the target locale.&nbsp; GlobalSight 
+ automatically inserts the localized content into the parallel locale directory 
+ that matches the Workarea source directory where the source content is 
+ stored.&nbsp; This newly created combined directory structure is now referred 
+ to as a <b>TeamSite Combined Branch</b>, because the branch now contains 
+ both the <span style="color: #0000ff;"><font color=blue >source</font></span> files for localization, 
+ and the <span style="color: #0000ff;"><font color=blue >target</font></span> files that have been 
+ localized.&nbsp; </p>
+
+<p class=BodyText>The directory name of the TeamSite Combined Branch is 
+ unchanged in TeamSite.&nbsp; For example, if the original branch name 
+ was <span style="font-family: 'Courier New';">Marketing</span>, the name 
+ of the TeamSite Combined Branch would also be <span style="font-family: 'Courier New';">Marketing</span>, 
+ but you would now find new sub-directories at the Workarea level below 
+ the branch directory, one new sub-directory for each target locale.</p>
+
+<b style="font-weight: bold;"><span style="font-size: 12.0pt;
+	font-family: 'Times New Roman';
+	color: #0000ff;"><font size=3 color=blue style="font-size:12.000000pt;"><br style="clear: all;"
+						clear=all>
+</font></span></b> 
+
+<h4>Example of a Complete TeamSite Directory Structure in the Default Mode</h4>
+
+<p class=BodyText>Let’s assume that you have two TeamSite branches before 
+ you start to work with GlobalSight, called A and B, each with a ‘Marketing’ 
+ Workarea.&nbsp; </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ Marketing </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ Marketing </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText>Since you have opted to implement GlobalSight with the 
+ Default GlobalSight/TeamSite Export Operation, you continue without making 
+ any changes to the branch directory structure (the changes will be made 
+ automatically by GlobalSight).&nbsp; </p>
+
+<p class=BodyText>Let’s further assume that you are going to translate 
+ the content in A to three target locales (Greek, French, Japanese), and 
+ translate the content in B in five target locales (Spanish, Yugoslavian, 
+ Greek, French, and Japanese).&nbsp; </p>
+
+<p class=BodyText>GlobalSight would automatically add sub-directories to 
+ your TeamSite Combined Branch at the time that you export the localized 
+ content from GlobalSight.&nbsp; The resulting branch structure, after exporting 
+ some content in each target locale, would look like this:</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ Marketing </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ el-GR</font></span></b> </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ fr-FR</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ ja-JP</font></span> </b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ Marketing </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ sp-SP</font></span></b> </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ su-YU</font></span></b> </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ el-GR</font></span></b> </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ fr-FR</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ ja-JP</font></span> </b></p>
+
+<p class=BodyText>All of the behavior described above is at the branch/Workarea 
+ level.&nbsp; However, there are some important considerations that occur 
+ in the Workarea sub-directory level, and we will now examine these considerations.</p>
+
+<p class=BodyText>First, let’s assume that your Workarea (Marketing) has 
+ the following sub-directory structure:</p>
+
+<p class=BodyText><b style="font-weight: bold;"><span style="font-size: 8.0pt; color: #ff0000;"><font size=1 color=red style="font-size:8.000000pt;">A<br>
+&nbsp; Marketing<br>
+&nbsp;&nbsp;&nbsp; Directory1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Directory11</font></span></b><b><span style="font-size: 8.0pt;"><font size=1 style="font-size:8pt;"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: #ff0000;"><font color=red >Directory12</font></span> 
+ (source files)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: #ff0000;"><font color=red >Directory13</font></span></font></span></b></p>
+
+<span style="font-size: 11.0pt; font-family: 'Times New Roman';"><font size=3 style="font-size:11pt;"><br 
+ style="clear: all;"
+	clear=all>
+</font></span> 
+
+<p class=BodyText>Now, let’s assume that, after performing a number of 
+ GlobalSight imports and exports, you add a sub-directory in the TeamSite 
+ Source Branch A.&nbsp; Since GlobalSight automatically attaches a definition 
+ of the newly-changed source branch path to the incoming content to GlobalSight, 
+ when the content has been localized, the default GlobalSight/TeamSite Export 
+ Operation would reflect the change to the source directory structure, 
+ and automatically create the additional sub-directory in all affected 
+ locale sub-directories.</p>
+
+&nbsp;
+
+<p class=BodyText>Finally, let’s assume that you delete a sub-directory 
+ in the TeamSite Source Branch B.&nbsp; Since GlobalSight automatically 
+ attaches a definition of the newly-changed source branch path to the incoming 
+ content to GlobalSight, when the content has been localized, the default 
+ GlobalSight/TeamSite Export Operation would reflect the change to the source 
+ directory structure, and automatically create a new sub-directory in all 
+ affected locale sub-directories.</p>
+
+<h4>&nbsp;</h4>
+
+<h4>The Expected Behavior for the Default GlobalSight/TeamSite Export Operation</h4>
+
+<p class=BodyText>When using the Default GlobalSight/TeamSite Export Operation, 
+ GlobalSight imports TeamSite files from your TeamSite branch Workarea directory 
+ structure, and automatically creates a copy of the Workarea directory 
+ structure (directories only, not content of directories) thereby creating 
+ a <b>TeamSite Combined Branch</b>.&nbsp; GlobalSight now exports the localized 
+ TeamSite files from GlobalSight into the TeamSite TeamSite Combined Branch 
+ directory structure in the parallel sub-directory to the branch directory 
+ under the Workarea directory where the source content is located.</p>
+
+<p class=BodyText><span style="position: relative;
+								z-index: 35;
+								left: -11px;
+								top: 0px;
+								width: 641px;
+								height: 657px;"><img src="image009.gif" v:shapes="_x0000_s1485 _x0000_s1486 _x0000_s1487 _x0000_s1488 _x0000_s1489 _x0000_s1490 _x0000_s1491 _x0000_s1492 _x0000_s1493 _x0000_s1494 _x0000_s1495" width="641px" height="657px" border="0" class="img_whs1"></span>&nbsp;</p>
+
+<p class=BodyText>&nbsp;</p>
+
+<p class=BodyText>Using the default GlobalSight TeamSite export behavior, 
+ you localize TeamSite content without further configuration of GlobalSight.&nbsp; 
+ </p>
+
+<p class=BodyText>Please note that temporary files are created in the same 
+ directory the files reside for Dynamic Preview. Those temporary files 
+ are deleted after the export of the files from GlobalSight to TeamSite.</p>
+
+<h4>Example of a Complete TeamSite Directory Structure in the Default Mode 
+ (Data Content Records<i>).</i></h4>
+
+<h3 class="whs2"><span style="font-size: 11.0pt;
+												font-family: 'Times New Roman';
+												color: #000000;
+												font-weight: normal;
+												font-style: normal;"><font size=3 color=black style="font-size:11.000000pt;">Note 
+ that Export of Data Content Records are handled a little bit differently.</font></span></h3>
+
+<h3 class="whs2"><span style="font-size: 11.0pt;
+												font-family: 'Times New Roman';
+												color: #000000;
+												font-weight: normal;
+												font-style: normal;"><font size=3 color=black style="font-size:11.000000pt;">For 
+ DCRs there is a data_root value defined. Default value of data_root is 
+ templatedata. So all the DCRs would reside under some directory in templatedata 
+ directory.</font></span></h3>
+
+<p class=BodyText>Let’s assume that you have a TeamSite branch before you 
+ start to work with GlobalSight, called A with a ‘DcrsHere’ Workarea.&nbsp; 
+ </p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr</font></span></b></p>
+
+<p class=BodyText>Since you have opted to implement GlobalSight with the 
+ Default GlobalSight/TeamSite Export Operation, you continue without making 
+ any changes to the branch directory structure (the changes will be made 
+ automatically by GlobalSight).&nbsp; </p>
+
+<p class=BodyText>Let’s further assume that you are going to translate 
+ the DCRs in A to three target locales (Greek, French, Japanese).</p>
+
+<p class=BodyText>GlobalSight would automatically add sub-directories to 
+ your TeamSite Combined Branch at the time that you export the localized 
+ content from GlobalSight.&nbsp; The resulting branch structure, after exporting 
+ some content in each target locale, would look like this:</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Source dcr)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Fr_FR </font></span><span style="color: #000000;"><font color=black >(sub-directory for French)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr&nbsp; </font></span><span style="color: #000000;"><font color=black >(Translated in 
+ French)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ El_GR&nbsp; </font></span><span style="color: #000000;"><font color=black >(sub-directory for Greek)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Translated in Greek)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Ja_JP </font></span><span style="color: #000000;"><font color=black >(sub-directory for Japanese)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Translated in Japanese)</font></span></b></p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText>Note that there would be some temporary directories created 
+ for “Dynamic Preview” of files. If from the Main Editor of GlobalSight 
+ you click on Dynamic Preview button, a GlobalSight_preview directory would 
+ be created under the data directory. The target locale specific directories 
+ would be created under GlobalSight_preview directory. All the dcr files 
+ under the GlobalSight_preview/target_locale would be deleted at the time 
+ when the file is exported from GlobalSight.</p>
+
+<p class=BodyText>Temporary file structure for Dynamic Preview would look 
+ like:</p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite Combined Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Source dcr)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ GlobalSight_preview </font></span><span style="color: #000000;"><font color=black >(temporary sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Fr_FR </font></span><span style="color: #000000;"><font color=black >(sub-directory for French)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr&nbsp; </font></span><span style="color: #000000;"><font color=black >(Translated in 
+ French)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ El_GR&nbsp; </font></span><span style="color: #000000;"><font color=black >(sub-directory for Greek)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Translated in Greek)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Ja_JP </font></span><span style="color: #000000;"><font color=black >(sub-directory for Japanese)</font></span></b></p>
+
+<p class=BodyText3><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <b>WarPeace.dcr </b></font></span><b>(Translated in Japanese)</b></p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="font-size: 11.0pt; color: #000000;"><font size=3 color=black style="font-size:11.000000pt;">A</font></span></b><span 
+ style="font-size: 11.0pt; color: #000000;"><font size=3 color=black style="font-size:11.000000pt;">lso note that there are temporary 
+ preview generated files saved directly under the DcrsHere workarea. Those 
+ temporary files are also deleted after export of the DCR from GlobalSight.</font></span></p>
+
+<h3 class="whs3">Non-Default GlobalSight/TeamSite Export Operation</h3>
+
+<p class=BodyText>A <b>TeamSite Target Branch</b> is a special GlobalSight 
+ requirement that must be created ONLY if you are using the Non-Default 
+ GlobalSight/TeamSite Export Operation.&nbsp; </p>
+
+<p class=BodyText>The original TeamSite branch that contains the content 
+ to be localized is now referred to as a <b>TeamSite Source Directory</b>.&nbsp; 
+ GlobalSight, in the non-default mode, does not change a TeamSite Source 
+ Directory in any way.&nbsp; Whatever structure or whatever files are created 
+ for TeamSite in this branch remains unchanged.&nbsp; All that is important 
+ for GlobalSight about this branch is that it contains the content to be 
+ localized.&nbsp; When using the Non-Default GlobalSight/TeamSite Export 
+ Operation, you must identify this branch as the Source Directory to GlobalSight.</p>
+
+<p class=BodyText>You must now create a new <b>TeamSite Target Branch</b> 
+ for every target locale you are anticipating will be used in GlobalSight. 
+ &nbsp;You must duplicate the sub-directory structure of the TeamSite Source 
+ Branch exactly, including the exact character strings for all directory 
+ names.&nbsp; You will probably need multiple TeamSite Target Branches 
+ for every TeamSite Source Branch, based upon the number of target locales, 
+ and you need to create a set of TeamSite Target Branches for every TeamSite 
+ Source Directory you have.</p>
+
+<p class=BodyText>You have the freedom to name the new TeamSite Target 
+ Branch as you wish, but it is recommended that you name the new branch 
+ with the same name as the TeamSite Source Branch and append the target 
+ locale to it.&nbsp; This will make the selection of the Source and Target 
+ Branches within GlobalSight very easy:</p>
+
+<p class=BodyText3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TeamSite 
+ Source Branch Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Marketing Materials</p>
+
+<p class=BodyText3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TeamSite 
+ Target Branch Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <span style="font-family: 'Courier New';">Marketing Materials in Greek</span></p>
+
+<p class=BodyText3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TeamSite 
+ Target Branch Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <span style="font-family: 'Courier New';">Marketing Materials in French</span></p>
+
+<p class=BodyText3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TeamSite 
+ Target Branch Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <span style="font-family: 'Courier New';">Marketing Materials in Japanese</span></p>
+
+<h4>Example of a Complete TeamSite Directory Structure in the Non-Default 
+ Mode</h4>
+
+<p class=BodyText>For example, let’s assume that you have two TeamSite 
+ branches before you start to work with GlobalSight, called A and B.&nbsp; 
+ Since you have opted to implement GlobalSight with the Non-Default GlobalSight/TeamSite 
+ Export Operation, you need to create new TeamSite branches, one new branch 
+ for every target locale for the original TeamSite Branch.&nbsp; Let’s 
+ further assume that you are going to translate the content in A to three 
+ target locales (Greek, French, Japanese), and translate the content in 
+ B in five target locales (Spanish, Yugoslavian, Greek, French, and Japanese).&nbsp; 
+ The resulting branch structure would look like this:</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ (TeamSite Source Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A 
+ in Greek</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A 
+ in French</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A 
+ in Japanese</font></span> </b>(TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ (TeamSite Source Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B 
+ in Spanish</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B 
+ in Yugoslavian</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B 
+ in Greek</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B 
+ in French</font></span></b> (TeamSite Target Branch)</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B 
+ in Japanese</font></span></b> (TeamSite Target Branch)</p>
+
+<span style="font-size: 11.0pt; font-family: 'Times New Roman';"><font size=3 style="font-size:11pt;"><br 
+ style="clear: all;"
+	clear=all>
+</font></span> 
+
+<p class=BodyText>Now, let’s assume that you add a sub-directory in the 
+ TeamSite Source Branch A. &nbsp;You must now immediately add this sub-directory 
+ using the exact character string for the directory name to the three TeamSite 
+ Target Branches associated with A, to ensure that the GlobalSight export 
+ operation does not encounter a different directory structure in the GlobalSight 
+ Target Directory from the GlobalSight Source Directory.</p>
+
+<p class=BodyText>Finally, let’s assume that you delete a sub-directory 
+ in the TeamSite Source Branch B.&nbsp; You must now immediately delete 
+ this sub-directory from each of the five TeamSite Target Branches directories 
+ for B.</p>
+
+<h4>The Expected Behavior for the Non-Default GlobalSight/TeamSite Export 
+ Operation</h4>
+
+<p class=BodyText>However, if your implementation of TeamSite does not 
+ use the TeamSite source branch directory for storing the localized content, 
+ then you must do two tasks:</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Build a target branch for each target locale in your TeamSite 
+ environment that DUPLICATES the directory structure of the source branch 
+ in every way, including spelling the directory names exactly the same.&nbsp; 
+ <i>NOTE: This exact duplication is very important, because without it, 
+ GlobalSight cannot get the localized output of GlobalSight into the target 
+ directory.</i></p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Configure GlobalSight so that it understands your implementation 
+ of TeamSite source branch and target branch FOR EACH TARGET LOCALE.&nbsp; 
+ You accomplish this by creating a definition for a source branch and target 
+ branch pair plus the target locale, and this definition is known in GlobalSight 
+ as a <b><span style="color: #0000ff;"><font color=blue >TeamSite Branches Definition</font></span></b>:</p>
+
+<p class=BodyText>THE GlobalSight <b><span style="color: #0000ff;"><font color=blue >TEAMSITE 
+ BRANCHES DEFINITION</font></span></b>:</p>
+
+<p class=BodyText>You add the first TeamSite Branches Definition to GlobalSight 
+ for the first target locale that applies to your TeamSite files.&nbsp; 
+ You continue to add TeamSite Branches definitions to GlobalSight until 
+ you have one for every target locale you want to operate in the non-default 
+ GlobalSight mode.</p>
+
+<p class=BodyText>After defining all the TeamSite Branches definitions, 
+ you begin to utilize GlobalSight from within your TeamSite application.&nbsp; 
+ As you create TeamSite/GlobalSight Jobs, they carry the definition of the 
+ TeamSite Source Branch for each TeamSite file imported into GlobalSight.&nbsp; 
+ </p>
+
+<p class=BodyText>When the Jobs are completely localized and ready for 
+ export, GlobalSight remembers the Source Branch for each Page of the TeamSite/GlobalSight 
+ Job being exported.&nbsp; GlobalSight then performs a match between the 
+ Source Branch of each Page and the Target Locale for that Page with all 
+ of the TeamSite Branches definitions.&nbsp; If the exported Page values 
+ find a match within the one of the GlobalSight TeamSite Branches definitions, 
+ the matching Job’s Pages are exported into the Target Branch specified 
+ in the matching TeamSite Branches definition.</p>
+
+<p class=BodyText>So, for example, the following sequences of events can 
+ occur during the matching between the Job’s Source Branch and Target Locale 
+ and any of the GlobalSight TeamSite Branches definitions:</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Source Branch is a match, Target Locale is a match, and 
+ the Page is exported to the Target Branch specified (non-default GlobalSight 
+ behavior).</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Source Branch is a match, Target Locale is not a match, 
+ and a new locale directory ‘copy’ is created in the TeamSite source directory 
+ and the Page is exported into that new directory (default GlobalSight behavior).</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Source Branch is not a match, Target Locale is a Match, 
+ and a new locale directory ‘copy’ is created in the TeamSite source directory 
+ and the Page is exported into that new directory (default GlobalSight behavior).</p>
+
+<p class=ListBullet2><span style="font-family: Symbol;">·<span style="font: 7.0pt 'Times New Roman';"><font size=1 style="font-size:7pt;">&nbsp;&nbsp; 
+ </font></span></span>Source Branch is not a match, Target Locale is not a Match, 
+ and a new locale directory ‘copy’ is created in the TeamSite source directory 
+ and the Page is exported into that new directory (default GlobalSight behavior).</p>
+
+<p class=BodyText>Now, when GlobalSight’s GlobalSight understands which TeamSite 
+ Source Branch and Target Branch to use when there is a match with a GlobalSight 
+ TeamSite Branches Definition, it will know what to do:</p>
+
+<p class=BodyText><span style="position: relative;
+								z-index: 52;
+								left: -7px;
+								top: 4px;
+								width: 638px;
+								height: 397px;"><img src="image011.gif" v:shapes="_x0000_s1451 _x0000_s1452 _x0000_s1453 _x0000_s1454 _x0000_s1455 _x0000_s1456 _x0000_s1457 _x0000_s1458 _x0000_s1459 _x0000_s1460 _x0000_s1461" width="638px" height="393px" border="0" class="img_whs4"></span>&nbsp;</p>
+
+<p class=BodyText>&nbsp;</p>
+
+<p class=BodyText>If there is a change to the source branch directory structure, 
+ you must reflect this change in the target branch where your localized 
+ files are to be inserted.&nbsp; </p>
+
+<p class=BodyText>Please note that temporary files are created in the same 
+ directory the files reside for Dynamic Preview. Those temporary files 
+ are deleted after the export of the files from GlobalSight to TeamSite.</p>
+
+<p class=BodyText>&nbsp;</p>
+
+<h4>Example of a Complete TeamSite Directory Structure in the non-default 
+ Mode (Data Content Records<i>).</i></h4>
+
+<h3 class="whs2"><span style="font-size: 11.0pt;
+												font-family: 'Times New Roman';
+												color: #000000;
+												font-weight: normal;
+												font-style: normal;"><font size=3 color=black style="font-size:11.000000pt;">Note 
+ that Export of Data Content Records are handled a little bit differently.</font></span></h3>
+
+<h3 class="whs2"><span style="font-size: 11.0pt;
+												font-family: 'Times New Roman';
+												color: #000000;
+												font-weight: normal;
+												font-style: normal;"><font size=3 color=black style="font-size:11.000000pt;">For 
+ DCRs there is a data_root defined. Default value of data_root is templatedata. 
+ So all the DCRs would reside under some directory in templatedata directory.</font></span></h3>
+
+<p class=BodyText>Let’s assume that you have Two TeamSite branches before 
+ you start to work with GlobalSight, called Branch A and Branch B. Here 
+ Branch A is source branch and Branch B is the target branch.</p>
+
+<p class=BodyText>If the structure of Branch A is as follows</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >A</font></span></b> 
+ <b>(TeamSite&nbsp; Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr</font></span></b></p>
+
+<p class=BodyText>Then you must have exactly the same structure under branch 
+ B. So if you don’t have exactly same branch structure under Branch B then 
+ you’ll need create a workarea under branch B called DcrsHere then the 
+ branch B would look like</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ <b>(TeamSite&nbsp; Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText>Let’s further assume that you are going to translate 
+ the DCRs in A to French. Assuming that branch B was defined as the target 
+ branch for English to French using Teamsite Profiles in GlobalSight, the 
+ French translated files would be redirected to branch B.</p>
+
+<p class=BodyText>GlobalSight would automatically add sub-directories to 
+ your TeamSite target Branch B at the time that you export the localized 
+ content from GlobalSight.&nbsp; The resulting branch structure, after exporting 
+ some content in each target locale, would look like this:</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ <b>(TeamSite&nbsp; Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <b><span style="color: #ff0000;"><font color=red >data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3
+	style="margin-left: 2.75in; text-indent: .25in;"><b style="font-weight: bold;"><span 
+ style="color: #ff0000;"><font color=red >WarPeace.dcr</font></span></b></p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3><span style="font-size: 11.0pt; color: #000000;"><font size=3 color=black style="font-size:11.000000pt;">Note 
+ that even though GlobalSight can creates the above mentioned directory 
+ structure automatically in the target branch, it’s advisable for the proper 
+ functioning of DCRs that you copy all the directories in your source branch 
+ A under templatedata directory to Branch B before starting any jobs. If 
+ you don’t do so then you’ll not be able to do a proper “Dynamic Preview” 
+ of DCRs from GlobalSight. Also images won’t be visible from GlobalSight. 
+ So please copy all the files under templatedata directory to each target 
+ locale before you start. You’ll need to update the target branches manually 
+ if there is any change in directory structure in the Source branch A.</font></span></p>
+
+<p class=BodyText>Note that there would be some temporary directories created 
+ for “Dynamic Preview” of files. If from the Main Editor of GlobalSight 
+ you click on Dynamic Preview button, a GlobalSight_preview directory would 
+ be created under the data directory. The target locale specific directories 
+ would be created under GlobalSight_preview directory. All the files under 
+ the GlobalSight_preview/target_locale would be deleted at the time when 
+ the file is exported from GlobalSight. But note that the GlobalSight_preview 
+ and target locale directory is not deleted as there might be many other 
+ files present under it or are currently being created. </p>
+
+<p class=BodyText>Temporary file structure for Dynamic Preview would look 
+ like:</p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >B</font></span></b> 
+ <b>(TeamSite&nbsp; Branch)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp; 
+ DcrsHere </font></span>(TeamSite Workarea)</b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ templatedata </font></span><span style="color: #000000;"><font color=black >(Directory data_root)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ internet </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ book </font></span><span style="color: #000000;"><font color=black >(sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ data</font></span><span style="color: #000000;"><font color=black >(sub-directory)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ </font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr </font></span><span style="color: #000000;"><font color=black >(Source dcr)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ GlobalSight_preview </font></span><span style="color: #000000;"><font color=black >(temporary sub-directory)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ Fr_FR </font></span><span style="color: #000000;"><font color=black >(sub-directory for French)</font></span></b></p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="color: #ff0000;"><font color=red >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ WarPeace.dcr &nbsp;</font></span><span style="color: #000000;"><font color=black >(Translated in 
+ French)</font></span></b></p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText3><b style="font-weight: bold;"><span style="font-size: 11.0pt; color: #000000;"><font size=3 color=black style="font-size:11.000000pt;">A</font></span></b><span 
+ style="font-size: 11.0pt; color: #000000;"><font size=3 color=black style="font-size:11.000000pt;">lso note that there are temporary 
+ preview generated files saved directly under the DcrsHere workarea. Those 
+ temporary files (e.g. WarPeace.dcr) are also deleted after export of the 
+ DCR from GlobalSight.</font></span></p>
+
+<p class=BodyText3>&nbsp;</p>
+
+<p class=BodyText>&nbsp;</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

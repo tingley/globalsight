@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<schemarules>
+  <ruleset schema="WEATHERREPORT">
+    <translate path="//CITY" loctype="translatable"/>
+    <translate path="//CITY/@NAME" loctype="translatable"/>
+  </ruleset>
+</schemarules>

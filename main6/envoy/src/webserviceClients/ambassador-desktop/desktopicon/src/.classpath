@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/activation.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/axis.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/axis-ant.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/dom4j.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/junit.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/log4j.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/mail.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/src/lib/wsdl4j.jar"/>
+	<classpathentry kind="con" path="org.dyno.visual.swing.VS_LIBRARY/layoutext"/>
+	<classpathentry kind="lib" path="D:/GlobalSightSource/main6/tools/j2eeVendor/jboss/jboss_server/server/default/lib/mysql-connector-java-5.1.6-bin.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

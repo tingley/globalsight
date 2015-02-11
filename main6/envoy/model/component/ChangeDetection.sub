@@ -1,0 +1,18 @@
+(object Petal
+  version 43
+  _written "Model Integrator 1.1.9251.0"
+  charSet 0)
+(object SubSystem "Change Detection"
+  is_unit TRUE
+  is_loaded TRUE
+  visible_modules (list dependency_list
+    (object Dependency_Relationship
+      quid "38BA5256027E"
+      supplier "Component View::System Interface"
+      quidu "38BA51D703A8"
+      supplier_is_subsystem TRUE))
+  quid "38BA51FD0081"
+  physical_models (list unit_reference_list
+    (object module "Change Detection" "NotAModuleType" "NotAModulePart"
+      quid "38BA529102B5"
+      stereotype "")))

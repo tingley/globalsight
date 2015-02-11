@@ -1,0 +1,12 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.scheduling.FluxEventMap" table="FLUX_GS_MAP">
+		<id name="eventId" column="ID" type="string">
+			<generator class="assigned" />
+		</id>
+		<property name="eventType" length="2" column="EVENT_TYPE" type="int" not-null="true" unique="false"/>
+		<property name="domainObjectId" column="DOMAIN_OBJ_ID" type="long" not-null="true" unique="false"/>
+		<property name="domainObjectType" length="2" column="DOMAIN_OBJ_TYPE" type="int" not-null="true" unique="false"/>	
+	</class>	
+</hibernate-mapping>

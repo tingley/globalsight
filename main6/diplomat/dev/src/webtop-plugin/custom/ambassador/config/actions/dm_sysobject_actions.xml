@@ -1,0 +1,2294 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config version='1.0'>
+   <scope type="dm_sysobject">
+
+      <!-- list of actions to display for a dm_sysobject -->
+      <actionlist id="default">
+         <!-- the most commonly used actions are displayed -->
+         <!-- as a flat list of links -->
+         <action id="checkout" nlsid="MSG_CHECKOUT"/>
+         <action id="editfile" nlsid="MSG_EDIT" showifdisabled="false"/>
+         <action id="checkin" nlsid="MSG_CHECKIN"/>
+         <action id="cancelcheckout" nlsid="MSG_CANCEL_CHECKOUT"/>
+         <action id="addtoclipboard" nlsid="MSG_ADD_TO_CLIPBOARD"/>
+         <action id="translate" nlsid="MSG_TRANSLATE"/>
+         <action id="canceltranslation" nlsid="MSG_CANCEL_TRANSLATION"/>
+
+         <!-- menu hiearchy of additional actions to display-->
+         <!-- this menu made available when the "More..." link is selected -->
+         <moreactionsmenu>
+            <menu id="file" nlsid="MSG_FILE_MENU">
+               <action id="saveasxforms" nlsid="MSG_SAVE_AS" showifdisabled="false"/>
+               <action id="delete" nlsid="MSG_DELETE" showifdisabled="false"/>
+               <action id="export" nlsid="MSG_EXPORT"/>
+               <action id="importrendition" nlsid="MSG_IMPORT_RENDITION" showifdisabled="false"/>
+               <action id="sendlocator" nlsid="MSG_SEND_LOCATOR"/>
+               <action id="findtarget" nlsid="MSG_FIND_TARGET" showifdisabled="false"/>
+               <action id="refresh" nlsid="MSG_REFRESH" showifdisabled="false"/>
+               <action id="govern" nlsid="MSG_GOVERN" showifdisabled="false"/>
+               <action id="ungovern" nlsid="MSG_UNGOVERN" showifdisabled="false"/>
+               <action id="markread" nlsid="MSG_DISCUSSION_MARK_READ" showifdisabled="true"/>
+               <action id="markunread" nlsid="MSG_DISCUSSION_MARK_UNREAD" showifdisabled="true"/>
+
+            </menu>
+            <menu id="view" nlsid="MSG_VIEW_MENU">
+               <action id="properties" nlsid="MSG_PROPERTIES"/>
+               <action id="versions" nlsid="MSG_VERSIONS"/>
+               <action id="locations" nlsid="MSG_LOCATIONS"/>
+               <action id="relationships" nlsid="MSG_RELATIONSHIPS"/>
+               <action id="renditions" nlsid="MSG_RENDITIONS"/>
+               <action id="viewassemblies" nlsid="MSG_ASSEMBLIES"/>
+               <action id="showtopicaction" nlsid="MSG_DISCUSSION_ACTION" showifdisabled="true"/>
+            </menu>
+
+            <menu id="tools" nlsid="MSG_TOOLS_MENU">
+               <action id="promote" nlsid="MSG_PROMOTE" showifdisabled="false"/>
+               <action id="demote" nlsid="MSG_DEMOTE" showifdisabled="false"/>
+               <action id="applylifecycle" nlsid="MSG_APPLY_LIFECYCLE" showifdisabled="false"/>
+               <action id="detachlifecycle" nlsid="MSG_DETACH_LIFECYCLE" showifdisabled="false"/>
+               <action id="suspendlifecycle" nlsid="MSG_SUSPEND_LIFECYCLE" showifdisabled="false"/>
+               <action id="restorelifecycle" nlsid="MSG_RESTORE_LIFECYCLE" showifdisabled="false"/>
+
+               <action id="streamlineviewvirtualdoc" nlsid="MSG_VIEW_VIRTUAL_DOCUMENT" showifdisabled="false"/>
+               <action id="makevirtual" nlsid="MSG_MAKE_VIRTUAL" showifdisabled="false"/>
+               <action id="makesimple" nlsid="MSG_MAKE_SIMPLE" showifdisabled="false"/>
+               <action id="addcomponentfromclipboard" nlsid="MSG_ADD_COMPONENT_FROM_CLIPBOARD" showifdisabled="false"/>
+               <action id="addcomponentfromfileselector" nlsid="MSG_ADD_COMPONENT_FROM_FILE_SELECTOR" showifdisabled="false"/>
+               <action id="addnewvirtualdocumentnode" nlsid="MSG_ADD_COMPONENT_USING_NEW_DOCUMENT" showifdisabled="false"/>
+               <action id="removevirtualdocumentnode" nlsid="MSG_REMOVE_COMPONENT" showifdisabled="false"/>
+               <action id="reordervirtualdocumentnodes" nlsid="MSG_REORDER_COMPONENTS" showifdisabled="false"/>
+               <action id="savechanges" nlsid="MSG_SAVE_CHANGES" showifdisabled="false"/>
+               <action id="setbindingrule" nlsid="MSG_SET_BINDING_RULE" showifdisabled="false"/>
+               <action id="modifyversionlabels" nlsid="MSG_MODIFY_VERSION_LABELS" showifdisabled="false" />
+               <action id="newassembly" nlsid="MSG_NEW_ASSEMBLY" showifdisabled="false" />
+               <action id="freezeassembly" nlsid="MSG_FREEZE_ASSEMBLY" showifdisabled="false"/>
+               <action id="unfreezeassembly" nlsid="MSG_UNFREEZE_ASSEMBLY" showifdisabled="false"/>
+
+               <action id="subscribe" nlsid="MSG_SUBSCRIBE" showifdisabled="false"/>
+               <action id="unsubscribe" nlsid="MSG_UNSUBSCRIBE" showifdisabled="false"/>
+               <action id="registerevents" nlsid="MSG_TURN_ON_NOTIFICATION" showifdisabled="false"/>
+               <action id="unregisterevents" nlsid="MSG_TURN_OFF_NOTIFICATION" showifdisabled="false"/>
+
+               <action id="startworkflowfromdoc" nlsid="MSG_START_WORKFLOW_FROM_DOC"/>
+               <action id="sendtodistributionlist" nlsid="MSG_SEND_TO_DISTRIBUTION"/>
+
+               <action id="submitforcategorization" nlsid="MSG_SUBMIT_FOR_CATEGORIZATION" showifdisabled="false"/>
+
+               <action id="createpdfrendition" nlsid="MSG_TRANSFORM_TO_PDF" showifdisabled="false"/>
+               <action id="createhtmlrendition" nlsid="MSG_TRANSFORM_TO_HTML" showifdisabled="false"/>
+               <action id="transformation" nlsid="MSG_TRANSFORM_MORE_OPTIONS" showifdisabled="false"/>
+            </menu>
+         </moreactionsmenu>
+      </actionlist>
+
+      <!-- action definitions -->
+
+      <!-- Show properties action -->
+      <action id="properties">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="enableShowAll" alias="ctrlKeyPressed" required="false"></param>
+            <param name="preferForms" required="false"></param>
+            <param name="templateId" required="false"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='preferforms' value='true'
+                        evaluatorclass='com.documentum.webcomponent.xforms.action.XFormsLaunchPropertiesEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>editxformsproperties</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>attributes</component>
+                        <container>properties</container>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Attributes action -->
+      <action id="attributes">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="enableShowAll" alias="ctrlKeyPressed" required="false"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>attributes</component>
+            <container>properties</container>
+         </execution>
+      </action>
+
+      <!-- Versions action -->
+      <action id="versions">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="folderPath" required="false"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreference</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <component>versions</component>
+                     <container>navigationcontainer</container>
+                     <navigation>jump</navigation>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- History action -->
+      <action id="history">
+         <params>
+            <param name="objectId" required="true"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>history</component>
+            <container>properties</container>
+         </execution>
+      </action>
+
+      <!-- Permissions action -->
+      <action id="permissions">
+         <params>
+            <param name="objectId" required="true"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>permissions</component>
+            <container>properties</container>
+         </execution>
+      </action>
+
+      <!-- Locations action -->
+      <action id="locations">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="folderPath" required="false"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>locations</component>
+            <container>navigationcontainer</container>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <!-- Relationships action -->
+      <action id="relationships">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="folderPath" required="false"></param>
+         </params>
+
+         <failoverenabled>true</failoverenabled>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreference</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <component>relationships</component>
+                     <container>navigationcontainer</container>
+                     <navigation>jump</navigation>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+
+      </action>
+
+      <!-- Subscribe action -->
+      <action id="subscribe">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderPath" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.SubscribeAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.SubscribeAction">
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Unsubscribe action -->
+      <action id="unsubscribe">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="events" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.UnsubscribeAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.UnsubscribeAction">
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Render As PDF action -->
+      <action id="createpdfrendition">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="contentType" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RenditionsPrecondition"/>
+            <precondition class="com.documentum.webcomponent.library.actions.CreatePDFRenditionAction"/>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.CreatePDFRenditionAction">
+                        <nlsbundle>com.documentum.webcomponent.library.renditions.RenditionsNlsProp</nlsbundle>
+                        <updatereplicasource>true</updatereplicasource>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+      <action id="createpdfrenditiongeneric" extends="createpdfrendition:application='webcomponent' type='dm_sysobject'"/>
+
+      <!-- Render As HTML action -->
+      <action id="createhtmlrendition">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="contentType" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RenditionsPrecondition"/>
+            <precondition class="com.documentum.webcomponent.library.actions.CreateHTMLRenditionAction"/>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.CreateHTMLRenditionAction">
+                        <nlsbundle>com.documentum.webcomponent.library.renditions.RenditionsNlsProp</nlsbundle>
+                        <updatereplicasource>true</updatereplicasource>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+      <action id="createhtmlrenditiongeneric" extends="createhtmlrendition:application='webcomponent' type='dm_sysobject'"/>
+
+      <!-- Import Rendition action -->
+      <action id="importrendition">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="contentType" required="false"></param>
+            <param name="ownerName" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ImportRenditionAction"/>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.ImportRenditionAction">
+            <permit>write_permit</permit>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreference</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>importrendition</component>
+                     <container>importrenditioncontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpimportrendition</component>
+                     <container>httpimportrenditioncontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>importrendition</component>
+                     <container>importrenditioncontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+
+            <nlsbundle>com.documentum.webcomponent.library.importrendition.ImportRenditionNlsProp</nlsbundle>
+         </execution>
+      </action>
+      <action id="importrenditiongeneric" extends="importrendition:application='webcomponent' type='dm_sysobject'"/>
+
+      <!-- Check-in action -->
+      <action id="checkin">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="filenamewithpath" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.CheckinAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>checkin</component>
+                     <container>checkincontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpcheckin</component>
+                     <container>httpcheckincontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>checkin</component>
+                     <container>checkincontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Checkout action -->
+      <action id="checkout">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="isLockOnly" required="false"></param>
+            <param name="isIgnoreDescendents" required="false"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+            <param name="nodeId" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.CheckoutAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <olecompound enabled="false"/>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>checkout</component>
+                     <container>checkoutcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpcheckout</component>
+                     <container>httpcheckoutcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>checkout</component>
+                     <container>checkoutcontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Cancel Checkout action -->
+      <action id="cancelcheckout">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.CancelCheckoutAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>cancelcheckout</component>
+                     <container>cancelcheckoutcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpcancelcheckout</component>
+                     <container>httpcancelcheckoutcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>cancelcheckout</component>
+                     <container>cancelcheckoutcontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+      
+      <!-- Translate action -->
+      <action id="translate">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="true"></param>
+            <param name="ownerName" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="isLockOnly" required="false"></param>
+            <param name="isIgnoreDescendents" required="false"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+            <param name="nodeId" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.ambassador.actions.TranslatePrecondition">
+            </precondition>
+         </preconditions>
+         <!--execution class="com.documentum.web.formext.action.LaunchComponent"-->
+         <execution class="com.documentum.ambassador.actions.TranslateLaunch">
+            <permit>version_permit</permit>
+            <olecompound enabled="false"/>
+            <component>translate</component>
+            <container>translatecontainer</container>
+         </execution>
+      </action>
+
+      <!-- Cancel Translation action -->
+      <action id="canceltranslation">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="true"></param>
+            <param name="isReference" required="false"></param>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.ambassador.actions.CancelTranslationPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.ambassador.actions.CancelTranslationAction">
+         </execution>
+      </action>
+
+      <!-- PDF comment -->
+      <action id="comment">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="contentType" required="true"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.CommentAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.CommentAction">
+            <nlsbundle>com.documentum.webcomponent.library.actions.CommentNlsProp</nlsbundle>
+         </execution>
+      </action>
+
+      <!-- View action -->
+      <action id="view">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="launchViewer" required="false"/>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="type" required="false" />
+            <param name="assembledFromId" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isform' value='true'
+                        evaluatorclass='com.documentum.webcomponent.xforms.action.XFormsLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>viewxforms</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>httpview</component>
+                        <container>httpviewcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>view</component>
+                        <container>viewcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>view</component>
+                        <container>viewcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='action'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.PreferredViewAction" />
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- View action -->
+      <action id="downloadcontent">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="type" required="false" />
+            <param name="isIgnoreDescendents" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isform' value='true'
+                        evaluatorclass='com.documentum.webcomponent.xforms.action.XFormsLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>viewxforms</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>read_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>view</component>
+                        <container>downloadcontentcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='action'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.view.LaunchViewEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.PreferredViewAction" />
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Edit File action -->
+      <action id="editfile">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="lockOwner" required="false"/>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="type" required="false"/>
+            <param name="ownerName" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.EditAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isform' value='true'
+                        evaluatorclass='com.documentum.webcomponent.xforms.action.XFormsLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>write_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>editxforms</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>edit</component>
+                        <container>editcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>httpedit</component>
+                        <container>httpeditcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false"/>
+                        <component>edit</component>
+                        <container>editcontainer</container>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='action'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.PreferredEditAction" />
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Edit action automatically done at end of new document -->
+      <action id="editafternew" extends="editfile:webcomponent/config/actions/dm_sysobject_actions.xml">
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isform' value='true'
+                     evaluatorclass='com.documentum.webcomponent.xforms.action.XFormsLaunchComponentEvaluator' />
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false" />
+                        <component>editxforms</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator' />
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false" />
+                        <component>edit</component>
+                        <container>editcontainer</container>
+                        <navigation>jump</navigation>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator' />
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false" />
+                        <component>httpedit</component>
+                        <container>httpeditcontainer</container>
+                        <navigation>jump</navigation>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator' />
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+                        <permit>version_permit</permit>
+                        <olecompound enabled="false" />
+                        <component>edit</component>
+                        <container>editcontainer</container>
+                        <navigation>jump</navigation>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='action'
+                        evaluatorclass='com.documentum.webcomponent.library.contenttransfer.edit.LaunchEditEvaluator' />
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.PreferredEditAction" />
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Export action -->
+      <action id="export">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="contentSize" required="false"></param>
+            <param name="contentType" required="false"></param>
+            <param name="isReference" required="false"></param>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ExportAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>read_permit</permit>
+            <olecompound enabled="false"/>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='isaccessibilityon' value='true' evaluatorclass='com.documentum.web.contentxfer.AccessibilityEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpexport</component>
+                     <container>httpexportcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>export</component>
+                     <container>exportcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpexport</component>
+                     <container>httpexportcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>export</component>
+                     <container>exportcontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Delete action -->
+      <action id="delete">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.DeleteDocPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <container>combocontainer</container>
+         </execution>
+      </action>
+
+      <!-- Rename action -->
+      <action id="rename">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="ownerName" required="false"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RenameDocPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>rename</component>
+            <container>combocontainer</container>
+         </execution>
+      </action>
+
+      <!-- Send-to action -->
+      <action id="sendto">
+         <params>
+            <param name="objectId" required="true"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.SendToAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <container>combocontainer</container>
+         </execution>
+      </action>
+
+      <!-- start workflow from doc action -->
+      <action id="startworkflowfromdoc">
+         <params>
+            <param name="startworkflowId" required="false"/>
+            <param name="objectId" required="true"/>
+            <param name="ownerName" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ArgumentExistsPrecondition">
+               <argument>startworkflowId</argument>
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.GenericRolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <container>startworkflowtemplatelocatorcontainer</container>
+            <component>alluserwftemplatelocator</component>
+         </execution>
+      </action>
+
+      <!-- Renditions action -->
+      <action id="renditions">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="folderPath" required="false"></param>
+            <param name="contentType" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RenditionsPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreference</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <component>renditions</component>
+                     <container>navigationcontainer</container>
+                     <navigation>jump</navigation>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Promote action -->
+      <action id="promote">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.PromoteAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.PromoteAction">
+                        <nlsbundle>com.documentum.webcomponent.library.actions.PromoteNlsProp</nlsbundle>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Demote action -->
+      <action id="demote">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.DemoteAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.DemoteAction">
+                        <nlsbundle>com.documentum.webcomponent.library.actions.DemoteNlsProp</nlsbundle>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Apply Lifecycle action -->
+      <action id="applylifecycle">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isReplica" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ApplyLifecycleAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreference</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='isreplica' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReplicaEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>informinvalidactionforreplica</component>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <component>applylifecycleall</component>
+                     <container>applylifecycle</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Suspend action -->
+      <action id="suspendlifecycle">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.SuspendLifecycleAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.SuspendLifecycleAction">
+                        <nlsbundle>com.documentum.webcomponent.library.actions.SuspendLifecycleNlsProp</nlsbundle>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+
+      <!-- Resume action -->
+      <action id="restorelifecycle">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ResumeLifecycleAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.ResumeLifecycleAction">
+                        <nlsbundle>com.documentum.webcomponent.library.actions.ResumeLifecycleNlsProp</nlsbundle>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Detach Lifecycle action -->
+      <action id="detachlifecycle">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.DetachLifecycleAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.DetachLifecycleAction">
+                        <nlsbundle>com.documentum.webcomponent.library.actions.DetachLifecycleNlsProp</nlsbundle>
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Send to distribution list action -->
+      <action id="sendtodistributionlist">
+         <params>
+            <param name="objectId" required="true"/>
+         </params>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>sendtodistributionlist</component>
+            <container>multiargdialogcontainer</container>
+         </execution>
+      </action>
+
+      <!-- Convert to virtual document action -->
+      <action id="makevirtual">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isReference" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ConvertVirtualDocumentAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.ConvertVirtualDocumentAction">
+            <nlsbundle>com.documentum.webcomponent.library.actions.ConvertVirtualDocumentNlsProp</nlsbundle>
+         </execution>
+      </action>
+
+      <!-- Convert to simple document action -->
+      <action id="makesimple">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isReference" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ConvertVirtualDocumentAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.ConvertVirtualDocumentAction">
+            <nlsbundle>com.documentum.webcomponent.library.actions.ConvertVirtualDocumentNlsProp</nlsbundle>
+         </execution>
+      </action>
+
+      <!-- add component from clipboard action -->
+      <action id="addcomponentfromclipboard">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="compoundArchitecture" required="false"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.AddComponentPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <olecompound enabled="false"/>
+            <component>addvirtualdocumentnodefromclipboard</component>
+         </execution>
+      </action>
+
+      <!-- add component from file selector action -->
+      <action id="addcomponentfromfileselector">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="compoundArchitecture" required="false"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.AddComponentFSPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <olecompound enabled="false"/>
+            <component>addvirtualdocumentnodefromfileselector</component>
+         </execution>
+      </action>
+
+      <!-- Add New Virtual Document Node action -->
+      <action id="addnewvirtualdocumentnode">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="compoundArchitecture" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.AddComponentFSPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <olecompound enabled="false"/>
+            <component>addnewvirtualdocumentnode</component>
+         </execution>
+      </action>
+
+      <!-- New Virtual Document Node action -->
+      <action id="newvirtualdocumentnode">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="ownerName" required="false"></param>
+            <param name="editAfterCreate" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <dynamicfilter class="com.documentum.web.contentxfer.ContentTransferLaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf'/>
+                  </criteria>
+                  <selection>
+                     <component>newdocument</component>
+                     <container>newdoccontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet'/>
+                  </criteria>
+                  <selection>
+                     <component>newdocument</component>
+                     <container>newdoccontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http'/>
+                  </criteria>
+                  <selection>
+                     <component>newdocument</component>
+                     <container>newhttpdoccontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- remove component action -->
+      <action id="removecomponent">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="isCurrentVDMNode" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RemoveComponentPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>removecomponent</component>
+            <container>removecomponentcontainer</container>
+         </execution>
+      </action>
+
+      <!-- remove virtual document node action -->
+      <action id="removevirtualdocumentnode">
+         <params>
+            <param name="vdmRootObjectId" required="true"></param>
+            <param name="nodeId" required="true"></param>
+            <param name="isCurrentVDMNode" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RemoveVirtualDocumentNodePrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>removevirtualdocumentnode</component>
+            <container>removevirtualdocumentnodecontainer</container>
+         </execution>
+      </action>
+
+      <!-- reorder components action -->
+      <action id="reordercomponents">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="compoundArchitecture" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ReorderComponentsPrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>reordercomponents</component>
+            <container>reordercomponentscontainer</container>
+         </execution>
+      </action>
+
+      <!-- reorder virtual document nodes action -->
+      <action id="reordervirtualdocumentnodes">
+         <params>
+            <param name="vdmRootObjectId" required="true"></param>
+            <param name="nodeId" required="true"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ReorderVirtualDocumentNodesPrecondition"></precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>reordervirtualdocumentnodes</component>
+         </execution>
+      </action>
+
+      <!-- view virtual document action in streamline mode -->
+      <action id="streamlineviewvirtualdoc">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isCurrentVDMNode" required="false"></param>
+            <param name="home_component" required="false"/>
+            <param name="home_component_args" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewVirtualDocumentPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>vdmliststreamline</component>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <!-- view virtual document action in classic mode (View/Virtual Document) -->
+      <action id="viewvdm">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isCurrentVDMNode" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewVirtualDocumentPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>vdmlist</component>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <!-- view assembly action in streamline mode -->
+      <action id="streamlineviewassembly">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="assembledFromId" required="false"></param>
+            <param name="home_component" required="false"/>
+            <param name="home_component_args" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAssemblyPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>assemblyliststreamline</component>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <!-- view assembly action in classic mode -->
+      <action id="viewassembly">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="assembledFromId" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAssemblyPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>assemblylist</component>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+
+      <!-- view virtual document action in classic mode (Tools/Virtual Documents/View Virtual Document) or in portal-->
+      <action id="viewvirtualdoc">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isCurrentVDMNode" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewVirtualDocumentPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <filter clientenv='portal'>
+               <component>vdmliststreamline</component>
+            </filter>
+            <filter clientenv='not portal'>
+               <component>vdmlist</component>
+            </filter>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <action id="vdmliststreamline" extends="streamlineviewvirtualdoc:webcomponent/config/actions/dm_sysobject_actions.xml">
+         <preconditions>
+         </preconditions>
+      </action>
+
+      <action id="vdmlist" extends="viewvirtualdoc:webcomponent/config/actions/dm_sysobject_actions.xml">
+         <preconditions>
+         </preconditions>
+      </action>
+
+      <action id="assemblyliststreamline" extends="streamlineviewassembly:webcomponent/config/actions/dm_sysobject_actions.xml">
+         <preconditions>
+         </preconditions>
+      </action>
+
+      <action id="assemblylist" extends="viewassembly:webcomponent/config/actions/dm_sysobject_actions.xml">
+         <preconditions>
+         </preconditions>
+      </action>
+
+      <action id="vdmclickactionprompt">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="launchViewer" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="pathInfo" required="false"/>
+            <param name="structureComponent" required="false"/>
+            <param name="selectedNodeIds" required="false"/>
+            <param name="useAssembly" required="false"/>
+         </params>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>vdmclickactionprompt</component>
+            <container>vdmclickactionpromptcontainer</container>
+         </execution>
+      </action>
+
+      <action id="openvirtualdocument">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="launchViewer" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="pathInfo" required="false"/>
+            <param name="structureComponent" required="false"/>
+            <param name="selectedNodeIds" required="false"/>
+            <param name="home_component" required="false"/>
+            <param name="home_component_args" required="false"/>
+         </params>
+         <execution class="com.documentum.webcomponent.library.actions.OpenVirtualDocumentAction">
+         </execution>
+      </action>
+
+      <action id="openassembly">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="launchViewer" required="false"/>
+            <param name="nodeId" required="false"/>
+            <param name="pathInfo" required="false"/>
+            <param name="structureComponent" required="false"/>
+            <param name="selectedNodeIds" required="false"/>
+            <param name="home_component" required="false"/>
+            <param name="home_component_args" required="false"/>
+         </params>
+         <execution class="com.documentum.webcomponent.library.actions.OpenAssemblyAction">
+         </execution>
+      </action>
+
+
+      <!-- View action -->
+      <action id="viewcontent">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="contentType" required="false"/>
+            <param name="contentSize" required="false"/>
+            <param name="isReference" required="false"/>
+            <param name="launchViewer" required="false"/>
+            <param name="vdmRootObjectId" required="false"/>
+            <param name="nodeId" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>read_permit</permit>
+            <olecompound enabled="false"/>
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='applet' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>view</component>
+                     <container>viewcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='http' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>httpview</component>
+                     <container>httpviewcontainer</container>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='contenttransfer' value='ucf' evaluatorclass='com.documentum.web.contentxfer.ContentTransferLaunchComponentEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <component>view</component>
+                     <container>viewcontainer</container>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- Commit Changes action -->
+      <action id="commitchanges">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.CheckinAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>commitchanges</component>
+            <container>checkincontainer</container>
+         </execution>
+      </action>
+
+      <!-- Set Binding Rule action -->
+      <action id="setbindingrule">
+         <params>
+            <param name="vdmRootObjectId" required="true"></param>
+            <param name="nodeId" required="true"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.SetBindingRulePrecondition">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>setbindingrule</component>
+         </execution>
+      </action>
+
+      <!-- Modify Version Labels action -->
+      <action id="modifyversionlabels">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="nodeId" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>version_permit</permit>
+            <component>modifyversionlabels</component>
+            <container>combocontainer</container>
+         </execution>
+      </action>
+
+      <!-- New Assembly action -->
+      <action id="newassembly">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="folderId" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+            <precondition class="com.documentum.webcomponent.library.actions.NewAssemblyPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponentWithPermitCheck">
+            <permit>write_permit</permit>
+            <component>newassembly</component>
+            <container>newassemblycontainer</container>
+         </execution>
+      </action>
+
+      <!-- Freeze assembly action -->
+      <action id="freezeassembly">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="assembledFromId" required="false"></param>
+            <param name="isFrozenAssembly" required="false"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.FreezeAssemblyAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+                <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.FreezeAssemblyAction">
+         </execution>
+      </action>
+
+      <!-- Unfreeze assembly action -->
+      <action id="unfreezeassembly">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="isFrozenAssembly" required="false"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.UnfreezeAssemblyAction">
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+                <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.UnfreezeAssemblyAction">
+         </execution>
+      </action>
+
+      <!-- DRL edit action (extends editfile) -->
+      <action id="drledit" extends="editfile:webcomponent/config/actions/dm_sysobject_actions.xml">
+      </action>
+
+      <!-- DRL view action (extends view) -->
+      <action id="drlview" extends="view:webcomponent/config/actions/dm_sysobject_actions.xml">
+      </action>
+
+      <!-- Send locator action -->
+      <action id="sendlocator">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="type" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.SendLocatorPrecondition">
+               <argument>objectId</argument>
+               <argument>type</argument>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>sendlocator</component>
+            <container>sendlocatorcontainer</container>
+         </execution>
+      </action>
+
+      <!-- FindTarget action -->
+      <action id="findtarget">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="openFolder" required="false"></param>
+            <param name="isReference" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RemoteObjectPrecondition">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+         </execution>
+      </action>
+
+      <!-- Virtual Document Copy Option Action -->
+      <action id="vdmcopyoption">
+         <params>
+            <param name="objectName" required="true"></param>
+         </params>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>vdmcopyoption</component>
+            <container>combocontainer</container>
+         </execution>
+      </action>
+
+      <!-- Save As XForms action -->
+      <action id="saveasxforms">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="contentType" required="false"></param>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>form_user</role>
+            </precondition>
+            <precondition class="com.documentum.webcomponent.xforms.action.XFormsPrecondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>saveasxforms</component>
+            <container>newxformscontainer</container>
+         </execution>
+      </action>
+
+      <!-- Refresh reference or replica action -->
+      <action id="refresh">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="isReplica" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RefreshAction">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.webcomponent.library.actions.RefreshAction">
+            <nlsbundle>com.documentum.webcomponent.library.actions.RefreshNlsProp</nlsbundle>
+         </execution>
+      </action>
+
+      <!-- View Assemblies action -->
+      <action id="viewassemblies">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="folderId" required="false"></param>
+            <param name="folderPath" required="false"></param>
+            <param name="linkCount" required="false"></param>
+            <param name="isVirtualDoc" required="false"></param>
+            <param name="assembledFromId" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.ViewAssembliesPrecondition" />
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>viewassemblies</component>
+            <navigation>jump</navigation>
+         </execution>
+      </action>
+
+      <!-- turn on notification action -->
+      <action id="registerevents">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="events" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RegisterEventsAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='isreplica' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReplicaEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreplica</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.RegisterEventsAction">
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+      <!-- turn off notification action -->
+      <action id="unregisterevents">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="events" required="false"></param>
+         </params>
+
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.UnRegisterEventsAction">
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.RedirectActionExecution">
+            <dynamicfilter class="com.documentum.web.formext.action.LaunchComponentFilter">
+               <option>
+                  <criteria>
+                      <criterion name='isreference' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReferenceEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreference</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                     <criterion name='isreplica' value='true' evaluatorclass='com.documentum.webcomponent.library.actions.ReplicaEvaluator'/>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.web.formext.action.LaunchComponent">
+                        <component>informinvalidactionforreplica</component>
+                     </execution>
+                  </selection>
+               </option>
+               <option>
+                  <criteria>
+                  </criteria>
+                  <selection>
+                     <execution class="com.documentum.webcomponent.library.actions.UnRegisterEventsAction">
+                     </execution>
+                  </selection>
+               </option>
+            </dynamicfilter>
+         </execution>
+      </action>
+
+
+      <!-- Reposition Component action -->
+      <action id="repositioncomponent">
+         <params>
+            <param name="vdmRootObjectId" required="true"></param>
+            <param name="nodeId" required="true"></param>
+            <param name="targetParentNodeId" required="true"></param>
+            <param name="insertAfterNodeId" required="false"></param>
+            <param name="preconditionShouldDisplayErrors" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.RepositionVirtualDocumentNodePrecondition">
+               <nlsbundle>com.documentum.webcomponent.library.actions.RepositionVirtualDocumentNodeNlsProp</nlsbundle>
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>repositionvirtualdocumentnode</component>
+         </execution>
+      </action>
+
+      <!-- Add Component action -->
+      <action id="addcomponent">
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="vdmRootObjectId" required="false"></param>
+            <param name="nodeId" required="false"></param>
+            <param name="newNodeObjectIds" required="true"></param>
+            <param name="insertAfterNodeId" required="false"></param>
+            <param name="lockOwner" required="false"></param>
+            <param name="compoundArchitecture" required="false"></param>
+            <param name="preconditionShouldDisplayErrors" require="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.AddVirtualDocumentNodePrecondition">
+               <nlsbundle>com.documentum.webcomponent.library.actions.AddVirtualDocumentNodePreconditionNlsProp</nlsbundle>
+            </precondition>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+
+         <execution class="com.documentum.web.formext.action.LaunchComponent">
+            <component>addvirtualdocumentnode</component>
+         </execution>
+      </action>
+
+     <!-- Transform action -->
+     <action id="transformation">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="folderId" required="false"/>
+            <param name="contentType" required="false"/>
+            <param name="ownerName" required="false"></param>
+            <!--param name="transformableToRendition" required="false"/-->
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.TransformationActionPrecondition"/>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchTransformationComponentWithChecks">
+            <permit>write_permit</permit>
+            <component>choosetransformationtype</component>
+            <container>transformationcontainer</container>
+       <nlsbundle>com.documentum.web.formext.action.LaunchComponentNLSProp</nlsbundle>
+         </execution>
+      </action>
+
+     <!-- Transform Rendition action -->
+     <action id="transformationtonewrendition">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="folderId" required="false"/>
+            <param name="contentType" required="false"/>
+            <param name="transformableToRendition" required="false"/>
+            <param name="ownerName" required="false"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.TransformationActionPrecondition"/>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchTransformationComponentWithChecks">
+            <permit>write_permit</permit>
+            <component>transformationselect</component>
+            <container>transformationcontainerrendition</container>
+       <nlsbundle>com.documentum.web.formext.action.LaunchComponentNLSProp</nlsbundle>
+         </execution>
+      </action>
+
+     <!-- Transform new Object action -->
+      <action id="transformationtonewrelation">
+         <params>
+            <param name="objectId" required="true"/>
+            <param name="folderId" required="false"/>
+            <param name="contentType" required="false"/>
+            <param name="transformableToRendition" required="false"/>
+            <param name="ownerName" required="false"/>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.webcomponent.library.actions.TransformationActionPrecondition"/>
+            <precondition class="com.documentum.web.formext.action.RolePrecondition">
+               <role>contributor</role>
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.web.formext.action.LaunchTransformationComponentWithChecks">
+            <permit>write_permit</permit>
+            <component>transformationselect</component>
+            <container>transformationcontainernewobject</container>
+       <nlsbundle>com.documentum.web.formext.action.LaunchComponentNLSProp</nlsbundle>
+         </execution>
+      </action>
+
+   </scope>
+
+</config>

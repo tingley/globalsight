@@ -1,0 +1,378 @@
+(object Petal
+  version 43
+  _written "Model Integrator 1.1.9251.0"
+  charSet 0)
+(object SubSystem "Linguistics"
+  is_unit TRUE
+  is_loaded TRUE
+  quid "388EB6D70049"
+  physical_models (list unit_reference_list
+    (object module "Terminology" "NotAModuleType" "NotAModulePart"
+      quid "388BA0D403AC"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A38A0282"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Gold TM" "NotAModuleType" "NotAModulePart"
+      quid "388BA0CE0137"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A38703E7"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Page Generator" "NotAModuleType" "NotAModulePart"
+      quid "388BA089028C"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A383000B"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Merger" "NotAModuleType" "NotAModulePart"
+      quid "388BA0620254"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A380027E"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Extraction Framework" "NotAModuleType" "NotAModulePart"
+      quid "388B9FFF005D"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A3660050"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Ling Server" "NotAModuleType" "NotAModulePart"
+      quid "388B9FEC03C7"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "388BA07A028B"
+          supplier "Component View::Linguistics::Extraction Framework"
+          quidu "388B9FFF005D"
+          supplier_is_spec TRUE)
+        (object Dependency_Relationship
+          quid "388BA07E006A"
+          supplier "Component View::Linguistics::Merger"
+          quidu "388BA0620254"
+          supplier_is_spec TRUE)
+        (object Dependency_Relationship
+          quid "388BA162023E"
+          supplier "Component View::Linguistics::Page Generator"
+          quidu "388BA089028C"
+          supplier_is_spec TRUE)
+        (object Dependency_Relationship
+          quid "388BA16500B2"
+          supplier "Component View::Linguistics::Gold TM"
+          quidu "388BA0CE0137"
+          supplier_is_spec TRUE)
+        (object Dependency_Relationship
+          quid "388BA1670209"
+          supplier "Component View::Linguistics::Terminology"
+          quidu "388BA0D403AC"
+          supplier_is_spec TRUE)
+        (object Dependency_Relationship
+          quid "3890C4F901D5"
+          supplier "Component View::Linguistics::Project TM"
+          quidu "3890C4E40135"
+          supplier_is_spec TRUE)))
+    (object module "Project TM" "NotAModuleType" "NotAModulePart"
+      quid "3890C4E40135"
+      stereotype ""
+      visible_modules (list dependency_list
+        (object Dependency_Relationship
+          quid "38A4A3850145"
+          supplier "Component View::Linguistics::Localization Data Server"
+          quidu "38A4A29B0134"
+          supplier_is_spec TRUE)))
+    (object module "Localization Data Server" "NotAModuleType" "NotAModulePart"
+      quid "38A4A29B0134"
+      stereotype ""))
+  physical_presentations (list unit_reference_list
+    (object Module_Diagram "Main"
+      quid "388B9189008C"
+      title "Main"
+      zoom 100
+      max_height 28350
+      max_width 21600
+      origin_x 0
+      origin_y 0
+      items (list diagram_item_list
+        (object ModView "Component View::Linguistics::Ling Server" "NotAModuleType" "NotAModulePart" @1
+          location (400, 800)
+          label (object ItemLabel
+            Parent_View @1
+            location (365, 775)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 127
+            label "Ling Server")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388B9FEC03C7"
+          width 228
+          autoResize TRUE
+          width 228
+          height 162)
+        (object ModView "Component View::Linguistics::Extraction Framework" "NotAModuleType" "NotAModulePart" @2
+          location (1184, 160)
+          label (object ItemLabel
+            Parent_View @2
+            location (1116, 135)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 255
+            label "Extraction Framework")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388B9FFF005D"
+          width 460
+          autoResize TRUE
+          width 460
+          height 162)
+        (object ModView "Component View::Linguistics::Merger" "NotAModuleType" "NotAModulePart" @3
+          location (1104, 432)
+          label (object ItemLabel
+            Parent_View @3
+            location (1069, 407)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 127
+            label "Merger")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388BA0620254"
+          width 228
+          autoResize TRUE
+          width 228
+          height 162)
+        (object ModVisView "" @4
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA07A028B"
+          client @1
+          supplier @2
+          line_style 0)
+        (object ModVisView "" @5
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA07E006A"
+          client @1
+          supplier @3
+          line_style 0)
+        (object ModView "Component View::Linguistics::Page Generator" "NotAModuleType" "NotAModulePart" @6
+          location (1008, 672)
+          label (object ItemLabel
+            Parent_View @6
+            location (957, 647)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 189
+            label "Page Generator")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388BA089028C"
+          width 340
+          autoResize TRUE
+          width 340
+          height 162)
+        (object ModView "Component View::Linguistics::Gold TM" "NotAModuleType" "NotAModulePart" @7
+          location (1024, 1152)
+          label (object ItemLabel
+            Parent_View @7
+            location (989, 1127)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 127
+            label "Gold TM")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388BA0CE0137"
+          width 228
+          autoResize TRUE
+          width 228
+          height 162)
+        (object ModView "Component View::Linguistics::Terminology" "NotAModuleType" "NotAModulePart" @8
+          location (1072, 1456)
+          label (object ItemLabel
+            Parent_View @8
+            location (1005, 1429)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 250
+            label "Terminology")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388BA0D403AC"
+          width 450
+          autoResize TRUE
+          width 450
+          height 175
+          height 175)
+        (object ModVisView "" @9
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA162023E"
+          client @1
+          supplier @6
+          line_style 0)
+        (object ModVisView "" @10
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA16500B2"
+          client @1
+          supplier @7
+          line_style 0)
+        (object ModVisView "" @11
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA1670209"
+          client @1
+          supplier @8
+          line_style 0)
+        (object ModView "Component View::Workflow::Workflow" "NotAModuleType" "NotAModulePart" @12
+          location (1184, 1840)
+          label (object ItemLabel
+            Parent_View @12
+            location (1135, 1813)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 181
+            label "Workflow")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "388BA169027A"
+          width 325
+          autoResize TRUE
+          width 325
+          height 175
+          height 175)
+        (object ModView "Component View::Linguistics::Project TM" "NotAModuleType" "NotAModulePart" @13
+          location (1040, 896)
+          label (object ItemLabel
+            Parent_View @13
+            location (1005, 871)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 127
+            label "Project TM")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "3890C4E40135"
+          width 228
+          autoResize TRUE
+          width 228
+          height 162)
+        (object ModVisView "" @14
+          stereotype TRUE
+          line_color 3342489
+          quidu "3890C4F901D5"
+          client @1
+          supplier @13
+          line_style 0)
+        (object ModView "Component View::Linguistics::Localization Data Server" "NotAModuleType" "NotAModulePart" @15
+          location (2016, 1168)
+          label (object ItemLabel
+            Parent_View @15
+            location (1955, 1143)
+            fill_color 13434879
+            anchor_loc 3
+            nlines 2
+            max_width 228
+            label "Localization Data Server")
+          icon_style "Icon"
+          line_color 3342489
+          fill_color 13434879
+          quidu "38A4A29B0134"
+          width 410
+          autoResize TRUE
+          width 410
+          height 162)
+        (object ModVisView "" @16
+          stereotype TRUE
+          line_color 3342489
+          quidu "388BA17302ED"
+          client @12
+          supplier @1
+          vertices (list Points
+            (1024, 1829 )
+            (381, 1829 )
+            (381, 878 ))
+          line_style 3
+          origin_attachment (1024, 1829)
+          terminal_attachment (381, 878))
+        (object ModVisView "" @17
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A2D80146"
+          client @12
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @18
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A3660050"
+          client @2
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @19
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A380027E"
+          client @3
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @20
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A383000B"
+          client @6
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @21
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A3850145"
+          client @13
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @22
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A38703E7"
+          client @7
+          supplier @15
+          line_style 0)
+        (object ModVisView "" @23
+          stereotype TRUE
+          line_color 3342489
+          quidu "38A4A38A0282"
+          client @8
+          supplier @15
+          line_style 0)))))

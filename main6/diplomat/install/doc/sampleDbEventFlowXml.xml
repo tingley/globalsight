@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<eventFlowXml>
+	<preMergeEvent>Diplomat::PrsXmlTranslatedEvent </preMergeEvent>
+	<postMergeEvent>Diplomat::DatabaseMergedEvent </postMergeEvent>
+	<batchInfo>
+		<batchId>batch1</batchId>
+		<pageCount>10</pageCount>
+		<pageNumber>4</pageNumber>
+		<displayName>foo.html</displayName>
+	</batchInfo>
+	<source name="DatabaseSourceAdapter" dynamic="true">
+		<locale>Unknown</locale>
+		<charset>Unknown</charset>
+	</source>
+	<target name="DatabaseTargetAdapter">
+		<locale>Unknown</locale>
+		<charset>Unknown</charset>
+	</target>
+</eventFlowXml>

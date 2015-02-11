@@ -1,0 +1,467 @@
+//                              -*- Mode: Java -*-
+/*
+ * Copyright (c) 2000-2005 GlobalSight Corporation. All rights reserved.
+ *
+ * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
+ * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
+ * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
+ * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
+ * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
+ *
+ * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
+ * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
+ * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
+ * BY LAW.
+ */
+
+/*
+Javacc grammar file for GlobalSight Download/upload file format.
+Version 1.0 9/25/2000 Initial version
+Version 1.1 9/22/2005 Added Help and Note lines in the header.
+*/
+
+options
+{
+    IGNORE_CASE = false;
+    STATIC = false;
+    UNICODE_INPUT = true;
+    DEBUG_PARSER = false;
+}
+
+PARSER_BEGIN(AmbassadorDwUpParser)
+package com.globalsight.ling.tw.offline.parser;
+
+public class AmbassadorDwUpParser
+{
+    private AmbassadorDwUpEventHandlerInterface m_handler = null;
+
+    public void setHandler(AmbassadorDwUpEventHandlerInterface p_handler)
+    {
+        m_handler = p_handler;
+    }
+}
+PARSER_END(AmbassadorDwUpParser)
+
+
+/*****************************************
+ * LEXICAL RULES
+ *****************************************/
+
+// Defines tokens for the "DEFAULT" state, we are in the default state
+// up until the <NEWLINE> following the header. See parse()
+<DEFAULT> TOKEN :
+{
+  <START: "# GlobalSight Download File"<NEWLINE>>
+| <NEWLINE:    ( "\r\n" | "\r" | "\n" ) >
+| <WHITESPACE: [" ", "\t"]>
+| <ALPHANUMERIC: ([ "a"-"z", "A"-"Z", "0"-"9", "-", "_", " ", "(", ")","[", "]", "/", "\\", ":", ".", ","])+ >
+| <BOM: ["\ufffe"]|["\ufeff"]>
+// Should be defined in its own state instead of DEFAULT state.
+| <HEADER_HELP_LINE: "# Help:"(~["\r","\n"])*>
+// Should be defined in its own state instead of DEFAULT state.
+| <HEADER_NOTE_LINE: "# Notes:"(~["\r","\n"])*>
+}
+
+// Defines tokens for the user defined state called START_LINE.
+<START_LINE> TOKEN:
+{
+  <ID: "# "(["0"-"9"])+<NEWLINE>>
+| <SUBFLOW_ID: "# "(["0"-"9"])+":"<ALPHANUMERIC>":"(["0"-"9"])+<NEWLINE>>
+| <SEG_FORMAT: "# Segment Format: "<ALPHANUMERIC><NEWLINE>>
+// This is a required format. The upload code requires specific fixed strings to follow.
+| <MATCH_TYPE: "# Match Type: "<ALPHANUMERIC><NEWLINE>>
+| <MATCH_SCORE: "# Match Score: "<ALPHANUMERIC><NEWLINE>>
+| <RESOURCES: "# Resources:"(~["\r","\n"])*<NEWLINE>>
+| <SOURCE_KEY: "# Src:"<NEWLINE>> : SEGMENT
+| <TARGET_KEY: "# Trg:"<NEWLINE>> : SEGMENT
+| <END: "# END GlobalSight Download File"> : DEFAULT
+}
+
+// Defines a different type of token regular expression (MORE)
+// for the user defined state called START_LINE.
+<START_LINE> MORE:
+{
+   <~[]> : SEGMENT
+}
+
+<SEGMENT> TOKEN:
+{
+  <END_LINE: ( "\r\n" | "\r" | "\n" )+ > : START_LINE
+| <TEXT: (~["\r", "\n"])+>
+}
+
+
+/*****************************************
+ * SYNTACTIC RULES
+ *****************************************/
+void parse() :
+{
+    Token bom = null;
+}
+{
+    { m_handler.handleStart(); }
+    (bom=<BOM>)?
+    { if (bom != null) m_handler.handleBom(bom.image); }
+    startSignature()
+    header()
+     <NEWLINE>
+    { m_handler.handleEndHeader(); }
+    { token_source.SwitchTo(START_LINE); }
+    (entry())+
+    endSignature() { m_handler.handleFinish(); return; }
+}
+
+void header() :
+{}
+{
+    encoding()
+    documentFormat()
+    placeholderFormat()
+    sourceLocale()
+    targetLocale()
+    (pageName())?
+    pageId()
+    workflowId()
+    taskId()
+    (exactMatchWordCount())?
+    (fuzzyMatchWordCount())?
+    (unmatchedMatchWordCount())?
+    (editAll())?
+    (help())*
+    (notes())*
+}
+
+void startSignature() :
+{
+    Token t;
+}
+{
+    t=<START>
+    { m_handler.handleStartSignature(t.image); }
+}
+
+void endSignature() :
+{
+    Token t;
+}
+{
+    t=<END>
+    { m_handler.handleEndSignature(t.image); }
+}
+
+void encoding() :
+{
+    Token t;
+}
+{
+    "# Encoding: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleEncoding(t.image); }
+}
+
+void documentFormat() :
+{
+    Token t;
+}
+{
+    "# Document Format: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleDocumentFormat(t.image); }
+}
+
+void placeholderFormat() :
+{
+    Token t;
+}
+{
+    "# Placeholder Format: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handlePlaceholderFormat(t.image); }
+}
+
+void sourceLocale() :
+{
+    Token t;
+}
+{
+    "# Source Locale: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleSourceLocale(t.image); }
+}
+
+void targetLocale() :
+{
+    Token t;
+}
+{
+    "# Target Locale: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleTargetLocale(t.image); }
+}
+
+void pageName() :
+{
+    Token t;
+}
+{
+    "# Page Name: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handlePageName(t.image); }
+}
+
+void pageId() :
+{
+    Token t;
+}
+{
+    "# Page ID: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handlePageId(t.image); }
+}
+
+void workflowId() :
+{
+    Token t;
+}
+{
+    "# Workflow ID: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleWorkflowId(t.image); }
+}
+
+void taskId() :
+{
+    Token t;
+}
+{
+    "# Task ID: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleTaskId(t.image); }
+}
+
+void exactMatchWordCount() :
+{
+    Token t;
+}
+{
+    "# Exact Match word count: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleExactMatchWordCount(t.image); }
+}
+
+void fuzzyMatchWordCount() :
+{
+    Token t;
+}
+{
+    "# Fuzzy Match word count: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleFuzzyMatchWordCount(t.image); }
+}
+
+void unmatchedMatchWordCount() :
+{
+    Token t;
+}
+{
+    "# No Match word count: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleUnmatchedMatchWordCount(t.image); }
+}
+
+void editAll() :
+{
+    Token t;
+}
+{
+    "# Edit all: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleEditAll(t.image); }
+}
+
+void help() :
+{
+    Token t;
+}
+{
+    t=<HEADER_HELP_LINE> <NEWLINE>
+    // we throw this value away
+}
+
+void notes() :
+{
+    Token t;
+}
+{
+    t=<HEADER_NOTE_LINE> <NEWLINE>
+    // we throw this value away
+}
+
+void entry() :
+{}
+{
+    (subflowId() | id())
+    text()
+}
+
+void id() :
+{
+    Token sk = null;
+    Token sf = null;
+    Token mt = null;
+    Token ms = null;
+    Token tk = null;
+    Token t = null;
+}
+{
+    t=<ID>
+    {
+        // remove "#" from string
+        m_handler.handleId(t.image.substring(1).trim());
+    }
+
+    (
+        sf=<SEG_FORMAT>
+        {
+            if (sf != null)
+            {
+                // remove "# Segment Format: " from string
+                m_handler.handleSegmentFormat(sf.image.substring(17).trim());
+            }
+        }
+    )?
+
+    (
+        mt=<MATCH_TYPE>
+        {
+            if (mt != null)
+            {
+                // remove "# Match Type: " from string
+                m_handler.handleMatchType(mt.image.substring(13).trim());
+            }
+        }
+    )?
+
+    (
+        ms=<MATCH_SCORE>
+        {
+            if (ms != null)
+            {
+                // remove "# Match Score: " from string
+                m_handler.handleMatchScore(ms.image.substring(14).trim());
+            }
+        }
+    )?
+
+    (
+        mt=<RESOURCES>
+        {
+            // we throw away the resource link content
+        }
+    )?
+
+
+    (
+        // Start of source text
+        sk=<SOURCE_KEY>
+        { if (sk != null) m_handler.handleSourceKey(sk.image); }
+        text()
+        // Start of target text
+        tk=<TARGET_KEY>
+        { if (tk != null) m_handler.handleTargetKey(tk.image); }
+    )?
+
+}
+
+void subflowId() :
+{
+    Token sk = null;
+    Token sf = null;
+    Token mt = null;
+    Token ms = null;
+    Token tk = null;
+    Token t = null;
+}
+{
+    t=<SUBFLOW_ID>
+    {
+        // remove "#" from string
+        m_handler.handleSubflowId(t.image.substring(1).trim());
+    }
+
+    (
+        sf=<SEG_FORMAT>
+        {
+            if (sf != null)
+            {
+                // remove "# Segment Format: " from string
+                m_handler.handleSegmentFormat(sf.image.substring(17).trim());
+            }
+        }
+    )?
+
+    (
+        mt=<MATCH_TYPE>
+        {
+            if (mt != null)
+            {
+                // remove "# Match Type: " from string
+                m_handler.handleMatchType(mt.image.substring(13).trim());
+            }
+        }
+    )?
+
+    (
+        ms=<MATCH_SCORE>
+        {
+            if (ms != null)
+            {
+                // remove "# Match Score: " from string
+                m_handler.handleMatchScore(ms.image.substring(14).trim());
+            }
+        }
+    )?
+
+    (
+        mt=<RESOURCES>
+        {
+            // we throw away the resource link content
+        }
+    )?
+
+    (
+        // Start of source text
+        sk=<SOURCE_KEY>
+        { if (sk != null) m_handler.handleSourceKey(sk.image); }
+        text()
+        // Start of target text
+        tk=<TARGET_KEY>
+        { if (tk != null) m_handler.handleTargetKey(tk.image); }
+    )?
+}
+
+void text() :
+{
+    Token text = null;
+    Token newline = null;
+}
+{
+    (
+        text=<TEXT>
+        {
+            // test to see of we "MORE'ed" a newline char
+            if (text.image.charAt(0) == '\n' || text.image.charAt(0) == '\r')
+            {
+                m_handler.handleSegmentNewLine(text.image.substring(0, 1)); // newline
+                m_handler.handleSegmentText(text.image.substring(1));
+            }
+            else // all text
+            {
+                m_handler.handleSegmentText(text.image);
+            }
+        }
+
+     |
+
+        newline=<END_LINE>
+        {
+            // test to see of we "MORE'ed" a non-newline char
+            if (newline.image.charAt(0) != '\n' && newline.image.charAt(0) != '\r')
+            {
+                m_handler.handleSegmentText(newline.image.substring(0, 1)); // first char
+                m_handler.handleSegmentNewLine(newline.image.substring(1));
+            }
+            else // all newlines
+            {
+                m_handler.handleSegmentNewLine(newline.image);
+            }
+        }
+    )+
+}

@@ -1,0 +1,44 @@
+<!-- edited with XML Spy v3.0.7 NT (http://www.xmlspy.com) by ragade (GlobalSight) -->
+<!-- PreviewUrlXml.dtd defines the PreviewUrlXml file for describing URLs used for preview -->
+<!ELEMENT previewUrlXml (locale*)>
+<!-- Each locale used in the system should be listed. A locale
+     consists of one sourceUrls and/or targetUrl component -->
+<!ELEMENT locale (sourceUrls?, targetUrls?)>
+<!-- The locale id is the name of the locale, like en_US -->
+<!ATTLIST locale
+	name CDATA #REQUIRED
+>
+<!-- The sourceUrls element contains one or more url elements. The encoding specifies the IANA character encoding in which  the URLs should be displayed. -->
+<!ELEMENT sourceUrls (url+)>
+<!ATTLIST sourceUrls
+	encoding CDATA "UTF-8"
+>
+<!-- The sourceUrls element contains one or more url elements. The encoding specifies the IANA character encoding in which  the URLs should be displayed. -->
+<!ELEMENT targetUrls (url+)>
+<!ATTLIST targetUrls
+	encoding CDATA "UTF-8"
+>
+<!-- The url element contains all the information needed to
+     fire off HTTP GET and POST connections to the URLs (without cookies) -->
+<!ELEMENT url (label, href, arg*)>
+<!ATTLIST url
+	type (get | post) #REQUIRED
+>
+<!--label is a small label that can be used when displaying the URL -->
+<!ELEMENT label (#PCDATA)>
+<!-- href is the URL href itself -->
+<!ELEMENT href (#PCDATA)>
+<!-- An arg is composed of a parameter and possibly a value. both are substitutable.
+	The substitution can come from the source data, or the target data. The value is "none"
+	if the parameter or value is not to be substituted.-->
+<!ELEMENT arg (parameter, value?)>
+<!-- parameter is the parameter part of an argument-->
+<!ELEMENT parameter (#PCDATA)>
+<!ATTLIST parameter
+	substitution_source (source | target | none) "none"
+>
+<!-- value is the value of the parameter -->
+<!ELEMENT value (#PCDATA)>
+<!ATTLIST value
+	substitution_source (source | target | none) "none"
+>

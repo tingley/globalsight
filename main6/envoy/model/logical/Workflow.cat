@@ -1,0 +1,3554 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "Workflow"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38C558E803DD"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "WorkflowServer"
+	    quid       	"39435E1300DC"
+	    documentation 	"This is an interface to the underlying workflow engine.  It uses whatever mechanism or API that the workflow engine supports or provide to communicate with the workflow engine."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "createWorkflowTemplate"
+		    quid       	"39B81DE6036C"
+		    documentation 	"create a workflow template based on a name, description, and a collection of tasks (nodes)"
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"39CF7DE90286"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_templateName"
+			    quid       	"39B81E20013E"
+			    type       	"String")
+			(object Parameter "p_description"
+			    quid       	"39B81E2A021F"
+			    type       	"String")
+			(object Parameter "p_tasks"
+			    quid       	"39B81E33004B"
+			    documentation 	"a list of WorkflowTask objects"
+			    type       	"List"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateWorkflowTemplate"
+		    quid       	"39DD35AB0202"
+		    documentation 	"update an existing workflow template (if it's not being published)."
+		    parameters 	(list Parameters
+			(object Parameter "p_templateId"
+			    quid       	"39DD35ED0289"
+			    type       	"long")
+			(object Parameter "p_templateName"
+			    quid       	"39DD35E202F2"
+			    type       	"String")
+			(object Parameter "p_description"
+			    quid       	"39DD35E2034C"
+			    type       	"String")
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6647025A"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_tasks"
+			    quid       	"39DD35E203B0"
+			    documentation 	"a list of WorkflowTask objects"
+			    type       	"List"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createWorkflowInstance"
+		    quid       	"39435E260242"
+		    documentation 	"Create a workflow instance.  The workflow instance does not start automatically."
+		    parameters 	(list Parameters
+			(object Parameter "p_wfSession"
+			    quid       	"39CF7DE100B8"
+			    documentation 	"The WFSession object created during authentication."
+			    type       	"WFSession")
+			(object Parameter "p_workflowInfo"
+			    quid       	"39B81DFD0260"
+			    type       	"WorkflowInfo"
+			    quidu      	"39D3CC4C0317"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"The specified workflow template exists.")
+		    post_condition 	(object Semantic_Info
+			PDL        	"A workflow instance is created according to the specified workflow template.  The workflow instance remains inactive.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "removeWorkflowInstance"
+		    quid       	"39C2B676011D"
+		    documentation 	"Remove the specified workflow.  Notify the participant by email of the currently active task (if any) that the workflow and her task are cancelled."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowInstanceId"
+			    quid       	"39C2B687013F"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getActiveTaskListForUser"
+		    quid       	"3943D69F00AA"
+		    documentation 	"Get a list of active tasks that are assigned to the specified user."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A667C00D0"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String"))
+		    result     	"Map"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTasksForUser"
+		    quid       	"3A8817A30243"
+		    documentation 	"Get a list of tasks based on the filter type.  The tasks will be returned as a Map where the task id is the key, and the WorkflowTaskInsatnce is the value."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A8818070098"
+			    type       	"String")
+			(object Parameter "p_filterType"
+			    quid       	"3A88181002E0"
+			    type       	"int"))
+		    result     	"Map"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "filterTaskForPM"
+		    quid       	"3A89B5AC0041"
+		    documentation 	"Get a list of tasks that are assigned by a specified project manager based on the filter type."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A89B5BA0222"
+			    type       	"String")
+			(object Parameter "p_filterType"
+			    quid       	"3A89B5BA02AE"
+			    type       	"int"))
+		    result     	"Map"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "acceptTask"
+		    quid       	"394441410110"
+		    documentation 	"Accept the specified task for the specified user."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6988030C"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"39CF7DA0039A"
+			    type       	"String")
+			(object Parameter "p_nodeInstanceId"
+			    quid       	"39CF7DA902FC"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "advanceTask"
+		    quid       	"394494150016"
+		    documentation 	"Set the current task as finished and start the next task."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowInstanceId"
+			    quid       	"39C2B6F20071"
+			    type       	"long")
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A69A20151"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"3A8444C3021F"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "activateTask"
+		    quid       	"3944BEDA0024"
+		    documentation 	"Activate the specified task of a workflow instance."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A69C500B1"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_workflowInstaceId"
+			    quid       	"3944BEFC0221"
+			    documentation 	"Task to reassign to the specified role."
+			    type       	"long")
+			(object Parameter "p_taskId"
+			    quid       	"39D51CEC01A2"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowTemplate"
+		    quid       	"39DD36C60245"
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A69F502D7"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_templateId"
+			    quid       	"39DD37290139"
+			    type       	"long"))
+		    result     	"WorkflowTemplate"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3E63A7520125")
+		(object Operation "getAllTemplates"
+		    quid       	"394631A403CF"
+		    documentation 	"Get a list of all the workflow templates in the workflow engine."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A0302B9"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_filterType"
+			    quid       	"39DD37720094"
+			    type       	"int"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowInstance"
+		    quid       	"39DD374600FF"
+		    documentation 	"Get a particular workflow instance."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A0F0112"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_workflowInstanceId"
+			    quid       	"39DD379A0327"
+			    type       	"long"))
+		    result     	"WorkflowInstance1"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"39DD34E802C0")
+		(object Operation "getAllWorkflowInstances"
+		    quid       	"39DD37BC009B"
+		    parameters 	(list Parameters
+			(object Parameter "p_filterType"
+			    quid       	"39DD38000016"
+			    type       	"int")
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A1E0286"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTasksForWorkflow"
+		    quid       	"39473F1F00B7"
+		    documentation 	"Get a list of tasks for the specified workflow instance."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A3D014A"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "workflowInstanceId"
+			    quid       	"39473F3903C2"
+			    documentation 	"Identification of the workflow instance to return data for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowTaskInstance"
+		    quid       	"3A88185403A6"
+		    documentation 	"Get a particular task of a workflow instance.  This method is used when retrieving a workflow task for a project manager."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A8818DD02E5"
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"3A8818E7034D"
+			    type       	"String")
+			(object Parameter "p_taskId"
+			    quid       	"3A8818F101AD"
+			    type       	"long"))
+		    result     	"WorkflowTaskInstance"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3AAE4DDA016E")
+		(object Operation "getWorkflowTaskInstanceForAssignee"
+		    quid       	"39473F75009D"
+		    documentation 	"Get a task of a workflow instance for a particular user.  This method is used when retrieving a workflow task for a translator/reviewer/etc. (for a project manager use getWorkflowTaskInstance)."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A89B65300C3"
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"3A89B6530150"
+			    type       	"String")
+			(object Parameter "p_taskId"
+			    quid       	"3A89B65301DC"
+			    type       	"long"))
+		    result     	"WorkflowTaskInstance"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3AAE4DDA016E")
+		(object Operation "startWorkflow"
+		    quid       	"39B8231A0367"
+		    documentation 	"Start the workflow instance (automatic dispatch)."
+		    parameters 	(list Parameters
+			(object Parameter "p_wfSession"
+			    quid       	"39CF7D45014A"
+			    documentation 	"The WFSession object created during authentication."
+			    type       	"WFSession")
+			(object Parameter "p_wfInstanceId"
+			    quid       	"39B82369009A"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "startWorkflow"
+		    quid       	"3A4A6AD702C8"
+		    documentation 	"Start the workflow instance (manual dispatch)."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6AF10397"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_wfInstanceId"
+			    quid       	"3A4A6AD702CA"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "workflowInstanceStructuralEdit"
+		    quid       	"39DD383702E6"
+		    documentation 	"Perform a structural edit of a workflow instance (reroute, reassign,...)"
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A8701AA"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_workflowInstance"
+			    quid       	"39DD3867000A"
+			    type       	"WorkflowInstance1"
+			    quidu      	"39DD34E802C0"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectTask"
+		    quid       	"39490907002C"
+		    documentation 	"Reject the specified task."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6A9B03B2"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"39CF7D1E01BC"
+			    type       	"String")
+			(object Parameter "p_nodeInstanceId"
+			    quid       	"39CF7D280012"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "suspendWorkflow"
+		    quid       	"398B4BE803DB"
+		    documentation 	"Suspend the specified workflow instance."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6AA802B6"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_worflowInstanceId"
+			    quid       	"398B4C0201B1"
+			    documentation 	"Identifies the workflow instance to suspend."
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "resumeWorkflow"
+		    quid       	"39CF7C9002E4"
+		    documentation 	"Resume the specified workflow instance.  This method is invoked on a workflow that was previously suspended."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6AC80212"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_workflowInstanceId"
+			    quid       	"39CF7CC801FE"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "openWorkflowSession"
+		    quid       	"3A4A6B35039F"
+		    documentation 	"Login to iflow and create a WFSession object based on the authentication info."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6B7B025F"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String")
+			(object Parameter "p_userName"
+			    quid       	"3A4A6B7E0318"
+			    type       	"String")
+			(object Parameter "p_password"
+			    quid       	"3A4A6B880037"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "closeWorkflowSession"
+		    quid       	"3A4A6B9C03E3"
+		    documentation 	"This is basically an iflow logout operation and removes the WFSession object from the internal hashtable."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3A4A6BCD03E4"
+			    documentation 	"The client's session id (HttpSession id)."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowTemplate"
+	    quid       	"39B7E17402DF"
+	    documentation 	"WorkflowTemplate class is basically a wrapper for iflow's Plan.  It can be instantiated by passing iflow's plan as paramter to the constructor.  Therefore, every method of this class delegates the task to the Plan object."
+	    operations 	(list Operations
+		(object Operation "getId"
+		    quid       	"39B7E4E301D4"
+		    documentation 	"Get the id of the workflow template."
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getName"
+		    quid       	"39B7E5010001"
+		    documentation 	"Get the template's name."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDescription"
+		    quid       	"39B7E5220008"
+		    documentation 	"Get the description of the template."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowTasks"
+		    quid       	"39B7E5300167"
+		    documentation 	"Get a list of workflow tasks that belong to this template.  This list contains a collection of WorkflowTask objects."
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowTemplateHelper"
+	    quid       	"39B7E1800232"
+	    documentation 	
+|WorkflowTemplateHelper class is responsible for creating a workflow template.  A workflow template has the following attributes:
+|1. Name
+|2. Description
+|3. A list of WorkflowTask objects
+|
+	    
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39DD407D0093"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowHelper"
+		    quidu      	"39DD3BCB009F"))
+	    operations 	(list Operations
+		(object Operation "createWorkflowTemplate"
+		    quid       	"39BD3EE40320"
+		    documentation 	"Create a workflow template based on a name, description, and list of tasks.  The workflow session arg is just for iflow purposes.  After a template is created, the id of the template is returned."
+		    parameters 	(list Parameters
+			(object Parameter "p_templateName"
+			    quid       	"39BD3F1E0306"
+			    type       	"String")
+			(object Parameter "p_description"
+			    quid       	"39BD3F1E0324"
+			    type       	"String")
+			(object Parameter "p_wfSession"
+			    quid       	"39BD3F1E0338"
+			    type       	"WFSession")
+			(object Parameter "p_wfTasks"
+			    quid       	"39BD3F1E0356"
+			    type       	"List"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateWorkflowTemplate"
+		    quid       	"39DD3F660150"
+		    parameters 	(list Parameters
+			(object Parameter "p_templateId"
+			    quid       	"39DD3F820074"
+			    type       	"long")
+			(object Parameter "p_templateName"
+			    quid       	"39DD3F8A0314"
+			    type       	"String")
+			(object Parameter "p_description"
+			    quid       	"39DD3F950067"
+			    type       	"String")
+			(object Parameter "p_wfSession"
+			    quid       	"39DD3FA30085"
+			    type       	"WFSession")
+			(object Parameter "p_workflowTasks"
+			    quid       	"39DD3FAC007E"
+			    type       	"List"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowTemplateTasks"
+		    quid       	"39DD3FCA0104"
+		    parameters 	(list Parameters
+			(object Parameter "p_plan"
+			    quid       	"39DD3FD60151"
+			    type       	"Plan")
+			(object Parameter "p_nodes"
+			    quid       	"39DD3FDC0308"
+			    type       	"Node[]"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowTask"
+	    quid       	"39B7E1960266"
+	    documentation 	"WorkflowTask contains information about a task (node) of a workflow.  A WorkflowTask is initially created through it's constructor and provides support for reading it's attributes."
+	    operations 	(list Operations
+		(object Operation "setActivity"
+		    quid       	"39DD3E4301DE"
+		    parameters 	(list Parameters
+			(object Parameter "p_activity"
+			    quid       	"39DD3E5002D7"
+			    type       	"Activity"
+			    quidu      	"39B7E1C201DD"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getActivity"
+		    quid       	"39DD3E5C028E"
+		    result     	"Activity"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"39B7E1C201DD")
+		(object Operation "getActivityName"
+		    quid       	"39B80AEF0298"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTaskId"
+		    quid       	"39DD3E6F028B"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getType"
+		    quid       	"39B80B0801AE"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setSequence"
+		    quid       	"39DD3E7F031A"
+		    parameters 	(list Parameters
+			(object Parameter "p_sequence"
+			    quid       	"39DD3E8802EB"
+			    type       	"int"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSequence"
+		    quid       	"39B80B1401E7"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimerDefinition"
+		    quid       	"39DD3E99010F"
+		    parameters 	(list Parameters
+			(object Parameter "p_timerDefs"
+			    quid       	"39DD3EA50152"
+			    type       	"List"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTimerDefinitions"
+		    quid       	"39B9607C0172"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setRole"
+		    quid       	"3A881B8E01FF"
+		    parameters 	(list Parameters
+			(object Parameter "p_role"
+			    quid       	"3A881B8E0200"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getRole"
+		    quid       	"3A881B9D021F"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAcceptedTime"
+		    quid       	"3A881BD100E3"
+		    documentation 	"Get the relative time by which the task should be accepted"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCompletedTime"
+		    quid       	"3A881BE800DC"
+		    documentation 	"Get the relative time by which the task should be completed."
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setActivityType"
+		    quid       	"3E63B6A0038C"
+		    documentation 	
+|Set the activity type for this activity node.  Note that this is not the type of a workflow node but a type only for "Activity Node". 
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_activityType"
+			    quid       	"3E63B6B4031D"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getActivityType"
+		    quid       	"3E63B7E80081"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowDataItem"
+	    quid       	"39B7E19E0376"
+	    documentation 	"WorkflowDataItem is a wrapper for iflow's DataItemRef (user-defined attributes).  This object is responsible for creating a DataItemRef (based on a attribute name, type, and value) and adding it to a list.  It also provides support for adding an array of DataItemRefs to the list."
+	    operations 	(list Operations
+		(object Operation "getName"
+		    quid       	"39DD39DE003B"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getType"
+		    quid       	"39DD39E901D2"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setValue"
+		    quid       	"39DD39FA0349"
+		    parameters 	(list Parameters
+			(object Parameter "p_value"
+			    quid       	"39DD3A10019C"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getValue"
+		    quid       	"39DD3A0701E9"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "Activity"
+	    quid       	"39B7E1C201DD"
+	    documentation 	"This class only represent the activity names defined in Envoy database and is used for defining a workflow template (template node names)."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3C476B64013D"
+		    supplier   	"Logical View::com::globalsight::everest::persistence::PersistentObject"
+		    quidu      	"3C47570F03C3"))
+	    operations 	(list Operations
+		(object Operation "setActivityName"
+		    quid       	"39B813140296"
+		    parameters 	(list Parameters
+			(object Parameter "p_activityName"
+			    quid       	"39B81326022E"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getActivityName"
+		    quid       	"39B8131B023C"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowServerLocal"
+	    quid       	"39B8136F02BF"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39B814240049"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")))
+	(object Class "WorkflowServerWLRMIImpl"
+	    quid       	"39B8139300A4"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39B8141802C2"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServerWLRemote"
+		    quidu      	"39B813CC01E7")))
+	(object Class "WorkflowServerWLRemote"
+	    quid       	"39B813CC01E7"
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39B8140E015F"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")
+		(object Inheritance_Relationship
+		    quid       	"39B8146200B6"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")))
+	(object Class "TimerDefinition"
+	    quid       	"39B956310372"
+	    documentation 	
+|TimerDefinition is a wrapper for workflow template's timer information.  The timer information include:
+|1. Timer prefix - a string that's used for creating a timer name for a particular node.
+|2. Timer type - The type of the timer (relative, absolute, periodic).
+|3. Timer Aciton type - The type of the timer action (send mail, escalate, or script).
+|4. List of WorkflowDataItem  - user-defined attributes used for timer information.
+	    
+	    operations 	(list Operations
+		(object Operation "getTimerPrefix"
+		    quid       	"39B95A9A0235"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTimerType"
+		    quid       	"39B95AA90114"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTimerAction"
+		    quid       	"39B95AB0018C"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDataItemRefs"
+		    quid       	"39B95AB60253"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowInstance1"
+	    quid       	"39DD34E802C0"
+	    operations 	(list Operations
+		(object Operation "getId"
+		    quid       	"39DD3C420385"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getName"
+		    quid       	"39DD3C5901C5"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDescription"
+		    quid       	"39DD3C6100D6"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowInstanceTasks"
+		    quid       	"39DD3C6900E2"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "reassignTask"
+		    quid       	"39DD3C7F02E2"
+		    parameters 	(list Parameters
+			(object Parameter "p_taskId"
+			    quid       	"39DD3C8B02CB"
+			    type       	"long")
+			(object Parameter "p_role"
+			    quid       	"39DD3C9301DD"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteWorkflowTask"
+		    quid       	"39DD3CA502FB"
+		    parameters 	(list Parameters
+			(object Parameter "p_taskId"
+			    quid       	"39DD3CB4039D"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addWorkflowTask"
+		    quid       	"39DD392D009B"
+		    documentation 	"adds a worklfow task before/after a specified task."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowTask"
+			    quid       	"39DD392D009D"
+			    type       	"WorkflowTask"
+			    quidu      	"3E63A6BA01BD")
+			(object Parameter "referenceTaskId"
+			    quid       	"39DD392D009E"
+			    type       	"long")
+			(object Parameter "p_addBefore"
+			    quid       	"39DD392D009F"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setWorkflowTaskDurations"
+		    quid       	"39DD392D00B9"
+		    documentation 	"Sets the duration(s) of a particular workflow task."
+		    parameters 	(list Parameters
+			(object Parameter "p_taskId"
+			    quid       	"39DD392D00BB"
+			    type       	"long")
+			(object Parameter "p_timerdefs"
+			    quid       	"39DD392D00BC"
+			    type       	"List"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowHelper"
+	    quid       	"39DD3BCB009F"
+	    operations 	(list Operations
+		(object Operation "getWorkflowTask"
+		    quid       	"39DD3BE90066"
+		    parameters 	(list Parameters
+			(object Parameter "p_workflow"
+			    quid       	"39DD3C0E022B"
+			    type       	"Object")
+			(object Parameter "p_node"
+			    quid       	"39DD3C1700B2"
+			    type       	"Node"))
+		    result     	"WorkflowTask"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3E63A6BA01BD")))
+	(object Class "WorkflowInstanceHelper"
+	    quid       	"39DD3DB80184"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39DD40840210"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowHelper"
+		    quidu      	"39DD3BCB009F"))
+	    operations 	(list Operations
+		(object Operation "getWorkflowInstanceTasks"
+		    quid       	"39DD3DD602F9"
+		    parameters 	(list Parameters
+			(object Parameter "p_process"
+			    quid       	"39DD3DE40083"
+			    type       	"ProcessInstance")
+			(object Parameter "p_nodes"
+			    quid       	"39DD3DF00206"
+			    type       	"NodeInstance[]"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowTaskInstance"
+	    quid       	"39DD3EC5027B"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39DD40D001D3"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTask"
+		    quidu      	"39B7E1960266"))
+	    operations 	(list Operations
+		(object Operation "getTaskId"
+		    quid       	"39DD3ED600B3"
+		    documentation 	"Get the id of the WorkflowTaskInstance."
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isActive"
+		    quid       	"3A881C1B01BC"
+		    documentation 	"Determines whether or not this task is currently active."
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isUpdated"
+		    quid       	"3A881C4803AB"
+		    documentation 	"Return whether or not the task instance is updated.  This is used when there's a structural edit."
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setWorkItemAttributes"
+		    quid       	"3A881C6D0124"
+		    documentation 	"Set the required iflow's WorkItem attributes.  A WorkItem represents the association of a particular workflow participant(s) (or members of a role) with a workflow task instance."
+		    parameters 	(list Parameters
+			(object Parameter "p_workItemName"
+			    quid       	"3A881CA700D7"
+			    type       	"String")
+			(object Parameter "p_initiator"
+			    quid       	"3A881CB500C3"
+			    type       	"String")
+			(object Parameter "p_assignee"
+			    quid       	"3A881CBC0240"
+			    type       	"String")
+			(object Parameter "p_creationTime"
+			    quid       	"3A881CC803A5"
+			    type       	"long")
+			(object Parameter "p_workItemState"
+			    quid       	"3A881CE300A1"
+			    type       	"int")
+			(object Parameter "p_wfTaskInstanceState"
+			    quid       	"3A881CEA03B8"
+			    type       	"int"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Implementation"
+		    uid        	0)
+		(object Operation "getWorkItems"
+		    quid       	"3A881E0300CD"
+		    documentation 	"Get a collection of all work items associated with this task instance.  The collection is basically a vector of EnvoyWorkItem objects."
+		    result     	"Vector"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInitiator"
+		    quid       	"3A881E4801F9"
+		    documentation 	"Get the initiator of the process to which this work item belongs."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCreationTime"
+		    quid       	"3A881E550202"
+		    documentation 	"Get the creation time of the work item."
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTaskState"
+		    quid       	"3A881F2901AC"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getToBeAcceptedDate"
+		    quid       	"3A881F420040"
+		    documentation 	"Get the date by which the task should be accepted."
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3AAE4DDF03CE")
+		(object Operation "getDueDate"
+		    quid       	"3A881F6000ED"
+		    documentation 	"Get the date by which the task should be completed."
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3AAE4DDF03CE")))
+	(object Class "EnvoyWorkItem"
+	    quid       	"3A881D8C0054"
+	    documentation 	"EnvoyWorkItem is a class that represent the iflow's WorkItem (association of a node instance and an assignee).  Note that EnvoyWorkItem should only be instantiated via WorkflowTaskInstance object."
+	    operations 	(list Operations
+		(object Operation "getWorkItemName"
+		    quid       	"3A881DBC00B7"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAssignee"
+		    quid       	"3A881DC900B6"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkItemStateq"
+		    quid       	"3A881DD00160"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Association "$UNNAMED$0"
+	    quid       	"39B8141E0357"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"39B8141F02D6"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServerLocal"
+		    quidu      	"39B8136F02BF"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"39B8141F02D7"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServerWLRMIImpl"
+		    quidu      	"39B8139300A4")))
+	(object Association "$UNNAMED$3"
+	    quid       	"39B81492003D"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"39B814920282"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTemplate"
+		    quidu      	"39B7E17402DF"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"39B814920283"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")))
+	(object Association "$UNNAMED$6"
+	    quid       	"39B814950127"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"39B814950394"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTemplateHelper"
+		    quidu      	"39B7E1800232"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"39B81495039E"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")))
+	(object Association "$UNNAMED$9"
+	    quid       	"39B814AE0187"
+	    roles      	(list role_list
+		(object Role "1"
+		    quid       	"39B814AF00E9"
+		    label      	"1"
+		    supplier   	"Logical View::Envoy::Workflow::Activity"
+		    quidu      	"39B7E1C201DD"
+		    is_navigable 	TRUE)
+		(object Role "1"
+		    quid       	"39B814AF00F3"
+		    label      	"1"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTask"
+		    quidu      	"39B7E1960266"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$10"
+	    quid       	"39B814B4001E"
+	    roles      	(list role_list
+		(object Role "n"
+		    quid       	"39B814B403C1"
+		    label      	"n"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTask"
+		    quidu      	"39B7E1960266"
+		    is_navigable 	TRUE)
+		(object Role "1"
+		    quid       	"39B814B403D5"
+		    label      	"1"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTemplateHelper"
+		    quidu      	"39B7E1800232")))
+	(object Association "$UNNAMED$11"
+	    quid       	"39B95B0C0080"
+	    roles      	(list role_list
+		(object Role "n"
+		    quid       	"39B95B0C02A7"
+		    label      	"n"
+		    supplier   	"Logical View::Envoy::Workflow::TimerDefinition"
+		    quidu      	"39B956310372"
+		    is_navigable 	TRUE)
+		(object Role "1"
+		    quid       	"39B95B0C02B1"
+		    label      	"1"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTask"
+		    quidu      	"39B7E1960266"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$12"
+	    quid       	"39B95B100216"
+	    roles      	(list role_list
+		(object Role "n"
+		    quid       	"39B95B1100AF"
+		    label      	"n"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowDataItem"
+		    quidu      	"39B7E19E0376"
+		    is_navigable 	TRUE)
+		(object Role "1"
+		    quid       	"39B95B1100B9"
+		    label      	"1"
+		    supplier   	"Logical View::Envoy::Workflow::TimerDefinition"
+		    quidu      	"39B956310372"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$13"
+	    quid       	"39DD4076025F"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$14"
+		    quid       	"39DD407703BF"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowInstanceHelper"
+		    quidu      	"39DD3DB80184"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$15"
+		    quid       	"39DD407703C9"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")))
+	(object Association "$UNNAMED$16"
+	    quid       	"39DD40A00133"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$17"
+		    quid       	"39DD40A10167"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTaskInstance"
+		    quidu      	"39DD3EC5027B"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$18"
+		    quid       	"39DD40A10171"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowInstanceHelper"
+		    quidu      	"39DD3DB80184")))
+	(object Association "$UNNAMED$19"
+	    quid       	"39DD40EC03B4"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$20"
+		    quid       	"39DD40ED024D"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowInstance1"
+		    quidu      	"39DD34E802C0"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$21"
+		    quid       	"39DD40ED0257"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC")))
+	(object Association "$UNNAMED$22"
+	    quid       	"3A881DDD00AB"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$23"
+		    quid       	"3A881DDE00FC"
+		    supplier   	"Logical View::Envoy::Workflow::EnvoyWorkItem"
+		    quidu      	"3A881D8C0054"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$24"
+		    quid       	"3A881DDE0106"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowTaskInstance"
+		    quidu      	"39DD3EC5027B"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "System Administrator"
+		    quid       	"39BD40B5035B"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39BD41DC01B1"
+			    supplier   	"WorkflowTemplate UI"
+			    quidu      	"39BD40FC033F"
+			    messages   	(list Messages
+				(object Message "createWorkflowTemplate(String, String, List)"
+				    quid       	"39BD41DC01B2"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0))))
+		    class      	"Use Case View::System Administrator"
+		    quidu      	"393F995C03C4"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "WorkflowTemplate UI"
+		    quid       	"39BD40FC033F"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39BD41E2034A"
+			    supplier   	"WorkflowServer"
+			    quidu      	"39BD4135008E"
+			    messages   	(list Messages
+				(object Message "createWorkflowTemplate(String, String, String, List)"
+				    quid       	"39BD41E2034B"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"39B81DE6036C"))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "WorkflowServer"
+		    quid       	"39BD4135008E"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39BD41E800FA"
+			    supplier   	"WorkflowTemplateHelper"
+			    quidu      	"39BD4188011A"
+			    messages   	(list Messages
+				(object Message "createWorkflowTemplate(String, String, WFSession, List)"
+				    quid       	"39BD41E800FB"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    quidu      	"39BD3EE40320"))))
+		    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "WorkflowTemplateHelper"
+		    quid       	"39BD4188011A"
+		    class      	"Logical View::Envoy::Workflow::WorkflowTemplateHelper"
+		    quidu      	"39B7E1800232"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    statemachine 	(object State_Machine "State/Activity Model"
+	quid       	"3A8444DE02BE"
+	states     	(list States
+	    (object State "$UNNAMED$25"
+		quid       	"3A8444F90028"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A8445790068"
+			supplier   	"Active"
+			quidu      	"3A8445040092"
+			sendEvent  	(object sendEvent
+			    quid       	"3A844579006B")))
+		type       	"StartState")
+	    (object State "Active"
+		quid       	"3A8445040092"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A8445BE00E0"
+			supplier   	"Accepted"
+			quidu      	"3A84450F01F7"
+			sendEvent  	(object sendEvent
+			    quid       	"3A8445BE00E3"))
+		    (object State_Transition
+			quid       	"3A8445C70378"
+			supplier   	"Rejected"
+			quidu      	"3A84451701F8"
+			sendEvent  	(object sendEvent
+			    quid       	"3A8445C7037B")))
+		type       	"Normal")
+	    (object State "Accepted"
+		quid       	"3A84450F01F7"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A8446D500CD"
+			supplier   	"Rejected"
+			quidu      	"3A84451701F8"
+			sendEvent  	(object sendEvent
+			    quid       	"3A8446D500D0"))
+		    (object State_Transition
+			quid       	"3A84478F003E"
+			supplier   	"Completed"
+			quidu      	"3A84451D03D7"
+			sendEvent  	(object sendEvent
+			    quid       	"3A84478F0041")))
+		type       	"Normal")
+	    (object State "Rejected"
+		quid       	"3A84451701F8"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A84469001C8"
+			supplier   	"Accepted"
+			quidu      	"3A84450F01F7"
+			sendEvent  	(object sendEvent
+			    quid       	"3A84469001CB"))
+		    (object State_Transition
+			quid       	"3A88170802EB"
+			supplier   	"Active"
+			quidu      	"3A8445040092"
+			sendEvent  	(object sendEvent
+			    quid       	"3A88170802EE")))
+		type       	"Normal")
+	    (object State "Completed"
+		quid       	"3A84451D03D7"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A8447B00032"
+			supplier   	"$UNNAMED$26"
+			quidu      	"3A8445200151"
+			sendEvent  	(object sendEvent
+			    quid       	"3A8447B00035"))
+		    (object State_Transition
+			quid       	"3A844CDD01BD"
+			supplier   	"$UNNAMED$27"
+			quidu      	"3A844C2A0044"
+			sendEvent  	(object sendEvent
+			    quid       	"3A844CDD01C0")))
+		type       	"Normal")
+	    (object State "$UNNAMED$26"
+		quid       	"3A8445200151"
+		type       	"EndState")
+	    (object State "$UNNAMED$27"
+		quid       	"3A844C2A0044"
+		type       	"EndState")
+	    (object State "Initial"
+		quid       	"3A844C2C0123"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A844CC60020"
+			supplier   	
+|Running
+|(Active)
+			
+			quidu      	"3A844C870368"
+			sendEvent  	(object sendEvent
+			    quid       	"3A844CC60023")))
+		type       	"Normal")
+	    (object State "Running
+(Active)"
+		quid       	"3A844C870368"
+		transitions 	(list transition_list
+		    (object State_Transition
+			quid       	"3A844CD80242"
+			supplier   	"Completed"
+			quidu      	"3A84451D03D7"
+			sendEvent  	(object sendEvent
+			    quid       	"3A844CD80245")))
+		type       	"Normal"))
+	partitions 	(list Partitions)
+	objects    	(list Objects)
+	statediagrams 	(list StateDiagrams
+	    (object State_Diagram "iflow's states for a WorkItem"
+		quid       	"3A8444DE03C3"
+		title      	"iflow's states for a WorkItem"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	350
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object StateView "StartState" "$UNNAMED$25" @2
+			location   	(930, 105)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@2
+			    location   	(972, 75)
+			    nlines     	2
+			    max_width  	600
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			quidu      	"3A8444F90028"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Active" @3
+			location   	(930, 495)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@3
+			    location   	(930, 484)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Active")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A8445040092"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Accepted" @4
+			location   	(615, 825)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(615, 814)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Accepted")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A84450F01F7"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Rejected" @5
+			location   	(1335, 840)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@5
+			    location   	(1335, 829)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Rejected")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A84451701F8"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Completed" @6
+			location   	(600, 1215)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(600, 1204)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Completed")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A84451D03D7"
+			autoResize 	TRUE)
+		    (object StateView "EndState" "$UNNAMED$26" @7
+			location   	(1185, 1290)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@7
+			    location   	(1239, 1248)
+			    nlines     	2
+			    max_width  	600
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			quidu      	"3A8445200151"
+			autoResize 	TRUE)
+		    (object Label @8
+			location   	(1050, 60)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	2
+			max_width  	806
+			label      	"Initial State - Workflow Instance has been created but not dispatched yet.")
+		    (object TransView "" @9
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A8445790068"
+			client     	@2
+			supplier   	@3
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @10
+			location   	(959, 269)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	375
+			label      	"dispatchWorkflow")
+		    (object Label @11
+			location   	(525, 630)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	225
+			label      	"acceptTask")
+		    (object Label @12
+			location   	(1080, 630)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	207
+			label      	"rejectTask")
+		    (object NoteView @13
+			location   	(1815, 840)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@13
+			    location   	(1552, 653)
+			    fill_color 	13434879
+			    nlines     	7
+			    max_width  	490
+			    label      	"A user can accept a task that he/she reject as long as nobody else has accepted it.  Upon acceptance of a task, the other users won't be able to see that task.")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	550
+			height     	387)
+		    (object TransView "" @14
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A8446D500CD"
+			client     	@4
+			supplier   	@5
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @15
+			location   	(841, 916)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	250
+			label      	"acceptTask")
+		    (object Label @16
+			location   	(870, 720)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	237
+			label      	"rejectTask")
+		    (object TransView "" @17
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A84478F003E"
+			client     	@4
+			supplier   	@6
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @18
+			location   	(330, 1020)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	269
+			label      	"taskCompleted")
+		    (object TransView "" @19
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A8447B00032"
+			client     	@6
+			supplier   	@7
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @20
+			location   	(1260, 1275)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	206
+			label      	"final state")
+		    (object NoteView @21
+			location   	(810, 1410)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@21
+			    location   	(556, 1329)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	472
+			    label      	"Upon the completion of a task, the next task will be activated.")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	532
+			height     	175)
+		    (object NoteView @22
+			location   	(480, 435)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@22
+			    location   	(214, 347)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	496
+			    label      	"iFlow creates WorkItem object per user belonging to a particular role.")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	556
+			height     	188)
+		    (object Label @23
+			location   	(30, 30)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	675
+			label      	"State diagram for an iFlow WorkItem")
+		    (object Label @24
+			location   	(75, 1634)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	1800
+			label      	"Note that there are a few other states that are not used in Envoy (i.e. Assigned, Unassigned, & etc.)")
+		    (object TransView "" @25
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A84469001C8"
+			client     	@5
+			supplier   	@4
+			vertices   	(list Points
+			    (1185, 853)
+			    (975, 872)
+			    (765, 844))
+			line_style 	0
+			x_offset   	FALSE)
+		    (object TransView "" @26
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A88170802EB"
+			client     	@5
+			supplier   	@3
+			vertices   	(list Points
+			    (1328, 773)
+			    (1303, 509)
+			    (1080, 500))
+			line_style 	0
+			x_offset   	FALSE)
+		    (object TransView "" @27
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A8445BE00E0"
+			client     	@3
+			supplier   	@4
+			line_style 	0
+			x_offset   	FALSE)
+		    (object TransView "" @28
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A8445C70378"
+			client     	@3
+			supplier   	@5
+			vertices   	(list Points
+			    (1031, 562)
+			    (1109, 613)
+			    (1268, 773))
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @29
+			location   	(1080, 510)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	1053
+			label      	"If all assignees reject the task, it'll be assigned to the PM.")))
+	    (object State_Diagram "iflow's states for a task instance"
+		quid       	"3A844BAB0087"
+		title      	"iflow's states for a task instance"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object StateView "EndState" "$UNNAMED$27" @30
+			location   	(1320, 945)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@30
+			    location   	(1374, 903)
+			    nlines     	2
+			    max_width  	600
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			quidu      	"3A844C2A0044"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Initial" @31
+			location   	(810, 210)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@31
+			    location   	(810, 199)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Initial")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A844C2C0123"
+			autoResize 	TRUE)
+		    (object Label @32
+			location   	(975, 163)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	975
+			label      	"Workflow instance has been created but not started.")
+		    (object StateView "Normal" "Running
+(Active)" @33
+			location   	(810, 570)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@33
+			    location   	(810, 559)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	
+|Running
+|(Active)
+			    )
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A844C870368"
+			autoResize 	TRUE)
+		    (object StateView "Normal" "Completed" @34
+			location   	(810, 945)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@34
+			    location   	(810, 934)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	204
+			    justify    	0
+			    label      	"Completed")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A84451D03D7"
+			autoResize 	TRUE)
+		    (object TransView "" @35
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A844CC60020"
+			client     	@31
+			supplier   	@33
+			line_style 	0
+			x_offset   	FALSE)
+		    (object TransView "" @36
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A844CD80242"
+			client     	@33
+			supplier   	@34
+			line_style 	0
+			x_offset   	FALSE)
+		    (object TransView "" @37
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A844CDD01BD"
+			client     	@34
+			supplier   	@30
+			line_style 	0
+			x_offset   	FALSE)
+		    (object Label @38
+			location   	(841, 344)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	701
+			label      	"startProcess (dispatchWorkflow)")
+		    (object Label @39
+			location   	(840, 720)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	293
+			label      	"taskCompleted")
+		    (object NoteView @40
+			location   	(1665, 960)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@40
+			    location   	(1412, 844)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	471
+			    label      	"The task is in complete mode and the workflow has moved to the next task.")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	531
+			height     	244)
+		    (object Label @41
+			location   	(44, 16)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			nlines     	1
+			max_width  	706
+			label      	"State diagram for iFlow's NodeInstance")))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "External Interface"
+	    quid       	"3949F0FA02AD"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	13
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServer" @42
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(900, 795)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@42
+			location   	(516, 136)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	768
+			justify    	0
+			label      	"WorkflowServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@42
+			location   	(516, 86)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	768
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39435E1300DC"
+		    compartment 	(object Compartment
+			Parent_View 	@42
+			location   	(516, 197)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	26
+			max_width  	766)
+		    width      	786
+		    height     	1442
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "WorkflowTemplate"
+	    quid       	"39B7E1240185"
+	    title      	"WorkflowTemplate"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	872
+	    origin_y   	1625
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServerWLRemote" @43
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(300, 465)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@43
+			location   	(45, 436)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	510
+			justify    	0
+			label      	"WorkflowServerWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@43
+			location   	(45, 386)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	510
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B813CC01E7"
+		    width      	528
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServerLocal" @44
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(285, 1065)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@44
+			location   	(170, 989)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	230
+			justify    	0
+			label      	"WorkflowServerLocal")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B8136F02BF"
+		    width      	248
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServerWLRMIImpl" @45
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(288, 768)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@45
+			location   	(19, 692)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	538
+			justify    	0
+			label      	"WorkflowServerWLRMIImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B8139300A4"
+		    width      	556
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @46
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B8141802C2"
+		    client     	@45
+		    supplier   	@43
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$0" @47
+		    location   	(285, 916)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B8141E0357"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @48
+			    Parent_View 	@47
+			    location   	(-115, 468)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B8141F02D6"
+			    client     	@47
+			    supplier   	@44
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @49
+			    Parent_View 	@47
+			    location   	(-115, 468)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B8141F02D7"
+			    client     	@47
+			    supplier   	@45
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::weblogic.rmi.Remote" @50
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(304, 144)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@50
+			location   	(72, 87)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	464
+			justify    	0
+			label      	"weblogic.rmi.Remote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@50
+			location   	(72, 37)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	464
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC948B02AE"
+		    width      	482
+		    height     	238
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @51
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B8146200B6"
+		    client     	@43
+		    supplier   	@50
+		    line_style 	0)
+		(object NoteView @52
+		    location   	(2720, 864)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@52
+			location   	(2461, 739)
+			fill_color 	13434879
+			nlines     	5
+			max_width  	483
+			label      	
+|There's a WorlflowInstance object in the JobCreation class diagram.  That's why I added a "1" at the end of the name of this class.
+			)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	543
+		    height     	262)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowHelper" @53
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1035, 1635)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@53
+			location   	(842, 1529)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	386
+			justify    	0
+			label      	"WorkflowHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39DD3BCB009F"
+		    width      	404
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowDataItem" @54
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2610, 1485)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@54
+			location   	(2490, 1304)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	240
+			justify    	0
+			label      	"WorkflowDataItem")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B7E19E0376"
+		    width      	258
+		    height     	386
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::Activity" @55
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2115, 2430)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@55
+			location   	(1929, 2324)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	372
+			justify    	0
+			label      	"Activity")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B7E1C201DD"
+		    width      	390
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::TimerDefinition" @56
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2100, 1875)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@56
+			location   	(1911, 1694)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	378
+			justify    	0
+			label      	"TimerDefinition")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B956310372"
+		    width      	396
+		    height     	386
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$12" @57
+		    location   	(2389, 1652)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B95B100216"
+		    roleview_list 	(list RoleViews
+			(object RoleView "n" @58
+			    Parent_View 	@57
+			    location   	(629, 356)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @59
+				Parent_View 	@58
+				location   	(2437, 1566)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+n"
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B95B1100AF"
+			    client     	@57
+			    supplier   	@54
+			    line_style 	0)
+			(object RoleView "1" @60
+			    Parent_View 	@57
+			    location   	(629, 356)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @61
+				Parent_View 	@60
+				location   	(2291, 1676)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+1"
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B95B1100B9"
+			    client     	@57
+			    supplier   	@56
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowTask" @62
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1470, 2850)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@62
+			location   	(1270, 2443)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	400
+			justify    	0
+			label      	"WorkflowTask")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B7E1960266"
+		    width      	418
+		    height     	838
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$9" @63
+		    location   	(1805, 2629)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B814AE0187"
+		    roleview_list 	(list RoleViews
+			(object RoleView "1" @64
+			    Parent_View 	@63
+			    location   	(381, 1125)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @65
+				Parent_View 	@64
+				location   	(1884, 2530)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+1"
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814AF00E9"
+			    client     	@63
+			    supplier   	@55
+			    line_style 	0)
+			(object RoleView "1" @66
+			    Parent_View 	@63
+			    location   	(381, 1125)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @67
+				Parent_View 	@66
+				location   	(1682, 2660)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+1"
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814AF00F3"
+			    client     	@63
+			    supplier   	@62
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$11" @68
+		    location   	(1826, 2295)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B95B0C0080"
+		    roleview_list 	(list RoleViews
+			(object RoleView "n" @69
+			    Parent_View 	@68
+			    location   	(642, 711)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @70
+				Parent_View 	@69
+				location   	(1909, 2092)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+n"
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B95B0C02A7"
+			    client     	@68
+			    supplier   	@56
+			    line_style 	0)
+			(object RoleView "1" @71
+			    Parent_View 	@68
+			    location   	(642, 711)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @72
+				Parent_View 	@71
+				location   	(1674, 2455)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+1"
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B95B0C02B1"
+			    client     	@68
+			    supplier   	@62
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowTemplate" @73
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2205, 330)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@73
+			location   	(2000, 174)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	410
+			justify    	0
+			label      	"WorkflowTemplate")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B7E17402DF"
+		    width      	428
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowTemplateHelper" @74
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1365, 2115)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@74
+			location   	(1078, 1959)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	574
+			justify    	0
+			label      	"WorkflowTemplateHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B7E1800232"
+		    width      	592
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$10" @75
+		    location   	(1398, 2356)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B814B4001E"
+		    roleview_list 	(list RoleViews
+			(object RoleView "n" @76
+			    Parent_View 	@75
+			    location   	(742, 948)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @77
+				Parent_View 	@76
+				location   	(1449, 2410)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+n"
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814B403C1"
+			    client     	@75
+			    supplier   	@62
+			    line_style 	0)
+			(object RoleView "1" @78
+			    Parent_View 	@75
+			    location   	(742, 948)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @79
+				Parent_View 	@78
+				location   	(1432, 2293)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	60
+				justify    	0
+				label      	"+1"
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814B403D5"
+			    client     	@75
+			    supplier   	@74
+			    line_style 	0)))
+		(object InheritView "" @80
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD407D0093"
+		    client     	@74
+		    supplier   	@53
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowInstance1" @81
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2130, 900)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@81
+			location   	(1849, 619)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	562
+			justify    	0
+			label      	"WorkflowInstance1")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39DD34E802C0"
+		    width      	580
+		    height     	586
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServer" @82
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1185, 720)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(801, 61)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	768
+			justify    	0
+			label      	"WorkflowServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@82
+			location   	(801, 11)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	768
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39435E1300DC"
+		    compartment 	(object Compartment
+			Parent_View 	@82
+			location   	(801, 122)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	26
+			max_width  	766)
+		    width      	786
+		    height     	1442
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @83
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B8140E015F"
+		    client     	@43
+		    supplier   	@82
+		    line_style 	0)
+		(object RealizeView "" @84
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B814240049"
+		    client     	@44
+		    supplier   	@82
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$3" @85
+		    location   	(1784, 489)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B81492003D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @86
+			    Parent_View 	@85
+			    location   	(600, -55)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814920282"
+			    client     	@85
+			    supplier   	@73
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @87
+			    Parent_View 	@85
+			    location   	(600, -55)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814920283"
+			    client     	@85
+			    supplier   	@82
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$6" @88
+		    location   	(1309, 1693)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39B814950127"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @89
+			    Parent_View 	@88
+			    location   	(125, 1149)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B814950394"
+			    client     	@88
+			    supplier   	@74
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @90
+			    Parent_View 	@88
+			    location   	(125, 1149)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39B81495039E"
+			    client     	@88
+			    supplier   	@82
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$19" @91
+		    location   	(1708, 818)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD40EC03B4"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$20" @92
+			    Parent_View 	@91
+			    location   	(524, 226)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD40ED024D"
+			    client     	@91
+			    supplier   	@81
+			    line_style 	0)
+			(object RoleView "$UNNAMED$21" @93
+			    Parent_View 	@91
+			    location   	(524, 226)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD40ED0257"
+			    client     	@91
+			    supplier   	@82
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowInstanceHelper" @94
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(330, 1410)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@94
+			location   	(49, 1304)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	562
+			justify    	0
+			label      	"WorkflowInstanceHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39DD3DB80184"
+		    width      	580
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @95
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD40840210"
+		    client     	@94
+		    supplier   	@53
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$13" @96
+		    location   	(631, 1162)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD4076025F"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$14" @97
+			    Parent_View 	@96
+			    location   	(-633, 554)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD407703BF"
+			    client     	@96
+			    supplier   	@94
+			    line_style 	0)
+			(object RoleView "$UNNAMED$15" @98
+			    Parent_View 	@96
+			    location   	(-633, 554)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD407703C9"
+			    client     	@96
+			    supplier   	@82
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Workflow::EnvoyWorkItem" @99
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(375, 3030)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@99
+			location   	(161, 2874)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	428
+			justify    	0
+			label      	"EnvoyWorkItem")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A881D8C0054"
+		    width      	446
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowTaskInstance" @100
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(360, 2310)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@100
+			location   	(118, 1979)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	484
+			justify    	0
+			label      	"WorkflowTaskInstance")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39DD3EC5027B"
+		    width      	502
+		    height     	686
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @101
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD40D001D3"
+		    client     	@100
+		    supplier   	@62
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$16" @102
+		    location   	(340, 1747)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39DD40A00133"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$17" @103
+			    Parent_View 	@102
+			    location   	(4, 339)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD40A10167"
+			    client     	@102
+			    supplier   	@100
+			    line_style 	0)
+			(object RoleView "$UNNAMED$18" @104
+			    Parent_View 	@102
+			    location   	(4, 339)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39DD40A10171"
+			    client     	@102
+			    supplier   	@94
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$22" @105
+		    location   	(368, 2757)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3A881DDD00AB"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$23" @106
+			    Parent_View 	@105
+			    location   	(8, 447)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3A881DDE00FC"
+			    client     	@105
+			    supplier   	@99
+			    line_style 	0)
+			(object RoleView "$UNNAMED$24" @107
+			    Parent_View 	@105
+			    location   	(8, 447)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3A881DDE0106"
+			    client     	@105
+			    supplier   	@100
+			    line_style 	0)))))
+	(object InteractionDiagram "CreateWfTemplate"
+	    mechanism_ref 	@1
+	    quid       	"39BD400002E3"
+	    title      	"CreateWfTemplate"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1260
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "System Administrator" @108
+		    location   	(855, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@108
+			location   	(855, 254)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	360
+			justify    	0
+			label      	"System Administrator")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39BD40B5035B"
+		    width      	336
+		    height     	721
+		    icon_height 	162
+		    icon_width 	120
+		    icon_y_offset 	-4
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @109
+			location   	(855, 368)
+			line_color 	3342489
+			InterObjView 	@108
+			height     	152
+			y_coord    	92
+			Nested     	FALSE))
+		(object NoteView @110
+		    location   	(400, 560)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@110
+			location   	(22, 376)
+			fill_color 	13434879
+			nlines     	7
+			max_width  	721
+			label      	"The system Admin will create a workflow template from the Workflow Template UI by passing a template name, description, and a list of tasks for that particular template.  Upon a successful creation, a template id is returned to the UI.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	781
+		    height     	381)
+		(object InterObjView "WorkflowTemplate UI" @111
+		    location   	(1456, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@111
+			location   	(1456, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	425
+			justify    	0
+			label      	"WorkflowTemplate UI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39BD40FC033F"
+		    width      	443
+		    height     	721
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @112
+			location   	(1455, 405)
+			line_color 	3342489
+			InterObjView 	@111
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @113
+			location   	(1456, 528)
+			line_color 	3342489
+			InterObjView 	@111
+			height     	152
+			y_coord    	92
+			Nested     	FALSE))
+		(object InterObjView "WorkflowServer" @114
+		    location   	(1904, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@114
+			location   	(1904, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	344
+			justify    	0
+			label      	"WorkflowServer")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39BD4135008E"
+		    width      	362
+		    height     	721
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @115
+			location   	(1904, 560)
+			line_color 	3342489
+			InterObjView 	@114
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @116
+			location   	(1904, 688)
+			line_color 	3342489
+			InterObjView 	@114
+			height     	168
+			y_coord    	108
+			Nested     	FALSE))
+		(object InterObjView "WorkflowTemplateHelper" @117
+		    location   	(2432, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@117
+			location   	(2432, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	492
+			justify    	0
+			label      	"WorkflowTemplateHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39BD4188011A"
+		    width      	510
+		    height     	721
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @118
+			location   	(2432, 736)
+			line_color 	3342489
+			InterObjView 	@117
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @119
+		    location   	(1152, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @120
+			Parent_View 	@119
+			location   	(1155, 356)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39BD41DC01B2"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	854
+			justify    	0
+			label      	"createWorkflowTemplate(String, String, List)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@111
+		    Focus_Src  	@109
+		    Focus_Entry 	@112
+		    origin     	(870, 400)
+		    terminus   	(1440, 400)
+		    ordinal    	0)
+		(object InterMessView "" @121
+		    location   	(1680, 560)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @122
+			Parent_View 	@121
+			location   	(1679, 516)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39BD41E2034B"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	929
+			justify    	0
+			label      	"createWorkflowTemplate(String, String, String, List)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@111
+		    supplier   	@114
+		    Focus_Src  	@113
+		    Focus_Entry 	@115
+		    origin     	(1471, 560)
+		    terminus   	(1888, 560)
+		    ordinal    	1)
+		(object InterMessView "" @123
+		    location   	(2176, 736)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @124
+			Parent_View 	@123
+			location   	(2167, 692)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39BD41E800FB"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	1091
+			justify    	0
+			label      	"createWorkflowTemplate(String, String, WFSession, List)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@114
+		    supplier   	@117
+		    Focus_Src  	@116
+		    Focus_Entry 	@118
+		    origin     	(1919, 736)
+		    terminus   	(2416, 736)
+		    ordinal    	2)))))

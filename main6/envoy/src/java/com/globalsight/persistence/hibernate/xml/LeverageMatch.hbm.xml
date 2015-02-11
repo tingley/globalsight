@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class table="LEVERAGE_MATCH"
+        name="com.globalsight.everest.integration.ling.tm2.LeverageMatch">
+
+        <composite-id>
+            <key-property name="originalSourceTuvId" type="long"
+                length="22" column="ORIGINAL_SOURCE_TUV_ID" />
+
+            <key-property name="subId" column="SUB_ID" type="string"
+                length="40" />
+
+            <key-property name="orderNum" column="ORDER_NUM" length="22"
+                type="short" />
+
+            <key-many-to-one
+                class="com.globalsight.util.GlobalSightLocale"
+                name="targetLocale" column="TARGET_LOCALE_ID" />
+        </composite-id>
+
+        <property name="matchedClob" access="field"
+            column="MATCHED_TEXT_CLOB" type="string" />
+
+        <property name="matchedText" access="field"
+            column="MATCHED_TEXT_STRING" type="string" />
+
+        <property name="matchedTuvId" length="22"
+            column="MATCHED_TUV_ID" type="long" />
+
+        <property name="sourcePageId" column="SOURCE_PAGE_ID" type="long" />
+
+        <property name="matchType" length="80" column="MATCH_TYPE"
+            type="string" />
+
+        <property name="scoreNum" length="22" column="SCORE_NUM" type="float" />
+ 		<property name="projectTmIndex" column="project_tm_index" type="int" />
+ 		<property name="tmId" column="tm_id" type="long" />
+ 		<property name="tmProfileId" column="tm_profile_id" type="long" />
+ 		<property name="mtName" column="MT_NAME" type="string"/>
+ 		<property name="matchedOriginalSource" column="MATCHED_ORIGINAL_SOURCE" type="string"/>
+    </class>
+
+</hibernate-mapping>

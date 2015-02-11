@@ -1,0 +1,1265 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "gxmlutil"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3AB65EAF025B"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "GxmlReader"
+	    quid       	"3AB6609D03CD"
+	    documentation 	
+|This class takes GXML or Paginated ResultSet content as input, parse them and generate a corresponding document model representing the input data. 
+|
+|The document model of GXML file is encapsulated in GXMLElement class. The document model of Paginated ResultSet is encapsulated in PRSElement class. 
+|
+|
+	    
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"3AC1315301DC"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlRootElement"
+		    quidu      	"3AC131260372"))
+	    operations 	(list Operations
+		(object Operation "parse"
+		    quid       	"3AB662760297"
+		    parameters 	(list Parameters
+			(object Parameter "p_content"
+			    quid       	"3AB6631303A1"
+			    type       	"String"))
+		    result     	"GxmlRootElement"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "GxmlElement"
+	    quid       	"3AB660DA00C8"
+	    documentation 	
+|In GXML or Paginated ResultSet, each XML tag pairs and the content in between are taken as a single document element.
+|
+|DocumentElement class is generalized the features of all element types. 
+|
+|For each individual XML tag type, a corresponding sub class of parent class DocumentElement is designed to reflect the specific attributes of that element type. 
+	    
+	    operations 	(list Operations
+		(object Operation "setAttribute"
+		    quid       	"3AB686D501AF"
+		    parameters 	(list Parameters
+			(object Parameter "p_attributeName"
+			    quid       	"3AC1327D02DF"
+			    type       	"String")
+			(object Parameter "p_value"
+			    quid       	"3AB68735021C"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAttribute"
+		    quid       	"3AB68706005B"
+		    parameters 	(list Parameters
+			(object Parameter "p_attributeName"
+			    quid       	"3AC1328801B8"
+			    type       	"String"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAttributeAsInt"
+		    quid       	"3AC132370388"
+		    parameters 	(list Parameters
+			(object Parameter "p_attributeName"
+			    quid       	"3AC1325502EB"
+			    type       	"String"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAttributeAsBoolean"
+		    quid       	"3AC13255029B"
+		    parameters 	(list Parameters
+			(object Parameter "p_attributeName"
+			    quid       	"3AC13271031E"
+			    type       	"String"))
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTextValue"
+		    quid       	"3AB687560006"
+		    parameters 	(list Parameters
+			(object Parameter "p_textValue"
+			    quid       	"3AB6877E0339"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "appendTextValue"
+		    quid       	"3AC132A102AF"
+		    parameters 	(list Parameters
+			(object Parameter "p_textValue"
+			    quid       	"3AC132B50253"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTextValue"
+		    quid       	"3AB6880001E1"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getType"
+		    quid       	"3AB6881102F4"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getName"
+		    quid       	"3AD62639038A"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAttributeNames"
+		    quid       	"3AD6264F0007"
+		    result     	"String[]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setChildElements"
+		    quid       	"3AB68821010D"
+		    parameters 	(list Parameters
+			(object Parameter "p_childElements"
+			    quid       	"3AB6885901DF"
+			    type       	"List"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addChildElement"
+		    quid       	"3AB6885901B7"
+		    parameters 	(list Parameters
+			(object Parameter "p_childElement"
+			    quid       	"3AB688860393"
+			    type       	"DocumentElement"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getChildElements"
+		    quid       	"3AB688860361"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getChildElements"
+		    quid       	"3AB688A70386"
+		    parameters 	(list Parameters
+			(object Parameter "p_elementTypes"
+			    quid       	"3ACA886A0246"
+			    type       	"int[]"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getChildElement"
+		    quid       	"3AC13300021F"
+		    parameters 	(list Parameters
+			(object Parameter "p_index"
+			    quid       	"3AC1331B0001"
+			    type       	"int"))
+		    result     	"GxmlElement"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateChildElement"
+		    quid       	"3ACA831101F8"
+		    parameters 	(list Parameters
+			(object Parameter "p_index"
+			    quid       	"3ACA834C01DE"
+			    type       	"int")
+			(object Parameter "p_newElement"
+			    quid       	"3ACA834C0293"
+			    type       	"GxmlElement"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateChildElements"
+		    quid       	"3ACA88770155"
+		    parameters 	(list Parameters
+			(object Parameter "p_newElementsInfo"
+			    quid       	"3AD6257400C0"
+			    type       	"List"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "toString"
+		    quid       	"3AD626840342"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "m_type"
+		    quid       	"3AB685B60030"
+		    type       	"int"
+		    exportControl 	"Protected")
+		(object ClassAttribute "m_name"
+		    quid       	"3AD6262003B6"
+		    type       	"String")
+		(object ClassAttribute "m_attributes"
+		    quid       	"3AB685C90240"
+		    type       	"HashMap")
+		(object ClassAttribute "m_childElements"
+		    quid       	"3AB685F602D1"
+		    type       	"List")
+		(object ClassAttribute "m_textValue"
+		    quid       	"3AB68614031A"
+		    type       	"StringBuffer")))
+	(object Class "SkeletonElement"
+	    quid       	"3AB661100315"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB6619D0259"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "PrsRootElement"
+	    quid       	"3AB68A260048"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB68BAC0175"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8"))
+	    operations 	(list Operations
+		(object Operation "getTranslatableAndLocalizable"
+		    quid       	"3ACA87CD0042"
+		    result     	"HashMap"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateTranslatableAndLocalizable"
+		    quid       	"3ACA87EA033D"
+		    parameters 	(list Parameters
+			(object Parameter "p_newElementInfo"
+			    quid       	"3ACA881501C2"
+			    type       	"List"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "RecordElement"
+	    quid       	"3AB68A330231"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB68FBF0161"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "ColumnElement"
+	    quid       	"3AB68A420142"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB68FC60161"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "LocalizableElement"
+	    quid       	"3AB68A4E004F"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB68FF500DC"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "TranslatableElement"
+	    quid       	"3AB68A5C01C2"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB68FF00310"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "SegmentElement"
+	    quid       	"3AB68A88002B"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AB690D9010C"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8")))
+	(object Class "PrsReader"
+	    quid       	"3AC130CA017B"
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"3AC1315B0183"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::PrsRootElement"
+		    quidu      	"3AB68A260048"))
+	    operations 	(list Operations
+		(object Operation "parse"
+		    quid       	"3AC130DB0298"
+		    parameters 	(list Parameters
+			(object Parameter "p_content"
+			    quid       	"3AC130F602C9"
+			    type       	"String"))
+		    result     	"PrsRootElement"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "GxmlRootElement"
+	    quid       	"3AC131260372"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AC1317C00D7"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8"))
+	    operations 	(list Operations
+		(object Operation "getTranslatableAndLocalizable"
+		    quid       	"3ACA83C603B0"
+		    result     	"HashMap"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateTranslatableAndLocalizable"
+		    quid       	"3ACA83E7035E"
+		    parameters 	(list Parameters
+			(object Parameter "p_newElementInfo"
+			    quid       	"3ACA8736024D"
+			    type       	"List"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "GxmlNames"
+	    quid       	"3AC138DC01F4"
+	    documentation 	
+|Contains Gxml and PRS document names.
+|
+|It has two sub-interfaces, one is Element which contains the Element tag names. Another is Attribute that contains the attibute names of all these element tags.
+	    
+	    stereotype 	"Interface")
+	(object Class "Element"
+	    quid       	"3AC138EE0163"
+	    documentation 	
+|Serves as a constant holder that contains the element tag names as constants.
+|
+|It is an inner interface of GxmlNames.
+	    
+	    stereotype 	"Interface")
+	(object Class "Attribute"
+	    quid       	"3AC1391F025E"
+	    documentation 	
+|Serves as a constant holder that contains the attribute names as constants.
+|
+|It is an inner interface of GxmlNames.
+	    
+	    stereotype 	"Interface")
+	(object Class "GxmlElementWrapper"
+	    quid       	"3AD626AA0256"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AD628530239"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlIndex"
+		    quidu      	"3AD62765016F"))
+	    operations 	(list Operations
+		(object Operation "setIndex"
+		    quid       	"3AD626E602AD"
+		    parameters 	(list Parameters
+			(object Parameter "p_index"
+			    quid       	"3AD627060245"
+			    type       	"GxmlIndex"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getIndex"
+		    quid       	"3AD627060227"
+		    result     	"GxmlIndex"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setElement"
+		    quid       	"3AD6272800F9"
+		    parameters 	(list Parameters
+			(object Parameter "p_element"
+			    quid       	"3AD627410177"
+			    type       	"GxmlElement"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getElement"
+		    quid       	"3AD627410159"
+		    result     	"GxmlElement"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "m_Index"
+		    quid       	"3AD626C40344"
+		    type       	"GxmlIndex")
+		(object ClassAttribute "m_element"
+		    quid       	"3AD626D30255"
+		    type       	"GxmlElement")))
+	(object Class "GxmlIndex"
+	    quid       	"3AD62765016F"
+	    operations 	(list Operations
+		(object Operation "setRecordIndex"
+		    quid       	"3AD627AB0075"
+		    parameters 	(list Parameters
+			(object Parameter "p_recordIndex"
+			    quid       	"3AD627DE0169"
+			    type       	"int"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getRecordIndex"
+		    quid       	"3AD627DE0155"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setColumnIndex"
+		    quid       	"3AD627F602CC"
+		    parameters 	(list Parameters
+			(object Parameter "p_columnIndex"
+			    quid       	"3AD62808000B"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getColumnIndex"
+		    quid       	"3AD6280703D5"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setElementIndex"
+		    quid       	"3AD6281202B8"
+		    parameters 	(list Parameters
+			(object Parameter "p_index"
+			    quid       	"3AD628200272"
+			    type       	"int"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getElementIndex"
+		    quid       	"3AD628200254"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "m_recordIndex"
+		    quid       	"3AD6277800F4"
+		    type       	"int")
+		(object ClassAttribute "m_columnIndex"
+		    quid       	"3AD627840188"
+		    type       	"int")
+		(object ClassAttribute "m_elementIndex"
+		    quid       	"3AD6278A01FE"
+		    type       	"int")))
+	(object Association "1"
+	    quid       	"3AB68DB30320"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$0"
+		    quid       	"3AB68DB90397"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8"
+		    client_cardinality 	(value cardinality "0..n")
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$1"
+		    quid       	"3AB68DB903AB"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement"
+		    quidu      	"3AB660DA00C8"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$2"
+	    quid       	"3AC13B8F031A"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$3"
+		    quid       	"3AC13B900361"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::Attribute"
+		    quidu      	"3AC1391F025E"
+		    client_cardinality 	(value cardinality "1")
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$4"
+		    quid       	"3AC13B90036B"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlNames"
+		    quidu      	"3AC138DC01F4"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$5"
+	    quid       	"3AC13C310240"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$6"
+		    quid       	"3AC13C3302E4"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::Element"
+		    quidu      	"3AC138EE0163"
+		    client_cardinality 	(value cardinality "1")
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$7"
+		    quid       	"3AC13C3302E5"
+		    supplier   	"Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlNames"
+		    quidu      	"3AC138DC01F4"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"3AB6604C00D8"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	1512
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlReader" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(540, 135)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(105, 54)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	870
+			justify    	0
+			label      	"GxmlReader")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AB6609D03CD"
+		    compartment 	(object Compartment
+			Parent_View 	@1
+			location   	(105, 115)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	2
+			max_width  	875)
+		    width      	888
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::PrsRootElement" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(2145, 405)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1529, 299)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1232
+			justify    	0
+			label      	"PrsRootElement")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AB68A260048"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(1529, 360)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	1228)
+		    width      	1250
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElement" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1515, 1230)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(843, 599)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1344
+			justify    	0
+			label      	"GxmlElement")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AB660DA00C8"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(843, 660)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	24
+			max_width  	1340)
+		    width      	1362
+		    height     	1286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @4
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AB68BAC0175"
+		    client     	@2
+		    supplier   	@3
+		    line_style 	0)
+		(object AssociationViewNew "1" @5
+		    location   	(2265, 1526)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AB68DB30320"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$0" @6
+			    Parent_View 	@5
+			    location   	(675, 641)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AB68DB90397"
+			    client     	@5
+			    supplier   	@3
+			    vertices   	(list Points
+				(2265, 1526)
+				(2265, 1230)
+				(2196, 1230))
+			    line_style 	0
+			    label      	(object SegLabel @7
+				Parent_View 	@6
+				location   	(2233, 1284)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..n"
+				pctDist    	0.900000
+				height     	54
+				orientation 	0))
+			(object RoleView "$UNNAMED$1" @8
+			    Parent_View 	@5
+			    location   	(675, 641)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AB68DB903AB"
+			    client     	@5
+			    supplier   	@3
+			    vertices   	(list Points
+				(2265, 1526)
+				(2265, 1805)
+				(2196, 1752))
+			    line_style 	0)))
+		(object NoteView @9
+		    location   	(2535, 1140)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@9
+			location   	(2351, 1040)
+			fill_color 	13434879
+			nlines     	4
+			max_width  	333
+			label      	"Refer to GXML DTD for the legal child element types for each type of element.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	393
+		    height     	213)
+		(object NoteView @10
+		    location   	(180, 690)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(42, 631)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	240
+			label      	"Root Element of GXML")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	300
+		    height     	131)
+		(object NoteView @11
+		    location   	(2775, 690)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(2603, 627)
+			fill_color 	13434879
+			nlines     	3
+			max_width  	308
+			label      	"Root Element of PaginatedResultSet")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	368
+		    height     	138)
+		(object AttachView "" @12
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    client     	@11
+		    supplier   	@2
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::PrsReader" @13
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1995, 135)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@13
+			location   	(1578, 54)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	834
+			justify    	0
+			label      	"PrsReader")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC130CA017B"
+		    compartment 	(object Compartment
+			Parent_View 	@13
+			location   	(1578, 115)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	2
+			max_width  	840)
+		    width      	852
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlRootElement" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(720, 405)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(104, 299)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1232
+			justify    	0
+			label      	"GxmlRootElement")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC131260372"
+		    compartment 	(object Compartment
+			Parent_View 	@14
+			location   	(104, 360)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	1228)
+		    width      	1250
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AttachView "" @15
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    client     	@10
+		    supplier   	@14
+		    line_style 	0)
+		(object UsesView "" @16
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC1315301DC"
+		    client     	@1
+		    supplier   	@14
+		    line_style 	0)
+		(object UsesView "" @17
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC1315B0183"
+		    client     	@13
+		    supplier   	@2
+		    line_style 	0)
+		(object InheritView "" @18
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC1317C00D7"
+		    client     	@14
+		    supplier   	@3
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::Attribute" @19
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(435, 1545)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@19
+			location   	(434, 1653)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	228
+			justify    	0
+			label      	"Attribute")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC1391F025E"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::Element" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(210, 1545)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(209, 1653)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	228
+			justify    	0
+			label      	"Element")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC138EE0163"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlNames" @21
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(300, 1140)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(299, 1248)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	228
+			justify    	0
+			label      	"GxmlNames")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC138DC01F4"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$2" @22
+		    location   	(383, 1395)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC13B8F031A"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$3" @23
+			    Parent_View 	@22
+			    location   	(188, -330)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC13B900361"
+			    client     	@22
+			    supplier   	@19
+			    line_style 	0
+			    label      	(object SegLabel @24
+				Parent_View 	@23
+				location   	(451, 1503)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	0.963271
+				height     	31
+				orientation 	0))
+			(object RoleView "$UNNAMED$4" @25
+			    Parent_View 	@22
+			    location   	(188, -330)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC13B90036B"
+			    client     	@22
+			    supplier   	@21
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$5" @26
+		    location   	(240, 1395)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC13C310240"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$6" @27
+			    Parent_View 	@26
+			    location   	(45, -330)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC13C3302E4"
+			    client     	@26
+			    supplier   	@20
+			    line_style 	0
+			    label      	(object SegLabel @28
+				Parent_View 	@27
+				location   	(268, 1516)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	0.900000
+				height     	54
+				orientation 	0))
+			(object RoleView "$UNNAMED$7" @29
+			    Parent_View 	@26
+			    location   	(45, -330)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC13C3302E5"
+			    client     	@26
+			    supplier   	@21
+			    line_style 	0)))
+		(object AttachView "" @30
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    client     	@9
+		    supplier   	@5
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlElementWrapper" @31
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(540, 2220)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(109, 2014)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	862
+			justify    	0
+			label      	"GxmlElementWrapper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AD626AA0256"
+		    compartment 	(object Compartment
+			Parent_View 	@31
+			location   	(109, 2075)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	7
+			max_width  	868)
+		    width      	880
+		    height     	436
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageimport::gxmlutil::GxmlIndex" @32
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1695, 2220)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@32
+			location   	(1295, 1939)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	800
+			justify    	0
+			label      	"GxmlIndex")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AD62765016F"
+		    compartment 	(object Compartment
+			Parent_View 	@32
+			location   	(1295, 2000)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	10
+			max_width  	797)
+		    width      	818
+		    height     	586
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @33
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AD628530239"
+		    client     	@31
+		    supplier   	@32
+		    line_style 	0)))))

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialog name="lukeinit" columns="1" modal="true" gap="8" top="3" bottom="3"
+	left="3" right="3" text="Path to Index directory:" icon="/img/luke.gif"
+	close="remove(lukeinit)" init="setupInit(lukeinit)">
+	<panel gap="4">
+		<label text="Path:"/>
+		<combobox name="path" columns="40" editable="true" perform="openOk(lukeinit)"/>
+		<button text="Browse..." action="openBrowse(path)"/>
+	</panel>
+	<checkbox name="ro" text="Open in Read-Only mode"/>
+	<checkbox name="force" text="Force unlock, if locked"/>
+	<separator/>
+	<panel weightx="1" halign="right" gap="8" top="3" right="3" bottom="2">
+		<button text="OK" action="openOk(lukeinit)"/>
+		<button text="Cancel" action="remove(lukeinit)"/>
+	</panel>
+</dialog>

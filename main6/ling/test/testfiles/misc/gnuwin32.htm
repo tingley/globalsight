@@ -1,0 +1,613 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0063)http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUtils.html -->
+<HTML><HEAD><TITLE>Native Win32 ports of some GNU utilities</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252">
+<META 
+content="Native Win32 ports of some GNU utilities&#13;&#10;linux&#13;&#10;bison-1.28 (GNU yacc)&#13;&#10;bzip2&#13;&#10;diffutils-2.7&#13;&#10;fileutils-3.16&#13;&#10;findutils-4.1&#13;&#10;flex-2.5.4 (GNU lex)&#13;&#10;gawk-3.0.3 (GNU awk)&#13;&#10;grep-2.1&#13;&#10;gsar110&#13;&#10;gzip-1.2.4&#13;&#10;less-332z&#13;&#10;m4-1.4&#13;&#10;make-3.78.1&#13;&#10;patch-2.4&#13;&#10;sed-2.05&#13;&#10;shellutils-1.9.4&#13;&#10;tar-1.12&#13;&#10;textutils-1.22&#13;&#10;wget-1.5.2&#13;&#10;fsplit&#13;&#10;recode-3.5&#13;&#10;ncompress-2.4.2" 
+name=description>
+<META content="MSHTML 5.50.4134.600" name=GENERATOR>
+<META content=Win32,GNU,utilities name=keywords></HEAD>
+<BODY bgColor=#e2e2eb>
+<TABLE width="65%" border=1>
+  <TBODY>
+  <TR>
+    <TD width="100%">
+      <P align=left><FONT face="Trebuchet MS"><IMG height=97 
+      alt=../images/f2c.jpg src="gnuwin32_files/f2c.jpg" width=108></FONT><FONT 
+      face=Verdana> 
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      <BIG><BIG>GNU utilities for Win32</BIG></BIG><BR><BR><BR>Here are some 
+      ports of common <A href="http://www.fsf.org/">GNU</A> utilities to native 
+      Win32. In this context, native means the executables do only depend on the 
+      Microsoft C-runtime (msvcrt.dll) and not an emulation layer like that 
+      provided by <A href="http://sourceware.cygnus.com/cygwin/">Cygwin</A> 
+      tools.<BR></FONT></P>
+      <P align=left><STRONG><FONT face=Verdana>Download:</FONT></STRONG></P>
+      <BLOCKQUOTE>
+        <P align=left><FONT face=Verdana>by http: <A 
+        href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUtils.zip">UnxUtils.zip</A><BR><BR>by 
+        ftp: <A 
+        href="ftp://ftp.uni-koeln.de/pc/win32/misc/unxutils.zip">ftp://ftp.uni-koeln.de/pc/win32/misc/unxutils.zip</A></FONT></P></BLOCKQUOTE>
+      <P align=left><FONT face=Verdana>latest updates (after 11/11/99):&nbsp; <A 
+      href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUpdates.zip">UnxUpdates.zip</A> 
+      </FONT></P>
+      <HR>
+
+      <P align=left><FONT face=Verdana>The following program versions are 
+      covered:</FONT></P>
+      <BLOCKQUOTE>
+        <P align=left><FONT face=Verdana>bc-1.05<BR>bison-1.28<BR>bzip2-0.9.0b 
+        (not 
+        GNU)<BR>diffutils-2.7<BR>fileutils-3.16<BR>findutils-4.1<BR>flex-2.5.4<BR>gawk-3.0.3<BR>grep-2.3<BR>gsar110<BR>gzip-1.2.4<BR>indent-2.2.0<BR>jwhois-2.4.1<BR>less-340<BR>m4-1.4<BR>make-3.77<BR>patch-2.4<BR>recode-3.5<BR>rman-3.0.7<BR>sed-3.02<BR>shellutils-1.9.4<BR>su.exe<BR>tar-1.12<BR>textutils-2.0<BR>wget-1.5.2<BR>which-2.4</FONT></P></BLOCKQUOTE>
+      <P align=left><FONT face=Verdana>Standard behaviour:</FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>All programs open files in binary mode, 
+        while stdin, stdout and stderr are in text mode</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>forward as well as backward slashes in 
+        file paths are accepted</FONT></P></LI></UL>
+      <P align=left><BIG><FONT face=Verdana>What is new:</FONT></BIG></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>I have added a hacked version (sh.exe) 
+        of the Almquist shell distributed with NetBSD running on native Win32. 
+        The shell has still some problems, but it should be good enough to run 
+        most makefiles with gnumake.<BR>The main problem at the moment comes 
+        from the restriction of pipes to a maximum of 1MB transfered data. This 
+        of course is because Win32 can not fork. </FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>08/26/99</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>Help files for many of the programs are 
+        available now via Bruce Wamplers <A 
+        href="http://www.objectcentral.com/vide/help/vhelp.htm">VIDE</A> 
+        site.</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated gzip/gunzip: the previous did 
+        not work on Win98 because it capitalizes the executable name in 
+        argv[0]</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>09/30/99</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>Added indent-2.2.0 </FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>Added a link to the excellent <A 
+        href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUtils.html#zsh">zsh</A> 
+        shell </FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated mv, rm and ln: fixed a nasty 
+        bug that only turns up if you use forward slashes in file 
+        paths</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated sdiff.exe and diff3.exe: these 
+        used to invoke diff.exe using a full pathname causing unnecessary 
+        complications. The new versions use the PATH.</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>10/20/99</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>updated mkdir and rmdir: fixed a nasty 
+        bug that only turns up if you use forward slashes in file 
+        paths</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated tar.exe: the previous version 
+        would not accept archive path names containing drive letters</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated bison to 
+      v1.28</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>11/05/99</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>updated grep, egrep and fgrep: the -r 
+        option now works as intended</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>11/11/99</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>updated tar.exe: stdin and stdout are 
+        now in opened in binary mode</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>patch.exe recompiled</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>the sh.exe is now really a renamed <A 
+        href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUtils.html#zsh">zsh</A>, 
+        this is somewhat bulky but seems to works good enough</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>02/19/00</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>For the time to come, the latest 
+        updates are here: <A 
+        href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/UnxUpdates.zip">UnxUpdates.zip</A> 
+        </FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated touch.exe. There was a sporadic 
+        problem when parsing the argument given to the -t option.</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated make to v3.78.1. I have dropped 
+        the gnumake name </FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated xargs.exe: the maximum length 
+        of the command line now is 131072</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>recompiled env.exe</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated find: now uses forward slashes 
+        in paths</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>Source code release still on 
+        hold.<BR></FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>03/03/00</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>make 3.78.1 needed a makeover: the old 
+        version had got sensitive for the case of file names</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>04/26/00</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>date.exe updated: there were problems 
+        with the command line parsing, solved by recompiling.</FONT></P></LI></UL>
+      <P align=left><FONT face=Verdana>&nbsp;&nbsp; <U>06/12/00</U></FONT></P>
+      <UL>
+        <LI>
+        <P align=left><FONT face=Verdana>added jwhois 2.4.1</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>added gplay.exe, a console multimedia 
+        player (including MP3)</FONT></P>
+        <LI>
+        <P align=left><FONT face=Verdana>updated cp.exe and mkdir.exe: the old 
+        versions did not&nbsp; honor the -p flag</FONT></P></LI></UL>
+      <P align=left>&nbsp;</P>
+      <TABLE height=2400 width=691 border=1>
+        <TBODY>
+        <TR>
+          <TD width=1 height=26>
+            <H2>Program</H2></TD>
+          <TD width=726 height=26>
+            <H2>Notes</H2></TD></TR>
+        <TR>
+          <TD width=1 height=19>ansi2knr.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>basename.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>bison.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>bzip2.exe</TD>
+          <TD width=726 height=19>Julian Sewards <A 
+            href="http://sourceware.cygnus.com/bzip2/">alternative 
+          compressor</A></TD></TR>
+        <TR>
+          <TD width=1 height=19>bunzip2.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>bzip2recover.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>cat.exe</TD>
+          <TD width=726 height=19>stdin and stdout opened in binary mode</TD></TR>
+        <TR>
+          <TD width=1 height=19>chgrp.exe</TD>
+          <TD width=726 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=1 height=19>chmod.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>chown.exe</TD>
+          <TD width=726 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=1 height=19>cksum.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>cmp.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>comm.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>compress.exe</TD>
+          <TD width=726 height=19>for (de)compressing .Z files; this is 
+            actually a program called ncompress and was found on one of&nbsp; 
+            the <A href="ftp://sunsite.unc.edu/pub/Linux/">Linux 
+        mirrors</A></TD></TR>
+        <TR>
+          <TD width=1 height=19>cp.exe</TD>
+          <TD width=726 height=19>works only on NT, does real hardlinks on 
+          NTFS</TD></TR>
+        <TR>
+          <TD width=1 height=19>csplit.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19><FONT color=#ff0000>ctags.exe 
+          (removed)</FONT></TD>
+          <TD width=726 height=19>you can get it from <A 
+            href="http://home.hiwaay.net/~darren/ctags/">Darren Hieberts 
+            site</A> or via the home page of the <A 
+            href="http://www.vim.org/">vim</A> editor</TD></TR>
+        <TR>
+          <TD width=1 height=19>cut.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>date.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>dd.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>df.exe</TD>
+          <TD width=726 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=1 height=19>diff.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>diff3.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=1 height=19>dirname.exe</TD>
+          <TD width=726 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>du.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>echo.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>egrep.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>env.exe</TD>
+          <TD width=469 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=216 height=19>expand.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>expr.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>factor.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>fgrep.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=38>find.exe</TD>
+          <TD width=469 height=38>
+            <UL>
+              <LI>Example of command line under Cmd/Command shell:<BR>find -name 
+              *.txt -exec cat {} ; </LI></UL></TD></TR>
+        <TR>
+          <TD width=216 height=19>flex.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>fmt.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>fold.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>gawk.exe</TD>
+          <TD width=469 height=19>input files opened in text mode</TD></TR>
+        <TR>
+          <TD width=216 height=19>make.exe</TD>
+          <TD width=469 height=19>From v3.77 upwards, make searches for a 
+            sh.exe on the path. If it does not find one, it switches to win32 
+            make mode that is it uses intermediate batch files for command 
+            processing.<BR>This is fine until your makefile tries to execute 
+            something like mkdir, which will invoke the internal mkdir from 
+            cmd.exe or command.com. As the results may not be to your liking, 
+            you may prefer to use the sh.exe provide here.</TD></TR>
+        <TR>
+          <TD width=216 height=19>grep.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>gsar.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>gunzip.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>gzip.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>head.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>id.exe</TD>
+          <TD width=469 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=216 height=19>install.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>join.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>less.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=7>ln.exe</TD>
+          <TD width=469 height=7>works only on NT, does real hardlinks on 
+          NTFS</TD></TR>
+        <TR>
+          <TD width=216 height=6>logname.exe</TD>
+          <TD width=469 height=6></TD></TR>
+        <TR>
+          <TD width=216 height=19>ls.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>m4.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>md5sum.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>mkdir.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>mkfifo.exe</TD>
+          <TD width=469 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=216 height=19>mknod.exe</TD>
+          <TD width=469 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=216 height=19>mv.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>mvdir.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>nl.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>od.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>paste.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>patch.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>pathchk.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>pr.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>printenv.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>printf.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>ptx.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>recode.exe</TD>
+          <TD width=469 height=19>stdin and stdout opened in binary mode</TD></TR>
+        <TR>
+          <TD width=216 height=19>rm.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>rman.exe</TD>
+          <TD width=469 height=19>PolyglotMan by Thomas A. Phelps ( <A 
+            href="ftp://ftp.cs.berkeley.edu/ucb/people/phelps/tcltk/rman.tar.Z">source</A>)</TD></TR>
+        <TR>
+          <TD width=216 height=19>rmdir.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sdiff.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sed.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>seq.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sleep.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sort.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sh.exe</TD>
+          <TD width=469 height=19>renamed zsh</TD></TR>
+        <TR>
+          <TD width=216 height=17>shar.exe</TD>
+          <TD width=469 height=17>only works with -T (text) option</TD></TR>
+        <TR>
+          <TD width=216 height=19>split.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>su.exe</TD>
+          <TD width=469 height=19>dummy</TD></TR>
+        <TR>
+          <TD width=216 height=19>sum.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>sync.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>tac.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>tail.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=76>tar.exe</TD>
+          <TD width=469 height=76>
+            <UL>
+              <LI>only forward slashes are accepted 
+              <LI>the -z option (compression) does not work 
+              <LI>no remote archives 
+              <LI>works only on NT, does real hardlinks on NTFS </LI></UL></TD></TR>
+        <TR>
+          <TD width=216 height=19>tee.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>test.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>touch.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>tr.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>uname.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>unexpand.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>uniq.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>unshar.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>uudecode.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>uuencode.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>wc.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>wget.exe</TD>
+          <TD width=469 height=19>wget 1.5.3 builds out of the box with MS 
+            Visual C</TD></TR>
+        <TR>
+          <TD width=216 height=19>which.exe</TD>
+          <TD width=469 height=19>does not search the current directory</TD></TR>
+        <TR>
+          <TD width=216 height=19>whoami.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>xargs.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>xxd.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=216 height=19>yes.exe</TD>
+          <TD width=469 height=19></TD></TR>
+        <TR>
+          <TD width=685 bgColor=#ff0000 colSpan=2 height=19></TD></TR>
+        <TR>
+          <TD width=685 colSpan=2 height=19>
+            <P align=center><STRONG><FONT face=Verdana>Additional 
+            programs</FONT></STRONG></P></TD></TR>
+        <TR>
+          <TD width=216 height=19>pclip.exe</TD>
+          <TD width=469 height=19>put the Windows clipboard text to 
+        stdout</TD></TR>
+        <TR>
+          <TD width=216 height=19>gclip.exe</TD>
+          <TD width=469 height=19>get&nbsp; the Windows clipboard text from 
+            stdin<BR>Example: run the text from the clipboard through sed and 
+            put the result 
+            back<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            pclip | sed "s/string1/string2/g" | gclip</TD></TR>
+        <TR>
+          <TD width=216 height=19>gplay.exe</TD>
+          <TD width=469 height=19>My new minimalist console multimedia player 
+            using <A href="http://msdn.microsoft.com/directx">DirectShow</A>. 
+            With<BR>gplay filename (wildcards are supported)<BR>you should be 
+            able to play just everything as long M$ supports 
+      it.</TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE>
+<H3><FONT face="Trebuchet MS"><A 
+href="http://www.edv.agrar.tu-muenchen.de/~syring/win32/md5sum">md5 sums</A> 
+</FONT></H3>
+<HR>
+
+<H3><FONT face="Trebuchet MS">Links:</FONT></H3>
+<P><FONT face="Trebuchet MS">Another source of unixish stuff: 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp; <A 
+href="http://www.itribe.net/virtunix/">http://www.itribe.net/virtunix/</A><BR><STRONG>A 
+native GNU C++/Fortran compiler for Win32:</STRONG><BR>&nbsp;&nbsp;&nbsp;&nbsp; 
+<A 
+href="http://www.xraylith.wisc.edu/~khan/software/gnu-win32/egcs-mingw32.html">http://www.xraylith.wisc.edu/~khan/software/gnu-win32/egcs-mingw32.html</A><BR><A 
+name=zsh></A><STRONG>A zsh shell for Win32:</STRONG><BR>&nbsp;&nbsp;&nbsp;&nbsp; 
+<A 
+href="ftp://ftp.blarg.net/users/amol/zsh">ftp://ftp.blarg.net/users/amol/zsh</A><BR><STRONG>An 
+emacs for NT:</STRONG></FONT><BR><FONT face="Trebuchet MS" size=3>&nbsp;&nbsp; 
+<A 
+href="http://www.cs.washington.edu/homes/voelker/ntemacs.html">http://www.cs.washington.edu/homes/voelker/ntemacs.html</A></FONT><BR><FONT 
+face="Trebuchet MS">Useful free NT system utilities:<BR>&nbsp;&nbsp;&nbsp;&nbsp; 
+<A 
+href="http://www.sysinternals.com/">http://www.sysinternals.com/</A><BR>Native 
+Perl on Win32:<BR>&nbsp;&nbsp;<FONT color=#ff0000>&nbsp;&nbsp; <A 
+href="http://www.activestate.com/">http://www.activestate.com/</A></FONT><BR>An 
+Un*x emulation on Win32:<BR>&nbsp;&nbsp;&nbsp;&nbsp; <A 
+href="http://sourceware.cygnus.com/cygwin/">http://sourceware.cygnus.com/cygwin/</A><BR>A 
+Cygwin compiled Perl:<BR>&nbsp;&nbsp;&nbsp;&nbsp; <A 
+href="http://cygutils.netpedia.net/">http://cygutils.netpedia.net/</A><BR>Another 
+Un*x emulation on Win32:<BR>&nbsp;&nbsp;&nbsp;&nbsp; <A 
+href="http://www.research.att.com/sw/tools/uwin/">http://www.research.att.com/sw/tools/uwin/</A><BR>A 
+more real Un*x on Windows NT:<BR>&nbsp;&nbsp;&nbsp;&nbsp; <A 
+href="http://www.interix.com/">http://www.interix.com/</A> (assimilated by 
+Microsoft)<BR></FONT></P>
+<HR>
+
+<P><!-- BEGIN WEBSIDESTORY CODE v1.2 - ALTERING THIS CODE WILL CAUSE TERMINATION OF ACCOUNT --><!-- COPYRIGHT 1996-1998 WEBSIDESTORY, INC. ALL RIGHT RESERVED -->
+<SCRIPT language=javascript><!--dt=(new Date()).getHours();sv = 10;ss="na";sc="na";ln="";pl="";rf=escape(document.referrer)+"";if((rf=="undefined")||(rf=="")){rf="bookmark";};bn=navigator.appName;if(bn.substring(0,9)=="Microsoft"){bn="MSIE";};bv=Math.round(parseFloat(navigator.appVersion)*100);if((bn=="MSIE")&&(parseInt(bv)==2)){bv=301;}; ja="na";if(navigator.appName=="Netscape") { if(bv>400) ln=navigator.language;if(bv>300) for(var i=0;i<navigator.plugins.length;i++)pl +=navigator.plugins[i].name+":" };//--></SCRIPT>
+
+<SCRIPT language=javascript1.1><!--sv=11;ja=(navigator.javaEnabled()==true)?"y":"n";//--></SCRIPT>
+
+<SCRIPT language=javascript1.2><!--sv=12;ss=screen.width+"*"+screen.height;sc=(bn=="MSIE")?screen.colorDepth:screen.pixelDepth;if(sc=="undefined"){sc="na";};//--></SCRIPT>
+
+<SCRIPT language=javascript1.3><!--sv=13;//--></SCRIPT>
+
+<SCRIPT language=javascript><!--arg="&bn="+bn+"&bv="+bv+"&ss="+ss+"&sc="+sc+"&dt="+dt+"&sv="+sv;arg+="&ja="+ja+"&rf="+rf+"&ln="+ln+"&pl="+escape(pl);x1="<a href='http://www.hitbox.com'>";x2="<img src='http://w122.hitbox.com/Hitbox?hb=W28907065181";x3="&cd=1&bt=1' border='0' height='60' width='234'";x4="alt='CLICK HERE TO VISIT THE HITBOX.COM'></a>";document.write(x1+x2+arg+x3+x4);//--></SCRIPT>
+
+<SCRIPT language=javascript1.2><!--document.write("<");document.write("!--");//--></SCRIPT>
+<FONT face="Trebuchet MS">Read my standard disclaimer: <A 
+href="http://www.edv.agrar.tu-muenchen.de/StdDisclaimer.html">(really?)</A><BR>Last 
+change on 06/12/00 by <A href="mailto:syring@email.com">K. M. Syring</A> (bug 
+reports are welcome)<BR>Original location of this page: <A 
+href="http://www.weihenstephan.de/~syring/win32/UnxUtils.html">http://www.weihenstephan.de/~syring/win32/UnxUtils.html</A></FONT></P><!-- BEGIN WEBSIDESTORY CODE V5. COPYRIGHT 1998-2000 WEBSIDESTORY, INC. ALL RIGHTS RESERVED. U.S. PATENT PENDING. --><!-- webbot bot="HTMLMarkup" startspan -->
+<TABLE cellSpacing=0 cellPadding=0 width=468 border=0>
+  <TBODY>
+  <TR>
+    <TD align=middle><A target=_top href="http://ics.hitbox.com/csr?id="><IMG 
+      height=60 alt="Click Here" src="gnuwin32_files/30358_searchhbn.gif" 
+      width=468 border=0></A><!--webbot bot="HTMLMarkup" startspan --></IFRAME><!--webbot
+    bot="HTMLMarkup" endspan --></TD></TR>
+  <TR>
+    <TD>
+      <SCRIPT language=javascript> var test=0;</SCRIPT>
+
+      <SCRIPT language=javascript1.1 src="gnuwin32_files/js">
+</SCRIPT>
+
+      <SCRIPT language=javascript>
+if (test==0) { var dt=0, sv=10, ss="na",sc="na",ln="",pl="",rf="",bn="",ja="",bv=0,x1="",x2="",x3="",arg="";
+rf=escape(document.referrer)+"";if((rf=="undefined")||(rf=="")){rf="bookmark";}
+bv=Math.round(parseFloat(navigator.appVersion)*100);bn=navigator.appName;
+if(bn!="Netscape"){dt=(new Date()).getHours();};if(bn.substring(0,9)=="Microsoft"){bn="MSIE";}
+if((bn=="MSIE")&&(parseInt(bv)==2)){bv=302;};ja="na";
+x1="<a href='http://counter.hitbox.com/a/joinbar.cgi' target='_top'>";
+x2="<img src='http://hg1.hitbox.com/HG?hc=w135&cd=1&hb=WQ59083157AZ28EN5&n=MainPage";
+x3="&cd=1&bt=2' border=0 height=15 width=468></a>";arg="&bn="+bn+"&bv="+bv+"&ss="+ss+"&sc="+sc+"&dt="+dt+"&sv="+sv;
+arg+="&ja="+ja+"&rf="+rf+"&ln="+ln+"&pl="+escape(pl);document.write(x1+x2+arg+x3);}</SCRIPT>
+
+      <SCRIPT language=javascript1.2>document.write("<");document.write("!--  ");</SCRIPT>
+      <NOSCRIPT><A target=_top 
+      href="http://counter.hitbox.com/a/joinbar.cgi"><IMG height=15 
+      src="gnuwin32_files/fullsize_text.gif" width=468 border=0></A></NOSCRIPT><!--//--></TD></TR></TBODY></TABLE><!-- webbot bot="HTMLMarkup" endspan --><!-- END WEBSIDESTORY CODE  -->
+<FORM action=http://mindit.netmind.com/mindit.shtml method=post>
+<TABLE cellSpacing=0 cellPadding=5 border=0>
+  <TBODY>
+  <TR>
+    <TD align=middle colSpan=2><FONT face=arial,helvetica size=-1><B>Receive 
+      email when this page changes</B></FONT></TD></TR>
+  <TR>
+    <TD vAlign=bottom align=middle><INPUT value="Enter email address" 
+      name=EMAIL><BR><FONT face=arial,helvetica size=-2>•<B> Powered by <A 
+      href="http://www.netmind.com/">NetMind</A> </B>•</FONT> </TD>
+    <TD align=middle><INPUT type=image height=26 width=76 
+      src="gnuwin32_files/mindit.gif" border=0>&nbsp;<BR><FONT 
+      face=arial,helvetica size=-2><B>Click 
+Here</B></FONT></TD></TR></TBODY></TABLE></FORM><!-- End Mind It Box --></BODY></HTML>

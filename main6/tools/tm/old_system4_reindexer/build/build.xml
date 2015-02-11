@@ -1,0 +1,84 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                   Reindexer Build FILE                      * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Reindexer" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="reindexer_src" value=".." />
+    <property name="reindexer_bin" value="reindexer_classes" />
+    <property name="reindexer_dist" value="dist" />
+    <property name="toolsLib" value="../../../lib/common" />
+    <property name="toolsLibNt" value="../../../lib/nt" />
+    <property name="toolsBuild" value="../../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <!--
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    -->
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="oracle" value="${toolsLibNt}/O817NTclasses12.zip" />
+    <property name="cap"
+        value="${toolsBuild}/capclasses/globalsight/serverclasses" />
+
+    <!--
+    <property name="reindexer_classpath"
+        value="${regexp}:${cap}:${weblogic}:${ldap}:${oracle}" />
+    -->
+    <property name="reindexer_classpath"
+        value="${cap}:${oracle}:${weblogic}" />
+
+    <property name="batch_file"
+        value="${reindexer_src}/System4Reindexer.bat"/>
+    <property name="sh_file"
+        value="${reindexer_src}/System4Reindexer.sh"/>
+    <property name="reindexer_jar"
+        value="${reindexer_bin}/reindexer.jar"/>
+    <property name="reindexer_zip"
+        value="${reindexer_dist}/reindexer.zip"/>
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling reindexer tool..." />
+    <mkdir dir="${reindexer_bin}" />
+    <javac classpath="${reindexer_classpath}"
+	   destdir="${reindexer_bin}" >
+      <src path="${reindexer_src}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <jar jarfile="${reindexer_jar}"
+         basedir="${reindexer_bin}"
+	 includes="com/**" />
+
+    <copy file="${batch_file}" todir="${reindexer_bin}"/>
+    <copy file="${sh_file}" todir="${reindexer_bin}"/>
+    <mkdir dir="${reindexer_bin}/globalsight"/>
+    <touch file="${reindexer_bin}/globalsight/CAP.log"/>
+
+    <mkdir dir="${reindexer_dist}" />
+    <zip zipfile="${reindexer_zip}">
+        <zipfileset dir="${reindexer_bin}"
+	     includes="reindexer.jar,System4Reindexer.bat,System4Reindexer.sh,globalsight/*"
+	      prefix="system4_reindexer" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${reindexer_bin}" />
+    <delete dir="${reindexer_dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

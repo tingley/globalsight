@@ -1,0 +1,49 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                   Install Build File                        * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+
+<project name="GlobalSight" default="install" basedir=".">
+               
+  <target name="init">
+    <echo message="***** Install build file *****"/>
+    <tstamp/>
+    <property name="installdir" value="../install" />
+    <property name="compiledclasses" value="installcompiledclasses" />
+  </target>
+
+  <target name="install" depends="init">   
+    <mkdir dir="${installclasses}"/>
+    <mkdir dir="${compiledclasses}"/>
+    <mkdir dir="${compiledclasses}/data"/>
+    <javac
+			srcdir="${installdir}"
+			destdir="${compiledclasses}"
+			classpath="${classpath}"
+			includes="util/*.java" />
+    <javac
+			srcdir="${installdir}"
+			destdir="${compiledclasses}"
+			classpath="${classpath}"
+			includes="installer/*.java" />
+    <javac
+			srcdir="${installdir}"
+			destdir="${compiledclasses}"
+			classpath="${classpath}"
+			includes="*.java" />
+    <copy todir="${compiledclasses}/data">
+         <fileset dir="${installdir}/data" includes="**.properties"/>
+    </copy>
+    <jar jarfile="${installclasses}/installer.jar"
+         basedir="${compiledclasses}"
+	     includes="**.class,installer/**.class,util/**.class,data/**.properties" />
+  </target>
+
+  <target name="clean" depends="init">
+    <delete dir="${installclasses}"/>
+    <delete dir="${compiledclasses}"/>
+  </target>
+  
+</project>
+

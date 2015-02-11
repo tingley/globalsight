@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.cxe.entity.fileprofile.FileProfileExtension"
+        table="FILE_PROFILE_EXTENSION">
+        <composite-id>
+            <key-many-to-one name="fileProfile" column="FILE_PROFILE_ID"
+                class="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" />
+            <key-many-to-one name="extension" column="EXTENSION_ID"
+                class="com.globalsight.cxe.entity.fileextension.FileExtensionImpl" />
+        </composite-id>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Upload" >
+  <topic name="Add Link" url="Setup/Terminology/Add_Link.htm" />
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Create DTD" url="Data_Sources/SGML_Rules/Create_DTD.htm" />
+  <topic name="CV/Resume" url="Vendor_Management/CV_Resume.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="File Menu" url="Appendix/Alignment/File_Menu.htm" />
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="How to Save Files for Upload" url="Appendix/Working_Offline/RTF_(List_View)/How_to_Save_Files_for_Upload.htm" />
+  <topic name="Import" url="Setup/Terminology/Import.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Insert Image" url="Setup/Terminology/Insert_Image.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Select Files to Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Tips For Working With Large RTF Files" url="Appendix/Working_Offline/RTF_(List_View)/Tips_For_Working_With_Large_RTF_Files.htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="Upload" url="My_Activities/Upload.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  <topic name="Upload DTD" url="Data_Sources/SGML_Rules/Upload_DTD.htm" />
+  <topic name="Upload Error" url="My_Activities/Upload_Error.htm" />
+  <topic name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+  <topic name="Uploading Alignment Work to GlobalSight" url="Appendix/Alignment/Uploading_Alignment_Work_to_GlobalSight.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Upload Aligner Package" >
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+</key>
+<key name="Upload Comment Reference File" >
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+</key>
+<key name="Upload DTD" >
+  <topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+  <topic name="Upload DTD" url="Data_Sources/SGML_Rules/Upload_DTD.htm" />
+</key>
+<key name="Upload Error" >
+  <topic name="Upload Error" url="My_Activities/Upload_Error.htm" />
+</key>
+<key name="Upload Files" >
+  <topic name="Upload" url="My_Activities/Upload.htm" />
+</key>
+<key name="Upload including" >
+  <topic name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
+</key>
+<key name="Upload Summary" >
+  <topic name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
+</key>
+<key name="Upload Support Files" >
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+</key>
+<key name="Uploading Alignment Work" >
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  <topic name="Uploading Alignment Work to GlobalSight" url="Appendix/Alignment/Uploading_Alignment_Work_to_GlobalSight.htm" />
+</key>
+
+</indexdata>

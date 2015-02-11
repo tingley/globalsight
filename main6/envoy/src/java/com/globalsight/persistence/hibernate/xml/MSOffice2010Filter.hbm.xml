@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter"
+        table="office2010_filter">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="companyId" column="COMPANY_ID" type="long"
+            not-null="true" unique="false" />
+        <property name="filterName" length="255" column="FILTER_NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="headerTranslate" column="IS_HEADER_TRANSLATE" type="yes_no"
+            not-null="false" />
+        <property name="masterTranslate" column="IS_MASTER_TRANSLATE" type="yes_no"
+            not-null="false" />
+        <property name="fileinfoTranslate" column="IS_FILEINFO_TRANSLATE" type="yes_no"
+            not-null="false" />
+        <property name="paragraphStyles" length="4000" column="UNEXTRACTABLE_WORD_PARAGRAPH_STYLES"
+            type="string" not-null="true" unique="false" />
+        <property name="characterStyles" length="4000" column="UNEXTRACTABLE_WORD_CHARACTER_STYLES"
+            type="string" not-null="true" unique="false" />
+        <property name="xmlFilterId" column="XML_FILTER_ID"
+            type="long" not-null="false" unique="false" />
+        <property name="secondFilterId" column="SECOND_FILTER_ID"
+            type="long" not-null="false" unique="false" />
+        <property name="secondFilterTableName" length="45" column="SECOND_FILTER_TABLE_NAME" type="string"
+            not-null="false" />
+    </class>
+</hibernate-mapping>

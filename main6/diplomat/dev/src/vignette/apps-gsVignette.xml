@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<webapps>
+   
+
+   <Context path="/gsVignette" 
+            docBase="webapps/gsVignette" 
+            debug="0" 
+	    reloadable="true" > 
+              <SimpleRealm filename="conf/users/example-users.xml" />
+             
+  </Context>
+
+</webapps>

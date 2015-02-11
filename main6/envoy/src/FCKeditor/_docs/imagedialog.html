@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<HTML>
+	<HEAD>
+		<TITLE>FCKeditor - Image Dialog</TITLE>
+		<META name="GENERATOR" content="Microsoft Visual Studio 7.0">
+	</HEAD>
+	<BODY>
+<STRONG><FONT size="6">Image Dialog Options<BR></FONT></STRONG><EM>(Revised:&nbsp;04/10/2003)</EM><BR><BR>
+			The new image dialog box has been implemented. There are two new useful options 
+			that this document will discuss: image file upload and image repository 
+			browsing.<BR><BR>
+			<BR>
+			<STRONG><FONT size="5">Image File Upload</FONT></STRONG>
+			<BR><BR>
+			The editor doesn’t manage the effective file upload system. It is limited to 
+			the editing system. But it can talk to a user custom file upload system. In 
+			this way, the end user (developer) can control and decide what is the better 
+			solution for it’s needs. Someone will save it on the file system. Other in the 
+			database. And another developer need to perform some image manipulations after 
+			the upload is completed. The preferred language is another big problem. So we 
+			let you decide what is the better way to manage it.<BR>
+			<BR>
+			In any case, some sample working solutions can be found at <STRONG>/FCKeditor_dir/_filemanager/upload</STRONG>.
+			<FONT color="#ff0000">Attention: all these samples use the folder “/UserImages/” of 
+				your web site to save the uploaded files. So be sure that you have the right 
+				security rights set.<BR>
+			</FONT>
+			<BR>
+			If you want to implement your custom one pay attention to these instructions:<BR>
+			The posted file is named “<STRONG>FCKeditor_File</STRONG> ”. So use this name to 
+			process the request.<BR>
+			After you have processed the file, write in the browser something like this:<BR>
+<PRE>
+    &lt;SCRIPT language=javascript&gt;
+        <STRONG>window.opener.setImage('" + sFileURL + "') ;</STRONG>
+        window.close() ;
+    &lt;/SCRIPT&gt;
+</PRE>
+
+			This will set the new image in the image dialog box and close your custom page.<BR>
+			<BR>
+			You can set the desired upload page in the <STRONG>fck_config.js</STRONG> file. 
+			Other upload options are also set there.<BR>
+			<BR>
+			Only <STRONG>JPG</STRONG>, <STRONG>GIF</STRONG> and <STRONG>PNG</STRONG> 
+files are allowed.<BR><BR>Warning: the Image Upload feature is not working over 
+IE 5.0 (FCKeditor version 
+			0.9.4 beta).<BR><BR>
+			<BR>
+			<STRONG><FONT size="5">Image Repository Browsing</FONT></STRONG>
+			<BR><BR>
+			Like the image upload process, the editor doesn’t manage files on the server. But 
+			in the same way you can define a custom web page to do that work. You can find 
+			some samples at <STRONG>/FCKeditor_dir/_filemanager/browse</STRONG> .<BR>
+			<BR>
+			If you want to implement your custom browser pay attention to these 
+			instructions:<BR>
+			After the user selected the file, write in the browser something like this:
+<PRE>
+    &lt;SCRIPT language=javascript&gt;
+        <STRONG>window.setImage('" + sFileURL + "') ;</STRONG>
+        window.close() ;
+    &lt;/SCRIPT&gt;
+</PRE>
+			This will set the new image in the image dialog box and close your custom page.<BR>
+			<BR>
+			You can set the desired browsing page in the <STRONG>fck_config.js</STRONG> file. Other image 
+browser options are also set 
+there. 
+	</BODY>
+</HTML>

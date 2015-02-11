@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.costing.CostByWordCount"
+        table="COST_BY_WORD_COUNT">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="repetitionCost" length="126" access="field"
+            column="REPETITION_COST" type="float" not-null="true" />
+
+        <property name="contextMatchCost" length="126" access="field"
+            column="EXACT_CONTEXT_COST" type="float" not-null="true" />
+
+        <property name="defaultContextExactMatchCost" length="126" access="field"
+            column="DEFAULT_CONTEXT_EXACT_COST" type="float" not-null="true" />
+
+        <property name="inContextMatchCost" length="126" access="field"
+            column="IN_CONTEXT_COST" type="float" not-null="true" />
+
+        <property name="noUseInContextMatchCost" length="126" access="field"
+            column="NO_USE_IN_CONTEXT_COST" type="float" not-null="true" />
+
+        <property name="noUseExactMatchCost" length="126" access="field"
+            column="NO_USE_EXACT_COST" type="float" not-null="true" />
+
+        <property name="segmentTmCost" length="126" access="field"
+            column="EXACT_SEGMENT_TM_COST" type="float" not-null="true" />
+
+        <property name="lowFuzzyMatchCost" length="126" access="field"
+            column="FUZZY_LOW_COST" type="float" not-null="true" />
+
+        <property name="medFuzzyMatchCost" length="126" access="field"
+            column="FUZZY_MED_COST" type="float" not-null="true" />
+
+        <property name="medHiFuzzyMatchCost" length="126" access="field"
+            column="FUZZY_MED_HI_COST" type="float" not-null="true" />
+
+        <property name="hiFuzzyMatchCost" length="126" access="field"
+            column="FUZZY_HI_COST" type="float" not-null="true" />
+
+        <property name="noMatchCost" length="126" access="field"
+            column="NO_MATCH_COST" type="float" not-null="true" />
+
+        <many-to-one name="cost" column="COST_ID"
+            class="com.globalsight.everest.costing.Cost" not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

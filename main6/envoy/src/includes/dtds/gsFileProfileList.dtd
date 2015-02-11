@@ -1,0 +1,43 @@
+<!--
+    Copyright (c) 2002, GlobalSight Corporation. All rights reserved.
+
+    DTD for list of GlobalSight file profiles.
+
+    Typical usage:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE gsFileProfileList SYSTEM "/globalsight/includes/dtds/gsFileProfileList.dtd">
+	<gsFileProfileList>
+    	<profile>
+        	<id>1001</id>
+        	<name>fileprofile1</name>
+        	<description>HTML Files</description>
+        	<format>HTML</format>
+        	<fileExtension>.html</fileExtension>
+        	<fileExtension>.htm</fileExtension>
+    	</profile>
+    	<profile>
+        	<id>1002</id>
+        	<name>fileprofile2</name>
+        	<description>XML Files</description>
+        	<format>XML</format>
+        	<fileExtension>.xml</fileExtension>
+	        <fileExtension>.jhtml</fileExtension>
+ 	       <fileExtension>.shtml</fileExtension>
+   	 </profile>
+	</gsFileProfileList>
+-->
+ 
+  <!ELEMENT gsFileProfileList (profile)*>
+
+  <!ELEMENT profile (id, name, description, format, fileExtension+)*>
+  
+  <!ELEMENT id (#PCDATA)>
+  
+  <!ELEMENT name (#PCDATA)>
+  
+  <!ELEMENT description (#PCDATA)>
+  
+  <!ELEMENT format (#PCDATA)>
+  
+  <!ELEMENT fileExtension (#PCDATA)>

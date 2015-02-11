@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Projects" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+  <topic name="Align Menu" url="Appendix/Alignment/Align_Menu.htm" />
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Contact Information" url="Contact_Information.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+  <topic name="Field Level Access" url="Setup/Users/Field_Level_Access.htm" />
+  <topic name="File Menu" url="Appendix/Alignment/File_Menu.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Flat Surcharge" url="Glossary/Flat_Surcharge.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+  <topic name="Project" url="Glossary/Project.htm" />
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Projects" url="Setup/Users/Projects.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Starting an Alignment Project" url="Appendix/Alignment/Starting_an_Alignment_Project.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Uploading Alignment Work to GlobalSight" url="Appendix/Alignment/Uploading_Alignment_Work_to_GlobalSight.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="View Project" url="Setup/Projects/View_Project.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+</key>
+<key name="Projects Main Screen" >
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="View Project" url="Setup/Projects/View_Project.htm" />
+</key>
+<key name="Rate Vendor" >
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Rate Vendor" url="My_Jobs/Rate_Vendor.htm" />
+</key>
+<key name="Rates Main Screen" >
+  <topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+</key>
+<key name="Ready Jobs" >
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+</key>
+<key name="Rejected Activities" >
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+</key>
+<key name="Replace" >
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Preparing Documents for Import" url="Appendix/Preparing_Documents_for_Import.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+  <topic name="Replacing in Termbase" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+</key>
+<key name="Replacement Results" >
+  <topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+</key>
+<key name="Reports Admin" >
+  <topic name="Reports Admin" url="Reports/Reports_Admin.htm" />
+</key>
+<key name="Reports Composer" >
+  <topic name="Reports Composer" url="Reports/Reports_Composer.htm" />
+</key>
+<key name="Reports Main Screen" >
+  <topic name="Reports Main Screen" url="Reports/Reports_Main_Screen.htm" />
+</key>
+<key name="Requests" >
+  <topic name="Progress Bar" url="Appendix/Progress_Bar.htm" />
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+  <topic name="System Shutdown" url="Setup/System_Shutdown/System_Shutdown.htm" />
+</key>
+
+</indexdata>

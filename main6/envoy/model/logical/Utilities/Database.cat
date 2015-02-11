@@ -1,0 +1,885 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Database"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38C6E848024D"
+    documentation 	"Database access utilities."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "DbConnector"
+	    quid       	"38C6E9CE0027"
+	    documentation 	"This interface defines the methods for the client to obtain a database connection java.sql.Connection instance.  An instance of this interface can be obtained by calling one of the makeConnector() methods in an instance of the DbUtilFactory interface."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getConnection"
+		    quid       	"38C6EADE00DC"
+		    documentation 	"Get a Connection object for communicating with the database."
+		    result     	"java.sql.Connection"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "renewConnection"
+		    quid       	"38C6EB240083"
+		    documentation 	"Get a new connection next time.  This method only affect future invokation of methods that depend on the database connection.  Existing connections that other clients have obtained in previous calls to getConnection() will still exist and remain unchanged."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "closeConnection"
+		    quid       	"38C6EB4600A0"
+		    documentation 	
+|Close the specified database connection.  If the specified connection is the same as the one currently in this instance, the current connection is automatically released throught a call to renewConnection().
+|
+|Note that this method does not check whether the specified database connection is in use by another thread.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_connection"
+			    quid       	"39403DDF0381"
+			    documentation 	"The JDBC connection to close."
+			    type       	"java.sql.Connection"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DbUtilFactory"
+	    quid       	"38C6ED3701EF"
+	    documentation 	"This is a factory class that creates vendor specific database utilities such as database connector (that creates database connections)."
+	    operations 	(list Operations
+		(object Operation "getInstance"
+		    quid       	"38C6ED9B0329"
+		    documentation 	"Create an instance of a concrete sub class, given the type of the database (which is used as part of the name of the factory)."
+		    parameters 	(list Parameters
+			(object Parameter "p_dbType"
+			    quid       	"39403DDF0384"
+			    documentation 	
+|Database type (e.g. "Oracle")
+			    
+			    type       	"String"))
+		    result     	"DbUtilFactory"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInstanceForURL"
+		    quid       	"38C6EDC301BE"
+		    documentation 	"Create an instance of a concrete sub class, given the URL of the database.  The database type is automatically detected by looking at the protocol part of the URL."
+		    parameters 	(list Parameters
+			(object Parameter "p_URL"
+			    quid       	"39403DDF0386"
+			    documentation 	"Database URL"))
+		    result     	"DbUtilFactory"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "makeConnector"
+		    quid       	"38C6EDE70011"
+		    documentation 	"Create a vendor specific database connector using the specified parameters and the default JDBC driver."
+		    parameters 	(list Parameters
+			(object Parameter "p_URL"
+			    quid       	"39403DDF0388"
+			    documentation 	"URL for the database to connect to.")
+			(object Parameter "p_username"
+			    quid       	"39403DDF0389"
+			    documentation 	"User name of account to connect to.")
+			(object Parameter "p_password"
+			    quid       	"39403DDF038A"
+			    documentation 	"Password of account to connect to."))
+		    result     	"DbConnector"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "makeConnector"
+		    quid       	"38C6F79D01D9"
+		    documentation 	"Create a vendor specific database connector using the specified parameters and the default JDBC driver."
+		    parameters 	(list Parameters
+			(object Parameter "p_driver"
+			    quid       	"39403DDF038C"
+			    documentation 	"JDBC driver class name.")
+			(object Parameter "p_URL"
+			    quid       	"39403DDF038D"
+			    documentation 	"URL for the database to connect to.")
+			(object Parameter "p_username"
+			    quid       	"39403DDF038E"
+			    documentation 	"User name of account to connect to.")
+			(object Parameter "p_password"
+			    quid       	"39403DDF038F"
+			    documentation 	"Password of account to connect to."))
+		    result     	"DbConnector"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "makeSequenceGenerator"
+		    quid       	"38C6F80002E0"
+		    documentation 	"Make a new sequence generator using the provided connector."
+		    parameters 	(list Parameters
+			(object Parameter "p_connector"
+			    quid       	"39403DDF0391"
+			    documentation 	"Database connector."
+			    type       	"DbConnector"))
+		    result     	"SequenceGenerator"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    abstract   	TRUE)
+	(object Class "SequenceGenerator"
+	    quid       	"38C6F8500294"
+	    documentation 	"This interface defines a set of operation for generating sequence numbers.  The methods defined here are database independent; the classes that implement this interface may be (and usually are) database specific."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "createSequence"
+		    quid       	"38C6F8B900AB"
+		    documentation 	"The name of the new sequence."
+		    parameters 	(list Parameters
+			(object Parameter "p_sequenceName"
+			    quid       	"39403DDF0395"
+			    documentation 	"The name of the new sequence."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteSequence"
+		    quid       	"38C6F8EA01CE"
+		    documentation 	"Delete an existing sequence.  Once deleted, the sequence will not be available.  A new sequence created using the same name will start from 1 again."
+		    parameters 	(list Parameters
+			(object Parameter "p_sequenceName"
+			    quid       	"39403DDF0397"
+			    documentation 	"The name of the sequence to delete."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getNextValue"
+		    quid       	"38C6F93C003B"
+		    documentation 	"Get the next value in the specified sequence."
+		    parameters 	(list Parameters
+			(object Parameter "p_sequenceName"
+			    quid       	"39403DDF0399"
+			    documentation 	"Name of the sequence to get a value for."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DbUtilFactoryOracle"
+	    quid       	"38C6FCC801DB"
+	    documentation 	"This factory class creates Oracle RDBMS specific database utilities such as database connector (that creates database connections)."
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"38C6FEC1012D"
+		    supplier   	"Logical View::Utilities::Database::DbConnectorOracle"
+		    quidu      	"38C6FEA503E0")
+		(object Uses_Relationship
+		    quid       	"38C6FEFC006A"
+		    supplier   	"Logical View::Utilities::Database::SequenceGeneratorOracle"
+		    quidu      	"38C6FEE60090"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38C6FD270200"
+		    supplier   	"Logical View::Utilities::Database::DbUtilFactory"
+		    quidu      	"38C6ED3701EF")))
+	(object Class "ColumnData"
+	    quid       	"38C6FD7F038D"
+	    documentation 	"A database column and its data."
+	    operations 	(list Operations
+		(object Operation "name"
+		    quid       	"38C6FDBE0333"
+		    documentation 	"Get the name of the column."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "sqlString"
+		    quid       	"38C6FDDB0317"
+		    documentation 	
+|Get the string value of the data in this column, with each "'" replaced by two "'" so that it can be used in a SQL statement.
+		    
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "stringValue"
+		    quid       	"38C6FE03004E"
+		    documentation 	"Get the data for the column in the format of a String."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "toSqlSpec"
+		    quid       	"38C6FE2601AC"
+		    documentation 	
+|Format this column into a String that can be used in a SQL statement. The format of the returned String is "column_name='column_value'" where the "column_value" is the column's value converted to a text string.
+		    
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "value"
+		    quid       	"38C6FE5F0281"
+		    documentation 	"Get the data for the column in the format of an Object."
+		    result     	"Object"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DbConnectorOracle"
+	    quid       	"38C6FEA503E0"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38C6FEAC0209"
+		    supplier   	"Logical View::Utilities::Database::DbConnector"
+		    quidu      	"38C6E9CE0027")))
+	(object Class "SequenceGeneratorOracle"
+	    quid       	"38C6FEE60090"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38C6FEF20386"
+		    supplier   	"Logical View::Utilities::Database::SequenceGenerator"
+		    quidu      	"38C6F8500294")))
+	(object Class "JDBCResultSetParser"
+	    quid       	"38C6FF2901AF"
+	    documentation 	"Parses a result set for names and data for each column in the result set."
+	    operations 	(list Operations
+		(object Operation "getColumns"
+		    quid       	"38C6FF48038A"
+		    documentation 	"Get all the columns in the given ResultSet."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Association "$UNNAMED$0"
+	    quid       	"38C6F9E2038D"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"38C6F9E30208"
+		    supplier   	"Logical View::Utilities::Database::DbConnector"
+		    quidu      	"38C6E9CE0027"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"38C6F9E30212"
+		    supplier   	"Logical View::Utilities::Database::DbUtilFactory"
+		    quidu      	"38C6ED3701EF")))
+	(object Association "$UNNAMED$3"
+	    quid       	"38C6F9E50110"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"38C6F9E5037D"
+		    supplier   	"Logical View::Utilities::Database::SequenceGenerator"
+		    quidu      	"38C6F8500294"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"38C6F9E5037E"
+		    supplier   	"Logical View::Utilities::Database::DbUtilFactory"
+		    quidu      	"38C6ED3701EF"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"38C6E9950396"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Utilities::Database::DbUtilFactoryOracle" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1184, 896)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(982, 846)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	404
+			justify    	0
+			label      	"DbUtilFactoryOracle")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FCC801DB"
+		    width      	422
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::ColumnData" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(400, 1504)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(267, 1454)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	266
+			justify    	0
+			label      	"ColumnData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FD7F038D"
+		    width      	284
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::DbConnectorOracle" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(432, 896)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(240, 848)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	394
+			justify    	0
+			label      	"DbConnectorOracle")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FEA503E0"
+		    width      	412
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::SequenceGeneratorOracle" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1888, 896)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1632, 848)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	522
+			justify    	0
+			label      	"SequenceGeneratorOracle")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FEE60090"
+		    width      	540
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::JDBCResultSetParser" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1152, 1376)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(933, 1326)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	438
+			justify    	0
+			label      	"JDBCResultSetParser")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FF2901AF"
+		    width      	456
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::DbConnector" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(448, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(312, 308)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"DbConnector")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(312, 258)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	269
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6E9CE0027"
+		    width      	290
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::SequenceGenerator" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1920, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(1722, 308)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	396
+			justify    	0
+			label      	"SequenceGenerator")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@7
+			location   	(1722, 258)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	396
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6F8500294"
+		    width      	414
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::DbUtilFactory" @8
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1168, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@8
+			location   	(896, 160)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	536
+			justify    	0
+			label      	"DbUtilFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6ED3701EF"
+		    width      	554
+		    height     	386
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @9
+		    location   	(741, 336)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6F9E2038D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @10
+			    Parent_View 	@9
+			    location   	(69, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E30208"
+			    client     	@9
+			    supplier   	@6
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @11
+			    Parent_View 	@9
+			    location   	(69, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E30212"
+			    client     	@9
+			    supplier   	@8
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$3" @12
+		    location   	(1578, 336)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6F9E50110"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @13
+			    Parent_View 	@12
+			    location   	(346, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E5037D"
+			    client     	@12
+			    supplier   	@7
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @14
+			    Parent_View 	@12
+			    location   	(346, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E5037E"
+			    client     	@12
+			    supplier   	@8
+			    line_style 	0)))
+		(object RealizeView "" @15
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FD270200"
+		    client     	@1
+		    supplier   	@8
+		    line_style 	0)
+		(object RealizeView "" @16
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FEAC0209"
+		    client     	@3
+		    supplier   	@6
+		    line_style 	0)
+		(object UsesView "" @17
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FEC1012D"
+		    client     	@1
+		    supplier   	@3
+		    line_style 	0)
+		(object RealizeView "" @18
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FEF20386"
+		    client     	@4
+		    supplier   	@7
+		    line_style 	0)
+		(object UsesView "" @19
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FEFC006A"
+		    client     	@1
+		    supplier   	@4
+		    line_style 	0)))
+	(object ClassDiagram "External Interface"
+	    quid       	"38C6E99D03CA"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Utilities::Database::DbConnector" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(448, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(312, 308)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"DbConnector")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@20
+			location   	(312, 258)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	269
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6E9CE0027"
+		    width      	290
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::SequenceGenerator" @21
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1920, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(1722, 308)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	396
+			justify    	0
+			label      	"SequenceGenerator")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@21
+			location   	(1722, 258)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	396
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6F8500294"
+		    width      	414
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::DbUtilFactory" @22
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1168, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@22
+			location   	(896, 160)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	536
+			justify    	0
+			label      	"DbUtilFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6ED3701EF"
+		    width      	554
+		    height     	386
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @23
+		    location   	(741, 336)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6F9E2038D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @24
+			    Parent_View 	@23
+			    location   	(-11, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E30208"
+			    client     	@23
+			    supplier   	@20
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @25
+			    Parent_View 	@23
+			    location   	(-11, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E30212"
+			    client     	@23
+			    supplier   	@22
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$3" @26
+		    location   	(1578, 336)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6F9E50110"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @27
+			    Parent_View 	@26
+			    location   	(346, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E5037D"
+			    client     	@26
+			    supplier   	@21
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @28
+			    Parent_View 	@26
+			    location   	(346, 16)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C6F9E5037E"
+			    client     	@26
+			    supplier   	@22
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Utilities::Database::DbUtilFactoryOracle" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1184, 896)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(982, 846)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	404
+			justify    	0
+			label      	"DbUtilFactoryOracle")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FCC801DB"
+		    width      	422
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @30
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6FD270200"
+		    client     	@29
+		    supplier   	@22
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Utilities::Database::ColumnData" @31
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(400, 1504)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(267, 1454)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	266
+			justify    	0
+			label      	"ColumnData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FD7F038D"
+		    width      	284
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::JDBCResultSetParser" @32
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1152, 1376)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@32
+			location   	(933, 1326)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	438
+			justify    	0
+			label      	"JDBCResultSetParser")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6FF2901AF"
+		    width      	456
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)))))

@@ -1,0 +1,220 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>GS Tag Syntax</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=content-type content="text/html; charset=windows-1252">
+<meta name=date content="07 9, 2002 10:56:12 AM">
+<meta name="build tags" content="Configuration">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=856>
+<meta name=layout-width content=729>
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+p.whs1 {font-weight: bold;}
+ul.whs2 {list-style: disc;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nLocale Content Management\nGS Tag Syntax");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>GS Tag Syntax</h1>
+
+<p>GS tags are specified in XML syntax. Accordingly, all attributes have 
+ values, and all values are quoted. However, the HTML extractor will accept 
+ a simplified HTML-like syntax and internally normalize it to XML syntax. 
+ The simplified syntax does not require attribute values to be quoted and 
+ is otherwise explained below. Locale values have the form “en_US”. &nbsp;Names 
+ will be uppercased within GlobalSight so they should be specified as uppercase 
+ and referred to as such. &nbsp;Names 
+ also have the limitation of being 40-characters long, if a longer name 
+ is specified it will be truncated when added to GlobalSight.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS ADD=&quot;name&quot; /&gt;</p>
+
+<p>A position where a snippet can be inserted.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;yes&quot;&gt; … &lt;/GS&gt;</p>
+
+<p>A region of deletable content.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;anything&quot;&gt; … 
+ &lt;/GS&gt;</p>
+
+<p>Simplified syntax; any value of DELETE gets normalized to “yes” even 
+ if it is “no”.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE&gt; … &lt;/GS&gt;</p>
+
+<p>Simplified syntax; the value of DELETE will be set to “yes”.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;yes&quot; DELETED=&quot;locale, 
+ locale, …&quot;&gt; … &lt;/GS&gt;</p>
+
+<p>A region of deletable content that has been deleted in certain locales. 
+ If the value of DELETED is empty, the region will be included in all locales.</p>
+
+<p>&nbsp;</p>
+
+<p>The following tags should never be written in the page manually since 
+ they depend on the System 4 database and existence of (specific) snippets. 
+ Instead, use the Snippet Editor UI accessible from the Main Editor to 
+ insert snippets or delete content.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS NAME=&quot;name&quot; ADDED=&quot;locale&quot; 
+ /&gt;</p>
+
+<p>Insertion of a generic snippet.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS NAME=&quot;name&quot; ADDED=&quot;locale&quot; 
+ ID=&quot;num&quot; /&gt;</p>
+
+<p>If ID &gt; 0, insertion of a specific snippet. If ID = 0, the generic 
+ snippet is inserted.</p>
+
+<p>&nbsp;</p>
+
+<p>To load snippets into the Snippet Library, a Snippet Import File must 
+ be created with snippets surrounded by the following tags.</p>
+
+<p class="whs1">&lt;GS EXTRACT=&quot;name&quot; [DESC=&quot;description&quot;]&gt; 
+ … &lt;/GS&gt;</p>
+
+<p>An extractable generic snippet.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS EXTRACT=&quot;name&quot; locale=&quot;xx_XX&quot; 
+ [DESC=&quot;description&quot;]&gt; … &lt;/GS&gt;</p>
+
+<p>An extractable specific snippet.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">Nesting of GS Tags</p>
+
+<p>GS Tags can be nested.</p>
+
+<ul type="disc" class="whs2">
+	
+	<li class=kadov-p><p>Snippets that are included by a GS ADDED Tag can 
+ themselves contain insert positions and deletable regions.</p></li>
+	
+	<li class=kadov-p><p>Deletable Regions can contain insert positions 
+ and deletable regions. If an outer region is deleted, embedded GS tags 
+ are ignored.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+<p>It is the responsibility of the source page and snippet author to ensure 
+ that positions refer to existing snippet names, that snippets and HTML 
+ content fragments consist of HTML block elements, and that insertion of 
+ snippets or deletion of regions produces valid HTML.</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

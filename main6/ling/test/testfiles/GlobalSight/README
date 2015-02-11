@@ -1,0 +1,14 @@
+Readme for publishing gs.terret.com to www.globalsight.com
+
+Save the files group & user from the www.globalsight.com area as they will be overwritten otherwise.
+
+Update the file cgi-bin/inquiry.cgi to reflect the proper email address to send to, appropriate BASE tag, and absolute FILE reference.
+
+Update the absolute reference to the FORM ACTION reference in inquiry.html
+
+Don't forget to test the sites www.global-sight.com and global-sight.com as well as www.globalsight.com.  No need to test the site globalsight.com.
+
+3/31/99
+
+update the BASE HREF in inquery.html
+

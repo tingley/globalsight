@@ -1,0 +1,20 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.everest.tuv.LeverageGroupImpl" table="LEVERAGE_GROUP" lazy="false">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<bag name="tusSet" inverse="true" cascade="save-update" lazy="false">
+			<key column="LEVERAGE_GROUP_ID"/>
+			<one-to-many class="com.globalsight.everest.tuv.TuImpl"/>
+		</bag>
+		<bag name="sourcePageSet" cascade="save-update"
+                table="SOURCE_PAGE_LEVERAGE_GROUP" lazy="false">
+                <key column="LG_ID" />
+                <many-to-many
+                    class="com.globalsight.everest.page.SourcePage"
+                    column="SP_ID" />
+        </bag>
+	</class>	
+</hibernate-mapping>

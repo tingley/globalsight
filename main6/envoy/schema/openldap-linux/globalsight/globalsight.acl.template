@@ -1,0 +1,9 @@
+access to *
+         by dn="uid=%%ldap_username%%, ou=People, o=%%ldap_base%%" write
+         by self write
+         by * read
+
+access to attrs=userPassword
+         by self write
+         by anonymous auth
+         by * none

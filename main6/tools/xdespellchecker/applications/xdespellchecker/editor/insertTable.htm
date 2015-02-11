@@ -1,0 +1,162 @@
+<html>
+<head>
+<title>Table Insert</title>
+<!--
+Copyright 2003 XDE
+-------------------------------------------------------------
+$Id: insertTable.htm,v 1.1 2009/04/14 15:42:52 yorkjin Exp $
+-------------------------------------------------------------
+$RCSfile: insertTable.htm,v $
+$Author: yorkjin $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:52 $
+$Locker:  $
+$Name:  $
+------------------------------------------------------------
+-->
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="xdeStyleSheet.css" type="text/css">
+</head>
+
+<body class="xdePopUpStyle">
+<center>
+<table width="95%" class="xdeCaptionStyle">
+  <tr> 
+    <td nowrap> 
+      <div align="right">Rows:</div>
+
+    </td>
+    <td nowrap> 
+      <input type="text" id="rows" size="4" maxlength="3" value="1">
+    </td>
+    <td nowrap align="right">Cell Padding:</td>
+    <td nowrap> 
+      <input type="text" id="cellPadding" size="3" maxlength="3" value="2">
+    </td>
+  </tr>
+
+  <tr> 
+    <td nowrap> 
+      <div align="right">Columns:</div>
+    </td>
+    <td nowrap> 
+      <input type="text" id="columns" size="4" maxlength="3" value="2">
+    </td>
+    <td nowrap align="right">Cell Spacing:</td>
+    <td nowrap> 
+      <input type="text" id="cellSpacing" size="3" maxlength="3" value="0">
+
+    </td>
+  </tr>
+  <tr> 
+    <td nowrap> 
+      <div align="right">Width:</div>
+    </td>
+    <td nowrap> 
+      <input type="text" id="width" size="5" maxlength="5" value="100">
+      <select id="WidthType">
+        <option value="%" selected>%</option>
+
+        <option value="">px</option>
+      </select>
+    </td>
+    <td nowrap align="right">Border:</td>
+    <td nowrap><input type="text" id="border" size="3" maxlength="3" value="1"></td>
+  </tr>
+  <tr><td colspan=4 nowrap align="right">
+	Border Color:&nbsp; 
+	<select id="BorderColor">
+
+	<option value="" selected>[Default]</option>
+	<option value="Black">Black</option>
+	<option value="blue">Blue</option>
+	<option value="brown">Brown</option>
+	<option value="cyan">Cyan</option>
+	<option value="darkblue">Dark Blue</option>
+
+	<option value="darkcyan">Dark Cyan</option>
+	<option value="darkgreen">Dark Green</option>
+	<option value="darkmagenta">Dark Magenta</option>
+	<option value="darkred">Dark Red</option>
+	<option value="gray">Gray</option>
+	<option value="green">Green</option>
+
+	<option value="lightgrey">Light Grey</option>
+	<option value="magenta">Magenta</option>
+	<option value="red">Red</option>
+	<option value="yellow">Yellow</option>
+	</select>
+  </td></tr>
+</table>
+
+</center>
+<div align="right"><font size=1><br>
+	<input type="button" name="tableInsert" value="Insert Table" onClick="generateTableCode();">&nbsp;&nbsp;
+</font></div>
+
+<script LANGUAGE="JavaScript">
+function getQueryParm(pURL, ParmtoGet) {
+	var StartPos = pURL.indexOf(ParmtoGet);
+	var ParmValue = '';
+	if (StartPos > -1) {
+		var lookfor = '&';
+		var NextPos = pURL.indexOf(lookfor, StartPos);
+		if (NextPos == -1) NextPos = pURL.length;
+		ParmValue = pURL.substring(StartPos + ParmtoGet.length + 1, NextPos);
+	}
+	return ParmValue;
+}
+
+var iFrameName = getQueryParm(parent.document.location.toString(), "iFrameName");
+
+function generateTableCode() {
+	var tmp, intWidth, tmpWidthType, intBorder, intCellPadding, intCellSpacing;
+	var intRows, intColumns, tmpBorderColor, cRow, cCol;
+	
+	intWidth = parseInt(document.getElementById('width').value, 10);
+	if (isNaN(intWidth)) intWidth = 100;
+	tmpWidthType = document.getElementById('WidthType').value;
+	intBorder = parseInt(document.getElementById('border').value, 10);
+	if (isNaN(intBorder)) intBorder = 1;
+	tmpBorderColor = document.getElementById('BorderColor').value;
+	if (intBorder == 0) {
+		tmp = '<table class="xdeInvisibleTable" ';
+	} else {
+		if (tmpBorderColor == '') tmp = '<table border="' + intBorder + '" ';
+		else tmp = '<table border="' + intBorder + '" bordercolor="' + tmpBorderColor + '" style="border-collapse: collapse"';
+	}
+	intCellPadding = parseInt(document.getElementById('cellPadding').value, 10);
+	if (isNaN(intCellPadding)) intCellPadding = 0;
+	intCellSpacing = parseInt(document.getElementById('cellSpacing').value, 10);
+	if (isNaN(intCellSpacing)) intCellSpacing = 0;
+	intRows = parseInt(document.getElementById('rows').value, 10);
+	if (isNaN(intRows)) intRows = 1;
+	intColumns = parseInt(document.getElementById('columns').value, 10);
+	if (isNaN(intColumns)) intColumns = 1;
+	
+	if (intWidth != '') {
+		tmp += ' width="' + intWidth;
+		if (tmpWidthType != '') tmp += tmpWidthType;
+		tmp += '"';
+	}
+	if (intCellPadding != '') tmp += ' cellpadding="' + intCellPadding + '"';
+	if (intCellSpacing != '') tmp += ' cellspacing="' + intCellSpacing + '"';
+	tmp += '>';
+	for (cRow = 0; cRow < intRows; cRow++) {
+		tmp += '<tr>';
+		for (cCol = 0; cCol < intColumns; cCol++) {
+			tmp += '<td></td>';
+		}
+		tmp += '</tr>';
+	}
+	tmp += '</table>';
+	window.parent.opener.insertHTML(iFrameName, tmp);
+	window.close();
+}
+</script>
+</body>
+</html>
+
+
+

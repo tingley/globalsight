@@ -1,0 +1,4210 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "L10nDataServer"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38C6A9BF035C"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "PageDataServer"
+	    quid       	"38ADD0A30270"
+	    documentation 	"This interface is used by the clients (the Linguistics components) to access data that are related to a page."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getSkeleton"
+		    quid       	"38ADD1BB004C"
+		    documentation 	"Get the skeleton of the specified page."
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"3949074403AC"
+			    documentation 	"Identifies the page to get skeleton for."
+			    type       	"PageIdentifier")
+			(object Parameter "locale"
+			    quid       	"3949074403AD"
+			    documentation 	"Locale of the skeleton to get."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addSkeleton"
+		    quid       	"38C6D3CD0258"
+		    documentation 	"Add a skeleton for the specified page and locale."
+		    parameters 	(list Parameters
+			(object Parameter "skeleton"
+			    quid       	"3949074403AF"
+			    documentation 	"The skeleton to add."
+			    type       	"String")
+			(object Parameter "projectID"
+			    quid       	"3949074403B0"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403B1"
+			    documentation 	"ID of the page to add a skeleton for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403B2"
+			    documentation 	"Locale of the skeleton to be added."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteSkeleton"
+		    quid       	"38C6D3D500D3"
+		    parameters 	(list Parameters
+			(object Parameter "projectID"
+			    quid       	"3949074403B4"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403B5"
+			    documentation 	"ID of the page to delete a skeleton for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403B6"
+			    documentation 	"Locale of the skeleton to be deleted."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateSkeleton"
+		    quid       	"38C6D3DC020A"
+		    documentation 	"Update the skeleton of the specified page and locale using the provided skeleton."
+		    parameters 	(list Parameters
+			(object Parameter "skeleton"
+			    quid       	"3949074403B8"
+			    documentation 	"The new skeleton for the specified page and locale."
+			    type       	"String")
+			(object Parameter "projectID"
+			    quid       	"3949074403B9"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403BA"
+			    documentation 	"ID of the page to set a new skeleton for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403BB"
+			    documentation 	"Locale of the new skeleton."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addAssetInfo"
+		    quid       	"38C6D3E90277"
+		    documentation 	"Add asset information to the specified page and locale."
+		    parameters 	(list Parameters
+			(object Parameter "assets"
+			    quid       	"3949074403BD"
+			    documentation 	"Assets to be added."
+			    type       	"Assets")
+			(object Parameter "projectID"
+			    quid       	"3949074403BE"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403BF"
+			    documentation 	"ID of the page to add asset information for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403C0"
+			    documentation 	"Locale of the asset information to be added."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteAssetInfo"
+		    quid       	"38C6D3EF0239"
+		    documentation 	"Delete the asset information for the specified page and lcale."
+		    parameters 	(list Parameters
+			(object Parameter "projectID"
+			    quid       	"3949074403C2"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403C3"
+			    documentation 	"ID of the page to delete asset information for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403C4"
+			    documentation 	"Locale of the asset information to be delete."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateAssetInfo"
+		    quid       	"38C6D3F90157"
+		    documentation 	"Update the asset information of the specified page and locale using the provided asset information."
+		    parameters 	(list Parameters
+			(object Parameter "assets"
+			    quid       	"3949074403C6"
+			    documentation 	"New asset information."
+			    type       	"Assets")
+			(object Parameter "projectID"
+			    quid       	"3949074403C7"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "PageID"
+			    quid       	"3949074403C8"
+			    documentation 	"ID of the page to update asset information for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403C9"
+			    documentation 	"Locale of the new asset information."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAssetInfo"
+		    quid       	"38CCB3A301B0"
+		    documentation 	"Get asset information of the specified page and locale."
+		    parameters 	(list Parameters
+			(object Parameter "projectID"
+			    quid       	"3949074403CB"
+			    documentation 	"ID of the project that the specified page is in."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"3949074403CC"
+			    documentation 	"ID of the page to get asset information for."
+			    type       	"Integer")
+			(object Parameter "locale"
+			    quid       	"3949074403CD"
+			    documentation 	"Locale of the asset information to get."))
+		    result     	"Assets"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "TMServer"
+	    quid       	"38C6B072025E"
+	    documentation 	"This interface is used by the clients (the Linguistics components) to access localization memory (TM) data."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "searchTmExact"
+		    quid       	"38C6BA620338"
+		    documentation 	"Search TM for exact match."
+		    parameters 	(list Parameters
+			(object Parameter "segment"
+			    quid       	"3949074403D1"
+			    documentation 	"Segment to search for."
+			    type       	"String")
+			(object Parameter "searchParams"
+			    quid       	"3949074403D2"
+			    documentation 	"Search parameters including TM to search, search constraints, etc."
+			    type       	"SearchParameters"))
+		    result     	"SearchResults"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchTmFuzzy"
+		    quid       	"38C6BA6F02DD"
+		    documentation 	"Search TM for fuzzy match."
+		    parameters 	(list Parameters
+			(object Parameter "segment"
+			    quid       	"3949074403D4"
+			    documentation 	"Segment to search for."
+			    type       	"String")
+			(object Parameter "searchParams"
+			    quid       	"3949074403D5"
+			    documentation 	"Search parameters including TM to search, search constraints, etc."
+			    type       	"SearchParameters"))
+		    result     	"SearchResults"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchConcordance"
+		    quid       	"38C6BA790100"
+		    parameters 	(list Parameters
+			(object Parameter "segment"
+			    quid       	"3949074403D7"
+			    documentation 	"Segment to search for."
+			    type       	"String")
+			(object Parameter "searchParams"
+			    quid       	"3949074403D8"
+			    documentation 	"Search parameters including TM to search, search constraints, etc."
+			    type       	"SearchParameters"))
+		    result     	"SearchResults"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTuvs"
+		    quid       	"38C6BA800179"
+		    parameters 	(list Parameters
+			(object Parameter "tuvID"
+			    quid       	"3949074403DA"
+			    type       	"Vector")
+			(object Parameter "locales"
+			    quid       	"3949074403DB"
+			    type       	"Vector"))
+		    result     	"SearchResults"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createTM"
+		    quid       	"38C6BA88009E"
+		    parameters 	(list Parameters
+			(object Parameter "params"
+			    quid       	"3949074403DD"
+			    type       	"TmParameters"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createTU"
+		    quid       	"38C6BA8F0293"
+		    parameters 	(list Parameters
+			(object Parameter "params"
+			    quid       	"3949074403DF"
+			    type       	"TuParameters")
+			(object Parameter "tmID"
+			    quid       	"3949074403E0"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addTUV"
+		    quid       	"38C6BA970081"
+		    parameters 	(list Parameters
+			(object Parameter "tuv"
+			    quid       	"3949074403E2"
+			    type       	"String")
+			(object Parameter "params"
+			    quid       	"3949074403E3"
+			    type       	"TuvParameters")
+			(object Parameter "exactMatchKey"
+			    quid       	"3949074403E4"
+			    type       	"Integer")
+			(object Parameter "signature"
+			    quid       	"3949074403E5"
+			    type       	"Vector")
+			(object Parameter "tuID"
+			    quid       	"3949074403E6"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addNote"
+		    quid       	"38C6BA9D022F"
+		    parameters 	(list Parameters
+			(object Parameter "note"
+			    quid       	"3949074403E8"
+			    type       	"String")
+			(object Parameter "destinationType"
+			    quid       	"3949074403E9"
+			    type       	"Integer")
+			(object Parameter "ID"
+			    quid       	"3949074403EA"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteTM"
+		    quid       	"38C6BAA401DF"
+		    parameters 	(list Parameters
+			(object Parameter "tmID"
+			    quid       	"3949074403EC"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteTU"
+		    quid       	"38C6BAAB0207"
+		    parameters 	(list Parameters
+			(object Parameter "tuID"
+			    quid       	"3949074403EE"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteTUV"
+		    quid       	"38C6BAB101B5"
+		    parameters 	(list Parameters
+			(object Parameter "tuvID"
+			    quid       	"3949074403F0"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateTM"
+		    quid       	"38C6BAB70150"
+		    parameters 	(list Parameters
+			(object Parameter "params"
+			    quid       	"3949074403F2"
+			    type       	"TmParameters")
+			(object Parameter "tmID"
+			    quid       	"3949074403F3"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateTU"
+		    quid       	"38C6BAC20160"
+		    parameters 	(list Parameters
+			(object Parameter "param"
+			    quid       	"3949074403F5"
+			    type       	"TuParameters")
+			(object Parameter "tuID"
+			    quid       	"3949074403F6"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateTUV"
+		    quid       	"38C6BACA0143"
+		    parameters 	(list Parameters
+			(object Parameter "newTUV"
+			    quid       	"3949074403F8"
+			    type       	"String")
+			(object Parameter "newParams"
+			    quid       	"3949074403F9"
+			    type       	"TuvParameters")
+			(object Parameter "newExactMatchKey"
+			    quid       	"3949074403FA"
+			    type       	"Integer")
+			(object Parameter "newSignature"
+			    quid       	"3949074403FB"
+			    type       	"Vector")
+			(object Parameter "tuvID"
+			    quid       	"3949074403FC"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createTMX"
+		    quid       	"38C6BAD20389"
+		    parameters 	(list Parameters
+			(object Parameter "data"
+			    quid       	"3949074403FE"
+			    type       	"TmxData"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTmx"
+		    quid       	"38C6BADC006D"
+		    parameters 	(list Parameters
+			(object Parameter "tmID"
+			    quid       	"394907440400"
+			    type       	"Integer"))
+		    result     	"TmxData"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTMLabel"
+		    quid       	"38C6BAE2022E"
+		    parameters 	(list Parameters
+			(object Parameter "label"
+			    quid       	"394907440402"
+			    type       	"String")
+			(object Parameter "tmID"
+			    quid       	"394907440403"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "L10nDataServer"
+	    quid       	"38C6D5BB014A"
+	    documentation 	"This class implements various data access interfaces: PageDataServer,TMServer and LinkManager.  It provides an API layer that maps JDBC calls (basically SQL statements) to object interfaces.  It uses DbUtilFactory to create JDBC connections and access RDBMS dependent sequence number generators (to create keys, for example), all in ways that are RDBMS independent."
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38C6D5E403DE"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServer"
+		    quidu      	"38C6B072025E")
+		(object Realize_Relationship
+		    quid       	"38C6E57100D5"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManager"
+		    quidu      	"38C6E49F015F")
+		(object Realize_Relationship
+		    quid       	"38C6D5E20088"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServer"
+		    quidu      	"38ADD0A30270")))
+	(object Class "LinkManager"
+	    quid       	"38C6E49F015F"
+	    documentation 	"Manage links between pages in a project."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "addLink"
+		    quid       	"38C6E4D20159"
+		    documentation 	"add link between two TUs"
+		    parameters 	(list Parameters
+			(object Parameter "tuID1"
+			    quid       	"39490744040E"
+			    type       	"Integer")
+			(object Parameter "tuID2"
+			    quid       	"39490744040F"
+			    type       	"Integer")
+			(object Parameter "linkID"
+			    quid       	"394907440410"
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"394907440411"
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"394907440412"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "breakLink"
+		    quid       	"38C6E4E60220"
+		    documentation 	"break link between two TUs"
+		    parameters 	(list Parameters
+			(object Parameter "tuID1"
+			    quid       	"394907440414"
+			    type       	"Integer")
+			(object Parameter "tuID2"
+			    quid       	"394907440415"
+			    type       	"Integer")
+			(object Parameter "linkID"
+			    quid       	"394907440416"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "clearAllProjectLinks"
+		    quid       	"38C6E4EF01F1"
+		    documentation 	"Clear out all links for a project."
+		    parameters 	(list Parameters
+			(object Parameter "projectID"
+			    quid       	"394907440418"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExternalLinks"
+		    quid       	"38C6E4FB036A"
+		    documentation 	"return links across a project."
+		    parameters 	(list Parameters
+			(object Parameter "tuID"
+			    quid       	"39490744041A"
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39490744041B"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInternalLinks"
+		    quid       	"38C6E5040309"
+		    documentation 	"return links internal to a page."
+		    parameters 	(list Parameters
+			(object Parameter "tuID"
+			    quid       	"39490744041D"
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39490744041E"
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"39490744041F"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "SearchParameters"
+	    quid       	"38CCAD55024F"
+	    documentation 	"TM's to search, search constraints, fuzzy threshold, max matches, etc.")
+	(object Class "SearchResults"
+	    quid       	"38CCAD8A031E"
+	    documentation 	"Each optional: Signatures, TU ids, search segments (for second pass match), target segments, etc.")
+	(object Class "TmParameters"
+	    quid       	"38CCADEC01F2"
+	    documentation 	"Meta-data at TM level. (TM = header in TMX nomenclature)")
+	(object Class "TuParameters"
+	    quid       	"38CCAE160351"
+	    documentation 	"Meata-data at TU level.")
+	(object Class "TuvParameters"
+	    quid       	"38CCAE2B0149"
+	    documentation 	"Meta-data at TUV level and segments.")
+	(object Class "TmxData"
+	    quid       	"38CCAE460350"
+	    documentation 	"All data needed to import TMX data and produce TMX output.")
+	(object Class "Assets"
+	    quid       	"38CCAE650124"
+	    documentation 	"Container for asset information.")
+	(object Class "PageDataServerWLRemote"
+	    quid       	"38CCFC000012"
+	    documentation 	"This interface extends PageDataServer to be a remote interface for WebLogic remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CCFC9C0084"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServer"
+		    quidu      	"38ADD0A30270")
+		(object Inheritance_Relationship
+		    quid       	"38CCFC9F0074"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")))
+	(object Class "PageDataServerWLRMI"
+	    quid       	"38CCFC760166"
+	    documentation 	"This is an implementation of the PageDataServerWLRemote interface using WebLogic's RMI. It handles remote client request by delegating the requests to the instance of a class that implements PageDataServer."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DE3C01CF"
+		    supplier   	"Logical View::weblogic.rmi.UnicastRemoteObject"
+		    quidu      	"38D6DE1203BA"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CCFCA2012D"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServerWLRemote"
+		    quidu      	"38CCFC000012")
+		(object Realize_Relationship
+		    quid       	"38D6DD2D0053"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD444E03DA"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440435"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "PageDataServerJDKRemote"
+	    quid       	"38CCFCCA0116"
+	    documentation 	"This interface extends PageDataServer to be a remote interface for JDK remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CCFCE202D3"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServer"
+		    quidu      	"38ADD0A30270")
+		(object Inheritance_Relationship
+		    quid       	"38CCFCE5016F"
+		    supplier   	"Logical View::java.rmi.Remote"
+		    quidu      	"38CC8FC9005E")))
+	(object Class "PageDataServerJDKRMI"
+	    quid       	"38CCFCEA0144"
+	    documentation 	"This is an implementation of the PageDataServerJDKRemote interface using JDK's RMI. It handles remote client request by delegating the requests to the instance of a class that implements PageDataServer."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DD8F01C6"
+		    supplier   	"Logical View::java.rmi.UnicastRemoteObject"
+		    quidu      	"38D6BCE9002C"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CCFCFC0321"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServerJDKRemote"
+		    quidu      	"38CCFCCA0116")
+		(object Realize_Relationship
+		    quid       	"38D6DD0A0161"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD44CE00C7"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440444"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "TMServerJDKRemote"
+	    quid       	"38CD02000273"
+	    documentation 	"This interface extends TMServer to be a remote interface for JDK remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CD02120175"
+		    supplier   	"Logical View::java.rmi.Remote"
+		    quidu      	"38CC8FC9005E")
+		(object Inheritance_Relationship
+		    quid       	"38CD02140358"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServer"
+		    quidu      	"38C6B072025E")))
+	(object Class "TMServerWLRemote"
+	    quid       	"38CD021C02C3"
+	    documentation 	"This interface extends TMServer to be a remote interface for WebLogic remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CD024E02C5"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServer"
+		    quidu      	"38C6B072025E")
+		(object Inheritance_Relationship
+		    quid       	"38CD0251023D"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")))
+	(object Class "TMServerJDKRMI"
+	    quid       	"38CD025D03A3"
+	    documentation 	"This is an implementation of the TMServerJDKRemote interface using JDK's RMI. It handles remote client request by delegating the requests to the instance of a class that implements TMServer."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DEC90023"
+		    supplier   	"Logical View::java.rmi.UnicastRemoteObject"
+		    quidu      	"38D6BCE9002C"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CD02C00139"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServerJDKRemote"
+		    quidu      	"38CD02000273")
+		(object Realize_Relationship
+		    quid       	"38D6DEB00104"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD44E4019B"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440459"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "TMServerWLRMI"
+	    quid       	"38CD02DB026E"
+	    documentation 	"This is an implementation of the TMServerWLRemote interface using WebLogic's RMI. It handles remote client request by delegating the requests to the instance of a class that implements TMServer."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DED10314"
+		    supplier   	"Logical View::weblogic.rmi.UnicastRemoteObject"
+		    quidu      	"38D6DE1203BA"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CD02E9012E"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServerWLRemote"
+		    quidu      	"38CD021C02C3")
+		(object Realize_Relationship
+		    quid       	"38D6DEB303A7"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD44DA0395"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440462"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "LinkManagerJDKRemote"
+	    quid       	"38CD2AC902F0"
+	    documentation 	"This interface extends LinkManager to be a remote interface for JDK remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CD2AF40035"
+		    supplier   	"Logical View::java.rmi.Remote"
+		    quidu      	"38CC8FC9005E")
+		(object Inheritance_Relationship
+		    quid       	"38CD2AF60182"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManager"
+		    quidu      	"38C6E49F015F")))
+	(object Class "LinkManagerWLRemote"
+	    quid       	"38CD2AD9020D"
+	    documentation 	"This interface extends LinkManager to be a remote interface for WebLogic remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CD2AF90371"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManager"
+		    quidu      	"38C6E49F015F")
+		(object Inheritance_Relationship
+		    quid       	"38CD2AFC02DF"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")))
+	(object Class "LinkManagerJDKRMI"
+	    quid       	"38CD2B060239"
+	    documentation 	"This is an implementation of the LinkManagerJDKRemote interface using JDK's RMI. It handles remote client request by delegating the requests to the instance of a class that implements LinkManager."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DF130138"
+		    supplier   	"Logical View::java.rmi.UnicastRemoteObject"
+		    quidu      	"38D6BCE9002C"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CD2B190196"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManagerJDKRemote"
+		    quidu      	"38CD2AC902F0")
+		(object Realize_Relationship
+		    quid       	"38D6DF060162"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD44EB0322"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440477"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "LinkManagerWLRMI"
+	    quid       	"38CD2B230096"
+	    documentation 	"This is an implementation of the LinkManagerrWLRemote interface using WebLogic's RMI. It handles remote client request by delegating the requests to the instance of a class that implements LinkManager."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6DF1B0342"
+		    supplier   	"Logical View::weblogic.rmi.UnicastRemoteObject"
+		    quidu      	"38D6DE1203BA"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CD2B2D01DB"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManagerWLRemote"
+		    quidu      	"38CD2AD9020D")
+		(object Realize_Relationship
+		    quid       	"38D6DF0803BD"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CD44F40090"
+		    documentation 	"Constructor.  Save reference to local L10nDataServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"394907440480"
+			    type       	"L10nDataServer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Association "$UNNAMED$0"
+	    quid       	"38CCA7F801C9"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"38CCA7F8034F"
+		    supplier   	"Logical View::Utilities::Database::DbUtilFactory"
+		    quidu      	"38C6ED3701EF"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"38CCA7F80382"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A")))
+	(object Association "$UNNAMED$3"
+	    quid       	"38CCFCA403E3"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"38CCFCA50308"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"38CCFCA50312"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServerWLRMI"
+		    quidu      	"38CCFC760166")))
+	(object Association "$UNNAMED$6"
+	    quid       	"38CCFD000092"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"38CCFD000363"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"38CCFD000377"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::PageDataServerJDKRMI"
+		    quidu      	"38CCFCEA0144")))
+	(object Association "$UNNAMED$9"
+	    quid       	"38CD02C60173"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"38CD02C603CC"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"38CD02C603D6"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServerJDKRMI"
+		    quidu      	"38CD025D03A3")))
+	(object Association "$UNNAMED$12"
+	    quid       	"38CD02F301C8"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"38CD02F40147"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"38CD02F4015B"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::TMServerWLRMI"
+		    quidu      	"38CD02DB026E")))
+	(object Association "$UNNAMED$15"
+	    quid       	"38CD2B1E02CA"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"38CD2B1F0195"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"38CD2B1F019F"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManagerJDKRMI"
+		    quidu      	"38CD2B060239")))
+	(object Association "$UNNAMED$18"
+	    quid       	"38CD2B3A03C5"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"38CD2B3B0376"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"38CD2B3B038A"
+		    supplier   	"Logical View::Linguistics::L10nDataServer::LinkManagerWLRMI"
+		    quidu      	"38CD2B230096")))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "main"
+		    quid       	"38CD41A9021E"
+		    documentation 	"Main method that runs when the componet is started."
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD424B0113"
+			    supplier   	"$UNNAMED$21"
+			    quidu      	"38CD423D023F"
+			    messages   	(list Messages
+				(object Message "create"
+				    quid       	"38CD424B0114"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0)))
+			(object Link
+			    quid       	"38CD434E0147"
+			    supplier   	"$UNNAMED$22"
+			    quidu      	"38CD434002F6"
+			    messages   	(list Messages
+				(object Message "set L10nDataServer as local server"
+				    quid       	"38CD434E0148"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	9)))
+			(object Link
+			    quid       	"38CD43FB03B3"
+			    supplier   	"$UNNAMED$23"
+			    quidu      	"38CD43A501BA"
+			    messages   	(list Messages
+				(object Message "create( )"
+				    quid       	"38CD43FB03B4"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"38CD444E03DA")))
+			(object Link
+			    quid       	"38CD472201F1"
+			    supplier   	"$UNNAMED$24"
+			    quidu      	"38CD46F003CF"
+			    messages   	(list Messages
+				(object Message "set L10nDataServer as local server"
+				    quid       	"38CD472201F2"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	3)))
+			(object Link
+			    quid       	"38CD474E026C"
+			    supplier   	"$UNNAMED$25"
+			    quidu      	"38CD43BA005C"
+			    messages   	(list Messages
+				(object Message "create( )"
+				    quid       	"38CD474E026D"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	4
+				    quidu      	"38CD44DA0395")))
+			(object Link
+			    quid       	"38CD47990378"
+			    supplier   	"$UNNAMED$26"
+			    quidu      	"38CD476C0323"
+			    messages   	(list Messages
+				(object Message "set L10nDataServer as local server"
+				    quid       	"38CD47990379"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	6)))
+			(object Link
+			    quid       	"38CD47B402D7"
+			    supplier   	"$UNNAMED$27"
+			    quidu      	"38CD43BE0239"
+			    messages   	(list Messages
+				(object Message "create( )"
+				    quid       	"38CD47B402D8"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	7
+				    quidu      	"38CD44F40090"))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$21"
+		    quid       	"38CD423D023F"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD426D019E"
+			    supplier   	"$UNNAMED$21"
+			    quidu      	"38CD423D023F"))
+		    class      	"Logical View::Linguistics::L10nDataServer::L10nDataServer"
+		    quidu      	"38C6D5BB014A"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$22"
+		    quid       	"38CD434002F6"
+		    class      	"LinkManagerFinder"
+		    quidu      	"38CD3CCE0343"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$23"
+		    quid       	"38CD43A501BA"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD4501028D"
+			    supplier   	"$UNNAMED$23"
+			    quidu      	"38CD43A501BA"
+			    messages   	(list Messages
+				(object Message "register with JNDI"
+				    quid       	"38CD4501028E"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2.1"
+				    ordinal    	2))))
+		    class      	"Logical View::Linguistics::L10nDataServer::PageDataServerWLRMI"
+		    quidu      	"38CCFC760166"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$25"
+		    quid       	"38CD43BA005C"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD4759000F"
+			    supplier   	"$UNNAMED$25"
+			    quidu      	"38CD43BA005C"
+			    messages   	(list Messages
+				(object Message "register with JNDI"
+				    quid       	"38CD47590019"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4.1"
+				    ordinal    	5))))
+		    class      	"Logical View::Linguistics::L10nDataServer::TMServerWLRMI"
+		    quidu      	"38CD02DB026E"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$27"
+		    quid       	"38CD43BE0239"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD47DA029F"
+			    supplier   	"$UNNAMED$27"
+			    quidu      	"38CD43BE0239"
+			    messages   	(list Messages
+				(object Message "register with JNDI"
+				    quid       	"38CD47DA02A0"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6.1"
+				    ordinal    	8))))
+		    class      	"Logical View::Linguistics::L10nDataServer::LinkManagerWLRMI"
+		    quidu      	"38CD2B230096"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$24"
+		    quid       	"38CD46F003CF"
+		    class      	"PageDataServerFinder"
+		    quidu      	"38CD05630035"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$26"
+		    quid       	"38CD476C0323"
+		    class      	"TMServerFinder"
+		    quidu      	"38CD064E02C8"
+		    persistence 	"Transient"
+		    multi      	FALSE)))
+	(object Mechanism @2
+	    logical_models 	(list unit_reference_list
+		(object Object "a TM"
+		    quid       	"38CD481500A5"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38CD48370357"
+			    supplier   	"$UNNAMED$28"
+			    quidu      	"38CD4834006E"
+			    messages   	(list Messages
+				(object Message "findServer( )"
+				    quid       	"38CD48370358"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    Operation  	"findServer"
+				    quidu      	"38C7B6E200B2")))
+			(object Link
+			    quid       	"38CD486001B2"
+			    supplier   	"$UNNAMED$29"
+			    quidu      	"38CD484F0013"
+			    messages   	(list Messages
+				(object Message "use service from this object"
+				    quid       	"38CD486001B3"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2)))
+			(object Link
+			    quid       	"38CD4871018E"
+			    supplier   	"a TM"
+			    quidu      	"38CD481500A5"
+			    messages   	(list Messages
+				(object Message "save reference to returned object"
+				    quid       	"38CD4871018F"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$28"
+		    quid       	"38CD4834006E"
+		    class      	"TMServerFinder"
+		    quidu      	"38CD064E02C8"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$29"
+		    quid       	"38CD484F0013"
+		    class      	"Logical View::Linguistics::L10nDataServer::TMServerWLRMI"
+		    quidu      	"38CD02DB026E"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"38C6B023037D"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServer" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(400, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(215, 694)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	370
+			justify    	0
+			label      	"PageDataServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(215, 644)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	370
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADD0A30270"
+		    width      	388
+		    height     	592
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServer" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1136, 704)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(918, 245)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"TMServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@4
+			location   	(918, 195)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6B072025E"
+		    width      	454
+		    height     	1042
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManager" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1792, 1008)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1574, 849)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"LinkManager")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@5
+			location   	(1574, 799)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6E49F015F"
+		    width      	454
+		    height     	442
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Utilities::Database::DbUtilFactory" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(1856, 1808)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(1717, 1733)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	278
+			justify    	0
+			label      	"DbUtilFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6ED3701EF"
+		    width      	296
+		    height     	174
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::L10nDataServer" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1120, 1808)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(957, 1752)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	326
+			justify    	0
+			label      	"L10nDataServer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6D5BB014A"
+		    width      	344
+		    height     	137
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @8
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6D5E403DE"
+		    client     	@7
+		    supplier   	@4
+		    line_style 	3
+		    origin_attachment 	(1131, 1740)
+		    terminal_attachment 	(1131, 1224))
+		(object RealizeView "" @9
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6E57100D5"
+		    client     	@7
+		    supplier   	@5
+		    vertices   	(list Points
+			(1130, 1740)
+			(1130, 1456)
+			(1800, 1456)
+			(1800, 1229))
+		    line_style 	3
+		    origin_attachment 	(1130, 1740)
+		    terminal_attachment 	(1800, 1229))
+		(object AssociationViewNew "$UNNAMED$0" @10
+		    location   	(1499, 1808)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCA7F801C9"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @11
+			    Parent_View 	@10
+			    location   	(395, 144)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCA7F8034F"
+			    client     	@10
+			    supplier   	@6
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @12
+			    Parent_View 	@10
+			    location   	(395, 144)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCA7F80382"
+			    client     	@10
+			    supplier   	@7
+			    line_style 	0)))
+		(object RealizeView "" @13
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6D5E20088"
+		    client     	@7
+		    supplier   	@3
+		    vertices   	(list Points
+			(1125, 1740)
+			(1125, 1453)
+			(402, 1453)
+			(402, 1224))
+		    line_style 	3
+		    origin_attachment 	(1125, 1740)
+		    terminal_attachment 	(402, 1224))))
+	(object ClassDiagram "External Interface"
+	    quid       	"38C6D59102F9"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServer" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(464, 592)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(279, 358)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	370
+			justify    	0
+			label      	"PageDataServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@14
+			location   	(279, 308)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	370
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADD0A30270"
+		    width      	388
+		    height     	592
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServer" @15
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1168, 736)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@15
+			location   	(949, 277)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	438
+			justify    	0
+			label      	"TMServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@15
+			location   	(949, 227)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	438
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6B072025E"
+		    width      	456
+		    height     	1042
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManager" @16
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1824, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@16
+			location   	(1606, 289)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"LinkManager")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@16
+			location   	(1606, 239)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6E49F015F"
+		    width      	454
+		    height     	442
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::SearchParameters" @17
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(448, 1792)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@17
+			location   	(260, 1741)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	376
+			justify    	0
+			label      	"SearchParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAD55024F"
+		    width      	394
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::SearchResults" @18
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(416, 2096)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@18
+			location   	(266, 2045)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	300
+			justify    	0
+			label      	"SearchResults")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAD8A031E"
+		    width      	318
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TmParameters" @19
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1056, 1792)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@19
+			location   	(908, 1741)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	296
+			justify    	0
+			label      	"TmParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCADEC01F2"
+		    width      	314
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TuParameters" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1056, 2096)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(910, 2045)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	292
+			justify    	0
+			label      	"TuParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAE160351"
+		    width      	310
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TuvParameters" @21
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1616, 1792)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(1466, 1741)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	300
+			justify    	0
+			label      	"TuvParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAE2B0149"
+		    width      	318
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TmxData" @22
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1568, 2096)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@22
+			location   	(1473, 2045)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	190
+			justify    	0
+			label      	"TmxData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAE460350"
+		    width      	208
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::Assets" @23
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(352, 2400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(267, 2349)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	170
+			justify    	0
+			label      	"Assets")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCAE650124"
+		    width      	188
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "PageDataServer Implementation"
+	    quid       	"38CCFB7501CA"
+	    title      	"PageDataServer Implementation"
+	    documentation 	"This diagram shows the detailed design of the implementation of PageDataServer."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	169
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServer" @24
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(1104, 416)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@24
+			location   	(941, 386)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	326
+			justify    	0
+			label      	"PageDataServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@24
+			location   	(941, 336)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	326
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADD0A30270"
+		    width      	344
+		    height     	184
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServerWLRemote" @25
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1520, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(1250, 899)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	540
+			justify    	0
+			label      	"PageDataServerWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@25
+			location   	(1250, 849)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	540
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCFC000012"
+		    width      	558
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::weblogic.rmi.Remote" @26
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1808, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@26
+			location   	(1807, 508)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"weblogic.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC948B02AE"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @27
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFC9C0084"
+		    client     	@25
+		    supplier   	@24
+		    line_style 	0)
+		(object InheritView "" @28
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFC9F0074"
+		    client     	@25
+		    supplier   	@26
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.Remote" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(416, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(415, 508)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC8FC9005E"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServerJDKRemote" @30
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(656, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@30
+			location   	(384, 899)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	544
+			justify    	0
+			label      	"PageDataServerJDKRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@30
+			location   	(384, 849)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	544
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCFCCA0116"
+		    width      	562
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @31
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFCE202D3"
+		    client     	@30
+		    supplier   	@24
+		    line_style 	0)
+		(object InheritView "" @32
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFCE5016F"
+		    client     	@30
+		    supplier   	@29
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServerWLRMI" @33
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1520, 1824)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@33
+			location   	(1290, 1743)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	460
+			justify    	0
+			label      	"PageDataServerWLRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCFC760166"
+		    width      	478
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @34
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFCA2012D"
+		    client     	@33
+		    supplier   	@25
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::L10nDataServer" @35
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1104, 2176)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@35
+			location   	(945, 2125)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	318
+			justify    	0
+			label      	"L10nDataServer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6D5BB014A"
+		    width      	336
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @36
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6D5E20088"
+		    client     	@35
+		    supplier   	@24
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$3" @37
+		    location   	(1293, 2014)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFCA403E3"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @38
+			    Parent_View 	@37
+			    location   	(-243, 478)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCFCA50308"
+			    client     	@37
+			    supplier   	@35
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @39
+			    Parent_View 	@37
+			    location   	(-243, 478)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCFCA50312"
+			    client     	@37
+			    supplier   	@33
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::PageDataServerJDKRMI" @40
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(656, 1824)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@40
+			location   	(417, 1743)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	478
+			justify    	0
+			label      	"PageDataServerJDKRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CCFCEA0144"
+		    width      	496
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @41
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFCFC0321"
+		    client     	@40
+		    supplier   	@30
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$6" @42
+		    location   	(899, 2014)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CCFD000092"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @43
+			    Parent_View 	@42
+			    location   	(227, 382)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCFD000363"
+			    client     	@42
+			    supplier   	@35
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @44
+			    Parent_View 	@42
+			    location   	(227, 382)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CCFD000377"
+			    client     	@42
+			    supplier   	@40
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Utilities::Server::EvRemote" @45
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(864, 1408)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@45
+			location   	(736, 1352)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"EvRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@45
+			location   	(736, 1305)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D69FC900F3"
+		    width      	274
+		    height     	230
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @46
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DD0A0161"
+		    client     	@40
+		    supplier   	@45
+		    line_style 	0)
+		(object RealizeView "" @47
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DD2D0053"
+		    client     	@33
+		    supplier   	@45
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.UnicastRemoteObject" @48
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 1264)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@48
+			location   	(335, 1372)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6BCE9002C"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @49
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DD8F01C6"
+		    client     	@40
+		    supplier   	@48
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::weblogic.rmi.UnicastRemoteObject" @50
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1984, 1248)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@50
+			location   	(1983, 1356)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	341
+			justify    	0
+			label      	"weblogic.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6DE1203BA"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @51
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DE3C01CF"
+		    client     	@33
+		    supplier   	@50
+		    line_style 	0)))
+	(object ClassDiagram "TMServer Implementation"
+	    quid       	"38CCFF800313"
+	    title      	"TMServer Implementation"
+	    documentation 	"This diagram shows the detailed design of the implementation of L10nMemoryServer."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	888
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServer" @52
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(1072, 352)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@52
+			location   	(944, 322)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"TMServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@52
+			location   	(944, 272)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6B072025E"
+		    width      	274
+		    height     	184
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::java.rmi.Remote" @53
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(368, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@53
+			location   	(367, 444)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC8FC9005E"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::weblogic.rmi.Remote" @54
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1824, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@54
+			location   	(1823, 444)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"weblogic.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC948B02AE"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServerJDKRemote" @55
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(624, 880)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@55
+			location   	(415, 851)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	418
+			justify    	0
+			label      	"TMServerJDKRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@55
+			location   	(415, 801)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	418
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD02000273"
+		    width      	436
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @56
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02120175"
+		    client     	@55
+		    supplier   	@53
+		    line_style 	0)
+		(object InheritView "" @57
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02140358"
+		    client     	@55
+		    supplier   	@52
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServerWLRemote" @58
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1520, 880)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@58
+			location   	(1316, 851)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	408
+			justify    	0
+			label      	"TMServerWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@58
+			location   	(1316, 801)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	408
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD021C02C3"
+		    width      	426
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @59
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD024E02C5"
+		    client     	@58
+		    supplier   	@52
+		    line_style 	0)
+		(object InheritView "" @60
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD0251023D"
+		    client     	@58
+		    supplier   	@54
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServerJDKRMI" @61
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(624, 1648)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@61
+			location   	(447, 1567)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	354
+			justify    	0
+			label      	"TMServerJDKRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD025D03A3"
+		    width      	372
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @62
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02C00139"
+		    client     	@61
+		    supplier   	@55
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::L10nDataServer" @63
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1072, 2128)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@63
+			location   	(913, 2077)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	318
+			justify    	0
+			label      	"L10nDataServer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6D5BB014A"
+		    width      	336
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @64
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6D5E403DE"
+		    client     	@63
+		    supplier   	@52
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$9" @65
+		    location   	(861, 1902)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02C60173"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @66
+			    Parent_View 	@65
+			    location   	(237, 638)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD02C603CC"
+			    client     	@65
+			    supplier   	@63
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @67
+			    Parent_View 	@65
+			    location   	(237, 638)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD02C603D6"
+			    client     	@65
+			    supplier   	@61
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::TMServerWLRMI" @68
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1520, 1664)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@68
+			location   	(1353, 1583)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	334
+			justify    	0
+			label      	"TMServerWLRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD02DB026E"
+		    width      	352
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @69
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02E9012E"
+		    client     	@68
+		    supplier   	@58
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$12" @70
+		    location   	(1281, 1910)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD02F301C8"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @71
+			    Parent_View 	@70
+			    location   	(-239, 630)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD02F40147"
+			    client     	@70
+			    supplier   	@63
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @72
+			    Parent_View 	@70
+			    location   	(-239, 630)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD02F4015B"
+			    client     	@70
+			    supplier   	@68
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Utilities::Server::EvRemote" @73
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(848, 1248)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@73
+			location   	(720, 1193)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"EvRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@73
+			location   	(720, 1146)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D69FC900F3"
+		    width      	274
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @74
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DEB00104"
+		    client     	@61
+		    supplier   	@73
+		    line_style 	0)
+		(object RealizeView "" @75
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DEB303A7"
+		    client     	@68
+		    supplier   	@73
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.UnicastRemoteObject" @76
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(240, 1264)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@76
+			location   	(239, 1372)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6BCE9002C"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @77
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DEC90023"
+		    client     	@61
+		    supplier   	@76
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::weblogic.rmi.UnicastRemoteObject" @78
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1968, 1312)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@78
+			location   	(1967, 1420)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	341
+			justify    	0
+			label      	"weblogic.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6DE1203BA"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @79
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DED10314"
+		    client     	@68
+		    supplier   	@78
+		    line_style 	0)))
+	(object ClassDiagram "LinkManager Implementation"
+	    quid       	"38CD2A4D0283"
+	    title      	"LinkManager Implementation"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	1144
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManager" @80
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(1040, 256)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@80
+			location   	(907, 227)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	266
+			justify    	0
+			label      	"LinkManager")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@80
+			location   	(907, 177)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	266
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6E49F015F"
+		    width      	284
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::java.rmi.Remote" @81
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 240)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@81
+			location   	(335, 348)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC8FC9005E"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::weblogic.rmi.Remote" @82
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1792, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(1791, 332)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"weblogic.rmi.Remote")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC948B02AE"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManagerJDKRemote" @83
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(512, 784)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@83
+			location   	(273, 755)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	478
+			justify    	0
+			label      	"LinkManagerJDKRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@83
+			location   	(273, 705)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	478
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD2AC902F0"
+		    width      	496
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManagerWLRemote" @84
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1536, 784)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@84
+			location   	(1301, 755)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	470
+			justify    	0
+			label      	"LinkManagerWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@84
+			location   	(1301, 705)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	470
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD2AD9020D"
+		    width      	488
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @85
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2AF40035"
+		    client     	@83
+		    supplier   	@81
+		    line_style 	0)
+		(object InheritView "" @86
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2AF60182"
+		    client     	@83
+		    supplier   	@80
+		    line_style 	0)
+		(object InheritView "" @87
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2AF90371"
+		    client     	@84
+		    supplier   	@80
+		    line_style 	0)
+		(object InheritView "" @88
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2AFC02DF"
+		    client     	@84
+		    supplier   	@82
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManagerJDKRMI" @89
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(512, 1776)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@89
+			location   	(306, 1695)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	412
+			justify    	0
+			label      	"LinkManagerJDKRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD2B060239"
+		    width      	430
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @90
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2B190196"
+		    client     	@89
+		    supplier   	@83
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::L10nDataServer" @91
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1040, 2208)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@91
+			location   	(881, 2157)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	318
+			justify    	0
+			label      	"L10nDataServer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6D5BB014A"
+		    width      	336
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @92
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C6E57100D5"
+		    client     	@91
+		    supplier   	@80
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$15" @93
+		    location   	(794, 2006)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2B1E02CA"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$16" @94
+			    Parent_View 	@93
+			    location   	(282, 742)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD2B1F0195"
+			    client     	@93
+			    supplier   	@91
+			    line_style 	0)
+			(object RoleView "$UNNAMED$17" @95
+			    Parent_View 	@93
+			    location   	(282, 742)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD2B1F019F"
+			    client     	@93
+			    supplier   	@89
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Linguistics::L10nDataServer::LinkManagerWLRMI" @96
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1536, 1776)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@96
+			location   	(1336, 1695)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	400
+			justify    	0
+			label      	"LinkManagerWLRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD2B230096"
+		    width      	418
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @97
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2B2D01DB"
+		    client     	@96
+		    supplier   	@84
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$18" @98
+		    location   	(1270, 2006)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CD2B3A03C5"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @99
+			    Parent_View 	@98
+			    location   	(-266, 742)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD2B3B0376"
+			    client     	@98
+			    supplier   	@91
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @100
+			    Parent_View 	@98
+			    location   	(-266, 742)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CD2B3B038A"
+			    client     	@98
+			    supplier   	@96
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Utilities::Server::EvRemote" @101
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(800, 1248)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@101
+			location   	(672, 1193)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"EvRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@101
+			location   	(672, 1146)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D69FC900F3"
+		    width      	274
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @102
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DF060162"
+		    client     	@89
+		    supplier   	@101
+		    line_style 	0)
+		(object RealizeView "" @103
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DF0803BD"
+		    client     	@96
+		    supplier   	@101
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.UnicastRemoteObject" @104
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(240, 1328)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@104
+			location   	(239, 1436)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	290
+			justify    	0
+			label      	"java.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6BCE9002C"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @105
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DF130138"
+		    client     	@89
+		    supplier   	@104
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::weblogic.rmi.UnicastRemoteObject" @106
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1920, 1312)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@106
+			location   	(1919, 1420)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	341
+			justify    	0
+			label      	"weblogic.rmi.UnicastRemoteObject")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6DE1203BA"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @107
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6DF1B0342"
+		    client     	@96
+		    supplier   	@106
+		    line_style 	0)))
+	(object InteractionDiagram "LDS Component Startup"
+	    mechanism_ref 	@1
+	    quid       	"38CD416E0273"
+	    title      	"LDS Component Startup"
+	    documentation 	"This is a scenario of the Localization Data Server component start up sequence."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "main" @108
+		    location   	(448, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@108
+			location   	(448, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"main")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD41A9021E"
+		    width      	300
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @109
+			location   	(448, 368)
+			line_color 	3342489
+			InterObjView 	@108
+			height     	1352
+			y_coord    	1292
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$21" @110
+		    location   	(816, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@110
+			location   	(816, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	296
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD423D023F"
+		    width      	314
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @111
+			location   	(816, 416)
+			line_color 	3342489
+			InterObjView 	@110
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$22" @112
+		    location   	(3376, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@112
+			location   	(3376, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	384
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD434002F6"
+		    width      	402
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @113
+			location   	(3376, 1600)
+			line_color 	3342489
+			InterObjView 	@112
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$26" @114
+		    location   	(2512, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@114
+			location   	(2512, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	318
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD476C0323"
+		    width      	336
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @115
+			location   	(2512, 1216)
+			line_color 	3342489
+			InterObjView 	@114
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$24" @116
+		    location   	(1728, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@116
+			location   	(1728, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	438
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD46F003CF"
+		    width      	456
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @117
+			location   	(1728, 848)
+			line_color 	3342489
+			InterObjView 	@116
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$23" @118
+		    location   	(1248, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@118
+			location   	(1248, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	442
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD43A501BA"
+		    width      	460
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @119
+			location   	(1248, 576)
+			line_color 	3342489
+			InterObjView 	@118
+			height     	200
+			y_coord    	140
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @120
+			location   	(1248, 656)
+			line_color 	3342489
+			InterObjView 	@118
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterObjView "$UNNAMED$25" @121
+		    location   	(2144, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@121
+			location   	(2144, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	326
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD43BA005C"
+		    width      	344
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @122
+			location   	(2144, 1008)
+			line_color 	3342489
+			InterObjView 	@121
+			height     	184
+			y_coord    	124
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @123
+			location   	(2144, 1072)
+			line_color 	3342489
+			InterObjView 	@121
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterObjView "$UNNAMED$27" @124
+		    location   	(2928, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@124
+			location   	(2928, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	384
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD43BE0239"
+		    width      	402
+		    height     	1585
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @125
+			location   	(2928, 1376)
+			line_color 	3342489
+			InterObjView 	@124
+			height     	168
+			y_coord    	108
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @126
+			location   	(2928, 1424)
+			line_color 	3342489
+			InterObjView 	@124
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterMessView "" @127
+		    location   	(16, 416)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @128
+			Parent_View 	@127
+			location   	(631, 372)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD424B0114"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	159
+			justify    	0
+			label      	"create"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@110
+		    Focus_Src  	@109
+		    Focus_Entry 	@111
+		    origin     	(463, 416)
+		    terminus   	(800, 416)
+		    ordinal    	0)
+		(object InterMessView "" @129
+		    location   	(16, 1600)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @130
+			Parent_View 	@129
+			location   	(1911, 1556)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD434E0148"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	694
+			justify    	0
+			label      	"set L10nDataServer as local server"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@112
+		    Focus_Src  	@109
+		    Focus_Entry 	@113
+		    origin     	(463, 1600)
+		    terminus   	(3360, 1600)
+		    ordinal    	9)
+		(object InterMessView "" @131
+		    location   	(16, 576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @132
+			Parent_View 	@131
+			location   	(847, 532)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD43FB03B4"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"create( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@118
+		    Focus_Src  	@109
+		    Focus_Entry 	@119
+		    origin     	(463, 576)
+		    terminus   	(1232, 576)
+		    ordinal    	1)
+		(object SelfMessView "" @133
+		    location   	(16, 656)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @134
+			Parent_View 	@133
+			location   	(1339, 612)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD4501028E"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	344
+			justify    	0
+			label      	"register with JNDI"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@118
+		    supplier   	@118
+		    Focus_Src  	@119
+		    Focus_Entry 	@120
+		    origin     	(1264, 656)
+		    terminus   	(1414, 656)
+		    ordinal    	2)
+		(object InterMessView "" @135
+		    location   	(16, 848)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @136
+			Parent_View 	@135
+			location   	(1087, 804)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD472201F2"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	672
+			justify    	0
+			label      	"set L10nDataServer as local server"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@116
+		    Focus_Src  	@109
+		    Focus_Entry 	@117
+		    origin     	(463, 848)
+		    terminus   	(1712, 848)
+		    ordinal    	3)
+		(object InterMessView "" @137
+		    location   	(16, 1008)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @138
+			Parent_View 	@137
+			location   	(1295, 964)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD474E026D"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"create( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@121
+		    Focus_Src  	@109
+		    Focus_Entry 	@122
+		    origin     	(463, 1008)
+		    terminus   	(2128, 1008)
+		    ordinal    	4)
+		(object SelfMessView "" @139
+		    location   	(16, 1072)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @140
+			Parent_View 	@139
+			location   	(2235, 1028)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD47590019"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	344
+			justify    	0
+			label      	"register with JNDI"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@121
+		    supplier   	@121
+		    Focus_Src  	@122
+		    Focus_Entry 	@123
+		    origin     	(2160, 1072)
+		    terminus   	(2310, 1072)
+		    ordinal    	5)
+		(object InterMessView "" @141
+		    location   	(16, 1216)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @142
+			Parent_View 	@141
+			location   	(1479, 1172)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD47990379"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	672
+			justify    	0
+			label      	"set L10nDataServer as local server"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@114
+		    Focus_Src  	@109
+		    Focus_Entry 	@115
+		    origin     	(463, 1216)
+		    terminus   	(2496, 1216)
+		    ordinal    	6)
+		(object InterMessView "" @143
+		    location   	(16, 1376)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @144
+			Parent_View 	@143
+			location   	(1687, 1332)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD47B402D8"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"create( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@108
+		    supplier   	@124
+		    Focus_Src  	@109
+		    Focus_Entry 	@125
+		    origin     	(463, 1376)
+		    terminus   	(2912, 1376)
+		    ordinal    	7)
+		(object SelfMessView "" @145
+		    location   	(16, 1424)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @146
+			Parent_View 	@145
+			location   	(3019, 1380)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD47DA02A0"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	344
+			justify    	0
+			label      	"register with JNDI"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@124
+		    supplier   	@124
+		    Focus_Src  	@125
+		    Focus_Entry 	@126
+		    origin     	(2944, 1424)
+		    terminus   	(3094, 1424)
+		    ordinal    	8)))
+	(object InteractionDiagram "TM Usage Scenario"
+	    mechanism_ref 	@2
+	    quid       	"38CD480A00B4"
+	    title      	"TM Usage Scenario"
+	    documentation 	
+|This scenario shows how a client (a TM instance) finds and use an instance of TMServer (in this scenario it is TMServerWLRMI).
+|
+|Scenrios for finding and using PageDataServer and LinkManager will be similar.
+	    
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "a TM" @147
+		    location   	(992, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@147
+			location   	(992, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"a TM")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD481500A5"
+		    width      	300
+		    height     	769
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @148
+			location   	(992, 400)
+			line_color 	3342489
+			InterObjView 	@147
+			height     	296
+			y_coord    	236
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @149
+			location   	(992, 576)
+			line_color 	3342489
+			InterObjView 	@147
+			height     	60
+			y_coord    	0
+			Nested     	TRUE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @150
+			location   	(992, 752)
+			line_color 	3342489
+			InterObjView 	@147
+			height     	152
+			y_coord    	92
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$28" @151
+		    location   	(1424, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@151
+			location   	(1424, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	318
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD4834006E"
+		    width      	336
+		    height     	769
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @152
+			location   	(1424, 400)
+			line_color 	3342489
+			InterObjView 	@151
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$29" @153
+		    location   	(1872, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@153
+			location   	(1872, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	326
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CD484F0013"
+		    width      	344
+		    height     	769
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @154
+			location   	(1872, 784)
+			line_color 	3342489
+			InterObjView 	@153
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @155
+		    location   	(16, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @156
+			Parent_View 	@155
+			location   	(1207, 356)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD48370358"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	259
+			justify    	0
+			label      	"findServer( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@147
+		    supplier   	@151
+		    Focus_Src  	@148
+		    Focus_Entry 	@152
+		    origin     	(1007, 400)
+		    terminus   	(1408, 400)
+		    ordinal    	0)
+		(object InterMessView "" @157
+		    location   	(16, 784)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @158
+			Parent_View 	@157
+			location   	(1431, 740)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD486001B3"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	541
+			justify    	0
+			label      	"use service from this object"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@147
+		    supplier   	@153
+		    Focus_Src  	@150
+		    Focus_Entry 	@154
+		    origin     	(1007, 784)
+		    terminus   	(1856, 784)
+		    ordinal    	2)
+		(object SelfMessView "" @159
+		    location   	(16, 576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @160
+			Parent_View 	@159
+			location   	(1083, 532)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38CD4871018F"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	616
+			justify    	0
+			label      	"save reference to returned object"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@147
+		    supplier   	@147
+		    Focus_Src  	@148
+		    Focus_Entry 	@149
+		    origin     	(1008, 576)
+		    terminus   	(1158, 576)
+		    ordinal    	1)
+		(object Label @161
+		    location   	(63, 353)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	3
+		    max_width  	593
+		    label      	"At startup, a TM (client) use TMServerFinder to find an instance of TMServerWLRMI.")
+		(object Label @162
+		    location   	(48, 768)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	12
+		    max_width  	668
+		    label      	"When the TM client needs to access the data stored in the Localization Data Server, it uses TMServerWLRMI's service to do so.")))))

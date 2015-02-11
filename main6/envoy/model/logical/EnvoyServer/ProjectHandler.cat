@@ -1,0 +1,38 @@
+
+(object Petal
+    version    	46
+    _written   	"Rose 7.7.0204.3001"
+    charSet    	0)
+
+(object Class_Category "Project Handler"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A3EBCA801FC"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Association "$UNNAMED$0"
+	    quid       	"3A3EC661009C"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"3A3EC661022D"
+		    supplier   	"Logical View::com::globalsight::everest::projecthandler::ProjectImpl"
+		    quidu      	"38C04B730308"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"3A3EC6610241"
+		    supplier   	"Logical View::com::globalsight::everest::foundation::L10nProfile"
+		    quidu      	"39B6DFCD0201")))
+	(object Association "$UNNAMED$3"
+	    quid       	"3A3ECDA700AE"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"3A3ECDA70270"
+		    supplier   	"Logical View::com::globalsight::everest::projecthandler::ProjectHandlerLocal"
+		    quidu      	"3A3ECD070284"
+		    client_cardinality 	(value cardinality "1")
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"3A3ECDA70271"
+		    supplier   	"Logical View::com::globalsight::everest::projecthandler::ProjectHandlerWLRMIImpl"
+		    quidu      	"3A3ECD9203B1"))))
+    logical_presentations 	(list unit_reference_list))

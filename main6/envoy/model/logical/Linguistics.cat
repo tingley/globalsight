@@ -1,0 +1,4259 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "Linguistics"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"388BA1C8010E"
+    documentation 	"This package is the Linguistics subsystem."
+    realized_interfaces 	(list realize_rel_list
+	(object Realize_Relationship
+	    quid       	"39417FD00009"
+	    supplier   	"Logical View::Linguistics::LingServer"
+	    quidu      	"388BA2370262")
+	(object Realize_Relationship
+	    quid       	"3941813503BA"
+	    supplier   	"Logical View::Linguistics::TranslationServer"
+	    quidu      	"394180620117"))
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "LingServer"
+	    quid       	"388BA2370262"
+	    documentation 	"Defines the external interface to the whole Linguistics subsystem.  This acts as a facade to the subsystem."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "addPageToProject"
+		    quid       	"388D633D018E"
+		    documentation 	
+|Add a page to the specified project.  Data from the input page is sent as input, as well as the project id that specifies the project that this page is in.  When a page is added, the Linguistics subsystem extracts linguistics data from the input page.  Linguistics data that will be extracted include source segments, URL to assets referenced in the page, localization strings such as dates, etc.  Optionally, TM search for the source segments will be performed and leveraged target segments will be included in the return data.
+|
+|A page identifier is generated for this page and returned to the client for future reference.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "input"
+			    quid       	"39403DDB02A8"
+			    documentation 	"Input data as a String object.  The content of the object is in XML format."
+			    type       	"String"
+			    quidu      	"397D9546039F")
+			(object Parameter "projectId"
+			    quid       	"39403DDB02A9"
+			    documentation 	"Identifies the project that this page is in."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    result     	"PageIdentifier"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"38ADD4780086")
+		(object Operation "generateLocalizedPage"
+		    quid       	"3896F220011D"
+		    documentation 	"Merge the localized segments and skeleton of the page, both provided by the caller, to create a final localized page that is ready to be used as localized data in the web site."
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"39403DDB02AF"
+			    documentation 	"Identifies the page to create merge output for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "assetURL"
+			    quid       	"39403DDB02B0"
+			    documentation 	"A list of URL in the specified page.")
+			(object Parameter "locale"
+			    quid       	"39403DDB02B1"
+			    documentation 	"Target locale of the page to generate."))
+		    result     	"LocalizedPage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3890F3E7031B")
+		(object Operation "createL10nProject"
+		    quid       	"3896F26F00BC"
+		    documentation 	
+|Create a localization project internally in the Linguistics subsystem.  The project is identified by a unique integer identification; the identification is returned to the caller so that it can be used in future calls to the Linguistics subsystem in operations that are project specific, such as saving data to the project TM.
+|
+|The project and its linguistics data will be kept in the Linguistics subsystem until one of the following services is requested: abort or finalize.  When a project is aborted, all its linguistics data, including TM, are discarded, which means that they will not be retrievable in the future.  When a project is finalized, all its linguistics data will be saved, e.g. in the Gold TM, for future reference.
+		    
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D99370143")
+		(object Operation "addTranslationToPage"
+		    quid       	"3896F285023A"
+		    documentation 	"Add the specified translation data to the specified page.  If the specified page does not exist, no data will be added and an error is returned."
+		    parameters 	(list Parameters
+			(object Parameter "projectId"
+			    quid       	"39403DDB02B4"
+			    documentation 	"Identification of the project to add linguistics data to."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "translationData"
+			    quid       	"39403DDB02B5"
+			    documentation 	"The translation data to be added to the specified project.  Note: Content and type of this parameter is unknown at this point; it can be a source segment and target segment pair.")
+			(object Parameter "locale"
+			    quid       	"39403DDB02B6"
+			    documentation 	"The locale of the translation data."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "abortL10nProject"
+		    quid       	"3896F2970204"
+		    documentation 	"Remove the specified project from the Linguistics subsystem and discard all its linguistics data without saving them."
+		    parameters 	(list Parameters
+			(object Parameter "projectId"
+			    quid       	"39403DDB02B8"
+			    documentation 	"The identification of the project to be aborted."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "finalizeL10nProject"
+		    quid       	"3896F2A8035D"
+		    documentation 	"Save the linguistics data of the specified project in permanent memory for future reference.  After the linguistics data are saved, the project is removed from the Linguistics subsystem.  The project itself cannot be referenced in the future."
+		    parameters 	(list Parameters
+			(object Parameter "projectId"
+			    quid       	"39403DDB02BA"
+			    documentation 	"The identification of the project to be finalized."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOnlineTranslationPackage"
+		    quid       	"38ADDE800088"
+		    documentation 	
+|Generate the latest version of the preview page that can be used by the Segment Editor as the source data in its operation to localize the page.  The preview page will include data and format information that makes the presentation of the page look as close to the "real" page as possible.  The latest version of the data will be used to generate the preview page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"39403DDB02BC"
+			    documentation 	"The page to generate preview for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "assetURL"
+			    quid       	"39403DDB02BD"
+			    documentation 	"A list of URL for the assets in the page."))
+		    result     	"OnlineTranslationPackage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3890F52500DE")
+		(object Operation "createPageVersion"
+		    quid       	"38ADE13C00E9"
+		    documentation 	
+|Take a "snapshot" of the current state of the specified page by "attaching" a version number to the latest version of the data in the page.  The data that have associated version number includes skeleton, source segments, target segments per target locale, and asset URLs.  The version number, which is one higher than the previous version, is generated by this method and returned to the caller.
+		    
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D99370143")
+		(object Operation "rebuildTranxPackage"
+		    quid       	"38CEF0C402B3"
+		    documentation 	
+|Rebuild the specified version of the preview page that can be used by the Segment Editor as the source data in its operation to localize the page.  The preview page will include data and format information that makes the presentation of the page look as close to the "real" page as possible.  Data of the specified version will be used to generate the page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"39403DDB02C5"
+			    documentation 	"The page to generate preview for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "locale"
+			    quid       	"39403DDB02C6"
+			    documentation 	"Target locale for the page.")
+			(object Parameter "version"
+			    quid       	"39403DDB02C7"
+			    documentation 	"Generates a translation preview page for the specified version of the page.  (See the method setVersion)"
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    result     	"PageGenerationOutput"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replacePageContent"
+		    quid       	"38CEFDCB00C4"
+		    documentation 	
+|Replace the content of a page in a project.  The page will be parsed and extracted.  The new extraction result will replace all existing data that are stored for that page, e.g. skeleton, segments, etc.
+|
+|If the specified page does not exist in the specified project, an exception will be thrown.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "input"
+			    quid       	"39403DDB02C9"
+			    documentation 	"The new content for the page."
+			    type       	"EFInputData"
+			    quidu      	"3890C79B03A1")
+			(object Parameter "pageID"
+			    quid       	"39403DDB02CA"
+			    documentation 	"Identifies the project and the page within the project."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWordCountForPage"
+		    quid       	"38CEFE9C0043"
+		    documentation 	"Returns the number of words to be translated for the specified page."
+		    parameters 	(list Parameters
+			(object Parameter "pageID"
+			    quid       	"39403DDB02CC"
+			    documentation 	"Identifies the project and the page to get word count for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086"))
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D99370143")
+		(object Operation "finalizePage"
+		    quid       	"39449A4602D2"
+		    documentation 	"Finalize the specified page.  Create a version of the specified page in its latest state.  Translation for the text segment are commited to the translation memory associated with the project that the specified page belongs to."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSnippet"
+		    quid       	"3946396503A1"
+		    documentation 	"Get the specified local content snippet."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"394639900168"
+			    documentation 	"Identification of the page to be edited."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_localContentName"
+			    quid       	"3994957B00F9"
+			    documentation 	"Name that identifies the local content snippet that can be inserted."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "cancelPages"
+		    quid       	"3947F92C0075"
+		    documentation 	"Cancel the specified pages.  Any data that has not been versioned by a previous call to the createPageVersion will be discarded.  If specified, the latest translation for text segments are saved into the associated translation memory repository."
+		    parameters 	(list Parameters
+			(object Parameter "pages"
+			    quid       	"3947F9DB033D"
+			    documentation 	"An array of page identifiers that specify the pages to cancel.")
+			(object Parameter "saveTM"
+			    quid       	"3947F9E00178"
+			    documentation 	"Specifies whether translation data should be saved in the associated Translation Memory repository."
+			    type       	"Boolean"
+			    quidu      	"397D99370355"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addNewSegment"
+		    quid       	"3957A76E037A"
+		    documentation 	"Add a new text segment before or after the specified text segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3957A790018E"
+			    documentation 	"Identifies the project and page where the new segment is to be added."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_currentSegmentId"
+			    quid       	"3957A797029D"
+			    documentation 	"Identifies the segment before or after which the new segment is to be added."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_before"
+			    quid       	"3957A7B4028A"
+			    documentation 	"Specifies whether the new segment is to be added before or after the current segment.  Before if true, after if false."
+			    type       	"Boolean"
+			    quidu      	"397D99370355")
+			(object Parameter "p_newSegment"
+			    quid       	"3957A7BC02FA"
+			    documentation 	"The content of the new segment to be added."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteSegment"
+		    quid       	"398B087C00CF"
+		    documentation 	"Delete the specified segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B08A703D4"
+			    documentation 	"Identifies the project and page where the specified segment is to be deleted."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_segmentId"
+			    quid       	"398B08A800BE"
+			    documentation 	"Identifies the segment to be deleted."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "findTermMatch"
+		    quid       	"398B0B060372"
+		    documentation 	"Find all terminology matches for the specified text in the specified project."
+		    parameters 	(list Parameters
+			(object Parameter "p_projectId"
+			    quid       	"398B0B060373"
+			    documentation 	"Identifies the project that specifies the terminology database to search for matches."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_text"
+			    quid       	"398B0B060374"
+			    documentation 	"The text to search for terminology matches."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "joinSegments"
+		    quid       	"398B0F8902A1"
+		    documentation 	"Join the specified segments together to become one segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B0FCB0224"
+			    documentation 	"Identifies the project and page where the specified segment is to be deleted."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_segmentIds"
+			    quid       	"398B0FD202B0"
+			    documentation 	"Identificaitons of the list of segments to be joined."
+			    type       	"Integer Array"))
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"The specified segements must be adjacent to each other.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOfflineTranslationPackages"
+		    quid       	"398B129C0375"
+		    documentation 	"Generate translation packages for all the specified pages to be downloaded and translated offline."
+		    parameters 	(list Parameters
+			(object Parameter "p_projectId"
+			    quid       	"398ECBC502C7"
+			    documentation 	"Identifies the project to get pages for."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_pages"
+			    quid       	"398ECBC5037B"
+			    documentation 	"The page to be generate translation packages for."))
+		    result     	"OfflineTranslationPackage Array"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getPreviousTranslations"
+		    quid       	"398B30E900E4"
+		    documentation 	"Get a list of previous translation, each element in the list is a pair of activity (e.g. QA) and translated segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B31140371"
+			    documentation 	"Identifies the project and page where the specified segment is to be deleted."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_segmentId"
+			    quid       	"398B3103018C"
+			    documentation 	"Identifies the segment to get previous translations for."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "revertToPreviousTranslation"
+		    quid       	"398B33DB034B"
+		    documentation 	"Revert a segment's translation to one that was done in a previous stage/task."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B361E0072"
+			    documentation 	"Identifies the project and page where the specified segment is to be deleted."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_segmentId"
+			    quid       	"398B36230373"
+			    documentation 	"Identifies the segment to revert translations for."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_taskId"
+			    quid       	"398B36340024"
+			    documentation 	"The ID of the previous task that this segment's translation should revert to."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_locale"
+			    quid       	"398B36510008"
+			    documentation 	"The target locale for this operation."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchTm"
+		    quid       	"398EB0A203C2"
+		    parameters 	(list Parameters
+			(object Parameter "p_projectId"
+			    quid       	"398EB0C50386"
+			    documentation 	"Identifies the project that specifies the terminology database to search for matches."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_searchCriteria"
+			    quid       	"398EB0E50350"
+			    documentation 	"Specifies the criteria of the LM search: exact or fuzzy, degree of fuzziness, concordance.")
+			(object Parameter "p_text"
+			    quid       	"398EB0F702E8"
+			    documentation 	"The text to search for LM matches."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "splitSourceSegment"
+		    quid       	"398EB3E00221"
+		    documentation 	"Split a source segment into two and return a new version of the translation package."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398EB419022D"
+			    documentation 	"Identifies the project and page where the specified segment is to be deleted."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_segmentId"
+			    quid       	"398EB4230105"
+			    documentation 	"Identificaiton of the segment to be splitted."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_position"
+			    quid       	"398EB4260249"
+			    documentation 	"The position at which the segment is to be splitted.  This is specified as the offset from the beginning of the source segment."
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    result     	"OnlineTranslationPackage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3890F52500DE")
+		(object Operation "saveUploadedPages"
+		    quid       	"398EB7D90129"
+		    documentation 	"Save all the specified uploaded pages."
+		    parameters 	(list Parameters
+			(object Parameter "p_projectId"
+			    quid       	"398EB81801AC"
+			    documentation 	"Identifies the project to get pages for."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_pages"
+			    quid       	"398EB820035C"
+			    documentation 	"The uploaded pages to be saved."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceTmMatches"
+		    quid       	"399444E400DF"
+		    documentation 	"Replace TM matches according to the new source to target segment pairs."
+		    parameters 	(list Parameters
+			(object Parameter "p_tmList"
+			    quid       	"399444EC00E1"
+			    documentation 	"A list of TMs to apply the replacements to.")
+			(object Parameter "p_tmMatchReplacements"
+			    quid       	"399444E400E9"
+			    documentation 	"This is a list of TM match replacements.  Each element in the list specifies the source locale, source segment, the target locale, the original target segment, and the replacement target segment."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceSkeleton"
+		    quid       	"399497890005"
+		    documentation 	"Replace the skeleton of the specified page with the provided skeleton."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"399497C100F6"
+			    documentation 	"Identifies the project and the page within the project."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "p_newSkeleton"
+			    quid       	"399497A100B4"
+			    documentation 	"The new skeleton to replace the existing one."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "SERVICE_NAME"
+		    quid       	"38D6BA400330"
+		    documentation 	"Service name that the remote server that implements this interface will be registered under."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    initv      	"LingServer"
+		    exportControl 	"Public"
+		    static     	TRUE)))
+	(object Class "LingServerLocal"
+	    quid       	"388D62C5022C"
+	    documentation 	
+|The "real" class that does the work of interfacing with the Linguistics subsystem.  An instance of this class runs in the same process of the Linguistics subsystem.  All other classes that implements the LingServer communicates with the Linguistics subsystem through this class.
+	    
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"388D65F20217"
+		    supplier   	"Logical View::Linguistics::LingServer"
+		    quidu      	"388BA2370262"))
+	    exportControl 	"Protected")
+	(object Class "LingServerJDKRMI"
+	    quid       	"388D631400D1"
+	    documentation 	"This is an implementation of the LingServerJDKRemote interface using JDK's RMI.  It runs in the same process as LingServerLocal (and therefore in the same process as the Linguistics subsystem) and provides a remote interface to remote clients.  It delegates client requests to an instance of LingServerLocal."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38D6BD0F0103"
+		    supplier   	"Logical View::java.rmi.UnicastRemoteObject"
+		    quidu      	"38D6BCE9002C"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38D6BD23001C"
+		    supplier   	"Logical View::Utilities::Server::EvRemote"
+		    quidu      	"38D69FC900F3")
+		(object Realize_Relationship
+		    quid       	"38D6C1CC00FF"
+		    supplier   	"Logical View::Linguistics::LingServerJDKRemote"
+		    quidu      	"38CC902801F5"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38C80A06031E"
+		    documentation 	"Constructor.  Save reference to local LingServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"39403DDB02D9"
+			    documentation 	"Referece to a local (in process) instance of LingServer."
+			    type       	"LingServer"
+			    quidu      	"388BA2370262"))
+		    result     	"LingServer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"388BA2370262")))
+	(object Class "EFInputData"
+	    quid       	"3890C79B03A1"
+	    documentation 	
+|Input data to the Extraction Framework.  This includes a real (static) or virtual (dynamically generated) web page for translation.
+|
+|This class has getters and setters for all the private attributes.
+	    
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "nativeData"
+		    quid       	"3890C7B2015F"
+		    documentation 	"The input data as bytes in a byte array, encoded in its native encoding."
+		    type       	"Byte"
+		    quidu      	"397D9B5F03DB"
+		    Containment 	"By Value")
+		(object ClassAttribute "textData"
+		    quid       	"3890C7D10395"
+		    documentation 	"The input data as a Java String."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    Containment 	"By Value")
+		(object ClassAttribute "URL"
+		    quid       	"3890C81701B5"
+		    documentation 	"Pointer to the input data.  The extraction framework will fetch the actual data using this URL."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    Containment 	"By Value")
+		(object ClassAttribute "codeSet"
+		    quid       	"3890C8650149"
+		    documentation 	"The name of the code set that the input data is encoded in."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    Containment 	"By Value")
+		(object ClassAttribute "locale"
+		    quid       	"3890C86C0275"
+		    documentation 	"The language and country that the input data is created for."
+		    type       	"Locale"
+		    quidu      	"397D98AB01F6"
+		    Containment 	"By Value")
+		(object ClassAttribute "dataFormat"
+		    quid       	"3890C876000D"
+		    documentation 	"The format of the input data.  E.g. UNKNOWN, PLAINTEXT, HTML, JAVASCRIPT, CSS, XML, XSL."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    Containment 	"By Value")
+		(object ClassAttribute "segment"
+		    quid       	"3890C88303AF"
+		    documentation 	"Flag for applying linguistic segmentation.  True means apply; false mean do not apply."
+		    type       	"Boolean"
+		    quidu      	"397D99370355"
+		    Containment 	"By Value")))
+	(object Class "PageLinguisticsData"
+	    quid       	"3890CC4A02B5"
+	    documentation 	"Extraction result (output data) from the Extraction Framework."
+	    operations 	(list Operations
+		(object Operation "getSourceSegments"
+		    quid       	"389617E801BE"
+		    documentation 	"Get the source segments for this page."
+		    parameters 	(list Parameters
+			(object Parameter "locale"
+			    quid       	"39403DDB02E4"))
+		    result     	"SegmentNode"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3890E9260074")
+		(object Operation "getSkeleton"
+		    quid       	"3896183802F0"
+		    documentation 	"Get the skeleton of the page."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTargetSegments"
+		    quid       	"3896454C02CD"
+		    documentation 	"Get the translated target segments for this page for the specified locale."
+		    parameters 	(list Parameters
+			(object Parameter "locale"
+			    quid       	"39403DDB02E7"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAllSegments"
+		    quid       	"38964562038D"
+		    documentation 	"Get source segments and target segements for all locales in the page."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "skeleton"
+		    quid       	"3890CCBD018E"
+		    documentation 	"The skeleton file in Unicode (String?).  This is a kind of a template, with placeholders for text segments that has been extracted (and removed from the file)."
+		    type       	"String"
+		    quidu      	"397D9546039F"
+		    Containment 	"By Value")
+		(object ClassAttribute "segments"
+		    quid       	"3890CD21037C"
+		    documentation 	"List of segments in Unicode (String?)."
+		    type       	"SegmentNode"
+		    quidu      	"3890E9260074")
+		(object ClassAttribute "errors"
+		    quid       	"3890E9540373"
+		    documentation 	"List of non-fatal errors/warnings/information.")
+		(object ClassAttribute "wordCount"
+		    quid       	"3890E9AD02E5"
+		    documentation 	
+|Word count statistics of input "chunk" and each segment.
+		    
+		    type       	"Integer"
+		    quidu      	"397D99370143")
+		(object ClassAttribute "assets"
+		    quid       	"3890EC4200E6"
+		    documentation 	"List of URL's pointing to assets (graphics, JavaScript, Java applets etc..).  Skeleton now includes markers surrounding assets to facilitate page generation and localization steps.")
+		(object ClassAttribute "l10nStrings"
+		    quid       	"3890EC5E00D3"
+		    documentation 	"Localization strings: strings that need to be automatically or manually localized.  E.g., fonts, dates, currency etc.")))
+	(object Class "SegmentNode"
+	    quid       	"3890E9260074")
+	(object Class "TMSearchParameters"
+	    quid       	"3890EE64033A"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "tmNode"
+		    quid       	"3890EE7C01FE"
+		    documentation 	"Holds list of TM search options.  One node for each separate TM to search.  ")
+		(object ClassAttribute "tmSearchType"
+		    quid       	"3890EEA00369"
+		    documentation 	"TM or concordance search")
+		(object ClassAttribute "tmName"
+		    quid       	"3890EEBD02D4"
+		    documentation 	"Name of TM to search")
+		(object ClassAttribute "threshold"
+		    quid       	"3890EED6038E"
+		    documentation 	"Threshold at which we accept fuzzy matches (default is 80% fuzzy match).")
+		(object ClassAttribute "sourceLocale"
+		    quid       	"3890EF11036B"
+		    documentation 	"We search on this locale")
+		(object ClassAttribute "ngramSize"
+		    quid       	"3890EF28035A"
+		    documentation 	"N-gram size for source locale (N-gram is an overlapping character sequence.")
+		(object ClassAttribute "constraints"
+		    quid       	"3890EF380371"
+		    documentation 	
+|SQL sub-statement constraining the rows we search. (e.g., where date > 12/9/99 and Project = "Excalibur"  and page_id = 1030)
+		    )
+		(object ClassAttribute "targetLocales"
+		    quid       	"3890EF5400DC"
+		    documentation 	"List of locales for which we return matches. We search on one locale, but return n locale matches")))
+	(object Class "TMComponentInput"
+	    quid       	"3890EF7502A7"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "tmToSearch"
+		    quid       	"3890EF820133"
+		    documentation 	"List of TMs to search and associated search parameters ")
+		(object ClassAttribute "sourceSegments"
+		    quid       	"3890EF9E0093"
+		    documentation 	"List of source segments to leverage.")
+		(object ClassAttribute "concordanceParams"
+		    quid       	"3890EFBE03D8")))
+	(object Class "TMComponentOutput"
+	    quid       	"3890EFD50074"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "orgSrcSegments"
+		    quid       	"3890EFE602D1"
+		    documentation 	"Original source segments")
+		(object ClassAttribute "matchedSegments"
+		    quid       	"3890EFF9012A"
+		    documentation 	"List of matched segments for each specified target locale.  ")
+		(object ClassAttribute "leverageStats"
+		    quid       	"3890F013024A"
+		    documentation 	"Leveraged word count statistics: Number of exact and fuzzy matches for each locale.  Number of exact and fuzzy words in each matched segments.  Total word count of all input segments.")))
+	(object Class "TerminologyParameters"
+	    quid       	"3890F1A5003F"
+	    documentation 	"Similar to TM parameters (to be defined later)")
+	(object Class "TerminologyInput"
+	    quid       	"3890F1D600C2"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "segment"
+		    quid       	"3890F1FB01D3"
+		    documentation 	"Segment to retrieve all relevant terms in segment or term to find individual terms.")
+		(object ClassAttribute "sourceLocale"
+		    quid       	"3890F20C0015"
+		    documentation 	"Source code set and locale")
+		(object ClassAttribute "targetLocale"
+		    quid       	"3890F22102B4"
+		    documentation 	"Target code set and locale")))
+	(object Class "TerminologyOutput"
+	    quid       	"3890F23D00C0"
+	    documentation 	"List of all source terms and target matchesfound in segment or a list of matches for the query term for each target locale. Each item in the list is give a score 0-100.")
+	(object Class "MergerParameters"
+	    quid       	"3890F28B0393"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "entityCodePoints"
+		    quid       	"3890F2BD0381"
+		    documentation 	"List of Unicode code points to convert to entities (if applicable to the format)")
+		(object ClassAttribute "mergeContents"
+		    quid       	"3890F2DD02AA"
+		    documentation 	"Boolean: Merge the localized content or not?"
+		    type       	"Boolean"
+		    quidu      	"397D99370355")))
+	(object Class "MergerInput"
+	    quid       	"3890F30A02FF"
+	    documentation 	"Note:  The merger could accept one multiple target locales at a time, and out put each localized page at one call.  The merge is not currently designed for multiple target input.  I raise the possibility of outputting multiple localized pages as a possible optimization."
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "mergerParams"
+		    quid       	"3890F33403BE"
+		    documentation 	"Merger Parameters for each target locale"
+		    type       	"MergerParameters"
+		    quidu      	"3890F28B0393")
+		(object ClassAttribute "skeleton"
+		    quid       	"3890F34B03DF"
+		    documentation 	"Skeleton (possibly modified by add/delete).")
+		(object ClassAttribute "targetSegments"
+		    quid       	"3890F35E022E"
+		    documentation 	"List of target segments.")
+		(object ClassAttribute "localizableChunks"
+		    quid       	"3890F37B01C1"
+		    documentation 	"List of localizable chunks (fonts, dates, currency, URLs etc.).")
+		(object ClassAttribute "targetLocale"
+		    quid       	"3890F38C019E"
+		    documentation 	"Target locale")
+		(object ClassAttribute "targetCodeSet"
+		    quid       	"3890F39F008D"
+		    documentation 	"Target codeset.")))
+	(object Class "LocalizedPage"
+	    quid       	"3890F3E7031B"
+	    documentation 	
+|This is the output from the merger.
+|
+|This class has getters and setters for all the private attributes.
+	    
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "localizedPage"
+		    quid       	"3890F3F900DC"
+		    documentation 	
+|Localized "Page"
+		    )
+		(object ClassAttribute "errors"
+		    quid       	"3890F40D012B"
+		    documentation 	"List of non-fatal errors/warnings/information.")))
+	(object Class "PageGenerationInput"
+	    quid       	"3890F42C01C6"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "sourceSkeleton"
+		    quid       	"3890F43B02B8"
+		    documentation 	"Source skeleton")
+		(object ClassAttribute "assetURL"
+		    quid       	"3890F45C0265"
+		    documentation 	"List of asset URL's")
+		(object ClassAttribute "prevExactMatches"
+		    quid       	"3890F46E021B"
+		    documentation 	"List of previously translated exact match segments (from Page TM).")
+		(object ClassAttribute "otherMatches"
+		    quid       	"3890F49902EF"
+		    documentation 	"List of all other exact fuzzy matches (from Project TM).")
+		(object ClassAttribute "matchedTargetTerms"
+		    quid       	"3890F4B602AB"
+		    documentation 	"Matched target terms for each segment.")
+		(object ClassAttribute "targetLocale"
+		    quid       	"3890F4D10033"
+		    documentation 	"Target code set and locale")
+		(object ClassAttribute "srcSegments"
+		    quid       	"389644DB013A"
+		    documentation 	"Source segments")))
+	(object Class "OnlineTranslationPackage"
+	    quid       	"3890F52500DE"
+	    documentation 	
+|This is the data object that is used by the Segment Editor to render the page to be localized, as well as store localization results.
+|
+|Note from Jim: We need to think about rendering the segments properly in the HTML pages.
+|
+|XML, RTF, MIF, WML other formats…?
+|
+|This class has getters and setters for all the private attributes.
+	    
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "sourcePage"
+		    quid       	"3890F5450198"
+		    documentation 	
+|Source page with "extra" markup (i.e., highlighted for extact/fuzzy matches, links for terminology, navigation aids etc..)
+		    )
+		(object ClassAttribute "targetPage"
+		    quid       	"3890F5520219"
+		    documentation 	"Target page.")
+		(object ClassAttribute "srcSegments"
+		    quid       	"3890F56303AE"
+		    documentation 	"List of source segments to translate")
+		(object ClassAttribute "tmMatches"
+		    quid       	"3890F58203E4"
+		    documentation 	"List of Page and Project TM matches for each source segment.")
+		(object ClassAttribute "terminologyMatches"
+		    quid       	"3890F5A003C9"
+		    documentation 	"List of terminology matches for each source segment.")
+		(object ClassAttribute "targetSegments"
+		    quid       	"38971E7402CC"
+		    documentation 	"List of localized target segments")))
+	(object Class "TranslatorWorkstationInput"
+	    quid       	"3890F62F0108"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "sourcePage"
+		    quid       	"3890F64E030B"
+		    documentation 	"Juiced up source page for TW")
+		(object ClassAttribute "targetPage"
+		    quid       	"3890F65E0174"
+		    documentation 	"Juiced up source page for TW")
+		(object ClassAttribute "tmMatches"
+		    quid       	"3890F66F0363"
+		    documentation 	"TM matches.")
+		(object ClassAttribute "termMatches"
+		    quid       	"3890F68C0333"
+		    documentation 	"Term Matches.")
+		(object ClassAttribute "segments"
+		    quid       	"3890F69E028E"
+		    documentation 	"Each source segment properly rendered.")
+		(object ClassAttribute "localizedContent"
+		    quid       	"3890F6B802F0"
+		    documentation 	"Suggested localized content (dates, currency, numbers) for target.")))
+	(object Class "TranslatorWorkstationOutput"
+	    quid       	"3890F6E80190"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "segments"
+		    quid       	"3890F710018E"
+		    documentation 	"List of source segment(s) and matching target segment(s).")
+		(object ClassAttribute "newGlossary"
+		    quid       	"3890F7210337"
+		    documentation 	"New glossary terms and translations?")))
+	(object Class "LocalizationComponentInput"
+	    quid       	"3890F76403C9"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "skeleton"
+		    quid       	"3890F77400BF"
+		    documentation 	"Skeleton.")
+		(object ClassAttribute "targetLocale"
+		    quid       	"3890F7830324"
+		    documentation 	"Target locale and codeset.")
+		(object ClassAttribute "localizableStuff"
+		    quid       	"3890F7960227"
+		    documentation 	"List of localizable stuff.")
+		(object ClassAttribute "localizationRules"
+		    quid       	"3890F7AA02C6"
+		    documentation 	"Localization rules for current input (project).")))
+	(object Class "LocalizationComponentOutput"
+	    quid       	"3890F7C001A5"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "targetPage"
+		    quid       	"3890F7D302ED"
+		    documentation 	"Localized target page.")))
+	(object Class "SegmentationValidationInput"
+	    quid       	"3890F8370228")
+	(object Class "SegmentationValidationOutput"
+	    quid       	"3890F84502E7")
+	(object Class "SegmentationRendererInput"
+	    quid       	"3890F8940178")
+	(object Class "SegmentationRendererOutput"
+	    quid       	"3890F8A40243")
+	(object Class "PageIdentifier"
+	    quid       	"38ADD4780086"
+	    documentation 	"This type uniquely identifies a page in the system.  Each page has an associated project id.  An implementation of this type will be passed between servers and clients."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getProjectId"
+		    quid       	"38ADD4E20241"
+		    documentation 	"Get the identification of the project that this page is in."
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D99370143")
+		(object Operation "getPageId"
+		    quid       	"38ADD50200FC"
+		    documentation 	"Get the identification number of this page.  This identification, together with the identification of the project that this page is in, and the identification of the job that this page is in, uniquely identifies a page."
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D99370143")))
+	(object Class "LingServerJDKRemote"
+	    quid       	"38CC902801F5"
+	    documentation 	"This interface extends LingServer to be a remote interface for JDK remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CC90530251"
+		    supplier   	"Logical View::Linguistics::LingServer"
+		    quidu      	"388BA2370262")
+		(object Inheritance_Relationship
+		    quid       	"38CC906D017C"
+		    supplier   	"Logical View::java.rmi.Remote"
+		    quidu      	"38CC8FC9005E")))
+	(object Class "LingServerWLRemote"
+	    quid       	"38CC94610055"
+	    documentation 	"This interface extends LingServer to be a remote interface for WebLogic remote objects."
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"38CC94A0034F"
+		    supplier   	"Logical View::Linguistics::LingServer"
+		    quidu      	"388BA2370262")
+		(object Inheritance_Relationship
+		    quid       	"38CC94A40246"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")))
+	(object Class "LingServerWLRMI"
+	    quid       	"38CC94AA03A3"
+	    documentation 	"This is an implementation of the LingServerWLRemote interface using WebLogic's RMI.  It runs in the same process as LingServerLocal (and therefore in the same process as the Linguistics subsystem) and provides a remote interface to remote clients.  It delegates client requests to an instance of LingServerLocal."
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"38CC94B701CB"
+		    supplier   	"Logical View::Linguistics::LingServerWLRemote"
+		    quidu      	"38CC94610055"))
+	    operations 	(list Operations
+		(object Operation "create"
+		    quid       	"38CCA5CE0321"
+		    documentation 	"Constructor.  Save reference to local LingServer to be used for delegation."
+		    parameters 	(list Parameters
+			(object Parameter "localServer"
+			    quid       	"39403DDB034C"
+			    documentation 	"Referece to a local (in process) instance of LingServer."
+			    type       	"LingServer"
+			    quidu      	"388BA2370262"))
+		    result     	"LingServer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"388BA2370262")))
+	(object Class "PageGenerator"
+	    quid       	"38CFC9D301A6"
+	    documentation 	"This is the interface to the Page Generator component."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "generateTranxPreview"
+		    quid       	"38CFCFA1029D"
+		    documentation 	
+|Generate the specified version of the preview page that can be used by the Segment Editor as the source data in its operation to localize the page.  The preview page will include data and format information that makes the presentation of the page look as close to the "real" page as possible.  Data of the specified version will be used to generate the page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"39403DDB0350"
+			    documentation 	"The page to generate preview for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "locale"
+			    quid       	"39403DDB0351"
+			    documentation 	"Target locale for the page.")
+			(object Parameter "version"
+			    quid       	"39403DDB0352"
+			    documentation 	"Generates a translation preview page for the specified version of the page.  (See the method setVersion)"
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    result     	"PageGenerationOutput"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rebuildTranxPreview"
+		    quid       	"38CFCFCC0385"
+		    documentation 	
+|Rebuild the specified version of the preview page that can be used by the Segment Editor as the source data in its operation to localize the page.  The preview page will include data and format information that makes the presentation of the page look as close to the "real" page as possible.  Data of the specified version will be used to generate the page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "pageId"
+			    quid       	"39403DDB0354"
+			    documentation 	"The page to generate preview for."
+			    type       	"PageIdentifier"
+			    quidu      	"38ADD4780086")
+			(object Parameter "locale"
+			    quid       	"39403DDB0355"
+			    documentation 	"Target locale for the page.")
+			(object Parameter "version"
+			    quid       	"39403DDB0356"
+			    documentation 	"Generates a translation preview page for the specified version of the page.  (See the method setVersion)"
+			    type       	"Integer"
+			    quidu      	"397D99370143"))
+		    result     	"PageGenerationOutput"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "TranslationServer"
+	    quid       	"394180620117"
+	    documentation 	"This interface performs translation related operations on a given piece of text.  The typical usage would be to search for a TM or terminology match for a given text segment.  This is purely a linguistics operation, nothing is job related."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getAllTM"
+		    quid       	"394630C80206"
+		    documentation 	"Get a list of all the translation memories in the Linguistics system."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceSegmentInTM"
+		    quid       	"397F1AC20254"
+		    documentation 	"Replace a segment for the specified locale in the specified TM."
+		    parameters 	(list Parameters
+			(object Parameter "p_TMId"
+			    quid       	"397F1AEF0258"
+			    documentation 	"The identification of the TM where the target segment is."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_segmentId"
+			    quid       	"397F1AEF026D"
+			    documentation 	"The identification of the segment to be replaced."
+			    type       	"Integer"
+			    quidu      	"397D99370143")
+			(object Parameter "p_locale"
+			    quid       	"397F1AEF0277"
+			    documentation 	"The locale that the new text apply to."
+			    type       	"Locale"
+			    quidu      	"397D98AB01F6")
+			(object Parameter "p_newText"
+			    quid       	"397F1AEF0295"
+			    documentation 	"The new text for the target segment."
+			    type       	"String"
+			    quidu      	"397D9546039F"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "OfflineTranslationPackage"
+	    quid       	"398B11ED0265"
+	    documentation 	"A package to be downloaded for offline translation of the specified page.  ")
+	(object Association "$UNNAMED$0"
+	    quid       	"388D666900AF"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"388D666A0205"
+		    supplier   	"Logical View::Linguistics::LingServerLocal"
+		    quidu      	"388D62C5022C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"388D666A020F"
+		    supplier   	"Logical View::Linguistics::LingServerJDKRMI"
+		    quidu      	"388D631400D1")))
+	(object Association "$UNNAMED$3"
+	    quid       	"38CC94BC0205"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"38CC94BD010C"
+		    supplier   	"Logical View::Linguistics::LingServerLocal"
+		    quidu      	"388D62C5022C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"38CC94BD0116"
+		    supplier   	"Logical View::Linguistics::LingServerWLRMI"
+		    quidu      	"38CC94AA03A3")))
+	(object Class_Category "L10nDataServer"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\Linguistics\\L10nDataServer.cat"
+	    quid       	"38C6A9BF035C")
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "$UNNAMED$6"
+		    quid       	"38ADEB6C022A"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38ADEBCD00B7"
+			    supplier   	"$UNNAMED$7"
+			    quidu      	"38ADEB9302A8"
+			    messages   	(list Messages
+				(object Message "createL10nProject( )"
+				    quid       	"38ADEBCD00B8"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"3896F26F00BC")
+				(object Message "addPageToProject(input : String, projectId : Integer)"
+				    quid       	"38ADEBE4006A"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    quidu      	"388D633D018E")
+				(object Message "getOnlineTranslationPackage (  )"
+				    quid       	"38ADF27B02A0"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	3
+				    Operation  	"getOnlineTranslationPackage(pageId : PageIdentifier, assetURL : )"
+				    quidu      	"38ADDE800088")
+				(object Message "addTranslationToPage(projectId : Integer, translationData : , locale : )"
+				    quid       	"38ADF2AD018A"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	4
+				    quidu      	"3896F285023A")
+				(object Message "createPageVersion( )"
+				    quid       	"38ADF30703B0"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	5
+				    quidu      	"38ADE13C00E9")
+				(object Message "generateLocalizedPage(pageId : PageIdentifier, assetURL : , locale : )"
+				    quid       	"38ADF3CB03B2"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	6
+				    quidu      	"3896F220011D")
+				(object Message "finalizeL10nProject(projectId : Integer)"
+				    quid       	"38ADF41F0204"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"8"
+				    ordinal    	7
+				    quidu      	"3896F2A8035D")))
+			(object Link
+			    quid       	"38ADF20D01BC"
+			    supplier   	"$UNNAMED$6"
+			    quidu      	"38ADEB6C022A")
+			(object Link
+			    quid       	"38C804090143"
+			    supplier   	"$UNNAMED$8"
+			    quidu      	"38C803E7031B"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"38C804090144"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+		    quidu      	"38BEFAD2003B"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$7"
+		    quid       	"38ADEB9302A8"
+		    class      	"Logical View::Linguistics::LingServer"
+		    quidu      	"388BA2370262"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$8"
+		    quid       	"38C803E7031B"
+		    class      	"LingServerFinder"
+		    quidu      	"38C7B9E1032C"
+		    persistence 	"Transient"
+		    multi      	FALSE)))
+	(object Mechanism @2
+	    logical_models 	(list unit_reference_list
+		(object Object "Main"
+		    quid       	"38C809480248"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"38D6C5DF03E4"
+			    supplier   	"$UNNAMED$9"
+			    quidu      	"38D6C5A702A3"
+			    messages   	(list Messages
+				(object Message "create"
+				    quid       	"38D6C5DF03E5"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0)))
+			(object Link
+			    quid       	"38D6C5F402FE"
+			    supplier   	"$UNNAMED$10"
+			    quidu      	"38D6C5AD039C"
+			    messages   	(list Messages
+				(object Message "create( )"
+				    quid       	"38D6C5F402FF"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    Operation  	"create(localServer : LingServer)"
+				    quidu      	"38C80A06031E")))
+			(object Link
+			    quid       	"38D6C61301CC"
+			    supplier   	"$UNNAMED$11"
+			    quidu      	"38D6C5B901EA"
+			    messages   	(list Messages
+				(object Message "getRegistry( )"
+				    quid       	"38D6C61301CD"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    quidu      	"38D6A17D019A")))
+			(object Link
+			    quid       	"38D6C62F030C"
+			    supplier   	"$UNNAMED$12"
+			    quidu      	"38D6C5C0037B"
+			    messages   	(list Messages
+				(object Message "bind(  )"
+				    quid       	"38D6C62F030D"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	3
+				    Operation  	"bind(name : String, server : EvRemote)"
+				    quidu      	"38D6A0080248"))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$9"
+		    quid       	"38D6C5A702A3"
+		    class      	"Logical View::Linguistics::LingServerLocal"
+		    quidu      	"388D62C5022C"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$10"
+		    quid       	"38D6C5AD039C"
+		    class      	"Logical View::Linguistics::LingServerJDKRMI"
+		    quidu      	"388D631400D1"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$11"
+		    quid       	"38D6C5B901EA"
+		    class      	"Logical View::Utilities::Server::RegistryLocator"
+		    quidu      	"38D6A153003C"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$12"
+		    quid       	"38D6C5C0037B"
+		    class      	"Logical View::Utilities::Server::ServerRegistry"
+		    quidu      	"38D69F87013E"
+		    persistence 	"Transient"
+		    multi      	FALSE)))
+	(object Mechanism @3
+	    logical_models 	(list unit_reference_list
+		(object Object "Job Handler"
+		    quid       	"394297C8032C"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"394297DA00E3"
+			    supplier   	"$UNNAMED$13"
+			    quidu      	"394297D60200"
+			    messages   	(list Messages
+				(object Message "addPageToProject(input : String, projectId : Integer)"
+				    quid       	"394297DA00E4"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    quidu      	"388D633D018E")))
+			(object Link
+			    quid       	"3942A2B90370"
+			    supplier   	"Workflow"
+			    quidu      	"394297E103E6"
+			    messages   	(list Messages
+				(object Message "create workflow instances"
+				    quid       	"3942A2B90384"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$13"
+		    quid       	"394297D60200"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"394297EC02C0"
+			    supplier   	"Workflow"
+			    quidu      	"394297E103E6"))
+		    class      	"Logical View::Linguistics::LingServer"
+		    quidu      	"388BA2370262"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "Workflow"
+		    quid       	"394297E103E6"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"3890C78C03DC"
+	    title      	"Main"
+	    documentation 	
+|The reasons for having LingServerLocal are:
+|
+|1. It implements the logic of the LingServer interface so that other LingServer implementer can delegate to it.  This means that we have the implementation in one place only.
+|
+|2. It can be used directly by co-located clients.
+|
+|
+	    
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object CategoryView "Logical View::Linguistics::L10nDataServer" @4
+		    location   	(1376, 2576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1232, 2492)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"L10nDataServer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6A9BF035C"
+		    width      	300
+		    height     	180)
+		(object ClassView "Class" "Logical View::Linguistics::LingServer" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1408, 688)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1167, 303)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	482
+			justify    	0
+			label      	"LingServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@5
+			location   	(1167, 253)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	482
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388BA2370262"
+		    compartment 	(object Compartment
+			Parent_View 	@5
+			location   	(1167, 359)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Label"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	27
+			max_width  	0)
+		    width      	500
+		    height     	894
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::PageIdentifier" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(656, 2528)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(514, 2448)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	284
+			justify    	0
+			label      	"PageIdentifier")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(514, 2398)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	284
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADD4780086"
+		    width      	302
+		    height     	284
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerWLRemote" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1808, 1344)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(1593, 1316)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	430
+			justify    	0
+			label      	"LingServerWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@7
+			location   	(1593, 1266)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	430
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC94610055"
+		    width      	448
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @8
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC94A0034F"
+		    client     	@7
+		    supplier   	@5
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerJDKRMI" @9
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(704, 1728)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@9
+			location   	(522, 1650)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	364
+			justify    	0
+			label      	"LingServerJDKRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388D631400D1"
+		    width      	382
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerLocal" @10
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1392, 2128)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(1235, 2078)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	314
+			justify    	0
+			label      	"LingServerLocal")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388D62C5022C"
+		    width      	332
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @11
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"388D65F20217"
+		    client     	@10
+		    supplier   	@5
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$0" @12
+		    location   	(1072, 1941)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"388D666900AF"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @13
+			    Parent_View 	@12
+			    location   	(-432, 949)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"388D666A0205"
+			    client     	@12
+			    supplier   	@10
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @14
+			    Parent_View 	@12
+			    location   	(-432, 949)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"388D666A020F"
+			    client     	@12
+			    supplier   	@9
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Linguistics::LingServerWLRMI" @15
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1808, 1696)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@15
+			location   	(1627, 1618)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	362
+			justify    	0
+			label      	"LingServerWLRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC94AA03A3"
+		    width      	380
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @16
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC94B701CB"
+		    client     	@15
+		    supplier   	@7
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$3" @17
+		    location   	(1585, 1925)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC94BC0205"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @18
+			    Parent_View 	@17
+			    location   	(-479, 245)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CC94BD010C"
+			    client     	@17
+			    supplier   	@10
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @19
+			    Parent_View 	@17
+			    location   	(-479, 245)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CC94BD0116"
+			    client     	@17
+			    supplier   	@15
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Linguistics::LingServerJDKRemote" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(704, 1232)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(483, 1204)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	442
+			justify    	0
+			label      	"LingServerJDKRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@20
+			location   	(483, 1154)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	442
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC902801F5"
+		    width      	460
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @21
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6C1CC00FF"
+		    client     	@9
+		    supplier   	@20
+		    line_style 	0)
+		(object InheritView "" @22
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC90530251"
+		    client     	@20
+		    supplier   	@5
+		    line_style 	0)))
+	(object ClassDiagram "External Interface"
+	    quid       	"388BA1F902A9"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::PageIdentifier" @23
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1648, 304)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(1501, 220)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	294
+			justify    	0
+			label      	"PageIdentifier")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@23
+			location   	(1501, 170)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	294
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADD4780086"
+		    width      	312
+		    height     	292
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServer" @24
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(656, 640)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@24
+			location   	(263, 156)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	786
+			justify    	0
+			label      	"LingServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@24
+			location   	(263, 106)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	786
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388BA2370262"
+		    compartment 	(object Compartment
+			Parent_View 	@24
+			location   	(263, 212)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Label"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	28
+			max_width  	0)
+		    width      	804
+		    height     	1092
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::OnlineTranslationPackage" @25
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(480, 1664)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(221, 1614)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	518
+			justify    	0
+			label      	"OnlineTranslationPackage")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F52500DE"
+		    width      	536
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LocalizedPage" @26
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1664, 1712)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@26
+			location   	(1508, 1606)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	312
+			justify    	0
+			label      	"LocalizedPage")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F3E7031B"
+		    width      	330
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TranslationServer" @27
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1632, 816)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@27
+			location   	(1463, 757)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	338
+			justify    	0
+			label      	"TranslationServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@27
+			location   	(1463, 707)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	338
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394180620117"
+		    compartment 	(object Compartment
+			Parent_View 	@27
+			location   	(1463, 813)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	0)
+		    width      	356
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "Data Objects"
+	    quid       	"38C6AFD303A0"
+	    title      	"Data Objects"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	2081
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::EFInputData" @28
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(544, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@28
+			location   	(343, 105)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	402
+			justify    	0
+			label      	"EFInputData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890C79B03A1"
+		    width      	420
+		    height     	486
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::PageLinguisticsData" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1712, 432)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(1450, 126)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	524
+			justify    	0
+			label      	"PageLinguisticsData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890CC4A02B5"
+		    width      	542
+		    height     	636
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::SegmentNode" @30
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1728, 2384)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@30
+			location   	(1583, 2333)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	290
+			justify    	0
+			label      	"SegmentNode")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890E9260074"
+		    width      	308
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TMSearchParameters" @31
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(512, 1040)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(294, 784)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"TMSearchParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890EE64033A"
+		    width      	454
+		    height     	536
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TMComponentInput" @32
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 912)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@32
+			location   	(876, 781)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	424
+			justify    	0
+			label      	"TMComponentInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890EF7502A7"
+		    width      	442
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TMComponentOutput" @33
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 1232)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@33
+			location   	(880, 1101)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	416
+			justify    	0
+			label      	"TMComponentOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890EFD50074"
+		    width      	434
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TerminologyParameters" @34
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(528, 1488)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@34
+			location   	(293, 1437)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	470
+			justify    	0
+			label      	"TerminologyParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F1A5003F"
+		    width      	488
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TerminologyInput" @35
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 1568)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@35
+			location   	(919, 1437)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	338
+			justify    	0
+			label      	"TerminologyInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F1D600C2"
+		    width      	356
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TerminologyOutput" @36
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1680, 1488)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@36
+			location   	(1490, 1436)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	380
+			justify    	0
+			label      	"TerminologyOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F23D00C0"
+		    width      	398
+		    height     	128
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::MergerParameters" @37
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(400, 1936)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@37
+			location   	(144, 1830)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	512
+			justify    	0
+			label      	"MergerParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F28B0393"
+		    width      	530
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::MergerInput" @38
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 2032)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@38
+			location   	(743, 1826)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	690
+			justify    	0
+			label      	"MergerInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F30A02FF"
+		    width      	708
+		    height     	436
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LocalizedPage" @39
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1712, 1936)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@39
+			location   	(1556, 1830)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	312
+			justify    	0
+			label      	"LocalizedPage")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F3E7031B"
+		    width      	330
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::PageGenerationInput" @40
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(368, 2560)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@40
+			location   	(151, 2329)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	434
+			justify    	0
+			label      	"PageGenerationInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F42C01C6"
+		    width      	452
+		    height     	486
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::OnlineTranslationPackage" @41
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(960, 2512)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@41
+			location   	(701, 2306)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	518
+			justify    	0
+			label      	"OnlineTranslationPackage")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F52500DE"
+		    width      	536
+		    height     	436
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TranslatorWorkstationInput" @42
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2688, 320)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@42
+			location   	(2425, 114)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	526
+			justify    	0
+			label      	"TranslatorWorkstationInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F62F0108"
+		    width      	544
+		    height     	436
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::TranslatorWorkstationOutput" @43
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(3504, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@43
+			location   	(3227, 118)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	554
+			justify    	0
+			label      	"TranslatorWorkstationOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F6E80190"
+		    width      	572
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LocalizationComponentInput" @44
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2720, 944)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@44
+			location   	(2445, 788)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	550
+			justify    	0
+			label      	"LocalizationComponentInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F76403C9"
+		    width      	568
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LocalizationComponentOutput" @45
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(3584, 880)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@45
+			location   	(3295, 799)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	578
+			justify    	0
+			label      	"LocalizationComponentOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F7C001A5"
+		    width      	596
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::SegmentationValidationInput" @46
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2800, 1296)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@46
+			location   	(2523, 1245)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	554
+			justify    	0
+			label      	"SegmentationValidationInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F8370228"
+		    width      	572
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::SegmentationValidationOutput" @47
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(3712, 1296)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@47
+			location   	(3420, 1245)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	584
+			justify    	0
+			label      	"SegmentationValidationOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F84502E7"
+		    width      	602
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::SegmentationRendererInput" @48
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2784, 1552)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@48
+			location   	(2517, 1501)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	534
+			justify    	0
+			label      	"SegmentationRendererInput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F8940178"
+		    width      	552
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::SegmentationRendererOutput" @49
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(3696, 1568)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@49
+			location   	(3409, 1517)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	574
+			justify    	0
+			label      	"SegmentationRendererOutput")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3890F8A40243"
+		    width      	592
+		    height     	126
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "Page Generator"
+	    quid       	"38CFC9B403D2"
+	    title      	"Page Generator"
+	    documentation 	"Classes in the page generator component."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::PageGenerator" @50
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(768, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@50
+			location   	(539, 320)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	458
+			justify    	0
+			label      	"PageGenerator")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@50
+			location   	(539, 270)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	458
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CFC9D301A6"
+		    compartment 	(object Compartment
+			Parent_View 	@50
+			location   	(539, 376)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	0)
+		    width      	476
+		    height     	284
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "LingServer Interface"
+	    quid       	"38D6C0730328"
+	    title      	"LingServer Interface"
+	    documentation 	"This diagram shows the class relationship for the LingServer interface that makes it work in the Envoy Server Registry Facility.  Currently this diagram only shows the JDK RMI implementation.  Later (in iterfaction 2) we can add the WebLogic implementation."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Linguistics::LingServer" @51
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(1280, 192)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@51
+			location   	(903, 136)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	754
+			justify    	0
+			label      	"LingServer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@51
+			location   	(903, 86)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	754
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388BA2370262"
+		    width      	772
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerJDKRemote" @52
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(944, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@52
+			location   	(723, 900)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	442
+			justify    	0
+			label      	"LingServerJDKRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@52
+			location   	(723, 850)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	442
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC902801F5"
+		    width      	460
+		    height     	180
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @53
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC90530251"
+		    client     	@52
+		    supplier   	@51
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.Remote" @54
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(736, 496)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@54
+			location   	(574, 444)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	324
+			justify    	0
+			label      	"java.rmi.Remote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@54
+			location   	(574, 394)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	324
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC8FC9005E"
+		    width      	342
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @55
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CC906D017C"
+		    client     	@52
+		    supplier   	@54
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::java.rmi.UnicastRemoteObject" @56
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(352, 1216)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@56
+			location   	(63, 1164)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	578
+			justify    	0
+			label      	"java.rmi.UnicastRemoteObject")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@56
+			location   	(63, 1114)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	578
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6BCE9002C"
+		    width      	596
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerJDKRMI" @57
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(992, 1408)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@57
+			location   	(810, 1356)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	364
+			justify    	0
+			label      	"LingServerJDKRMI")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388D631400D1"
+		    width      	382
+		    height     	128
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Linguistics::LingServerLocal" @58
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1280, 1824)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@58
+			location   	(1123, 1774)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	314
+			justify    	0
+			label      	"LingServerLocal")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"388D62C5022C"
+		    width      	332
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @59
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"388D65F20217"
+		    client     	@58
+		    supplier   	@51
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$0" @60
+		    location   	(1136, 1616)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"388D666900AF"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$2" @61
+			    Parent_View 	@60
+			    location   	(-144, -128)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @62
+				Parent_View 	@61
+				location   	(1023, 1525)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"388D666A020F"
+			    client     	@60
+			    supplier   	@57
+			    line_style 	0)
+			(object RoleView "$UNNAMED$1" @63
+			    Parent_View 	@60
+			    location   	(-144, -128)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @64
+				Parent_View 	@63
+				location   	(1182, 1756)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"388D666A0205"
+			    client     	@60
+			    supplier   	@58
+			    line_style 	0)))
+		(object InheritView "" @65
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6BD0F0103"
+		    client     	@57
+		    supplier   	@56
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Utilities::Server::EvRemote" @66
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(432, 800)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@66
+			location   	(304, 744)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"EvRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@66
+			location   	(304, 697)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D69FC900F3"
+		    width      	274
+		    height     	230
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @67
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6BD23001C"
+		    client     	@57
+		    supplier   	@66
+		    line_style 	0)
+		(object RealizeView "" @68
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38D6C1CC00FF"
+		    client     	@57
+		    supplier   	@52
+		    line_style 	0)))
+	(object InteractionDiagram "Processing a Project"
+	    mechanism_ref 	@1
+	    quid       	"38ADEB4A031B"
+	    title      	"Processing a Project"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	1730
+	    items      	(list diagram_item_list
+		(object InterObjView "$UNNAMED$6" @69
+		    location   	(688, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@69
+			location   	(688, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADEB6C022A"
+		    width      	300
+		    height     	2550
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @70
+			location   	(688, 368)
+			line_color 	3342489
+			InterObjView 	@69
+			height     	487
+			y_coord    	427
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @71
+			location   	(688, 1424)
+			line_color 	3342489
+			InterObjView 	@69
+			height     	601
+			y_coord    	541
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @72
+			location   	(688, 2144)
+			line_color 	3342489
+			InterObjView 	@69
+			height     	226
+			y_coord    	166
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @73
+			location   	(688, 2384)
+			line_color 	3342489
+			InterObjView 	@69
+			height     	301
+			y_coord    	241
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$7" @74
+		    location   	(1280, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@74
+			location   	(1280, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon       	"Interface"
+		    icon_style 	"None"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38ADEB9302A8"
+		    width      	300
+		    height     	2550
+		    icon_height 	57
+		    icon_width 	57
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @75
+			location   	(1275, 555)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @76
+			location   	(1275, 735)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @77
+			location   	(1275, 1620)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @78
+			location   	(1275, 1740)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @79
+			location   	(1275, 1905)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @80
+			location   	(1275, 2250)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @81
+			location   	(1275, 2565)
+			line_color 	3342489
+			InterObjView 	@74
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$8" @82
+		    location   	(1872, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(1872, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	394
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C803E7031B"
+		    width      	412
+		    height     	2550
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @83
+			location   	(1875, 390)
+			line_color 	3342489
+			InterObjView 	@82
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @84
+		    location   	(16, 560)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @85
+			Parent_View 	@84
+			location   	(983, 516)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADEBCD00B8"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	413
+			justify    	0
+			label      	"createL10nProject( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@70
+		    Focus_Entry 	@75
+		    origin     	(703, 560)
+		    terminus   	(1264, 560)
+		    ordinal    	1)
+		(object InterMessView "" @86
+		    location   	(16, 736)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @87
+			Parent_View 	@86
+			location   	(983, 692)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADEBE4006A"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	885
+			justify    	0
+			label      	"addPageToProject(input : String, projectId : Integer)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@70
+		    Focus_Entry 	@76
+		    origin     	(703, 736)
+		    terminus   	(1264, 736)
+		    ordinal    	2)
+		(object NoteView @88
+		    location   	(320, 608)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@88
+			location   	(110, 364)
+			fill_color 	13434879
+			nlines     	9
+			max_width  	384
+			label      	"Call these methods once per page in the project.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	444
+		    height     	500)
+		(object NoteView @89
+		    location   	(320, 1712)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@89
+			location   	(95, 1437)
+			fill_color 	13434879
+			nlines     	11
+			max_width  	415
+			label      	"Call these methods for every page in the project during the translation process.  The addTranslationToPage method is called at least once per segment. The createPageVersion method is called every time the user saves a page.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	475
+		    height     	562)
+		(object InterMessView "" @90
+		    location   	(16, 1616)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @91
+			Parent_View 	@90
+			location   	(983, 1572)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADF27B02A0"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	568
+			justify    	0
+			label      	"getOnlineTranslationPackage (  )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@71
+		    Focus_Entry 	@77
+		    origin     	(703, 1616)
+		    terminus   	(1264, 1616)
+		    ordinal    	3)
+		(object InterMessView "" @92
+		    location   	(16, 1744)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @93
+			Parent_View 	@92
+			location   	(983, 1700)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADF2AD018A"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	1183
+			justify    	0
+			label      	"addTranslationToPage(projectId : Integer, translationData : , locale : )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@71
+		    Focus_Entry 	@78
+		    origin     	(703, 1744)
+		    terminus   	(1264, 1744)
+		    ordinal    	4)
+		(object InterMessView "" @94
+		    location   	(16, 1904)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @95
+			Parent_View 	@94
+			location   	(983, 1860)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADF30703B0"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"createPageVersion( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@71
+		    Focus_Entry 	@79
+		    origin     	(703, 1904)
+		    terminus   	(1264, 1904)
+		    ordinal    	5)
+		(object InterMessView "" @96
+		    location   	(16, 2256)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @97
+			Parent_View 	@96
+			location   	(983, 2212)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADF3CB03B2"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	1210
+			justify    	0
+			label      	"generateLocalizedPage(pageId : PageIdentifier, assetURL : , locale : )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@72
+		    Focus_Entry 	@80
+		    origin     	(703, 2256)
+		    terminus   	(1264, 2256)
+		    ordinal    	6)
+		(object InterMessView "" @98
+		    location   	(16, 2560)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @99
+			Parent_View 	@98
+			location   	(983, 2516)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38ADF41F0204"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	650
+			justify    	0
+			label      	"finalizeL10nProject(projectId : Integer)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@74
+		    Focus_Src  	@73
+		    Focus_Entry 	@81
+		    origin     	(703, 2560)
+		    terminus   	(1264, 2560)
+		    ordinal    	7)
+		(object NoteView @100
+		    location   	(336, 2240)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@100
+			location   	(120, 2174)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	396
+			label      	"Call this per page per locale")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	456
+		    height     	144)
+		(object NoteView @101
+		    location   	(352, 2528)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@101
+			location   	(123, 2409)
+			fill_color 	13434879
+			nlines     	4
+			max_width  	422
+			label      	"End of project, save Project TM to Gold TM, etc.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	482
+		    height     	250)
+		(object InterMessView "" @102
+		    location   	(16, 384)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @103
+			Parent_View 	@102
+			location   	(1279, 340)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38C804090144"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	47
+			justify    	0
+			label      	""
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@69
+		    supplier   	@82
+		    Focus_Src  	@70
+		    Focus_Entry 	@83
+		    origin     	(703, 384)
+		    terminus   	(1856, 384)
+		    ordinal    	0)))
+	(object InteractionDiagram "Subsystem Startup"
+	    mechanism_ref 	@2
+	    quid       	"38C8077E004B"
+	    title      	"Subsystem Startup"
+	    documentation 	"This is a scenario of the Linguistics subsystem start up sequence."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "Main" @104
+		    location   	(640, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@104
+			location   	(640, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"Main")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C809480248"
+		    width      	300
+		    height     	1505
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @105
+			location   	(640, 352)
+			line_color 	3342489
+			InterObjView 	@104
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @106
+			location   	(640, 640)
+			line_color 	3342489
+			InterObjView 	@104
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @107
+			location   	(640, 1344)
+			line_color 	3342489
+			InterObjView 	@104
+			height     	296
+			y_coord    	236
+			Nested     	FALSE))
+		(object Label @108
+		    location   	(48, 352)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	5
+		    max_width  	394
+		    label      	"Create a instance of the local implementation of LingServer.")
+		(object Label @109
+		    location   	(47, 672)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	11
+		    max_width  	444
+		    label      	"Create an instance of the remote class that implements LingServer and delegates to the local class LingServerLocal.  Pass the reference of LingServerLocal to LingServerJDKRMI so that it has a delegate target.")
+		(object Label @110
+		    location   	(48, 1328)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	7
+		    max_width  	444
+		    label      	"Find the system wide server registry and bind (register) LingServerJDKRMI with it so that clients can find it and use it.")
+		(object InterObjView "$UNNAMED$9" @111
+		    location   	(1088, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@111
+			location   	(1088, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	296
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6C5A702A3"
+		    width      	314
+		    height     	1505
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @112
+			location   	(1088, 352)
+			line_color 	3342489
+			InterObjView 	@111
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$10" @113
+		    location   	(1552, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@113
+			location   	(1552, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	358
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6C5AD039C"
+		    width      	376
+		    height     	1505
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @114
+			location   	(1552, 640)
+			line_color 	3342489
+			InterObjView 	@113
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$11" @115
+		    location   	(1984, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@115
+			location   	(1984, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	304
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6C5B901EA"
+		    width      	322
+		    height     	1505
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @116
+			location   	(1984, 1344)
+			line_color 	3342489
+			InterObjView 	@115
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$12" @117
+		    location   	(2430, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@117
+			location   	(2430, 233)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	285
+			justify    	0
+			label      	"")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6C5C0037B"
+		    width      	236
+		    height     	1505
+		    icon_height 	57
+		    icon_width 	57
+		    icon_y_offset 	15
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @118
+			location   	(2430, 1515)
+			line_color 	3342489
+			InterObjView 	@117
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @119
+		    location   	(16, 352)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @120
+			Parent_View 	@119
+			location   	(863, 308)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38D6C5DF03E5"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	159
+			justify    	0
+			label      	"create"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@104
+		    supplier   	@111
+		    Focus_Src  	@105
+		    Focus_Entry 	@112
+		    origin     	(655, 352)
+		    terminus   	(1072, 352)
+		    ordinal    	0)
+		(object InterMessView "" @121
+		    location   	(16, 640)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @122
+			Parent_View 	@121
+			location   	(1095, 596)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38D6C5F402FF"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	197
+			justify    	0
+			label      	"create( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@104
+		    supplier   	@113
+		    Focus_Src  	@106
+		    Focus_Entry 	@114
+		    origin     	(655, 640)
+		    terminus   	(1536, 640)
+		    ordinal    	1)
+		(object InterMessView "" @123
+		    location   	(16, 1344)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @124
+			Parent_View 	@123
+			location   	(1311, 1300)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38D6C61301CD"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	291
+			justify    	0
+			label      	"getRegistry( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@104
+		    supplier   	@115
+		    Focus_Src  	@107
+		    Focus_Entry 	@116
+		    origin     	(655, 1344)
+		    terminus   	(1968, 1344)
+		    ordinal    	2)
+		(object InterMessView "" @125
+		    location   	(16, 1520)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @126
+			Parent_View 	@125
+			location   	(1534, 1476)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"38D6C62F030D"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	172
+			justify    	0
+			label      	"bind(  )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@104
+		    supplier   	@117
+		    Focus_Src  	@107
+		    Focus_Entry 	@118
+		    origin     	(655, 1520)
+		    terminus   	(2414, 1520)
+		    ordinal    	3)))
+	(object InteractionDiagram "Add a page to a project."
+	    mechanism_ref 	@3
+	    quid       	"3942979C031F"
+	    title      	"Add a page to a project."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "Job Handler" @127
+		    location   	(448, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@127
+			location   	(448, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"Job Handler")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394297C8032C"
+		    width      	300
+		    height     	593
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @128
+			location   	(448, 368)
+			line_color 	3342489
+			InterObjView 	@127
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @129
+			location   	(448, 512)
+			line_color 	3342489
+			InterObjView 	@127
+			height     	216
+			y_coord    	156
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$13" @130
+		    location   	(1232, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@130
+			location   	(1232, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394297D60200"
+		    width      	300
+		    height     	593
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @131
+			location   	(1232, 368)
+			line_color 	3342489
+			InterObjView 	@130
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "Workflow" @132
+		    location   	(1968, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@132
+			location   	(1968, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"Workflow")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394297E103E6"
+		    width      	300
+		    height     	593
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @133
+			location   	(1968, 608)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @134
+		    location   	(16, 368)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @135
+			Parent_View 	@134
+			location   	(839, 324)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"394297DA00E4"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"addPageToProject(input : String, projectId : Integer)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@127
+		    supplier   	@130
+		    Focus_Src  	@128
+		    Focus_Entry 	@131
+		    origin     	(463, 368)
+		    terminus   	(1216, 368)
+		    ordinal    	0)
+		(object InterMessView "" @136
+		    location   	(1216, 608)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @137
+			Parent_View 	@136
+			location   	(1207, 564)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3942A2B90384"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	513
+			justify    	0
+			label      	"create workflow instances"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@127
+		    supplier   	@132
+		    Focus_Src  	@129
+		    Focus_Entry 	@133
+		    origin     	(463, 608)
+		    terminus   	(1952, 608)
+		    ordinal    	1)))))

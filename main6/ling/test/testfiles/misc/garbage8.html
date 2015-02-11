@@ -1,0 +1,31 @@
+<HTML>
+<HEAD>
+</HEAD>
+
+<BODY>
+<P>From the character code tutorial at http://www.hut.fi/u/jkorpela/chars.html
+Wed Aug 23 03:24:09 2000</P>
+
+<P>Here, an inline element CODE is interupted by an INPUT box. The
+closing CODE tag has been moved to the skeleton because the parsing
+context has been set to skeletal (not extracting).  The problem looks
+like a misbehaviour of the extractor: it seems to prefer skeletal
+breaks in favor of text-introducing tags.  (To rephrase that: tags
+that "definitely" belong to the skeleton force a switch to the
+skeleton, whereas tags that belong in text do *not* force a switch to
+text.)</P> 
+
+<P>A better way to process the tags would use 2 passes: the first pass
+creates an ElementList, the second pass triages tags into skeleton and
+text, thereby having the freedom to treat some "skeletal" tags as
+inline, and inline tags surrounding a text context as skeletal. </P>
+
+  <FORM action=http://www.eki.ee/letter/chardata.cgi>
+  <DIV>This simple interface to the database lets you retrieve information about 
+  a Unicode character by code position (to be specified in hexadecimal, with 
+  four digits, as in <CODE>U+<VAR>nnnn</VAR></CODE>): <CODE>U+<INPUT size=10 
+  name=ucode></CODE> <INPUT type=submit value="Submit Query"> 
+</DIV></FORM>
+
+</BODY>
+</HTML>

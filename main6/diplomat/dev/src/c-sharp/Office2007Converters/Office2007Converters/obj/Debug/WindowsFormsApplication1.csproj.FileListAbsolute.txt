@@ -1,0 +1,8 @@
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\GlobalSight.WordConverter.MainForm.resources
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb

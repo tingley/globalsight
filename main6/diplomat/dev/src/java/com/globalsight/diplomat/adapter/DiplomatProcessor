@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2000 GlobalSight Corporation. All rights reserved.
+ * Dhananjay Ragade <ragade@globalsight.com>
+ *	 
+ * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
+ * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
+ * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
+ * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
+ * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
+ *
+ * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
+ * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
+ * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
+ * BY LAW.
+ */
+package com.globalsight.diplomat.adapter;
+
+/**
+ * DiplomatProcessor
+ * <p>
+ * An implementation of the DiplomatProcessorInterface
+ */
+public class DiplomatProcessor
+implements DiplomatProcessorInterface
+{
+
+    //constructor
+    DiplomatProcessor ()
+    {
+	m_eventFlowXml = null;
+	m_binaryContent = null;
+	m_unicodeContent = null;
+    }
+
+    /** Sets the processor's internal reference to the Event Flow Xml 
+     * @param the event flow xml */
+    public void setEventFlowXml(String p_eventFlowXml)
+    { m_eventFlowXml = p_eventFlowXml; }
+
+    /** Gets the event flow xml */
+    public String getEventFlowXml()
+    { return m_eventFlowXml; }
+
+    /** Sets the processor's internal reference to the content as a unicode string
+     * @param the content*/
+    public void setUnicodeContent(String p_unicodeContent)
+    { m_unicodeContent = p_unicodeContent; }
+
+    /** Gets the unicode content*/
+    public String getUnicodeContent()
+    { return m_unicodeContent; }
+
+    /** Sets the processor's internal reference to binary content as a byte array
+     * @param the content*/
+    public void setBinaryContent(byte[] p_binaryContent)
+    { m_binaryContent = p_binaryContent; }
+
+    /** Gets the unicode content*/
+    public byte[] getBinaryContent()
+    { return m_binaryContent; }
+
+    /** Performs arbitrary processing given the EventFlowXml
+    * and the content (in an original format like HTML, or in
+    * DiplomatXml, etc.) or in binary.
+    */
+    public void process ()
+    {
+	//arbitrary processing
+    }
+
+    //private members
+    private String m_eventFlowXml;
+    private String m_unicodeContent;
+    private byte[] m_binaryContent;
+}
+

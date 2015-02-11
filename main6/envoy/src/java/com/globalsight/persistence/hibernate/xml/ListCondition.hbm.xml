@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.ListCondition" table="LIST_CONDITION">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="multiple" column="MULTIPLE" type="yes_no"
+			not-null="true" unique="false" />
+			
+		<set name="allOptions" inverse="true" cascade="all">
+			<key column="LIST_CONDITION_ID" />
+			<one-to-many class="com.globalsight.cxe.entity.customAttribute.SelectOption" />
+		</set>
+	</class>
+</hibernate-mapping>

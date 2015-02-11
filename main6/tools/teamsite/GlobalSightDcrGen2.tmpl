@@ -1,0 +1,255 @@
+#!../../iw-perl/bin/iwperl
+
+#
+# This program receives a file name and the file data.
+# AJG - In the future it may need to receive meta-data (ie is a dcr, etc..)
+# Write to a log file in $iwhome/report/tmp/IW_GlobalSightImport.log
+# Makes a call to the program /usr/bin/GSNotifyIWImport passing the
+# absolute filename returned to IW and in the future possibly some meta-data
+# This external program can then start an IW workflow, log to a file, perform an
+# IWSubmit, or any other desired functionality.
+
+use strict;
+use CGI;
+use vars qw($logfile);
+
+sub log_entry;
+my $iw_home = "%%teamsite_home%%";
+my $username = "%%teamsite_master%%";
+my $previewPrefix = "Ambassador_preview";
+# Get IW home
+open(GETDATA, "%%teamsite_home%%/bin/iwgethome|");
+my($iwhome)= <GETDATA>;
+chomp($iwhome);
+close(GETDATA);
+
+# Get IW mount
+open(GETDATA, "$iw_home/bin/iwgetmount|");
+my($iwmount)= <GETDATA>;
+chomp($iwmount);
+close(GETDATA);
+
+# Get IW CGI Mount
+open(GETDATA, "$iw_home/bin/iwgetlocation iwcgimount|");
+my($iwcgimount)= <GETDATA>;
+chomp($iwcgimount);
+close(GETDATA);
+
+#generate a log file in the iw-home report/tmp directory
+$logfile="$iw_home/report/tmp/IW_GlobalSightImport.log";
+open(LOGFILE,">>$logfile") || die "$0:ERROR: can\'t open $logfile";
+
+print "Content-type: text/html\n\n";
+
+log_entry " GlobalSightDcrGen Start\n";
+
+my $q = new CGI;
+
+print "Intialized CGI object\n";
+log_entry "Intialized CGI object\n";
+
+my $dir		= $q->param('dir');
+my $relpath		= $q->param('relpath');
+my $filename	= $q->param('filename');
+my $template      = $q->param('template');
+my $locale		= $q->param('locale');
+my $filetype	= $q->param('filetype');
+my $iwtemplating_root = "";
+$dir	=~ s/$iwcgimount/$iwmount/;
+open(GETDATA, "$iw_home/bin/iwconfig teamsite_templating data_root|");
+($iwtemplating_root)= <GETDATA>;
+chomp($iwtemplating_root);
+$iwtemplating_root =~ s/^\///;
+close(GETDATA);
+my $dcr_filename;
+my $abs_filename;
+my $tmplname = $template;
+$tmplname =~ s/\.tpl//;
+my $dcrtmpl = "$dir/$relpath/$template";
+$dcrtmpl =~ s#/data/#/presentation/#;
+my %ext = get_template_info();
+my $ed = $ext{$template};
+my $extension;
+my $previewDir;
+$ed =~ s/^(.*?),(.*)$/$extension = $1; $previewDir = $2/e;
+
+log_entry "GlobalSightDcrGen dir:$dir:\n";
+log_entry "GlobalSightDcrGen relpath:$relpath:\n";
+log_entry "GlobalSightDcrGen filename:$filename:\n";
+log_entry "GlobalSightDcrGen template:$template:\n";
+log_entry "GlobalSightDcrGen locale:$locale:\n";
+log_entry "GlobalSightDcrGen filetype:$filetype:\n";
+log_entry "GlobalSightDcrGen tmplname:$tmplname:\n";
+log_entry "GlobalSightDcrGen extension:$extension:\n";
+my $teamsite_file = $filename;
+if($teamsite_file =~ /^teamsite_reimport/)
+{
+        $teamsite_file =~ s#^teamsite_reimport_(\d+?)_##s;
+}
+if ($filetype =~ /Source/)
+{
+    $dcr_filename = "$dir/$relpath/$teamsite_file";
+    $relpath .= "/$previewPrefix";
+} else
+{
+    $dcr_filename = "$dir/$relpath/$previewPrefix/$locale/$teamsite_file";
+    $relpath .= "/$previewPrefix/$locale";
+}
+
+if ($dcr_filename =~ /^$iwmount\/(.*)\/WORKAREA\/(.*)\/$iwtemplating_root\/(.*)\/data/) {
+	print "dcr=dcr\n";
+}
+else
+{
+	print "dcr=none\n";
+}
+$abs_filename = "$dir/$previewPrefix" . "_" . "$locale" . "_" . "$filename" . "_" . "$tmplname." . $extension ;
+if ($dir =~ /^$iwmount/) 
+{
+   if (create_dir($dir,$relpath)) 
+   {
+	$abs_filename = "$dir/$previewDir/$previewPrefix" . "_" . "$locale" . "_" . "$filename" . "_" . "$tmplname." . $extension ;
+	$dcrtmpl =~ s/^$iwmount//;
+	$dcr_filename =~ s/^$iwmount//;
+	$abs_filename =~ s/^$iwmount//;
+	log_entry "$iwhome/bin/iwgen -t \"$dcrtmpl\" -r \"$dcr_filename\" \"$abs_filename\"";
+	system("$iw_home/bin/iwgen -t \"$dcrtmpl\" -r \"$dcr_filename\" \"$abs_filename\"");
+   }
+} else 
+{
+	((log_entry "ERROR:Illegal file path for writing file $abs_filename : $!\n") && die "ERROR:Illegal file path for writing file $abs_filename : $!\n");
+}
+	open(DATA, "< $abs_filename") ||
+		((log_entry "ERROR:Couldn't open $abs_filename for reading: $!\n") &&
+		die "ERROR:Couldn't open $abs_filename for reading: $!\n");
+	binmode(DATA);
+	$/ = undef;
+	my $content = <DATA>;
+	#log_entry "content=:$content:\n";
+	close (DATA);
+close(LOGFILE);
+	print $content;
+log_entry "Finished CGI object\n";
+print "status=OK\n";
+
+sub log_entry {
+	my $entry = shift;
+	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	localtime(time);
+	my($date) = sprintf("%04d/%02d/%02d-%02d:%02d:%02d",($year+1900),$mon+1,$mday,$hour,$min,$sec);
+	print LOGFILE "$date:$entry";
+}
+
+
+sub create_dir {
+	my ($basedir,$relpath) = @_;
+	createBranchAndWorkArea($basedir, $relpath);
+
+	my @dirs = split '/', $relpath;
+	my $fullpath = $basedir;
+
+	if (! -d $basedir) {
+	   log_entry "ERROR:Base Directory does not exist: $basedir\n";
+	   die "ERROR:Base Directory does not exist: $basedir\n";
+	}
+
+	foreach my $dir (@dirs) {
+		$fullpath .= "/$dir";
+		if (! -d $fullpath) {
+		  my $result = eval{mkdir($fullpath, 0777)};
+		  # return result sometimes returns true even when failure occurs
+		  if (!$result) {
+		    log_entry "ERROR:Couldn't create directory: $fullpath\n";
+		    die "ERROR:Couldn't create directory: $fullpath\n";
+		  } else {
+		    system("chmod 0777 \"$fullpath\"");
+		    # system("chown nobody:nobody  $fullpath");
+		    log_entry "\tCreated directory $fullpath\n";
+		  }
+		}
+	}
+
+	# Check since $result above may be erroneous
+	opendir(DIRHANDLE, "$basedir/$relpath") ||
+	((log_entry "ERROR:Directory creation failed\n") &&
+	  die "ERROR:Directory creation failed!\n");
+	closedir(DIRHANDLE);
+	return 1;
+}
+#
+# This is a sub that reads the templating.cfg file and gets the attributes required 
+# for template generation and preview. This is copied to GlobalSightImport.ipl
+# So if you change something in this routine then you might also want to change
+# the get_template_info sub of GlobalSightImport.ipl
+#
+
+sub get_template_info
+{
+	my $required_category = "";
+	my $required_datatype = "";
+	my $extension="";
+	my $current_datatype="";
+	my $current_template="";
+	my %ext = ();
+
+	# Let's open the templating.cfg file and read the extension for the
+	# required template.
+	local $/;
+	open (DATA ,"<$iw_home/local/config/templating.cfg") || print "Unable to open $!<BR>";
+	my $current_category = <DATA>;
+	close DATA;
+	#log_entry "\n\n :<pre>$current_category<pre>: \n";
+	my $temp_path = $relpath;
+
+	$temp_path =~ s#/?$iwtemplating_root/(.*?)/(.*?)/data
+	               #$required_category=$1; 
+	                $required_datatype = $2;
+	               #gmsxe;
+	# Get the category info.
+	$current_category =~ s#(<category\s*name\s*=\s*"$required_category"
+	                       (.*?)
+	                       <\/category>)
+	                      #$current_datatype=$1
+	                      #gmxse;
+	# Get the data-type info.
+	$current_datatype =~ s#(<data-type\s*name\s*=\s*"$required_datatype"
+	                       (.*?)
+	                       <\/data-type>)
+	                      #$current_template=$1
+	                      #gmxse;
+	# Get the template and extension info
+        $current_template =~ s#(<template\s*name\s*=\s*"(.*?)"\s*
+                               extension\s*=\s*"(.*?)"\s*>
+                               (.*?)
+                               <branch(.*?)preview-dir\s*=\s*"(.*?)"\s*>
+                               (.*?)
+                               <\/template>)
+	                      #$ext{$2}=$3.",".$6;
+                              #gmxse;
+	return %ext;
+}
+# Creates branches and workareas if they do not exist.
+sub createBranchAndWorkArea {
+	my ($basedir, $relpath) = @_;
+        $username = "pgautam";
+        (my $branch       = $basedir) =~ s#/WORKAREA/.*##m;
+        (my $root         = $branch)  =~ s#(.*)/(.*)#$1#m;
+        (my $branchname   = $branch)  =~ s#(.*)/(.*)#$2#m;
+        (my $workareaname = $basedir) =~ s#.*/WORKAREA/(.*)#$1#m;
+
+        # Check if the branch exists
+        if (! -d $branch)
+        {
+                # Branch does not exist. Create it
+                log_entry("$branch doesn't exist. Creating it...\n");
+                system("$iw_home/bin/iwmkbr \"$root\" \"$branchname\"  \"Created by CLT\" INITIAL $username");
+        }
+        # Find out if the Workarea exists
+        if (! -d $basedir)
+        {
+                log_entry("WORKAREA $basedir does not exist. Creating it...\n");
+                # Create the workarea.
+                system("$iw_home/bin/iwmkwa \"$branch\" \"$workareaname\"  \"Created by CLT\" INITIAL $username");
+        }
+}
+

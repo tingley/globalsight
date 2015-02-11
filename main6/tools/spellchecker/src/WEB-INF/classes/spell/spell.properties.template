@@ -1,0 +1,2 @@
+# The base directory where dictionaries are stored:
+dictionaryDirectory = %%file_storage_dir_forwardslash%%/spellcheckerdicts

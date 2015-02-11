@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Target Locales" >
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
+  <topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Locale" url="Glossary/Locale.htm" />
+  <topic name="Locale Pair" url="Glossary/Locale_Pair.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <topic name="Snippet" url="Glossary/Snippet.htm" />
+  <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+</key>
+<key name="TeamSite" >
+  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
+  <topic name="New TeamSite Branch Definition" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+</key>
+<key name="TeamSite branch" >
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+</key>
+<key name="TeamSite Branch Definitions" >
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+</key>
+<key name="TeamSite branches for TeamSite" >
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+</key>
+<key name="TeamSite Profiles Main Screen" >
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+</key>
+<key name="TeamSite requires" >
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+</key>
+<key name="TeamSite Server" >
+  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
+  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+</key>
+<key name="TeamSite Server Configuration" >
+  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+</key>
+<key name="Term Audit" >
+  <topic name="Term Audit" url="Reports/Term_Audit.htm" />
+</key>
+<key name="Term Link" >
+  <topic name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+</key>
+<key name="Termbase" >
+  <topic name="Add Field Constraint" url="Setup/Terminology/Add_Field_Constraint.htm" />
+  <topic name="Add Link" url="Setup/Terminology/Add_Link.htm" />
+  <topic name="Add Synonym Constraint" url="Setup/Terminology/Add_Synonym_Constraint.htm" />
+  <topic name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Create/Edit Field" url="Setup/Terminology/Create_Edit_Field.htm" />
+  <topic name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
+  <topic name="Define Termbase Column" url="Setup/Terminology/Define_Termbase_Column.htm" />
+  <topic name="Entry Editor" url="Setup/Terminology/Entry_Editor.htm" />
+  <topic name="Import" url="Setup/Terminology/Import.htm" />
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Manage Input Models" url="Setup/Terminology/Manage_Input_Models.htm" />
+  <topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+  <topic name="Output Options (Export p.2)" url="Setup/Terminology/Output_Options_(Export_p.2)1.htm" />
+  <topic name="Project" url="Glossary/Project.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="Replacing in Termbase" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+  <topic name="Schedule Re-Indexing" url="Setup/Terminology/Schedule_Re-Indexing.htm" />
+  <topic name="Select a Termbase" url="My_Activities/Select_a_Termbase.htm" />
+  <topic name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+  <topic name="Termbase" url="Glossary/Termbase.htm" />
+  <topic name="Termbase Export" url="Setup/Terminology/Export.htm" />
+  <topic name="Termbase Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+  <topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+  <topic name="What is a Terminology Database" url="Appendix/Linguistic_FAQ/What_is_a_Terminology_Database.htm" />
+</key>
+<key name="Termbase Indexes" >
+  <topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+</key>
+<key name="Termbase leveraging" >
+  <topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+</key>
+<key name="Termbase Maintenance" >
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+</key>
+<key name="Termbase Search Results" >
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+</key>
+<key name="Terminology Database" >
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="What is a Terminology Database" url="Appendix/Linguistic_FAQ/What_is_a_Terminology_Database.htm" />
+</key>
+<key name="Terminology Main Screen" >
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+</key>
+<key name="Testing Import" >
+  <topic name="Testing Import" url="Setup/Snippet_Import/Testing_Import.htm" />
+  <topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+</key>
+<key name="Tips" >
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Tips For Working With Large RTF Files" url="Appendix/Working_Offline/RTF_(List_View)/Tips_For_Working_With_Large_RTF_Files.htm" />
+</key>
+
+</indexdata>

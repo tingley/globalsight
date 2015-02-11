@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+<book name="Create/Edit Localization Profile" >
+  <item name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <item name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <item name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+</book>
+<item name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+
+</tocdata>

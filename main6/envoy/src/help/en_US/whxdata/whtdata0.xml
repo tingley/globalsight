@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="Home" url="Home.htm" />
+<item name="Overview - Administrator" url="Overview.htm" />
+<item name="Overview - Project Manager" url="Overview_PM.htm" />
+<item name="Overview - Workflow Manager" url="Overview_WM.htm" />
+<item name="Overview - Localization Participant" url="Overview_LP.htm" />
+<item name="Overview - Customer" url="Overview_-_Customer.htm" />
+<book name="My Account" >
+  <item name="Account Information" url="My_Account.htm" />
+  <item name="Contact Information" url="Contact_Information.htm" />
+  <item name="Account Options" url="Account_Options.htm" />
+  <item name="Email Notification" url="Email_Notification.htm" />
+  <item name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <item name="View User Events" url="Setup/Users/View_User_Events.htm" />
+  <item name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+</book>
+<book name="Setup" >
+<chunk name="Setup" ref="whtdata1.xml" />
+</book>
+<book name="Data Sources" >
+  <book name="File Profiles" >
+    <item name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+    <item name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  </book>
+  <book name="File Extensions" >
+    <item name="File Extensions Main Screen" url="Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm" />
+    <item name="Create File Extension" url="Data_Sources/File_Extensions/Create_File_Extension.htm" />
+  </book>
+  <book name="XML Rules" >
+    <item name="XML Rules Main Screen" url="Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm" />
+    <item name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+  </book>
+  <book name="SGML Rules" >
+    <item name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+    <item name="Upload DTD" url="Data_Sources/SGML_Rules/Upload_DTD.htm" />
+    <item name="Create DTD" url="Data_Sources/SGML_Rules/Create_DTD.htm" />
+    <item name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  </book>
+  <book name="Import" >
+    <item name="Select Files To Import" url="Data_Sources/Import/Select_Files_To_Import.htm" />
+    <item name="Map Files" url="Data_Sources/Import/Map_Files.htm" />
+    <item name="Enter Job Name" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+  </book>
+  <book name="Upload" >
+    <item name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
+    <item name="Select Files To Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+    <item name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
+  </book>
+  <book name="TeamSite Server Configuration" >
+    <item name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+    <item name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+    <item name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+  </book>
+  <book name="TeamSite Profiles" >
+    <item name="TeamSite Profiles Main Screen" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+    <item name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
+    <item name="TeamSite Source Branch" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
+    <item name="TeamSite Target Branch" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+  </book>
+  <book name="Database Connections" >
+    <item name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
+    <item name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  </book>
+  <book name="Database Profiles" >
+    <item name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+    <item name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+    <item name="Database Column Profiles" url="Data_Sources/Database_Profiles/Columns.htm" />
+    <item name="Create/Edit Column Profile" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+    <item name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+    <item name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+    <item name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+  </book>
+  <book name="Database Import Settings" >
+    <item name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+    <item name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  </book>
+  <book name="Database Preview Rules" >
+    <item name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+    <item name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+  </book>
+  <book name="Export Locations" >
+    <item name="Export Locations Main Screen" url="Data_Sources/Export_Locations/Export_Locations_Main_Screen.htm" />
+    <item name="Create/Edit Export Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
+  </book>
+  <book name="Corpus Aligner" >
+    <item name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+    <book name="Create Aligner Package" >
+      <item name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
+      <item name="Select Files To Align (Create p.2)" url="Data_Sources/Corpus_Aligner/Select_Files_To_Align_(Create_p.2).htm" />
+      <item name="Alignment Parameters (Create p.3)" url="Data_Sources/Corpus_Aligner/Alignment_Parameters.htm" />
+      <item name="Aligner Package Creation Status (Create p.4)" url="Data_Sources/Corpus_Aligner/Aligner_Package_Creation_Status.htm" />
+    </book>
+    <item name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+    <item name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  </book>
+  <item name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+</book>
+<book name="My Jobs" >
+  <item name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <item name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <item name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <item name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <item name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <item name="Edit Planned Completion Date" url="My_Jobs/Edit_Planned_Completion_Date.htm" />
+  <item name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <item name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <item name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <item name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <item name="Export" url="My_Jobs/Export.htm" />
+  <item name="Export Source" url="My_Jobs/Export_Source.htm" />
+  <item name="Target Word Count" url="My_Jobs/Target_Word_Count.htm" />
+  <book name="Search/Replace" >
+    <item name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+    <item name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  </book>
+  <book name="Job Details" >
+    <item name="Job Details" url="My_Jobs/Job_Details.htm" />
+    <item name="Activity/Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+    <item name="Vendor Rating" url="My_Jobs/Rate_Vendor.htm" />
+    <item name="Comments" url="My_Jobs/Job_Comments.htm" />
+    <item name="Add/Edit Comments" url="My_Jobs/Add_Comments.htm" />
+    <item name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+    <item name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+    <item name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+    <item name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+    <item name="Surcharges" url="My_Jobs/Surcharges.htm" />
+    <item name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+    <item name="Edit Final Cost" url="My_Jobs/Edit_Final_Cost.htm" />
+    <item name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
+    <item name="Edit Word Count" url="My_Jobs/Edit_Word_Count.htm" />
+    <item name="Export Error" url="My_Jobs/Export_Error.htm" />
+    <item name="Detailed Word Count" url="My_Jobs/Detailed_Word_Count.htm" />
+    <item name="Assign User" url="My_Jobs/Re-Assign.htm" />
+    <item name="Re-Assign" url="My_Jobs/Re-Assign.htm" />
+  </book>
+  <book name="Customer Jobs" >
+    <item name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+    <book name="Download Files" >
+      <item name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+      <item name="Download Progress" url="My_Jobs/Customer_Jobs/Download_Progress.htm" />
+    </book>
+    <item name="View File List" url="My_Jobs/Customer_Jobs/View_File_List.htm" />
+    <book name="Comments" >
+      <item name="Segment Comments" url="My_Jobs/Customer_Jobs/Segment_Comments.htm" />
+      <item name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+    </book>
+    <item name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+  </book>
+</book>
+<book name="My Activities" >
+<chunk name="My Activities" ref="whtdata2.xml" />
+</book>
+<book name="Vendor Management" >
+  <item name="Vendors" url="Vendor_Management/Vendors.htm" />
+  <item name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <book name="Ratings" >
+    <item name="Ratings" url="Vendor_Management/Ratings.htm" />
+    <item name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+  </book>
+  <item name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <book name="Create/Edit Vendor" >
+    <item name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+    <item name="Contact Information" url="Vendor_Management/Contact_Information1.htm" />
+    <item name="CV/Resume" url="Vendor_Management/CV_Resume.htm" />
+    <item name="New Vendor - Roles" url="Vendor_Management/Roles.htm" />
+    <item name="Edit Vendor - New Roles" url="Vendor_Management/Edit_Vendor_-_Roles.htm" />
+    <item name="Edit Vendor - Edit Roles" url="Vendor_Management/Edit_Role_(Edit_Vendor).htm" />
+    <item name="Projects" url="Vendor_Management/Projects.htm" />
+    <item name="Field Level Access" url="Vendor_Management/Field_Level_Access.htm" />
+    <item name="Permissions" url="Vendor_Management/Permissions.htm" />
+  </book>
+  <item name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+</book>
+<book name="Content Management" >
+<chunk name="Content Management" ref="whtdata3.xml" />
+</book>
+<book name="Reports" >
+<chunk name="Reports" ref="whtdata4.xml" />
+</book>
+<book name="Appendix" >
+<chunk name="Appendix" ref="whtdata5.xml" />
+</book>
+<book name="Glossary" >
+<chunk name="Glossary" ref="whtdata6.xml" />
+</book>
+
+</tocdata>

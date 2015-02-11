@@ -1,0 +1,36 @@
+<!--  l10nRequestXml.dtd describes request to localize data to CAP. -->
+<!ELEMENT l10nRequestXml (externalPageId, importInitiatorId, originalCharacterEncoding, l10nProfileId, baseHref?, batchInfo)>
+<!-- dataSourceType is like FileSystem, Database, Teamsite, Vignette, etc. -->
+<!-- dataSourceId is the ID of the file profile, database source profile, etc.  -->
+<!ATTLIST l10nRequestXml
+dataSourceType CDATA #REQUIRED
+dataSourceId CDATA #REQUIRED
+>
+<!-- externalPageId unique (to CXE) identifier for the page.  Should be user friendly name.  For files, it is the relative path name.  For files, used by CAP to determine a “Page” for “Page TM” leveraging.  For files, the file system adapter name plus path.  For database content, the data source profile name plus timestamp.  -->
+<!ELEMENT externalPageId (#PCDATA)>
+<!--  Specifies if this page can be previewed by CXE. Optional, if not specified assumes ‘false’.-->
+<!ATTLIST externalPageId
+pageIsCxePreviewable (true | false) "false"
+>
+<!-- importInitiatorId is the user id of the user who initiated the import for this file. -->
+<!ELEMENT importInitiatorId (#PCDATA)>
+<!-- originalCharacterEncoding from the data source. -->
+<!ELEMENT originalCharacterEncoding (#PCDATA)>
+<!--  l10nProfile identifier as a database sequence number . -->
+<!ELEMENT l10nProfileId (#PCDATA)>
+<!-- The base href to view the page properly.  Optional, only needed for CMS (ie. TeamSite) -->
+<!ELEMENT baseHref (#PCDATA)>
+<!--  This page is part of a batch that should be retained into the same job. -->
+<!ELEMENT batchInfo (batchId, pageCount, pageNumber, docPageCount, docPageNumber, jobPrefixName?)>
+<!--  batchId is the unique (to CXE) id for the batch. -->
+<!ELEMENT batchId (#PCDATA)>
+<!--  The number of documents in the batch. -->
+<!ELEMENT pageCount (#PCDATA)>
+<!--  The order of this document in the batch. -->
+<!ELEMENT pageNumber (#PCDATA)>
+<!--  The number of expanded pages (slides) of the current document. -->
+<!ELEMENT docPageCount (#PCDATA)>
+<!--  The order of this expanded page (slide) of the current document. -->
+<!ELEMENT docPageNumber (#PCDATA)>
+<!--  Optional, the prefix the job name should contain that this request is added to. -->
+<!ELEMENT jobPrefixName (#PCDATA)>

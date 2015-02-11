@@ -1,0 +1,256 @@
+<!--
+ * FCKeditor - The text editor for internet
+ * Copyright (C) 2003 Frederico Caldeira Knabben
+ *
+ * Licensed under the terms of the GNU Lesser General Public License
+ * (http://www.opensource.org/licenses/lgpl-license.php)
+ *
+ * For further information go to http://www.fredck.com/FCKeditor/ 
+ * or contact fckeditor@fredck.com.
+ *
+ * fck_table.html: Table dialog box.
+ *
+ * Authors:
+ *   Frederico Caldeira Knabben (fckeditor@fredck.com)
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html>
+	<head>
+		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
+		<link href="../css/fck_dialog.css" type="text/css" rel="stylesheet">
+		<!-- Constants -->
+		<script language="javascript" src="../js/dhtmled.js"></script>
+		<script language="javascript" src="../js/fck_events.js"></script>
+		<script language="javascript" src="../js/fck_toolbar.js"></script>
+		<script language="javascript">
+<!--
+// Gets the document DOM
+var oDOM = dialogArguments.objContent.DOM ;
+
+// Gets the table if there is one selected.
+var table ;
+var sel = oDOM.selection.createRange();
+if (oDOM.selection.type != 'Text') 
+{
+	if (sel.length == 1) 
+	{
+		if (sel.item(0).tagName == "TABLE") 
+			table = sel.item(0);
+	}
+}
+
+// Set the dialog title.
+if (table) 
+	document.write("<TITLE>" + dialogArguments.lang["DlgTableTitleEdit"] + "</TITLE>") ;
+else 
+	document.write("<TITLE>" + dialogArguments.lang["DlgTableTitleInsert"] + "</TITLE>") ;
+
+// Fired when the window loading process is finished. It sets the fields with the
+// actual values if a table is selected in the editor.
+function setDefaults()
+{
+	// First of all, translate the dialog box texts
+	dialogArguments.AvailableLangs.TranslatePage(document) ;
+
+	if (table)
+	{
+		txtRows.value    = table.rows.length ;
+		txtColumns.value = table.rows[0].cells.length ;
+
+		// Gets the value from the Width or the Style attribute
+		var iWidth  = (table.style.width  ? table.style.width  : table.width ) ;
+		var iHeight = (table.style.height ? table.style.height : table.height ) ;
+
+		if (iWidth.indexOf('%') >= 0)			// Percentual = %
+		{
+			iWidth = parseInt( iWidth.substr(0,iWidth.length - 1) ) ;
+			selWidthType.value = "percent" ;
+		}
+		else if (iWidth.indexOf('px') >= 0)		// Style Pixel = px
+		{																										  //
+			iWidth = iWidth.substr(0,iWidth.length - 2);
+			selWidthType.value = "pixels" ;
+		}
+		
+		if (iHeight.indexOf('px') >= 0)		// Style Pixel = px
+			iHeight = iHeight.substr(0,iHeight.length - 2);
+		
+		txtWidth.value			= iWidth ;
+		txtHeight.value			= iHeight ;
+		txtBorder.value			= table.border ;
+		selAlignment.value		= table.align ;
+		txtCellPadding.value	= table.cellPadding	;
+		txtCellSpacing.value	= table.cellSpacing	;
+		cmbFontStyle.value		= table.className ;
+
+		if (table.caption) txtCaption.value	= table.caption.innerText ;		
+		
+		txtRows.disabled    = true ;
+		txtColumns.disabled = true ;
+	}	
+}
+
+// Fired when the user press the OK button
+function ok()
+{
+	if (! table)
+	{
+		var sTableAtt = "" ;
+
+		if (txtWidth.value != '')		sTableAtt += 'width="' + txtWidth.value + (selWidthType.value == "percent" ? "%" : "") + '"' ;
+		if (txtHeight.value != '')		sTableAtt += 'height="' + txtHeight.value + '"' ;
+		if (txtBorder.value != '')		sTableAtt += 'border="' + txtBorder.value + '"' ;
+		if (selAlignment.value != '')	sTableAtt += 'align="' + selAlignment.value + '"' ;
+		if (txtCellSpacing.value != '')	sTableAtt += 'cellspacing="' + txtCellSpacing.value + '"' ;
+		if (txtCellPadding.value != '')	sTableAtt += 'cellpadding="' + txtCellPadding.value + '"' ;
+		if (cmbFontStyle.value != '')	sTableAtt += 'class="' + cmbFontStyle.value + '"' ;
+
+		var oTableParms = new ActiveXObject("DEInsertTableParam.DEInsertTableParam") ;
+		
+		if (txtRows.value != '')	oTableParms.NumRows    = txtRows.value ;
+		if (txtColumns.value != '')	oTableParms.NumCols    = txtColumns.value ;
+		if (sTableAtt != '')		oTableParms.TableAttrs = sTableAtt ;
+		if (txtCaption.value != '')	oTableParms.Caption    = txtCaption.value ;
+		
+		dialogArguments.objContent.DOM.selection.clear() ;
+		dialogArguments.objContent.ExecCommand(DECMD_INSERTTABLE,OLECMDEXECOPT_DODEFAULT, oTableParms);
+	}
+	else
+	{
+		// Removes the Width and Height styles
+		if ( table.style.width )	table.style.removeAttribute("width") ;
+		if ( table.style.height )	table.style.removeAttribute("height") ;
+		
+		table.width			= txtWidth.value + (selWidthType.value == "percent" ? "%" : "") ;
+		table.height		= txtHeight.value ;
+		table.border		= txtBorder.value ;
+		table.align			= selAlignment.value ;
+		table.cellPadding	= txtCellPadding.value ;
+		table.cellSpacing	= txtCellSpacing.value ;
+		table.className		= cmbFontStyle.value ;
+		
+		if (txtCaption.value != '')
+		{
+			if (! table.caption) table.createCaption() ;
+			table.caption.innerText = txtCaption.value ;
+		}
+//		else
+//			table.deleteCaption() ;		// TODO: It causes an IE error.
+	}
+	
+	window.close();
+}
+
+// Fired when the user press the CANCEL button.
+function cancel() 
+{
+	window.close() ;
+}
+
+function IsDigit()
+{
+	return ((event.keyCode >= 48) && (event.keyCode <= 57))
+}
+//-->
+		</script>
+	</head>
+	<body bottommargin="5" leftmargin="5" topmargin="5" rightmargin="5" onload="setDefaults()">
+		<table cellSpacing="0" cellPadding="0" width="100%" border="0" height="100%">
+			<tr>
+				<td>
+					<table cellSpacing="1" cellPadding="1" width="100%" border="0">
+						<tr>
+							<td valign="top">
+								<table cellSpacing="0" cellPadding="0" border="0">
+									<tr>
+										<td><span fckLang="DlgTableRows">Rows</span>:</td>
+										<td>&nbsp;<input id="txtRows" type="text" maxLength="3" size="2" value="3" name="txtRows" onkeypress="event.returnValue=IsDigit();"></td>
+									</tr>
+									<tr>
+										<td><span fckLang="DlgTableColumns">Columns</span>:</td>
+										<td>&nbsp;<input id="txtColumns" type="text" maxLength="2" size="2" value="2" name="txtColumns" onkeypress="event.returnValue=IsDigit();"></td>
+									</tr>
+									<tr>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+									</tr>
+									<tr>
+										<td><span fckLang="DlgTableBorder">Border size</span>:</td>
+										<td>&nbsp;<INPUT id="txtBorder" type="text" maxLength="2" size="2" value="1" name="txtBorder" onkeypress="event.returnValue=IsDigit();"></td>
+									</tr>
+									<tr>
+										<td><span fckLang="DlgTableAlign">Alignment</span>:</td>
+										<td>&nbsp;<select id="selAlignment" name="selAlignment">
+												<option fckLang="DlgTableAlignNotSet" value="" selected>&lt;Not set&gt;</option>
+												<option fckLang="DlgTableAlignLeft" value="left">Left</option>
+												<option fckLang="DlgTableAlignCenter" value="center">Center</option>
+												<option fckLang="DlgTableAlignRight" value="right">Right</option>
+											</select></td>
+									</tr>
+								</table>
+							</td>
+							<td>&nbsp;&nbsp;&nbsp;</td>
+							<td align="right" valign="top">
+								<table cellSpacing="0" cellPadding="0" border="0">
+									<tr>
+										<td><span fckLang="DlgTableWidth">Width</span>:</td>
+										<td>&nbsp;<input id="txtWidth" type="text" maxLength="4" size="3" value="200" name="txtWidth" onkeypress="event.returnValue=IsDigit();"></td>
+										<td>&nbsp;<select id="selWidthType" name="selWidthType">
+												<option fckLang="DlgTableWidthPx" value="pixels" selected>pixels</option>
+												<option fckLang="DlgTableWidthPc" value="percent">percent</option>
+											</select></td>
+									</tr>
+									<tr>
+										<td><span fckLang="DlgTableHeight">Height</span>:</td>
+										<td>&nbsp;<INPUT id="txtHeight" type="text" maxLength="4" size="3" name="txtHeight" onkeypress="event.returnValue=IsDigit();"></td>
+										<td>&nbsp;<span fckLang="DlgTableWidthPx">pixels</span></td>
+									</tr>
+									<tr>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+									</tr>
+									<tr>
+										<td nowrap><span fckLang="DlgTableCellSpace">Cell spacing</span>:</td>
+										<td>&nbsp;<input id="txtCellSpacing" type="text" maxLength="2" size="2" value="1" name="txtCellSpacing"
+												onkeypress="event.returnValue=IsDigit();"></td>
+										<td>&nbsp;</td>
+									</tr>
+									<tr>
+										<td nowrap><span fckLang="DlgTableCellPad">Cell padding</span>:</td>
+										<td>&nbsp;<input id="txtCellPadding" type="text" maxLength="2" size="2" value="1" name="txtCellPadding"
+												onkeypress="event.returnValue=IsDigit();"></td>
+										<td>&nbsp;</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+					<table cellSpacing="0" cellPadding="0" width="100%" border="0" ID="Table1">
+						<tr>
+						<td nowrap><span fcklang="DlgClassName">Class Name</span>:</td>
+							<td>&nbsp;</td>
+										<td>
+										<script language="javascript">
+											var tbstyles = new TBCombo( "FontStyle"		, "null"			, "", dialogArguments.config.StyleNames, dialogArguments.config.StyleValues, 'CheckStyle("cmbFontStyle")');
+											document.write(tbstyles.GetHTML());
+										</script></td>
+						</tr>
+						<tr>
+							<td><span fckLang="DlgTableCaption">Caption</span>:</td>
+							<td>&nbsp;</td>
+							<td width="100%">&nbsp;
+								<input id="txtCaption" type="text" style="WIDTH: 100%"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td align="middle"">
+					<br>
+					<input style="WIDTH: 100px" type="button" fckLang="DlgBtnOK" value="OK" onclick="ok();">&nbsp; <input type="button" fckLang="DlgBtnCancel" value="Cancel" onclick="cancel();">
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

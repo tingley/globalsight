@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Results" >
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Segment Protection" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Editing_Text.htm" />
+  <topic name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+  <topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+</key>
+<key name="Review Window" >
+  <topic name="Review Window" url="My_Activities/Review_Window.htm" />
+</key>
+<key name="Roles" >
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <topic name="Fixed Rates" url="Glossary/Fixed_Rates.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+</key>
+<key name="Roles List" >
+  <topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+</key>
+<key name="Save Files for Upload" >
+  <topic name="How to Save Files for Upload" url="Appendix/Working_Offline/RTF_(List_View)/How_to_Save_Files_for_Upload.htm" />
+</key>
+<key name="Schedule" >
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+  <topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+  <topic name="Output Options (Export p.2)2" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="Reports Admin" url="Reports/Reports_Admin.htm" />
+  <topic name="Schedule Re-Indexing" url="Setup/Terminology/Schedule_Re-Indexing.htm" />
+  <topic name="System Shutdown" url="Setup/System_Shutdown/System_Shutdown.htm" />
+</key>
+<key name="Schedule Re-Indexing" >
+  <topic name="Schedule Re-Indexing" url="Setup/Terminology/Schedule_Re-Indexing.htm" />
+</key>
+<key name="Scores calculated" >
+  <topic name="How are TM Fuzzy Matching scores calculated" url="Appendix/Linguistic_FAQ/How_are_TM_Fuzzy_Matching_scores_calculated.htm" />
+</key>
+<key name="Search" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="Find" url="Reports/Find.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_LP" url="Overview_LP.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+  <topic name="Replacing in Termbase" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+  <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <topic name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Term Audit" url="Reports/Term_Audit.htm" />
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+  <topic name="Vendors" url="Vendor_Management/Vendors.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+  <topic name="Workflows - Search" url="Setup/Workflows/Workflows_-_Search.htm" />
+</key>
+
+</indexdata>

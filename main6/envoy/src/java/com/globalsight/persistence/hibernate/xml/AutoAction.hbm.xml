@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.autoactions.AutoAction"
+        table="autoaction">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="100"
+            column="NAME" type="string" />
+
+        <property name="email" length="100"
+            column="EMAIL" type="string" not-null="true" />
+
+        <property name="description" length="2000"
+            column="DESCRIPTION" type="string" not-null="true" />
+            
+        <property name="companyID" length="100" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
+    </class>
+
+</hibernate-mapping>

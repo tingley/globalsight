@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="idiomas" >
+  <topic name="Adjuntar procesos de producción a idiomas de destino" url="Configuraci_n/Perfiles_de_traducci_n/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Base de datos terminológica" url="Glosario/Termbase.htm" />
+  <topic name="Cargos" url="Configuraci_n/Usuarios/Roles.htm" />
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+  <topic name="Crear combinación de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Create_Locale_Pair.htm" />
+  <topic name="Crear/modificar actividad" url="Configuraci_n/Perfiles_de_traducci_n/Create_Modify_Activity.htm" />
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+  <topic name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+  <topic name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="idiomas cuentan" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="idiomas definidos" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="idiomas empleados" >
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+</key>
+<key name="idiomas limitan" >
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+</key>
+<key name="idiomas seleccionada" >
+  <topic name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+</key>
+<key name="ignore mucha" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="igual" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="imagen" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="imagen existente" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+</key>
+<key name="imagen original" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="imágenes" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="img-height" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="img-width" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="IMG SRC" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="IMPLIED" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="Importa" >
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="importación" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+  <topic name="Ejemplo de archivo de importación de fragmentos" url="Glosario/Snippet_Library_File_Example.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pantalla principal de importación" url="Fuentes_de_datos/Importaci_n/Import_Main_Screen.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+  <topic name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+</key>
+<key name="importación seleccionada" >
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="importación todos" >
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+</key>
+<key name="importación/creación" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="importando" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="Importante" >
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="importar" >
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Terminología" url="Configuraci_n/Bases_de_datos_terminol_gica/Terminology_Main_Screen.htm" />
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+  <topic name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+</key>
+<key name="Importar fragmentos" >
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+</key>
+<key name="importarse" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+</key>
+<key name="importe" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="imprimibles" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="incluidos" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="incluir" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="incluir todas" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="incluirse" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="incluso si" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+
+</indexdata>

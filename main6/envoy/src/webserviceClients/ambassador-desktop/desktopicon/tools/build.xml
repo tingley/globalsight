@@ -1,0 +1,78 @@
+<project name="DesktopIcon" default="make.app" basedir=".">
+	<property name="src" value="${basedir}/../src">
+	</property>
+	<property name="lib.dir" value="${src}/lib" />
+	<property name="toDir" value="${basedir}/../DesktopIcon">
+	</property>
+	<property name="classes.dir" value="${toDir}/classes" />
+	<property name="fromDir" value="${basedir}/../bin">
+	</property>
+	<property name="build.dir" value="${basedir}/../build">
+	</property>
+	<property name="packageFile" value="${build.dir}/DesktopIcon.zip">
+	</property>
+	<property name="jarFile" value="${toDir}/desktopicon.jar">
+	</property>
+	<property name="manifestFile" value="${basedir}/MANIFEST.MF">
+	</property>
+
+	<target name="make.app" depends="clean, make.jar">
+	</target>
+
+	<target name="make.package" depends="make.app">
+		<mkdir dir="${build.dir}" />
+		<zip file="${packageFile}" basedir="${toDir}" compress="yes" />
+		<delete dir="${toDir}">
+		</delete>
+	</target>
+
+	<fileset id="jar.files" dir="${lib.dir}">
+		<!-- common jars -->
+		<include name="*.jar" />
+	</fileset>
+
+	<path id="class.path">
+		<fileset refid="jar.files" />
+		<pathelement location="${classes.dir}" />
+	</path>
+	<target name="compile">
+		<javac srcdir="${src}" destdir="${toDir}">
+			<classpath refid="class.path" />
+		</javac>
+	</target>
+
+	<target name="make.jar" depends="copy.files,compile">
+		<echo message="*** make jar ****" />
+		<move file="${toDir}/com" todir="${toDir}/com/" />
+		<move file="${toDir}/org" todir="${toDir}/org/" />
+		<move file="${toDir}/log4j.xml" todir="${toDir}/com/" />
+		<jar destfile="${jarFile}" manifest="${manifestFile}">
+			<fileset dir="${toDir}/com" includes="**/*.class" />
+                        <fileset dir="${toDir}/com" includes="**/log4j.xml" />
+			<fileset dir="${toDir}/org" includes="**/*.class" />
+		</jar>
+		<delete dir="${toDir}/com"></delete>
+		<delete dir="${toDir}/org"></delete>
+	</target>
+
+	<target name="copy.files">
+		<echo message="*** Copy files ****" />
+		<echo message="path is ${toDir} " />
+		<copy todir="${toDir}">
+			<fileset dir="${src}">
+				<exclude name="com/**" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean">
+		<echo message="*** Clean Files ****" />
+		<echo message="path is ${toDir} " />
+
+		<delete dir="${toDir}">
+		</delete>
+		<delete file="${packageFile}">
+		</delete>
+	</target>
+
+</project>

@@ -1,0 +1,310 @@
+<PUBLIC:COMPONENT>
+<PUBLIC:PROPERTY NAME="Anonymous" />  <!-- in -->
+<PUBLIC:PROPERTY NAME="Admin" />      <!-- in -->
+<PUBLIC:PROPERTY NAME="Termbase" />   <!-- in -->
+<PUBLIC:PROPERTY NAME="BaseUrl" />    <!-- in -->
+
+<PUBLIC:METHOD NAME="GetEntryForEditor" />
+<PUBLIC:METHOD NAME="SaveEntry" />
+<PUBLIC:METHOD NAME="CreateEntry" />
+<PUBLIC:METHOD NAME="ReloadEntry" />
+<PUBLIC:METHOD NAME="DeleteEntry" />
+<PUBLIC:METHOD NAME="GetEntryXml" />
+
+<PUBLIC:ATTACH EVENT="onload" FOR="window" ONEVENT="doOnload();" />
+<PUBLIC:ATTACH EVENT="onunload" FOR="window" ONEVENT="doOnunload();" />
+</PUBLIC:COMPONENT>
+
+<SCRIPT LANGUAGE="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="Javascript" src="/globalsight/envoy/terminology/viewer/error.js"></SCRIPT>
+<SCRIPT LANGUAGE="Javascript" src="/globalsight/envoy/terminology/viewer/viewer_resources_js.jsp"></SCRIPT>
+
+<SCRIPT LANGUAGE="Javascript">
+/* TODO: - add source and target lang defaults for translator */
+
+var bAnonymous;
+var bAdmin;
+
+var strTermbase;
+var strBaseUrl;
+
+var nCid;
+var nTid;
+
+var objDoc = null;
+var bInitialized = false;
+
+var objStylesheet = null;
+var objEntry = null;
+
+var g_loading = false;
+
+// For locking/unlocking/deleting stuff
+var protocolState = null;
+
+function doOnload()
+{
+    // initialize application
+    objDoc = window.document;
+    bAnonymous = Anonymous;
+    bAdmin = Admin;
+    strTermbase = Termbase;
+    strBaseUrl = BaseUrl;
+
+    InitTermbase();
+
+    loadUserPreferences();
+
+    bInitialized = true;
+}
+
+function doOnunload()
+{
+    // hook for saving the page state
+    saveUserPreferences();
+}
+
+function loadUserPreferences()
+{
+    idPreferences.load('InputModelEditor');
+
+    try
+    {
+        // setSourceLanguage(idPreferences.getAttribute('sourceLanguage'));
+    }
+    catch (ex)
+    {
+    }
+}
+
+function saveUserPreferences()
+{
+    try
+    {
+        // idPreferences.setAttribute('sourceLanguage', getSourceLanguage());
+    }
+    catch (ex)
+    {
+    }
+
+    idPreferences.save('InputModelEditor');
+}
+
+function isRTLLocale(locale)
+{
+  if (locale.indexOf('ar') == 0 || locale.indexOf('he') == 0 ||
+      locale.indexOf('fa') == 0 || locale.indexOf('ur') == 0)
+  {
+    return true;
+  }
+
+  return false;
+}
+
+function LoadXML(strXML)
+{
+    var objDom = XmlDocument.create();
+    objDom.async = false;
+    if (objDom.loadXML('<?xml version="1.0" encoding="unicode"?>' + strXML))
+    {
+        return objDom;
+    }
+    else
+    {
+        return null;
+    }
+}
+
+function LoadXMLfile(strFilename)
+{
+    var objDom = XmlDocument.create();
+    objDom.async = false;
+    if (objDom.load(strFilename))
+    {
+        return objDom;
+    }
+    else
+    {
+        return null;
+    }
+}
+
+function InitTermbase()
+{
+    // idTermbase.innerText = strTermbase;
+}
+
+function TermbaseError(strMessage, bFatal)
+{
+    ShowError(strMessage);
+
+    if (bFatal)
+    {
+        // reset all elements
+        alert(lb_close_window);
+    }
+}
+
+// ==========================================================
+
+function GetEntryXml()
+{
+    return objEntry;
+}
+
+function GetEntry(nConceptId, nTermId)
+{
+    if (g_loading) return;
+
+    g_loading = true;
+
+    nCid = nConceptId;
+    nTid = nTermId;
+
+    idBody.style.cursor = 'wait';
+
+    xmlEntry.src = strBaseUrl + '/entry.jsp?' +
+        'CONCEPTID=' + nConceptId + '&TERMID=' + nTermId;
+}
+
+function GetEntryForEditor(nConceptId)
+{
+    // alert("GetEntryForEditor loading " + nConceptId);
+
+    var xmlhttp = XmlHttp.create();
+    var async = false;
+    xmlhttp.open('POST', strBaseUrl + '/entry.jsp?' +
+        'CONCEPTID=' + nConceptId + '&TERMID=0', async);
+    xmlhttp.send();
+
+    return xmlhttp.responseXML;
+}
+
+function ReloadEntry()
+{
+    if (g_loading) return;
+
+    if (nCid != 0 && nTid != 0)
+    {
+        g_loading = true;
+
+        idBody.style.cursor = 'wait';
+
+        xmlEntry.src = strBaseUrl + '/entry.jsp?' +
+            'CONCEPTID=' + nCid + '&TERMID=' + nTid +
+            '&SOURCE=' + escape(escape(getSourceLanguage())) +
+            '&TARGET=' + escape(escape(getTargetLanguage()));
+    }
+}
+
+function sendRequest(xml)
+{
+    // window.document.recalc(true);
+
+    xmlTemp.async = false;
+    xmlTemp.loadXML(xml);
+
+    if (xmlTemp.parseError.errorCode != 0)
+    {
+        TermbaseError("Internal xml error: " + xmlTemp.parseError.reason,
+            false);
+        idBody.style.cursor = 'auto';
+        return '';
+    }
+
+    var xmlhttp = XmlHttp.create();
+    if (!xmlhttp)
+    {
+        TermbaseError("Fatal Error: XMLHTTP object not found", true);
+    }
+
+    xmlhttp.Open("POST", strBaseUrl + '/protocol.jsp', false);
+    xmlhttp.Send(xmlTemp.XMLDocument);
+
+    // alert("Response = " + xmlhttp.responseXML.xml);
+
+    return xmlhttp.responseXML;
+}
+
+function SetEntry()
+{
+}
+
+function DeleteEntry(conceptId)
+{
+    idBody.style.cursor = 'wait';
+
+    xml = '<delete conceptid="' + conceptId + '"></delete>';
+
+    var response = sendRequest(xml);
+
+    if (response.documentElement.nodeName == 'exception')
+    {
+        TermbaseError(response.documentElement.text, false);
+        idBody.style.cursor = 'auto';
+        return null;
+    }
+
+    // If we currently show this entry, display a message
+    if (conceptId == ConceptId)
+    {
+        // SetEntryFeedback("Entry deleted");
+    }
+
+    // alert(response.xml);
+
+    idBody.style.cursor = 'auto';
+
+    return response;
+}
+
+function SaveEntry(conceptId, xml)
+{
+    idBody.style.cursor = 'wait';
+
+    xml = '<update conceptid="' + conceptId + '">' + xml + '</update>';
+
+    var response = sendRequest(xml);
+
+    if (response.documentElement.nodeName == 'exception')
+    {
+        TermbaseError(response.documentElement.text, false);
+        idBody.style.cursor = 'auto';
+        return null;
+    }
+
+    // alert(response.xml);
+
+    idBody.style.cursor = 'auto';
+
+    return response;
+}
+
+function CreateEntry(xml)
+{
+    idBody.style.cursor = 'wait';
+
+    xml = '<create>' + xml + '</create>';
+
+    var response = sendRequest(xml);
+
+    if (response.documentElement.nodeName == 'exception')
+    {
+        TermbaseError(response.documentElement.text, false);
+        idBody.style.cursor = 'auto';
+        return null;
+    }
+
+    idBody.style.cursor = 'auto';
+
+    var conceptId = response.documentElement.text;
+
+    return conceptId;
+}
+</SCRIPT>
+
+<BODY>
+<XML id="xmlEntry" onreadystatechange="SetEntry(this)"></XML>
+<XML id="xmlProtocol" onreadystatechange="HandleResponse(this)"></XML>
+<XML id="xmlTemp"></XML>
+</BODY>

@@ -1,0 +1,5160 @@
+/*=(===============================================================)*/
+
+/*=(===============================================================)*/
+/*=(Created with RoboEditor.)=======================================*/
+/*=(===============================================================)*/
+
+
+/*begin-old-version{{*/
+
+p.Normal{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+h1{
+     margin-top:12.0pt;
+     margin-right:-.7pt;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:18.0pt;
+     font-family:Arial;
+     color:blue;
+     letter-spacing:-.5pt;
+     font-weight:bold;
+}
+h2{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     font-size:14.0pt;
+     font-family:Arial;
+     color:blue;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+h3{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.5in;
+     font-size:12.0pt;
+     font-family:Arial;
+     color:blue;
+     font-weight:bold;
+     font-style:italic;
+}
+h4{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:12.0pt;
+     font-family:Times New Roman;
+     color:blue;
+     font-weight:bold;
+}
+h5{
+     margin-top:11.0pt;
+     margin-right:0in;
+     margin-bottom:11.0pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     color:blue;
+     font-weight:normal;
+     font-style:italic;
+}
+h6{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-weight:normal;
+     font-style:italic;
+}
+p.Heading7{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Heading8{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:9.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.Heading9{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:9.0pt;
+     font-family:Times New Roman;
+}
+p.Index1{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.25in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index4{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index5{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index6{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:60.0pt;
+     text-indent:-10.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index7{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:70.0pt;
+     text-indent:-10.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index8{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:80.0pt;
+     text-indent:-10.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Index9{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     text-indent:-10.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Toc1{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:45.35pt;
+     line-height:11.0pt;
+     font-size:8.0pt;
+     font-family:Arial;
+     color:blue;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.Toc2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:63.35pt;
+     line-height:11.0pt;
+     font-size:8.0pt;
+     font-family:Arial;
+     color:blue;
+}
+p.Toc3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.0in;
+     line-height:11.0pt;
+     font-size:8.0pt;
+     font-family:Arial;
+     color:blue;
+}
+p.Toc4{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:85.5pt;
+     line-height:11.0pt;
+     font-size:8.0pt;
+     font-family:Arial;
+}
+p.Toc5{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:11.0pt;
+     margin-left:0in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Arial;
+}
+p.Toc6{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:50.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Toc7{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:60.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Toc8{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:70.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Toc9{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:80.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.NormalIndent{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.FootnoteText{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     line-height:11.0pt;
+     font-size:9.0pt;
+     font-family:Times New Roman;
+}
+p.CommentText{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Header{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+}
+p.Footer{
+     margin:0in;
+     margin-bottom:.0001pt;
+     border:none;
+     padding:0in;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+}
+p.IndexHeading{
+     margin-top:22.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:0in;
+     font-size:12.0pt;
+     font-family:Times New Roman;
+     text-transform:uppercase;
+     font-weight:bold;
+}
+p.Caption{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-weight:bold;
+}
+p.Tof{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:20.0pt;
+     text-indent:-20.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.EnvelopeAddress{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:2.0in;
+     font-size:12.0pt;
+     font-family:Arial;
+}
+p.EnvelopeReturn{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Arial;
+}
+span.FootnoteReference{
+     vertical-align:super;
+}
+span.CommentReference{
+}
+span.LineNumber{
+}
+span.PageNumber{
+     border:solid #993300 .5pt;
+     padding:0in;
+}
+p.EndnoteText{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Toa{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:10.0pt;
+     text-indent:-10.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.MacroText{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Courier New;
+}
+p.ToaHeading{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     line-height:18.0pt;
+     font-size:14.0pt;
+     font-family:Arial;
+     font-weight:bold;
+}
+p.List{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.25in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet{
+     margin-top:0in;
+     margin-right:.5in;
+     margin-bottom:.0001pt;
+     margin-left:.25in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListNumber{
+     margin-top:6.0pt;
+     margin-right:-.7pt;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.List2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.List3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.List4{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.List5{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet2{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:72.7pt;
+     text-indent:-9.35pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet3{
+     margin-top:6.0pt;
+     margin-right:.5in;
+     margin-bottom:6.0pt;
+     margin-left:1.25in;
+     text-indent:-9.0pt;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet4{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:148.3pt;
+     text-indent:-.25in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet5{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:149.05pt;
+     text-indent:-9.35pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListNumber2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListNumber3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListNumber4{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListNumber5{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Title{
+     margin-top:12.0pt;
+     margin-right:1.5in;
+     margin-bottom:20.0pt;
+     margin-left:0in;
+     font-size:30.0pt;
+     font-family:Arial;
+     letter-spacing:-2.0pt;
+     font-weight:bold;
+}
+p.Closing{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:3.0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Signature{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:3.0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyText{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.BodyTextIndent{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListContinue{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListContinue2{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListContinue3{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.25in;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListContinue4{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:2.0in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.ListContinue5{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:2.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.MessageHeader{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     text-indent:-.75in;
+     background:#CCCCCC;
+     border:none;
+     padding:0in;
+     font-size:12.0pt;
+     font-family:Arial;
+}
+p.Subtitle{
+     margin-top:0in;
+     margin-right:1.5in;
+     margin-bottom:8.0pt;
+     margin-left:0in;
+     line-height:20.0pt;
+     font-size:17.0pt;
+     font-family:Arial;
+     letter-spacing:-.7pt;
+     font-weight:bold;
+     font-style:italic;
+}
+p.Salutation{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Date{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyTextFirstIndent{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.BodyTextFirstIndent2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     text-indent:10.5pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.NoteHeading{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyText2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     line-height:200%;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyText3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:8.0pt;
+     font-family:Times New Roman;
+}
+p.BodyTextIndent2{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     line-height:200%;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyTextIndent3{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     font-size:8.0pt;
+     font-family:Times New Roman;
+}
+p.BlockText{
+     margin-top:0in;
+     margin-right:1.0in;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+a:link{
+     color:blue;
+     text-decoration:underline;
+     text-underline:single;
+}
+span.Hyperlink{
+     color:blue;
+     text-decoration:underline;
+     text-underline:single;
+}
+a:visited{
+     color:purple;
+     text-decoration:underline;
+     text-underline:single;
+}
+span.HyperlinkFollowed{
+     color:purple;
+     text-decoration:underline;
+     text-underline:single;
+}
+p.DocumentMap{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     background:navy;
+     font-size:10.0pt;
+     font-family:Tahoma;
+}
+p.PlainText{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Courier New;
+}
+p.AutoSig{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:12.0pt;
+     font-family:Times New Roman;
+}
+address{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+pre{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Courier New;
+}
+p.TOCBase{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:11.0pt;
+     margin-left:0in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Arial;
+}
+p.InstructionHead{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-weight:bold;
+}
+p.HeaderBase{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Arial;
+     letter-spacing:-.2pt;
+}
+p.FootnoteBase{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     line-height:11.0pt;
+     font-size:9.0pt;
+     font-family:Times New Roman;
+}
+p.TableText{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:0in;
+     font-size:8.0pt;
+     font-family:Times New Roman;
+}
+p.TitleCover{
+     margin-top:1.25in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:36.0pt;
+     font-family:Times New Roman;
+     letter-spacing:-2.4pt;
+     font-weight:bold;
+}
+p.SubtitleCover{
+     margin-top:76.0pt;
+     margin-right:84.0pt;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     font-size:20.0pt;
+     font-family:Times New Roman;
+     letter-spacing:-1.0pt;
+     font-style:italic;
+}
+p.FooterEven{
+     margin-top:30.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.FooterFirst{
+     margin-top:30.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.FooterOdd{
+     margin-top:30.0pt;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.HeaderEven{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+}
+p.HeaderFirst{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+}
+p.HeaderOdd{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Arial;
+     color:#993300;
+     letter-spacing:-.2pt;
+}
+p.IndexBase{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.25in;
+     line-height:11.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+span.Lead-inEmphasis{
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.ListNumber{
+     margin-top:6.0pt;
+     margin-right:-.7pt;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     text-indent:-.25in;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ReturnAddress{
+     margin:0in;
+     margin-bottom:.0001pt;
+     line-height:11.0pt;
+     font-size:8.0pt;
+     font-family:Times New Roman;
+}
+p.SectionHeading{
+     margin-top:12.0pt;
+     margin-right:85.7pt;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:16.0pt;
+     font-family:Arial;
+     color:blue;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.Note{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.TOC{
+     margin-top:12.0pt;
+     margin-right:85.7pt;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     border:none;
+     padding:0in;
+     font-size:16.0pt;
+     font-family:Arial;
+     color:blue;
+     letter-spacing:-.2pt;
+     font-weight:bold;
+}
+p.Code{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:1.25in;
+     font-size:9.0pt;
+     font-family:Courier New;
+     color:blue;
+}
+p.NoteIndented{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.BodyTextIndented{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.25in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.NoteIndented2{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.ListBullet3Small{
+     margin-top:0in;
+     margin-right:.5in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     text-indent:-9.0pt;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet4Small{
+     margin-top:0in;
+     margin-right:.5in;
+     margin-bottom:.0001pt;
+     margin-left:2.0in;
+     text-indent:-45.0pt;
+     line-height:11.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.TableHead{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Helvetica;
+     color:black;
+     font-weight:bold;
+}
+p.TableBullet{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:.3in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     color:black;
+}
+p.TextinTable{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Bodytextlast{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:9.35pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.TextinTablesmall{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.CodeText{
+     margin-top:0in;
+     margin-right:-.9pt;
+     margin-bottom:.0001pt;
+     margin-left:85.5pt;
+     border:none;
+     padding:0in;
+     font-size:7.0pt;
+     font-family:Courier New;
+}
+p.FigureTitle{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.25in;
+     text-align:center;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     color:blue;
+     font-style:italic;
+}
+p.BodyTextIndentedSmall{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.CodeSmall{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     font-size:9.0pt;
+     font-family:Courier New;
+     color:blue;
+}
+p.NoteIndented2Small{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.Heading3Sub-Title{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.5in;
+     font-size:12.0pt;
+     font-family:Arial;
+     color:blue;
+     font-weight:bold;
+     font-style:italic;
+}
+p.Codesmall0{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:1.25in;
+     font-size:9.0pt;
+     font-family:Courier New;
+     color:blue;
+}
+p.ListBullet2small{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:72.7pt;
+     text-indent:-9.35pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.Bullet2Small{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.BodyText1{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:1.0in;
+     font-size:12.0pt;
+     font-family:Times New Roman;
+}
+p.ListBullet5small{
+     margin-top:3.0pt;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:90.7pt;
+     text-indent:-9.35pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.BodyText-Example{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.Step{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Bullet{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:3.0pt;
+     margin-left:24.6pt;
+     text-indent:-9.0pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.CellHeading{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-weight:bold;
+}
+p.Picture{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.TOCHeading{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:18.0pt;
+     font-family:Arial;
+     text-transform:uppercase;
+     font-weight:bold;
+}
+p.Copyright{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:9.0pt;
+     font-family:Times New Roman;
+}
+p.Bulletindented{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:2.0pt;
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.Cellbody{
+     margin:0in;
+     margin-bottom:.0001pt;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+p.TOCTitle{
+     margin-top:12.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:0in;
+     font-size:18.0pt;
+     font-family:Arial;
+     text-transform:uppercase;
+     font-weight:bold;
+}
+span.command{
+}
+span.screen{
+}
+p.note0{
+     margin-right:0in;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+span.label{
+}
+p.Noteindented0{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+     font-style:italic;
+}
+p.Listnumbertext{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.5in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.Bulletindented2{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:94.3pt;
+     text-indent:-9.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+}
+p.BulletSmall{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     text-indent:-9.0pt;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+     color:blue;
+     font-weight:bold;
+}
+p.Sub-Title{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:11.0pt;
+     font-family:Arial;
+     font-weight:bold;
+}
+p.BulletLarge{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+     color:blue;
+}
+p.knownproblemheader{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.75in;
+     font-size:11.0pt;
+     font-family:Times New Roman;
+     font-weight:bold;
+}
+p.TableText0{
+     margin-top:2.0pt;
+     margin-right:0in;
+     margin-bottom:2.0pt;
+     margin-left:0in;
+     font-size:10.0pt;
+     font-family:Palatino;
+     color:black;
+}
+p.CommentsTitle{
+     margin-top:6.0pt;
+     margin-right:0in;
+     margin-bottom:6.0pt;
+     margin-left:.5in;
+     font-size:14.0pt;
+     font-family:Times New Roman;
+     color:red;
+}
+span.standardtext1{
+}
+p.TableNumberSequence{
+     margin-top:0in;
+     margin-right:0in;
+     margin-bottom:.0001pt;
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-size:10.0pt;
+     font-family:Times New Roman;
+}
+ins{
+     text-decoration:none;
+}
+lfo1{
+     margin-left:.25in;
+     text-indent:-.25in;
+     font-family:Symbol;
+}
+lfo2{
+     margin-left:.25in;
+     text-indent:-.25in;
+     font-family:Symbol;
+}
+lfo3{
+     margin-left:.25in;
+     text-indent:-.25in;
+     font-family:Symbol;
+}
+lfo5{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo6{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo7{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo8{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo9{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo11{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo12{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo13{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo14{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo16{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo17{
+     margin-left:.75in;
+     text-indent:-.25in;
+}
+lfo18{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo19{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo20{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo21{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo22{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo23{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo24{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo25{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo26{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo27{
+     margin-left:.75in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo28{
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo56{
+     margin-left:96.0pt;
+     text-indent:-6.0pt;
+     font-family:Symbol;
+}
+lfo59{
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-family:Wingdings;
+}
+lfo63{
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-family:Symbol;
+}
+lfo64{
+     margin-left:.75in;
+     text-indent:0in;
+     font-family:Symbol;
+}
+lfo65{
+     margin-left:.75in;
+     text-indent:0in;
+     font-family:Symbol;
+}
+lfo71{
+     margin-left:1.25in;
+     text-indent:-.25in;
+     font-family:Symbol;
+}
+lfo73{
+     margin-left:1.25in;
+     text-indent:-.25in;
+     font-family:Arial;
+}
+lfo74{
+     margin-left:1.0in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo75{
+     margin-left:1.25in;
+     text-indent:-.25in;
+     font-family:Times;
+}
+lfo82{
+     margin-left:1.25in;
+     text-indent:-.25in;
+}
+lfo83{
+     margin-left:1.5in;
+     text-indent:-.25in;
+}
+lfo84{
+     margin-left:1.75in;
+     text-indent:-.25in;
+}
+lfo85{
+     margin-left:2.0in;
+     text-indent:-.25in;
+}
+lfo91{
+     margin-left:.55in;
+     text-indent:-.25in;
+     font-family:Arial;
+}
+lfo167{
+     margin-left:1.75in;
+     text-indent:-.25in;
+     font-family:Geneva;
+}
+OL, UL {
+margin-top: 0px;
+margin-bottom: 0px;
+}
+
+/*}}end-old-version*/
+p.Normal {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNormal {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h1 {
+	margin-top: 12.0pt;
+	margin-right: -.7pt;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 18.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.5pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h1 {
+	font-size: 18.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.5pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h2 {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	font-size: 14.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h2 {
+	font-size: 14.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h3 {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .5in;
+	font-size: 12.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	font-weight: bold;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h3 {
+	font-size: 12.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	font-weight: bold;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h4 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h4 {
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h5 {
+	margin-top: 11.0pt;
+	margin-right: 0in;
+	margin-bottom: 11.0pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: normal;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h5 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: normal;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+h6 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: normal;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-h6 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: normal;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Heading7 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeading7 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Heading8 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeading8 {
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Heading9 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeading9 {
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index1 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .25in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex1 {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex2 {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex3 {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index4 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex4 {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index5 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex5 {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index6 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 60.0pt;
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex6 {
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index7 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 70.0pt;
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex7 {
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index8 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 80.0pt;
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex8 {
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Index9 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndex9 {
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc1 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 45.35pt;
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc1 {
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 63.35pt;
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc2 {
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.0in;
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc3 {
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc4 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 85.5pt;
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc4 {
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc5 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 11.0pt;
+	margin-left: 0in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc5 {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc6 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 50.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc6 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc7 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 60.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc7 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc8 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 70.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc8 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toc9 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 80.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToc9 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.NormalIndent {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNormalIndent {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FootnoteText {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	line-height: 11.0pt;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFootnoteText {
+	line-height: 11.0pt;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.CommentText {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCommentText {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Header {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeader {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Footer {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	border: none;
+	padding: 0in;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFooter {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.IndexHeading {
+	margin-top: 22.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 0in;
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndexHeading {
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+	text-transform: uppercase;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Caption {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCaption {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Tof {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 20.0pt;
+	text-indent: -20.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTof {
+	text-indent: -20.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.EnvelopeAddress {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 2.0in;
+	font-size: 12.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CEnvelopeAddress {
+	font-size: 12.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.EnvelopeReturn {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CEnvelopeReturn {
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+span.FootnoteReference {
+	vertical-align: super;
+}
+
+span.CommentReference {
+}
+
+span.LineNumber {
+}
+
+span.PageNumber {
+	border: solid #993300 .5pt;
+	padding: 0in;
+}
+
+p.EndnoteText {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CEndnoteText {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Toa {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 10.0pt;
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToa {
+	text-indent: -10.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.MacroText {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Courier New";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CMacroText {
+	font-size: 10.0pt;
+	font-family: "Courier New";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ToaHeading {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	line-height: 18.0pt;
+	font-size: 14.0pt;
+	font-family: Arial;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CToaHeading {
+	line-height: 18.0pt;
+	font-size: 14.0pt;
+	font-family: Arial;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.List {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .25in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CList {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet {
+	margin-top: 0in;
+	margin-right: .5in;
+	margin-bottom: .0001pt;
+	margin-left: .25in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListNumber {
+	margin-top: 6.0pt;
+	margin-right: -.7pt;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.List2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CList2 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.List3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CList3 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.List4 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CList4 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.List5 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CList5 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet2 {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 72.7pt;
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet2 {
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet3 {
+	margin-top: 6.0pt;
+	margin-right: .5in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.25in;
+	text-indent: -9.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet3 {
+	text-indent: -9.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet4 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 148.3pt;
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet4 {
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet5 {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 149.05pt;
+	text-indent: -9.35pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet5 {
+	text-indent: -9.35pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListNumber2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber2 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListNumber3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber3 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListNumber4 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber4 {
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListNumber5 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber5 {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Title {
+	margin-top: 12.0pt;
+	margin-right: 1.5in;
+	margin-bottom: 20.0pt;
+	margin-left: 0in;
+	font-size: 30.0pt;
+	font-family: Arial;
+	letter-spacing: -2.0pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTitle {
+	font-size: 30.0pt;
+	font-family: Arial;
+	letter-spacing: -2.0pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Closing {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 3.0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CClosing {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Signature {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 3.0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSignature {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyText {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyText {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextIndent {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextIndent {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListContinue {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListContinue {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListContinue2 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListContinue2 {
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListContinue3 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.25in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListContinue3 {
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListContinue4 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 2.0in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListContinue4 {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListContinue5 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 2.25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListContinue5 {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.MessageHeader {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	text-indent: -.75in;
+	background: #CCCCCC;
+	border: none;
+	padding: 0in;
+	font-size: 12.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CMessageHeader {
+	text-indent: -.75in;
+	font-size: 12.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Subtitle {
+	margin-top: 0in;
+	margin-right: 1.5in;
+	margin-bottom: 8.0pt;
+	margin-left: 0in;
+	line-height: 20.0pt;
+	font-size: 17.0pt;
+	font-family: Arial;
+	letter-spacing: -.7pt;
+	font-weight: bold;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSubtitle {
+	line-height: 20.0pt;
+	font-size: 17.0pt;
+	font-family: Arial;
+	letter-spacing: -.7pt;
+	font-weight: bold;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Salutation {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSalutation {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Date {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CDate {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextFirstIndent {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextFirstIndent {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextFirstIndent2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	text-indent: 10.5pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextFirstIndent2 {
+	text-indent: 10.5pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.NoteHeading {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNoteHeading {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyText2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	line-height: 200%;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyText2 {
+	line-height: 200%;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyText3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyText3 {
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextIndent2 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	line-height: 200%;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextIndent2 {
+	line-height: 200%;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextIndent3 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextIndent3 {
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BlockText {
+	margin-top: 0in;
+	margin-right: 1.0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBlockText {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+a:link {
+	color: #0000ff;
+	x-text-underline: normal;
+	text-underline: single;
+	/*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ 
+}
+
+span.Hyperlink {
+	color: #0000ff;
+	x-text-underline: normal;
+	text-underline: single;
+	/*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ 
+}
+
+a:visited {
+	color: #800080;
+	x-text-underline: normal;
+	text-underline: single;
+	/*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ 
+}
+
+span.HyperlinkFollowed {
+	color: #800080;
+	x-text-underline: normal;
+	text-underline: single;
+	/*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ 
+}
+
+p.DocumentMap {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	background: #000080;
+	font-size: 10.0pt;
+	font-family: Tahoma;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CDocumentMap {
+	font-size: 10.0pt;
+	font-family: Tahoma;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.PlainText {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Courier New";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CPlainText {
+	font-size: 10.0pt;
+	font-family: "Courier New";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.AutoSig {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CAutoSig {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p {
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TOCBase {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 11.0pt;
+	margin-left: 0in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTOCBase {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.InstructionHead {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CInstructionHead {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.HeaderBase {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeaderBase {
+	font-size: 10.0pt;
+	font-family: Arial;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FootnoteBase {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	line-height: 11.0pt;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFootnoteBase {
+	line-height: 11.0pt;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TableText {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 0in;
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTableText {
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TitleCover {
+	margin-top: 1.25in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 36.0pt;
+	font-family: "Times New Roman";
+	letter-spacing: -2.4pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTitleCover {
+	font-size: 36.0pt;
+	font-family: "Times New Roman";
+	letter-spacing: -2.4pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.SubtitleCover {
+	margin-top: 76.0pt;
+	margin-right: 84.0pt;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	font-size: 20.0pt;
+	font-family: "Times New Roman";
+	letter-spacing: -1.0pt;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSubtitleCover {
+	font-size: 20.0pt;
+	font-family: "Times New Roman";
+	letter-spacing: -1.0pt;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FooterEven {
+	margin-top: 30.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFooterEven {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FooterFirst {
+	margin-top: 30.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFooterFirst {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FooterOdd {
+	margin-top: 30.0pt;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFooterOdd {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.HeaderEven {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeaderEven {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.HeaderFirst {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeaderFirst {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.HeaderOdd {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeaderOdd {
+	font-size: 10.0pt;
+	font-family: Arial;
+	color: #993300;
+	letter-spacing: -.2pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.IndexBase {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .25in;
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CIndexBase {
+	line-height: 11.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+span.Lead-inEmphasis {
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+p.ListNumber {
+	margin-top: 6.0pt;
+	margin-right: -.7pt;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListNumber {
+	text-indent: -.25in;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ReturnAddress {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CReturnAddress {
+	line-height: 11.0pt;
+	font-size: 8.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.SectionHeading {
+	margin-top: 12.0pt;
+	margin-right: 85.7pt;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 16.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSectionHeading {
+	font-size: 16.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Note {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNote {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TOC {
+	margin-top: 12.0pt;
+	margin-right: 85.7pt;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	border: none;
+	padding: 0in;
+	font-size: 16.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTOC {
+	font-size: 16.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	letter-spacing: -.2pt;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Code {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 1.25in;
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCode {
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.NoteIndented {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNoteIndented {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextIndented {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextIndented {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.NoteIndented2 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNoteIndented2 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet3Small {
+	margin-top: 0in;
+	margin-right: .5in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	text-indent: -9.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet3Small {
+	text-indent: -9.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet4Small {
+	margin-top: 0in;
+	margin-right: .5in;
+	margin-bottom: .0001pt;
+	margin-left: 2.0in;
+	text-indent: -45.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet4Small {
+	text-indent: -45.0pt;
+	line-height: 11.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TableHead {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: Helvetica;
+	color: #000000;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTableHead {
+	font-size: 10.0pt;
+	font-family: Helvetica;
+	color: #000000;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TableBullet {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: .3in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #000000;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTableBullet {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #000000;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TextinTable {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTextinTable {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Bodytextlast {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 9.35pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodytextlast {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TextinTablesmall {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTextinTablesmall {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.CodeText {
+	margin-top: 0in;
+	margin-right: -.9pt;
+	margin-bottom: .0001pt;
+	margin-left: 85.5pt;
+	border: none;
+	padding: 0in;
+	font-size: 7.0pt;
+	font-family: "Courier New";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCodeText {
+	font-size: 7.0pt;
+	font-family: "Courier New";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.FigureTitle {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.25in;
+	text-align: center;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CFigureTitle {
+	text-align: center;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyTextIndentedSmall {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyTextIndentedSmall {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.CodeSmall {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCodeSmall {
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.NoteIndented2Small {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNoteIndented2Small {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Heading3Sub-Title {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .5in;
+	font-size: 12.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	font-weight: bold;
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CHeading3Sub-Title {
+	font-size: 12.0pt;
+	font-family: Arial;
+	color: #0000ff;
+	font-weight: bold;
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Codesmall0 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 1.25in;
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCodesmall0 {
+	font-size: 9.0pt;
+	font-family: "Courier New";
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet2small {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: 72.7pt;
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet2small {
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Bullet2Small {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBullet2Small {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyText1 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 1.0in;
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyText1 {
+	font-size: 12.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.ListBullet5small {
+	margin-top: 3.0pt;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 90.7pt;
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListBullet5small {
+	text-indent: -9.35pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BodyText-Example {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBodyText-Example {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Step {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CStep {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Bullet {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 3.0pt;
+	margin-left: 24.6pt;
+	text-indent: -9.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBullet {
+	text-indent: -9.0pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.CellHeading {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCellHeading {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Picture {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CPicture {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TOCHeading {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 18.0pt;
+	font-family: Arial;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTOCHeading {
+	font-size: 18.0pt;
+	font-family: Arial;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Copyright {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCopyright {
+	font-size: 9.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Bulletindented {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 2.0pt;
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBulletindented {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Cellbody {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCellbody {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TOCTitle {
+	margin-top: 12.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 0in;
+	font-size: 18.0pt;
+	font-family: Arial;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTOCTitle {
+	font-size: 18.0pt;
+	font-family: Arial;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+span.command {
+}
+
+span.screen {
+}
+
+p.note0 {
+	margin-right: 0in;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-Cnote0 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+span.label {
+}
+
+p.Noteindented0 {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CNoteindented0 {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+	font-style: italic;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Listnumbertext {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .5in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CListnumbertext {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Bulletindented2 {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: 94.3pt;
+	text-indent: -9.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBulletindented2 {
+	text-indent: -9.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BulletSmall {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	text-indent: -9.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBulletSmall {
+	text-indent: -9.0pt;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.Sub-Title {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 11.0pt;
+	font-family: Arial;
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CSub-Title {
+	font-size: 11.0pt;
+	font-family: Arial;
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.BulletLarge {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CBulletLarge {
+	text-indent: -.25in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	color: #0000ff;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.knownproblemheader {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .75in;
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-Cknownproblemheader {
+	font-size: 11.0pt;
+	font-family: "Times New Roman";
+	font-weight: bold;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.TableText0 {
+	margin-top: 2.0pt;
+	margin-right: 0in;
+	margin-bottom: 2.0pt;
+	margin-left: 0in;
+	font-size: 10.0pt;
+	font-family: Palatino;
+	color: #000000;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTableText0 {
+	font-size: 10.0pt;
+	font-family: Palatino;
+	color: #000000;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+p.CommentsTitle {
+	margin-top: 6.0pt;
+	margin-right: 0in;
+	margin-bottom: 6.0pt;
+	margin-left: .5in;
+	font-size: 14.0pt;
+	font-family: "Times New Roman";
+	color: #ff0000;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CCommentsTitle {
+	font-size: 14.0pt;
+	font-family: "Times New Roman";
+	color: #ff0000;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+span.standardtext1 {
+}
+
+p.TableNumberSequence {
+	margin-top: 0in;
+	margin-right: 0in;
+	margin-bottom: .0001pt;
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-p-CTableNumberSequence {
+	text-indent: -.25in;
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+ins {
+	x-text-underline: off;
+	x-text-overline: off;
+	x-text-line-through: off;
+	/*begin!kadov{{*/ text-decoration: none none none; /*}}end!kadov*/ 
+}
+
+lfo1 {
+	margin-left: .25in;
+	text-indent: -.25in;
+	font-family: Symbol;
+}
+
+lfo2 {
+	margin-left: .25in;
+	text-indent: -.25in;
+	font-family: Symbol;
+}
+
+lfo3 {
+	margin-left: .25in;
+	text-indent: -.25in;
+	font-family: Symbol;
+}
+
+lfo5 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo6 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo7 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo8 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo9 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo11 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo12 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo13 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo14 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo16 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo17 {
+	margin-left: .75in;
+	text-indent: -.25in;
+}
+
+lfo18 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo19 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo20 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo21 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo22 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo23 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo24 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo25 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo26 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo27 {
+	margin-left: .75in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo28 {
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo56 {
+	margin-left: 96.0pt;
+	text-indent: -6.0pt;
+	font-family: Symbol;
+}
+
+lfo59 {
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-family: Wingdings;
+}
+
+lfo63 {
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-family: Symbol;
+}
+
+lfo64 {
+	margin-left: .75in;
+	text-indent: 0in;
+	font-family: Symbol;
+}
+
+lfo65 {
+	margin-left: .75in;
+	text-indent: 0in;
+	font-family: Symbol;
+}
+
+lfo71 {
+	margin-left: 1.25in;
+	text-indent: -.25in;
+	font-family: Symbol;
+}
+
+lfo73 {
+	margin-left: 1.25in;
+	text-indent: -.25in;
+	font-family: Arial;
+}
+
+lfo74 {
+	margin-left: 1.0in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo75 {
+	margin-left: 1.25in;
+	text-indent: -.25in;
+	font-family: Times;
+}
+
+lfo82 {
+	margin-left: 1.25in;
+	text-indent: -.25in;
+}
+
+lfo83 {
+	margin-left: 1.5in;
+	text-indent: -.25in;
+}
+
+lfo84 {
+	margin-left: 1.75in;
+	text-indent: -.25in;
+}
+
+lfo85 {
+	margin-left: 2.0in;
+	text-indent: -.25in;
+}
+
+lfo91 {
+	margin-left: .55in;
+	text-indent: -.25in;
+	font-family: Arial;
+}
+
+lfo167 {
+	margin-left: 1.75in;
+	text-indent: -.25in;
+	font-family: Geneva;
+}
+
+OL,
+UL {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+P.Address {
+	font-style: italic;
+	font-family: "Times New Roman";
+	font-size: 10.0pt;
+	margin-left: .75in;
+	margin-bottom: .0001pt;
+	margin-right: 0in;
+	margin-top: 0in;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-P-CAddress {
+	font-style: italic;
+	font-family: "Times New Roman";
+	font-size: 10.0pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+P.Preformatted {
+	line-height: normal;
+	x-text-tab-stops: repeat 1in;
+	white-space: nowrap;
+	font-family: "Courier New";
+	font-size: 10.0pt;
+	margin-left: .75in;
+	margin-bottom: .0001pt;
+	margin-right: 0in;
+	margin-top: 0in;
+}
+
+/*=(Generated Code)=================================================*/
+/*=(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)===================*/
+/*begin!kadov{{=====================================================*/ 
+LI.kadov-P-CPreformatted {
+	line-height: normal;
+	x-text-tab-stops: repeat 1in;
+	white-space: nowrap;
+	font-family: "Courier New";
+	font-size: 10.0pt;
+}
+/*}}end!kadov=======================================================*/ 
+
+
+
+
+/*=(===============================================================)*/

@@ -1,0 +1,12 @@
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\bin\Release\GlobalSight.Common.dll
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\obj\Release\ResolveAssemblyReference.cache
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\obj\Release\GlobalSight.Common.dll
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\bin\Release\GlobalSight.Common.dll
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\ResolveAssemblyReference.cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\GlobalSight.Common.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\GlobalSight.Common\GlobalSight.Common\bin\Release\GlobalSight.Common.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\GlobalSight.Common.dll
+C:\GlobalSight\Code\Office2003Converters\GlobalSight.Common\GlobalSight.Common\bin\Release\GlobalSight.Common.dll
+C:\GlobalSight\Code\Office2003Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\ResolveAssemblyReference.cache
+C:\GlobalSight\Code\Office2003Converters\GlobalSight.Common\GlobalSight.Common\obj\Release\GlobalSight.Common.dll

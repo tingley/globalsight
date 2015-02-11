@@ -1,0 +1,293 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
+package com.globalsight.everest.webapp.pagehandler.administration.activity;
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.text.MessageFormat;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.ActivityComparator;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.Activity;
+import com.globalsight.persistence.dependencychecking.ActivityDependencyChecker;
+import com.globalsight.util.FormUtil;
+import com.globalsight.util.GeneralException;
+
+/**
+ */
+public class ActivityMainHandler extends PageHandler
+        implements ActivityConstants
+{
+    /**
+     * Invokes this PageHandler
+     *
+     * @param pageDescriptor the page desciptor
+     * @param request the original request sent from the browser
+     * @param response the original response object
+     * @param context context the Servlet context
+     */
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
+        HttpServletRequest p_request, HttpServletResponse p_response,
+        ServletContext p_context)
+        throws ServletException, IOException, EnvoyServletException
+    {
+        HttpSession session = p_request.getSession(false);
+        String action = p_request.getParameter("action");
+
+        try
+        {
+            if (ActivityConstants.CANCEL.equals(action))
+            {
+                clearSessionExceptTableInfo(session, ActivityConstants.ACTIVITY_KEY);
+            }
+            else if (ActivityConstants.CREATE.equals(action))
+            {
+                if (FormUtil.isNotDuplicateSubmisson(p_request, FormUtil.Forms.NEW_ACTIVITY_TYPE)) {
+                    createActivity(p_request);
+                }
+            }
+            else if (ActivityConstants.EDIT.equals(action))
+            {
+                modifyActivity(session, p_request); 
+                clearSessionExceptTableInfo(session, ActivityConstants.ACTIVITY_KEY);
+            }
+            else if (ActivityConstants.REMOVE.equals(action))
+            {
+                removeActivity(session, p_request); 
+            }
+            dataForTable(p_request, session);
+        }
+        catch (NamingException ne)
+        {
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+        }
+        catch (RemoteException re)
+        {
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+        }
+        catch (GeneralException ge)
+        {
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+        }
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+    }
+
+
+    private void dataForTable(HttpServletRequest p_request, HttpSession p_session)
+        throws RemoteException, NamingException, GeneralException
+    {
+        Vector activities = getAllActivities();
+        Locale uiLocale = (Locale)p_session.getAttribute(
+                                    WebAppConstants.UILOCALE);
+
+        setTableNavigation(p_request, p_session, activities,
+                       new ActivityComparator(uiLocale),
+                       10,
+                       ACTIVITY_LIST, ACTIVITY_KEY);
+    }
+
+    /**
+     * Create an Activity.
+     */
+    private Activity createActivity(HttpServletRequest p_request)
+        throws RemoteException, NamingException, GeneralException
+    {
+        // create the activity.
+        Activity act = new Activity();
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        String actDisplayName = p_request.getParameter(ActivityConstants.NAME);
+        act.setDisplayName(actDisplayName);
+        act.setName(actDisplayName + "_" + companyId);
+        act.setDescription(p_request.getParameter(ActivityConstants.DESC));
+        act.setType(getType(p_request));
+        act.setIsEditable(getIsEditable(p_request));
+        act.setCompanyId(companyId);
+        act.setUseType(p_request.getParameter("useTypeField"));
+        
+        if(getType(p_request) == Activity.TYPE_AUTOACTION) {
+            act.setAutoActionID(p_request.getParameter("SelectAutoAction"));
+        }
+        else if(getType(p_request) == Activity.TYPE_GSEDITION) {
+            act.setEditionActionID(p_request.getParameter("SelectEditionAction"));
+        }
+        
+        return ServerProxy.getJobHandler().createActivity(act);
+    } 
+    
+    private Vector getAllActivities()
+        throws RemoteException, NamingException, GeneralException
+    {
+        return vectorizedCollection(ServerProxy.getJobHandler().getAllActivities());
+    }
+
+    private void modifyActivity(HttpSession p_session, HttpServletRequest p_request)
+         throws RemoteException, NamingException, GeneralException
+    {
+        SessionManager sessionMgr = (SessionManager)
+                p_session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        Activity act = (Activity) sessionMgr.getAttribute(ActivityConstants.ACTIVITY);
+        act.setDescription(p_request.getParameter(ActivityConstants.DESC));
+        act.setType(getType(p_request));
+        act.setIsEditable(getIsEditable(p_request));
+        
+        if(getType(p_request) == Activity.TYPE_AUTOACTION) {
+            act.setAutoActionID(p_request.getParameter("SelectAutoAction"));
+            act.setEditionActionID(null);
+        }
+        else if(getType(p_request) == Activity.TYPE_GSEDITION) {
+            act.setEditionActionID(p_request.getParameter("SelectEditionAction"));
+            act.setAutoActionID(null);
+        }
+        else {
+            act.setAutoActionID(null);
+            act.setEditionActionID(null);
+        }
+        
+        ServerProxy.getJobHandler().modifyActivity(act);
+    }
+
+    /**
+     * Remove an Activity if there are no dependencies.
+     */
+    private void removeActivity(HttpSession p_session, HttpServletRequest p_request)
+        throws RemoteException, NamingException, GeneralException
+    {
+        String name = (String)p_request.getParameter("name");
+        Activity act = (Activity)ServerProxy.getJobHandler().getActivity(name);
+        String deps = checkForDependencies(act, p_session);
+        if (deps == null)
+        {
+            ServerProxy.getJobHandler().removeActivity(act);
+        }
+        else
+        {
+            SessionManager sessionMgr = (SessionManager)
+                p_session.getAttribute(WebAppConstants.SESSION_MANAGER);
+            sessionMgr.setAttribute(DEPENDENCIES, deps);
+        }
+    }
+
+    /**
+     * Returns the activity type based on the request's information.
+     */
+    private int getType(HttpServletRequest p_request)
+    {
+        int type = Activity.TYPE_TRANSLATE;
+        String typeStr = 
+            new String(p_request.getParameter(ActivityConstants.TYPE));
+        
+        if (typeStr.equals(ActivityConstants.REVIEW_NOT_EDITABLE) ||
+            typeStr.equals(ActivityConstants.REVIEW_EDITABLE))  
+        {
+            type = Activity.TYPE_REVIEW;
+        }
+        else if (typeStr.equals(ActivityConstants.AUTO_ACTION)) {
+            type = Activity.TYPE_AUTOACTION;
+        }
+        else if (typeStr.equals(ActivityConstants.GSEDITION)) {
+            type = Activity.TYPE_GSEDITION;
+        }
+        else
+        {
+            type = Activity.TYPE_TRANSLATE;
+        }
+        
+        return type;
+    }
+    
+    /**
+     * Returns the whether this activity is editable
+     * based on the request's information.
+     */
+    private boolean getIsEditable(HttpServletRequest p_request)
+    {
+        boolean isEditable = true;
+        String typeStr = 
+            new String(p_request.getParameter(ActivityConstants.TYPE));
+        
+        if (typeStr.equals(ActivityConstants.REVIEW_NOT_EDITABLE))  
+        {
+            isEditable = false;
+        }
+        return isEditable;
+    }
+
+
+    /**
+     * Check if any objects have dependencies on this L10nProfile.
+     * This should be called BEFORE attempting to remove a Profile.
+     * <p>
+     * 
+     * @param p_activity
+     * @param session
+     * @return 
+     * @exception EnvoyServletException
+     *                   Failed to look for dependencies for the profile.
+     *                   The cause is indicated by the exception message.
+     * @exception RemoteException
+     * @exception GeneralException
+     */
+    private String checkForDependencies(Activity p_activity, HttpSession session)
+        throws RemoteException, GeneralException
+    {
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        ActivityDependencyChecker depChecker = new ActivityDependencyChecker();
+        Hashtable catDeps = depChecker.categorizeDependencies(p_activity);
+
+        //now convert the hashtable into a Vector of Strings
+        StringBuffer deps = new StringBuffer();
+        if (catDeps.size() == 0)
+            return null;
+
+        deps.append("<span class=\"errorMsg\">");
+        Object[] args = {bundle.getString("lb_activity_type")};
+        deps.append(MessageFormat.format(bundle.getString("msg_dependency"), args));
+
+        for (Enumeration e = catDeps.keys(); e.hasMoreElements() ;)
+        {
+            String key = (String)e.nextElement();
+            deps.append("<p>*** " + bundle.getString(key) + " ***<br>");
+            Vector values = (Vector)catDeps.get(key);
+            for (int i = 0 ; i < values.size() ; i++)
+            {
+                deps.append((String)values.get(i));
+                deps.append("<br>");
+            }
+        }
+        deps.append("</span>");
+        return deps.toString();
+    }
+}
+

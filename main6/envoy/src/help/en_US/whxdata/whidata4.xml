@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Column" >
+  <topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Assigning Holidays" url="Setup/Calendars/Assigning_Holidays.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Column Mapping" url="Setup/Projects/Column_Mapping.htm" />
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Currency Main Screen" url="Setup/Currency/Currency_Main_Screen.htm" />
+  <topic name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+  <topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+  <topic name="Define Termbase Column" url="Setup/Terminology/Define_Termbase_Column.htm" />
+  <topic name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="Export Locations Main Screen" url="Data_Sources/Export_Locations/Export_Locations_Main_Screen.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="File Extensions Main Screen" url="Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm" />
+  <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="Find" url="Reports/Find.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Import" url="Setup/Terminology/Import.htm" />
+  <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+  <topic name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="Manage Input Models" url="Setup/Terminology/Manage_Input_Models.htm" />
+  <topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Output Options (Export p.2)2" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+  <topic name="Ratings" url="Vendor_Management/Ratings.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <topic name="System Holidays" url="Setup/Calendars/System_Holidays.htm" />
+  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+  <topic name="Term Audit" url="Reports/Term_Audit.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+  <topic name="User Calendars" url="Setup/Calendars/User_Calendars.htm" />
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+  <topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+  <topic name="Vendors" url="Vendor_Management/Vendors.htm" />
+  <topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+  <topic name="XML Rules Main Screen" url="Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm" />
+</key>
+<key name="Column Mapping" >
+  <topic name="Column Mapping" url="Setup/Projects/Column_Mapping.htm" />
+</key>
+<key name="Column Profiles" >
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+</key>
+<key name="Columns needed" >
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+</key>
+<key name="Comments" >
+  <topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
+  <topic name="Add Comments1" url="My_Activities/Add_Comments1.htm" />
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="List Comments" url="My_Activities/List_Comments.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Preview Rules Sample" url="Appendix/Database_Integration/Preview_Rules_Sample.htm" />
+  <topic name="Rate Vendor" url="My_Jobs/Rate_Vendor.htm" />
+  <topic name="Segment Comments" url="My_Jobs/Customer_Jobs/Segment_Comments.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+  <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="Comments entered" >
+  <topic name="List Comments" url="My_Activities/List_Comments.htm" />
+</key>
+<key name="Concordance Search" >
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+</key>
+<key name="Contact Info" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Contact Information" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+  <topic name="Contact Information" url="Contact_Information.htm" />
+  <topic name="Contact Information1" url="Vendor_Management/Contact_Information1.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+</key>
+<key name="Content Editor" >
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+</key>
+<key name="Content Management Overview" >
+  <topic name="Content Management Overview" url="Content_Management/Content_Management_Overview.htm" />
+</key>
+<key name="Corpus Results" >
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+</key>
+<key name="Cost Report" >
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Create Aligner Package" >
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
+</key>
+<key name="Create DTD" >
+  <topic name="Create DTD" url="Data_Sources/SGML_Rules/Create_DTD.htm" />
+  <topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+</key>
+<key name="Create File Extension" >
+  <topic name="Create File Extension" url="Data_Sources/File_Extensions/Create_File_Extension.htm" />
+</key>
+<key name="Create Locale Pair" >
+  <topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+</key>
+
+</indexdata>

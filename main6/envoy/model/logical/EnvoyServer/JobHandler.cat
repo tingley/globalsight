@@ -1,0 +1,4327 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Job Handler"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA37380127"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "JobHandler"
+	    quid       	"38BEFAD2003B"
+	    documentation 	
+|Provides the external interface to the Job Handler component.
+|
+|Handles
+|  - creating jobs from requests
+|  - dispatching/starting jobs
+|  - routing the job using the workflow
+|
+|
+|
+	    
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "addRequestToJob"
+		    quid       	"38C064F0031F"
+		    documentation 	
+|Adds the specified request to job(s).
+|It adds the request to as many jobs as there are target
+|locales specified.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "request"
+			    quid       	"39403DDC028C"
+			    type       	"L10nRequest"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDefaultProject"
+		    quid       	"38C6EF9B00EB"
+		    documentation 	"Returns the project that is specified as the system's default project."
+		    result     	"Project"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowsForProject"
+		    quid       	"38CD7475016F"
+		    documentation 	
+|Returns a collection of workflows for the specific
+|project.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_projectId"
+			    quid       	"39403DDC028F"
+			    type       	"long"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowsByUser"
+		    quid       	"38CD75AE0197"
+		    documentation 	
+|Returns a collection of workflows that the user
+|is a participant in.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_userId"
+			    quid       	"39403DDC0291"
+			    type       	"long"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDispatchCriteria"
+		    quid       	"38D135AA0304"
+		    result     	"DispatchCriteria"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setDispatchCriteria"
+		    quid       	"38D135AF03C0"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowById"
+		    quid       	"38FB6D8F0213"
+		    result     	"L10nJob"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflows"
+		    quid       	"38FCE9270212"
+		    documentation 	"Get a list of L10nJob instances for jobs in the system that matches the specified list of SearchCriteria."
+		    result     	"ArrayList"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "acceptTask"
+		    quid       	"394440A201EE"
+		    documentation 	"Accept the specified localization task for the specified user."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createLocalContentJob"
+		    quid       	"3944C9370259"
+		    documentation 	"Creat a job to edit local content."
+		    parameters 	(list Parameters
+			(object Parameter "request"
+			    quid       	"3944C98602C1"
+			    type       	"L10nRequest"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getListOfWorkflowTemplates"
+		    quid       	"3945826902E4"
+		    documentation 	"Get a list of all the workflow templates in the workflow server."
+		    result     	"WorkflowTemplate"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectTask"
+		    quid       	"394908AD014F"
+		    documentation 	"Reject the specified task."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "saveBookmark"
+		    quid       	"397F6F3C01D8"
+		    documentation 	"Save the provided session context.  A session context include the following information: (1) user id, (2) Project ID, (3) Workflow ID,  (4) Page ID, (5) segment index."
+		    parameters 	(list Parameters
+			(object Parameter "p_userId"
+			    quid       	"397F6F3C01D9"
+			    documentation 	"User ID of the user to save context for."
+			    type       	"String")
+			(object Parameter "p_sessionId"
+			    quid       	"397F6F3C01DA"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"397F6F3C01DB"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"397F6F3C01DC"
+			    documentation 	"Identifies the job that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"397F6F3C01DD"
+			    documentation 	"The page that the current session is in."
+			    type       	"Integer")
+			(object Parameter "p_segmentId"
+			    quid       	"397F6F3C01DE"
+			    documentation 	"The segment that the current session is in."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createActivity"
+		    quid       	"39BFE8CE01FB"
+		    documentation 	"Creates an activity (node/task name)."
+		    parameters 	(list Parameters
+			(object Parameter "p_activity"
+			    quid       	"39BFE8CE01FC"
+			    type       	"Activity"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "removeActivity"
+		    quid       	"39BFE8CE020F"
+		    documentation 	"Remove an activity from the database."
+		    parameters 	(list Parameters
+			(object Parameter "p_activity"
+			    quid       	"39BFE8CE0219"
+			    type       	"Activity"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAllActivities"
+		    quid       	"39BFE8CE0269"
+		    documentation 	"Get a list of all activities in the system."
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "openWorkflowSession"
+		    quid       	"39CF7BAD01D9"
+		    documentation 	"Creates a workflow session which is basically the initial login to the workflow server."
+		    parameters 	(list Parameters
+			(object Parameter "p_userName"
+			    quid       	"39CF7BCE00BF"
+			    type       	"String")
+			(object Parameter "p_password"
+			    quid       	"39CF7BD702A2"
+			    type       	"String")
+			(object Parameter "p_sessionId"
+			    quid       	"39CF7BE10274"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "closeWorkflowSession"
+		    quid       	"39CF7BFC0115"
+		    documentation 	"Close an existing workflow session (workflow server logout)."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"39CF7C0D032C"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowSession"
+		    quid       	"39CF7C240339"
+		    documentation 	"Get the workflow session based on a valid session id."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"39CF7C3D0349"
+			    type       	"String"))
+		    result     	"WFSession"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "SERVICE_NAME"
+		    quid       	"38FB8E44002F"
+		    type       	"String"
+		    initv      	"JobHandlerServer"
+		    static     	TRUE)))
+	(object Class "Workflow"
+	    quid       	"38CEE29200B8"
+	    documentation 	"This class models a workflow (instance) in the Job Handler component."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getName"
+		    quid       	"38CEE2B901B8"
+		    documentation 	
+|Returns the name of the job.
+|
+		    
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDescription"
+		    quid       	"38FB6E1D00EB"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSourceLocale"
+		    quid       	"38CEE2B901F4"
+		    result     	"Locale"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTargetLocale"
+		    quid       	"38CEE2B90212"
+		    result     	"Locale"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTasks"
+		    quid       	"38CEE2B90227"
+		    documentation 	"Get an ordered list of the tasks of a job."
+		    result     	"JobStage[]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isAuthorizationNeeded"
+		    quid       	"38CEE2B902DB"
+		    documentation 	"Return 'true' if the job requires authorization, 'false' if not."
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCurrentTask"
+		    quid       	"38CEE2B9032B"
+		    documentation 	
+|Return the current task only if in the "Running" state.
+|Otherwise null.
+		    
+		    result     	"Stage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getProject"
+		    quid       	"38CEE2B9033F"
+		    documentation 	"Returns the project this job is associated with."
+		    result     	"Project"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getL10nPageInfo"
+		    quid       	"38CEE2B9038F"
+		    documentation 	"Get a list of all pages for this job."
+		    result     	"Map"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "saveTranslatedChunk"
+		    quid       	"38CFA50403AE"
+		    documentation 	
+|Takes the segment that was translated and passes it
+|to the linguistic component.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"39403DDC02E9"
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"39403DDC02EA"
+			    type       	"long")
+			(object Parameter "p_translatedChunk"
+			    quid       	"39403DDC02EB"
+			    type       	"String")
+			(object Parameter "p_note"
+			    quid       	"39403DDC02EC"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getId"
+		    quid       	"38CFC4C500D2"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "cancel"
+		    quid       	"38CFC758006C"
+		    parameters 	(list Parameters
+			(object Parameter "p_cancelersId"
+			    quid       	"39403DDC02EF"
+			    type       	"long")
+			(object Parameter "p_comments"
+			    quid       	"39403DDC02F0"
+			    type       	"String")
+			(object Parameter "p_saveTM"
+			    quid       	"3947F3C7006F"
+			    documentation 	"Specifies whether TM data should be saved in TM repository."
+			    type       	"Boolean"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "dispatch"
+		    quid       	"38FB6DE102EE"
+		    documentation 	"Dispatch this job without waiting for any more user input or dispatch criteria evaluation."
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "advanceTask"
+		    quid       	"38FB6DF00173"
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "calculateCost"
+		    quid       	"38FB6DF701F5"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getProjectId"
+		    quid       	"38FB6E0E02F2"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCreator"
+		    quid       	"38FB6E17009C"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCurrentState"
+		    quid       	"38FB6E1801E8"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOnlineTranslationPackage"
+		    quid       	"38FB6E1F036F"
+		    documentation 	"Get a package for the specified page.  The package is intended to be used for on line translation."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"39403DDC02FA"
+			    type       	"long"))
+		    result     	"OnlineTranslationPackage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTMList"
+		    quid       	"38FB6E24005F"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWordCount"
+		    quid       	"38FB6E250327"
+		    parameters 	(list Parameters
+			(object Parameter "p_beforeTM"
+			    quid       	"39403DDC02FD"
+			    type       	"boolean"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "staticData"
+		    quid       	"38FCE9820295"
+		    documentation 	
+|Returns 'true' if the job contains static data.  Data that
+|was manually entered into the system and needs
+|manual intervention for finalizing.
+|
+|Returns 'false' if the job doesn't contain any static data.
+		    
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "finalizeWorkflow"
+		    quid       	"38CFC76001D6"
+		    documentation 	"Finalize the workflow by sending localized pages to the web data source."
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "authorize"
+		    quid       	"38FF54D90211"
+		    documentation 	
+|Authorize a job.
+|
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_authorizersId"
+			    quid       	"39403DDC0303"
+			    type       	"long")
+			(object Parameter "p_comment"
+			    quid       	"39403DDC0304"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "reject"
+		    quid       	"38FF55BA0084"
+		    documentation 	
+|Reject a job that hasn't been dispatched yet.
+|
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_rejectersId"
+			    quid       	"39403DDC0306"
+			    type       	"long")
+			(object Parameter "p_comment"
+			    quid       	"39403DDC0307"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addOperationComment"
+		    quid       	"3900CFA102A6"
+		    documentation 	
+|Adds comment about the operation of the job (e.g. authorize the job, reject the job).
+|
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_action"
+			    quid       	"39403DDC0309"
+			    type       	"String")
+			(object Parameter "p_userId"
+			    quid       	"39403DDC030A"
+			    type       	"long")
+			(object Parameter "p_date"
+			    quid       	"39403DDC030B"
+			    type       	"Date")
+			(object Parameter "p_comment"
+			    quid       	"39403DDC030C"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTaskFinished"
+		    quid       	"39449290028D"
+		    documentation 	"Set the current active task as finished."
+		    parameters 	(list Parameters
+			(object Parameter "p_taskComplete"
+			    quid       	"394927DA0327"
+			    documentation 	"Flags whether the task is complete (e.g. all segments translated) or not."
+			    type       	"Boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addRequest"
+		    quid       	"39449D5F0047"
+		    documentation 	"Add a localization request to the job."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "reassignTask"
+		    quid       	"3944BDEC03B1"
+		    documentation 	"Reassign the specified task to the specified role."
+		    parameters 	(list Parameters
+			(object Parameter "task"
+			    quid       	"3944BE20004E"
+			    documentation 	"Task to reassign to the specified role.")
+			(object Parameter "role"
+			    quid       	"3944BE2B0022"
+			    documentation 	"Role to reassign the specified task to."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSnippet"
+		    quid       	"3944D4830103"
+		    documentation 	"Get the specified local content snippet."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3944D4830107"
+			    documentation 	"Identification of the page being edited."
+			    type       	"Integer")
+			(object Parameter "p_localContentName"
+			    quid       	"3994938E01AE"
+			    documentation 	"Name that identifies the local content snippet that can be inserted."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "reroute"
+		    quid       	"394814BE01DC"
+		    documentation 	"Change the route of the workflow."
+		    parameters 	(list Parameters
+			(object Parameter "workflowTemplate"
+			    quid       	"394814CE022F"
+			    documentation 	"The workflow template for the new workflow routing."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addNewSegment"
+		    quid       	"3957A74202CC"
+		    documentation 	"Add a new text segment before or after the specified text segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3957AA6B02DA"
+			    documentation 	"Identifies the page within the current workflow to which the new segment is to be added."
+			    type       	"long")
+			(object Parameter "p_currentSegmentId"
+			    quid       	"3957AC110327"
+			    documentation 	"Identifies the segment before or after which the new segment is to be added."
+			    type       	"Integer")
+			(object Parameter "p_before"
+			    quid       	"3957AC11036D"
+			    documentation 	"Specifies whether the new segment is to be added before or after the current segment.  Before if true, after if false."
+			    type       	"Boolean")
+			(object Parameter "p_newSegment"
+			    quid       	"3957AC11039F"
+			    documentation 	"The content of the new segment to be added."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addDataComment"
+		    quid       	"3957F8700142"
+		    documentation 	"Add comment to the current task of the work; the comment applies to the data, e.g. a segment was splitted or two segments were joined."
+		    parameters 	(list Parameters
+			(object Parameter "p_userId"
+			    quid       	"3957FD4E0360"
+			    documentation 	"Identification of the user who added the comment."
+			    type       	"Long")
+			(object Parameter "p_comment"
+			    quid       	"3957FD5902D0"
+			    documentation 	"The comment to be added."
+			    type       	"String")
+			(object Parameter "p_date"
+			    quid       	"3957FE0F0047"
+			    documentation 	"The date the comment is added."
+			    type       	"Date"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteSegment"
+		    quid       	"398B07D901F7"
+		    documentation 	"Delete the specified segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B08080399"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is to be deleted."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B0809001F"
+			    documentation 	"Identifies the segment to be deleted."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "findTermMatch"
+		    quid       	"398B0A8503C7"
+		    documentation 	"Find all terminology matches for the specified text in the specified project."
+		    parameters 	(list Parameters
+			(object Parameter "p_text"
+			    quid       	"398B0A9402C4"
+			    documentation 	"The text to search for terminology matches."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "joinSegments"
+		    quid       	"398B0F060090"
+		    documentation 	"Join the specified segments together to become one segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B0F060091"
+			    documentation 	"Identifies the page within the current workflow in which the specified segments are to be joined."
+			    type       	"long")
+			(object Parameter "p_segmentIds"
+			    quid       	"398B0F5F034B"
+			    documentation 	"Identificaitons of the list of segments to be joined."
+			    type       	"Integer Array"))
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"The specified segements must be adjacent to each other.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOfflineTranslationPackages"
+		    quid       	"398B13970326"
+		    documentation 	"Get a list of packages for all the pages in the workflow.  The packages are intended to be used for offline translation."
+		    result     	"OfflineTranslationPackage Array"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getPreviousTranslations"
+		    quid       	"398B30620072"
+		    documentation 	"Get a list of previous translation, each element in the list is a pair of activity (e.g. QA) and translated segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B3089014A"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B30A4001C"
+			    documentation 	"Identifies the segment to get previous translations for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "revertToPreviousTranslation"
+		    quid       	"398B334100FB"
+		    documentation 	"Revert a segment's translation to one that was done in a previous stage/task."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398B3373025B"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B33A20385"
+			    documentation 	"Identifies the segment to revert translations for."
+			    type       	"Integer")
+			(object Parameter "p_taskId"
+			    quid       	"398B33A2038F"
+			    documentation 	"The ID of the previous task that this segment's translation should revert to."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectTranslationResult"
+		    quid       	"398B4B390252"
+		    documentation 	"Reject the result of the previous translation."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchTm"
+		    quid       	"398EAFA30040"
+		    documentation 	"Search LM for segment matches."
+		    parameters 	(list Parameters
+			(object Parameter "p_searchCriteria"
+			    quid       	"398EB0480156"
+			    documentation 	"Specifies the criteria of the LM search: exact or fuzzy, degree of fuzziness, concordance.")
+			(object Parameter "p_text"
+			    quid       	"398EB05501C2"
+			    documentation 	"The text to search for LM matches."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "splitSourceSegment"
+		    quid       	"398EB3580239"
+		    documentation 	"Split a source segment into two and return a new version of the translation package."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"398EB38C00C1"
+			    documentation 	"Identifies the page within the current workflow in which the specified segments are to be splitted."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398EB3BD0357"
+			    documentation 	"Identificaiton of the segment to be splitted."
+			    type       	"Integer")
+			(object Parameter "p_position"
+			    quid       	"398EB3C3030F"
+			    documentation 	"The position at which the segment is to be splitted.  This is specified as the offset from the beginning of the source segment."
+			    type       	"Integer"))
+		    result     	"OnlineTranslationPackage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "saveUploadedPages"
+		    quid       	"398EB7AA00B3"
+		    documentation 	"Save all the specified uploaded pages."
+		    parameters 	(list Parameters
+			(object Parameter "p_pages"
+			    quid       	"398EB7C802B5"
+			    documentation 	"The uploaded pages to be saved."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getBookmark"
+		    quid       	"398EC56801A2"
+		    documentation 	"Get the bookmark for this task."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setBookmark"
+		    quid       	"398EC7F1012D"
+		    documentation 	"Set a bookmark for the current workflow."
+		    parameters 	(list Parameters
+			(object Parameter "p_bookmark"
+			    quid       	"398EC8180364"
+			    documentation 	"The bookmark to set.  A bookmark specifies page and segment."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceTmMatches"
+		    quid       	"39943CF301D6"
+		    documentation 	"Replace TM matches according to the new source to target segment pairs."
+		    parameters 	(list Parameters
+			(object Parameter "p_tmMatchReplacements"
+			    quid       	"3994416C0309"
+			    documentation 	"This is a list of TM match replacements.  Each element in the list specifies the source locale, source segment, the target locale, the original target segment, and the replacement target segment."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceSkeleton"
+		    quid       	"3994975702F2"
+		    documentation 	"Replace the skeleton of the specified page with the provided skeleton."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"39949779025B"
+			    documentation 	"Identifies the page to replace skeleton for."
+			    type       	"Integer")
+			(object Parameter "p_newSkeleton"
+			    quid       	"399497790265"
+			    documentation 	"The new skeleton to replace the existing one."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobHandlerImpl"
+	    quid       	"399B0FA40117"
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"399B13D0000E"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobCreationManager"
+		    quidu      	"399B139F03CF"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"399B103800B5"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+		    quidu      	"38BEFAD2003B"))
+	    operations 	(list Operations
+		(object Operation "makeJobSubComponents"
+		    quid       	"399B13610311"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "makeJobRules"
+		    quid       	"399B150F02B6"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addRequestToJob"
+		    quid       	"399B17D00147"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "NewInterface"
+	    quid       	"399B10230372"
+	    stereotype 	"Interface")
+	(object Class "JobCreationManager"
+	    quid       	"399B139F03CF"
+	    operations 	(list Operations
+		(object Operation "makeJobAdditionEngine"
+		    quid       	"399B13B90047"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobAdditionEngine"
+	    quid       	"399B17E90265"
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"399B1B2E01F1"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::L10ProfileConstraint"
+		    quidu      	"399B1B060301")
+		(object Uses_Relationship
+		    quid       	"399B1B3D00A8"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::WorkflowDispatchConstraint"
+		    quidu      	"399B1AF70061")
+		(object Uses_Relationship
+		    quid       	"399B213400F3"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::Job"
+		    quidu      	"399B20B102EA"))
+	    operations 	(list Operations
+		(object Operation "createWorkflowConstraint"
+		    quid       	"399B17F70099"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createL10ProfileConstraint"
+		    quid       	"399B180F0274"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "queryWorkflowDispatchRule"
+		    quid       	"399B181D0184"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "queryL10ProfileIdentityRule"
+		    quid       	"399B182C0013"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addJobToDispatchBox"
+		    quid       	"399B184702ED"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createJob"
+		    quid       	"399B2121038B"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowDispatchRule"
+	    quid       	"399B1A2101F4"
+	    operations 	(list Operations
+		(object Operation "verifyRule"
+		    quid       	"399B1A340061"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "L10ProfileIdentityRule"
+	    quid       	"399B1A4C00A1"
+	    operations 	(list Operations
+		(object Operation "verifyRule"
+		    quid       	"399B1A5C03D9"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "WorkflowDispatchConstraint"
+	    quid       	"399B1AF70061")
+	(object Class "L10ProfileConstraint"
+	    quid       	"399B1B060301")
+	(object Class "WorkflowInstance"
+	    quid       	"399B1F69028E"
+	    operations 	(list Operations
+		(object Operation "addPageToWorkflow"
+		    quid       	"399B1F74001D"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "Job"
+	    quid       	"399B20B102EA"
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"399B20D30054"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::WorkflowInstance"
+		    quidu      	"399B1F69028E"))
+	    operations 	(list Operations
+		(object Operation "createWorkflowInstance"
+		    quid       	"399B20BB01EA"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobDispatchBox"
+	    quid       	"399B28C00033"
+	    operations 	(list Operations
+		(object Operation "addJob"
+		    quid       	"399B28DF0092"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobDispatcher"
+	    quid       	"39A3EC950298"
+	    operations 	(list Operations
+		(object Operation "setDispatchCriteria"
+		    quid       	"39A3ECC80377"
+		    documentation 	"set the dispatch criteria and if the timer has already started, restart it again."
+		    parameters 	(list Parameters
+			(object Parameter "p_dispatchCriteria"
+			    quid       	"39A3F12300D2"
+			    type       	"DispatchCriteria"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDispatchCriteria"
+		    quid       	"39A3ECF50296"
+		    result     	"DispatchCriteria"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "start"
+		    quid       	"39A3F0DC0256"
+		    documentation 	"starts the DispatchTimer if necessary"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "startDispatching"
+		    quid       	"39A3F162003C"
+		    documentation 	"Specifies to start dispatching all the jobs."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "stop"
+		    quid       	"39A3F173034E"
+		    documentation 	"stop the timer if necessary"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "wordCountIncreased"
+		    quid       	"39A3F17F008E"
+		    documentation 	"This is a callback method that notifies the dispatcher that the word count on a job has increased - so possibly ready for dispatching."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DispatcherConstants"
+	    quid       	"39A3ED780063"
+	    stereotype 	"Interface")
+	(object Class "CriteriaAccessHelper"
+	    quid       	"39A3ED9A0076"
+	    documentation 	"CriteriaAccessHelper is basically a helper class for loading/storing dispatch criteria from/to the criteria.properties file."
+	    operations 	(list Operations
+		(object Operation "loadDispatchCriteria"
+		    quid       	"39A3F442013F"
+		    documentation 	"Load the criteria from the criteria property file.    "
+		    result     	"DispatchCriteria"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "storeDispatchCriteria"
+		    quid       	"39A3F46F003F"
+		    documentation 	"Write the new dispatch criteria out to the property file."
+		    parameters 	(list Parameters
+			(object Parameter "p_dispatchCriteria"
+			    quid       	"39A3F4820227"
+			    type       	"DispatchCriteria"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DispatchCriteria"
+	    quid       	"39A3EDB20374"
+	    documentation 	
+|This class holds the criteria for automatically dispatching jobs.  The criteria could be:
+|1. immediate, OR
+|2. PeriodOfTime info (absolute/relative) AND/OR VolumeOfData info.
+	    
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39A3FD41014A"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::java.io.Serializable"
+		    quidu      	"39A3EDC10375"))
+	    operations 	(list Operations
+		(object Operation "andCondition"
+		    quid       	"39A3F5090307"
+		    documentation 	"Determines whether the conditions should be AND'd together."
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setImmediate"
+		    quid       	"39A3F5220386"
+		    documentation 	"Set the immediate flag to be the specified value."
+		    parameters 	(list Parameters
+			(object Parameter "p_immediate"
+			    quid       	"39A3F52D033B"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isImmediate"
+		    quid       	"39A3F5470298"
+		    documentation 	"Determines whether the immediate condition is checked."
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimeCondition"
+		    quid       	"39A3F5740076"
+		    documentation 	"Set the time condition for a relative time."
+		    parameters 	(list Parameters
+			(object Parameter "p_interval"
+			    quid       	"39A3F580004C"
+			    type       	"int")
+			(object Parameter "p_unit"
+			    quid       	"39A3F58900F9"
+			    type       	"int")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F5920246"
+			    type       	"Timestamp"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimeCondition"
+		    quid       	"39A3F63803A3"
+		    documentation 	"Set the time condition for an absolute time."
+		    parameters 	(list Parameters
+			(object Parameter "p_days"
+			    quid       	"39A3F6430100"
+			    type       	"int[]")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F64E016A"
+			    type       	"Timestamp"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTimeCondition"
+		    quid       	"39A3F66E024C"
+		    documentation 	"Get the period of time condition."
+		    result     	"PeriodOfTime"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setVolumeOfDataCondition"
+		    quid       	"39A3F68103D0"
+		    documentation 	"Set the data volume's condition."
+		    parameters 	(list Parameters
+			(object Parameter "p_volume"
+			    quid       	"39A3F698027F"
+			    type       	"long")
+			(object Parameter "p_beforeTM"
+			    quid       	"39A3F6A7026C"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getVolumeOfDataCondition"
+		    quid       	"39A3F6DB01E5"
+		    result     	"VolumeOfData"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimeAndVolumeCondition"
+		    quid       	"39A3F6EE00B6"
+		    parameters 	(list Parameters
+			(object Parameter "p_interval"
+			    quid       	"39A3F6FD011C"
+			    type       	"int")
+			(object Parameter "p_unit"
+			    quid       	"39A3F70400F4"
+			    type       	"int")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F70B011C"
+			    type       	"Timestamp")
+			(object Parameter "p_volume"
+			    quid       	"39A3F7160059"
+			    type       	"long")
+			(object Parameter "p_beforeTM"
+			    quid       	"39A3F71D02F8"
+			    type       	"boolean")
+			(object Parameter "p_and"
+			    quid       	"39A3F7280073"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimeAndVolumeCondition"
+		    quid       	"39A3F7360268"
+		    parameters 	(list Parameters
+			(object Parameter "p_days"
+			    quid       	"39A3F7420342"
+			    type       	"int[]")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F74B0114"
+			    type       	"Timestamp")
+			(object Parameter "p_volume"
+			    quid       	"39A3F754026B"
+			    type       	"long")
+			(object Parameter "p_beforeTM"
+			    quid       	"39A3F76501B1"
+			    type       	"boolean")
+			(object Parameter "p_and"
+			    quid       	"39A3F775039F"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "java.io.Serializable"
+	    quid       	"39A3EDC10375"
+	    stereotype 	"Interface")
+	(object Class "DispatchTimer"
+	    quid       	"39A3EE220311"
+	    documentation 	"DispatchTimer is a timer thread that sleeps based on a particular period of time (interval or absolute) and fires dispatching notification events for objects that are interested in that event. "
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39A3FCF50209"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::java.lang.Thread"
+		    quidu      	"39A3EE36007A"))
+	    operations 	(list Operations
+		(object Operation "run"
+		    quid       	"39A3F7DF024D"
+		    documentation 	"Performs the main action of the DispatchTimer based on the period of time (relative or absolute)."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "TimerHelper"
+	    quid       	"39A3EE2F0341"
+	    documentation 	"TimerHelper is a helper class for calculating and providing the sleep time to the DispatchTimer thread."
+	    operations 	(list Operations
+		(object Operation "getRelativeSleepTime"
+		    quid       	"39A3F83B0245"
+		    parameters 	(list Parameters
+			(object Parameter "p_timerData"
+			    quid       	"39A3F8490097"
+			    type       	"PeriodOfTime"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAbsoluteSleepTime"
+		    quid       	"39A3F85803C4"
+		    parameters 	(list Parameters
+			(object Parameter "p_timerData"
+			    quid       	"39A3F8670357"
+			    type       	"PeriodOfTime"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "java.lang.Thread"
+	    quid       	"39A3EE36007A")
+	(object Class "VolumeOfData"
+	    quid       	"39A3EEF10047"
+	    documentation 	"Represents an amount of data to be translated.  This amount is used for criteria for automatically dispatching a job."
+	    operations 	(list Operations
+		(object Operation "setVolumeContext"
+		    quid       	"39A3F8A30367"
+		    parameters 	(list Parameters
+			(object Parameter "p_volume"
+			    quid       	"39A3F8B002EE"
+			    type       	"long")
+			(object Parameter "p_beforeLM"
+			    quid       	"39A3F8B90020"
+			    type       	"boolean"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getVolume"
+		    quid       	"39A3F8C9019F"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "beforeTM"
+		    quid       	"39A3F8D202E3"
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "PeriodOfTime"
+	    quid       	"39A3EEFC0093"
+	    documentation 	"PeriodOfTime represents the relative and absolute time.  The relative time has an interval, unit of time, and start time (i.e. every 5 days/hrs/min starting at 12pm).  The absolute time has an array of selected days, and a starting time (i.e. every Tue, Thu starting at 12pm)."
+	    operations 	(list Operations
+		(object Operation "setTimeContext"
+		    quid       	"39A3F97C0016"
+		    parameters 	(list Parameters
+			(object Parameter "p_interval"
+			    quid       	"39A3F9A3003A"
+			    type       	"int")
+			(object Parameter "p_unit"
+			    quid       	"39A3F9AC00AB"
+			    type       	"int")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F9BA016A"
+			    type       	"Timestamp"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTimeContext"
+		    quid       	"39A3F9E502AC"
+		    parameters 	(list Parameters
+			(object Parameter "p_days"
+			    quid       	"39A3F9F101C3"
+			    type       	"int[]")
+			(object Parameter "p_startTime"
+			    quid       	"39A3F9FB033A"
+			    type       	"Timestamp"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isAbsolute"
+		    quid       	"39A3FA0C01C2"
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInterval"
+		    quid       	"39A3FA21021C"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getIntervalInMillisec"
+		    quid       	"39A3FA2900A1"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getIntervalUnit"
+		    quid       	"39A3FA4C0391"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getStartTime"
+		    quid       	"39A3FA54031A"
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDispalyedStartTime"
+		    quid       	"39A3FA5F03D4"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDays"
+		    quid       	"39A3FA6B0345"
+		    result     	"int[]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getNumberOfDays"
+		    quid       	"39A3FA770216"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "findDay"
+		    quid       	"39A3FA8300A1"
+		    documentation 	"Finds a particular day within the array of selected days using the binary search algorithm."
+		    parameters 	(list Parameters
+			(object Parameter "p_day"
+			    quid       	"39A3FA9D01C0"
+			    type       	"int"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDayAt"
+		    quid       	"39A3FAA8037F"
+		    parameters 	(list Parameters
+			(object Parameter "p_index"
+			    quid       	"39A3FABC0034"
+			    type       	"int"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getUnitInMillisec"
+		    quid       	"39A3FAC703A1"
+		    parameters 	(list Parameters
+			(object Parameter "p_unit"
+			    quid       	"39A3FAD803E2"
+			    type       	"int"))
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobDispatchListener"
+	    quid       	"39A3EF160299"
+	    documentation 	"An interface used for dispatch processing notification."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "notifyJobDispatchTrigger"
+		    quid       	"39A3FB110004"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "notifyJobDispatchTrigger"
+		    quid       	"39A3FB210026"
+		    parameters 	(list Parameters
+			(object Parameter "p_job"
+			    quid       	"39A3FB2E029B"
+			    type       	"Job"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "JobDispatchAdapter"
+	    quid       	"39A3EF280245"
+	    documentation 	"JobDispatchAdapter is responsible for firing events to a particular job dispatcher."
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39A3FCE20342"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatchListener"
+		    quidu      	"39A3EF160299")))
+	(object Association "$UNNAMED$0"
+	    quid       	"38C059DA0396"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"38C059DD000B"
+		    supplier   	"Logical View::Envoy::Envoy Server::Project Handler::ProjectImpl"
+		    quidu      	"38C04B730308"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"38C059DD000C"
+		    supplier   	"Logical View::Envoy::Envoy Server::Project Handler::ProjectImpl"
+		    quidu      	"38C04B730308"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$3"
+	    quid       	"38CFD9DA00FB"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"38CFD9DA02B3"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+		    quidu      	"38CEE29200B8"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"38CFD9DA02C7"
+		    supplier   	"Logical View::Envoy::Envoy Server::Project Handler::ProjectImpl"
+		    quidu      	"38C04B730308"
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$6"
+	    quid       	"399B1A7500DC"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"399B1A78019F"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine"
+		    quidu      	"399B17E90265"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"399B1A7801A9"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobCreationManager"
+		    quidu      	"399B139F03CF"
+		    is_navigable 	TRUE)))
+	(object Association "$UNNAMED$9"
+	    quid       	"399B1A8A0277"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"399B1A8D016D"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::WorkflowDispatchRule"
+		    quidu      	"399B1A2101F4"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"399B1A8D0177"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine"
+		    quidu      	"399B17E90265")))
+	(object Association "$UNNAMED$12"
+	    quid       	"399B1A91006E"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"399B1A910371"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::L10ProfileIdentityRule"
+		    quidu      	"399B1A4C00A1"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"399B1A91037B"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine"
+		    quidu      	"399B17E90265")))
+	(object Association "$UNNAMED$15"
+	    quid       	"399B1B240142"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"399B1B2502CA"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::WorkflowDispatchConstraint"
+		    quidu      	"399B1AF70061"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"399B1B2502D4"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine"
+		    quidu      	"399B17E90265")))
+	(object Association "$UNNAMED$18"
+	    quid       	"399B20DD03BF"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"399B20E00107"
+		    supplier   	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"399B20E0011B"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::Job"
+		    quidu      	"399B20B102EA")))
+	(object Association "$UNNAMED$21"
+	    quid       	"399B28F40006"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$22"
+		    quid       	"399B28FA01BD"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatchBox"
+		    quidu      	"399B28C00033"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$23"
+		    quid       	"399B28FA01C7"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine"
+		    quidu      	"399B17E90265")))
+	(object Association "$UNNAMED$24"
+	    quid       	"39A3FBFD0235"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$25"
+		    quid       	"39A3FBFE0236"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$26"
+		    quid       	"39A3FBFE0240"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+		    quidu      	"38BEFAD2003B")))
+	(object Association "$UNNAMED$27"
+	    quid       	"39A3FC270325"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$28"
+		    quid       	"39A3FC2803A9"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::CriteriaAccessHelper"
+		    quidu      	"39A3ED9A0076"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$29"
+		    quid       	"39A3FC2803B3"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298")))
+	(object Association "$UNNAMED$30"
+	    quid       	"39A3FC390000"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$31"
+		    quid       	"39A3FC39030D"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatcherConstants"
+		    quidu      	"39A3ED780063"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$32"
+		    quid       	"39A3FC390317"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298")))
+	(object Association "$UNNAMED$33"
+	    quid       	"39A3FC4C022E"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$34"
+		    quid       	"39A3FC4D0384"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchCriteria"
+		    quidu      	"39A3EDB20374"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$35"
+		    quid       	"39A3FC4D038E"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$36"
+	    quid       	"39A3FCA90390"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$37"
+		    quid       	"39A3FCAB02A3"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer"
+		    quidu      	"39A3EE220311"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$38"
+		    quid       	"39A3FCAB02A4"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$39"
+	    quid       	"39A3FCD00288"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$40"
+		    quid       	"39A3FCD10225"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatchListener"
+		    quidu      	"39A3EF160299"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$41"
+		    quid       	"39A3FCD1022F"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer"
+		    quidu      	"39A3EE220311"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$42"
+	    quid       	"39A3FCD50109"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$43"
+		    quid       	"39A3FCD70007"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::PeriodOfTime"
+		    quidu      	"39A3EEFC0093"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$44"
+		    quid       	"39A3FCD70011"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer"
+		    quidu      	"39A3EE220311"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$45"
+	    quid       	"39A3FCEC0274"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$46"
+		    quid       	"39A3FCED0185"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::TimerHelper"
+		    quidu      	"39A3EE2F0341"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$47"
+		    quid       	"39A3FCED0186"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer"
+		    quidu      	"39A3EE220311")))
+	(object Association "$UNNAMED$48"
+	    quid       	"39A3FD050194"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$49"
+		    quid       	"39A3FD060109"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::VolumeOfData"
+		    quidu      	"39A3EEF10047"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$50"
+		    quid       	"39A3FD060113"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchCriteria"
+		    quidu      	"39A3EDB20374")))
+	(object Association "$UNNAMED$51"
+	    quid       	"39A3FD080383"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$52"
+		    quid       	"39A3FD09038E"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::PeriodOfTime"
+		    quidu      	"39A3EEFC0093"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$53"
+		    quid       	"39A3FD090399"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::DispatchCriteria"
+		    quidu      	"39A3EDB20374")))
+	(object Association "$UNNAMED$54"
+	    quid       	"3A3EC49F0009"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$55"
+		    quid       	"3A3EC49F01AE"
+		    supplier   	"Logical View::Utilities::Persistence::PersistenceService"
+		    quidu      	"39A56C84012C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$56"
+		    quid       	"3A3EC49F01CC"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298")))
+	(object Class_Category "Job Creation"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\JobCreation.cat"
+	    quid       	"39A441D90304")
+	(object Class_Category "Job Management"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\JobManagement.cat"
+	    quid       	"39A441EF0360")
+	(object Class_Category "Page Management"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\PageManagement.cat"
+	    quid       	"39A4420F00B3")
+	(object Class_Category "Job Costing"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\JobCosting.cat"
+	    quid       	"39A44219005D")
+	(object Class_Category "Job Reporting"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\JobReporting.cat"
+	    quid       	"39A4422303AB")
+	(object Class_Category "Workflow Coordinator"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\WorkflowCoordinator.cat"
+	    quid       	"39A4422E02FC")
+	(object Class_Category "User Manager Coordinator"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\JobHandlerDomains\\UserManagerCoordinator.cat"
+	    quid       	"39A4424003C1")
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "JobHandler"
+		    quid       	"39A42DFD0190"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39A42FAD0083"
+			    supplier   	"JobDispatcher"
+			    quidu      	"39A42E1F0185"
+			    messages   	(list Messages
+				(object Message "setDispatchCriteria(DispatchCriteria)"
+				    quid       	"39A42FAD0084"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    quidu      	"39A3ECC80377")))
+			(object Link
+			    quid       	"39A436E00264"
+			    supplier   	"JobDispatchListener"
+			    quidu      	"39A42F3C03D4"
+			    messages   	(list Messages
+				(object Message "notifyJobDispatchTrigger(Job)"
+				    quid       	"39A436E00265"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	6
+				    Operation  	"notifyJobDispatchTrigger( )"
+				    quidu      	"39A3FB110004"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+		    quidu      	"38BEFAD2003B"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "JobDispatcher"
+		    quid       	"39A42E1F0185"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39A432590249"
+			    supplier   	"CriteriaAccessHelper"
+			    quidu      	"39A42E3100EB"
+			    messages   	(list Messages
+				(object Message "storeDispatchCriteria(DispatchCriteria)"
+				    quid       	"39A43259024A"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"39A3F46F003F")))
+			(object Link
+			    quid       	"39A432830286"
+			    supplier   	"DispatchTimer"
+			    quidu      	"39A42E3F0394")
+			(object Link
+			    quid       	"39A432B90374"
+			    supplier   	"JobDispatcher"
+			    quidu      	"39A42E1F0185"
+			    messages   	(list Messages
+				(object Message "start( )"
+				    quid       	"39A432B90375"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    quidu      	"39A3F0DC0256"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher"
+		    quidu      	"39A3EC950298"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "CriteriaAccessHelper"
+		    quid       	"39A42E3100EB"
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::CriteriaAccessHelper"
+		    quidu      	"39A3ED9A0076"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "DispatchTimer"
+		    quid       	"39A42E3F0394"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39A432E500BA"
+			    supplier   	"TimerHelper"
+			    quidu      	"39A42F310201"
+			    messages   	(list Messages
+				(object Message "getRelativeSleepTime(PeriodOfTime)"
+				    quid       	"39A432E500BB"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	3
+				    quidu      	"39A3F83B0245")))
+			(object Link
+			    quid       	"39A433780242"
+			    supplier   	"JobDispatchListener"
+			    quidu      	"39A42F3C03D4"
+			    messages   	(list Messages
+				(object Message "notifyJobDispatchTrigger( )"
+				    quid       	"39A43378024C"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	4
+				    quidu      	"39A3FB110004"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer"
+		    quidu      	"39A3EE220311"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "TimerHelper"
+		    quid       	"39A42F310201"
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::TimerHelper"
+		    quidu      	"39A3EE2F0341"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "JobDispatchListener"
+		    quid       	"39A42F3C03D4"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39A433920325"
+			    supplier   	"JobDispatcher"
+			    quidu      	"39A42E1F0185"
+			    messages   	(list Messages
+				(object Message "startDispatching( )"
+				    quid       	"39A433920326"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	5
+				    quidu      	"39A3F162003C")
+				(object Message "wordCountIncreased( )"
+				    quid       	"39A436F602E7"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"8"
+				    ordinal    	7
+				    quidu      	"39A3F17F008E"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobDispatchListener"
+		    quidu      	"39A3EF160299"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"38BEFAB002BD"
+	    title      	"Main"
+	    zoom       	95
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobHandler" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(464, 528)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(304, 496)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	340
+			justify    	0
+			label      	"JobHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(304, 448)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	320
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BEFAD2003B"
+		    width      	340
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::Workflow" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(1088, 544)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(928, 512)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	322
+			justify    	0
+			label      	"Workflow")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(928, 464)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	319
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CEE29200B8"
+		    width      	340
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Project Handler::ProjectImpl" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1824, 544)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1585, 387)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	478
+			justify    	0
+			label      	"ProjectImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C04B730308"
+		    compartment 	(object Compartment
+			Parent_View 	@4
+			location   	(1585, 502)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	4
+			max_width  	53)
+		    width      	496
+		    height     	338
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @5
+		    location   	(1963, 769)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C059DA0396"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @6
+			    Parent_View 	@5
+			    location   	(27, 33)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C059DD000B"
+			    client     	@5
+			    supplier   	@4
+			    vertices   	(list Points
+				(1963, 769)
+				(2074, 769)
+				(2012, 713))
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @7
+			    Parent_View 	@5
+			    location   	(27, 33)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C059DD000C"
+			    client     	@5
+			    supplier   	@4
+			    vertices   	(list Points
+				(1963, 769)
+				(1824, 769)
+				(1824, 713))
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$3" @8
+		    location   	(1416, 544)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38CFD9DA00FB"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @9
+			    Parent_View 	@8
+			    location   	(-8, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CFD9DA02B3"
+			    client     	@8
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @10
+			    Parent_View 	@8
+			    location   	(-8, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38CFD9DA02C7"
+			    client     	@8
+			    supplier   	@4
+			    line_style 	0)))))
+	(object ClassDiagram "External Interface"
+	    quid       	"38C425370381"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	106
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobHandler" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(640, 640)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(184, 106)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	912
+			justify    	0
+			label      	"JobHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@11
+			location   	(184, 56)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	912
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BEFAD2003B"
+		    width      	930
+		    height     	1192
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::Workflow" @12
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1568, 1296)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@12
+			location   	(1256, 87)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	624
+			justify    	0
+			label      	"Workflow")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@12
+			location   	(1256, 37)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	624
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CEE29200B8"
+		    width      	642
+		    height     	2542
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "JobCreation"
+	    quid       	"399B02FF02D5"
+	    title      	"JobCreation"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1100
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobHandler" @13
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(608, 288)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@13
+			location   	(152, 229)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	912
+			justify    	0
+			label      	"JobHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@13
+			location   	(152, 179)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	912
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BEFAD2003B"
+		    width      	930
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobHandlerImpl" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1712, 544)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(1442, 388)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	540
+			justify    	0
+			label      	"JobHandlerImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B0FA40117"
+		    width      	558
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @15
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B103800B5"
+		    client     	@14
+		    supplier   	@13
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::L10ProfileConstraint" @16
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(928, 1456)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@16
+			location   	(816, 1376)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	226
+			justify    	0
+			label      	"L10ProfileConstraint")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B1B060301"
+		    width      	244
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::WorkflowDispatchConstraint" @17
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(928, 768)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@17
+			location   	(784, 688)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	294
+			justify    	0
+			label      	"WorkflowDispatchConstraint")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B1AF70061"
+		    width      	312
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::WorkflowInstance" @18
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1392, 1648)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@18
+			location   	(1169, 1542)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	446
+			justify    	0
+			label      	"WorkflowInstance")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B1F69028E"
+		    width      	464
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Workflow::WorkflowServer" @19
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1920, 1712)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@19
+			location   	(1919, 1820)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	635
+			justify    	0
+			label      	"WorkflowServer")
+		    icon       	"Interface"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39435E1300DC"
+		    width      	58
+		    height     	58
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::Job" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2352, 1296)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(2098, 1215)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	508
+			justify    	0
+			label      	"Job")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B20B102EA"
+		    width      	526
+		    height     	186
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object UsesView "" @21
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B20D30054"
+		    client     	@20
+		    supplier   	@18
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$18" @22
+		    location   	(2098, 1536)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B20DD03BF"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @23
+			    Parent_View 	@22
+			    location   	(18, 192)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B20E00107"
+			    client     	@22
+			    supplier   	@19
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @24
+			    Parent_View 	@22
+			    location   	(18, 192)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B20E0011B"
+			    client     	@22
+			    supplier   	@20
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobCreationManager" @25
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2272, 1008)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(2016, 902)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	512
+			justify    	0
+			label      	"JobCreationManager")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B139F03CF"
+		    width      	530
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object UsesView "" @26
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B13D0000E"
+		    client     	@14
+		    supplier   	@25
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::WorkflowDispatchRule" @27
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(544, 816)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@27
+			location   	(419, 710)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	250
+			justify    	0
+			label      	"WorkflowDispatchRule")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B1A2101F4"
+		    width      	268
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::L10ProfileIdentityRule" @28
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(512, 1152)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@28
+			location   	(387, 1046)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	250
+			justify    	0
+			label      	"L10ProfileIdentityRule")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B1A4C00A1"
+		    width      	268
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobDispatchBox" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2416, 1696)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(2313, 1590)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	206
+			justify    	0
+			label      	"JobDispatchBox")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B28C00033"
+		    width      	224
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobAdditionEngine" @30
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1504, 1088)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@30
+			location   	(1212, 857)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	584
+			justify    	0
+			label      	"JobAdditionEngine")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399B17E90265"
+		    width      	602
+		    height     	486
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$6" @31
+		    location   	(1905, 1045)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B1A7500DC"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @32
+			    Parent_View 	@31
+			    location   	(17, 37)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A78019F"
+			    client     	@31
+			    supplier   	@30
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @33
+			    Parent_View 	@31
+			    location   	(17, 37)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A7801A9"
+			    client     	@31
+			    supplier   	@25
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$9" @34
+		    location   	(940, 927)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B1A8A0277"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @35
+			    Parent_View 	@34
+			    location   	(12, 15)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A8D016D"
+			    client     	@34
+			    supplier   	@27
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @36
+			    Parent_View 	@34
+			    location   	(12, 15)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A8D0177"
+			    client     	@34
+			    supplier   	@30
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$12" @37
+		    location   	(924, 1125)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B1A91006E"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @38
+			    Parent_View 	@37
+			    location   	(12, 37)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A910371"
+			    client     	@37
+			    supplier   	@28
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @39
+			    Parent_View 	@37
+			    location   	(12, 37)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B1A91037B"
+			    client     	@37
+			    supplier   	@30
+			    line_style 	0)))
+		(object UsesView "" @40
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B1B2E01F1"
+		    client     	@30
+		    supplier   	@16
+		    line_style 	0)
+		(object UsesView "" @41
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B1B3D00A8"
+		    client     	@30
+		    supplier   	@17
+		    line_style 	0)
+		(object UsesView "" @42
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B213400F3"
+		    client     	@30
+		    supplier   	@20
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$21" @43
+		    location   	(2054, 1454)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399B28F40006"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$22" @44
+			    Parent_View 	@43
+			    location   	(550, 366)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B28FA01BD"
+			    client     	@43
+			    supplier   	@29
+			    line_style 	0)
+			(object RoleView "$UNNAMED$23" @45
+			    Parent_View 	@43
+			    location   	(550, 366)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399B28FA01C7"
+			    client     	@43
+			    supplier   	@30
+			    line_style 	0)))))
+	(object ClassDiagram "Auto Job Dispatching"
+	    quid       	"39A3EB4A02BA"
+	    title      	"Auto Job Dispatching"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::java.io.Serializable" @46
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 1232)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@46
+			location   	(160, 1184)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	350
+			justify    	0
+			label      	"java.io.Serializable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@46
+			location   	(160, 1136)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	350
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EDC10375"
+		    width      	368
+		    height     	232
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::java.lang.Thread" @47
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1632, 784)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@47
+			location   	(1488, 704)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	294
+			justify    	0
+			label      	"java.lang.Thread")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EE36007A"
+		    width      	312
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobDispatchAdapter" @48
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1600, 2112)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@48
+			location   	(1392, 2032)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	412
+			justify    	0
+			label      	"JobDispatchAdapter")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EF280245"
+		    width      	430
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobDispatchListener" @49
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1600, 1648)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@49
+			location   	(1341, 1564)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	518
+			justify    	0
+			label      	"JobDispatchListener")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@49
+			location   	(1341, 1514)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	518
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EF160299"
+		    width      	536
+		    height     	292
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @50
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCE20342"
+		    client     	@48
+		    supplier   	@49
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::TimerHelper" @51
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2032, 1152)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@51
+			location   	(1790, 1046)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	484
+			justify    	0
+			label      	"TimerHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EE2F0341"
+		    width      	502
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::VolumeOfData" @52
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 2496)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@52
+			location   	(130, 2340)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	412
+			justify    	0
+			label      	"VolumeOfData")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EEF10047"
+		    width      	430
+		    height     	336
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::PeriodOfTime" @53
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1040, 2000)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@53
+			location   	(797, 1619)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	486
+			justify    	0
+			label      	"PeriodOfTime")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EEFC0093"
+		    width      	504
+		    height     	786
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobHandler" @54
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(992, 112)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@54
+			location   	(864, 80)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"JobHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@54
+			location   	(864, 32)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BEFAD2003B"
+		    width      	274
+		    height     	184
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::CriteriaAccessHelper" @55
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1760, 512)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@55
+			location   	(1532, 381)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	456
+			justify    	0
+			label      	"CriteriaAccessHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3ED9A0076"
+		    width      	474
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::DispatcherConstants" @56
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1024, 1184)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@56
+			location   	(816, 1152)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	418
+			justify    	0
+			label      	"DispatcherConstants")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@56
+			location   	(816, 1104)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	418
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3ED780063"
+		    width      	436
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::DispatchTimer" @57
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1488, 1200)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@57
+			location   	(1399, 1094)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	178
+			justify    	0
+			label      	"DispatchTimer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EE220311"
+		    width      	196
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$39" @58
+		    location   	(1539, 1409)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCD00288"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$40" @59
+			    Parent_View 	@58
+			    location   	(83, 369)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCD10225"
+			    client     	@58
+			    supplier   	@49
+			    line_style 	0)
+			(object RoleView "$UNNAMED$41" @60
+			    Parent_View 	@58
+			    location   	(83, 369)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCD1022F"
+			    client     	@58
+			    supplier   	@57
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$45" @61
+		    location   	(1683, 1182)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCEC0274"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$46" @62
+			    Parent_View 	@61
+			    location   	(227, 142)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCED0185"
+			    client     	@61
+			    supplier   	@51
+			    line_style 	0)
+			(object RoleView "$UNNAMED$47" @63
+			    Parent_View 	@61
+			    location   	(227, 142)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCED0186"
+			    client     	@61
+			    supplier   	@57
+			    line_style 	0)))
+		(object InheritView "" @64
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCF50209"
+		    client     	@57
+		    supplier   	@47
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$42" @65
+		    location   	(1130, 1369)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCD50109"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$43" @66
+			    Parent_View 	@65
+			    location   	(10, 329)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCD70007"
+			    client     	@65
+			    supplier   	@53
+			    vertices   	(list Points
+				(1130, 1369)
+				(1053, 1406)
+				(1047, 1606))
+			    line_style 	0)
+			(object RoleView "$UNNAMED$44" @67
+			    Parent_View 	@65
+			    location   	(10, 329)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCD70011"
+			    client     	@65
+			    supplier   	@57
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::DispatchCriteria" @68
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 1872)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@68
+			location   	(36, 1541)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	600
+			justify    	0
+			label      	"DispatchCriteria")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EDB20374"
+		    width      	618
+		    height     	686
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$48" @69
+		    location   	(336, 2271)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FD050194"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$49" @70
+			    Parent_View 	@69
+			    location   	(16, 1007)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FD060109"
+			    client     	@69
+			    supplier   	@52
+			    line_style 	0)
+			(object RoleView "$UNNAMED$50" @71
+			    Parent_View 	@69
+			    location   	(16, 1007)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FD060113"
+			    client     	@69
+			    supplier   	@68
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$51" @72
+		    location   	(716, 1941)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FD080383"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$52" @73
+			    Parent_View 	@72
+			    location   	(348, 677)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FD09038E"
+			    client     	@72
+			    supplier   	@53
+			    line_style 	0)
+			(object RoleView "$UNNAMED$53" @74
+			    Parent_View 	@72
+			    location   	(348, 677)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FD090399"
+			    client     	@72
+			    supplier   	@68
+			    line_style 	0)))
+		(object RealizeView "" @75
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FD41014A"
+		    client     	@68
+		    supplier   	@46
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Utilities::Persistence::PersistenceService" @76
+		    ShowCompartmentStereotypes 	TRUE
+		    SuppressAttribute 	TRUE
+		    SuppressOperation 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(304, 768)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@76
+			location   	(110, 718)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	388
+			justify    	0
+			label      	"PersistenceService")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A56C84012C"
+		    width      	406
+		    height     	124
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "m_instance" @77
+		    location   	(451, 993)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @78
+			Parent_View 	@77
+			location   	(451, 934)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	600
+			justify    	0
+			label      	"m_instance"
+			pctDist    	0.500000
+			height     	60
+			orientation 	0)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39C160E00023"
+		    roleview_list 	(list RoleViews
+			(object RoleView "" @79
+			    Parent_View 	@77
+			    location   	(147, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @80
+				Parent_View 	@79
+				location   	(263, 879)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39C160E300D2"
+			    client     	@77
+			    supplier   	@76
+			    vertices   	(list Points
+				(451, 993)
+				(304, 993)
+				(304, 830))
+			    line_style 	0
+			    label      	(object SegLabel @81
+				Parent_View 	@79
+				location   	(358, 855)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.900000
+				height     	54
+				orientation 	1))
+			(object RoleView "" @82
+			    Parent_View 	@77
+			    location   	(147, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @83
+				Parent_View 	@82
+				location   	(371, 894)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39C160E300DC"
+			    client     	@77
+			    supplier   	@76
+			    vertices   	(list Points
+				(451, 993)
+				(529, 993)
+				(366, 830))
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::JobDispatcher" @84
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1024, 672)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@84
+			location   	(802, 441)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	444
+			justify    	0
+			label      	"JobDispatcher")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EC950298"
+		    width      	462
+		    height     	486
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$24" @85
+		    location   	(1003, 316)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FBFD0235"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$25" @86
+			    Parent_View 	@85
+			    location   	(11, 204)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FBFE0236"
+			    client     	@85
+			    supplier   	@84
+			    line_style 	0)
+			(object RoleView "$UNNAMED$26" @87
+			    Parent_View 	@85
+			    location   	(11, 204)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FBFE0240"
+			    client     	@85
+			    supplier   	@54
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$27" @88
+		    location   	(1388, 592)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FC270325"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$28" @89
+			    Parent_View 	@88
+			    location   	(396, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC2803A9"
+			    client     	@88
+			    supplier   	@55
+			    line_style 	0)
+			(object RoleView "$UNNAMED$29" @90
+			    Parent_View 	@88
+			    location   	(396, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC2803B3"
+			    client     	@88
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$30" @91
+		    location   	(1024, 1003)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FC390000"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$31" @92
+			    Parent_View 	@91
+			    location   	(32, 443)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC39030D"
+			    client     	@91
+			    supplier   	@56
+			    line_style 	0)
+			(object RoleView "$UNNAMED$32" @93
+			    Parent_View 	@91
+			    location   	(32, 443)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC390317"
+			    client     	@91
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$36" @94
+		    location   	(1313, 1001)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FCA90390"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$37" @95
+			    Parent_View 	@94
+			    location   	(321, 441)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCAB02A3"
+			    client     	@94
+			    supplier   	@57
+			    line_style 	0)
+			(object RoleView "$UNNAMED$38" @96
+			    Parent_View 	@94
+			    location   	(321, 441)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FCAB02A4"
+			    client     	@94
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$33" @97
+		    location   	(707, 1221)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39A3FC4C022E"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$34" @98
+			    Parent_View 	@97
+			    location   	(19, 661)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC4D0384"
+			    client     	@97
+			    supplier   	@68
+			    line_style 	0)
+			(object RoleView "$UNNAMED$35" @99
+			    Parent_View 	@97
+			    location   	(19, 661)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39A3FC4D038E"
+			    client     	@97
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$54" @100
+		    location   	(649, 721)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3A3EC49F0009"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$55" @101
+			    Parent_View 	@100
+			    location   	(-375, 49)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3A3EC49F01AE"
+			    client     	@100
+			    supplier   	@76
+			    line_style 	0)
+			(object RoleView "$UNNAMED$56" @102
+			    Parent_View 	@100
+			    location   	(-375, 49)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3A3EC49F01CC"
+			    client     	@100
+			    supplier   	@84
+			    line_style 	0)))))
+	(object InteractionDiagram "Automatically Dispatching Jobs"
+	    mechanism_ref 	@1
+	    quid       	"39A42DE3014D"
+	    title      	"Automatically Dispatching Jobs"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	2088
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "JobHandler" @103
+		    location   	(976, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@103
+			location   	(976, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"JobHandler")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42DFD0190"
+		    width      	300
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @104
+			location   	(976, 608)
+			line_color 	3342489
+			InterObjView 	@103
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @105
+			location   	(976, 1504)
+			line_color 	3342489
+			InterObjView 	@103
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "JobDispatcher" @106
+		    location   	(1312, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@106
+			location   	(1312, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	324
+			justify    	0
+			label      	"JobDispatcher")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42E1F0185"
+		    width      	342
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @107
+			location   	(1312, 608)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @108
+			location   	(1312, 672)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @109
+			location   	(1312, 832)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	136
+			y_coord    	76
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @110
+			location   	(1312, 848)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	60
+			y_coord    	0
+			Nested     	TRUE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @111
+			location   	(1312, 1328)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @112
+			location   	(1312, 1696)
+			line_color 	3342489
+			InterObjView 	@106
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "CriteriaAccessHelper" @113
+		    location   	(1728, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@113
+			location   	(1728, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	434
+			justify    	0
+			label      	"CriteriaAccessHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42E3100EB"
+		    width      	452
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @114
+			location   	(1728, 672)
+			line_color 	3342489
+			InterObjView 	@113
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "DispatchTimer" @115
+		    location   	(2144, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@115
+			location   	(2144, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	334
+			justify    	0
+			label      	"DispatchTimer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42E3F0394"
+		    width      	352
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @116
+			location   	(2144, 960)
+			line_color 	3342489
+			InterObjView 	@115
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @117
+			location   	(2144, 1136)
+			line_color 	3342489
+			InterObjView 	@115
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "TimerHelper" @118
+		    location   	(2496, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@118
+			location   	(2496, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	284
+			justify    	0
+			label      	"TimerHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42F310201"
+		    width      	302
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @119
+			location   	(2496, 960)
+			line_color 	3342489
+			InterObjView 	@118
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "JobDispatchListener" @120
+		    location   	(2896, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@120
+			location   	(2896, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	422
+			justify    	0
+			label      	"JobDispatchListener")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A42F3C03D4"
+		    width      	440
+		    height     	1681
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @121
+			location   	(2896, 1136)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @122
+			location   	(2896, 1296)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	152
+			y_coord    	92
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @123
+			location   	(2896, 1504)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @124
+			location   	(2896, 1696)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterMessView "" @125
+		    location   	(1168, 608)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @126
+			Parent_View 	@125
+			location   	(1216, 560)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A42FAD0084"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	713
+			justify    	0
+			label      	"setDispatchCriteria(DispatchCriteria)"
+			pctDist    	0.740984
+			height     	49
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@103
+		    supplier   	@106
+		    Focus_Src  	@104
+		    Focus_Entry 	@107
+		    origin     	(991, 608)
+		    terminus   	(1296, 608)
+		    ordinal    	0)
+		(object NoteView @127
+		    location   	(384, 368)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@127
+			location   	(16, 288)
+			fill_color 	13434879
+			nlines     	3
+			max_width  	697
+			label      	"Initially JobHandler will instantiate DispatchBox, JobDispatcher, and JobDispatchAdapter.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	757
+		    height     	163)
+		(object InterMessView "" @128
+		    location   	(16, 672)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @129
+			Parent_View 	@128
+			location   	(1520, 624)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A43259024A"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	748
+			justify    	0
+			label      	"storeDispatchCriteria(DispatchCriteria)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@106
+		    supplier   	@113
+		    Focus_Src  	@108
+		    Focus_Entry 	@114
+		    origin     	(1327, 672)
+		    terminus   	(1712, 672)
+		    ordinal    	1)
+		(object SelfMessView "" @130
+		    location   	(16, 848)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @131
+			Parent_View 	@130
+			location   	(1408, 800)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A432B90375"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	176
+			justify    	0
+			label      	"start( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@106
+		    supplier   	@106
+		    Focus_Src  	@109
+		    Focus_Entry 	@110
+		    origin     	(1328, 848)
+		    terminus   	(1478, 848)
+		    ordinal    	2)
+		(object InterMessView "" @132
+		    location   	(16, 960)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @133
+			Parent_View 	@132
+			location   	(2320, 912)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A432E500BB"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	731
+			justify    	0
+			label      	"getRelativeSleepTime(PeriodOfTime)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@115
+		    supplier   	@118
+		    Focus_Src  	@116
+		    Focus_Entry 	@119
+		    origin     	(2159, 960)
+		    terminus   	(2480, 960)
+		    ordinal    	3)
+		(object NoteView @134
+		    location   	(2384, 768)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@134
+			location   	(2176, 656)
+			fill_color 	13434879
+			nlines     	5
+			max_width  	377
+			label      	"Assuming that the time is relative.  Otherwise, the sleep time for the absolute time should be used.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	437
+		    height     	225)
+		(object InterMessView "" @135
+		    location   	(16, 1136)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @136
+			Parent_View 	@135
+			location   	(2512, 1088)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A43378024C"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	537
+			justify    	0
+			label      	"notifyJobDispatchTrigger( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@115
+		    supplier   	@120
+		    Focus_Src  	@117
+		    Focus_Entry 	@121
+		    origin     	(2159, 1136)
+		    terminus   	(2880, 1136)
+		    ordinal    	4)
+		(object InterMessView "" @137
+		    location   	(2096, 1328)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @138
+			Parent_View 	@137
+			location   	(2112, 1280)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A433920326"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	388
+			justify    	0
+			label      	"startDispatching( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	1)
+		    line_color 	3342489
+		    client     	@120
+		    supplier   	@106
+		    Focus_Src  	@122
+		    Focus_Entry 	@111
+		    origin     	(2880, 1328)
+		    terminus   	(1328, 1328)
+		    ordinal    	5)
+		(object NoteView @139
+		    location   	(432, 944)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@139
+			location   	(32, 512)
+			fill_color 	13434879
+			nlines     	21
+			max_width  	778
+			label      	
+|The Project Manager invokes the Dispatch Configuration GUI through the system's Administrator Interface.  The Project Manager specifies that a workflow is to be started when one or more of the following time conditions are met:
+|a.A time interval, such as "every 5 days/hrs/min/sec starting at a particular hour (i.e. 2pm)".  All workflows will be dispatched when this condition is met.
+|b.An absolute time, such as "every weekday at 12:00 noon".  All workflows will be dispatched when this condition is met.
+|
+|The Project Manager confirms the settings. The system saves the new conditions.  The system continuously monitors the events that may affect these conditions.  When a condition is met, workflow's costing information is determined. Then the system dispatches the jobs that meet the condition.  Each workflow is started and routed to its first task.
+			)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	838
+		    height     	875)
+		(object NoteView @140
+		    location   	(432, 1776)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@140
+			location   	(16, 1408)
+			fill_color 	13434879
+			nlines     	17
+			max_width  	797
+			label      	
+|Another condition is whenever data is added or changed in the web data source.  This means that a job will be created and dispatched immediately every time a request is brought into the system.
+|
+|The last condition is when a specific volume of data has been accumulated in a workflow.  Only the workflows that met this condition will be dispatched.  This volume of data can be specified as either (1) number of localizable words before LM is leveraged, or (2) number of localizable words after LM is leveraged.
+|In either of the cases discribed above, the JobHandler will fire an event to invoke a particular method in JobDispatcher.
+|Note: The time condition and volume condition can be AND/OR together.
+			)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	857
+		    height     	738)
+		(object InterMessView "" @141
+		    location   	(16, 1504)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @142
+			Parent_View 	@141
+			location   	(1936, 1456)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A436E00265"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	593
+			justify    	0
+			label      	"notifyJobDispatchTrigger(Job)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@103
+		    supplier   	@120
+		    Focus_Src  	@105
+		    Focus_Entry 	@123
+		    origin     	(991, 1504)
+		    terminus   	(2880, 1504)
+		    ordinal    	6)
+		(object InterMessView "" @143
+		    location   	(16, 1696)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @144
+			Parent_View 	@143
+			location   	(2112, 1648)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39A436F602E7"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	463
+			justify    	0
+			label      	"wordCountIncreased( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	1)
+		    line_color 	3342489
+		    client     	@120
+		    supplier   	@106
+		    Focus_Src  	@124
+		    Focus_Entry 	@112
+		    origin     	(2880, 1696)
+		    terminus   	(1328, 1696)
+		    ordinal    	7)
+		(object NoteView @145
+		    location   	(2128, 1824)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@145
+			location   	(1808, 1712)
+			fill_color 	13434879
+			nlines     	5
+			max_width  	621
+			label      	"If immediate is selected or only volume info is not null (even if it's OR with Timer), dispatch the jobs.   Otherwise (if AND with TImer) add jobs to the queue and wait for timer for start dispatching.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	681
+		    height     	232)))))

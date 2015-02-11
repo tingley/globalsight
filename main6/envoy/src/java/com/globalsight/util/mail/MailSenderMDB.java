@@ -1,0 +1,86 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
+package com.globalsight.util.mail;
+import java.util.HashMap;
+
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+
+/**
+ * The MailSenderMDB is a message driven bean that handles sending
+ * email asynchronously.
+ */
+public class MailSenderMDB extends GenericQueueMDB
+{
+    // for logging purposes
+    private static GlobalSightCategory s_logger =
+        (GlobalSightCategory) GlobalSightCategory.getLogger(MailSenderMDB.class);
+
+  //////////////////////////////////////
+  // Constructor                      //
+  //////////////////////////////////////
+  public MailSenderMDB()
+  {
+      super(s_logger);
+
+  }
+
+  //////////////////////////////////////
+  // Public Methods                   //
+  //////////////////////////////////////
+
+    /**
+     * Receives a message to send an email and uses the MailSender class
+     * to actually send it. This allows email to be sent asynchronously
+     *
+     * @param p_cxeRequest The JMS message containing the hashtable with email args
+     */
+    public void onMessage(Message p_msg)
+    {
+        try {
+            ObjectMessage msg = (ObjectMessage) p_msg;
+            HashMap args = (HashMap) msg.getObject();
+
+            CompanyThreadLocal.getInstance().setIdValue(
+                    (String) args.get(CompanyWrapper.CURRENT_COMPANY_ID));
+
+            String to = (String) args.get("to");
+            String from = (String) args.get("from");
+            String cc = (String) args.get("cc");
+            String bcc = (String) args.get("bcc");
+            String subject = (String) args.get("subject");
+            String text = (String) args.get("text");
+			String[] attachments = (String[]) args.get("attachments");
+			s_logger.info("Sending email to " + to + " for '" + subject + "'");
+			MailSender.getInstance().sendMail(from, to, cc, bcc, subject, text,
+					attachments);
+        } catch (Exception e) {
+            s_logger.error(e.getLocalizedMessage());
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
+    }
+}
+

@@ -1,0 +1,120 @@
+<%@ page import="java.util.*,
+        com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
+        com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandlerHelper,
+        com.globalsight.everest.servlet.util.SessionManager,
+        com.globalsight.everest.workflow.WorkflowConstants,
+        com.globalsight.everest.taskmanager.Task"
+ %>
+<%
+   String tasksAvailableUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + Task.STATE_ACTIVE + "&listType=stateOnly";
+   String tasksInProgressUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + Task.STATE_ACCEPTED + "&listType=stateOnly";
+   String tasksInProgressGSEditionUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + WorkflowConstants.TASK_GSEDITION_IN_PROGESS + "&listType=stateOnly";
+   String tasksFinishedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + Task.STATE_COMPLETED + "&listType=stateOnly";
+   String tasksRejectedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + Task.STATE_REJECTED + "&listType=stateOnly";
+   String tasksAllStatusUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
+           "=" + Task.STATE_ALL + "&listType=stateOnly";	
+	
+    // Get most recently used tasks 
+    String mruTasksStr = (String)session.getAttribute(JobSearchConstants.MRU_TASKS);
+    ArrayList mruTasks = new ArrayList();
+    if (mruTasksStr != null)
+    {
+        StringTokenizer st = new StringTokenizer(mruTasksStr, "|");
+        while (st.hasMoreTokens())
+        {
+            mruTasks.add(st.nextToken());
+        }
+    }
+    
+%>
+
+//////////////// My Activities menu ///////////////////
+var myActivitiesMenu = new WebFXMenu;
+
+// search activity
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_search_activities")%>", "javascript:goToUrl('<%=tasksSearchUrl%>');", ""));
+
+// last search
+<%
+Integer lastSearchState = (Integer)session.getAttribute("lastTaskSearchState");
+if (lastSearchState != null)
+{
+    int taskstate = lastSearchState.intValue();
+    String lastTaskUrl = LinkHelper.getWebActivityURL(request, "myactivities") + 
+                        "&listType=lastSearch";
+    String menuLabel = mainMenuBundle.getString("lb_last_search");
+
+    if (taskstate == Task.STATE_ACTIVE)
+    {
+        menuLabel += " (" + mainMenuBundle.getString("lb_available") + ")";
+    }
+    else if (taskstate == Task.STATE_ACCEPTED)
+    {
+        menuLabel += " (" + mainMenuBundle.getString("lb_inprogress") + ")";
+    }
+    else if (taskstate == Task.STATE_COMPLETED)
+    {
+        menuLabel += " (" + mainMenuBundle.getString("lb_finished") + ")";
+    }
+    else if (taskstate == Task.STATE_REJECTED)
+    {
+        menuLabel += " (" + mainMenuBundle.getString("lb_rejected") + ")";
+    }
+    else
+    {
+    	menuLabel += " (" + mainMenuBundle.getString("lb_all_status") + ")";
+    }
+%>
+myActivitiesMenu.add(new WebFXMenuItem("<%=menuLabel%>", "javascript:goToUrl('<%=lastTaskUrl%>');", ""));
+<%
+}
+%>
+
+myActivitiesMenu.add(new WebFXMenuSeparator());
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_available")%>", "javascript:goToUrl('<%=tasksAvailableUrl%>');", ""));
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>", "javascript:goToUrl('<%=tasksInProgressUrl%>');", ""));
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>(<%=mainMenuBundle.getString("lb_gsedition")%>)", "javascript:goToUrl('<%=tasksInProgressGSEditionUrl%>');", ""));
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_finished")%>", "javascript:goToUrl('<%=tasksFinishedUrl%>');", ""));
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_rejected")%>", "javascript:goToUrl('<%=tasksRejectedUrl%>');", ""));
+
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_status")%>", "javascript:goToUrl('<%=tasksAllStatusUrl%>');", ""));
+
+<%
+try
+{
+    if (mruTasks.size() != 0)
+    {
+%>
+    myActivitiesMenu.add(new WebFXMenuSeparator());
+<%
+        for (int i = 0; i < mruTasks.size(); i++)
+        {
+            String str = (String)mruTasks.get(i);
+            StringTokenizer st = new StringTokenizer(str, ":");
+            String alocale = st.nextToken();
+            String jobname = st.nextToken();
+            String mrutask = st.nextToken();
+            String taskstate = st.nextToken();
+            String label = jobname + " (" + alocale + ")";
+            String aurl = new String("/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskId=" + mrutask + "&state=" + taskstate + "&jobname="+jobname + "&cookie=" + str);
+%>
+        myActivitiesMenu.add(new WebFXMenuItem("<%=label%>", "javascript:goToUrl('<%=aurl%>');", ""));
+<%
+        }
+    }
+}
+catch(Exception e)
+{
+    // Cookie from client is corrupted, just ignore it.
+}
+%>

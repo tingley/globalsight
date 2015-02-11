@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Print Termbase Entry</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<META HTTP-EQUIV="CONTENTTYPE" CONTENT="text/html; charset=UTF-8">
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<STYLE type="text/css" MEDIA="all">
+@import url("/globalsight/envoy/terminology/viewer/printer.css");
+</STYLE>
+<style type="text/css" media="print">
+.noprint {display:none;visibility:hidden;}
+</style>
+<SCRIPT>
+var g_args;
+
+function init()
+{
+  // See http://support.microsoft.com/kb/q296113/.
+  // Window title is not changed but the printed title is correct.
+  document.title = "Entry " + g_args.cids[0] + " in termbase \u00ab" +
+    g_args.termbase + "\u00bb";
+  document.getElementById("idViewerEntry").innerHTML = g_args.entries[0];
+}
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+  }
+  else
+  {
+  }
+
+  window.returnValue = null;
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doOnBeforePrint()
+{
+  idHeader.style.display = 'none';
+  idHeaderSeparator.style.display = 'none';
+}
+
+function doOnAfterPrint()
+{
+  idHeader.style.display = 'block';
+  idHeaderSeparator.style.display = 'block';
+  btnClose.focus();
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  init();
+
+  btnPrint.focus();
+}
+</script>
+</head>
+<body onload="doLoad()" onkeypress="doKeypress()">
+<div id="idHeader" class="noprint">
+  &nbsp;<button id="btnClose" onclick="doClose(true)">Close</button>
+  &nbsp;<button id="btnPrint" onclick="window.print()">Print</button>
+  &nbsp; (buttons won't be printed)
+</div>
+<hr id="idHeaderSeparator" class="noprint">
+<div id="idViewerEntry"></div>
+</body>
+</html>

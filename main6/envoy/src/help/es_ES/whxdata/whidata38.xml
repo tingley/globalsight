@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="más grandes" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="más importante" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="más nodos" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="material original" >
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+  <topic name="Idioma" url="Glosario/Locale.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="material original está" >
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+</key>
+<key name="material superfluo" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="máximo" >
+  <topic name="Segmento" url="Glosario/Segment.htm" />
+</key>
+<key name="mayor nivel" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mayor parte" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mayor precisión" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mayoría" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Mayús+Ctrl+Flecha derecha" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="Mayús+Ctrl+Flecha izquierda" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="mayúsculas" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="mayúsculas tanto" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="medicina" >
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+</key>
+<key name="medida" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="medio" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+</key>
+<key name="mejor" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="memoria" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="TM" url="Glosario/TM.htm" />
+</key>
+<key name="memoria e insertarlos" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="memorias" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="TM" url="Glosario/TM.htm" />
+</key>
+<key name="mencionado" >
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+</key>
+<key name="menos" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mensaje" >
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="mensaje contiene" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="mensaje electrónico" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="mensajes" >
+  <topic name="Formatos de datos compatibles" url="Ap_ndice/Supported_Data_Formats.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="mensajes electrónicos enviados" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="menudo" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="meta-content" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="método común consiste" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="métodos" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="métodos graben" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="México" >
+  <topic name="Idioma" url="Glosario/Locale.htm" />
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="Mi cuenta" >
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+</key>
+<key name="Microsoft Word" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="mínimo" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="minúsculas" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="minutos" >
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="Mis actividades" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+</key>
+<key name="Mis trabajos" >
+  <topic name="Descripción general" url="Overview.htm" />
+</key>
+<key name="misma" >
+  <topic name="Ficha de actividades Disponibles" url="Mis_actividades/Available_Activity_Tab.htm" />
+  <topic name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+  <topic name="Fragmento" url="Glosario/Snippet.htm" />
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="misma empresa" >
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="misma forma" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="misma página" >
+  <topic name="Fragmento" url="Glosario/Snippet.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mismas palabras" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="mismas reglas HTML" >
+  <topic name="Contenido que puede eliminarse" url="Glosario/Deletable_Content.htm" />
+</key>
+<key name="mismo" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Fragmento" url="Glosario/Snippet.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="mismo contenido" >
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="mismo fragmento se" >
+  <topic name="Fragmento" url="Glosario/Snippet.htm" />
+</key>
+<key name="mismo idioma" >
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="mismo mecanismo" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="mismo nodo condicional" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="mismo orden" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="mismo registro" >
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+</key>
+<key name="mismos signos" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="missing" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="missing cat" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="modificación" >
+  <topic name="Añadir/Modificar procesos de producción" url="Configuraci_n/Perfiles_de_traducci_n/Add_Edit_Workflows.htm" />
+  <topic name="Cargos" url="Configuraci_n/Usuarios/Roles.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Modificado" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+
+</indexdata>

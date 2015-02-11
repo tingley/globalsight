@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.ling.docproc.extractor.xliff.XliffAlt"
+        table="xliff_alt">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <many-to-one name="tuv" column="TUV_ID"
+            class="com.globalsight.everest.tuv.TuvImpl"
+            not-null="true" lazy="false" />
+
+        <property name="sourceSegment" length="1000"
+            column="SOURCE_SEGMENT" type="string"/>
+
+        <property name="segment" length="1000"
+            column="SEGMENT" type="string" not-null="true" />
+            
+        <property name="language" length="100"
+            column="LANGUAGE" type="string" not-null="false" />
+            
+        <property name="quality" length="100"
+            column="QUALITY" type="string" not-null="false" />
+   
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,4311 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "User Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA40C5039A"
+    documentation 	"This package contains use cases that manages user account related data."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Add User Profile"
+	    quid       	"38BA470C0372"
+	    documentation 	
+|Actor
+|=====
+|
+|User Manager. Manages the Users and their profiles.
+|
+|Normal Course of Events
+|=====================
+|
+|The User Manager invokes the Envoy administration interface and selects the "User" option and then select "Add". Envoy displays a blank user profile screen for the user to enter profile attributes of the new user. The User Manager enters the following attributes of the new user:
+|
+|1) An account name that identifies the user.
+|
+|2) A password for the user to log in to the system.
+|
+|3) Email address where she can be contacted.
+|
+|4) The user's role. A user can have one or more of the following roles:
+|
+|a) Content Creator
+|b) Translator 
+|c) Localization Coordinator 
+|d) Localization Authority 
+|e) Project Manager
+|
+|5) Role specific information, if required, for each role that the user has:
+|
+|a) For the "Content Creator" role
+|i) The source locale that she enters data in.
+|ii)  The target locales that she wants her data to be localized to.
+|
+|b) For the "Localizer" role: 
+|i) The locales she is responsible for. 
+|ii) The type of stages she is responsible for.
+|iii) Cost information 
+|
+|6) Privileges of each new user in terms of actions
+|
+|a) Edit source files or tables directly without going through a workflow. 
+|
+|b) edit target files or tables directly without going through a workflow.
+|
+|c) edit source files or tables with updates to Translation Memory (TM).
+|
+|d) edit target files or tables without updates to Translation Memory(TM).
+|
+|e) create a workflow manually.
+|
+|f) modify the source language in a job 
+|
+|g) modify the target language in a job.
+|
+|h) enable the password to be self managed and admin managed.
+|
+|i) modify a workflow
+|
+|j) cancel a workflow.
+|
+|k) delete a workflow.
+|
+|7) Password.
+|
+|8) Source/Target Language Pairs Per User
+|
+|9) Default UI Language
+|
+|10) Group name
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @1
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"3947BCC70113"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980C14A023E"
+				    supplier   	"$UNNAMED$0"
+				    quidu      	"3947BCEC0167"
+				    messages   	(list Messages
+					(object Message "addUser( )"
+					    quid       	"3980C14A023F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947BD4001CB"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$0"
+			    quid       	"3947BCEC0167"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@1
+		    quid       	"3947BCAD03B5"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @2
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@2
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947BCC70113"
+			    width      	374
+			    height     	369
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @3
+				location   	(448, 384)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	120
+				y_coord    	60
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$0" @4
+			    location   	(1056, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@4
+				location   	(1056, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947BCEC0167"
+			    width      	300
+			    height     	369
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @5
+				location   	(1616, 384)
+				line_color 	3342489
+				InterObjView 	@4
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @6
+			    location   	(16, 384)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @7
+				Parent_View 	@6
+				location   	(752, 336)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C14A023F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	244
+				justify    	0
+				label      	"addUser( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@2
+			    supplier   	@4
+			    Focus_Src  	@3
+			    Focus_Entry 	@5
+			    origin     	(463, 384)
+			    terminus   	(1040, 384)
+			    ordinal    	0)))))
+	(object UseCase "Modify User Profile"
+	    quid       	"38C3C3800059"
+	    documentation 	
+|Actor
+|=====
+|
+|User Manager. Manages the Users and their profiles.
+|
+|Normal Course of Events
+|=====================
+|
+|The User Manager invokes the Envoy administration interface and selects the "User" option and then select "Show". Envoy displays a list of users in the system. The User Manager selects one of the users and selects "Modify". Envoy fetches the selected user's profile and displays the profile information in a User Profile screen. The User Manager can make changes to all the attributes in the selected user's profile, except the user's account name. When the User Manager is satisfied with the changes, she selects the "done" option to proceed. Envoy displays a message to prompt the User Manager to confirm the changes. The User Manager selects the confirm option. Envoy saves the changes in its database of user profiles.
+|
+|Alternative Courses
+|================
+|
+|When the User Manager selects the "Cancel" option at the User Profile screen or the confirmation dialog, Envoy abort the update operation and redisplays the list of users in the system for the User Manager to select from and restart the update operation again.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @8
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"3947BDB90085"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3947BDB90089"
+				    supplier   	"User Management GUI"
+				    quidu      	"3947BDB90085"
+				    messages   	(list Messages
+					(object Message "display list of users"
+					    quid       	"3947BDB9008A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "select a user"
+					    quid       	"3947BDB9008B"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2)
+					(object Message "show details of selected user"
+					    quid       	"3947C34B02CA"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4)))
+				(object Link
+				    quid       	"3980C1720173"
+				    supplier   	"$UNNAMED$1"
+				    quidu      	"3947BDB90093"
+				    messages   	(list Messages
+					(object Message "getUsers( )"
+					    quid       	"3980C1720174"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947BE14014E")
+					(object Message "getUserDetails( )"
+					    quid       	"3980C183024A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3
+					    quidu      	"3947C2B0008D")
+					(object Message "modifyUser( )"
+					    quid       	"3980C1960175"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	5
+					    quidu      	"3947C32F0342"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$1"
+			    quid       	"3947BDB90093"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@8
+		    quid       	"3947BDA202B3"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	81
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @9
+			    location   	(464, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@9
+				location   	(464, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947BDB90085"
+			    width      	374
+			    height     	1249
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @10
+				location   	(464, 432)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	952
+				y_coord    	892
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @11
+				location   	(464, 736)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	194
+				y_coord    	134
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @12
+				location   	(464, 864)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @13
+				location   	(464, 1120)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$1" @14
+			    location   	(1136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@14
+				location   	(1136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947BDB90093"
+			    width      	300
+			    height     	1249
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @15
+				location   	(1728, 448)
+				line_color 	3342489
+				InterObjView 	@14
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @16
+				location   	(1728, 992)
+				line_color 	3342489
+				InterObjView 	@14
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @17
+				location   	(1728, 1264)
+				line_color 	3342489
+				InterObjView 	@14
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @18
+			    location   	(16, 736)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @19
+				Parent_View 	@18
+				location   	(560, 688)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947BDB9008A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	397
+				justify    	0
+				label      	"display list of users"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@9
+			    Focus_Src  	@10
+			    Focus_Entry 	@11
+			    origin     	(480, 736)
+			    terminus   	(630, 736)
+			    ordinal    	1)
+			(object SelfMessView "" @20
+			    location   	(16, 864)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @21
+				Parent_View 	@20
+				location   	(560, 816)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947BDB9008B"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	282
+				justify    	0
+				label      	"select a user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@9
+			    Focus_Src  	@10
+			    Focus_Entry 	@12
+			    origin     	(480, 864)
+			    terminus   	(630, 864)
+			    ordinal    	2)
+			(object SelfMessView "" @22
+			    location   	(16, 1120)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @23
+				Parent_View 	@22
+				location   	(560, 1072)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C34B02CA"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	572
+				justify    	0
+				label      	"show details of selected user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@9
+			    Focus_Src  	@10
+			    Focus_Entry 	@13
+			    origin     	(480, 1120)
+			    terminus   	(630, 1120)
+			    ordinal    	4)
+			(object InterMessView "" @24
+			    location   	(1088, 448)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @25
+				Parent_View 	@24
+				location   	(800, 400)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C1720174"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	257
+				justify    	0
+				label      	"getUsers( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@14
+			    Focus_Src  	@10
+			    Focus_Entry 	@15
+			    origin     	(479, 448)
+			    terminus   	(1120, 448)
+			    ordinal    	0)
+			(object InterMessView "" @26
+			    location   	(1088, 992)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @27
+				Parent_View 	@26
+				location   	(800, 944)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C183024A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	360
+				justify    	0
+				label      	"getUserDetails( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@14
+			    Focus_Src  	@10
+			    Focus_Entry 	@16
+			    origin     	(479, 992)
+			    terminus   	(1120, 992)
+			    ordinal    	3)
+			(object InterMessView "" @28
+			    location   	(1088, 1264)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @29
+				Parent_View 	@28
+				location   	(800, 1216)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C1960175"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	298
+				justify    	0
+				label      	"modifyUser( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@14
+			    Focus_Src  	@10
+			    Focus_Entry 	@17
+			    origin     	(479, 1264)
+			    terminus   	(1120, 1264)
+			    ordinal    	5)))))
+	(object UseCase "Delete User Profile"
+	    quid       	"38C3C3C40011"
+	    documentation 	
+|Actor
+|=====
+|
+|User Manager. Manages the Users and their profiles.
+|
+|Normal Course of Events
+|=====================
+|
+|The User Manager invokes the Envoy administration interface and selects the "User" option and then select "Show". Envoy displays a list of users in the system. The User Manager selects one of the users and selects "Delete". Envoy asks the User Manager to confirm her decision. The User Manager confirms. Envoy verifies that the user has no outstanding jobs assigned to her and deletes the user's profile from the system.
+|
+|Alternative Courses
+|=================
+|
+|Envoy detects that the user to be removed has outstanding localization jobs in the system. Envoy displays a message to inform the User Manager. When the User Manager dismisses the message, Envoy aborts the action to remove the user, and redisplays the list of all users in the system.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @30
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"3947C39402B1"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3947C39402B6"
+				    supplier   	"User Management GUI"
+				    quidu      	"3947C39402B1"
+				    messages   	(list Messages
+					(object Message "display list of users"
+					    quid       	"3947C39402B7"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "select a user"
+					    quid       	"3947C39402B8"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2)
+					(object Message "show details of selected user"
+					    quid       	"3947C39402B9"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4)))
+				(object Link
+				    quid       	"3980C1B802F0"
+				    supplier   	"$UNNAMED$2"
+				    quidu      	"3947C39402BF"
+				    messages   	(list Messages
+					(object Message "getUsers( )"
+					    quid       	"3980C1B802F1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947BE14014E")
+					(object Message "getUserDetails( )"
+					    quid       	"3980C1CB022F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3
+					    quidu      	"3947C2B0008D")
+					(object Message "deleteUser( )"
+					    quid       	"3980C1DC0284"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	5
+					    quidu      	"3947C3FE01EB"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$2"
+			    quid       	"3947C39402BF"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@30
+		    quid       	"3947C3850147"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	81
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @31
+			    location   	(464, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@31
+				location   	(464, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C39402B1"
+			    width      	374
+			    height     	1608
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @32
+				location   	(464, 368)
+				line_color 	3342489
+				InterObjView 	@31
+				height     	1375
+				y_coord    	1315
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @33
+				location   	(464, 480)
+				line_color 	3342489
+				InterObjView 	@31
+				height     	1258
+				y_coord    	1198
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @34
+				location   	(464, 544)
+				line_color 	3342489
+				InterObjView 	@31
+				height     	1188
+				y_coord    	1128
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @35
+				location   	(464, 608)
+				line_color 	3342489
+				InterObjView 	@31
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @36
+				location   	(464, 880)
+				line_color 	3342489
+				InterObjView 	@31
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$2" @37
+			    location   	(1136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@37
+				location   	(1136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C39402BF"
+			    width      	300
+			    height     	1608
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @38
+				location   	(1728, 368)
+				line_color 	3342489
+				InterObjView 	@37
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @39
+				location   	(1728, 720)
+				line_color 	3342489
+				InterObjView 	@37
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @40
+				location   	(1728, 1024)
+				line_color 	3342489
+				InterObjView 	@37
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @41
+			    location   	(16, 480)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @42
+				Parent_View 	@41
+				location   	(560, 432)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C39402B7"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	397
+				justify    	0
+				label      	"display list of users"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@31
+			    Focus_Src  	@32
+			    Focus_Entry 	@33
+			    origin     	(480, 480)
+			    terminus   	(630, 480)
+			    ordinal    	1)
+			(object SelfMessView "" @43
+			    location   	(16, 608)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @44
+				Parent_View 	@43
+				location   	(560, 560)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C39402B8"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	282
+				justify    	0
+				label      	"select a user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@31
+			    Focus_Src  	@34
+			    Focus_Entry 	@35
+			    origin     	(480, 608)
+			    terminus   	(630, 608)
+			    ordinal    	2)
+			(object SelfMessView "" @45
+			    location   	(16, 880)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @46
+				Parent_View 	@45
+				location   	(560, 832)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C39402B9"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	572
+				justify    	0
+				label      	"show details of selected user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@31
+			    Focus_Src  	@34
+			    Focus_Entry 	@36
+			    origin     	(480, 880)
+			    terminus   	(630, 880)
+			    ordinal    	4)
+			(object InterMessView "" @47
+			    location   	(16, 368)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @48
+				Parent_View 	@47
+				location   	(800, 320)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C1B802F1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	257
+				justify    	0
+				label      	"getUsers( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@37
+			    Focus_Src  	@32
+			    Focus_Entry 	@38
+			    origin     	(479, 368)
+			    terminus   	(1120, 368)
+			    ordinal    	0)
+			(object InterMessView "" @49
+			    location   	(1104, 720)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @50
+				Parent_View 	@49
+				location   	(800, 672)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C1CB022F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	360
+				justify    	0
+				label      	"getUserDetails( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@37
+			    Focus_Src  	@34
+			    Focus_Entry 	@39
+			    origin     	(479, 720)
+			    terminus   	(1120, 720)
+			    ordinal    	3)
+			(object InterMessView "" @51
+			    location   	(16, 1024)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @52
+				Parent_View 	@51
+				location   	(800, 976)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C1DC0284"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	288
+				justify    	0
+				label      	"deleteUser( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@31
+			    supplier   	@37
+			    Focus_Src  	@34
+			    Focus_Entry 	@40
+			    origin     	(479, 1024)
+			    terminus   	(1120, 1024)
+			    ordinal    	5)))))
+	(object UseCase "Add a Role"
+	    quid       	"392F10060042"
+	    documentation 	
+|3.35.1	Actor
+|User Manager.
+|3.35.2	Priority
+|3.35.3	Description
+|The User Manager adds a role into the user management repository.
+|3.35.4	Normal Course Of Events
+|The User Manager invokes the User Management GUI through the Envoy administration interface.  The User Manager selects the "Add Role" option.  The system displays a panel with blank input fields for the User Manager to enter the following fields:
+|
+|1.	Name of the role.  This field is mandatory and must be unique in the system.
+|2.	Description of the role.  This field is optional.
+|
+|The User Manager enters data into the input fields and tells the system to save the input.  The system prompts the User Manager to confirm her input.  The User Manager confirms.  The system saves the data for the new role into the system's database.
+|3.35.5	Alternative Courses
+|1)	Instead of confirming her input, the User Manager cancels the input.  The system redisplays the input fields with the original input from the User Manager for her to modify the input.
+|2)	When the system saves the data, it finds that the name of the new role already exists in the system.  The system displays a dialog box to inform the User Manager.  The User Manager dismisses the dialog box.  The system redisplays the input fields with the original input from the User Manager for her to modify the input.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @53
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"39474E0C03DD"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980C208036D"
+				    supplier   	"$UNNAMED$3"
+				    quidu      	"39474FBB00B1"
+				    messages   	(list Messages
+					(object Message "addRole( )"
+					    quid       	"3980C208036E"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"39474FC10150"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$3"
+			    quid       	"39474FBB00B1"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@53
+		    quid       	"39474DFE0102"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @54
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@54
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39474E0C03DD"
+			    width      	374
+			    height     	417
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @55
+				location   	(448, 352)
+				line_color 	3342489
+				InterObjView 	@54
+				height     	200
+				y_coord    	140
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$3" @56
+			    location   	(992, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@56
+				location   	(992, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39474FBB00B1"
+			    width      	300
+			    height     	417
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @57
+				location   	(1568, 432)
+				line_color 	3342489
+				InterObjView 	@56
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @58
+			    location   	(1008, 432)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @59
+				Parent_View 	@58
+				location   	(720, 384)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C208036E"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	241
+				justify    	0
+				label      	"addRole( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@54
+			    supplier   	@56
+			    Focus_Src  	@55
+			    Focus_Entry 	@57
+			    origin     	(463, 432)
+			    terminus   	(976, 432)
+			    ordinal    	0)))))
+	(object UseCase "Modify a Role"
+	    quid       	"392F16970324"
+	    documentation 	
+|3.36.1	Actor
+|User Manager.
+|3.36.2	Priority
+|3.36.3	Description
+|The User Manager removes a role from the user management repository.
+|3.36.4	Normal Course Of Events
+|The User Manager invokes the User Management GUI through the Envoy administration interface.  The User Manager selects the "Show Roles" option.  The system displays a list of roles that exist in the system.  The Use Manager selects one of the roles and selects the "Modify" option.  The system displays a panel with input fields for the User Manager; the system pre-set the input fields with data from the role that the User Manager has selected.  The system allows the User Manager to modify the following fields:
+|
+|1.	Description of the role.
+|
+|The User Manager enters data into the input fields and tells the system to save the input.  The system prompts the User Manager to confirm her input.  The User Manager confirms.  The system saves the new data for the existing role into the system's database.
+|3.36.5	Alternative Courses
+|1)	Instead of confirming her input, the User Manager cancels the input.  The system redisplays the input fields with the original input from the User Manager for her to modify the input.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @60
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"394751B50041"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394751B50046"
+				    supplier   	"User Management GUI"
+				    quidu      	"394751B50041"
+				    messages   	(list Messages
+					(object Message "display list of roles"
+					    quid       	"394751B50047"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "select a role"
+					    quid       	"394751B50048"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2)
+					(object Message "show details of selected role"
+					    quid       	"3947C2010121"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4)))
+				(object Link
+				    quid       	"3980C2170238"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"394751B5004D"
+				    messages   	(list Messages
+					(object Message "getAllRoles( )"
+					    quid       	"3980C2170239"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947505A027D")
+					(object Message "getRoleDetails( )"
+					    quid       	"3980C2310113"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3
+					    quidu      	"3947C0200101")
+					(object Message "modifyRole( )"
+					    quid       	"3980C240031E"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	5
+					    quidu      	"394751E102F7"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$4"
+			    quid       	"394751B5004D"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@60
+		    quid       	"39475113028D"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	81
+		    origin_y   	38
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @61
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@61
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394751B50041"
+			    width      	374
+			    height     	1695
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @62
+				location   	(448, 400)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	1430
+				y_coord    	1370
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @63
+				location   	(448, 544)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	1226
+				y_coord    	1166
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @64
+				location   	(448, 576)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	1188
+				y_coord    	1128
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @65
+				location   	(448, 688)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @66
+				location   	(448, 944)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$4" @67
+			    location   	(1136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@67
+				location   	(1136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394751B5004D"
+			    width      	300
+			    height     	1695
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @68
+				location   	(1728, 400)
+				line_color 	3342489
+				InterObjView 	@67
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @69
+				location   	(1728, 816)
+				line_color 	3342489
+				InterObjView 	@67
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @70
+				location   	(1728, 1056)
+				line_color 	3342489
+				InterObjView 	@67
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @71
+			    location   	(16, 544)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @72
+				Parent_View 	@71
+				location   	(544, 496)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394751B50047"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	385
+				justify    	0
+				label      	"display list of roles"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@61
+			    Focus_Src  	@62
+			    Focus_Entry 	@63
+			    origin     	(464, 544)
+			    terminus   	(614, 544)
+			    ordinal    	1)
+			(object SelfMessView "" @73
+			    location   	(16, 688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @74
+				Parent_View 	@73
+				location   	(544, 640)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394751B50048"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	269
+				justify    	0
+				label      	"select a role"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@61
+			    Focus_Src  	@64
+			    Focus_Entry 	@65
+			    origin     	(464, 688)
+			    terminus   	(614, 688)
+			    ordinal    	2)
+			(object SelfMessView "" @75
+			    location   	(16, 944)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @76
+				Parent_View 	@75
+				location   	(544, 896)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C2010121"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	560
+				justify    	0
+				label      	"show details of selected role"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@61
+			    Focus_Src  	@64
+			    Focus_Entry 	@66
+			    origin     	(464, 944)
+			    terminus   	(614, 944)
+			    ordinal    	4)
+			(object InterMessView "" @77
+			    location   	(16, 400)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @78
+				Parent_View 	@77
+				location   	(784, 352)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C2170239"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	301
+				justify    	0
+				label      	"getAllRoles( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@67
+			    Focus_Src  	@62
+			    Focus_Entry 	@68
+			    origin     	(463, 400)
+			    terminus   	(1120, 400)
+			    ordinal    	0)
+			(object InterMessView "" @79
+			    location   	(16, 816)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @80
+				Parent_View 	@79
+				location   	(784, 768)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C2310113"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	335
+				justify    	0
+				label      	"getRoleDetails( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@67
+			    Focus_Src  	@64
+			    Focus_Entry 	@69
+			    origin     	(463, 816)
+			    terminus   	(1120, 816)
+			    ordinal    	3)
+			(object InterMessView "" @81
+			    location   	(16, 1056)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @82
+				Parent_View 	@81
+				location   	(784, 1008)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C240031E"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	294
+				justify    	0
+				label      	"modifyRole( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@61
+			    supplier   	@67
+			    Focus_Src  	@64
+			    Focus_Entry 	@70
+			    origin     	(463, 1056)
+			    terminus   	(1120, 1056)
+			    ordinal    	5)))))
+	(object UseCase "Delete a Role"
+	    quid       	"392F17550006"
+	    documentation 	
+|3.37.1	Actor
+|User Manager.
+|3.37.2	Priority
+|3.37.3	Description
+|The User Manager deletes a role from the user management repository.
+|3.37.4	Normal Course Of Events
+|The User Manager invokes the User Management GUI through the Envoy administration interface.  The User Manager selects the "Show Roles" option.  The system displays a list of roles that exist in the system.  The Use Manager selects one of the roles and selects the "Delete" option.  The system prompts the User Manager to confirm her action.  The User Manager confirms.  The system deletes the selected role from the system's database.
+|3.37.5	Alternative Courses
+|1)	When the User Manager confirms her decision to delete the selected role, the system detects that the selected role has outstanding jobs assigned to it in the system. The system displays a message to inform the User Manager.  When the User Manager dismisses the message, Envoy aborts the action to delete the role, and redisplays the list of all roles in the system
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @83
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"394750300345"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394750580234"
+				    supplier   	"$UNNAMED$5"
+				    quidu      	"394750530395"
+				    messages   	(list Messages
+					(object Message "getAllRoles( )"
+					    quid       	"3980CDA900ED"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947505A027D")
+					(object Message "getRoleDetails( )"
+					    quid       	"3980CDB9024F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3
+					    quidu      	"3947C0200101")
+					(object Message "deleteRole( )"
+					    quid       	"3980CF050256"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	5
+					    quidu      	"3947519B0314")))
+				(object Link
+				    quid       	"3947513A03A1"
+				    supplier   	"User Management GUI"
+				    quidu      	"394750300345"
+				    messages   	(list Messages
+					(object Message "display list of roles"
+					    quid       	"3947513A03A2"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "select a role"
+					    quid       	"394751460041"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2)
+					(object Message "show details of selected role"
+					    quid       	"3947C1DF01FF"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$5"
+			    quid       	"394750530395"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@83
+		    quid       	"39475014002D"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	80
+		    origin_y   	15
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @84
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@84
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394750300345"
+			    width      	374
+			    height     	1647
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @85
+				location   	(448, 400)
+				line_color 	3342489
+				InterObjView 	@84
+				height     	1382
+				y_coord    	1322
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @86
+				location   	(448, 560)
+				line_color 	3342489
+				InterObjView 	@84
+				height     	1162
+				y_coord    	1102
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @87
+				location   	(448, 576)
+				line_color 	3342489
+				InterObjView 	@84
+				height     	840
+				y_coord    	780
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @88
+				location   	(448, 784)
+				line_color 	3342489
+				InterObjView 	@84
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @89
+				location   	(448, 1072)
+				line_color 	3342489
+				InterObjView 	@84
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$5" @90
+			    location   	(1136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@90
+				location   	(1136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394750530395"
+			    width      	300
+			    height     	1647
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @91
+				location   	(1728, 400)
+				line_color 	3342489
+				InterObjView 	@90
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @92
+				location   	(1728, 896)
+				line_color 	3342489
+				InterObjView 	@90
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @93
+				location   	(1728, 1216)
+				line_color 	3342489
+				InterObjView 	@90
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @94
+			    location   	(16, 560)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @95
+				Parent_View 	@94
+				location   	(544, 512)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947513A03A2"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	385
+				justify    	0
+				label      	"display list of roles"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@84
+			    Focus_Src  	@85
+			    Focus_Entry 	@86
+			    origin     	(464, 560)
+			    terminus   	(614, 560)
+			    ordinal    	1)
+			(object SelfMessView "" @96
+			    location   	(16, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @97
+				Parent_View 	@96
+				location   	(544, 736)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394751460041"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	269
+				justify    	0
+				label      	"select a role"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@84
+			    Focus_Src  	@87
+			    Focus_Entry 	@88
+			    origin     	(464, 784)
+			    terminus   	(614, 784)
+			    ordinal    	2)
+			(object SelfMessView "" @98
+			    location   	(16, 1072)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @99
+				Parent_View 	@98
+				location   	(544, 1024)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C1DF01FF"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	560
+				justify    	0
+				label      	"show details of selected role"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@84
+			    Focus_Src  	@87
+			    Focus_Entry 	@89
+			    origin     	(464, 1072)
+			    terminus   	(614, 1072)
+			    ordinal    	4)
+			(object InterMessView "" @100
+			    location   	(16, 400)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @101
+				Parent_View 	@100
+				location   	(784, 352)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CDA900ED"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	301
+				justify    	0
+				label      	"getAllRoles( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@90
+			    Focus_Src  	@85
+			    Focus_Entry 	@91
+			    origin     	(463, 400)
+			    terminus   	(1120, 400)
+			    ordinal    	0)
+			(object InterMessView "" @102
+			    location   	(16, 896)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @103
+				Parent_View 	@102
+				location   	(784, 848)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CDB9024F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	357
+				justify    	0
+				label      	"getRoleDetails( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@90
+			    Focus_Src  	@87
+			    Focus_Entry 	@92
+			    origin     	(463, 896)
+			    terminus   	(1120, 896)
+			    ordinal    	3)
+			(object InterMessView "" @104
+			    location   	(1088, 1216)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @105
+				Parent_View 	@104
+				location   	(784, 1168)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF050256"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	285
+				justify    	0
+				label      	"deleteRole( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@84
+			    supplier   	@90
+			    Focus_Src  	@87
+			    Focus_Entry 	@93
+			    origin     	(463, 1216)
+			    terminus   	(1120, 1216)
+			    ordinal    	5)))))
+	(object UseCase "Add Users to a Group"
+	    quid       	"39401F330277"
+	    documentation 	
+|3.28.2	Actor
+|User Manager
+|3.28.3	Description
+|The User Manager selects a list of users and adds them to a user group.
+|3.28.4	Normal Course of Events
+|The User Manager invokes the User Management GUI through the system's Administration Interface.  She selects the "User Groups" option and then selects "Add User to Group" option.  Envoy displays a list of user groups in the system.  The User Manager selects a user group.  Envoy displays a list of users in the system. The User Manager selects the appropriate users and selects the "Add" option. Envoy adds the users to the appropriate group.  
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @106
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"3947C50B00D0"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3947C71502B1"
+				    supplier   	"User Management GUI"
+				    quidu      	"3947C50B00D0"
+				    messages   	(list Messages
+					(object Message "show list of groups"
+					    quid       	"3947C71502B2"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "show list of users"
+					    quid       	"3947C757025C"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3)))
+				(object Link
+				    quid       	"3980CF300384"
+				    supplier   	"$UNNAMED$6"
+				    quidu      	"3947C50B00D6"
+				    messages   	(list Messages
+					(object Message "addUsersToGroup(  )"
+					    quid       	"3980CF300385"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4
+					    quidu      	"3947C9430354")
+					(object Message "getUserGroups( )"
+					    quid       	"3980CF4202A4"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947C705029A")
+					(object Message "getUsers( )"
+					    quid       	"3980CF5300C8"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2
+					    quidu      	"3947BE14014E"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$6"
+			    quid       	"3947C50B00D6"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@106
+		    quid       	"3947C4E802B0"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @107
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@107
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C50B00D0"
+			    width      	374
+			    height     	1395
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @108
+				location   	(448, 384)
+				line_color 	3342489
+				InterObjView 	@107
+				height     	1146
+				y_coord    	1086
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @109
+				location   	(448, 560)
+				line_color 	3342489
+				InterObjView 	@107
+				height     	680
+				y_coord    	620
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @110
+				location   	(448, 592)
+				line_color 	3342489
+				InterObjView 	@107
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @111
+				location   	(448, 912)
+				line_color 	3342489
+				InterObjView 	@107
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$6" @112
+			    location   	(1056, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@112
+				location   	(1056, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C50B00D6"
+			    width      	300
+			    height     	1395
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @113
+				location   	(1616, 384)
+				line_color 	3342489
+				InterObjView 	@112
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @114
+				location   	(1616, 736)
+				line_color 	3342489
+				InterObjView 	@112
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @115
+				location   	(1616, 1120)
+				line_color 	3342489
+				InterObjView 	@112
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @116
+			    location   	(16, 592)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @117
+				Parent_View 	@116
+				location   	(544, 544)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C71502B2"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	385
+				justify    	0
+				label      	"show list of groups"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@107
+			    supplier   	@107
+			    Focus_Src  	@109
+			    Focus_Entry 	@110
+			    origin     	(464, 592)
+			    terminus   	(614, 592)
+			    ordinal    	1)
+			(object SelfMessView "" @118
+			    location   	(16, 912)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @119
+				Parent_View 	@118
+				location   	(544, 864)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C757025C"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	363
+				justify    	0
+				label      	"show list of users"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@107
+			    supplier   	@107
+			    Focus_Src  	@109
+			    Focus_Entry 	@111
+			    origin     	(464, 912)
+			    terminus   	(614, 912)
+			    ordinal    	3)
+			(object InterMessView "" @120
+			    location   	(1040, 1120)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @121
+				Parent_View 	@120
+				location   	(752, 1072)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF300385"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	432
+				justify    	0
+				label      	"addUsersToGroup(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@107
+			    supplier   	@112
+			    Focus_Src  	@109
+			    Focus_Entry 	@115
+			    origin     	(463, 1120)
+			    terminus   	(1040, 1120)
+			    ordinal    	4)
+			(object InterMessView "" @122
+			    location   	(16, 384)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @123
+				Parent_View 	@122
+				location   	(752, 336)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF4202A4"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	366
+				justify    	0
+				label      	"getUserGroups( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@107
+			    supplier   	@112
+			    Focus_Src  	@108
+			    Focus_Entry 	@113
+			    origin     	(463, 384)
+			    terminus   	(1040, 384)
+			    ordinal    	0)
+			(object InterMessView "" @124
+			    location   	(16, 736)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @125
+				Parent_View 	@124
+				location   	(752, 688)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF5300C8"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	257
+				justify    	0
+				label      	"getUsers( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@107
+			    supplier   	@112
+			    Focus_Src  	@109
+			    Focus_Entry 	@114
+			    origin     	(463, 736)
+			    terminus   	(1040, 736)
+			    ordinal    	2)))))
+	(object UseCase "Delete Users from a Group"
+	    quid       	"39401F5801DA"
+	    documentation 	
+|3.29.2	Actor
+|User Manager
+|
+|3.29.3	Description 
+|The User Manager selects a list of users from a user group and deletes them from that group.
+|3.29.4	Normal Course of Events
+|The User Manager invokes the User Management GUI through the system's Administration Interface.  She selects the "User Groups" option and then selects "Show" option.  Envoy displays a list of user groups in the system. The User Manager selects one of the groups.  Envoy displays a list of users in the select group. The User Manager selects one or more users and selects delete.  Envoy prompts the User Manager to confirm the selection.  The User Manager confirms her selection.  Envoy deletes the selected users from the user group.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @126
+		    logical_models 	(list unit_reference_list
+			(object Object "User Management GUI"
+			    quid       	"3947C9D1025D"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3947C9D10262"
+				    supplier   	"User Management GUI"
+				    quidu      	"3947C9D1025D"
+				    messages   	(list Messages
+					(object Message "show list of groups"
+					    quid       	"3947C9D10263"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "show list of users in the group"
+					    quid       	"3947C9D10264"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	3)
+					(object Message "select users to delete"
+					    quid       	"3947CAD7035F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	4)))
+				(object Link
+				    quid       	"3980CF700250"
+				    supplier   	"$UNNAMED$7"
+				    quidu      	"3947C9D1026A"
+				    messages   	(list Messages
+					(object Message "deleteUsersFromGroup(  )"
+					    quid       	"3980CF700251"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	5
+					    quidu      	"3947CA91037C")
+					(object Message "getUsers( )"
+					    quid       	"3980CF86012F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	2
+					    quidu      	"3947BE14014E")
+					(object Message "getUserGroups( )"
+					    quid       	"3980CF9D039F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947C705029A"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$7"
+			    quid       	"3947C9D1026A"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@126
+		    quid       	"3947C9BB0107"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	338
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "User Management GUI" @127
+			    location   	(784, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@127
+				location   	(784, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	356
+				justify    	0
+				label      	"User Management GUI")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C9D1025D"
+			    width      	374
+			    height     	1415
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @128
+				location   	(784, 400)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	1150
+				y_coord    	1090
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @129
+				location   	(784, 576)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	872
+				y_coord    	812
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @130
+				location   	(784, 576)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @131
+				location   	(784, 928)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @132
+				location   	(784, 1152)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$7" @133
+			    location   	(1392, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@133
+				location   	(1392, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947C9D1026A"
+			    width      	300
+			    height     	1415
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @134
+				location   	(1952, 400)
+				line_color 	3342489
+				InterObjView 	@133
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @135
+				location   	(1952, 720)
+				line_color 	3342489
+				InterObjView 	@133
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @136
+				location   	(1952, 1328)
+				line_color 	3342489
+				InterObjView 	@133
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @137
+			    location   	(16, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @138
+				Parent_View 	@137
+				location   	(880, 528)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C9D10263"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	385
+				justify    	0
+				label      	"show list of groups"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@127
+			    Focus_Src  	@129
+			    Focus_Entry 	@130
+			    origin     	(800, 576)
+			    terminus   	(950, 576)
+			    ordinal    	1)
+			(object SelfMessView "" @139
+			    location   	(16, 928)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @140
+				Parent_View 	@139
+				location   	(880, 880)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947C9D10264"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	588
+				justify    	0
+				label      	"show list of users in the group"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@127
+			    Focus_Src  	@129
+			    Focus_Entry 	@131
+			    origin     	(800, 928)
+			    terminus   	(950, 928)
+			    ordinal    	3)
+			(object SelfMessView "" @141
+			    location   	(16, 1152)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @142
+				Parent_View 	@141
+				location   	(880, 1104)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947CAD7035F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	438
+				justify    	0
+				label      	"select users to delete"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@127
+			    Focus_Src  	@129
+			    Focus_Entry 	@132
+			    origin     	(800, 1152)
+			    terminus   	(950, 1152)
+			    ordinal    	4)
+			(object Label @143
+			    location   	(64, 768)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	7
+			    max_width  	456
+			    label      	"The search criteria in the getUsers() call specifies the selected group.")
+			(object InterMessView "" @144
+			    location   	(1360, 1328)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @145
+				Parent_View 	@144
+				location   	(1088, 1280)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF700251"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	548
+				justify    	0
+				label      	"deleteUsersFromGroup(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@133
+			    Focus_Src  	@129
+			    Focus_Entry 	@136
+			    origin     	(799, 1328)
+			    terminus   	(1376, 1328)
+			    ordinal    	5)
+			(object InterMessView "" @146
+			    location   	(1360, 720)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @147
+				Parent_View 	@146
+				location   	(1088, 672)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF86012F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	257
+				justify    	0
+				label      	"getUsers( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@133
+			    Focus_Src  	@129
+			    Focus_Entry 	@135
+			    origin     	(799, 720)
+			    terminus   	(1376, 720)
+			    ordinal    	2)
+			(object InterMessView "" @148
+			    location   	(16, 400)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @149
+				Parent_View 	@148
+				location   	(1088, 352)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980CF9D039F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	366
+				justify    	0
+				label      	"getUserGroups( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@127
+			    supplier   	@133
+			    Focus_Src  	@128
+			    Focus_Entry 	@134
+			    origin     	(799, 400)
+			    terminus   	(1376, 400)
+			    ordinal    	0)))))
+	(object UseCase "Login to the System"
+	    quid       	"3949402D0295"
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @150
+		    logical_models 	(list unit_reference_list
+			(object Object "System's Client"
+			    quid       	"3949404E03B5"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394941B101CB"
+				    supplier   	"$UNNAMED$8"
+				    quidu      	"394941AB024E"
+				    messages   	(list Messages
+					(object Message "login(  )"
+					    quid       	"394941B101CC"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    quidu      	"394941B301EC")
+					(object Message "create"
+					    quid       	"3949472800F0"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "return server object"
+					    quid       	"394956A80291"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.3"
+					    ordinal    	7))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$8"
+			    quid       	"394941AB024E"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3949426C0170"
+				    supplier   	"$UNNAMED$8"
+				    quidu      	"394941AB024E"
+				    messages   	(list Messages
+					(object Message "find GateKeeper"
+					    quid       	"394946270050"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2)))
+				(object Link
+				    quid       	"3949427B0013"
+				    supplier   	"$UNNAMED$9"
+				    quidu      	"3949426700E6"
+				    messages   	(list Messages
+					(object Message "login(  )"
+					    quid       	"394942CA01B1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2"
+					    ordinal    	3
+					    quidu      	"38DA68B002FA")
+					(object Message "return server object"
+					    quid       	"3949569E025A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.2.3"
+					    ordinal    	6))))
+			    class      	"Logical View::Envoy::EV Interface::Key"
+			    quidu      	"394941860010"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$9"
+			    quid       	"3949426700E6"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"39494678021A"
+				    supplier   	"$UNNAMED$10"
+				    quidu      	"3949465B0222"
+				    messages   	(list Messages
+					(object Message "create"
+					    quid       	"394946970138"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2.2"
+					    ordinal    	5)))
+				(object Link
+				    quid       	"3980C26F01E5"
+				    supplier   	"$UNNAMED$11"
+				    quidu      	"3949442A024D"
+				    messages   	(list Messages
+					(object Message "authenticateUser(  )"
+					    quid       	"3980C26F01EF"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2.1"
+					    ordinal    	4
+					    quidu      	"394944450332"))))
+			    class      	"Logical View::Envoy::EV Interface::GateKeeper"
+			    quidu      	"38DA688B03AB"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$11"
+			    quid       	"3949442A024D"
+			    class      	"Logical View::Envoy::User Management::UserManager"
+			    quidu      	"39474F9F021A"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$10"
+			    quid       	"3949465B0222"
+			    class      	"Logical View::Envoy::EV Interface::Server"
+			    quidu      	"38BDB46D0297"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@150
+		    quid       	"394940400397"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	3
+		    items      	(list diagram_item_list
+			(object InterObjView "System's Client" @151
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@151
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"System's Client")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949404E03B5"
+			    width      	300
+			    height     	1532
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @152
+				location   	(448, 400)
+				line_color 	3342489
+				InterObjView 	@151
+				height     	1267
+				y_coord    	1207
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @153
+				location   	(448, 1280)
+				line_color 	3342489
+				InterObjView 	@151
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$8" @154
+			    location   	(880, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@154
+				location   	(880, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394941AB024E"
+			    width      	300
+			    height     	1532
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @155
+				location   	(880, 400)
+				line_color 	3342489
+				InterObjView 	@154
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @156
+				location   	(880, 576)
+				line_color 	3342489
+				InterObjView 	@154
+				height     	1031
+				y_coord    	971
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @157
+				location   	(880, 688)
+				line_color 	3342489
+				InterObjView 	@154
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @158
+				location   	(880, 1152)
+				line_color 	3342489
+				InterObjView 	@154
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$9" @159
+			    location   	(1280, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@159
+				location   	(1280, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949426700E6"
+			    width      	300
+			    height     	1532
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @160
+				location   	(1280, 832)
+				line_color 	3342489
+				InterObjView 	@159
+				height     	440
+				y_coord    	380
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$11" @161
+			    location   	(1664, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@161
+				location   	(1664, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949442A024D"
+			    width      	300
+			    height     	1532
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @162
+				location   	(2240, 880)
+				line_color 	3342489
+				InterObjView 	@161
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$10" @163
+			    location   	(2048, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@163
+				location   	(2048, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949465B0222"
+			    width      	300
+			    height     	1532
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @164
+				location   	(2576, 1040)
+				line_color 	3342489
+				InterObjView 	@163
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @165
+			    location   	(672, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @166
+				Parent_View 	@165
+				location   	(663, 532)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394941B101CC"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	404
+				justify    	0
+				label      	"login(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@151
+			    supplier   	@154
+			    Focus_Src  	@152
+			    Focus_Entry 	@156
+			    origin     	(463, 576)
+			    terminus   	(864, 576)
+			    ordinal    	1)
+			(object InterMessView "" @167
+			    location   	(1120, 832)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @168
+				Parent_View 	@167
+				location   	(1079, 788)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394942CA01B1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	404
+				justify    	0
+				label      	"login(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@154
+			    supplier   	@159
+			    Focus_Src  	@156
+			    Focus_Entry 	@160
+			    origin     	(895, 832)
+			    terminus   	(1264, 832)
+			    ordinal    	3)
+			(object SelfMessView "" @169
+			    location   	(16, 688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @170
+				Parent_View 	@169
+				location   	(971, 644)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394946270050"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	348
+				justify    	0
+				label      	"find GateKeeper"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@154
+			    supplier   	@154
+			    Focus_Src  	@156
+			    Focus_Entry 	@157
+			    origin     	(896, 688)
+			    terminus   	(1046, 688)
+			    ordinal    	2)
+			(object InterMessView "" @171
+			    location   	(1712, 1040)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @172
+				Parent_View 	@171
+				location   	(1664, 992)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394946970138"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	159
+				justify    	0
+				label      	"create"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@159
+			    supplier   	@163
+			    Focus_Src  	@160
+			    Focus_Entry 	@164
+			    origin     	(1295, 1040)
+			    terminus   	(2032, 1040)
+			    ordinal    	5)
+			(object InterMessView "" @173
+			    location   	(16, 400)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @174
+				Parent_View 	@173
+				location   	(663, 356)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949472800F0"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	169
+				justify    	0
+				label      	"create"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@151
+			    supplier   	@154
+			    Focus_Src  	@152
+			    Focus_Entry 	@155
+			    origin     	(463, 400)
+			    terminus   	(864, 400)
+			    ordinal    	0)
+			(object InterMessView "" @175
+			    location   	(1088, 1152)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @176
+				Parent_View 	@175
+				location   	(1088, 1104)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949569E025A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	391
+				justify    	0
+				label      	"return server object"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@159
+			    supplier   	@154
+			    Focus_Src  	@160
+			    Focus_Entry 	@158
+			    origin     	(1264, 1152)
+			    terminus   	(896, 1152)
+			    ordinal    	6)
+			(object InterMessView "" @177
+			    location   	(672, 1280)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @178
+				Parent_View 	@177
+				location   	(672, 1232)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394956A80291"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	413
+				justify    	0
+				label      	"return server object"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@154
+			    supplier   	@151
+			    Focus_Src  	@156
+			    Focus_Entry 	@153
+			    origin     	(864, 1280)
+			    terminus   	(464, 1280)
+			    ordinal    	7)
+			(object InterMessView "" @179
+			    location   	(16, 880)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @180
+				Parent_View 	@179
+				location   	(1472, 832)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C26F01EF"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	413
+				justify    	0
+				label      	"authenticateUser(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@159
+			    supplier   	@161
+			    Focus_Src  	@160
+			    Focus_Entry 	@162
+			    origin     	(1295, 880)
+			    terminus   	(1648, 880)
+			    ordinal    	4)))))
+	(object Association "$UNNAMED$12"
+	    quid       	"38BA471A0098"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"38BA471B0017"
+		    supplier   	"Use Case View::User Management::Add User Profile"
+		    quidu      	"38BA470C0372"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"38BA471B0018"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$15"
+	    quid       	"38C3C3AB028C"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"38C3C3AC00CB"
+		    supplier   	"Use Case View::User Management::Modify User Profile"
+		    quidu      	"38C3C3800059"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"38C3C3AC00CC"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$18"
+	    quid       	"38C3C3F8035F"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"38C3C3F9025C"
+		    supplier   	"Use Case View::User Management::Delete User Profile"
+		    quidu      	"38C3C3C40011"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"38C3C3F9025D"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$21"
+	    quid       	"392F101303BC"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$22"
+		    quid       	"392F101500D9"
+		    supplier   	"Use Case View::User Management::Add a Role"
+		    quidu      	"392F10060042"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$23"
+		    quid       	"392F101500E3"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$24"
+	    quid       	"392F16A2008B"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$25"
+		    quid       	"392F16A301AF"
+		    supplier   	"Use Case View::User Management::Modify a Role"
+		    quidu      	"392F16970324"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$26"
+		    quid       	"392F16A301B0"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$27"
+	    quid       	"393C39A20000"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$28"
+		    quid       	"393C39A30029"
+		    supplier   	"Use Case View::User Management::Delete a Role"
+		    quidu      	"392F17550006"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$29"
+		    quid       	"393C39A3002A"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$30"
+	    quid       	"39401F4F0259"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$31"
+		    quid       	"39401F50034B"
+		    supplier   	"Use Case View::User Management::Add Users to a Group"
+		    quidu      	"39401F330277"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$32"
+		    quid       	"39401F500355"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC")))
+	(object Association "$UNNAMED$33"
+	    quid       	"39401F8002D1"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$34"
+		    quid       	"39401F81021F"
+		    supplier   	"Use Case View::User Management::Delete Users from a Group"
+		    quidu      	"39401F5801DA"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$35"
+		    quid       	"39401F810220"
+		    supplier   	"Use Case View::User Manager"
+		    quidu      	"38BA469701BC"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "User Management"
+	    quid       	"38BA46FE02E6"
+	    title      	"User Management"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::User Management::Add User Profile" @181
+		    location   	(1440, 736)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@181
+			location   	(1440, 874)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add User Profile")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA470C0372"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Modify User Profile" @182
+		    location   	(1536, 1040)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@182
+			location   	(1536, 1178)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify User Profile")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C3C3800059"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Delete User Profile" @183
+		    location   	(1488, 1344)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@183
+			location   	(1488, 1482)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete User Profile")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C3C3C40011"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Add a Role" @184
+		    location   	(512, 336)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@184
+			location   	(512, 474)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add a Role")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F10060042"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Modify a Role" @185
+		    location   	(992, 304)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@185
+			location   	(992, 442)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify a Role")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F16970324"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Delete a Role" @186
+		    location   	(1312, 496)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@186
+			location   	(1312, 634)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete a Role")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F17550006"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Add Users to a Group" @187
+		    location   	(1440, 1776)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@187
+			location   	(1440, 1914)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add Users to a Group")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39401F330277"
+		    height     	118)
+		(object UseCaseView "Use Case View::User Management::Delete Users from a Group" @188
+		    location   	(1088, 2032)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@188
+			location   	(1088, 2170)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete Users from a Group")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39401F5801DA"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::User Manager" @189
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(240, 1344)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@189
+			location   	(240, 1453)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	325
+			justify    	0
+			label      	"User Manager")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"38BA469701BC"
+		    width      	180
+		    height     	60
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$12" @190
+		    location   	(792, 1061)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38BA471A0098"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @191
+			    Parent_View 	@190
+			    location   	(312, 421)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38BA471B0017"
+			    client     	@190
+			    supplier   	@181
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @192
+			    Parent_View 	@190
+			    location   	(312, 421)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38BA471B0018"
+			    client     	@190
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$15" @193
+		    location   	(861, 1194)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C3C3AB028C"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$16" @194
+			    Parent_View 	@193
+			    location   	(381, 554)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C3AC00CB"
+			    client     	@193
+			    supplier   	@182
+			    line_style 	0)
+			(object RoleView "$UNNAMED$17" @195
+			    Parent_View 	@193
+			    location   	(381, 554)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C3AC00CC"
+			    client     	@193
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$18" @196
+		    location   	(837, 1344)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C3C3F8035F"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @197
+			    Parent_View 	@196
+			    location   	(357, 704)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C3F9025C"
+			    client     	@196
+			    supplier   	@183
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @198
+			    Parent_View 	@196
+			    location   	(357, 704)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C3F9025D"
+			    client     	@196
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$21" @199
+		    location   	(362, 881)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F101303BC"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$22" @200
+			    Parent_View 	@199
+			    location   	(122, -463)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F101500D9"
+			    client     	@199
+			    supplier   	@184
+			    line_style 	0)
+			(object RoleView "$UNNAMED$23" @201
+			    Parent_View 	@199
+			    location   	(122, -463)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F101500E3"
+			    client     	@199
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$24" @202
+		    location   	(584, 865)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F16A2008B"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$25" @203
+			    Parent_View 	@202
+			    location   	(344, -479)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F16A301AF"
+			    client     	@202
+			    supplier   	@185
+			    line_style 	0)
+			(object RoleView "$UNNAMED$26" @204
+			    Parent_View 	@202
+			    location   	(344, -479)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F16A301B0"
+			    client     	@202
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$27" @205
+		    location   	(740, 945)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393C39A20000"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$28" @206
+			    Parent_View 	@205
+			    location   	(500, -399)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C39A30029"
+			    client     	@205
+			    supplier   	@186
+			    line_style 	0)
+			(object RoleView "$UNNAMED$29" @207
+			    Parent_View 	@205
+			    location   	(500, -399)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C39A3002A"
+			    client     	@205
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$30" @208
+		    location   	(813, 1548)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39401F4F0259"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$31" @209
+			    Parent_View 	@208
+			    location   	(573, 204)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401F50034B"
+			    client     	@208
+			    supplier   	@187
+			    line_style 	0)
+			(object RoleView "$UNNAMED$32" @210
+			    Parent_View 	@208
+			    location   	(573, 204)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401F500355"
+			    client     	@208
+			    supplier   	@189
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$33" @211
+		    location   	(694, 1711)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39401F8002D1"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$34" @212
+			    Parent_View 	@211
+			    location   	(454, 367)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401F81021F"
+			    client     	@211
+			    supplier   	@188
+			    line_style 	0)
+			(object RoleView "$UNNAMED$35" @213
+			    Parent_View 	@211
+			    location   	(454, 367)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401F810220"
+			    client     	@211
+			    supplier   	@189
+			    line_style 	0)))))))

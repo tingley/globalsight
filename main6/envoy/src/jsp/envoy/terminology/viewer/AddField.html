@@ -1,0 +1,293 @@
+<html xmlns:m="http://www.w3.org/1998/Math/MathML">
+<head>
+<title>Add Field</title>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<OBJECT ID="MathPlayer" CLASSID="clsid:32F66A20-7614-11D4-BD11-00104BD3F987"></OBJECT>
+<?IMPORT NAMESPACE="m" IMPLEMENTATION="#MathPlayer" ?>
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<style>
+/* TO BE REMOVED AND REPLACED BY SetStylesheet.js */
+BODY,
+LABEL,
+#idDescription {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 10pt;
+}
+#idDescription {
+    height: 5em;
+    width: 100%;
+    overflow: auto;
+    padding: 1px 3px 1px 1px;
+    background-color: lightblue;
+}
+</style>
+<SCRIPT language="Javascript">
+var g_args;
+
+var g_currentFields;
+var g_currentAttributes;
+
+function setup(level, definedFields)
+{
+  g_currentFields = new Array().concat(definedFields);
+
+  if (g_currentFields.length == 0)
+  {
+    if (level == 'concept')
+    {
+      g_currentFields = g_currentFields.concat(g_conceptFields);
+    }
+    else if (level == 'language')
+    {
+      g_currentFields = g_currentFields.concat(g_languageFields);
+    }
+    else if (level == 'term')
+    {
+      g_currentFields = g_currentFields.concat(g_termFields);
+    }
+    else if (level == 'field')
+    {
+      g_currentFields = g_currentFields.concat(g_fieldFields);
+    }
+    else if (level == 'source')
+    {
+      g_currentFields = g_currentFields.concat(g_sourceFields);
+    }
+  }
+
+  // override field and source level fields
+  if (level == 'field')
+  {
+    g_currentFields = g_fieldFields;
+  }
+  else if (level == 'source')
+  {
+    g_currentFields = g_sourceFields;
+  }
+
+  fillSelect(idType, g_currentFields);
+  setValues(0);
+}
+
+function clearSelect(select)
+{
+    var options = select.options;
+    for (var i = options.length; i >= 1; --i)
+    {
+        options.remove(i-1);
+    }
+}
+
+function fillSelect(select, fields)
+{
+    clearSelect(select);
+
+    var options = select.options;
+
+    for (var i = 0; i < fields.length; i++)
+    {
+        var field = fields[i];
+
+        var option = document.createElement('OPTION');
+        option.text = field.getDisplayName() + ' ';
+        option.value = i;
+        options.add(option);
+    }
+
+    setDescription(0);
+}
+
+function fillAttributes(select, values)
+{
+    g_currentAttributes = values;
+
+    clearSelect(select);
+
+    var options = select.options;
+
+    for (var i = 0; i < values.length; i++)
+    {
+        var value = values[i];
+
+        var option = document.createElement('OPTION');
+        option.text = Trim(value) + '\u00a0';
+        option.value = i;
+        options.add(option);
+    }
+}
+
+function fillAttributesWithDummy(select)
+{
+    clearSelect(select);
+
+    var options = select.options;
+    var option = document.createElement('OPTION');
+    option.text = "text field ";
+    options.add(option);
+}
+
+function setDescription(index)
+{
+  var field = g_currentFields[index];
+
+  idDescription.innerText = field.getDescription();
+}
+
+function setValues(index)
+{
+  var field = g_currentFields[index];
+
+  if (field.isAttribute())
+  {
+    fillAttributes(idAttrValue, field.getValues().split(","));
+
+    if (g_currentFields.length == 1)
+    {
+      idAttrValue.focus();
+    }
+
+    idAttrValue.disabled = false;
+    idAttrValueLabel.disabled = false;
+    idValue.disabled = true;
+    idValueLabel.disabled = true;
+  }
+  else
+  {
+    fillAttributesWithDummy(idAttrValue);
+
+    if (g_currentFields.length == 1)
+    {
+      idValue.focus();
+    }
+
+    idAttrValue.disabled = true;
+    idAttrValueLabel.disabled = true;
+    idValue.disabled = false;
+    idValueLabel.disabled = false;
+  }
+}
+
+function changeType()
+{
+  var index = idType.options[idType.selectedIndex].value;
+
+  setValues(index);
+  setDescription(index);
+}
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var index = idType.options[idType.selectedIndex].value;
+    var field = g_currentFields[index];
+    var type = field.type;
+    var value;
+
+    if (field.isAttribute())
+    {
+      index = idAttrValue.options[idAttrValue.selectedIndex].value;
+      value = Trim(g_currentAttributes[index]);
+    }
+    else
+    {
+      value = Trim(idValue.value);
+    }
+
+    g_args.setType(type);
+    g_args.setValue(value);
+
+    window.returnValue = g_args;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  var level = g_args.getLevel();
+  idLevel.innerText = Trim(level);
+
+  var definedFields = g_args.getDefinedFields();
+  setup(level, definedFields);
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">
+New field at <span id="idLevel"></span> &nbsp;level</SPAN>
+<BR><BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <THEAD>
+    <COL WIDTH="25%">
+    <COL WIDTH="75%">
+  </THEAD>
+  <TR>
+    <TD>
+      <LABEL FOR="idType">Field type:</LABEL>
+    </TD>
+    <TD>
+      <select id="idType" TABINDEX="1" onchange="changeType()"></select>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top">
+      <LABEL id="idAttrValueLabel" FOR="idAttrValue">Attribute Value:</LABEL>
+    </TD>
+    <TD valign="top">
+      <SELECT id="idAttrValue" TABINDEX="2"></SELECT>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top">
+      <LABEL id="idValueLabel" FOR="idValue">Text Value:</LABEL>
+    </TD>
+    <TD valign="top">
+      <TEXTAREA id="idValue" TABINDEX="2" rows="5" cols="27"></TEXTAREA>
+    </TD>
+  </TR>
+  <TR><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+  <TR>
+    <TD valign="top"><LABEL>Explanation:</LABEL></TD>
+    <TD ROWSPAN="2" valign="top">
+      <P id="idDescription"></P>
+    </TD>
+  </TR>
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="3" onclick="doClose(true);">
+<INPUT id="idCancel" TYPE=BUTTON VALUE="Cancel" TABINDEX="4" onclick="doClose(false);">
+</DIV>
+
+</DIV>
+</body>
+</html>

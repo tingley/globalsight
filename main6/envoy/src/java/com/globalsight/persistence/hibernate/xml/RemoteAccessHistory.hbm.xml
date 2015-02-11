@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.webservices.remoteaccess.RemoteAccessHistory" table="REMOTE_ACCESS_HISTORY">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="accessToken" length="60" column="ACCESS_TOKEN"
+            type="string" not-null="false" />
+        <property name="apiName" length="60" column="API_NAME"
+            type="string" not-null="false" />
+        <property name="userId" length="25" column="USER_ID"
+            type="string" not-null="false" />
+		<property name="contents" column="CONTENTS" type="string"
+			not-null="false" unique="false" />
+		<property name="createDate" column="CREATE_DATE" type="timestamp"
+			not-null="true" unique="false" />
+		<property name="lastAccessDate" column="LAST_ACCESS_DATE" type="timestamp"
+			not-null="true" unique="false" />
+
+    </class>
+</hibernate-mapping>

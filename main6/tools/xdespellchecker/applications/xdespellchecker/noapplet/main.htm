@@ -1,0 +1,289 @@
+<html>
+<head>
+<script src="SpellCheckNoApplet.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Spell Check Page</title>
+<STYLE>
+body    {
+    font-face:verdana,arial,helvetica;
+    font-size:8pt;
+    }
+table   {
+    font-family:verdana, arial, helvetica;
+    font-size: 8pt;
+    font-weight: bold;
+    border-top-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    }
+input   {
+    font-face:verdana,arial,helvetica;
+    font-size:8pt;
+    }
+.nicefield {
+    width: 140px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    }
+.button {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: normal;
+    width: 100px;
+    border-style: groove;
+    }
+</STYLE>
+</head>
+
+<body LEFTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0" RIGHTMARGIN="0"
+ onunload="enableSpellCheck()">
+<script>
+var mainFrameLoaded = false;
+function init() { mainFrameLoaded = true; }
+
+//2003-05-01 establish multilingual buttons, English will be default
+var Languageobject =
+  getQueryParm(parent.document.location.toString(), "language");
+
+var customDictionaryName =
+  getQueryParm(parent.document.location.toString(), "customDictionaryName");
+
+var UILanguage =
+  getQueryParm(parent.document.location.toString(), "UILanguage");
+
+var cLanguage = null;
+var tmp = null;
+
+if (Languageobject != "")
+{
+    if (typeof(Languageobject) != 'undefined')
+    {
+        LanguageControl = eval('parent.opener.document.' + Languageobject);
+        cLanguage = LanguageControl.value;
+    }
+    else
+    {
+        cLanguage="usenglish;usenglish2002";
+    }
+}
+else
+{
+    cLanguage="usenglish;usenglish2002";
+}
+
+if (cLanguage == null)
+{
+    cLanguage = "usenglish;usenglish2002";
+}
+if (UILanguage == "")
+{
+    UILanguage = cLanguage;
+}
+
+var bchangeVal = "  Change  ";
+var bignoreVal = "  Ignore  ";
+var bignoreaVal = "Ignore All";
+var bchangeaVal = "Change All";
+var baddVal = "Add Word";
+var bfinishVal = "  Finish  ";
+var bcancelVal = "  Cancel  ";
+//text
+var tPleaseWait = "Please wait, checking....";
+var tChangeto = "Change to:";
+var tSuggestions = "Suggestions:";
+var tmisSpelledMessage = " is misspelled";
+var tSpellfinished = "Spell Check Completed, save changes?";
+if (UILanguage.indexOf("spanish") > -1)
+{
+    bchangeVal = "  Cambio  ";
+    bignoreVal = "  Salto   ";
+    bignoreaVal = "Salto Todos";
+    bchangeaVal = "CambioTodos";
+    baddVal = "Agregue";
+    bfinishVal = "  Final   ";
+    bcancelVal = "Cancelación";
+    tChangeto = "Cambie a:";
+    tSuggestions = "Sugerencias:";
+    tmisSpelledMessage = " se deletrea mal";
+    tSpellfinished = "Final";
+}
+else if (UILanguage.indexOf("french") > -1)
+{
+    bchangeVal = "Changement";
+    bignoreVal = " Ignorez ";
+    bignoreaVal = "Ignorez tous";
+    bchangeaVal = "Changez Tous";
+    baddVal = "Ajoutez";
+    bfinishVal = "Finition";
+    bcancelVal = "Annulation";
+    tChangeto = "Changement:";
+    tSuggestions = "Suggérez:";
+    tmisSpelledMessage = " est mal épelé";
+    tSpellfinished = "Finition";
+}
+else if(UILanguage.indexOf("dutch") > -1)
+{
+    bchangeVal = "Verbeter";
+    bignoreVal = "Ignoreer";
+    bignoreaVal = "Alles ignoreren";
+    bchangeaVal = "Alles verbeteren";
+    baddVal = "Toevoegen";
+    bfinishVal = "Einde";
+    bcancelVal = "Annuleren";
+    tChangeto = "Verbeter:";
+    tSuggestions = "Suggestie:";
+    tmisSpelledMessage = " is foutief geschreven";
+    tSpellfinished = "Einde";
+}
+else if(UILanguage.indexOf("german") > -1)
+{
+    bchangeVal = "Verbessern";
+    bignoreVal = "Ignorieren";
+    bignoreaVal = "Alle ignorieren";
+    bchangeaVal = "Alle verbessern";
+    baddVal = "ZufÃ¼gen";
+    bfinishVal = "Ende";
+    bcancelVal = "Abbrechen";
+    tChangeto = "Verbessern:";
+    tSuggestions = "VorschlÃ¤ge:";
+    tmisSpelledMessage = " ist falsch geschrieben";
+    tSpellfinished = "Beenden";
+}
+
+mainwindowloaded = false;
+function enableFinish()
+{
+    self.document.spellcheckform.bfinish.disabled = false;
+//  window.spellcheckform.bfinish.disabled = false;
+}
+</SCRIPT>
+<FORM NAME="spellcheckform" METHOD="post" ACTION="">
+<INPUT TYPE="hidden" NAME="fixedtext" VALUE="">
+<INPUT TYPE="hidden" NAME="language" VALUE="usenglish">
+<INPUT TYPE="hidden" NAME="customDictionaryName" VALUE="">
+
+<INPUT TYPE="hidden" NAME="misSpelledMessage" VALUE=" is not correct">
+<INPUT TYPE="hidden" NAME="Spellfinished" VALUE="Spell Check Completed">
+<INPUT TYPE="hidden" NAME="MispelledWords" VALUE="">
+<INPUT TYPE="hidden" NAME="currentword" VALUE="">
+<div style="border: solid black; border-top-width: 1px;
+ border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px;">
+<TABLE WIDTH="100%" LEFT="0" BORDER="0" ALIGN="LEFT"
+  BGCOLOR="#B1C5EC" HEIGHT="100%">
+  <TR>
+    <TD VALIGN="TOP">
+      <TABLE BORDER="0">
+        <TR>
+          <TD WIDTH="85" ALIGN="RIGHT" VALIGN="TOP">
+            <script>document.write(tChangeto);</script>
+          </TD>
+          <TD WIDTH="123" VALIGN="TOP">
+            <INPUT TYPE="text" NAME="tchangeto" class="nicefield"
+            onkeypress="return noenter()">
+          </TD>
+        </TR>
+        <TR>
+          <TD ALIGN="RIGHT" VALIGN="TOP">
+            <DIV STYLE="padding-top: 3px;">
+            <script>document.write(tSuggestions);</script>
+            </DIV>
+          </TD>
+          <TD VALIGN="TOP">
+            <SELECT NAME="suggestionlist"  SIZE="4" onchange="SelectWord();"
+              onclick="SelectWord();" class="nicefield">
+              <OPTION>Checking, Text Please Wait</OPTION>
+            </SELECT>
+          </TD>
+        </TR>
+      </TABLE>
+    </TD>
+    <TD VALIGN="TOP">
+      <TABLE BORDER="0" cellpadding="0" cellspacing="0">
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bchange" VALUE="  Change  "
+            onclick="ChangeWord();enableFinish();" class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bignore" VALUE="  Ignore  "
+            onclick="Ignore();"  class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bchangea" VALUE="Change All"
+            onclick="ChangeAll();enableFinish();"  class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bignorea" VALUE="Ignore All"
+            onclick="IgnoreAll();"  class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>&nbsp;</TD>
+          <TD>
+            <INPUT TYPE="button" NAME="badd" VALUE="Add Word"
+            onclick="AddWord();"  class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bfinish" VALUE="  Finish  "
+            onclick="finishSpellCheck();"  class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bcancel" VALUE="  Cancel  "
+            onclick="CancelSpellCheck();"  class="button">
+          </TD>
+        </TR>
+      </TABLE>
+    </TD>
+  </TR>
+</TABLE>
+</div>
+</FORM>
+
+<script>
+self.document.spellcheckform.customDictionaryName.value = customDictionaryName;
+if (self.document.spellcheckform.language.value != cLanguage)
+{
+    self.document.spellcheckform.language.value = cLanguage;
+
+    //update button text
+    self.document.spellcheckform.bchange.value = bchangeVal;
+    self.document.spellcheckform.bchangea.value = bchangeaVal;
+    self.document.spellcheckform.bignore.value = bignoreVal;
+    self.document.spellcheckform.bignorea.value = bignoreaVal;
+    self.document.spellcheckform.badd.value = baddVal;
+    self.document.spellcheckform.bfinish.value = bfinishVal;
+    self.document.spellcheckform.bcancel.value = bcancelVal;
+    self.document.spellcheckform.suggestionlist[0].value = bcancelVal;
+    self.document.spellcheckform.misSpelledMessage.value = tmisSpelledMessage;
+    self.document.spellcheckform.Spellfinished.value = tSpellfinished;
+}
+var textobjectcheck = getQueryParm(parent.document.location.toString(), "ctrl");
+var controlType = getQueryParm(parent.document.location.toString(), "typectrl");
+OriginalControl = eval('parent.opener.document.' + textobjectcheck) ||
+  window.parent.opener.document.getElementById(textobjectcheck);
+
+self.document.spellcheckform.fixedtext.value =
+  getControlText(OriginalControl, controlType);
+
+function noenter()
+{
+  return !(window.event && window.event.keyCode == 13);
+}
+/*
+$RCSfile: main.htm,v $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:52 $
+------------------------------------------------------------
+*/
+
+</script>
+<script language="javascript">init();</script>
+</body>
+
+</html>

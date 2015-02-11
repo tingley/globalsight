@@ -1,0 +1,96 @@
+<!-- ---------------------------------------------------------------------
+//  Author:       Steve Taylor (steve.taylor@astutemedia.com)
+//
+//  Date:         19/10/2004
+//
+//  File:         CalendarPopup.htc
+//
+//  Description:  This element behavior encapulates the calendar.htc and exposes
+//                it as a popup.
+//
+//-------------------------------------------------------------------- -->
+<public:component tagname="Calendar">
+    <public:defaults    viewLinkContent="true" />
+    <public:property    name="Version"              value="Calendar 1.0" />
+    <public:property    name="Target"               value="" />
+    <public:event       id="onDateSelected"         name="ondateselected">
+    <public:method      name="Unload" />
+    <public:attach      event="oncontentready"      onevent="Init()" />
+</public:component>
+
+<script>
+var popup, popupBody = null;
+var win = window;
+var winDoc = win.document;
+
+function Init()
+{
+    // Check to see if there is a target element.
+    if(Target != null && Target != "")
+    {
+        // Add a double click to the target elem, to show the calendar.
+        winDoc.getElementById(Target).attachEvent("ondblclick", ShowPopup);
+    }
+
+    // Create a popup object
+    popup = win.createPopup();
+    popupBody = popup.document.body;
+
+    // Add the scriptlet to the popups body.
+    popupBody.innerHTML = "<object id='cal' width='100%' ParentId='" + id + "' height='100%' type='text/x-scriptlet' data='/globalsight/includes/Calendar.htm'></object>";
+}
+
+function Unload(val)
+{
+    // Create a new event.
+    var e = createEventObject();
+    // Expose the selected value with the event.
+    e.selectedDate = val;
+    // Fire the event.
+    onDateSelected.fire(e);
+
+    if(Target != null && Target != "")
+    {
+        // Find the target in the parent document and set the value.
+        winDoc.getElementById(Target).value = val;
+    }
+
+    // Hide the popup.
+    popup.hide();
+}
+
+function ShowPopup()
+{
+    var wEvent = win.event;
+    var winDocBody = winDoc.body;
+    var popupWidth = 310; // 310
+    var popupHeight = 190; // 190
+
+    // Set the x and y from where the mouse clicks.
+    x = wEvent.x + 22;
+    y = wEvent.y - 22;
+
+    // Check to see if the popup goes out of bounds.
+    if (x + popupWidth > winDocBody.clientWidth)
+        x = wEvent.x - (popupWidth + winDocBody.scrollLeft + 22);
+    else
+        x += winDocBody.scrollLeft;
+
+    if (y + popupHeight > winDocBody.offsetHeight)
+        y = wEvent.y - (popupHeight + winDocBody.scrollTop + 22);
+    else
+        y += winDocBody.scrollTop;
+
+    popupBody.style.border = "1px solid #333333";
+
+    // Show the popup.
+    popup.show(20, -40, popupWidth, popupHeight, document.body);
+}
+</script>
+
+<!-- Output the calendar icon and attach the ShowPopup() function to the onclick event. -->
+<body id="TheBody">
+<img src="/globalsight/includes/Calendar.gif" width="16" height="15"
+ style="cursor:hand" onclick="ShowPopup()" title="Click to show calendar"
+ align="absMiddle">
+</body>

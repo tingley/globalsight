@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="disposición" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+  <topic name="Pantalla principal Glosarios" url="Configuraci_n/Archivos_de_referencia/Support_Files_Main_Screen.htm" />
+</key>
+<key name="distinguirlos" >
+  <topic name="Fragmento específico" url="Glosario/Specific_Snippet.htm" />
+</key>
+<key name="distintos idiomas" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="distintos usuarios" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="distribuir" >
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="docs" >
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+</key>
+<key name="documentación" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="documento" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="documento XML" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="documentos" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="documentos incorporando varios conjuntos" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="dog.gif" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="dólar" >
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+</key>
+<key name="dont-translate" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="dont-translate path" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="dtd" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+</key>
+<key name="dude" >
+  <topic name="Archivos de registro" url="Configuraci_n/Archivos_de_registro/Log_Files.htm" />
+</key>
+<key name="Duplica" >
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+</key>
+<key name="Duplicar" >
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="Duplicate" >
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+</key>
+<key name="durante" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="E" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="E&lt;HTML" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="editar algo" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="Editor" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Editor de fragmentos" url="Mis_actividades/Snippet_Editor.htm" />
+  <topic name="Editor de fragmentos y contenido" url="Mis_actividades/Snippet_and_Content_Editor.htm" />
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="editor del sistema" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="editor del usuario" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="Editor principal" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="editor principal interpreta" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="EE" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+</key>
+<key name="EE.UU" >
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+</key>
+<key name="ej" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Ejecutar" >
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+</key>
+<key name="Ejemplo" >
+  <topic name="Actividad" url="Glosario/Activity.htm" />
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+  <topic name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+  <topic name="Crear extensión de archivo" url="Configuraci_n/Extensiones_de_archivo/Create_File_Extension.htm" />
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+  <topic name="Crear/modificar tipo de actividad" url="Configuraci_n/Tipos_de_actividades/Create_Modify_Activity_Type.htm" />
+  <topic name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Ejemplo de archivo de importación de fragmentos" url="Glosario/Snippet_Library_File_Example.htm" />
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Ficha de actividades Disponibles" url="Mis_actividades/Available_Activity_Tab.htm" />
+  <topic name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Personalizar la configuración de segmentación" url="Ap_ndice/Customizing_Segmentation_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Proceso de producción" url="Glosario/Workflow.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="ejemplo anterior" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="Ejemplo del término" >
+  <topic name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+</key>
+<key name="ejemplo/fragmento3" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ejemplo/fragmento4" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ejemplo/nombre" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+
+</indexdata>

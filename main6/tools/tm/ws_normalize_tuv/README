@@ -1,0 +1,31 @@
+White space normalize tuv table.
+
+Whitespace normalization is performed only on HTML segments with a
+specified locale (typically source locale). The procedure is as
+follows.
+
+  1. Take a string from either segment_string or segment_clob column.
+  2. Whitespace normalize it using c.g.l.common.Text#normalizeWhiteSpaces().
+  3. If the result of the normalized string is different from the
+     original, it is written back to the database. exact_match_key is
+     also recalculated and updated.
+  4. If the segment is translatable, delete its indices from
+     fuzzy_index table and reindex it.
+
+
+How to Use:
+1. unzip the archive.
+2. go to <weblogic home> and type "setenv.cmd".
+3. go to system4_normalization and type System4Normalization.bat plus
+   parameters. The commandline syntax is as follows.
+
+Usage: System4Normalization [-q] LOCALE
+  LOCALE,  locale of which segments get normalized. This is usually
+           source locale.
+  -q,      Suppress the confirmation message.
+
+For example, 
+
+	System4Normalization.bat en_US
+
+normalize white space and reindex the segments of en_US locale.

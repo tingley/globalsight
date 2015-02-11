@@ -1,0 +1,543 @@
+<%@ page
+    contentType="text/html; charset=UTF-8"
+    errorPage="/envoy/common/error.jsp"
+    import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
+        java.util.ResourceBundle,
+        com.globalsight.util.edit.EditUtil,
+        com.globalsight.terminology.importer.ImportOptions,
+        com.globalsight.everest.servlet.util.SessionManager,
+        com.globalsight.everest.webapp.pagehandler.PageHandler,
+        com.globalsight.everest.webapp.WebAppConstants"
+    session="true"
+%>
+<jsp:useBean id="next" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="prevXml" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="prevCsv" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="cancel" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<%
+ResourceBundle bundle = PageHandler.getBundle(session);
+SessionManager sessionMgr = (SessionManager)session.getAttribute(
+  WebAppConstants.SESSION_MANAGER);
+
+String xmlDefinition =
+  (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_DEFINITION);
+String xmlImportOptions =
+  (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_IMPORT_OPTIONS);
+
+String urlNext    = next.getPageURL();
+String urlPrevXml = prevXml.getPageURL();
+String urlPrevCsv = prevCsv.getPageURL();
+String urlCancel  = cancel.getPageURL();
+
+// Perform error handling, then clear out session attribute.
+String errorScript = "";
+String error = (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_ERROR);
+if (error != null)
+{
+  errorScript = "var error = new Error();" +
+    "error.message = '" + EditUtil.toJavascript(bundle.getString("lb_import_error")) + "';" +
+    "error.description = '" + EditUtil.toJavascript(error) +
+    "'; showError(error);";
+}
+sessionMgr.removeElement(WebAppConstants.TERMBASE_ERROR);
+
+String lb_heading = bundle.getString("lb_terminology_set_import_options");
+String lb_helptext = bundle.getString("helper_text_terminology_import_options");
+String lb_failedToAnalyze = bundle.getString("jsmsg_tb_import_failed_analyze");
+
+String lb_addAsNew = bundle.getString("lb_terminology_add_all_concepts_as_new");
+String lb_syncConcept = bundle.getString("lb_terminology_synchronize_on_concept_id");
+String lb_syncLanguage = bundle.getString("lb_terminology_synchronize_on_language");
+String lb_overwrite = bundle.getString("lb_terminology_overwrite_existing_concepts");
+String lb_merge = bundle.getString("lb_terminology_merge_new_and_existing_concepts");
+String lb_discard = bundle.getString("lb_terminology_discard_new_concepts");
+
+String lb_cancel = bundle.getString("lb_cancel");
+String lb_previous = bundle.getString("lb_previous");
+String lb_import = bundle.getString("lb_import");
+%>
+<HTML XMLNS:gs>
+<!-- This is envoy\terminology\management\importOptions.jsp -->
+<HEAD>
+<TITLE><%=bundle.getString("lb_terminology_import_options")%></TITLE>
+<STYLE>
+FORM         { display: inline; }
+</STYLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<%@ include file="/envoy/common/warning.jspIncl" %>
+<%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT language="Javascript" src="envoy/terminology/management/protocol.js"></SCRIPT>
+<SCRIPT language="Javascript" src="envoy/terminology/management/importOptions.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var needWarning = false;
+var objectName = "";
+var guideNode = "terminology";
+var helpFile = "<%=bundle.getString("help_termbase_import_options")%>";
+var xmlDefinition = 
+				'<%=xmlDefinition.replace("'", "\\'").trim()%>';
+var xmlImportOptions = 
+				'<%=xmlImportOptions.replace("\\", "\\\\").replace("'", "\\'").trim()%>';
+
+eval("<%=errorScript%>");
+
+function doCancel()
+{
+    window.navigate("<%=urlCancel%>");
+}
+
+function doPrev()
+{
+    var result = buildImportOptions();
+
+    if (result.message != null && result.message != "")
+    {
+        showError(result);
+        if (result.element != null)
+        {
+            result.element.focus();
+        }
+    }
+    else
+    {
+        var url;
+        var dom;
+        if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+          dom = oImportOptions.XMLDocument;
+        }
+        else if(window.DOMParser)
+        { 
+          var parser = new DOMParser();
+          dom = parser.parseFromString(xmlImportOptions,"text/xml");
+        }
+        
+        var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+
+        if (node.text == "<%=ImportOptions.TYPE_XML%>" ||
+            node.text == "<%=ImportOptions.TYPE_MTF%>")
+        {
+            url = "<%=urlPrevXml%>";
+        }
+        else if (node.text == "<%=ImportOptions.TYPE_CSV%>")
+        {
+            url = "<%=urlPrevCsv%>";
+        }
+        else if (node.text == "<%=ImportOptions.TYPE_TBX%>")
+        {
+        	url = "<%=urlPrevXml%>";
+        }
+
+        oForm.action = url +
+            "&<%=WebAppConstants.TERMBASE_ACTION%>" +
+            "=<%=WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
+
+        if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+      		oForm.importoptions.value = oImportOptions.xml;
+        }
+        else if(window.DOMParser)
+        { 
+          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
+        }
+        
+        oForm.submit();
+    }
+}
+
+function doNext()
+{
+    var result = buildImportOptions();
+
+    if (result.message != null && result.message != "")
+    {
+        showError(result);
+        result.element.focus();
+    }
+    else
+    {
+    	var dom;
+        if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+          dom = oImportOptions.XMLDocument;
+        }
+        else if(window.DOMParser)
+        { 
+          var parser = new DOMParser();
+          dom = parser.parseFromString(xmlImportOptions,"text/xml");
+        }
+    	var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+
+    	if (node.text == "<%=ImportOptions.TYPE_TBX%>")
+    	{
+    		oForm.action = "<%=urlNext +
+  	          "&" + WebAppConstants.TERMBASE_ACTION +
+  	          "=" + WebAppConstants.TERMBASE_ACTION_START_IMPORT%>";
+    	}
+    	else
+    	{
+    		oForm.action = "<%=urlNext +
+    	          "&" + WebAppConstants.TERMBASE_ACTION +
+    	          "=" + WebAppConstants.TERMBASE_ACTION_START_IMPORT%>";
+    	}
+
+        if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+      		oForm.importoptions.value = oImportOptions.xml;
+        }
+        else if(window.DOMParser)
+        { 
+          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
+        }
+        oForm.submit();
+    }
+}
+
+function checkAnalysisError()
+{
+    var dom;
+    if(window.navigator.userAgent.indexOf("MSIE")>0)
+    {
+      dom = oImportOptions.XMLDocument;
+    }
+    else if(window.DOMParser)
+    { 
+      var parser = new DOMParser();
+      dom = parser.parseFromString(xmlImportOptions,"text/xml");
+    }
+    
+    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
+    var errorMessage = node.text;
+    if (errorMessage != "")
+    {
+        node.text = "";
+
+        showWarning("<%=EditUtil.toJavascript(lb_failedToAnalyze)%>" + errorMessage);
+
+        var url;
+        node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+
+        if (node.text == "<%=ImportOptions.TYPE_XML%>" ||
+            node.text == "<%=ImportOptions.TYPE_MTF%>")
+        {
+            url = "<%=urlPrevXml%>";
+        }
+        else if (node.text == "<%=ImportOptions.TYPE_CSV%>")
+        {
+            url = "<%=urlPrevCsv%>";
+        }
+
+        oForm.action = url +
+            "&<%=WebAppConstants.TERMBASE_ACTION%>" +
+            "=<%=WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
+
+        if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+      		oForm.importoptions.value = oImportOptions.xml;
+        }
+        else if(window.DOMParser)
+        { 
+          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
+        }
+        oForm.submit();
+    }
+}
+
+function Result(message, element)
+{
+    this.message = message;
+    this.description = message;
+    this.element = element;
+    this.domImportOptions = null;
+}
+
+function buildImportOptions()
+{
+    var dom;
+    if(window.navigator.userAgent.indexOf("MSIE")>0)
+    {
+      dom = oImportOptions.XMLDocument;
+    }
+    else if(window.DOMParser)
+    { 
+      var parser = new DOMParser();
+      dom = parser.parseFromString(xmlImportOptions,"text/xml");
+    }
+    
+    var result = new Result("", null);
+    var node;
+    node = dom.selectSingleNode("/importOptions/syncOptions");
+    while (node.hasChildNodes())
+    {
+        node.removeChild(node.firstChild);
+    }
+
+    var syncMode = dom.createElement("syncMode");
+    var syncLanguage = dom.createElement("syncLanguage");
+    var syncAction = dom.createElement("syncAction");
+    var nosyncAction = dom.createElement("nosyncAction");
+
+    var form = document.oDummyForm;
+
+    for (var i = 0; i < 3; i++)
+    {
+        if (form.oSync[i].checked)
+        {
+            syncMode.text = Mode[i];
+            if (Mode[i] == "add_as_new")
+            {
+                syncAction.text = "";
+                syncLanguage.text = "";
+            }
+            if (Mode[i] == "sync_on_concept")
+            {
+                syncLanguage.text = "";
+
+                for (var j = 0; j < 3; j++)
+                {
+                    if (form.oSyncId[j].checked)
+                    {
+                        syncAction.text = Action[j];
+                    }
+                }
+                
+                for (var j = 0; j < 2; j++)
+                {
+                    if (form.oNosyncLang[j].checked)
+                    {
+                        nosyncAction.text = NoAction[j];
+                    }
+                }
+            }
+            if (Mode[i] == "sync_on_language")
+            {
+                var lang = form.oLanguage.options[form.oLanguage.selectedIndex].value;
+                syncLanguage.text = lang;
+
+                for (var j = 0; j < 3; j++)
+                {
+                    if (form.oSyncLang[j].checked)
+                    {
+                        syncAction.text = Action[j];
+                    }
+                }
+
+                for (var j = 0; j < 2; j++)
+                {
+                    if (form.oNosyncLang[j].checked)
+                    {
+                        nosyncAction.text = NoAction[j];
+                    }
+                }
+            }
+        }
+    }
+
+    node.appendChild(syncMode);
+    node.appendChild(syncLanguage);
+    node.appendChild(syncAction);
+    node.appendChild(nosyncAction);
+
+    result.domImportOptions=dom;
+    return result;
+}
+
+function parseImportOptions()
+{
+    var dom;
+    if(window.navigator.userAgent.indexOf("MSIE")>0)
+    {
+      dom = oImportOptions.XMLDocument;
+    }
+    else if(window.DOMParser)
+    { 
+      var parser = new DOMParser();
+      dom = parser.parseFromString(xmlImportOptions,"text/xml");
+    }
+    var nodes, node, fileName, fileType, fileEncoding, separater, ignoreHeader;
+    nodes = dom.selectNodes("/importOptions/syncOptions");
+    if (nodes.length > 0)
+    {
+        node = nodes[0];//node = nodes.item(0);
+
+        if (node.selectSingleNode("syncMode"))
+        {
+            syncMode = node.selectSingleNode("syncMode").text;
+        }
+        if (node.selectSingleNode("syncLanguage"))
+        {
+            syncLanguage = node.selectSingleNode("syncLanguage").text;
+        }
+        if (node.selectSingleNode("syncAction"))
+        {
+            syncAction = node.selectSingleNode("syncAction").text;
+        }
+        if (node.selectSingleNode("nosyncAction"))
+        {
+            nosyncAction = node.selectSingleNode("nosyncAction").text;
+        }
+
+        var form = document.oDummyForm;
+        var id = MapMode[syncMode];
+        if (id)
+        {
+            form.oSync[id].checked = 'true';
+
+            id = MapMode[syncAction];
+            if (syncMode == "sync_on_concept")
+            {
+                form.oSyncId[id].checked = 'true';
+            }
+            else
+            {
+                form.oSyncLang[id].checked = 'true';
+
+                selectValue(form.oLanguage, syncLanguage);
+
+                if (nosyncAction == NoAction[0])
+                {
+                    form.oNosyncLang[0].checked = 'true';
+                }
+                else
+                {
+                    form.oNosyncLang[1].checked = 'true';
+                }
+            }
+        }
+    }
+}
+
+function selectValue(select, value)
+{
+    var options = select.options;
+    for (var i = 0; i < options.length; ++i)
+    {
+        if (options[i].value == value)
+        {
+            select.selectedIndex = i;
+            return;
+        }
+    }
+}
+
+function doOnLoad()
+{
+    checkAnalysisError();
+
+    // Load the Guides
+    loadGuides();
+
+    var dom;
+    if(window.navigator.userAgent.indexOf("MSIE")>0)
+    {
+      dom = oDefinition.XMLDocument;
+    }
+    else if(window.DOMParser)
+    { 
+      var parser = new DOMParser();
+      dom = parser.parseFromString(xmlDefinition,"text/xml");
+    }
+    
+    var names = dom.selectNodes("/definition/languages/language/name");
+
+    for (var i = 0; i < names.length; ++i)
+    {
+        var name = names[i].text;//var name = names.item(i).text;
+
+        oOption = document.createElement("OPTION");
+        oOption.text = name;
+        oOption.value = name;
+
+        oDummyForm.oLanguage.add(oOption);
+    }
+
+    parseImportOptions();
+}
+</SCRIPT>
+</HEAD>
+<BODY onload="doOnLoad()" LEFTMARGIN="0" RIGHTMARGIN="0"
+        TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
+        CLASS="standardText">
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
+<DIV ID="contentLayer"
+ STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+
+<SPAN CLASS="mainHeading" id="idHeading"><%=lb_heading%></SPAN>
+<P>
+<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
+<TR>
+<TD WIDTH=500><%=lb_helptext%></TD>
+</TR>
+</TABLE>
+<P>
+
+<DIV style="display:none">
+<XML id="oDefinition"><%=xmlDefinition%></XML>
+<XML id="oImportOptions"><%=xmlImportOptions%></XML>
+</DIV>
+
+<DIV>
+<FORM NAME="oForm" ACTION="" METHOD="post">
+<INPUT TYPE="hidden" NAME="importoptions" VALUE="ImportOptions XML goes here">
+</FORM>
+<FORM NAME="oDummyForm">
+<input type="radio" name="oSync" id="idSync1" CHECKED="true">
+<label for="idSync1"><%=lb_addAsNew%></label>
+</DIV>
+<DIV>
+<input type="radio" name="oSync" id="idSync2">
+<label for="idSync2"><%=lb_syncConcept%></label>
+  <DIV style="margin-left: 40px">
+  <input type="radio" name="oSyncId" id="idSync2O" onclick="idSync2.click()"
+   CHECKED="true">
+  <label for="idSync2O"><%=lb_overwrite%></label><br>
+  <input type="radio" name="oSyncId" id="idSync2M" onclick="idSync2.click()">
+  <label for="idSync2M"><%=lb_merge%></label><br>
+  <input type="radio" name="oSyncId" id="idSync2D" onclick="idSync2.click()">
+  <label for="idSync2D"><%=lb_discard%></label><br>
+  </DIV>
+</DIV>
+<DIV>
+<input type="radio" name="oSync" id="idSync3">
+<label for="idSync3"><%=lb_syncLanguage%></label>
+  <select name="oLanguage" id="idLanguageList"
+    onclick="idSync3.click()" onchange="idSync3.click()"></select>
+  <DIV style="margin-left: 40px">
+    <input type="radio" name="oSyncLang" id="idSync3O" onclick="idSync3.click()"
+     CHECKED="true">
+    <label for="idSync3O"><%=lb_overwrite%></label><br>
+    <input type="radio" name="oSyncLang" id="idSync3M" onclick="idSync3.click()">
+    <label for="idSync3M"><%=lb_merge%></label><br>
+    <input type="radio" name="oSyncLang" id="idSync3D" onclick="idSync3.click()">
+    <label for="idSync3D"><%=lb_discard%></label><br>
+  </DIV>
+<input type="radio" name="foo" id="idFoo" style="visibility: hidden">
+<%=bundle.getString("lb_unsynchronized_entries") %>: &nbsp;
+    <input type="radio" name="oNosyncLang" id="idNosync3D"
+     onclick="idSync3.click()">
+    <label for="idNosync3D"><%=bundle.getString("lb_discard") %></label>
+    <input type="radio" name="oNosyncLang" id="idNosync3A" checked
+     onclick="idSync3.click()">
+    <label for="idNosync3A"><%=bundle.getString("lb_add") %></label> &nbsp;
+</DIV>
+</FORM>
+
+<P>
+<DIV id="idButtons">
+<INPUT TYPE="BUTTON" NAME="Cancel" VALUE="<%=lb_cancel%>" onclick="doCancel()">
+<INPUT TYPE="BUTTON" NAME="Previous" VALUE="<%=lb_previous%>" onclick="doPrev()">
+<INPUT TYPE="BUTTON" NAME="Import" VALUE="<%=lb_import%>" onclick="doNext()">
+</DIV>
+
+</FORM>
+
+</DIV>
+</BODY>
+</HTML>

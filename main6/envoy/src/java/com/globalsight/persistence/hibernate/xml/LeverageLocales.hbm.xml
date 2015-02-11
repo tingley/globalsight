@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.foundation.LeverageLocales"
+        table="LEVERAGE_LOCALES" lazy="false">
+
+        <composite-id>
+            <key-many-to-one name="backPointer"
+                class="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
+                column="WORKFLOW_INFO_ID" lazy="false" />
+
+            <key-many-to-one name="locale" column="LOCALE_ID"
+                class="com.globalsight.util.GlobalSightLocale" lazy="false"/>
+        </composite-id>
+
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

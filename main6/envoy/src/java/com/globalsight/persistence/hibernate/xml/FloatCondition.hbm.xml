@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.FloatCondition" table="FLOAT_CONDITION">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="definition" column="DEFINITION" type="integer" not-null="false" unique="false" />
+		<property name="max" column="MAX" type="float" not-null="false" unique="false" />
+		<property name="min" column="MIN" type="float" not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

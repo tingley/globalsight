@@ -1,0 +1,40 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object SubSystem "System Interface"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA51D703A8"
+    visible_modules 	(list dependency_list
+	(object Module_Visibility_Relationship
+	    quid       	"38BA525E01C1"
+	    supplier   	"Component View::Envoy Server"
+	    quidu      	"3890C34D0021"
+	    supplier_is_subsystem 	TRUE)
+	(object Module_Visibility_Relationship
+	    quid       	"38BA52610085"
+	    supplier   	"Component View::Linguistics"
+	    quidu      	"388EB6D70049"
+	    supplier_is_subsystem 	TRUE)
+	(object Module_Visibility_Relationship
+	    quid       	"38BD4FE80140"
+	    supplier   	"Component View::User Management"
+	    quidu      	"38BA54500109"
+	    supplier_is_subsystem 	TRUE))
+    physical_models 	(list unit_reference_list
+	(object module "EV Interface" "NotAModuleType" "NotAModulePart"
+	    quid       	"38BA527F03BD"
+	    stereotype 	""))
+    physical_presentations 	(list unit_reference_list
+	(object Module_Diagram "Main"
+	    quid       	"39416701039C"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list))))

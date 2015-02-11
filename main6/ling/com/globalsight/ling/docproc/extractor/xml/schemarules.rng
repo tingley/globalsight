@@ -1,0 +1,206 @@
+<!-- RELAX NG schema for XML rule file -->
+
+<grammar
+  xmlns="http://relaxng.org/ns/structure/1.0"
+  xmlns:c="http://globalsight.com/comment">
+
+  <start>
+    <ref name="schemarules"/>
+  </start>
+
+  <c:c> ------------   Element definition   --------------------</c:c>
+
+  <c:c> Document root </c:c>
+  <define name="schemarules">
+    <element name="schemarules">
+      <optional>
+        <ref name="use-empty-tag" />
+      </optional>
+      <oneOrMore>
+        <ref name="ruleset"/>
+      </oneOrMore>
+    </element>
+  </define>
+
+
+  <c:c>
+         One ruleset element for each XML instance. There can be multiple 
+         ruleset elements in a rule file.
+  </c:c>
+  <define name="ruleset">
+    <element name="ruleset">
+      <attribute name="schema"/>
+      <oneOrMore>
+        <choice>
+          <ref name="translate"/>
+          <ref name="dont-translate"/>
+          <ref name="dont-count"/>
+		  <ref name="sid"/>
+		  <ref name="internal"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+
+  <c:c> Specify an element that is internal text</c:c>
+  <define name="internal">
+    <element name="internal">
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>      
+    </element>
+  </define>     
+  
+  <c:c> Specify an element that is to be translated </c:c>
+  <define name="translate">
+    <element name="translate">
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>
+      <optional>
+        <ref name="loctype"/>
+      </optional>
+      <optional>
+        <ref name="datatype"/>
+      </optional>
+      <optional>
+        <ref name="type"/>
+      </optional>
+      <optional>
+        <ref name="inline"/>
+      </optional>
+      <optional>
+        <ref name="containedInHtml"/>
+      </optional>
+      <optional>
+        <ref name="movable"/>
+      </optional>
+      <optional>
+        <ref name="erasable"/>
+      </optional>
+    </element>
+  </define>      
+
+
+  <c:c> Specify an element that is not to be translated </c:c>
+  <define name="dont-translate">
+    <element name="dont-translate">
+      <ref name="path"/>
+      <optional>
+        <ref name="inline"/>
+      </optional>
+      
+    </element>
+  </define>
+  
+  <define name="sid">
+    <element name="sid">
+      <ref name="path"/>
+      <optional>
+	     <ref name="name"/>
+	  </optional>
+    </element>
+  </define>
+
+  <define name="dont-count">
+    <element name="dont-count">
+      <ref name="path"/>
+      <ref name="words"/>
+    </element>
+  </define>
+
+  <c:c> ------------   Attribute definition   --------------------</c:c>
+
+  <define name="use-empty-tag">
+    <attribute name="use-empty-tag">
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+
+
+  <c:c> XPath expression to select parts of XML documents </c:c>
+  <define name="path">
+    <attribute name="path"/>
+  </define>
+  
+  <define name="name">
+    <attribute name="name"/>
+  </define>
+  
+  <define name="words">
+    <attribute name="words"/>
+  </define>
+
+  <c:c> Localization Type: "translatable" or "localizable" </c:c>
+  <define name="loctype">
+    <attribute name="loctype">
+      <choice>
+        <value>translatable</value>
+        <value>localizable</value>
+      </choice>
+    </attribute>
+  </define>
+
+
+  <c:c>
+         Datatype: extraction format of the selected parts (html,
+         javascript, xml, etc). Note that the values are in lower case.
+  </c:c>
+  <define name="datatype">
+    <attribute name="datatype"/>
+  </define>
+
+
+  <c:c> 
+         Type: type of the segment. e.g. link, abbr, font-name,
+         etc. Default is text.
+  </c:c>
+  <define name="type">
+    <attribute name="type"/>
+  </define>
+
+
+  <c:c> Inline: segment breaking tag or not </c:c>
+  <define name="inline">
+    <attribute name="inline">
+      <choice>
+        <value>yes</value>
+        <value>no</value>
+      </choice>
+    </attribute>
+  </define>
+
+  <c:c> ContainedInHtml: HTML tag surrounded by xml </c:c>
+  <define name="containedInHtml">
+    <attribute name="containedInHtml">
+      <choice>
+        <value>yes</value>
+        <value>no</value>
+      </choice>
+    </attribute>
+  </define>
+
+
+  <c:c> Movable: movable tag or not </c:c>
+  <define name="movable">
+    <attribute name="movable">
+      <choice>
+        <value>yes</value>
+        <value>no</value>
+      </choice>
+    </attribute>
+  </define>
+
+
+  <c:c> Erasable: erasable tag or not </c:c>
+  <define name="erasable">
+    <attribute name="erasable">
+      <choice>
+        <value>yes</value>
+        <value>no</value>
+      </choice>
+    </attribute>
+  </define>
+
+</grammar>
+
+

@@ -1,0 +1,129 @@
+<html>
+<head>
+<title>Edit Term Constraints</title>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT language="Javascript">
+var g_args;
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var value;
+
+    if (idRequired.checked)
+    {
+      value = "required";
+    }
+    else
+    {
+      value = "optional";
+    }
+
+    if (idMultiple.checked)
+    {
+      value += ", multiple";
+    }
+
+    g_args.setTerm(value);
+
+    window.returnValue = g_args;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  idTerm.innerText = g_args.isMainTerm() ? "Main Term" : "Synonyms";
+  idTermVerb.innerText = g_args.isMainTerm() ? "is:" : "are:";
+  idLanguage.innerText = g_args.getLanguage();
+  var value = g_args.getTerm();
+
+  if (value.indexOf("required") >= 0)
+  {
+    idRequired.checked = true;
+    idOptional.focus();
+  }
+  else
+  {
+    idOptional.checked = true;
+    idRequired.focus();
+  }
+
+  if (!g_args.isMainTerm()) 
+  {
+    idRow.style.display = "";
+    if (value.indexOf("multiple") >= 0)
+    {
+      idMultiple.checked = true;
+    }
+  }
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">Edit Term Constraints</SPAN>
+<BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <TR>
+    <TD valign="top" colspan=2>
+      <LABEL><SPAN id="idTerm">Terms</SPAN> in language:</LABEL>
+      <span id="idLanguage"></span>
+    </TD>
+  </TR>
+  <TR>
+    <TD rowspan=2 valign=top>
+      <SPAN id="idTermVerb">are:</SPAN>
+    </TD>
+    <TD>
+      <INPUT TYPE="radio" name="m" id="idRequired" TABINDEX="1">
+      <LABEL FOR="idRequired">required</LABEL>
+      <INPUT TYPE="radio" name="m" id="idOptional" TABINDEX="2">
+      <LABEL FOR="idOptional">optional</LABEL>
+    </TD>
+  </TR>
+  <TR id="idRow" style="display: none">
+    <TD>
+      <INPUT TYPE="checkbox" id="idMultiple" TABINDEX="3">
+      <LABEL FOR="idMultiple">can occur multiple times</LABEL>
+    </TD>
+  </TR>
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="4" onclick="doClose(true);">
+<INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="5" onclick="doClose(false);">
+</DIV>
+
+</DIV>
+</body>
+</html>

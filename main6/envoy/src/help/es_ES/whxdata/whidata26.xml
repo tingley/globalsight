@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="este procesamiento" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="este proceso" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="este proyecto" >
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="este punto" >
+  <topic name="Editor de fragmentos y contenido" url="Mis_actividades/Snippet_and_Content_Editor.htm" />
+</key>
+<key name="este segmento" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="Este segmento está bloqueado" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="este significa" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="este trabajo" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+</key>
+<key name="este usuario" >
+  <topic name="Cargos" url="Configuraci_n/Usuarios/Roles.htm" />
+  <topic name="Crear/modificar conexión a la base datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/Create_Modify_DB_Connection.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="este valor determina" >
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="este valor se cambia automáticamente" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="estén" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+</key>
+<key name="Estos" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+</key>
+<key name="estos deben figurar entre" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="Estos elementos sólo aparecerán si cuenta" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+</key>
+<key name="Estos nuevos  generarían" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+</key>
+<key name="Estos tipos se pueden excluir utilizando" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="etapa" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="etapas" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+</key>
+<key name="etcétera" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="Etiqueta" >
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiqueta del" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="etiqueta está alineada" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="etiqueta fragmento4" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="Etiqueta GS" >
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+</key>
+<key name="etiqueta GS ADDED" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiqueta HTML" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiqueta HTML abarca más" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiquetas" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Marcadores de posición" url="Glosario/Placeholder_Tags.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Página de origen con etiquetas GS" url="Glosario/GS-tagged_Source_Page.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiquetas abreviadas" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="Etiquetas abreviadas/detalladas" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="etiquetas del texto original aparezcan" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="etiquetas detalladas" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="etiquetas GS" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Página de origen con etiquetas GS" url="Glosario/GS-tagged_Source_Page.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiquetas GS incrustadas" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiquetas GS se especifican" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiquetas GS se pueden anidar" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="etiquetas GS se utilizan" >
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+</key>
+<key name="etiquetas GS&lt;/H1" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="etiquetas GS&lt;/TITLE" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="etiquetas html" >
+  <topic name="Marcadores de posición" url="Glosario/Placeholder_Tags.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiquetas HTML deben encerrarse" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="etiquetas html se mostraran" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiquetas inicial" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="etiquetas pasan al esqueleto" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="etiquetas sí deben romperlos" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="euro" >
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+</key>
+<key name="euros" >
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+</key>
+<key name="Exacta" >
+  <topic name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+</key>
+<key name="Examinar" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+  <topic name="Pantalla principal Terminología" url="Configuraci_n/Bases_de_datos_terminol_gica/Terminology_Main_Screen.htm" />
+</key>
+<key name="Examinar base" >
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+</key>
+<key name="Examinar error" >
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+</key>
+<key name="examinar esta página web" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="excepción" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Excepciones" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="excluir" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="excluirlo" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="exclusión" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="exclusivas" >
+  <topic name="TM" url="Glosario/TM.htm" />
+</key>
+<key name="exista" >
+  <topic name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+</key>
+<key name="existe" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="existe ningún registro" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="existencia" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+
+</indexdata>

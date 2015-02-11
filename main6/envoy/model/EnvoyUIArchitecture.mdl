@@ -1,0 +1,6614 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Design "Logical View"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A1488AD0159"
+    defaults   	(object defaults
+	rightMargin 	0.250000
+	leftMargin 	0.250000
+	topMargin  	0.250000
+	bottomMargin 	0.500000
+	pageOverlap 	0.250000
+	clipIconLabels 	TRUE
+	autoResize 	TRUE
+	snapToGrid 	TRUE
+	gridX      	16
+	gridY      	16
+	defaultFont 	(object Font
+	    size       	10
+	    face       	"Arial"
+	    bold       	FALSE
+	    italics    	FALSE
+	    underline  	FALSE
+	    strike     	FALSE
+	    color      	0
+	    default_color 	TRUE)
+	showMessageNum 	1
+	showClassOfObject 	TRUE
+	notation   	"Unified")
+    root_usecase_package 	(object Class_Category "Use Case View"
+	quid       	"39F77FC20179"
+	exportControl 	"Public"
+	global     	TRUE
+	logical_models 	(list unit_reference_list)
+	logical_presentations 	(list unit_reference_list
+	    (object UseCaseDiagram "Main"
+		quid       	"39F77FC9005E"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    root_category 	(object Class_Category "Logical View"
+	quid       	"39F77FC20178"
+	exportControl 	"Public"
+	global     	TRUE
+	subsystem  	"Component View"
+	quidu      	"39F77FC20196"
+	logical_models 	(list unit_reference_list
+	    (object Class "ControlServlet"
+		quid       	"39F7805703A9"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3CE3FCB0022E"
+			supplier   	"Logical View::javax.servlet.http.HttpServlet"
+			quidu      	"3CE3FC78030A"))
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"39F7A70C009C"
+			supplier   	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF")
+		    (object Uses_Relationship
+			quid       	"3CE3FCC0001E"
+			supplier   	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"))
+		operations 	(list Operations
+		    (object Operation "doGet"
+			quid       	"39F780800186"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getPageHandlerInstance"
+			quid       	"39F78749038A"
+			parameters 	(list Parameters
+			    (object Parameter "pageHandlerClassName"
+				quid       	"39F793DE009C"
+				type       	"String"))
+			result     	"PageHandler"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"39F7941A02BF")))
+	    (object Class "WebSiteDescription"
+		quid       	"39F780B201D4"
+		operations 	(list Operations
+		    (object Operation "getPageDescriptor"
+			quid       	"39F780CD00AB"
+			parameters 	(list Parameters
+			    (object Parameter "pageName"
+				quid       	"39F7813003D8"
+				type       	"String"))
+			result     	"WebPageDescriptor"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"39F780E60290")
+		    (object Operation "getActivityDescriptor"
+			quid       	"39F79D230251"
+			parameters 	(list Parameters
+			    (object Parameter "activityName"
+				quid       	"39F79D4D009C"
+				type       	"String"))
+			result     	"WebActivityDescriptor"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"39F79D6D008C"))
+		cardinality 	(value Cardinality "1..1"))
+	    (object Class "WebPageDescriptor"
+		quid       	"39F780E60290"
+		operations 	(list Operations
+		    (object Operation "getDestinationPageName"
+			quid       	"39F784710232"
+			parameters 	(list Parameters
+			    (object Parameter "linkName"
+				quid       	"39F7861C0128"
+				type       	"String"))
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getPageName"
+			quid       	"39F78638037A"
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getJspURL"
+			quid       	"39F7865B01A5"
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getPageHandlerClassName"
+			quid       	"39F7869F0167"
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "PageHandler"
+		quid       	"39F7941A02BF"
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"3A14644A015E"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"))
+		operations 	(list Operations
+		    (object Operation "invokePageHandler"
+			quid       	"39F79438034B"
+			parameters 	(list Parameters
+			    (object Parameter "aWebPageDescriptor"
+				quid       	"39F795FA0251"
+				type       	"WebPageDescriptor"
+				quidu      	"39F780E60290")
+			    (object Parameter "theRequest"
+				quid       	"39F7945B0280")
+			    (object Parameter "theResponse"
+				quid       	"39F7946F007D")
+			    (object Parameter "theContext"
+				quid       	"39F794760119"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getControlFlowHelper"
+			quid       	"39F7949801F4"
+			result     	"ControlFlowHelper"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"39F7A53D01C5")
+		    (object Operation "invokePageHandlerForApplet"
+			quid       	"3A1463A30154"
+			parameters 	(list Parameters
+			    (object Parameter "isDoGet"
+				quid       	"3A14640D0247"
+				type       	"boolean")
+			    (object Parameter "thePageDescriptor"
+				quid       	"3A14640D0323"
+				type       	"WebPageDescriptor"
+				quidu      	"39F780E60290")
+			    (object Parameter "theRequest"
+				quid       	"3A14640E0018"
+				type       	"HttpRequest")
+			    (object Parameter "theResponse"
+				quid       	"3A14640E00EA"
+				type       	"HttpResponse")
+			    (object Parameter "theContext"
+				quid       	"3A14640E01C6"
+				type       	"ServletContext"))
+			result     	"Serializable[]"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getErrorPage"
+			quid       	"3CE52D720148"
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getBundle"
+			quid       	"3CE52D7A0078"
+			stereotype 	"static"
+			parameters 	(list Parameters
+			    (object Parameter "p_session"
+				quid       	"3CE52D9501A3"
+				type       	"HttpSession"))
+			result     	"ResourceBundle"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getUser"
+			quid       	"3CE52DA503A5"
+			stereotype 	"static"
+			parameters 	(list Parameters
+			    (object Parameter "p_session"
+				quid       	"3CE52DAE0072"
+				type       	"HttpSession"))
+			result     	"User"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getUILocaleAsString"
+			quid       	"3CE52E7D0215"
+			stereotype 	"static"
+			parameters 	(list Parameters
+			    (object Parameter "p_session"
+				quid       	"3CE52E8B02D3"
+				type       	"HttpSession"))
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "saveParameterToSession"
+			quid       	"3CE52ED70106"
+			parameters 	(list Parameters
+			    (object Parameter "p_request"
+				quid       	"3CE52EE5006F"
+				type       	"HttpServletRequest")
+			    (object Parameter "p_sessionMgr"
+				quid       	"3CE52EFA00B6"
+				type       	"SessionManager")
+			    (object Parameter "p_paramName"
+				quid       	"3CE52F0500A8"
+				type       	"String"))
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "removeParameterFromSession"
+			quid       	"3CE5301C0320"
+			parameters 	(list Parameters
+			    (object Parameter "p_sessionMgr"
+				quid       	"3CE5302303DE"
+				type       	"SessionManager")
+			    (object Parameter "p_paramName"
+				quid       	"3CE5302E0055"
+				type       	"String"))
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)))
+	    (object Class "WebActivityDescriptor"
+		quid       	"39F79D6D008C"
+		operations 	(list Operations
+		    (object Operation "getDefaultPageDescriptor"
+			quid       	"39F79D930157"
+			result     	"WebPageDescriptor"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"39F780E60290")))
+	    (object Class "EntryPageControlFlowHelper"
+		quid       	"39F7A41300AB"
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"39F7A46201B5"
+			supplier   	"Logical View::ControlFlowHelper"
+			quidu      	"39F7A53D01C5")))
+	    (object Class "EntryPageHandler"
+		quid       	"39F7A48A0203"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"39F7A49F0399"
+			supplier   	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"))
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"39F7A642032C"
+			supplier   	"Logical View::EntryPageControlFlowHelper"
+			quidu      	"39F7A41300AB"))
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"39F7A53902AF"
+			supplier   	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF")))
+	    (object Class "ControlFlowHelper"
+		quid       	"39F7A53D01C5"
+		stereotype 	"Interface"
+		operations 	(list Operations
+		    (object Operation "determineLinkToFollow"
+			quid       	"39F7A55E0290"
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "UserSummaryListApplet"
+		quid       	"3A1462CC01C3")
+	    (object Class "RoleSummaryListApplet"
+		quid       	"3A1462DF0351")
+	    (object Class "AppletRequestHandler"
+		quid       	"3A1463580305"
+		stereotype 	"Interface"
+		operations 	(list Operations
+		    (object Operation "doService"
+			quid       	"3A14649C003A"
+			parameters 	(list Parameters
+			    (object Parameter "isDoGet"
+				quid       	"3A1464EF033C"
+				type       	"boolean")
+			    (object Parameter "thePageDescriptor"
+				quid       	"3A1464EF0396"
+				type       	"WebPageDescriptor"
+				quidu      	"39F780E60290")
+			    (object Parameter "theRequest"
+				quid       	"3A1464F00013"
+				type       	"HttpRequest")
+			    (object Parameter "theResponse"
+				quid       	"3A1464F00077"
+				type       	"HttpResponse")
+			    (object Parameter "theServlet"
+				quid       	"3A1464F000D1"
+				type       	"ServletContext"))
+			result     	"Serializable[]"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "AbstractAppletRequestHandler"
+		quid       	"3A1464570302"
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"3A1465CA0233"
+			supplier   	"Logical View::UserSummaryListHandler"
+			quidu      	"3A14659900A2")
+		    (object Uses_Relationship
+			quid       	"3A1465CD024B"
+			supplier   	"Logical View::RoleSummaryListHandler"
+			quidu      	"3A1465B50048"))
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3A14647900B2"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"))
+		operations 	(list Operations
+		    (object Operation "getInstance"
+			quid       	"3A14652201E1"
+			result     	"AppletRequestHandler"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"3A1463580305")))
+	    (object Class "UserSummaryListHandler"
+		quid       	"3A14659900A2"
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3A1465D30380"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"))
+		operations 	(list Operations
+		    (object Operation "newInstance"
+			quid       	"3A14696D02F0"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "RoleSummaryListHandler"
+		quid       	"3A1465B50048"
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3A1465DD01FE"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"))
+		operations 	(list Operations
+		    (object Operation "newInstance"
+			quid       	"3A146B63025B"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "ConcretePageHandler"
+		quid       	"3A14896000FC"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3A1489830201"
+			supplier   	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"))
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"3A1488F70051"
+			supplier   	"Logical View::UserSummaryListHandler"
+			quidu      	"3A14659900A2")
+		    (object Uses_Relationship
+			quid       	"3A1488FD009F"
+			supplier   	"Logical View::RoleSummaryListHandler"
+			quidu      	"3A1465B50048"))
+		operations 	(list Operations
+		    (object Operation "invokePageHandlerForApplet"
+			quid       	"3A1489E603A8"
+			documentation 	
+|Overwrite the default implementation which does nothing.
+|
+|The method implementation does this:
+|
+|1. get the class name of concrete AppletRequestHandler  which is stored as a parameter of the HttpRequest object
+|
+|2. instanstiates the concrete AppletRequestHandler using Class.forName().newInstance().
+|
+|3. Delegate to the doService method of the concrete AppletRequestHandler.
+			
+			parameters 	(list Parameters
+			    (object Parameter "isDoGet"
+				quid       	"3A1489E603A9"
+				type       	"boolean")
+			    (object Parameter "thePageDescriptor"
+				quid       	"3A1489E603AA"
+				type       	"WebPageDescriptor"
+				quidu      	"39F780E60290")
+			    (object Parameter "theRequest"
+				quid       	"3A1489E603AB"
+				type       	"HttpRequest")
+			    (object Parameter "theResponse"
+				quid       	"3A1489E603AC"
+				type       	"HttpResponse")
+			    (object Parameter "theContext"
+				quid       	"3A1489E603AD"
+				type       	"ServletContext"))
+			result     	"Serializable[]"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "EnvoyApplet"
+		quid       	"3A156DFE0011"
+		documentation 	
+|EnvoyApplet is the main applet that contains the grid and related components.  The applet expects two parameter to be passed in (thru html tag).  The first one is the "grid" which is a fully qualified path of the grid that should be contained in the applet.  The second parameter is "rand" which is the randomly generated id used for accessing the existing http session from the ControlServlet.
+		
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3A1572C103CC"
+			supplier   	"Logical View::java.applet.Applet"
+			quidu      	"3A156ED103CC"))
+		used_nodes 	(list uses_relationship_list
+		    (object Uses_Relationship
+			quid       	"3A15747F01A6"
+			supplier   	"Logical View::EnvoyGrid"
+			quidu      	"3A156E1F0041"))
+		operations 	(list Operations
+		    (object Operation "init"
+			quid       	"3A156F0B028F"
+			documentation 	"Overrides Applet's init method."
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "createGrid"
+			quid       	"3A156F240245"
+			documentation 	"instantiates the panel containing the grid and populates the components."
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "appendDataToPostConnection"
+			quid       	"3A156F7A037F"
+			documentation 	"Post data (for saving) and redirect page if necessary."
+			parameters 	(list Parameters
+			    (object Parameter "p_outgoingData"
+				quid       	"3CE3F29F02DD"
+				type       	"Vector")
+			    (object Parameter "p_targetParam"
+				quid       	"3CE3F2B603B2"
+				type       	"String"))
+			result     	"Vector"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getParentFrame"
+			quid       	"3A156FB20055"
+			documentation 	"Gets the parent from of the applet."
+			result     	"Frame"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getErrorDialog"
+			quid       	"3CE3F30F02B6"
+			parameters 	(list Parameters
+			    (object Parameter "p_errorMessage"
+				quid       	"3CE3F3210153"
+				type       	"String")
+			    (object Parameter "p_component"
+				quid       	"3CE3F32D0010"
+				type       	"Component"))
+			result     	"boolean"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "displayErrorPage"
+			quid       	"3CE3F34A024D"
+			parameters 	(list Parameters
+			    (object Parameter "p_exception"
+				quid       	"3CE3F35E018D"
+				type       	"ExceptionMessage"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "Concrete Applet"
+		quid       	"3A156E090049"
+		documentation 	"AlternativeApplet is a subclass of EnvoyApplet and is strictly used for going from one applet to another.  In our case we only have one applet which is responsible for displaying a particular panel.  Therefore, overriding the init method would cause reloading the applet."
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3A1572CD00F8"
+			supplier   	"Logical View::EnvoyApplet"
+			quidu      	"3A156DFE0011"))
+		operations 	(list Operations
+		    (object Operation "init"
+			quid       	"3A157012017F"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "EnvoyGrid"
+		quid       	"3A156E1F0041"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3CE3F6A403CD"
+			supplier   	"Logical View::java.awt.Panel"
+			quidu      	"3A1572940010"))
+		operations 	(list Operations
+		    (object Operation "getTitle"
+			quid       	"3A1570300042"
+			documentation 	"Get the title of the grid.  This title is used by the print function."
+			result     	"String"
+			concurrency 	"Sequential"
+			abstract   	TRUE
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "populate"
+			quid       	"3A15704E0013"
+			documentation 	"Populate the data of the grid panel."
+			parameters 	(list Parameters
+			    (object Parameter "p_data"
+				quid       	"3A1570620044"
+				documentation 	"an array of serializable objects."
+				type       	"Vector"))
+			concurrency 	"Sequential"
+			abstract   	TRUE
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getImage"
+			quid       	"3CE3F7E00010"
+			parameters 	(list Parameters
+			    (object Parameter "p_imageFile"
+				quid       	"3CE3F7EA02A9"
+				type       	"String"))
+			result     	"Image"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getEnvoyApplet"
+			quid       	"3CE3F8130384"
+			result     	"EnvoyApplet"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0
+			quidu      	"3A156DFE0011"))
+		abstract   	TRUE)
+	    (object Class "GlobalEnvoy"
+		quid       	"3A156E500037"
+		documentation 	"The GlobalEnvoy is a global class with a few static methods that are used all client classes for getting a reference to some common stuff."
+		operations 	(list Operations
+		    (object Operation "setLocale"
+			quid       	"3A1570CA038C"
+			parameters 	(list Parameters
+			    (object Parameter "p_locale"
+				quid       	"3A1570D5039C"
+				type       	"Locale"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getLocale"
+			quid       	"3A1570E00077"
+			result     	"Locale"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "setParentComponent"
+			quid       	"3A1570EB0249"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getParentComponent"
+			quid       	"3A1570F6012D"
+			result     	"Component"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getStringWidth"
+			quid       	"3A1571060375"
+			documentation 	
+|get the width of the specified label.
+|
+			
+			parameters 	(list Parameters
+			    (object Parameter "p_label"
+				quid       	"3A1571180122"
+				type       	"String"))
+			result     	"int"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getStringWidth"
+			quid       	"3A1571D10178"
+			documentation 	"Calculate the required width for displaying the labels.  The labels should have the same fixed length for alignment and this method will go through the list of all labels and set the result width based on the longest label."
+			parameters 	(list Parameters
+			    (object Parameter "p_labels"
+				quid       	"3A1571E6007E"
+				type       	"Vector"))
+			result     	"int"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getDisplayDate"
+			quid       	"3A1571FC011F"
+			documentation 	"returns a readable representation of a Date object based on the current locale."
+			parameters 	(list Parameters
+			    (object Parameter "p_date"
+				quid       	"3A1572120059"
+				type       	"Date"))
+			result     	"String"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "java.applet.Applet"
+		quid       	"3A156ED103CC")
+	    (object Class "ConcreteClass"
+		quid       	"3A1572760125"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3A15731C006F"
+			supplier   	"Logical View::java.awt.Panel"
+			quidu      	"3A1572940010")
+		    (object Inheritance_Relationship
+			quid       	"3CE3F6AB02B4"
+			supplier   	"Logical View::EnvoyGrid"
+			quidu      	"3A156E1F0041"))
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3A157318016E"
+			supplier   	"Logical View::EnvoyGrid"
+			quidu      	"3A156E1F0041")))
+	    (object Class "java.awt.Panel"
+		quid       	"3A1572940010")
+	    (object Class "javax.servlet.http.HttpServlet"
+		quid       	"3CE3FC78030A")
+	    (object Association "$UNNAMED$0"
+		quid       	"39F7A66C02EE"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$1"
+			quid       	"39F7A66D01A5"
+			supplier   	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			client_cardinality 	(value cardinality "1..n")
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$2"
+			quid       	"39F7A66D01A6"
+			supplier   	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"
+			client_cardinality 	(value cardinality "1"))))
+	    (object Association "$UNNAMED$3"
+		quid       	"39F7A6D20109"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$4"
+			quid       	"39F7A6D2037A"
+			supplier   	"Logical View::WebActivityDescriptor"
+			quidu      	"39F79D6D008C"
+			client_cardinality 	(value cardinality "1..n")
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$5"
+			quid       	"39F7A6D2037B"
+			supplier   	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"
+			client_cardinality 	(value cardinality "1"))))
+	    (object Association "$UNNAMED$6"
+		quid       	"3A14630403E1"
+		stereotype 	"Http Request"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$7"
+			quid       	"3A1463050265"
+			supplier   	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$8"
+			quid       	"3A146305026F"
+			supplier   	"Logical View::UserSummaryListApplet"
+			quidu      	"3A1462CC01C3")))
+	    (object Association "$UNNAMED$9"
+		quid       	"3A1463080151"
+		stereotype 	"Http Request"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$10"
+			quid       	"3A14630900C7"
+			supplier   	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$11"
+			quid       	"3A14630900D1"
+			supplier   	"Logical View::RoleSummaryListApplet"
+			quidu      	"3A1462DF0351")))
+	    (object Association "$UNNAMED$12"
+		quid       	"3A1488ED0115"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$13"
+			quid       	"3A1488EE0256"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$14"
+			quid       	"3A1488EE0261"
+			supplier   	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF")))
+	    (object Association "$UNNAMED$15"
+		quid       	"3A1489890390"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$16"
+			quid       	"3A14898A020B"
+			supplier   	"Logical View::AppletRequestHandler"
+			quidu      	"3A1463580305"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$17"
+			quid       	"3A14898A0215"
+			supplier   	"Logical View::ConcretePageHandler"
+			quidu      	"3A14896000FC")))
+	    (object Association "$UNNAMED$18"
+		quid       	"3A1572FE0293"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$19"
+			quid       	"3A1572FF0353"
+			supplier   	"Logical View::GlobalEnvoy"
+			quidu      	"3A156E500037"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$20"
+			quid       	"3A1572FF0354"
+			supplier   	"Logical View::EnvoyApplet"
+			quidu      	"3A156DFE0011")))
+	    (object Association "$UNNAMED$21"
+		quid       	"3A15730B0288"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$22"
+			quid       	"3A15730C01E9"
+			supplier   	"Logical View::EnvoyGrid"
+			quidu      	"3A156E1F0041"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$23"
+			quid       	"3A15730C01F3"
+			supplier   	"Logical View::EnvoyApplet"
+			quidu      	"3A156DFE0011"
+			is_navigable 	TRUE
+			is_aggregate 	TRUE)))
+	    (object Association "$UNNAMED$24"
+		quid       	"3CE3F6B00334"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$25"
+			quid       	"3CE3F6B1037B"
+			supplier   	"Logical View::EnvoyGrid"
+			quidu      	"3A156E1F0041"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$26"
+			quid       	"3CE3F6B10385"
+			supplier   	"Logical View::EnvoyApplet"
+			quidu      	"3A156DFE0011")))
+	    (object Mechanism @1
+		logical_models 	(list unit_reference_list
+		    (object Object "aControlServlet"
+			quid       	"39F78224000F"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"39F7827101C5"
+				supplier   	"theWebSiteDescription"
+				quidu      	"39F782500167"
+				messages   	(list Messages
+				    (object Message "getPageDescriptor (sourcePageName)"
+					quid       	"39F7827101C6"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1"
+					ordinal    	0
+					Operation  	"getPageDescriptor(String)"
+					quidu      	"39F780CD00AB")
+				    (object Message "sourceWebPageDescriptor"
+					quid       	"39F782DF0148"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"1.1"
+					ordinal    	1)
+				    (object Message "getPageDescriptor (targetPageName)"
+					quid       	"39F792B203C8"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"3"
+					ordinal    	4
+					Operation  	"getPageDescriptor(String)"
+					quidu      	"39F780CD00AB")
+				    (object Message "targetWebPageDescriptor"
+					quid       	"39F792CD030D"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"3.1"
+					ordinal    	5)))
+			    (object Link
+				quid       	"39F786DE0000"
+				supplier   	"aControlServlet"
+				quidu      	"39F78224000F"
+				messages   	(list Messages
+				    (object Message "getPageHandlerInstance(targetPageHandlerClassName)"
+					quid       	"39F793A40167"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"5"
+					ordinal    	8
+					Operation  	"getPageHandlerInstance(String)"
+					quidu      	"39F78749038A")))
+			    (object Link
+				quid       	"39F79225007D"
+				supplier   	"sourceWebPageDescriptor"
+				quidu      	"39F7916D01A5"
+				messages   	(list Messages
+				    (object Message "getDestinationPageName(linkName)"
+					quid       	"39F79225007E"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"2"
+					ordinal    	2
+					Operation  	"getDestinationPageName(String)"
+					quidu      	"39F784710232")
+				    (object Message "targetPageName"
+					quid       	"39F79243001F"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"2.1"
+					ordinal    	3)))
+			    (object Link
+				quid       	"39F79318009C"
+				supplier   	"targetWebPageDescriptor"
+				quidu      	"39F791F70109"
+				messages   	(list Messages
+				    (object Message "getPageHandlerClassName( )"
+					quid       	"39F79318009D"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"4"
+					ordinal    	6
+					quidu      	"39F7869F0167")
+				    (object Message "targetPageHandlerClassName"
+					quid       	"39F7933600CB"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"4.1"
+					ordinal    	7)))
+			    (object Link
+				quid       	"39F795D00222"
+				supplier   	"targetPageHandler"
+				quidu      	"39F795B0009C"
+				messages   	(list Messages
+				    (object Message "invokePageHandler(aWebPageDescriptor, , , )"
+					quid       	"39F795D00223"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"6"
+					ordinal    	9
+					Operation  	"invokePageHandler(WebPageDescriptor, , , )"
+					quidu      	"39F79438034B"))))
+			class      	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "theWebSiteDescription"
+			quid       	"39F782500167"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"39F79188034B"
+				supplier   	"sourceWebPageDescriptor"
+				quidu      	"39F7916D01A5"))
+			class      	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "sourceWebPageDescriptor"
+			quid       	"39F7916D01A5"
+			class      	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "targetWebPageDescriptor"
+			quid       	"39F791F70109"
+			class      	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "targetPageHandler"
+			quid       	"39F795B0009C"
+			class      	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"
+			persistence 	"Transient"
+			multi      	FALSE)))
+	    (object Mechanism @2
+		logical_models 	(list unit_reference_list
+		    (object Object "aControlServlet"
+			quid       	"39F7987802BF"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"39F798B900BB"
+				supplier   	"theWebSiteDescription"
+				quidu      	"39F7989C0399"
+				messages   	(list Messages
+				    (object Message "getPageDescriptor (sourcePageName)"
+					quid       	"39F798B900BC"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1"
+					ordinal    	0
+					Operation  	"getPageDescriptor(String)"
+					quidu      	"39F780CD00AB")
+				    (object Message "sourceWebPageDescriptor"
+					quid       	"39F798DC0177"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"1.1"
+					ordinal    	1)
+				    (object Message "getPageDescriptor (destinationPageName)"
+					quid       	"39F79B2D01D4"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"6"
+					ordinal    	11
+					Operation  	"getPageDescriptor(String)"
+					quidu      	"39F780CD00AB")
+				    (object Message "destinationWebPageDescriptor"
+					quid       	"39F79B480186"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"6.1"
+					ordinal    	12)))
+			    (object Link
+				quid       	"39F79925037A"
+				supplier   	"sourceWebPageDescriptor"
+				quidu      	"39F7991601C5"
+				messages   	(list Messages
+				    (object Message "getPageHandlerClassName( )"
+					quid       	"39F79925037B"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"2"
+					ordinal    	2
+					quidu      	"39F7869F0167")
+				    (object Message "sourcePageHandlerClassName"
+					quid       	"39F799A90280"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"2.1"
+					ordinal    	3)
+				    (object Message "getDestinationPageName(linkName)"
+					quid       	"39F79AA40280"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"5"
+					ordinal    	9
+					Operation  	"getDestinationPageName(String)"
+					quidu      	"39F784710232")
+				    (object Message "destinationPageName"
+					quid       	"39F79AB601D4"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"5.1"
+					ordinal    	10)))
+			    (object Link
+				quid       	"39F799DA02CE"
+				supplier   	"aControlServlet"
+				quidu      	"39F7987802BF"
+				messages   	(list Messages
+				    (object Message "getPageHandlerInstance(sourcePageHandlerClassName)"
+					quid       	"39F799DA02CF"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"2.1.1"
+					ordinal    	4
+					Operation  	"getPageHandlerInstance(String)"
+					quidu      	"39F78749038A")
+				    (object Message "getPageHandlerInstance(destinationPageHandlerClassName)"
+					quid       	"39F79AC80261"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"8"
+					ordinal    	15
+					Operation  	"getPageHandlerInstance(String)"
+					quidu      	"39F78749038A")))
+			    (object Link
+				quid       	"39F79A100399"
+				supplier   	"sourcePageHandler"
+				quidu      	"39F799C80232"
+				messages   	(list Messages
+				    (object Message "getControlFlowHelper( )"
+					quid       	"39F79A10039A"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"3"
+					ordinal    	5
+					quidu      	"39F7949801F4")
+				    (object Message "aControlFlowHelper"
+					quid       	"39F79A3A01A5"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"3.1"
+					ordinal    	6)))
+			    (object Link
+				quid       	"39F79A700290"
+				supplier   	"aControlFlowHelper"
+				quidu      	"39F79A61034B"
+				messages   	(list Messages
+				    (object Message "determineLinkToFollow( )"
+					quid       	"39F79A700291"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"4"
+					ordinal    	7
+					quidu      	"39F7A55E0290")
+				    (object Message "linkName"
+					quid       	"39F79A86030D"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"4.1"
+					ordinal    	8)))
+			    (object Link
+				quid       	"39F79BA30232"
+				supplier   	"destinationWebPageDescriptor"
+				quidu      	"39F79B750138"
+				messages   	(list Messages
+				    (object Message "getPageHandlerClassName( )"
+					quid       	"39F79BA30233"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"7"
+					ordinal    	13
+					quidu      	"39F7869F0167")
+				    (object Message "destinationPageHandlerClassName"
+					quid       	"39F79BB703D8"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"7.1"
+					ordinal    	14)))
+			    (object Link
+				quid       	"39F79BFB0251"
+				supplier   	"destinationPageHandler"
+				quidu      	"39F79BDF0232"
+				messages   	(list Messages
+				    (object Message "invokePageHandler(destinationWebPageDescriptor, , , )"
+					quid       	"39F79BFB0252"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"9"
+					ordinal    	16
+					Operation  	"invokePageHandler(WebPageDescriptor, , , )"
+					quidu      	"39F79438034B"))))
+			class      	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "theWebSiteDescription"
+			quid       	"39F7989C0399"
+			class      	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "sourceWebPageDescriptor"
+			quid       	"39F7991601C5"
+			class      	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "sourcePageHandler"
+			quid       	"39F799C80232"
+			class      	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "aControlFlowHelper"
+			quid       	"39F79A61034B"
+			class      	"Logical View::ControlFlowHelper"
+			quidu      	"39F7A53D01C5"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "destinationWebPageDescriptor"
+			quid       	"39F79B750138"
+			class      	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "destinationPageHandler"
+			quid       	"39F79BDF0232"
+			class      	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"
+			persistence 	"Transient"
+			multi      	FALSE)))
+	    (object Mechanism @3
+		logical_models 	(list unit_reference_list
+		    (object Object "aControlServlet"
+			quid       	"39F79C7B001F"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"39F79DE003B9"
+				supplier   	"theWebSiteDescription"
+				quidu      	"39F79C8F036B"
+				messages   	(list Messages
+				    (object Message "getActivityDescriptor(activityName)"
+					quid       	"39F79DE003BA"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1"
+					ordinal    	0
+					Operation  	"getActivityDescriptor(String)"
+					quidu      	"39F79D230251")
+				    (object Message "aWebActivityDescriptor"
+					quid       	"39F79DF60399"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"1.1"
+					ordinal    	1)))
+			    (object Link
+				quid       	"39F79E5003A9"
+				supplier   	"targetWebPageDescriptor"
+				quidu      	"39F79E130242"
+				messages   	(list Messages
+				    (object Message "getPageHandlerClassName( )"
+					quid       	"39F79E5003AA"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"3"
+					ordinal    	4
+					quidu      	"39F7869F0167")
+				    (object Message "targetPageHandlerClassName"
+					quid       	"39F79E9E0119"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"3.1"
+					ordinal    	5)))
+			    (object Link
+				quid       	"39F79ED1003E"
+				supplier   	"aControlServlet"
+				quidu      	"39F79C7B001F"
+				messages   	(list Messages
+				    (object Message "getPageHandlerInstance(targetPageHandlerClassName)"
+					quid       	"39F79ED1003F"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"4"
+					ordinal    	6
+					Operation  	"getPageHandlerInstance(String)"
+					quidu      	"39F78749038A")))
+			    (object Link
+				quid       	"39F79F21007D"
+				supplier   	"targetPageHandler"
+				quidu      	"39F79EC00196"
+				messages   	(list Messages
+				    (object Message "invokePageHandler(targetWebPageDescriptor, , , )"
+					quid       	"39F79F21007E"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"5"
+					ordinal    	7
+					Operation  	"invokePageHandler(WebPageDescriptor, , , )"
+					quidu      	"39F79438034B")))
+			    (object Link
+				quid       	"39F79FDE035B"
+				supplier   	"aWebActivityDescriptor"
+				quidu      	"39F79FCC02EE"
+				messages   	(list Messages
+				    (object Message "getDefaultPageDescriptor( )"
+					quid       	"39F79FDE035C"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"2"
+					ordinal    	2
+					quidu      	"39F79D930157")
+				    (object Message "targetWebPageDescriptor"
+					quid       	"39F79FEE032C"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"ToClientFromSupplier"
+					sequence   	"2.1"
+					ordinal    	3))))
+			class      	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "theWebSiteDescription"
+			quid       	"39F79C8F036B"
+			class      	"Logical View::WebSiteDescription"
+			quidu      	"39F780B201D4"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "targetWebPageDescriptor"
+			quid       	"39F79E130242"
+			class      	"Logical View::WebPageDescriptor"
+			quidu      	"39F780E60290"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "targetPageHandler"
+			quid       	"39F79EC00196"
+			class      	"Logical View::PageHandler"
+			quidu      	"39F7941A02BF"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "aWebActivityDescriptor"
+			quid       	"39F79FCC02EE"
+			class      	"Logical View::WebActivityDescriptor"
+			quidu      	"39F79D6D008C"
+			persistence 	"Transient"
+			multi      	FALSE)))
+	    (object Mechanism @4
+		logical_models 	(list unit_reference_list
+		    (object Object "$UNNAMED$27"
+			quid       	"3A1466AA0357"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A1468C70098"
+				supplier   	"$UNNAMED$28"
+				quidu      	"3A1466B00270"
+				messages   	(list Messages
+				    (object Message "doGet( )"
+					quid       	"3A1468C70099"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1"
+					ordinal    	0
+					quidu      	"39F780800186"))))
+			class      	"Logical View::UserSummaryListApplet"
+			quidu      	"3A1462CC01C3"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$28"
+			quid       	"3A1466B00270"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A1468D50066"
+				supplier   	"$UNNAMED$29"
+				quidu      	"3A1468650138"
+				messages   	(list Messages
+				    (object Message "invokePageHandlerForApplet()"
+					quid       	"3A1468D50067"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1"
+					ordinal    	1
+					Operation  	"invokePageHandlerForApplet(boolean, WebPageDescriptor, HttpRequest, HttpResponse, ServletContext)"
+					quidu      	"3A1489E603A8"))))
+			class      	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$29"
+			quid       	"3A1468650138"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A148A930266"
+				supplier   	"$UNNAMED$30"
+				quidu      	"3A1468AE009C"
+				messages   	(list Messages
+				    (object Message "newInstance( )"
+					quid       	"3A148B790357"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1.1"
+					ordinal    	2
+					quidu      	"3A14696D02F0")
+				    (object Message "doService()"
+					quid       	"3A148BF80197"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1.2"
+					ordinal    	3
+					Operation  	"doService(boolean, WebPageDescriptor, HttpRequest, HttpResponse, ServletContext)"
+					quidu      	"3A14649C003A"))))
+			class      	"Logical View::ConcretePageHandler"
+			quidu      	"3A14896000FC"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$30"
+			quid       	"3A1468AE009C"
+			class      	"Logical View::UserSummaryListHandler"
+			quidu      	"3A14659900A2"
+			persistence 	"Transient"
+			multi      	FALSE)))
+	    (object Mechanism @5
+		logical_models 	(list unit_reference_list
+		    (object Object "$UNNAMED$31"
+			quid       	"3A1469FD00BC"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A146A6E0372"
+				supplier   	"$UNNAMED$32"
+				quidu      	"3A146A020344"
+				messages   	(list Messages
+				    (object Message "doGet( )"
+					quid       	"3A146A6E0373"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1"
+					ordinal    	0
+					quidu      	"39F780800186"))))
+			class      	"Logical View::RoleSummaryListApplet"
+			quidu      	"3A1462DF0351"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$32"
+			quid       	"3A146A020344"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A146A7D012E"
+				supplier   	"$UNNAMED$33"
+				quidu      	"3A146A14006F"
+				messages   	(list Messages
+				    (object Message "invokePageHandlerForApplet()"
+					quid       	"3A146A7D012F"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1"
+					ordinal    	1
+					Operation  	"invokePageHandlerForApplet(boolean, WebPageDescriptor, HttpRequest, HttpResponse, ServletContext)"
+					quidu      	"3A1489E603A8"))))
+			class      	"Logical View::ControlServlet"
+			quidu      	"39F7805703A9"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$33"
+			quid       	"3A146A14006F"
+			collaborators 	(list link_list
+			    (object Link
+				quid       	"3A14989603E0"
+				supplier   	"$UNNAMED$34"
+				quidu      	"3A146B3102DC"
+				messages   	(list Messages
+				    (object Message "newInstance( )"
+					quid       	"3A14989603E1"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1.1"
+					ordinal    	2
+					quidu      	"3A146B63025B")
+				    (object Message "doService()"
+					quid       	"3A1498AE02FE"
+					frequency  	"Aperiodic"
+					synchronization 	"Simple"
+					dir        	"FromClientToSupplier"
+					sequence   	"1.1.2"
+					ordinal    	3
+					Operation  	"doService(boolean, WebPageDescriptor, HttpRequest, HttpResponse, ServletContext)"
+					quidu      	"3A14649C003A"))))
+			class      	"Logical View::ConcretePageHandler"
+			quidu      	"3A14896000FC"
+			persistence 	"Transient"
+			multi      	FALSE)
+		    (object Object "$UNNAMED$34"
+			quid       	"3A146B3102DC"
+			class      	"Logical View::RoleSummaryListHandler"
+			quidu      	"3A1465B50048"
+			persistence 	"Transient"
+			multi      	FALSE))))
+	logical_presentations 	(list unit_reference_list
+	    (object ClassDiagram "Main"
+		quid       	"39F77FC9008C"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	75
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::ControlServlet" @6
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(352, 432)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(93, 326)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"ControlServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7805703A9"
+			compartment 	(object Compartment
+			    Parent_View 	@6
+			    location   	(93, 387)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	3
+			    max_width  	516)
+			width      	536
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::PageHandler" @7
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1088, 304)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@7
+			    location   	(759, 23)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	658
+			    justify    	0
+			    label      	"PageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7941A02BF"
+			compartment 	(object Compartment
+			    Parent_View 	@7
+			    location   	(759, 84)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	10
+			    max_width  	657)
+			width      	676
+			height     	586
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::EntryPageControlFlowHelper" @8
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1504, 1056)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@8
+			    location   	(1224, 1004)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	560
+			    justify    	0
+			    label      	"EntryPageControlFlowHelper")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7A41300AB"
+			width      	578
+			height     	128
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::EntryPageHandler" @9
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(880, 848)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@9
+			    location   	(702, 782)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	357
+			    justify    	0
+			    label      	"EntryPageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7A48A0203"
+			width      	375
+			height     	156
+			annotation 	8
+			autoResize 	TRUE)
+		    (object RealizeView "" @10
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A53902AF"
+			client     	@9
+			supplier   	@7
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::ControlFlowHelper" @11
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1520, 736)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@11
+			    location   	(1275, 677)
+			    fill_color 	16777215
+			    nlines     	1
+			    max_width  	490
+			    justify    	0
+			    label      	"ControlFlowHelper")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@11
+			    location   	(1275, 627)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	490
+			    justify    	0
+			    label      	"<<Interface>>")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7A53D01C5"
+			compartment 	(object Compartment
+			    Parent_View 	@11
+			    location   	(1275, 738)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	16777215
+			    anchor     	2
+			    nlines     	2
+			    max_width  	488)
+			width      	508
+			height     	242
+			annotation 	8
+			autoResize 	TRUE)
+		    (object RealizeView "" @12
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A46201B5"
+			client     	@8
+			supplier   	@11
+			line_style 	0)
+		    (object UsesView "" @13
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A642032C"
+			client     	@9
+			supplier   	@8
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::WebPageDescriptor" @14
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(976, 1328)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@14
+			    location   	(689, 1147)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	574
+			    justify    	0
+			    label      	"WebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F780E60290"
+			compartment 	(object Compartment
+			    Parent_View 	@14
+			    location   	(689, 1208)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	5
+			    max_width  	573)
+			width      	592
+			height     	386
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::WebActivityDescriptor" @15
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(336, 1232)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@15
+			    location   	(68, 1126)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	536
+			    justify    	0
+			    label      	"WebActivityDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79D6D008C"
+			compartment 	(object Compartment
+			    Parent_View 	@15
+			    location   	(68, 1187)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	2
+			    max_width  	535)
+			width      	554
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::WebSiteDescription" @16
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(368, 816)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@16
+			    location   	(143, 710)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	450
+			    justify    	0
+			    label      	"WebSiteDescription")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F780B201D4"
+			compartment 	(object Compartment
+			    Parent_View 	@16
+			    location   	(143, 771)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	3
+			    max_width  	447)
+			width      	468
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$0" @17
+			location   	(626, 1034)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A66C02EE"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$1" @18
+				Parent_View 	@17
+				location   	(386, 746)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"39F7A66D01A5"
+				client     	@17
+				supplier   	@14
+				line_style 	0
+				label      	(object SegLabel @19
+				    Parent_View 	@18
+				    location   	(665, 1104)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	15
+				    justify    	0
+				    label      	"1..n"
+				    pctDist    	0.481810
+				    height     	28
+				    orientation 	1))
+			    (object RoleView "$UNNAMED$2" @20
+				Parent_View 	@17
+				location   	(386, 746)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"39F7A66D01A6"
+				client     	@17
+				supplier   	@16
+				line_style 	0
+				label      	(object SegLabel @21
+				    Parent_View 	@20
+				    location   	(486, 986)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	15
+				    justify    	0
+				    label      	"1"
+				    pctDist    	0.900000
+				    height     	54
+				    orientation 	0))))
+		    (object AssociationViewNew "$UNNAMED$3" @22
+			location   	(351, 1023)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A6D20109"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$4" @23
+				Parent_View 	@22
+				location   	(111, 735)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				label      	(object SegLabel @24
+				    Parent_View 	@23
+				    location   	(305, 1093)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    hidden     	TRUE
+				    anchor     	1
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	60
+				    justify    	0
+				    label      	""
+				    pctDist    	0.800000
+				    height     	42
+				    orientation 	1)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"39F7A6D2037A"
+				client     	@22
+				supplier   	@15
+				line_style 	0
+				label      	(object SegLabel @25
+				    Parent_View 	@23
+				    location   	(401, 1091)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	81
+				    justify    	0
+				    label      	"1..n"
+				    pctDist    	0.709392
+				    height     	54
+				    orientation 	0))
+			    (object RoleView "$UNNAMED$5" @26
+				Parent_View 	@22
+				location   	(111, 735)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"39F7A6D2037B"
+				client     	@22
+				supplier   	@16
+				line_style 	0
+				label      	(object SegLabel @27
+				    Parent_View 	@26
+				    location   	(311, 946)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	15
+				    justify    	0
+				    label      	"1"
+				    pctDist    	0.844984
+				    height     	47
+				    orientation 	0))))
+		    (object UsesView "" @28
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A70C009C"
+			client     	@6
+			supplier   	@7
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::javax.servlet.http.HttpServlet" @29
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(352, 96)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@29
+			    location   	(209, 20)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	286
+			    justify    	0
+			    label      	"javax.servlet.http.HttpServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3CE3FC78030A"
+			width      	304
+			height     	176
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @30
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3CE3FCB0022E"
+			client     	@6
+			supplier   	@29
+			line_style 	0)
+		    (object UsesView "" @31
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3CE3FCC0001E"
+			client     	@6
+			supplier   	@16
+			line_style 	0)))
+	    (object ClassDiagram "Applet Request Handling"
+		quid       	"3A14626E0023"
+		title      	"Applet Request Handling"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::UserSummaryListApplet" @32
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(464, 528)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@32
+			    location   	(330, 452)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	268
+			    justify    	0
+			    label      	"UserSummaryListApplet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1462CC01C3"
+			width      	286
+			height     	176
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::ControlServlet" @33
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1136, 192)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@33
+			    location   	(877, 86)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"ControlServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7805703A9"
+			width      	536
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$6" @34
+			location   	(751, 382)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	(object SegLabel @35
+			    Parent_View 	@34
+			    location   	(585, 346)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    anchor     	10
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	450
+			    justify    	0
+			    label      	"<<Http Request>>"
+			    pctDist    	-2.266667
+			    height     	37
+			    orientation 	0)
+			line_color 	3342489
+			quidu      	"3A14630403E1"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$7" @36
+				Parent_View 	@34
+				location   	(303, 206)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A1463050265"
+				client     	@34
+				supplier   	@33
+				line_style 	0)
+			    (object RoleView "$UNNAMED$8" @37
+				Parent_View 	@34
+				location   	(303, 206)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A146305026F"
+				client     	@34
+				supplier   	@32
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::RoleSummaryListApplet" @38
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1680, 560)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@38
+			    location   	(1545, 484)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	270
+			    justify    	0
+			    label      	"RoleSummaryListApplet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1462DF0351"
+			width      	288
+			height     	176
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$9" @39
+			location   	(1431, 390)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	(object SegLabel @40
+			    Parent_View 	@39
+			    location   	(1635, 374)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    anchor     	10
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	450
+			    justify    	0
+			    label      	"<<Http Request>>"
+			    pctDist    	3.900000
+			    height     	17
+			    orientation 	0)
+			line_color 	3342489
+			quidu      	"3A1463080151"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$10" @41
+				Parent_View 	@39
+				location   	(967, -122)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A14630900C7"
+				client     	@39
+				supplier   	@33
+				line_style 	0)
+			    (object RoleView "$UNNAMED$11" @42
+				Parent_View 	@39
+				location   	(967, -122)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A14630900D1"
+				client     	@39
+				supplier   	@38
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::UserSummaryListHandler" @43
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(480, 1808)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@43
+			    location   	(329, 1702)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	302
+			    justify    	0
+			    label      	"UserSummaryListHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A14659900A2"
+			width      	320
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::RoleSummaryListHandler" @44
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1808, 1792)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@44
+			    location   	(1657, 1686)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	302
+			    justify    	0
+			    label      	"RoleSummaryListHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1465B50048"
+			width      	320
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::PageHandler" @45
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1136, 848)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@45
+			    location   	(843, 582)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	586
+			    justify    	0
+			    label      	"PageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7941A02BF"
+			width      	604
+			height     	556
+			annotation 	8
+			autoResize 	TRUE)
+		    (object UsesView "" @46
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"39F7A70C009C"
+			client     	@33
+			supplier   	@45
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::AppletRequestHandler" @47
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1136, 1600)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@47
+			    location   	(918, 1541)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	436
+			    justify    	0
+			    label      	"AppletRequestHandler")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@47
+			    location   	(918, 1491)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	436
+			    justify    	0
+			    label      	"<<Interface>>")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1463580305"
+			width      	454
+			height     	242
+			annotation 	8
+			autoResize 	TRUE)
+		    (object RealizeView "" @48
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1465D30380"
+			client     	@43
+			supplier   	@47
+			line_style 	0)
+		    (object RealizeView "" @49
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1465DD01FE"
+			client     	@44
+			supplier   	@47
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::ConcretePageHandler" @50
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1136, 1248)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@50
+			    location   	(838, 1142)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	596
+			    justify    	0
+			    label      	"ConcretePageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A14896000FC"
+			width      	614
+			height     	236
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @51
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1489830201"
+			client     	@50
+			supplier   	@45
+			line_style 	0)
+		    (object AssociationViewNew "$UNNAMED$15" @52
+			location   	(1136, 1422)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1489890390"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$16" @53
+				Parent_View 	@52
+				location   	(0, 174)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A14898A020B"
+				client     	@52
+				supplier   	@47
+				line_style 	0)
+			    (object RoleView "$UNNAMED$17" @54
+				Parent_View 	@52
+				location   	(0, 174)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A14898A0215"
+				client     	@52
+				supplier   	@50
+				line_style 	0)))
+		    (object UsesView "" @55
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1488F70051"
+			client     	@50
+			supplier   	@43
+			vertices   	(list Points
+			    (843, 1366)
+			    (509, 1503)
+			    (490, 1689))
+			line_style 	0)
+		    (object UsesView "" @56
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1488FD009F"
+			client     	@50
+			supplier   	@44
+			vertices   	(list Points
+			    (1432, 1366)
+			    (1775, 1503)
+			    (1793, 1673))
+			line_style 	0)))
+	    (object ClassDiagram "Envoy Applet"
+		quid       	"3A156DDF0270"
+		title      	"Envoy Applet"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	33
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::Concrete Applet" @57
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(880, 960)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@57
+			    location   	(770, 855)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	220
+			    justify    	0
+			    label      	"Concrete Applet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A156E090049"
+			width      	238
+			height     	234
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::java.applet.Applet" @58
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(880, 96)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@58
+			    location   	(705, 37)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	351
+			    justify    	0
+			    label      	"java.applet.Applet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A156ED103CC"
+			width      	369
+			height     	143
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::ConcreteClass" @59
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1360, 1648)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@59
+			    location   	(1269, 1572)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	182
+			    justify    	0
+			    label      	"ConcreteClass")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1572760125"
+			width      	200
+			height     	176
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::java.awt.Panel" @60
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1568, 896)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@60
+			    location   	(1478, 820)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	180
+			    justify    	0
+			    label      	"java.awt.Panel")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1572940010"
+			width      	198
+			height     	176
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::GlobalEnvoy" @61
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(320, 1072)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@61
+			    location   	(90, 841)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	460
+			    justify    	0
+			    label      	"GlobalEnvoy")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A156E500037"
+			width      	478
+			height     	486
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::EnvoyGrid" @62
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
+			location   	(1376, 1296)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@62
+			    location   	(997, 1140)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	758
+			    justify    	0
+			    label      	"EnvoyGrid")
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A156E1F0041"
+			width      	776
+			height     	336
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @63
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3CE3F6A403CD"
+			client     	@62
+			supplier   	@60
+			line_style 	0)
+		    (object InheritView "" @64
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3CE3F6AB02B4"
+			client     	@59
+			supplier   	@62
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::EnvoyApplet" @65
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
+			location   	(880, 496)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@65
+			    location   	(53, 290)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	1654
+			    justify    	0
+			    label      	"EnvoyApplet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A156DFE0011"
+			width      	1672
+			height     	436
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @66
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1572C103CC"
+			client     	@65
+			supplier   	@58
+			line_style 	0)
+		    (object InheritView "" @67
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1572CD00F8"
+			client     	@57
+			supplier   	@65
+			line_style 	0)
+		    (object AssociationViewNew "$UNNAMED$18" @68
+			location   	(611, 771)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3A1572FE0293"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$19" @69
+				Parent_View 	@68
+				location   	(-397, 275)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A1572FF0353"
+				client     	@68
+				supplier   	@61
+				line_style 	0)
+			    (object RoleView "$UNNAMED$20" @70
+				Parent_View 	@68
+				location   	(-397, 275)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3A1572FF0354"
+				client     	@68
+				supplier   	@65
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$24" @71
+			location   	(1143, 920)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3CE3F6B00334"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$25" @72
+				Parent_View 	@71
+				location   	(263, 424)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CE3F6B1037B"
+				client     	@71
+				supplier   	@62
+				line_style 	0)
+			    (object RoleView "$UNNAMED$26" @73
+				Parent_View 	@71
+				location   	(263, 424)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CE3F6B10385"
+				client     	@71
+				supplier   	@65
+				line_style 	0)))))
+	    (object InteractionDiagram "Request Resulution type a"
+		mechanism_ref 	@1
+		quid       	"39F782170196"
+		title      	"Request Resulution type a"
+		zoom       	85
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object InterObjView "aControlServlet" @74
+			location   	(256, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@74
+			    location   	(256, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	332
+			    justify    	0
+			    label      	"aControlServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F78224000F"
+			width      	350
+			height     	1841
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @75
+			    location   	(256, 528)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	1448
+			    y_coord    	1388
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @76
+			    location   	(256, 784)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @77
+			    location   	(256, 1088)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @78
+			    location   	(256, 1280)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @79
+			    location   	(256, 1536)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @80
+			    location   	(256, 1664)
+			    line_color 	3342489
+			    InterObjView 	@74
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE))
+		    (object InterObjView "theWebSiteDescription" @81
+			location   	(1072, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@81
+			    location   	(1072, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	458
+			    justify    	0
+			    label      	"theWebSiteDescription")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F782500167"
+			width      	476
+			height     	1841
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @82
+			    location   	(1072, 656)
+			    line_color 	3342489
+			    InterObjView 	@81
+			    height     	248
+			    y_coord    	188
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @83
+			    location   	(1072, 1184)
+			    line_color 	3342489
+			    InterObjView 	@81
+			    height     	216
+			    y_coord    	156
+			    Nested     	FALSE))
+		    (object InterObjView "sourceWebPageDescriptor" @84
+			location   	(1728, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@84
+			    location   	(1728, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	534
+			    justify    	0
+			    label      	"sourceWebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7916D01A5"
+			width      	552
+			height     	1841
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @85
+			    location   	(1728, 992)
+			    line_color 	3342489
+			    InterObjView 	@84
+			    height     	216
+			    y_coord    	156
+			    Nested     	FALSE))
+		    (object InterObjView "targetWebPageDescriptor" @86
+			location   	(2400, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@86
+			    location   	(2400, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	557
+			    justify    	0
+			    label      	"targetWebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F791F70109"
+			width      	575
+			height     	1841
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @87
+			    location   	(2400, 1456)
+			    line_color 	3342489
+			    InterObjView 	@86
+			    height     	200
+			    y_coord    	140
+			    Nested     	FALSE))
+		    (object InterObjView "targetPageHandler" @88
+			location   	(2928, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@88
+			    location   	(2928, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	514
+			    justify    	0
+			    label      	"targetPageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F795B0009C"
+			width      	532
+			height     	1841
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @89
+			    location   	(2928, 1856)
+			    line_color 	3342489
+			    InterObjView 	@88
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterMessView "" @90
+			location   	(16, 656)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @91
+			    Parent_View 	@90
+			    location   	(663, 612)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F7827101C6"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	922
+			    justify    	0
+			    label      	"getPageDescriptor (sourcePageName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@74
+			supplier   	@81
+			Focus_Src  	@75
+			Focus_Entry 	@82
+			origin     	(271, 656)
+			terminus   	(1056, 656)
+			ordinal    	0)
+		    (object InterMessView "" @92
+			location   	(752, 784)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @93
+			    Parent_View 	@92
+			    location   	(664, 740)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F782DF0148"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	653
+			    justify    	0
+			    label      	"sourceWebPageDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@81
+			supplier   	@74
+			Focus_Src  	@82
+			Focus_Entry 	@76
+			origin     	(1056, 784)
+			terminus   	(272, 784)
+			ordinal    	1)
+		    (object InterMessView "" @94
+			location   	(1024, 992)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @95
+			    Parent_View 	@94
+			    location   	(991, 949)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79225007E"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	1613
+			    justify    	0
+			    label      	"getDestinationPageName(linkName)"
+			    pctDist    	0.499668
+			    height     	44
+			    orientation 	0)
+			line_color 	3342489
+			client     	@74
+			supplier   	@84
+			Focus_Src  	@75
+			Focus_Entry 	@85
+			origin     	(271, 992)
+			terminus   	(1712, 992)
+			ordinal    	2)
+		    (object InterMessView "" @96
+			location   	(1024, 1088)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @97
+			    Parent_View 	@96
+			    location   	(992, 1044)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79243001F"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	410
+			    justify    	0
+			    label      	"targetPageName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@84
+			supplier   	@74
+			Focus_Src  	@85
+			Focus_Entry 	@77
+			origin     	(1712, 1088)
+			terminus   	(272, 1088)
+			ordinal    	3)
+		    (object InterMessView "" @98
+			location   	(16, 1184)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @99
+			    Parent_View 	@98
+			    location   	(663, 1140)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F792B203C8"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	896
+			    justify    	0
+			    label      	"getPageDescriptor (targetPageName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@74
+			supplier   	@81
+			Focus_Src  	@75
+			Focus_Entry 	@83
+			origin     	(271, 1184)
+			terminus   	(1056, 1184)
+			ordinal    	4)
+		    (object InterMessView "" @100
+			location   	(672, 1280)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @101
+			    Parent_View 	@100
+			    location   	(664, 1236)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F792CD030D"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	627
+			    justify    	0
+			    label      	"targetWebPageDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@81
+			supplier   	@74
+			Focus_Src  	@83
+			Focus_Entry 	@78
+			origin     	(1056, 1280)
+			terminus   	(272, 1280)
+			ordinal    	5)
+		    (object InterMessView "" @102
+			location   	(1680, 1456)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @103
+			    Parent_View 	@102
+			    location   	(1327, 1412)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79318009D"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	1329
+			    justify    	0
+			    label      	"getPageHandlerClassName( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@74
+			supplier   	@86
+			Focus_Src  	@75
+			Focus_Entry 	@87
+			origin     	(271, 1456)
+			terminus   	(2384, 1456)
+			ordinal    	6)
+		    (object InterMessView "" @104
+			location   	(1328, 1536)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @105
+			    Parent_View 	@104
+			    location   	(1328, 1492)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F7933600CB"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	1347
+			    justify    	0
+			    label      	"targetPageHandlerClassName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@86
+			supplier   	@74
+			Focus_Src  	@87
+			Focus_Entry 	@79
+			origin     	(2384, 1536)
+			terminus   	(272, 1536)
+			ordinal    	7)
+		    (object SelfMessView "" @106
+			location   	(16, 1664)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @107
+			    Parent_View 	@106
+			    location   	(673, 1688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F793A40167"
+			    anchor_loc 	1
+			    nlines     	3
+			    max_width  	1349
+			    justify    	0
+			    label      	"getPageHandlerInstance(targetPageHandlerClassName)"
+			    pctDist    	2.673333
+			    height     	24
+			    orientation 	1)
+			line_color 	3342489
+			client     	@74
+			supplier   	@74
+			Focus_Src  	@75
+			Focus_Entry 	@80
+			origin     	(272, 1664)
+			terminus   	(422, 1664)
+			ordinal    	8)
+		    (object InterMessView "" @108
+			location   	(1584, 1856)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @109
+			    Parent_View 	@108
+			    location   	(1589, 1812)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F795D00223"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	2091
+			    justify    	0
+			    label      	"invokePageHandler(aWebPageDescriptor, , , )"
+			    pctDist    	0.499432
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@74
+			supplier   	@88
+			Focus_Src  	@75
+			Focus_Entry 	@89
+			origin     	(271, 1856)
+			terminus   	(2912, 1856)
+			ordinal    	9)))
+	    (object InteractionDiagram "Request Resolution type b"
+		mechanism_ref 	@2
+		quid       	"39F7986801A5"
+		title      	"Request Resolution type b"
+		zoom       	85
+		max_height 	28350
+		max_width  	21600
+		origin_x   	88
+		origin_y   	272
+		items      	(list diagram_item_list
+		    (object InterObjView "aControlServlet" @110
+			location   	(304, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@110
+			    location   	(304, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	332
+			    justify    	0
+			    label      	"aControlServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7987802BF"
+			width      	350
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @111
+			    location   	(304, 384)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	1880
+			    y_coord    	1820
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @112
+			    location   	(304, 480)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @113
+			    location   	(304, 784)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	162
+			    y_coord    	102
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @114
+			    location   	(304, 880)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @115
+			    location   	(304, 1136)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @116
+			    location   	(304, 1312)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @117
+			    location   	(304, 1520)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @118
+			    location   	(304, 1712)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @119
+			    location   	(304, 1936)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @120
+			    location   	(304, 2032)
+			    line_color 	3342489
+			    InterObjView 	@110
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE))
+		    (object InterObjView "theWebSiteDescription" @121
+			location   	(1200, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@121
+			    location   	(1200, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	458
+			    justify    	0
+			    label      	"theWebSiteDescription")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7989C0399"
+			width      	476
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @122
+			    location   	(1200, 384)
+			    line_color 	3342489
+			    InterObjView 	@121
+			    height     	216
+			    y_coord    	156
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @123
+			    location   	(1200, 1616)
+			    line_color 	3342489
+			    InterObjView 	@121
+			    height     	216
+			    y_coord    	156
+			    Nested     	FALSE))
+		    (object InterObjView "sourceWebPageDescriptor" @124
+			location   	(1808, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@124
+			    location   	(1808, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	534
+			    justify    	0
+			    label      	"sourceWebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F7991601C5"
+			width      	552
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @125
+			    location   	(1808, 672)
+			    line_color 	3342489
+			    InterObjView 	@124
+			    height     	334
+			    y_coord    	274
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @126
+			    location   	(1808, 1408)
+			    line_color 	3342489
+			    InterObjView 	@124
+			    height     	232
+			    y_coord    	172
+			    Nested     	FALSE))
+		    (object InterObjView "sourcePageHandler" @127
+			location   	(2448, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@127
+			    location   	(2448, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	540
+			    justify    	0
+			    label      	"sourcePageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F799C80232"
+			width      	558
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @128
+			    location   	(2448, 1056)
+			    line_color 	3342489
+			    InterObjView 	@127
+			    height     	200
+			    y_coord    	140
+			    Nested     	FALSE))
+		    (object InterObjView "aControlFlowHelper" @129
+			location   	(2896, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@129
+			    location   	(2896, 250)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	285
+			    justify    	0
+			    label      	"aControlFlowHelper")
+			icon       	"Interface"
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79A61034B"
+			width      	236
+			height     	2129
+			icon_height 	57
+			icon_width 	57
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @130
+			    location   	(2896, 1232)
+			    line_color 	3342489
+			    InterObjView 	@129
+			    height     	200
+			    y_coord    	140
+			    Nested     	FALSE))
+		    (object InterObjView "destinationWebPageDescriptor" @131
+			location   	(3472, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@131
+			    location   	(3472, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	598
+			    justify    	0
+			    label      	"destinationWebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79B750138"
+			width      	616
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @132
+			    location   	(3472, 1856)
+			    line_color 	3342489
+			    InterObjView 	@131
+			    height     	200
+			    y_coord    	140
+			    Nested     	FALSE))
+		    (object InterObjView "destinationPageHandler" @133
+			location   	(4064, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@133
+			    location   	(4064, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	642
+			    justify    	0
+			    label      	"destinationPageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79BDF0232"
+			width      	660
+			height     	2129
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @134
+			    location   	(4064, 2144)
+			    line_color 	3342489
+			    InterObjView 	@133
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterMessView "" @135
+			location   	(16, 384)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @136
+			    Parent_View 	@135
+			    location   	(751, 340)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F798B900BC"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	922
+			    justify    	0
+			    label      	"getPageDescriptor (sourcePageName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@121
+			Focus_Src  	@111
+			Focus_Entry 	@122
+			origin     	(319, 384)
+			terminus   	(1184, 384)
+			ordinal    	0)
+		    (object InterMessView "" @137
+			location   	(752, 480)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @138
+			    Parent_View 	@137
+			    location   	(752, 436)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F798DC0177"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	653
+			    justify    	0
+			    label      	"sourceWebPageDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@121
+			supplier   	@110
+			Focus_Src  	@122
+			Focus_Entry 	@112
+			origin     	(1184, 480)
+			terminus   	(320, 480)
+			ordinal    	1)
+		    (object InterMessView "" @139
+			location   	(1056, 672)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @140
+			    Parent_View 	@139
+			    location   	(1055, 628)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79925037B"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	715
+			    justify    	0
+			    label      	"getPageHandlerClassName( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@124
+			Focus_Src  	@111
+			Focus_Entry 	@125
+			origin     	(319, 672)
+			terminus   	(1792, 672)
+			ordinal    	2)
+		    (object InterMessView "" @141
+			location   	(1056, 784)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @142
+			    Parent_View 	@141
+			    location   	(1056, 740)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F799A90280"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	760
+			    justify    	0
+			    label      	"sourcePageHandlerClassName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@124
+			supplier   	@110
+			Focus_Src  	@125
+			Focus_Entry 	@113
+			origin     	(1792, 784)
+			terminus   	(320, 784)
+			ordinal    	3)
+		    (object SelfMessView "" @143
+			location   	(16, 880)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @144
+			    Parent_View 	@143
+			    location   	(779, 948)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F799DA02CF"
+			    anchor_loc 	1
+			    nlines     	4
+			    max_width  	1374
+			    justify    	0
+			    label      	"getPageHandlerInstance(sourcePageHandlerClassName)"
+			    pctDist    	3.066667
+			    height     	68
+			    orientation 	1)
+			line_color 	3342489
+			client     	@110
+			supplier   	@110
+			Focus_Src  	@113
+			Focus_Entry 	@114
+			origin     	(320, 880)
+			terminus   	(470, 880)
+			ordinal    	4)
+		    (object InterMessView "" @145
+			location   	(1376, 1056)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @146
+			    Parent_View 	@145
+			    location   	(1375, 1012)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79A10039A"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	568
+			    justify    	0
+			    label      	"getControlFlowHelper( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@127
+			Focus_Src  	@111
+			Focus_Entry 	@128
+			origin     	(319, 1056)
+			terminus   	(2432, 1056)
+			ordinal    	5)
+		    (object InterMessView "" @147
+			location   	(1392, 1136)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @148
+			    Parent_View 	@147
+			    location   	(1376, 1092)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79A3A01A5"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	480
+			    justify    	0
+			    label      	"aControlFlowHelper"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@127
+			supplier   	@110
+			Focus_Src  	@128
+			Focus_Entry 	@115
+			origin     	(2432, 1136)
+			terminus   	(320, 1136)
+			ordinal    	6)
+		    (object InterMessView "" @149
+			location   	(1600, 1232)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @150
+			    Parent_View 	@149
+			    location   	(1599, 1188)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79A700291"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	609
+			    justify    	0
+			    label      	"determineLinkToFollow( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@129
+			Focus_Src  	@111
+			Focus_Entry 	@130
+			origin     	(319, 1232)
+			terminus   	(2880, 1232)
+			ordinal    	7)
+		    (object InterMessView "" @151
+			location   	(1600, 1312)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @152
+			    Parent_View 	@151
+			    location   	(1600, 1268)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79A86030D"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	237
+			    justify    	0
+			    label      	"linkName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@129
+			supplier   	@110
+			Focus_Src  	@130
+			Focus_Entry 	@116
+			origin     	(2880, 1312)
+			terminus   	(320, 1312)
+			ordinal    	8)
+		    (object InterMessView "" @153
+			location   	(16, 1408)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @154
+			    Parent_View 	@153
+			    location   	(1055, 1364)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79AA40280"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	874
+			    justify    	0
+			    label      	"getDestinationPageName(linkName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@124
+			Focus_Src  	@111
+			Focus_Entry 	@126
+			origin     	(319, 1408)
+			terminus   	(1792, 1408)
+			ordinal    	9)
+		    (object InterMessView "" @155
+			location   	(1056, 1520)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @156
+			    Parent_View 	@155
+			    location   	(1056, 1476)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79AB601D4"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	539
+			    justify    	0
+			    label      	"destinationPageName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@124
+			supplier   	@110
+			Focus_Src  	@126
+			Focus_Entry 	@117
+			origin     	(1792, 1520)
+			terminus   	(320, 1520)
+			ordinal    	10)
+		    (object SelfMessView "" @157
+			location   	(16, 2032)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @158
+			    Parent_View 	@157
+			    location   	(770, 2082)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79AC80261"
+			    anchor_loc 	1
+			    nlines     	3
+			    max_width  	1478
+			    justify    	0
+			    label      	"getPageHandlerInstance(destinationPageHandlerClassName)"
+			    pctDist    	3.000000
+			    height     	50
+			    orientation 	1)
+			line_color 	3342489
+			client     	@110
+			supplier   	@110
+			Focus_Src  	@111
+			Focus_Entry 	@120
+			origin     	(320, 2032)
+			terminus   	(470, 2032)
+			ordinal    	15)
+		    (object InterMessView "" @159
+			location   	(752, 1616)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @160
+			    Parent_View 	@159
+			    location   	(751, 1572)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79B2D01D4"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	1025
+			    justify    	0
+			    label      	"getPageDescriptor (destinationPageName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@121
+			Focus_Src  	@111
+			Focus_Entry 	@123
+			origin     	(319, 1616)
+			terminus   	(1184, 1616)
+			ordinal    	11)
+		    (object InterMessView "" @161
+			location   	(752, 1712)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @162
+			    Parent_View 	@161
+			    location   	(752, 1668)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79B480186"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	756
+			    justify    	0
+			    label      	"destinationWebPageDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@121
+			supplier   	@110
+			Focus_Src  	@123
+			Focus_Entry 	@118
+			origin     	(1184, 1712)
+			terminus   	(320, 1712)
+			ordinal    	12)
+		    (object InterMessView "" @163
+			location   	(1888, 1856)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @164
+			    Parent_View 	@163
+			    location   	(1887, 1812)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79BA30233"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	715
+			    justify    	0
+			    label      	"getPageHandlerClassName( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@131
+			Focus_Src  	@111
+			Focus_Entry 	@132
+			origin     	(319, 1856)
+			terminus   	(3456, 1856)
+			ordinal    	13)
+		    (object InterMessView "" @165
+			location   	(1888, 1936)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @166
+			    Parent_View 	@165
+			    location   	(1888, 1892)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79BB703D8"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	863
+			    justify    	0
+			    label      	"destinationPageHandlerClassName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@131
+			supplier   	@110
+			Focus_Src  	@132
+			Focus_Entry 	@119
+			origin     	(3456, 1936)
+			terminus   	(320, 1936)
+			ordinal    	14)
+		    (object InterMessView "" @167
+			location   	(16, 2144)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @168
+			    Parent_View 	@167
+			    location   	(2183, 2100)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79BFB0252"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	1341
+			    justify    	0
+			    label      	"invokePageHandler(destinationWebPageDescriptor, , , )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@110
+			supplier   	@133
+			Focus_Src  	@111
+			Focus_Entry 	@134
+			origin     	(319, 2144)
+			terminus   	(4048, 2144)
+			ordinal    	16)))
+	    (object InteractionDiagram "Request Resolution type c"
+		mechanism_ref 	@3
+		quid       	"39F79C730000"
+		title      	"Request Resolution type c"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	106
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object InterObjView "aControlServlet" @169
+			location   	(304, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@169
+			    location   	(304, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	332
+			    justify    	0
+			    label      	"aControlServlet")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79C7B001F"
+			width      	350
+			height     	1441
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @170
+			    location   	(304, 384)
+			    line_color 	3342489
+			    InterObjView 	@169
+			    height     	1192
+			    y_coord    	1132
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @171
+			    location   	(304, 464)
+			    line_color 	3342489
+			    InterObjView 	@169
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @172
+			    location   	(304, 784)
+			    line_color 	3342489
+			    InterObjView 	@169
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @173
+			    location   	(304, 1072)
+			    line_color 	3342489
+			    InterObjView 	@169
+			    height     	294
+			    y_coord    	234
+			    Nested     	TRUE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @174
+			    location   	(304, 1232)
+			    line_color 	3342489
+			    InterObjView 	@169
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE))
+		    (object InterObjView "theWebSiteDescription" @175
+			location   	(1040, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@175
+			    location   	(1040, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	458
+			    justify    	0
+			    label      	"theWebSiteDescription")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79C8F036B"
+			width      	476
+			height     	1441
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @176
+			    location   	(1040, 384)
+			    line_color 	3342489
+			    InterObjView 	@175
+			    height     	200
+			    y_coord    	140
+			    Nested     	FALSE))
+		    (object InterObjView "targetWebPageDescriptor" @177
+			location   	(2208, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@177
+			    location   	(2208, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	514
+			    justify    	0
+			    label      	"targetWebPageDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79E130242"
+			width      	532
+			height     	1441
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @178
+			    location   	(2208, 976)
+			    line_color 	3342489
+			    InterObjView 	@177
+			    height     	450
+			    y_coord    	390
+			    Nested     	FALSE))
+		    (object InterObjView "targetPageHandler" @179
+			location   	(2752, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@179
+			    location   	(2752, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	388
+			    justify    	0
+			    label      	"targetPageHandler")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79EC00196"
+			width      	406
+			height     	1441
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @180
+			    location   	(2752, 1456)
+			    line_color 	3342489
+			    InterObjView 	@179
+			    height     	60
+			    y_coord    	0
+			    Nested     	FALSE))
+		    (object InterObjView "aWebActivityDescriptor" @181
+			location   	(1616, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@181
+			    location   	(1616, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	486
+			    justify    	0
+			    label      	"aWebActivityDescriptor")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"39F79FCC02EE"
+			width      	504
+			height     	1441
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @182
+			    location   	(1616, 672)
+			    line_color 	3342489
+			    InterObjView 	@181
+			    height     	232
+			    y_coord    	172
+			    Nested     	FALSE))
+		    (object InterMessView "" @183
+			location   	(16, 384)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @184
+			    Parent_View 	@183
+			    location   	(671, 340)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79DE003BA"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	638
+			    justify    	0
+			    label      	"getActivityDescriptor(activityName)"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@169
+			supplier   	@175
+			Focus_Src  	@170
+			Focus_Entry 	@176
+			origin     	(319, 384)
+			terminus   	(1024, 384)
+			ordinal    	0)
+		    (object InterMessView "" @185
+			location   	(672, 464)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @186
+			    Parent_View 	@185
+			    location   	(672, 419)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79DF60399"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	427
+			    justify    	0
+			    label      	"aWebActivityDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@175
+			supplier   	@169
+			Focus_Src  	@176
+			Focus_Entry 	@171
+			origin     	(1024, 464)
+			terminus   	(320, 464)
+			ordinal    	1)
+		    (object InterMessView "" @187
+			location   	(944, 976)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @188
+			    Parent_View 	@187
+			    location   	(1253, 934)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79E5003AA"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	544
+			    justify    	0
+			    label      	"getPageHandlerClassName( )"
+			    pctDist    	0.498783
+			    height     	43
+			    orientation 	0)
+			line_color 	3342489
+			client     	@169
+			supplier   	@177
+			Focus_Src  	@170
+			Focus_Entry 	@178
+			origin     	(319, 976)
+			terminus   	(2192, 976)
+			ordinal    	4)
+		    (object InterMessView "" @189
+			location   	(944, 1072)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @190
+			    Parent_View 	@189
+			    location   	(1256, 1028)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79E9E0119"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	554
+			    justify    	0
+			    label      	"targetPageHandlerClassName"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@177
+			supplier   	@169
+			Focus_Src  	@178
+			Focus_Entry 	@173
+			origin     	(2192, 1072)
+			terminus   	(320, 1072)
+			ordinal    	5)
+		    (object SelfMessView "" @191
+			location   	(16, 1232)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @192
+			    Parent_View 	@191
+			    location   	(741, 1236)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79ED1003F"
+			    anchor_loc 	1
+			    nlines     	3
+			    max_width  	525
+			    justify    	0
+			    label      	"getPageHandlerInstance(targetPageHandlerClassName)"
+			    pctDist    	2.813333
+			    height     	4
+			    orientation 	1)
+			line_color 	3342489
+			client     	@169
+			supplier   	@169
+			Focus_Src  	@170
+			Focus_Entry 	@174
+			origin     	(320, 1232)
+			terminus   	(470, 1232)
+			ordinal    	6)
+		    (object InterMessView "" @193
+			location   	(1536, 1456)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @194
+			    Parent_View 	@193
+			    location   	(1527, 1412)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79F21007E"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	918
+			    justify    	0
+			    label      	"invokePageHandler(targetWebPageDescriptor, , , )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@169
+			supplier   	@179
+			Focus_Src  	@170
+			Focus_Entry 	@180
+			origin     	(319, 1456)
+			terminus   	(2736, 1456)
+			ordinal    	7)
+		    (object InterMessView "" @195
+			location   	(960, 672)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @196
+			    Parent_View 	@195
+			    location   	(959, 628)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79FDE035C"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	507
+			    justify    	0
+			    label      	"getDefaultPageDescriptor( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@169
+			supplier   	@181
+			Focus_Src  	@170
+			Focus_Entry 	@182
+			origin     	(319, 672)
+			terminus   	(1600, 672)
+			ordinal    	2)
+		    (object InterMessView "" @197
+			location   	(960, 784)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @198
+			    Parent_View 	@197
+			    location   	(960, 740)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"39F79FEE032C"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	470
+			    justify    	0
+			    label      	"targetWebPageDescriptor"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	1)
+			line_color 	3342489
+			client     	@181
+			supplier   	@169
+			Focus_Src  	@182
+			Focus_Entry 	@172
+			origin     	(1600, 784)
+			terminus   	(320, 784)
+			ordinal    	3)))
+	    (object InteractionDiagram "UserSummaryList Request Handling"
+		mechanism_ref 	@4
+		quid       	"3A14668C0047"
+		title      	"UserSummaryList Request Handling"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object InterObjView "$UNNAMED$27" @199
+			location   	(336, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@199
+			    location   	(336, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	454
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1466AA0357"
+			width      	472
+			height     	873
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @200
+			    location   	(336, 432)
+			    line_color 	3342489
+			    InterObjView 	@199
+			    height     	576
+			    y_coord    	516
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$28" @201
+			location   	(832, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@201
+			    location   	(832, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1466B00270"
+			width      	300
+			height     	873
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @202
+			    location   	(832, 432)
+			    line_color 	3342489
+			    InterObjView 	@201
+			    height     	516
+			    y_coord    	456
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$29" @203
+			location   	(1264, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@203
+			    location   	(1264, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	408
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1468650138"
+			width      	426
+			height     	873
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @204
+			    location   	(1264, 496)
+			    line_color 	3342489
+			    InterObjView 	@203
+			    height     	392
+			    y_coord    	332
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$30" @205
+			location   	(1824, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@205
+			    location   	(1824, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	480
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1468AE009C"
+			width      	498
+			height     	873
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @206
+			    location   	(1824, 656)
+			    line_color 	3342489
+			    InterObjView 	@205
+			    height     	178
+			    y_coord    	118
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @207
+			    location   	(1824, 768)
+			    line_color 	3342489
+			    InterObjView 	@205
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE))
+		    (object InterMessView "" @208
+			location   	(16, 432)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @209
+			    Parent_View 	@208
+			    location   	(583, 388)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A1468C70099"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	157
+			    justify    	0
+			    label      	"doGet( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@199
+			supplier   	@201
+			Focus_Src  	@200
+			Focus_Entry 	@202
+			origin     	(351, 432)
+			terminus   	(816, 432)
+			ordinal    	0)
+		    (object InterMessView "" @210
+			location   	(1072, 496)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @211
+			    Parent_View 	@210
+			    location   	(1159, 454)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A1468D50067"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	554
+			    justify    	0
+			    label      	"invokePageHandlerForApplet()"
+			    pctDist    	0.778055
+			    height     	43
+			    orientation 	0)
+			line_color 	3342489
+			client     	@201
+			supplier   	@203
+			Focus_Src  	@202
+			Focus_Entry 	@204
+			origin     	(847, 496)
+			terminus   	(1248, 496)
+			ordinal    	1)
+		    (object InterMessView "" @212
+			location   	(1552, 656)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @213
+			    Parent_View 	@212
+			    location   	(1543, 612)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A148B790357"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	273
+			    justify    	0
+			    label      	"newInstance( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@203
+			supplier   	@205
+			Focus_Src  	@204
+			Focus_Entry 	@206
+			origin     	(1279, 656)
+			terminus   	(1808, 656)
+			ordinal    	2)
+		    (object InterMessView "" @214
+			location   	(1552, 768)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @215
+			    Parent_View 	@214
+			    location   	(1543, 724)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A148BF80197"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	200
+			    justify    	0
+			    label      	"doService()"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@203
+			supplier   	@205
+			Focus_Src  	@204
+			Focus_Entry 	@207
+			origin     	(1279, 768)
+			terminus   	(1808, 768)
+			ordinal    	3)
+		    (object NoteView @216
+			location   	(896, 1504)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@216
+			    location   	(77, 1182)
+			    fill_color 	13434879
+			    nlines     	12
+			    max_width  	1602
+			    label      	
+|Overwrite the default implementation which does nothing.
+|
+|The method implementation does this:
+|
+|1. get the class name of concrete AppletRequestHandler  which is stored as a parameter of the HttpRequest object
+|
+|2. instanstiates the concrete AppletRequestHandler using Class.forName().newInstance().
+|
+|3. Delegate to the doService method of the concrete AppletRequestHandler.
+			    )
+			line_color 	3342489
+			fill_color 	13434879
+			width      	1662
+			height     	656)
+		    (object AttachView "" @217
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@216
+			supplier   	@210
+			line_style 	0)))
+	    (object InteractionDiagram "RoleSummaryList Request Handling"
+		mechanism_ref 	@5
+		quid       	"3A1469AC01F6"
+		title      	"RoleSummaryList Request Handling"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	419
+		items      	(list diagram_item_list
+		    (object InterObjView "$UNNAMED$31" @218
+			location   	(368, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@218
+			    location   	(368, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	454
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A1469FD00BC"
+			width      	472
+			height     	793
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @219
+			    location   	(368, 400)
+			    line_color 	3342489
+			    InterObjView 	@218
+			    height     	528
+			    y_coord    	468
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$32" @220
+			location   	(800, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@220
+			    location   	(800, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	282
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A146A020344"
+			width      	300
+			height     	793
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @221
+			    location   	(800, 400)
+			    line_color 	3342489
+			    InterObjView 	@220
+			    height     	468
+			    y_coord    	408
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$33" @222
+			location   	(1248, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@222
+			    location   	(1248, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	408
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A146A14006F"
+			width      	426
+			height     	793
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @223
+			    location   	(1248, 496)
+			    line_color 	3342489
+			    InterObjView 	@222
+			    height     	312
+			    y_coord    	252
+			    Nested     	FALSE))
+		    (object InterObjView "$UNNAMED$34" @224
+			location   	(1856, 224)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	TRUE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@224
+			    location   	(1856, 224)
+			    fill_color 	13434879
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	480
+			    justify    	0
+			    label      	"")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3A146B3102DC"
+			width      	498
+			height     	793
+			icon_height 	0
+			icon_width 	0
+			icon_y_offset 	0
+			annotation 	1
+			Focus_Of_Control 	(object Focus_Of_Control "" @225
+			    location   	(1856, 592)
+			    line_color 	3342489
+			    InterObjView 	@224
+			    height     	162
+			    y_coord    	102
+			    Nested     	FALSE)
+			Focus_Of_Control 	(object Focus_Of_Control "" @226
+			    location   	(1856, 688)
+			    line_color 	3342489
+			    InterObjView 	@224
+			    height     	60
+			    y_coord    	0
+			    Nested     	TRUE))
+		    (object InterMessView "" @227
+			location   	(16, 400)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @228
+			    Parent_View 	@227
+			    location   	(583, 356)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A146A6E0373"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	157
+			    justify    	0
+			    label      	"doGet( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@218
+			supplier   	@220
+			Focus_Src  	@219
+			Focus_Entry 	@221
+			origin     	(383, 400)
+			terminus   	(784, 400)
+			ordinal    	0)
+		    (object InterMessView "" @229
+			location   	(1040, 496)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @230
+			    Parent_View 	@229
+			    location   	(1135, 454)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A146A7D012F"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	554
+			    justify    	0
+			    label      	"invokePageHandlerForApplet()"
+			    pctDist    	0.769784
+			    height     	43
+			    orientation 	0)
+			line_color 	3342489
+			client     	@220
+			supplier   	@222
+			Focus_Src  	@221
+			Focus_Entry 	@223
+			origin     	(815, 496)
+			terminus   	(1232, 496)
+			ordinal    	1)
+		    (object InterMessView "" @231
+			location   	(1552, 592)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @232
+			    Parent_View 	@231
+			    location   	(1551, 548)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A14989603E1"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	273
+			    justify    	0
+			    label      	"newInstance( )"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@222
+			supplier   	@224
+			Focus_Src  	@223
+			Focus_Entry 	@225
+			origin     	(1263, 592)
+			terminus   	(1840, 592)
+			ordinal    	2)
+		    (object InterMessView "" @233
+			location   	(1568, 688)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object SegLabel @234
+			    Parent_View 	@233
+			    location   	(1551, 644)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    quidu      	"3A1498AE02FE"
+			    anchor_loc 	1
+			    nlines     	1
+			    max_width  	200
+			    justify    	0
+			    label      	"doService()"
+			    pctDist    	0.500000
+			    height     	45
+			    orientation 	0)
+			line_color 	3342489
+			client     	@222
+			supplier   	@224
+			Focus_Src  	@223
+			Focus_Entry 	@226
+			origin     	(1263, 688)
+			terminus   	(1840, 688)
+			ordinal    	3)
+		    (object NoteView @235
+			location   	(880, 1488)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@235
+			    location   	(136, 1169)
+			    fill_color 	13434879
+			    nlines     	12
+			    max_width  	1453
+			    label      	
+|Overwrite the default implementation which does nothing.
+|
+|The method implementation does this:
+|
+|1. get the class name of concrete AppletRequestHandler  which is stored as a parameter of the HttpRequest object
+|
+|2. instanstiates the concrete AppletRequestHandler using Class.forName().newInstance().
+|
+|3. Delegate to the doService method of the concrete AppletRequestHandler.
+			    )
+			line_color 	3342489
+			fill_color 	13434879
+			width      	1513
+			height     	650)
+		    (object AttachView "" @236
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@235
+			supplier   	@229
+			line_style 	0)))))
+    root_subsystem 	(object SubSystem "Component View"
+	quid       	"39F77FC20196"
+	physical_models 	(list unit_reference_list)
+	physical_presentations 	(list unit_reference_list
+	    (object Module_Diagram "Main"
+		quid       	"39F77FC9005D"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    process_structure 	(object Processes
+	quid       	"39F77FC20197"
+	ProcsNDevs 	(list
+	    (object Process_Diagram "Deployment View"
+		quid       	"39F77FC20199"
+		title      	"Deployment View"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
+    properties 	(object Properties
+	attributes 	(list Attribute_Set
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"propertyId"
+		value      	"809135966")
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Project"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"EditorType"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"CORBA"
+				name       	"BuiltIn"
+				value      	100)
+			    (object Attribute
+				tool       	"CORBA"
+				name       	"WindowsShell"
+				value      	101)))
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"StopOnError"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CreateMissingDirectories"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"Editor"
+			value      	("EditorType" 100))
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"IncludePath"
+			value      	"")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Class"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"ConstValue"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"ImplementationType"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"ArrayDimensions"
+			value      	"")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Module-Spec"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CmIdentification"
+			value      	"  %X% %Q% %Z% %W%")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"AdditionalIncludes"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CopyrightNotice"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"InclusionProtectionSymbol"
+			value      	"AUTO GENERATE")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Module-Body"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CmIdentification"
+			value      	"  %X% %Q% %Z% %W%")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"AdditionalIncludes"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CopyrightNotice"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"InclusionProtectionSymbol"
+			value      	"AUTO GENERATE")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Operation"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"OperationIsOneWay"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"Context"
+			value      	"")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Attribute"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"IsReadOnly"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CaseSpecifier"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"Order"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"ArrayDimensions"
+			value      	"")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Role"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"AssocTypeSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"CORBA"
+				name       	"Array"
+				value      	24)
+			    (object Attribute
+				tool       	"CORBA"
+				name       	"Sequence"
+				value      	47)))
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"BoundedRoleType"
+			value      	("AssocTypeSet" 47))
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"IsReadOnly"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"GenerateForwardReference"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"CaseSpecifier"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"Order"
+			value      	"")
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"ArrayDimensions"
+			value      	"")))
+	    (object Attribute
+		tool       	"CORBA"
+		name       	"default__Uses"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"CORBA"
+			name       	"GenerateForwardReference"
+			value      	FALSE)))
+	    (object Attribute
+		tool       	"ClearCase"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"DDL"
+		name       	"propertyId"
+		value      	"809135966")
+	    (object Attribute
+		tool       	"DDL"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"DDL"
+		name       	"default__Project"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"DDL"
+			name       	"DDLScriptFilename"
+			value      	"DDL1.SQL")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"DataBaseSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"DDL"
+				name       	"ANSI"
+				value      	800)
+			    (object Attribute
+				tool       	"DDL"
+				name       	"Oracle"
+				value      	801)
+			    (object Attribute
+				tool       	"DDL"
+				name       	"SQLServer"
+				value      	802)
+			    (object Attribute
+				tool       	"DDL"
+				name       	"Sybase"
+				value      	803)
+			    (object Attribute
+				tool       	"DDL"
+				name       	"Watcom"
+				value      	804)))
+		    (object Attribute
+			tool       	"DDL"
+			name       	"DataBase"
+			value      	("DataBaseSet" 800))
+		    (object Attribute
+			tool       	"DDL"
+			name       	"DropClause"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"InheritSuffix"
+			value      	"_V")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"TableName"
+			value      	"T_")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"ViewName"
+			value      	"V_")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"PrimaryKeyColumnType"
+			value      	"NUMBER(5)")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"Directory"
+			value      	"AUTO GENERATE")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"BaseViews"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"PrimaryKeyColumnName"
+			value      	"Id")))
+	    (object Attribute
+		tool       	"DDL"
+		name       	"default__Attribute"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"DDL"
+			name       	"Unique"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"Length"
+			value      	"")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"CompositeUnique"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"PrimaryKey"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"NullsOK"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"DDL"
+			name       	"ColumnType"
+			value      	"VARCHAR")
+		    (object Attribute
+			tool       	"DDL"
+			name       	"CheckConstraint"
+			value      	"")))
+	    (object Attribute
+		tool       	"framework"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"propertyId"
+		value      	"360000002")
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Project"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"NestedTableNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TableNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"ViewNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"VarrayNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"ObjectTableNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TypeNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"DDLScriptFilename"
+			value      	"DDL1.SQL")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"SchemaNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"NestedTableNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TableNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"VarrayNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"SchemaNameSuffix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"ViewNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"DropClause"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"PrimaryKeyColumnType"
+			value      	"NUMBER(5,0)")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"ObjectTableNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TypeNamePrefix"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"PrimaryKeyColumnName"
+			value      	"_ID")))
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Module-Spec"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsSchema"
+			value      	FALSE)))
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Class"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CollectionTypeScale"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CollectionTypeLength"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CollectionOfREFS"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CollectionTypePrecision"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"WhereClause"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CheckConstraint"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"OID"
+			value      	"")))
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Operation"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerReferencingNames"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsWriteNoProcessState"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"MethodKindSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"MapMethod"
+				value      	1901)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"OrderMethod"
+				value      	1902)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Function"
+				value      	1903)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Procedure"
+				value      	1904)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Operator"
+				value      	1905)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Constructor"
+				value      	1906)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Destructor"
+				value      	1907)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Trigger"
+				value      	1908)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"Calculated"
+				value      	1909)))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsReadNoProcessState"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"OrderNumber"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerEventSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"INSERT"
+				value      	1601)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"UPDATE"
+				value      	1602)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"DELETE"
+				value      	1603)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"INSERT OR UPDATE"
+				value      	1604)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"INSERT OR DELETE"
+				value      	1605)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"UPDATE OR DELETE"
+				value      	1606)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"INSERT OR UPDATE OR DELETE"
+				value      	1607)))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerText"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsSelfish"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"MethodKind"
+			value      	("MethodKindSet" 1903))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerForEachSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"ROW"
+				value      	1701)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"STATEMENT"
+				value      	1702)))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerTypeSet"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"AFTER"
+				value      	1801)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"BEFORE"
+				value      	1802)
+			    (object Attribute
+				tool       	"Oracle8"
+				name       	"INSTEAD OF"
+				value      	1803)))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsWriteNoDataState"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerWhenClause"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerEvent"
+			value      	("TriggerEventSet" 1601))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"OverloadID"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerForEach"
+			value      	("TriggerForEachSet" 1701))
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsReadNoDataState"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"TriggerType"
+			value      	("TriggerTypeSet" 1801))))
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Role"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"OrderNumber"
+			value      	"")))
+	    (object Attribute
+		tool       	"Oracle8"
+		name       	"default__Attribute"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsIndex"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"NullsAllowed"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"Precision"
+			value      	"2")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsUnique"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"Length"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"OrderNumber"
+			value      	"")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CompositeUnique"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"IsPrimaryKey"
+			value      	FALSE)
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"Scale"
+			value      	"6")
+		    (object Attribute
+			tool       	"Oracle8"
+			name       	"CheckConstraint"
+			value      	"")))
+	    (object Attribute
+		tool       	"RequisitePro"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"Rose Model Integrator"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"Rose Web Publisher"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"SoDA"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"COM"
+		name       	"propertyId"
+		value      	"783606378")
+	    (object Attribute
+		tool       	"COM"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"COM"
+		name       	"default__Class"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpstring"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"dllname"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"uuid"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"Generate"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"COM"
+			name       	"TypeKinds"
+			value      	(list Attribute_Set
+			    (object Attribute
+				tool       	"COM"
+				name       	"enum"
+				value      	100)
+			    (object Attribute
+				tool       	"COM"
+				name       	"record"
+				value      	101)
+			    (object Attribute
+				tool       	"COM"
+				name       	"module"
+				value      	102)
+			    (object Attribute
+				tool       	"COM"
+				name       	"interface"
+				value      	103)
+			    (object Attribute
+				tool       	"COM"
+				name       	"dispinterface"
+				value      	104)
+			    (object Attribute
+				tool       	"COM"
+				name       	"coclass"
+				value      	105)
+			    (object Attribute
+				tool       	"COM"
+				name       	"alias"
+				value      	106)
+			    (object Attribute
+				tool       	"COM"
+				name       	"union"
+				value      	107)
+			    (object Attribute
+				tool       	"COM"
+				name       	"max"
+				value      	108)
+			    (object Attribute
+				tool       	"COM"
+				name       	"(none)"
+				value      	109)))
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpcontext"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"kind"
+			value      	("TypeKinds" 109))
+		    (object Attribute
+			tool       	"COM"
+			name       	"version"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"alias"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"attributes"
+			value      	"")))
+	    (object Attribute
+		tool       	"COM"
+		name       	"default__Operation"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpstring"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"Generate"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"COM"
+			name       	"id"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"attributes"
+			value      	"")))
+	    (object Attribute
+		tool       	"COM"
+		name       	"default__Attribute"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpstring"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"Generate"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"COM"
+			name       	"id"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"attributes"
+			value      	"")))
+	    (object Attribute
+		tool       	"COM"
+		name       	"default__Module-Spec"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"COM"
+			name       	"lcid"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpstring"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"uuid"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"library"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"Generate"
+			value      	TRUE)
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpcontext"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"filename"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"version"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"attributes"
+			value      	"")
+		    (object Attribute
+			tool       	"COM"
+			name       	"helpfile"
+			value      	"")))
+	    (object Attribute
+		tool       	"COM"
+		name       	"default__Param"
+		value      	(list Attribute_Set
+		    (object Attribute
+			tool       	"COM"
+			name       	"attributes"
+			value      	"")))
+	    (object Attribute
+		tool       	"VisualStudio"
+		name       	"HiddenTool"
+		value      	FALSE)
+	    (object Attribute
+		tool       	"Version Control"
+		name       	"HiddenTool"
+		value      	FALSE))
+	quid       	"39F77FC20198"))

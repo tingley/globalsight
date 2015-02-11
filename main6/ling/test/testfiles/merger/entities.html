@@ -1,0 +1,81 @@
+<html>
+<head>
+<STYLE>
+@charset "http://www.very.long.so.we.break.here--\3E \
+/and-continue-here.heidasassaaberau";
+
+@import "http://www.very.long.so.we.break.here--\3E \
+/and-continue-here.heidasassaaberau";
+
+/* Strings can span several lines (a la shell).  The escaped newline
+must be ignored.  The Merger can only produce a single long line,
+which is ok.
+
+NOTE: strings are not used in CSS2, so they are output WITH QUOTES
+inside localizable, and the decoder handles this special case.
+*/
+string      { font: "Arial \
+Verdana" }
+
+/* invalid CSS string, just for the record.  parser chokes.
+string      { font: "Arial \
+
+Verdana" }
+*/
+
+/* Strings and token can contain \DDDDDD numeric character escapes
+with up to 6 hexadecimal digits (for 24-bit Klingon characters).
+The codecs truncate chars to the 16-bit range supported by Java.
+If a digit or letter follows the hexadecimal number, the end of the
+number needs to be made clear. There are two ways to do that: 
+1) with a space (or other whitespace character): "\26 B" ("&B") 
+2) by providing exactly 6 hexadecimal digits: "\000026B" ("&B")
+In fact, these two methods may be combined.  Only one whitespace
+character is ignored after a hexadecimal escape.  Note that this
+means that a "real" space after the escape sequence must itself
+either be escaped or doubled. 
+*/
+string      { font: "\26 BLUE";
+              font: "\000026BLUE";
+              font: "\26RED";
+              font: "\26\ RED";
+              font: "\26 amp;";
+              font: "\26nbsp;";
+            }
+
+/* identifier B&W? */
+B\&W\?      { font: B\&W\? }
+B\26 W\3F   { font: B\26 W\3F }
+
+
+/* tests with unicode characters: two euro symbols */
+\20AC \20AC  { font: "\20AC \20AC"; }
+
+/* tests with unicode characters: euro, letter a, euro */
+\20AC a\20AC  { font: "\20AC a\20AC"; }
+
+</STYLE>
+</head>
+<body>
+
+<P>
+less than &lt; <BR>
+greater than &gt; <BR>
+quote &quot; <BR>
+apostrophe &apos; <BR>
+euro &euro; <BR>
+ETH &ETH; <BR>
+non-breaking space a&nbsp;a (segment has 7 words). <BR>
+left arrow &lArr; <BR>
+Dagger &Dagger; <BR>
+Numeric superscript 2 &#178; <BR>
+</P>
+
+<SCRIPT>
+alert("I love \"System 3!\"");
+</SCRIPT>
+
+<A href="javascript:alert(%22I love \%22System 3!\%22%22);">Click me.</A> 
+
+</body>
+</html>

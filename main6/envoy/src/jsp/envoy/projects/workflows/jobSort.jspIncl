@@ -1,0 +1,60 @@
+<%
+Integer sortColumn = (Integer)session.getAttribute(JobManagementHandler.SORT_COLUMN);
+Boolean sortAscending = (Boolean)session.getAttribute(JobManagementHandler.SORT_ASCENDING);
+
+// Build the reverse sort directive
+// get sort arrow image (up -or- down)
+String imgSortArrow = sortAscending.booleanValue() ? bundle.getString("img_arrowUp") : bundle.getString("img_arrowDown");
+StringBuffer tmp = new StringBuffer();
+tmp.append("<IMG SRC=\"");
+tmp.append(imgSortArrow);
+tmp.append("\" WIDTH=7 HEIGHT=4 HSPACE=1 BORDER=0>");
+imgSortArrow = tmp.toString();
+
+// Set sort arrow image and the reverse sort directive
+// (doing it this way keeps the HTML cleaner below)
+String jobIdSortArrow, jobNameSortArrow, jobPrioritySortArrow, jobProjectSortArrow,
+       jobSourceLocaleSortArrow, jobWordCountSortArrow, jobDateSortArrow,
+       jobEstCompletionDateSortArrow, jobPlannedDateSortArrow, jobActualCompletionDateSortArrow, jobEstTranslateCompletionDateSortArrow, jobStatusSortArrow;
+
+jobIdSortArrow = jobNameSortArrow = jobPrioritySortArrow = jobProjectSortArrow = jobSourceLocaleSortArrow = jobWordCountSortArrow = jobDateSortArrow = jobEstCompletionDateSortArrow = jobPlannedDateSortArrow = jobActualCompletionDateSortArrow = jobEstTranslateCompletionDateSortArrow = jobStatusSortArrow = "";
+
+switch(sortColumn.intValue())
+{
+    case JobComparator.JOB_ID:
+        jobIdSortArrow = imgSortArrow;
+        break;
+    case JobComparator.JOB_NAME:
+        jobNameSortArrow = imgSortArrow;
+        break;
+    case JobComparator.PRIORITY:
+        jobPrioritySortArrow = imgSortArrow;
+        break;
+    case JobComparator.PROJECT:
+        jobProjectSortArrow = imgSortArrow;
+        break;
+    case JobComparator.SOURCE_LOCALE:
+        jobSourceLocaleSortArrow = imgSortArrow;
+        break;
+    case JobComparator.WORD_COUNT:
+        jobWordCountSortArrow = imgSortArrow;
+        break;
+    case JobComparator.DATE_CREATED:
+        jobDateSortArrow = imgSortArrow;
+        break;
+    case JobComparator.EST_COMPLETION_DATE:
+        jobEstCompletionDateSortArrow = imgSortArrow;
+        break;
+    case JobComparator.PLANNED_DATE:
+        jobPlannedDateSortArrow = imgSortArrow;
+        break;
+    case JobComparator.JOB_STATUS:
+        jobStatusSortArrow = imgSortArrow;
+        break;
+    case JobComparator.EST_TRANSLATE_COMPLETION_DATE:
+        jobEstTranslateCompletionDateSortArrow = imgSortArrow;
+        break;
+    default:
+        break;
+}
+%>

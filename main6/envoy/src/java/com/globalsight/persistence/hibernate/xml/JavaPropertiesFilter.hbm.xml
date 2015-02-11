@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter"
+        table="java_properties_filter">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="companyId" column="COMPANY_ID" type="long"
+            not-null="true" unique="false" />
+        <property name="filterName" length="255" column="FILTER_NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="enableSidSupport" column="ENABLE_SID_SUPPORT" type="yes_no"
+            not-null="false" />
+        <property name="enableUnicodeEscape" column="ENABLE_UNICODE_ESCAPE" type="yes_no"
+            not-null="false" />
+        <property name="enablePreserveSpaces" column="ENABLE_TRIM_SEGMENT" type="yes_no"
+            not-null="false" />
+        <property name="secondFilterId" column="SECOND_FILTER_ID"
+            type="long" not-null="false" unique="false" />
+        <property name="secondFilterTableName" length="45" column="SECOND_FILTER_TABLE_NAME" type="string"
+            not-null="false" />
+        <property name="internalText" column="INTERNAL_TEXTS" type="string"
+            not-null="true" />
+            
+    </class>
+</hibernate-mapping>

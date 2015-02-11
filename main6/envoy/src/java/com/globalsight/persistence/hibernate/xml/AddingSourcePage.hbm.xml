@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.page.AddingSourcePage" table="ADDING_SOURCE_PAGE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="jobId" column="JOB_ID" type="long" not-null="true" unique="false" />
+		<property name="l10nProfileId" column="L10N_PROFILE_ID" type="long" not-null="true" unique="false" />
+		<property name="dataSource" column="DATA_SOURCE" length="100" type="string" not-null="true" unique="false" />
+		<property name="externalPageId" length="4000" column="EXTERNAL_PAGE_ID" type="string" not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

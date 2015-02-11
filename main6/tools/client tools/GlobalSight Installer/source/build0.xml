@@ -1,0 +1,96 @@
+<project name="Installer" default="jar" basedir=".">
+
+	<property name="version" value="%%version%%" />
+	<property name="patch" value="/usr/local/software/patch" />
+	<property name="systeminfo.dir" value="${patch}/GlobalSight/install/data" />
+        <property name="name" value="GlobalSight_Installer_${version}.zip"/>
+
+	<property name="server" value="/home/max/server" />
+	<property name="serverSysteminfo.dir" value="${server}/GlobalSight/install/data" />
+
+	<fileset id="jar" dir=".">
+		<include name="installer.jar" />
+	</fileset>
+
+	<fileset id="class" dir="./bin">
+		<include name="**" />
+	</fileset>
+
+	<target name="copy" depends="jar" description="--> description">
+		<copy verbose="${verbose}" overwrite="true" todir="C:\ambassador\server\GlobalSight_20090115\patch\installer">
+			<fileset refid="jar" />
+		</copy>
+	</target>
+
+	<target name="build">
+		<mkdir dir="dist" />
+		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="1.6" classpath=".:lib/log4j.jar:lib/commons-codec-1.3.jar" srcdir="src" destdir="dist" includes="**" />
+		<copy verbose="${verbose}" overwrite="true" todir="dist">
+			<fileset dir="properties/">
+				<include name="*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="jar" depends="build">
+		<jar destfile="installer.jar" basedir="dist">
+			<manifest>
+				<attribute name="Main-Class" value="com.Main" />
+				<attribute name="Class-Path" value="lib/log4j.jar lib/junit.jar lib/commons-codec-1.3.jar" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="init" depends="jar">
+		<delete file="${name}" />
+		<delete dir="installer_root"/>
+		
+		<mkdir dir="installer_root/installer/data" />
+	</target>
+
+	<target name="buildIstaller" depends="init">
+		<copy verbose="${verbose}" overwrite="true" todir="installer_root/installer">
+			<fileset dir=".">
+				<include name="installer.jar" />
+				<include name="icon/*" />
+				<include name="lib/*" />
+				<include name="script/**" />
+				<include name="log4j.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="buildPatch" depends="buildIstaller">
+
+		<copy verbose="${verbose}" overwrite="true" todir="installer_root/installer/data">
+			<fileset dir="${patch}">
+				<include name="**" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="buildServer" depends="buildIstaller">
+
+			<copy verbose="${verbose}" overwrite="true" todir="${serverSysteminfo.dir}">
+				<fileset dir=".">
+					<include name="system.xml" />
+				</fileset>
+			</copy>
+			
+			<copy verbose="${verbose}" overwrite="true" todir="installer_root">
+				<fileset dir="run/build">
+					<include name="**" />
+				</fileset>
+			</copy>
+				
+			<copy verbose="${verbose}" overwrite="true" todir="installer_root/server">
+				<fileset dir="${server}">
+					<include name="**" />
+				</fileset>
+			</copy>		
+			
+			<zip update="true" zipfile="${name}">
+				<zipfileset dir="./installer_root" includes="**" />
+			</zip>
+		</target>
+</project>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Workflows" >
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Job" url="Glossary/Job.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+  <topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+  <topic name="Workflows - Search" url="Setup/Workflows/Workflows_-_Search.htm" />
+</key>
+<key name="Working Offline" >
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+</key>
+<key name="Writing XML Rules" >
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="XML Rules Main Screen" >
+  <topic name="XML Rules Main Screen" url="Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm" />
+</key>
+
+</indexdata>

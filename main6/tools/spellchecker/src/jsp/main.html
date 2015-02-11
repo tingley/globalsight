@@ -1,0 +1,287 @@
+<html id="idHTML">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Spell Check Page</title>
+<STYLE>
+body	{
+          font-face: verdana,arial,helvetica;
+          font-size: 8pt;
+        }
+table   {
+          font-family: verdana, arial, helvetica;
+          font-size: 8pt;
+          font-weight: bold;
+          border-top-width: 0px;
+          border-right-width: 0px;
+          border-bottom-width: 0px;
+          border-left-width: 0px;
+        }
+input   {
+          font-face: verdana,arial,helvetica;
+          font-size: 8pt;
+        }
+.nicefield {
+          width: 140px;
+          font-family: Verdana, Arial, Helvetica, sans-serif;
+          font-size: 10px;
+        }
+.button {
+          width: 100px;
+          font-family: Verdana, Arial, Helvetica, sans-serif;
+          font-size: 10px;
+          font-style: normal;
+          font-weight: normal;
+          border-style: groove;
+        }
+</STYLE>
+<STYLE id='idStyleRtl' disabled>
+.nicefield {
+          font-size: 12px !important;
+        }
+</STYLE>
+<script src="spellcheck.js"></script>
+<script>
+var mainFrameLoaded = false;
+
+var query = parent.document.location.toString();
+var locale = scGetQueryParm(query, "locale");
+var uilocale = scGetQueryParm(query, "uilocale");
+var dict = scGetQueryParm(query, "dict");
+var customDict = scGetQueryParm(query, "customDict");
+
+if (isRtlLocale(locale))
+{
+  // Only if Arabic UI strings are available.
+  // idHTML.dir = 'rtl';
+}
+
+// Buttons
+var bchangeVal  = "  Change  ";
+var bignoreVal  = "  Ignore  ";
+var bignoreaVal = "Ignore All";
+var bchangeaVal = "Change All";
+var baddVal     = " Add Word ";
+var bfinishVal  = "  Finish  ";
+var bcancelVal  = "  Cancel  ";
+
+// Labels
+var tPleaseWait        = "Please wait, checking....";
+var tChangeto          = "Change to:";
+var tSuggestions       = "Suggestions:";
+var tmisSpelledMessage = " is misspelled";
+var tSpellfinished     = "Spell Check Completed, save changes?";
+
+uilocale = uilocale.substring(0, 2);
+
+if (uilocale == "es")
+{
+    bchangeVal = "  Cambio  ";
+    bignoreVal = "  Salto   ";
+    bignoreaVal = "Salto Todos";
+    bchangeaVal = "CambioTodos";
+    baddVal = "Agregue";
+    bfinishVal = "  Final   ";
+    bcancelVal = "Cancelación";
+    tChangeto = "Cambie a:";
+    tSuggestions = "Sugerencias:";
+    tmisSpelledMessage = " se deletrea mal";
+    tSpellfinished = "Final";
+}
+else if (uilocale == "fr")
+{
+    bchangeVal = "Change";
+    bignoreVal = " Ignore ";
+    bignoreaVal = "Ignore tous";
+    bchangeaVal = "Change tous";
+    baddVal = "Ajoute";
+    bfinishVal = "Finition";
+    bcancelVal = "Annulation";
+    tChangeto = "Changement:";
+    tSuggestions = "Suggérez:";
+    tmisSpelledMessage = " est mal épelé";
+    tSpellfinished = "Finition";
+}
+else if(uilocale == "nl")
+{
+    bchangeVal = "Verbeter";
+    bignoreVal = "Ignoreer";
+    bignoreaVal = "Alles ignoreren";
+    bchangeaVal = "Alles verbeteren";
+    baddVal = "Toevoegen";
+    bfinishVal = "Einde";
+    bcancelVal = "Annuleren";
+    tChangeto = "Verbeter:";
+    tSuggestions = "Suggestie:";
+    tmisSpelledMessage = " is foutief geschreven";
+    tSpellfinished = "Einde";
+}
+else if(uilocale == "de")
+{
+    bchangeVal = "Verbessern";
+    bignoreVal = "Ignorieren";
+    bignoreaVal = "Alle ignorieren";
+    bchangeaVal = "Alle verbessern";
+    baddVal = "Zufügen";
+    bfinishVal = "Ende";
+    bcancelVal = "Abbrechen";
+    tChangeto = "Verbessern:";
+    tSuggestions = "Vorschläge:";
+    tmisSpelledMessage = " ist falsch geschrieben";
+    tSpellfinished = "Beenden";
+}
+
+function noMisspellings()
+{
+  alert("No mis-spellings found.");
+}
+
+function noenter()
+{
+  return !(window.event && window.event.keyCode == 13);
+}
+
+function init()
+{
+  mainFrameLoaded = true;
+
+  var form = document.spellcheckform;
+
+  form.locale.value = locale;
+  form.uilocale.value = uilocale;
+  form.dict.value = dict;
+  form.customDict.value = customDict;
+
+  if (isRtlLocale(locale))
+  {
+    form.tchangeto.dir = 'rtl';
+    form.suggestionlist.dir = 'rtl';
+  }
+
+  if (locale.indexOf('ar') == 0)
+  {
+    idStyleRtl.disabled = false;    
+  }
+
+  if (uilocale != 'en')
+  {
+    //update button text
+    form.bchange.value = bchangeVal;
+    form.bchangea.value = bchangeaVal;
+    form.bignore.value = bignoreVal;
+    form.bignorea.value = bignoreaVal;
+    form.badd.value = baddVal;
+    form.bfinish.value = bfinishVal;
+    form.bcancel.value = bcancelVal;
+
+    form.suggestionlist[0].value = bcancelVal;
+    form.misSpelledMessage.value = tmisSpelledMessage;
+    form.Spellfinished.value = tSpellfinished;
+  }
+
+  var tmp = parent.document.location.toString();
+  var control = scGetQueryParm(tmp, "ctrl");
+  var controlType = scGetQueryParm(tmp, "typectrl");
+
+  var originalControl = eval('parent.opener.document.' + control) ||
+    parent.opener.document.getElementById(control);
+
+  form.fixedtext.value = scGetControlText(originalControl, controlType);
+
+  form.tchangeto.focus();
+}
+</script>
+</head>
+
+<body LEFTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0" RIGHTMARGIN="0"
+ onload="init()">
+
+<FORM NAME="spellcheckform" METHOD="post" ACTION="">
+<INPUT TYPE="hidden" NAME="fixedtext" VALUE="">
+<INPUT TYPE="hidden" NAME="locale" VALUE="">
+<INPUT TYPE="hidden" NAME="uilocale" VALUE="">
+<INPUT TYPE="hidden" NAME="dict" VALUE="">
+<INPUT TYPE="hidden" NAME="customDict" VALUE="">
+
+<INPUT TYPE="hidden" NAME="misSpelledMessage" VALUE=" is not correct">
+<INPUT TYPE="hidden" NAME="Spellfinished" VALUE="Spell Check Completed">
+<INPUT TYPE="hidden" NAME="MispelledWords" VALUE="">
+<INPUT TYPE="hidden" NAME="currentword" VALUE="">
+
+<div style="border: solid black; border-top-width: 1px;
+ border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px;">
+<TABLE WIDTH="100%" LEFT="0" BORDER="0" ALIGN="LEFT"
+  BGCOLOR="#B1C5EC" HEIGHT="100%">
+  <TR>
+    <TD VALIGN="TOP">
+      <TABLE BORDER="0">
+        <TR>
+          <TD WIDTH="85" ALIGN="RIGHT" VALIGN="TOP">
+            <script>document.write(tChangeto);</script>
+          </TD>
+          <TD WIDTH="123" VALIGN="TOP">
+            <INPUT TYPE="text" NAME="tchangeto" class="nicefield"
+	    onkeypress="return noenter()">
+          </TD>
+        </TR>
+        <TR>
+          <TD ALIGN="RIGHT" VALIGN="TOP">
+            <DIV STYLE="padding-top: 3px;">
+            <script>document.write(tSuggestions);</script>
+            </DIV>
+          </TD>
+          <TD VALIGN="TOP">
+            <SELECT NAME="suggestionlist" SIZE="4" onchange="scSelectWord();"
+              onclick="scSelectWord();" class="nicefield">
+              <OPTION>Checking, Text Please Wait</OPTION>
+            </SELECT>
+          </TD>
+        </TR>
+      </TABLE>
+    </TD>
+    <TD VALIGN="TOP">
+      <TABLE BORDER="0" cellpadding="0" cellspacing="0">
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bchange" VALUE="  Change  "
+            onclick="scChangeWord();" class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bignore" VALUE="  Ignore  "
+            onclick="scIgnore();" class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bchangea" VALUE="Change All"
+            onclick="scChangeAll();" class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bignorea" VALUE="Ignore All"
+            onclick="scIgnoreAll();" class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>&nbsp;</TD>
+          <TD>
+            <INPUT TYPE="button" NAME="badd" VALUE="Add Word"
+            onclick="scAddWord();" class="button">
+          </TD>
+        </TR>
+        <TR>
+          <TD>
+            <INPUT TYPE="button" NAME="bfinish" VALUE="  Finish  "
+            onclick="scFinishSpellCheck();" class="button">
+          </TD>
+          <TD>
+            <INPUT TYPE="button" NAME="bcancel" VALUE="  Cancel  "
+            onclick="scCancelSpellCheck();" class="button">
+          </TD>
+        </TR>
+      </TABLE>
+    </TD>
+  </TR>
+</TABLE>
+</div>
+</FORM>
+</body>
+</html>

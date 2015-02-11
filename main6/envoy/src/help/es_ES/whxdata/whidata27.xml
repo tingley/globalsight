@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="existiría" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="Expand All" >
+  <topic name="Definir una nueva rama de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/New_TeamSite_Branch_Definition.htm" />
+  <topic name="Ramas de destino de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Target_Branches.htm" />
+</key>
+<key name="expande" >
+  <topic name="Definir una nueva rama de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/New_TeamSite_Branch_Definition.htm" />
+  <topic name="Ramas de destino de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Target_Branches.htm" />
+</key>
+<key name="expandir" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+</key>
+<key name="Exporta" >
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+</key>
+<key name="exportación" >
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="exportación al sistema" >
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+</key>
+<key name="exportación asociado" >
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+</key>
+<key name="exportación seleccionada" >
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+</key>
+<key name="Exportado" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="exportar" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+  <topic name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+  <topic name="Informe Detalles del trabajo" url="Informes/Job_Details_Report.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="exportar archivos" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="Exportar estilo" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="Exportar inicia" >
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="Exportar páginas" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="exportar todas sus páginas" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+</key>
+<key name="exportarla" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="Expresión XPath" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="expresiones XPath" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="extensión" >
+  <topic name="Crear extensión de archivo" url="Configuraci_n/Extensiones_de_archivo/Create_File_Extension.htm" />
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+</key>
+<key name="extensión seleccionada" >
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+</key>
+<key name="Extensiones" >
+  <topic name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+</key>
+<key name="extensiones incluidas" >
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+</key>
+<key name="extensiones indicadas" >
+  <topic name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+</key>
+<key name="extracción" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="extracción permite controlar" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="extracción se" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="extractor" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="extractor clasifica todos" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="extractor decide" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="extraer" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="extraído" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="extraído automáticamente" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="f1" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="f1gatito" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="facilita" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="facilitar" >
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="facilitarle esta tarea" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="facilitarse información adicional acerca del término" >
+  <topic name="Base de datos terminológica" url="Glosario/Termbase.htm" />
+</key>
+<key name="Factor" >
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+</key>
+<key name="facturar" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="FALLÓ_LA_EXPORTACIÓN" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="FALLÓ_LA_IMPORTACIÓN" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="falta" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="faltan" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="Faltan estas eiquetas" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="Faltan estas etiquetas" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="FAQ" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="fecha" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+  <topic name="Proceso de producción" url="Glosario/Workflow.htm" />
+</key>
+<key name="fecha indicada" >
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+</key>
+<key name="Fecha límite" >
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+</key>
+
+</indexdata>

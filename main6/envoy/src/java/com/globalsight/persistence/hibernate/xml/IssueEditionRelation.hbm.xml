@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.comment.IssueEditionRelation" table="ISSUE_EDITION_RELATION">
+    
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="originalTuId" length="20" column="ORIGINAL_TU_ID" type="long" not-null="false" />
+        <property name="originalTuvId" length="20" column="ORIGINAL_TUV_ID" type="long" not-null="false" />
+        <property name="originalIssueHistoryId" length="60" column="ORIGINAL_ISSUE_HISTORY_ID" type="string" not-null="false" />
+        <many-to-one name="tuv" column="TUV_ID" class="com.globalsight.everest.tuv.TuvImpl" not-null="true" lazy="false" />
+    </class>
+</hibernate-mapping>

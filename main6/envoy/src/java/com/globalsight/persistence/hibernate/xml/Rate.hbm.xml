@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.costing.Rate" table="RATE">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="contextMatchRate" length="126"
+            column="EXACT_CONTEXT_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="inContextMatchRate" length="126"
+            column="IN_CONTEXT_MATCH_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="hiFuzzyMatchRate" length="126"
+            column="FUZZY_HI_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="lowFuzzyMatchRate" length="126"
+            column="FUZZY_LOW_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="medFuzzyMatchRate" length="126"
+            column="FUZZY_MED_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="medHiFuzzyMatchRate" length="126"
+            column="FUZZY_MED_HI_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="name" length="40" column="NAME" type="string"
+            not-null="true" unique="false" />
+
+        <property name="noMatchRate" length="126" column="NO_MATCH_RATE"
+            type="float" not-null="true" unique="false" />
+
+        <property name="noMatchRepetitionRate" length="126"
+            column="NO_MATCH_REPETITION_RATE" type="float"
+            not-null="true" unique="false" />
+
+        <property name="segmentTmRate" length="126"
+            column="EXACT_SEGMENT_TM_RATE" type="float" not-null="true"
+            unique="false" />
+
+        <property name="unitRate" length="126" column="UNIT_RATE"
+            type="float" not-null="true" unique="false" />
+
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" unique="false" />
+
+        <property name="type" length="1" column="TYPE" type="string"
+            not-null="false" unique="false" />
+
+        <property name="contextMatchRatePer" length="126"
+            column="EXACT_CONTEXT_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="inContextMatchRatePer" length="126"
+            column="IN_CONTEXT_MATCH_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="hiFuzzyMatchRatePer" length="126"
+            column="FUZZY_HI_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="lowFuzzyMatchRatePer" length="126"
+            column="FUZZY_LOW_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="medFuzzyMatchRatePer" length="126"
+            column="FUZZY_MED_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="medHiFuzzyMatchRatePer" length="126"
+            column="FUZZY_MED_HI_RATE_PER" type="float" not-null="true"
+            unique="false" />
+            
+        <property name="segmentTmRatePer" length="126"
+            column="EXACT_SEGMENT_TM_RATE_PER" type="float" not-null="true"
+            unique="false" />
+
+        <property name="noMatchRepetitionRatePer" length="126"
+            column="NO_MATCH_REPETITION_RATE_PER" type="float"
+            not-null="true" unique="false" />
+            
+        <many-to-one name="activity" column="ACTIVITY_ID"
+            class="com.globalsight.everest.workflow.Activity"
+            not-null="true" lazy="false" />
+
+        <many-to-one name="currency" column="CURRENCY_CONV_ID"
+            class="com.globalsight.everest.costing.Currency"
+            not-null="false" lazy="false" />
+
+        <many-to-one name="localePair" column="LOCALE_PAIR_ID"
+            class="com.globalsight.everest.foundation.LocalePair"
+            not-null="true" lazy="false" />
+
+    </class>
+
+</hibernate-mapping>

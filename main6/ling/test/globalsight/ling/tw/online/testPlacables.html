@@ -1,0 +1,107 @@
+<HTML>
+ <HEAD>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO8859_1">
+
+  <SCRIPT LANGUAGE="JavaScript">
+  <!--
+     function testVerbose()
+     {
+      document.theform.output.value = document.placables.getVerbose();
+     }
+      
+     function testCompact()
+     {
+      document.theform.output.value = document.placables.getCompact();
+     }
+
+     function testGetPtagToNativeMappingTable()
+     {
+      document.theform.output.value = document.placables.getPtagToNativeMappingTable();
+     }
+
+     function testErrorCheck()
+     {
+       alert(document.placables.errorCheck(document.theform.output.value));
+     }
+
+     function testGetTargetDiplomatString()
+     {
+       // You must always do an error check first before submitting the target.
+       msg = document.placables.errorCheck(document.theform.output.value);
+       if(!msg)
+       {
+         document.theform.output.value = document.placables.getTargetDiplomat(document.theform.output.value);
+       }
+       else
+       {
+         alert(msg);
+       }
+     }
+
+     function testSetInputSegment()
+     {
+    
+       document.placables.setInputSegment(document.theform.input.value, "", "html");
+     }
+
+     function onerror(msg, URL, linenum)
+     {
+       var errorMsg = msg;
+       alert("Error:" + errorMsg);
+       return true;
+     }
+  
+   //-->
+  </SCRIPT>
+ </HEAD>
+<BODY> 
+<FORM name=theform>
+Input:
+<textarea name="input" col="200" rows="15" wrap="virtual">
+&lt;bpt type="bold" i="1" erasable="1">&amp;lt;b&amp;gt;&lt;/bpt>Hello World&lt;ept type="bold" i="1" erasable="1">&amp;lt;b&amp;gt;&lt;/ept>
+</textarea>
+Output:
+<textarea name="output" col="200" rows="15" ></textarea>
+<p>
+<INPUT type="button" value="Set Input Segment" onclick="testSetInputSegment()"/>
+<p>
+<p>
+<INPUT type="button" value="Verbose" onclick="testVerbose()"></a>
+<INPUT type="button" value="Compact" onclick="testCompact()"/>
+<INPUT type="button" value="Error Check" onclick="testErrorCheck()"/>
+<INPUT type="button" value="Mapping Table" onclick="testGetPtagToNativeMappingTable()"/>
+<INPUT type="button" value="Get Diplomat Segment" onclick="testGetTargetDiplomatString()"/>
+</FORM>
+<p>
+THIS IS A SAMPLE PAGE TO DEMONSTRATE PTAGS.<p>
+<ul>
+  <li> 1) Use the SetInputSegment button to submit the input string and convert it to  PTags internaly.
+  <li> 2) Then press GetVerbose or GetCompact to get the converted string.
+  <li> 3) Make some changes in the output box to simulate translator activity.
+  <li> 4) Press the check errors button.
+  <li> 6) Press the GetDiplomatSegment button to get the target back as diplomat.
+</ul>
+NOTE: An empty error message means there are no errors.
+<p>
+NOTE: You can paste another larger Diplomat segment into the input box if you like.
+<p>
+NOTE: The mapping Table button returns an HTML string that will be used to display the mapping table.
+ <APPLET 
+  archive="online.jar"
+  code="com.globalsight.ling.tw.online.OnlineApplet.class" 
+  id="placables" 
+  name="placables" 
+  width="1" 
+  height="1" 
+>
+ </APPLET>
+</BODY >
+</HTML>
+
+
+
+
+
+
+
+

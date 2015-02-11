@@ -1,0 +1,8 @@
+bin\Release\GlobalSight.Common.dll
+obj\Release\ResolveAssemblyReference.cache
+obj\Release\GlobalSight.Common.dll
+bin\Debug\GlobalSight.Common.dll
+bin\Debug\GlobalSight.Common.pdb
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\GlobalSight.Common.dll
+obj\Debug\GlobalSight.Common.pdb

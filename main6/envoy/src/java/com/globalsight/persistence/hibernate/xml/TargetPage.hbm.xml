@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.page.TargetPage"
+        table="TARGET_PAGE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <component name="extractedFile"
+            class="com.globalsight.everest.page.ExtractedTargetFile"
+            lazy="false">
+            <property name="gxmlVersion" length="10"
+                column="GXML_VERSION" type="string" not-null="false"
+                unique="false" />
+            <property name="externalBaseHref" length="2000"
+                column="EXTERNAL_BASE_HREF" type="string"
+                not-null="false" unique="false" />
+            <property name="internalBaseHref" length="2000"
+                column="INTERNAL_BASE_HREF" type="string"
+                not-null="false" unique="false" />
+
+            <bag name="leverageGroupSet" cascade="save-update"
+                table="TARGET_PAGE_LEVERAGE_GROUP">
+                <key column="TP_ID" />
+                <many-to-many
+                    class="com.globalsight.everest.tuv.LeverageGroupImpl"
+                    column="LG_ID" />
+            </bag>
+        </component>
+        <component name="unextractedFile"
+            class="com.globalsight.everest.page.UnextractedFile"
+            lazy="false">
+            <property name="fileLength" column="FILE_LENGTH" type="long"
+                not-null="false" unique="false" />
+            <property name="lastModifiedDate" column="LAST_MODIFIED"
+                type="timestamp" not-null="false" unique="false" />
+            <property name="lastModifiedBy" length="80"
+                column="MODIFIER_USER_ID" type="string" not-null="false"
+                unique="false" />
+            <property name="storagePath" length="4000"
+                column="STORAGE_PATH" type="string" not-null="false"
+                unique="false" />
+        </component>
+        <component name="wordCount"
+            class="com.globalsight.everest.page.PageWordCounts"
+            lazy="false">
+            <property name="contextMatchWordCount" length="10"
+                column="EXACT_CONTEXT_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="inContextWordCount" length="10"
+                column="IN_CONTEXT_MATCH_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="noUseInContextMatchWordCount" length="10"
+                column="NO_USE_IC_MATCH_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="noUseExactMatchWordCount" length="10"
+                column="NO_USE_EXACT_MATCH_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="hiFuzzyWordCount" length="10"
+                column="FUZZY_HI_WORD_COUNT" type="int" not-null="false"
+                unique="false" />
+            <property name="lowFuzzyWordCount" length="10"
+                column="FUZZY_LOW_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="medFuzzyWordCount" length="10"
+                column="FUZZY_MED_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="medHiFuzzyWordCount" length="10"
+                column="FUZZY_MED_HI_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="repetitionWordCount" length="10"
+                column="REPETITION_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="segmentTmWordCount" length="10"
+                column="EXACT_SEGMENT_TM_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="subLevMatchWordCount" length="10"
+                column="SUB_LEV_MATCH_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="subLevRepetitionWordCount" length="10"
+                column="SUB_LEV_REPETITION_WORD_COUNT" type="int"
+                not-null="false" unique="false" />
+            <property name="totalWordCount" length="10"
+                column="TOTAL_WORD_COUNT" type="int" not-null="false"
+                unique="false" />
+            <property name="unmatchedWordCount" length="10"
+                column="NO_MATCH_WORD_COUNT" type="int" not-null="false"
+                unique="false" />
+        </component>
+        <property name="cuvId" length="22" column="CUV_ID" type="long"
+            not-null="false" unique="false" />
+        <property name="errorAsString" length="4000"
+            column="EXCEPTION_XML" type="string" not-null="false"
+            unique="false" />
+        <property name="pageState" length="20" column="STATE"
+            type="string" not-null="true" unique="false" />
+        <property name="prevStateBeforeUpdate" length="20"
+            column="PREV_UPDATE_STATE" type="string" not-null="false"
+            unique="false" />
+        <property name="timestamp" column="TIMESTAMP" type="timestamp"
+            not-null="true" unique="false" />
+        <property name="exportSubDir" length="128"
+            column="EXPORT_SUB_DIR" type="string" not-null="false"
+            unique="false" />
+        <property name="CVSTargetModule" length="2000"
+            column="CVS_TARGET_MODULE" type="string" not-null="false"
+            unique="false" />
+        <property name="CVSTargetFilename" length="2000"
+            column="CVS_TARGET_FILENAME" type="string" not-null="false"
+            unique="false" />
+        <property name="isDefaultContextMatch"
+            column="IS_DEFAULT_CONTEXT_MATCH" type="yes_no"
+            not-null="false" unique="false" />
+        <many-to-one name="sourcePage" column="SOURCE_PAGE_ID"
+            class="com.globalsight.everest.page.SourcePage"
+            not-null="true" />
+        <many-to-one name="workflowInstance"
+            column="WORKFLOW_IFLOW_INSTANCE_ID"
+            class="com.globalsight.everest.workflowmanager.WorkflowImpl"
+            not-null="false" />
+    </class>
+</hibernate-mapping>

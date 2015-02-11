@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="Actividad" url="Glosario/Activity.htm" />
+<item name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+<item name="Base de datos terminológica" url="Glosario/Termbase.htm" />
+<item name="Biblioteca de fragmentos" url="Glosario/Snippet_Library.htm" />
+<item name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+<item name="Combinación de idiomas" url="Glosario/Locale_Pair.htm" />
+<item name="Contenido que puede eliminarse" url="Glosario/Deletable_Content.htm" />
+<item name="Ejemplo de archivo de importación de fragmentos" url="Glosario/Snippet_Library_File_Example.htm" />
+<item name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+<item name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+<item name="Fragmento" url="Glosario/Snippet.htm" />
+<item name="Fragmento específico" url="Glosario/Specific_Snippet.htm" />
+<item name="Fragmento genérico" url="Glosario/Generic_Snippet.htm" />
+<item name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+<item name="Idioma" url="Glosario/Locale.htm" />
+<item name="Marcadores de posición" url="Glosario/Placeholder_Tags.htm" />
+<item name="Página de origen con etiquetas GS" url="Glosario/GS-tagged_Source_Page.htm" />
+<item name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+<item name="Proceso de producción" url="Glosario/Workflow.htm" />
+<item name="Proyecto" url="Glosario/Project.htm" />
+<item name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+<item name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+<item name="Segmento" url="Glosario/Segment.htm" />
+<item name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+<item name="Tipo de actividad" url="Glosario/Activity_Type.htm" />
+<item name="TM" url="Glosario/TM.htm" />
+<item name="Trabajo" url="Glosario/Job.htm" />
+
+</tocdata>

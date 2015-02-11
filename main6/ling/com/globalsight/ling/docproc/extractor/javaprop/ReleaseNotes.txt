@@ -1,0 +1,70 @@
+
+Aug 11, 2000
+
+Java Properties Extractor:
+
+- Notes
+- A known issue
+
+
+===================
+NOTES: 
+===================
+
+The javaprop extractor has some configuration options that can be used to change which TMX
+tags are erasable and whether or not leading spaces are marked up with TMX. Often, leading 
+spaces are important to software strings so this second option allows leading spaces to be 
+wrapped in TMX and marked as erasable/non-erasable.
+
+The configuration is currently hard-coded. To change the behavior, open the Extractor.java
+source file and search for the extract() method. Near the top are the following three lines
+of code:
+
+	// Configure Tmx behavior
+	JPTmxEncoder Tmx = new JPTmxEncoder();
+	Tmx.setErasable(JPConstants.ALL_TMX_NON_ERASABLE);
+	Tmx.enableTmxOnLeadingSpaces(true);
+
+The Tmx.setErasable() method can be set to one of the following:
+	
+	ALL_TMX_NON_ERASABLE		// encoded formatting cannot be erased
+	ALL_TMX_ERASABLE		// encoded formatting can be erased
+	LEADING_TMX_NON_ERASABLE 	// only leading formatting can be erased
+
+The Tmx.enableTmxOnLeadingSpaces() method can be set to TRUE or FALSE.
+	
+	true  - leading spaces will be wrapped in TMX
+	false - leading spaces will NOT be wrapped in TMX
+
+Note: This flag only affects leading spaces. 
+
+
+===================
+A KNOWN ISSUE:
+===================
+
+1) Conditional extraction: 
+The conditional extraction works fine.
+However, property values that use line the continuation sequence to 
+break an entry onto more than one line are "always" normalized
+(to a single line) regardless of the conditional extraction tags.
+
+This means that something that is NOT extracted like this:
+
+# GS_BEGIN_EXCLUDE
+key1 = see jane \
+		run.
+# GS_END_EXCLUDE
+
+will look like this in the merged file:
+
+key1 = see jane run.
+
+The condition was upheld but the format of the original string is changed.
+This should have no affect on the way the string is displayed or used and is consider a minor bug.
+
+
+
+
+
+

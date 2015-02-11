@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<book name="Companies" >
+  <item name="Companies Main Screen" url="Setup/Companies/Companies_Main_Screen.htm" />
+  <item name="Create Company" url="Setup/Companies/Companies_Basic_Screen.htm" />
+</book>
+<book name="Locale Pairs" >
+  <item name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+  <item name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+  <item name="Create Locale" url="Setup/Locale_Pairs/Create_Locale.htm" />
+</book>
+<book name="Activity Types" >
+  <item name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+  <item name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+</book>
+<book name="Currency" >
+  <item name="Currency Main Screen" url="Setup/Currency/Currency_Main_Screen.htm" />
+  <item name="Create/Edit Currency" url="Setup/Currency/Create_Modify_Currency.htm" />
+</book>
+<book name="Rates" >
+  <item name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+  <item name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+</book>
+<book name="Calendars" >
+  <item name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <book name="Create/Edit System Calendar" >
+    <item name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
+    <book name="Holidays" >
+      <item name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
+      <item name="Assigning Holidays" url="Setup/Calendars/Assigning_Holidays.htm" />
+      <item name="System Holidays" url="Setup/Calendars/System_Holidays.htm" />
+    </book>
+    <book name="User Calendars" >
+      <item name="User Calendars" url="Setup/Calendars/User_Calendars.htm" />
+      <item name="View User Events" url="Setup/Users/View_User_Events.htm" />
+      <item name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+    </book>
+  </book>
+</book>
+<book name="Permission Groups" >
+  <item name="Permission Groups - Main Screen" url="Setup/Permission_Groups/Permission_Groups.htm" />
+  <item name="Permission Group - Details" url="Setup/Permission_Groups/Permission_Group_(Details).htm" />
+  <book name="Edit Permission Group" >
+    <item name="Edit Permission Group - Basic Information" url="Setup/Permission_Groups/Edit_Permission_Group_-_Basic_Information.htm" />
+    <item name="Edit Permission Group - Permissions" url="Setup/Permission_Groups/Edit_Premossion_Group_-_Permissions.htm" />
+    <item name="Edit Permission Group - Users" url="Setup/Permission_Groups/Edit_Permission_Group_-_Users.htm" />
+  </book>
+  <book name="New Permission Group" >
+    <item name="New Permission Group - Basic Information" url="Setup/Permission_Groups/New_Permission_Group_-_Basic_Information.htm" />
+    <item name="New Permission Group - Permissions" url="Setup/Permission_Groups/New_Edit_Permission_Group_-_Permissions.htm" />
+    <item name="New Permission Group - Users" url="Setup/Permission_Groups/New_Permission_Group_-_Users.htm" />
+  </book>
+</book>
+<book name="Users" >
+  <item name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+  <item name="Search Users" url="Setup/Users/Filter_User_List.htm" />
+  <item name="User Details" url="Setup/Users/User_Details.htm" />
+  <book name="Create/Edit User" >
+    <item name="Basic Information" url="Setup/Users/User_Information.htm" />
+    <item name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+    <book name="Calendar" >
+      <item name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+      <item name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+      <item name="View User Events" url="Setup/Users/View_User_Events.htm" />
+    </book>
+    <item name="New/Edit Roles" url="Setup/Users/Edit_Roles.htm" />
+    <item name="Roles List" url="Setup/Users/Roles_List.htm" />
+    <item name="Projects" url="Setup/Users/Projects.htm" />
+    <item name="Field Level Access" url="Setup/Users/Field_Level_Access.htm" />
+    <item name="Permission Group" url="Setup/Users/New_User_-_Permission_Group.htm" />
+  </book>
+</book>
+<book name="Translation Memory" >
+  <item name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <item name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
+  <item name="Remove TM" url="Setup/Translation_Memory/Remove_TM.htm" />
+  <book name="Maintenance" >
+    <item name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+    <item name="Results (Search and Replace p.2)" url="Setup/Translation_Memory/Results.htm" />
+    <item name="Replacement Results" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+    <item name="Segment Deletion Results" url="Setup/Translation_Memory/Segment_Deletion_Results.htm" />
+  </book>
+  <book name="Export" >
+    <item name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+    <item name="Output Options (Export p.2)" url="Setup/Translation_Memory/Output_Options_(Export_p.2).htm" />
+    <item name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  </book>
+  <book name="Import" >
+    <item name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+    <item name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
+  </book>
+  <book name="Reindex" >
+    <item name="Reindex TM" url="Setup/Translation_Memory/Reindex_TM.htm" />
+    <item name="Reindexing TM" url="Setup/Translation_Memory/Reindexing_TM.htm" />
+  </book>
+</book>
+<book name="Translation Memory Profiles" >
+  <item name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+  <item name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+</book>
+<book name="Terminology" >
+  <item name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <item name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
+  <book name="Indexes" >
+    <item name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+    <item name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+    <item name="Schedule Re-Indexing" url="Setup/Terminology/Schedule_Re-Indexing.htm" />
+  </book>
+  <book name="Browse Termbase" >
+    <item name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+    <book name="Create/Edit Entry" >
+      <item name="Entry Editor" url="Setup/Terminology/Entry_Editor.htm" />
+      <item name="New Field" url="Setup/Terminology/New_Field.htm" />
+      <item name="Add Link" url="Setup/Terminology/Add_Link.htm" />
+      <item name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+      <item name="Insert Image" url="Setup/Terminology/Insert_Image.htm" />
+    </book>
+  </book>
+  <book name="Import" >
+    <item name="Import Termbase" url="Setup/Terminology/Import.htm" />
+    <item name="Verify CSV Columns (Import p.2)" url="Setup/Terminology/Verify_CSV_Columns_(Import_p.2).htm" />
+    <item name="Define Termbase Column" url="Setup/Terminology/Define_Termbase_Column.htm" />
+    <item name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
+    <item name="Import into Termbase (Import p.4)" url="Setup/Terminology/Import_into_Termbase.htm" />
+  </book>
+  <book name="Export" >
+    <item name="Export Termbase" url="Setup/Terminology/Export.htm" />
+    <item name="Output Options (Export p.2)" url="Setup/Terminology/Output_Options_(Export_p.2)1.htm" />
+    <item name="Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+  </book>
+  <book name="Maintenance" >
+    <item name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+    <item name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+    <item name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+    <item name="Replacing in Termbase (Maintenance p.4)" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+  </book>
+  <book name="Input Models" >
+    <item name="Manage Input Models" url="Setup/Terminology/Manage_Input_Models.htm" />
+    <book name="Create/Edit Input Model" >
+      <item name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+      <item name="Add Language Constraint" url="Setup/Terminology/Add_Language_Constraint.htm" />
+      <item name="Add Field Constraint" url="Setup/Terminology/Add_Field_Constraint.htm" />
+      <item name="Add Synonym Constraint" url="Setup/Terminology/Add_Synonym_Constraint.htm" />
+      <item name="Create/Edit Field" url="Setup/Terminology/Create_Edit_Field.htm" />
+    </book>
+  </book>
+  <item name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+</book>
+<book name="Projects" >
+  <item name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <item name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <item name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <book name="Import Schedules" >
+    <item name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+    <item name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+    <item name="Column Mapping" url="Setup/Projects/Column_Mapping.htm" />
+  </book>
+  <book name="Export Schedules" >
+    <item name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+    <item name="Output Options (Export p.2)" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+    <item name="Exporting... (Export p.3)" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+  </book>
+</book>
+<book name="Workflows" >
+  <item name="Workflows" url="Setup/Workflows/Workflows.htm" />
+  <item name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <item name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <item name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
+  <item name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <item name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <book name="Sample Workflows" >
+    <item name="One Activity Workflow" url="Setup/Workflows/Sample_Workflows/One_Activity_Workflow.htm" />
+    <item name="Two Activity Workflow" url="Setup/Workflows/Sample_Workflows/Two_Activity_Workflow.htm" />
+    <item name="Looping Workflow" url="Setup/Workflows/Sample_Workflows/Looping_Workflow.htm" />
+    <item name="Looping Workflow with Finish Options" url="Setup/Workflows/Sample_Workflows/Looping_Workflow_with_Finish_Options.htm" />
+  </book>
+</book>
+<book name="Localization Profiles" >
+<chunk name="Localization Profiles" ref="whtdata7.xml" />
+</book>
+<book name="Support Files" >
+<chunk name="Support Files" ref="whtdata8.xml" />
+</book>
+<book name="Snippet Import" >
+<chunk name="Snippet Import" ref="whtdata9.xml" />
+</book>
+<book name="System Parameters" >
+  <item name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+</book>
+<book name="Logs" >
+  <item name="Log Files" url="Setup/Logs/Log_Files.htm" />
+</book>
+<book name="System Shutdown" >
+<chunk name="System Shutdown" ref="whtdata10.xml" />
+</book>
+<item name="Setup Menus" url="Setup/Setup.htm" />
+
+</tocdata>

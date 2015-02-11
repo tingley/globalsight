@@ -1,0 +1,43 @@
+<!--
+    Copyright (c) 2002, GlobalSight Corporation. All rights reserved.
+
+    DTD for list of GlobalSight localization profiles.
+    
+    Typical usage:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE gsLocalizationProfileList SYSTEM "/globalsight/includes/dtds/gsLocalizationProfileList.dtd">
+    <gsLocalizationProfileList>
+    	<profile>
+        	<id>1003</id>
+        	<name>locprof2</name>
+        	<description>English to French, German, Spanish translations</description>
+        	<sourceLocale>en_US</sourceLocale>
+        	<targetLocale>fr_FR</targetLocale>
+        	<targetLocale>es_ES</targetLocale>
+        	<targetLocale>de_DE</targetLocale>
+    	</profile>
+    	<profile>
+        	<id>1004</id>
+        	<name>locprof3</name>
+        	<description>English to Japanese translation</description>
+        	<sourceLocale>en_US</sourceLocale>
+        	<targetLocale>ja_JP</targetLocale>
+    	</profile>
+	</gsLocalizationProfileList>
+
+-->
+
+  <!ELEMENT gsLocalizationProfileList (profile)*>
+
+  <!ELEMENT profile (id, name, description, sourceLocale, targetLocale+)*>
+  
+  <!ELEMENT id (#PCDATA)>
+  
+  <!ELEMENT name (#PCDATA)>
+  
+  <!ELEMENT description (#PCDATA)>
+  
+  <!ELEMENT sourceLocale (#PCDATA)>
+  
+  <!ELEMENT targetLocale (#PCDATA)>

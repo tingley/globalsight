@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IllustratorConvert", "IllustratorConvert\IllustratorConvert.csproj", "{8DFEC2EA-B118-419E-96C7-3B67DFDC110C}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "IllustratorConverterSetup", "IllustratorConverterSetup\IllustratorConverterSetup.vdproj", "{F865BF9F-50F8-47A3-95E2-D62A4A3DEBC9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8DFEC2EA-B118-419E-96C7-3B67DFDC110C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DFEC2EA-B118-419E-96C7-3B67DFDC110C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DFEC2EA-B118-419E-96C7-3B67DFDC110C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DFEC2EA-B118-419E-96C7-3B67DFDC110C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F865BF9F-50F8-47A3-95E2-D62A4A3DEBC9}.Debug|Any CPU.ActiveCfg = Debug
+		{F865BF9F-50F8-47A3-95E2-D62A4A3DEBC9}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

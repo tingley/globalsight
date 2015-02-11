@@ -1,0 +1,3863 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "pageexport"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A7F16BB0212"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "PageExporter"
+	    quid       	"3A82D38F03BC"
+	    documentation 	"A remote object responsible for manual/automatic export.  Note that the export process is based on one or more pages of a workflow."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "export"
+		    quid       	"3A82D39D014F"
+		    documentation 	
+|This method is used as a automatic/manual export for page(s).  The method takes two parameters:
+|1. a list of page ids.
+|2. an ExportParameter object that contains the workflow level info.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_pageIds"
+			    quid       	"3A82D6A901FB"
+			    documentation 	"A collection of page ids of a workflow since they should have the same target locale."
+			    type       	"List")
+			(object Parameter "p_exportParameter"
+			    quid       	"3AC3C56F03D0"
+			    documentation 	"An object containing workflow level info of one of more pages for export process."
+			    type       	"ExportParameters"
+			    quidu      	"3AC3C3880217"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "PageExporterWLRemote"
+	    quid       	"3AA6E54602C2"
+	    stereotype 	"Interface"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AA6E6010311"
+		    supplier   	"Logical View::weblogic.rmi.Remote"
+		    quidu      	"38CC948B02AE")
+		(object Inheritance_Relationship
+		    quid       	"3AA6E6060047"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::PageExporter"
+		    quidu      	"3A82D38F03BC")))
+	(object Class "PageExporterWLRMIImpl"
+	    quid       	"3AA6E55E0385"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3AA6E68F010D"
+		    supplier   	"Logical View::weblogic.rmi.UnicastRemoteObject"
+		    quidu      	"38D6DE1203BA"))
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"3AA6E67701D0"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::PageExporterLocal"
+		    quidu      	"3AA6E57A017C"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3AA6E62F00DC"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::PageExporterWLRemote"
+		    quidu      	"3AA6E54602C2")))
+	(object Class "PageExporterLocal"
+	    quid       	"3AA6E57A017C"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3AA6E5E001B5"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::PageExporter"
+		    quidu      	"3A82D38F03BC")))
+	(object Class "ExportPageGenerator"
+	    quid       	"3AA6E6ED0162"
+	    documentation 	"This class is responsible for creating a JMS session pool which is used for processing each export as a separate thread.  A JMS session pool is initially created an upon calling the performExport method, the message is sent to the JMS queue."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "performExport"
+		    quid       	"3AA6E71B03AD"
+		    documentation 	
+|Starts the export process by:
+|1. Setting the parameters in the message (by putting the attributes in a Hashtable) and then add the Hashtable to the message.
+|2. send the message to the JMS queue.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "p_pageIds"
+			    quid       	"3AA7BD2D0015"
+			    documentation 	"A collection of page ids of a workflow since they should have the same target locale."
+			    type       	"List")
+			(object Parameter "p_exportParameter"
+			    quid       	"3AC3C6150035"
+			    documentation 	"An object containing workflow level info of one of more pages for export process."
+			    type       	"ExportParameters"
+			    quidu      	"3AC3C3880217"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "createJMSSessionPool"
+		    quid       	"3AA7BCA803B7"
+		    documentation 	"creates the JMS session pool for processing the export as a separate thread."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)))
+	(object Class "ExportMessageListener"
+	    quid       	"3AA7C27202FA"
+	    documentation 	"This class implements MessageListener interface which is used to receive asynchronously delivered messages sent by ExportPageGenerator.  Upon receiving a message, it'll start performing the export process as a separate thread."
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3AA7C44F020F"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::javax.jms.MessageListener"
+		    quidu      	"3AA7C43100FE"))
+	    operations 	(list Operations
+		(object Operation "onMessage"
+		    quid       	"3AA7C2F80049"
+		    documentation 	"Pass a message to the Listener and then start the export process using the message received."
+		    parameters 	(list Parameters
+			(object Parameter "p_message"
+			    quid       	"3AA7C48701D4"
+			    documentation 	
+|The message is basically a Hashtable that contains:
+|1. A list of page Id(s).
+|2. A target charset (optional and is used only for files).
+|3. An export direcotry (only used for files).
+			    
+			    type       	"Message"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getPage"
+		    quid       	"3AC1368D0352"
+		    documentation 	"get the Page object for the given pageId."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AC136A40305"
+			    type       	"long"))
+		    result     	"Page"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0
+		    quidu      	"3A81DBBB01D0")
+		(object Operation "getExportTemplate"
+		    quid       	"3AA7C5570309"
+		    documentation 	"Get the template used for exporting a particular page."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AA7C5FB00DE"
+			    type       	"long"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)
+		(object Operation "getSegments"
+		    quid       	"3AA7C56303C5"
+		    documentation 	"Get a collection of segments for a particular page.  Each segment is represented as a TranslationUnitVariant object."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AA7C67401C9"
+			    type       	"long"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)
+		(object Operation "getRequest"
+		    quid       	"3AC3C64001B4"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AC3C9B401C9"
+			    type       	"long"))
+		    result     	"Request"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0
+		    quidu      	"3AA97A9202B5")
+		(object Operation "getOriginalMessageId"
+		    quid       	"3AA7C7A800BD"
+		    documentation 	"Get the original message id that was sent from CXE during importing the page.  This id is sent back to CXE for validation purposes."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)
+		(object Operation "getNewMessageId"
+		    quid       	"3AA7C9F600C5"
+		    documentation 	"Get a new message id created by CAP for verifying CXE's response to the export process."
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)
+		(object Operation "populatePage"
+		    quid       	"3AA7CA7D014C"
+		    documentation 	"Creates the final version of the GXML which is basically obtained by replacing the segments in the export template."
+		    parameters 	(list Parameters
+			(object Parameter "p_template"
+			    quid       	"3AA7CB8000EA"
+			    type       	"String")
+			(object Parameter "p_segments"
+			    quid       	"3AA7CB8A027F"
+			    type       	"List"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)
+		(object Operation "sendToCXE"
+		    quid       	"3AA7CB9E0151"
+		    documentation 	"Send the request to CXE.  This is basically the last part of the export process."
+		    parameters 	(list Parameters
+			(object Parameter "p_diplomatGxml"
+			    quid       	"3AA7CBF700EB"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Private"
+		    uid        	0)))
+	(object Class "javax.jms.MessageListener"
+	    quid       	"3AA7C43100FE"
+	    stereotype 	"Interface")
+	(object Class "ExportPageGeneratorImpl"
+	    quid       	"3AA7D15B0154"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3AA7D17A016C"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportPageGenerator"
+		    quidu      	"3AA6E6ED0162")))
+	(object Class "ExportLinkL10nManager"
+	    quid       	"3AC1313602E8"
+	    documentation 	
+|ExportLinkL10nManager is responsible for export's link localization process.  This class has two static methods that are used for updating two different "url" categories. 
+	    
+	    operations 	(list Operations
+		(object Operation "updateSupportedLink"
+		    quid       	"3AC131A402A0"
+		    documentation 	"Update a localizable segment with a url type of 'url-a', 'url-frame', 'url-link', 'url-form', and 'url-area' if necessary."
+		    parameters 	(list Parameters
+			(object Parameter "p_localeParam"
+			    quid       	"3AC131DC021E"
+			    type       	"String")
+			(object Parameter "p_sourceLocale"
+			    quid       	"3AC131F00340"
+			    type       	"String")
+			(object Parameter "p_targetLocale"
+			    quid       	"3AC131F70105"
+			    type       	"String")
+			(object Parameter "p_segment"
+			    quid       	"3AC1321201D6"
+			    type       	"Tuv"
+			    quidu      	"3AC0EFF1013F")
+			(object Parameter "p_isLocale"
+			    quid       	"3AC1322303C5"
+			    type       	"boolean"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "updateImageLink"
+		    quid       	"3AC1326100AD"
+		    documentation 	"Update an image url type (url-img) if necessary."
+		    parameters 	(list Parameters
+			(object Parameter "p_segment"
+			    quid       	"3AC1326E0391"
+			    type       	"Tuv"
+			    quidu      	"3AC0EFF1013F")
+			(object Parameter "p_rootDir"
+			    quid       	"3AC1328203D6"
+			    type       	"String")
+			(object Parameter "p_fileName"
+			    quid       	"3AC1328A019C"
+			    type       	"String")
+			(object Parameter "p_asRelative"
+			    quid       	"3AC132CF0386"
+			    type       	"boolean"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ExportParameters"
+	    quid       	"3AC3C3880217"
+	    documentation 	"ExportParameters class contains a few Workflow level info that are used during export process.  Since the selected pages for export are within the same workflow, we need to gather the generic info required for export and link management prior to page retrieval."
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3AC3DBC5015B"
+		    supplier   	"Logical View::Envoy::Envoy Server::Job Handler::java.io.Serializable"
+		    quidu      	"39A3EDC10375"))
+	    operations 	(list Operations
+		(object Operation "getSourceLocale"
+		    quid       	"3AC3C4500142"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTargetLocale"
+		    quid       	"3AC3C4000238"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExportCodeset"
+		    quid       	"3AC3C4090000"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTargetUrl"
+		    quid       	"3AC3C418026E"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getResponseUrl"
+		    quid       	"3AC3C4340110"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getScriptL10nParameter"
+		    quid       	"3AC3C45B0238"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExportDirectoryRuleType"
+		    quid       	"3AC3C48701A5"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWebServerRoot"
+		    quid       	"3AC3C49D02B5"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getImageLinkL10nType"
+		    quid       	"3AC3C4AB020B"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "isLinkL10nOn"
+		    quid       	"3AC3C4B401C8"
+		    result     	"boolean"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCmsSourceBranch"
+		    quid       	"3AC3C4C80177"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getCmsTargetBranch"
+		    quid       	"3AC3C4D101AC"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ExportBatchEvent"
+	    quid       	"3E6FB197012D"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3E6FB1FF02D2"
+		    supplier   	"Logical View::com::globalsight::everest::persistence::PersistentObject"
+		    quidu      	"3C47570F03C3"))
+	    operations 	(list Operations
+		(object Operation "getEndTime"
+		    quid       	"3E6FB28D002D"
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExportingPages"
+		    quid       	"3E6FB6A0039E"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExportType"
+		    quid       	"3E77B8EA0345"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getJob"
+		    quid       	"3E6FB358010B"
+		    result     	"Job"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getResponsibleUserId"
+		    quid       	"3E6FB2990283"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getStartTime"
+		    quid       	"3E6FB26B00E2"
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTaskId"
+		    quid       	"3E77B85A01D6"
+		    result     	"Long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowIds"
+		    quid       	"3E77B83501BF"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ExportingPage"
+	    quid       	"3E6FB1A9010B"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3E6FB6DD0048"
+		    supplier   	"Logical View::com::globalsight::everest::persistence::PersistentObject"
+		    quidu      	"3C47570F03C3"))
+	    operations 	(list Operations
+		(object Operation "getErrorMessage"
+		    quid       	"3E6FB5CB038D"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExportBatchEvent"
+		    quid       	"3E6FB4AF0295"
+		    result     	"ExportBatchEvent"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3E6FB197012D")
+		(object Operation "getPage"
+		    quid       	"3E6FB4A90336"
+		    result     	"GenericPage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3E78D8AF0323")
+		(object Operation "getPageType"
+		    quid       	"3E88FB2A037A"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getState"
+		    quid       	"3E6FB4C00249"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "$UNNAMED$0"
+	    quid       	"3E6FBF6A01AE")
+	(object Association "$UNNAMED$1"
+	    quid       	"3AA7C2AE0165"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$2"
+		    quid       	"3AA7C2AF0225"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportPageGenerator"
+		    quidu      	"3AA6E6ED0162"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$3"
+		    quid       	"3AA7C2AF0226"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::PageExporterLocal"
+		    quidu      	"3AA6E57A017C"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$4"
+	    quid       	"3AA7D17E012C"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$5"
+		    quid       	"3AA7D17F0264"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportMessageListener"
+		    quidu      	"3AA7C27202FA"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$6"
+		    quid       	"3AA7D17F026E"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportPageGeneratorImpl"
+		    quidu      	"3AA7D15B0154")))
+	(object Association "$UNNAMED$7"
+	    quid       	"3AC132DA0179"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$8"
+		    quid       	"3AC132DB0121"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportLinkL10nManager"
+		    quidu      	"3AC1313602E8"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$9"
+		    quid       	"3AC132DB012B"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportMessageListener"
+		    quidu      	"3AA7C27202FA")))
+	(object Association "$UNNAMED$10"
+	    quid       	"3AC3CA3000C3"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$11"
+		    quid       	"3AC3CA310114"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportParameters"
+		    quidu      	"3AC3C3880217"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$12"
+		    quid       	"3AC3CA31011E"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportMessageListener"
+		    quidu      	"3AA7C27202FA")))
+	(object Association "$UNNAMED$13"
+	    quid       	"3E6FB2220001"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$14"
+		    quid       	"3E6FB22202F0"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportingPage"
+		    quidu      	"3E6FB1A9010B"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$15"
+		    quid       	"3E6FB22202FA"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportBatchEvent"
+		    quidu      	"3E6FB197012D"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$16"
+	    quid       	"3E7BAD910085"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$17"
+		    quid       	"3E7BAD910252"
+		    supplier   	"Logical View::com::globalsight::everest::jobhandler::workflowhandler::Workflow"
+		    quidu      	"3AAE4DA80099"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$18"
+		    quid       	"3E7BAD910270"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportBatchEvent"
+		    quidu      	"3E6FB197012D"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$19"
+	    quid       	"3E7BB0E2009A"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$20"
+		    quid       	"3E7BB0E20266"
+		    supplier   	"Logical View::com::globalsight::everest::jobhandler::Job"
+		    quidu      	"3A846D080167"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$21"
+		    quid       	"3E7BB0E20284"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportBatchEvent"
+		    quidu      	"3E6FB197012D")))
+	(object Association "$UNNAMED$22"
+	    quid       	"3E88FBEC0300"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$23"
+		    quid       	"3E88FBED0239"
+		    supplier   	"Logical View::com::globalsight::everest::workflowmanager::GenericPage"
+		    quidu      	"3E78D8AF0323"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$24"
+		    quid       	"3E88FBED0243"
+		    supplier   	"Logical View::com::globalsight::everest::pageexport::ExportingPage"
+		    quidu      	"3E6FB1A9010B")))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "PageExporterLocal"
+		    quid       	"3AA7D2C60336"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3AA7D5030055"
+			    supplier   	"ExportPageGeneratorImpl"
+			    quidu      	"3AA7D33F01C8"
+			    messages   	(list Messages
+				(object Message "performExport(List, ExportParameters)"
+				    quid       	"3AA7D5030056"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"3AA6E71B03AD"))))
+		    class      	"Logical View::com::globalsight::everest::pageexport::PageExporterLocal"
+		    quidu      	"3AA6E57A017C"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "ExportPageGeneratorImpl"
+		    quid       	"3AA7D33F01C8"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3AA7D514028A"
+			    supplier   	"ExportMessageListener"
+			    quidu      	"3AA7D34A030E"
+			    messages   	(list Messages
+				(object Message "onMessage(Message)"
+				    quid       	"3AA7D514028B"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    quidu      	"3AA7C2F80049"))))
+		    class      	"Logical View::com::globalsight::everest::pageexport::ExportPageGeneratorImpl"
+		    quidu      	"3AA7D15B0154"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "ExportMessageListener"
+		    quid       	"3AA7D34A030E"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3AC3CB78034F"
+			    supplier   	"PageManager"
+			    quidu      	"3AC3CADC000C"
+			    messages   	(list Messages
+				(object Message "getSourcePage(long)"
+				    quid       	"3AC3CB780350"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	3
+				    quidu      	"3AA7B0C0003D")
+				(object Message "getTemplate(long, int)"
+				    quid       	"3AC3CB990298"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	4
+				    quidu      	"3AA6CEC702C5")))
+			(object Link
+			    quid       	"3AC3CBA70307"
+			    supplier   	"TuvManager"
+			    quidu      	"3AC3CB04026C"
+			    messages   	(list Messages
+				(object Message "getExportTuv(long, long)"
+				    quid       	"3AC3CBA70308"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	5
+				    quidu      	"3AA6CE8A0187")))
+			(object Link
+			    quid       	"3AC3CBFF0209"
+			    supplier   	"RequestHandler"
+			    quidu      	"3AC3CB2603C0"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"3AC3CBFF020A"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	6)))
+			(object Link
+			    quid       	"3AC3CCA90268"
+			    supplier   	"Request"
+			    quidu      	"3AC3CB300085"
+			    messages   	(list Messages
+				(object Message "getMessageId( )"
+				    quid       	"3AC3CCA90269"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"8"
+				    ordinal    	7
+				    quidu      	"3AA97B0E0336")))
+			(object Link
+			    quid       	"3AC3CD07028B"
+			    supplier   	"ExportLinkL10nManager"
+			    quidu      	"3AC3CCCF00AA"
+			    messages   	(list Messages
+				(object Message "updateSupportedLink(String, String, String, Tuv, boolean)"
+				    quid       	"3AC3CD07028C"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"10"
+				    ordinal    	9
+				    quidu      	"3AC131A402A0")
+				(object Message "updateImageLink(Tuv, String, String, boolean)"
+				    quid       	"3AC3CD1303C8"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"11"
+				    ordinal    	10
+				    quidu      	"3AC1326100AD")))
+			(object Link
+			    quid       	"3AC3D43D0380"
+			    supplier   	"ExportMessageListener"
+			    quidu      	"3AA7D34A030E"
+			    messages   	(list Messages
+				(object Message "populatePage(String, List)"
+				    quid       	"3AC3D43D0381"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"9"
+				    ordinal    	8
+				    quidu      	"3AA7CA7D014C")
+				(object Message "sendToCXE(String)"
+				    quid       	"3AC3D474032E"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"12"
+				    ordinal    	11
+				    quidu      	"3AA7CB9E0151"))))
+		    class      	"Logical View::com::globalsight::everest::pageexport::ExportMessageListener"
+		    quidu      	"3AA7C27202FA"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "PageExporterWLRMIImpl1"
+		    quid       	"3AA7D77900D3"
+		    documentation 	"Page exporter remote object."
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3AA7D7B30131"
+			    supplier   	"PageExporterLocal"
+			    quidu      	"3AA7D2C60336"
+			    messages   	(list Messages
+				(object Message "export(List, ExportParameters)"
+				    quid       	"3AA7D7B30132"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    quidu      	"3A82D39D014F"))))
+		    class      	"Logical View::com::globalsight::everest::pageexport::PageExporterWLRMIImpl"
+		    quidu      	"3AA6E55E0385"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "PageManager"
+		    quid       	"3AC3CADC000C"
+		    class      	"Logical View::com::globalsight::everest::page::PageManager"
+		    quidu      	"3AA6CEB200A8"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "TuvManager"
+		    quid       	"3AC3CB04026C"
+		    class      	"Logical View::com::globalsight::everest::tuv::TuvManager"
+		    quidu      	"3AA6CDF9020A"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "RequestHandler"
+		    quid       	"3AC3CB2603C0"
+		    class      	"Logical View::com::globalsight::everest::request::RequestHandler"
+		    quidu      	"38C6EEB803C6"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "Request"
+		    quid       	"3AC3CB300085"
+		    class      	"Logical View::com::globalsight::everest::request::Request"
+		    quidu      	"3AA97A9202B5"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "ExportLinkL10nManager"
+		    quid       	"3AC3CCCF00AA"
+		    class      	"Logical View::com::globalsight::everest::pageexport::ExportLinkL10nManager"
+		    quidu      	"3AC1313602E8"
+		    persistence 	"Transient"
+		    multi      	FALSE)))
+	(object Mechanism @2
+	    logical_models 	(list unit_reference_list
+		(object Object "WorkflowHandlerHelper"
+		    quid       	"3E6FBD850071"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FBD850072"
+			    supplier   	"WorkflowHandlerHelper"
+			    quidu      	"3E6FBD850071"
+			    messages   	(list Messages
+				(object Message "exportPage(...)"
+				    quid       	"3E6FC0ED00E3"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"ToClientFromSupplier"
+				    sequence   	"4"
+				    ordinal    	3)))
+			(object Link
+			    quid       	"3E6FBD850074"
+			    supplier   	"PageManager"
+			    quidu      	"3E6FBD85007F"
+			    messages   	(list Messages
+				(object Message "exportPage(...)"
+				    quid       	"3E6FC0F202CA"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	4)))
+			(object Link
+			    quid       	"3E6FBD850078"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E6FBD85008E"))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "JobExportControlFlowHelper"
+		    quid       	"3E6FBD85007C"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FC07B0229"
+			    supplier   	"PageManager"
+			    quidu      	"3E6FBD85007F")
+			(object Link
+			    quid       	"3E6FC0E70030"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E6FBD85008E"
+			    messages   	(list Messages
+				(object Message "notifyBeginExportTargetPage(...)"
+				    quid       	"3E6FC0E70031"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "PageManager"
+		    quid       	"3E6FBD85007F"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FBD850080"
+			    supplier   	"CxeExportServlet"
+			    quidu      	"3E6FBD850084"
+			    messages   	(list Messages
+				(object Message "doPost"
+				    quid       	"3E6FC0FE01A5"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	5))))
+		    class      	"Logical View::com::globalsight::everest::page::PageManager"
+		    quidu      	"3AA6CEB200A8"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "CxeExportServlet"
+		    quid       	"3E6FBD850084"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FBD850085"
+			    supplier   	"CapExportServlet"
+			    quidu      	"3E6FBD850089")
+			(object Link
+			    quid       	"3E712891026B"
+			    supplier   	"Responsible Export Component"
+			    quidu      	"3E71282D0344"
+			    messages   	(list Messages
+				(object Message "Merge and Conversion process"
+				    quid       	"3E712891026C"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	6))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "ExportEventObserver"
+		    quid       	"3E6FBD85008E"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FC2440258"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E6FBD85008E"
+			    messages   	(list Messages
+				(object Message "createExportBatchInfo(...)"
+				    quid       	"3E6FC2440259"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2)
+				(object Message "updateExportBatchInfo(...)"
+				    quid       	"3E6FC25E01F2"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"10"
+				    ordinal    	9))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "CapExportServlet"
+		    quid       	"3E6FBD850089"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FBD85008A"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E6FBD85008E"
+			    messages   	(list Messages
+				(object Message "notifyPageExportComplete(...)"
+				    quid       	"3E6FC12802B4"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"9"
+				    ordinal    	8))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$25"
+		    quid       	"3E6FBEB002DD"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E6FBF9000F5"
+			    supplier   	"WorkflowHandlerHelper"
+			    quidu      	"3E6FBD850071")
+			(object Link
+			    quid       	"3E6FC06F00A5"
+			    supplier   	"JobExportControlFlowHelper"
+			    quidu      	"3E6FBD85007C"
+			    messages   	(list Messages
+				(object Message "determineLinkToFollow(...)"
+				    quid       	"3E6FC06F00A6"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0))))
+		    class      	"Logical View::com::globalsight::everest::workflow::System4 User"
+		    quidu      	"3E63A61B0377"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "Responsible Export Component"
+		    quid       	"3E71282D0344"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E71289C028F"
+			    supplier   	"CapExportServlet"
+			    quidu      	"3E6FBD850089"
+			    messages   	(list Messages
+				(object Message "doPost(...)"
+				    quid       	"3E71289C0290"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"8"
+				    ordinal    	7))))
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "External Interface"
+	    quid       	"3A82D3870144"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::PageExporter" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1035, 270)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(429, 211)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1212
+			justify    	0
+			label      	"PageExporter")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(429, 161)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1212
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A82D38F03BC"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(429, 272)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	1218)
+		    width      	1230
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::persistence::PersistentObject" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(645, 735)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(474, 656)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	342
+			justify    	0
+			label      	"PersistentObject")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C47570F03C3"
+		    width      	360
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::jobhandler::Job" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(375, 1740)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(219, 1687)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	313
+			justify    	0
+			label      	"Job")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@5
+			location   	(219, 1637)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	313
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A846D080167"
+		    width      	331
+		    height     	231
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportBatchEvent" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(285, 1260)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(49, 1004)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	472
+			justify    	0
+			label      	"ExportBatchEvent")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FB197012D"
+		    compartment 	(object Compartment
+			Parent_View 	@6
+			location   	(49, 1065)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	9
+			max_width  	470)
+		    width      	490
+		    height     	536
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @7
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E6FB1FF02D2"
+		    client     	@6
+		    supplier   	@4
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$19" @8
+		    location   	(343, 1576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E7BB0E2009A"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$20" @9
+			    Parent_View 	@8
+			    location   	(58, 316)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E7BB0E20266"
+			    client     	@8
+			    supplier   	@5
+			    line_style 	0)
+			(object RoleView "$UNNAMED$21" @10
+			    Parent_View 	@8
+			    location   	(58, 316)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E7BB0E20284"
+			    client     	@8
+			    supplier   	@6
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportingPage" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(930, 1200)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(701, 1019)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	458
+			justify    	0
+			label      	"ExportingPage")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FB1A9010B"
+		    compartment 	(object Compartment
+			Parent_View 	@11
+			location   	(701, 1080)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	6
+			max_width  	457)
+		    width      	476
+		    height     	386
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @12
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E6FB6DD0048"
+		    client     	@11
+		    supplier   	@4
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$13" @13
+		    location   	(610, 1228)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E6FB2220001"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$14" @14
+			    Parent_View 	@13
+			    location   	(295, -92)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E6FB22202F0"
+			    client     	@13
+			    supplier   	@11
+			    line_style 	0)
+			(object RoleView "$UNNAMED$15" @15
+			    Parent_View 	@13
+			    location   	(295, -92)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E6FB22202FA"
+			    client     	@13
+			    supplier   	@6
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::com::globalsight::everest::workflowmanager::GenericPage" @16
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(945, 1665)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@16
+			location   	(770, 1613)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	350
+			justify    	0
+			label      	"GenericPage")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@16
+			location   	(770, 1563)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	350
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E78D8AF0323"
+		    width      	368
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$22" @17
+		    location   	(938, 1471)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E88FBEC0300"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$23" @18
+			    Parent_View 	@17
+			    location   	(8, 271)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E88FBED0239"
+			    client     	@17
+			    supplier   	@16
+			    line_style 	0)
+			(object RoleView "$UNNAMED$24" @19
+			    Parent_View 	@17
+			    location   	(8, 271)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E88FBED0243"
+			    client     	@17
+			    supplier   	@11
+			    line_style 	0)))))
+	(object ClassDiagram "Export"
+	    quid       	"3AA6E36B0387"
+	    title      	"Export"
+	    documentation 	"An object containing workflow level info for export process of one or more pages."
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	1350
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::PageExporter" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(375, 165)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(233, 106)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	284
+			justify    	0
+			label      	"PageExporter")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@20
+			location   	(233, 56)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	284
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A82D38F03BC"
+		    width      	302
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::weblogic.rmi.Remote" @21
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1500, 120)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(1293, 68)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	414
+			justify    	0
+			label      	"weblogic.rmi.Remote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@21
+			location   	(1293, 18)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	414
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38CC948B02AE"
+		    width      	432
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::PageExporterWLRemote" @22
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(990, 420)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@22
+			location   	(850, 366)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	280
+			justify    	0
+			label      	"PageExporterWLRemote")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@22
+			location   	(850, 316)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	280
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA6E54602C2"
+		    width      	298
+		    height     	232
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::PageExporterWLRMIImpl" @23
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1110, 810)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(975, 734)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	270
+			justify    	0
+			label      	"PageExporterWLRMIImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA6E55E0385"
+		    width      	288
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @24
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E6010311"
+		    client     	@22
+		    supplier   	@21
+		    line_style 	0)
+		(object InheritView "" @25
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E6060047"
+		    client     	@22
+		    supplier   	@20
+		    line_style 	0)
+		(object RealizeView "" @26
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E62F00DC"
+		    client     	@23
+		    supplier   	@22
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::weblogic.rmi.UnicastRemoteObject" @27
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1740, 465)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@27
+			location   	(1403, 413)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	674
+			justify    	0
+			label      	"weblogic.rmi.UnicastRemoteObject")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@27
+			location   	(1403, 363)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	674
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38D6DE1203BA"
+		    width      	692
+		    height     	228
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @28
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E68F010D"
+		    client     	@23
+		    supplier   	@27
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::javax.jms.MessageListener" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1920, 1065)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(1659, 1036)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	522
+			justify    	0
+			label      	"javax.jms.MessageListener")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@29
+			location   	(1659, 986)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	522
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7C43100FE"
+		    width      	540
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportPageGenerator" @30
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(375, 1140)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@30
+			location   	(125, 1056)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	500
+			justify    	0
+			label      	"ExportPageGenerator")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@30
+			location   	(125, 1006)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	500
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA6E6ED0162"
+		    compartment 	(object Compartment
+			Parent_View 	@30
+			location   	(125, 1117)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	497)
+		    width      	518
+		    height     	292
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::PageExporterLocal" @31
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(375, 600)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(264, 524)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	222
+			justify    	0
+			label      	"PageExporterLocal")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA6E57A017C"
+		    width      	240
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @32
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E5E001B5"
+		    client     	@31
+		    supplier   	@20
+		    line_style 	0)
+		(object UsesView "" @33
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA6E67701D0"
+		    client     	@23
+		    supplier   	@31
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$1" @34
+		    location   	(375, 840)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA7C2AE0165"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$2" @35
+			    Parent_View 	@34
+			    location   	(-30, 90)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AA7C2AF0225"
+			    client     	@34
+			    supplier   	@30
+			    line_style 	0)
+			(object RoleView "$UNNAMED$3" @36
+			    Parent_View 	@34
+			    location   	(-30, 90)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AA7C2AF0226"
+			    client     	@34
+			    supplier   	@31
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportPageGeneratorImpl" @37
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1140, 1095)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@37
+			location   	(1004, 1019)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	272
+			justify    	0
+			label      	"ExportPageGeneratorImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7D15B0154"
+		    width      	290
+		    height     	176
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @38
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA7D17A016C"
+		    client     	@37
+		    supplier   	@30
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportLinkL10nManager" @39
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(780, 1485)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@39
+			location   	(551, 1354)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	458
+			justify    	0
+			label      	"ExportLinkL10nManager")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC1313602E8"
+		    compartment 	(object Compartment
+			Parent_View 	@39
+			location   	(551, 1415)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	456)
+		    width      	476
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportParameters" @40
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(825, 2355)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@40
+			location   	(533, 1974)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	584
+			justify    	0
+			label      	"ExportParameters")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3C3880217"
+		    compartment 	(object Compartment
+			Parent_View 	@40
+			location   	(533, 2035)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	13
+			max_width  	581)
+		    width      	602
+		    height     	786
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::pageexport::ExportMessageListener" @41
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1425, 1635)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@41
+			location   	(1191, 1329)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	468
+			justify    	0
+			label      	"ExportMessageListener")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7C27202FA"
+		    compartment 	(object Compartment
+			Parent_View 	@41
+			location   	(1191, 1390)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	10
+			max_width  	466)
+		    width      	486
+		    height     	636
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @42
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA7C44F020F"
+		    client     	@41
+		    supplier   	@29
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$4" @43
+		    location   	(1221, 1249)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AA7D17E012C"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$5" @44
+			    Parent_View 	@43
+			    location   	(816, -371)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AA7D17F0264"
+			    client     	@43
+			    supplier   	@41
+			    line_style 	0)
+			(object RoleView "$UNNAMED$6" @45
+			    Parent_View 	@43
+			    location   	(816, -371)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AA7D17F026E"
+			    client     	@43
+			    supplier   	@37
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$7" @46
+		    location   	(1099, 1558)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC132DA0179"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$8" @47
+			    Parent_View 	@46
+			    location   	(-71, -122)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC132DB0121"
+			    client     	@46
+			    supplier   	@39
+			    line_style 	0)
+			(object RoleView "$UNNAMED$9" @48
+			    Parent_View 	@46
+			    location   	(-71, -122)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC132DB012B"
+			    client     	@46
+			    supplier   	@41
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$10" @49
+		    location   	(1153, 1959)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC3CA3000C3"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$11" @50
+			    Parent_View 	@49
+			    location   	(-152, 264)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC3CA310114"
+			    client     	@49
+			    supplier   	@40
+			    line_style 	0)
+			(object RoleView "$UNNAMED$12" @51
+			    Parent_View 	@49
+			    location   	(-152, 264)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AC3CA31011E"
+			    client     	@49
+			    supplier   	@41
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::java.io.Serializable" @52
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(270, 1710)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@52
+			location   	(81, 1653)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	378
+			justify    	0
+			label      	"java.io.Serializable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@52
+			location   	(81, 1603)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	378
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39A3EDC10375"
+		    width      	396
+		    height     	238
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @53
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3AC3DBC5015B"
+		    client     	@40
+		    supplier   	@52
+		    line_style 	0)))
+	(object InteractionDiagram "Export"
+	    mechanism_ref 	@1
+	    quid       	"3AA7D1DE0170"
+	    title      	"Export"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	2031
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "PageExporterLocal" @54
+		    location   	(1200, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@54
+			location   	(1200, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	430
+			justify    	0
+			label      	"PageExporterLocal")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7D2C60336"
+		    width      	448
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @55
+			location   	(1200, 390)
+			line_color 	3342489
+			InterObjView 	@54
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @56
+			location   	(1200, 540)
+			line_color 	3342489
+			InterObjView 	@54
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "ExportPageGeneratorImpl" @57
+		    location   	(1710, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@57
+			location   	(1710, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	526
+			justify    	0
+			label      	"ExportPageGeneratorImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7D33F01C8"
+		    width      	544
+		    height     	2220
+		    icon_height 	57
+		    icon_width 	57
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @58
+			location   	(1710, 540)
+			line_color 	3342489
+			InterObjView 	@57
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @59
+			location   	(1710, 705)
+			line_color 	3342489
+			InterObjView 	@57
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "ExportMessageListener" @60
+		    location   	(2250, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@60
+			location   	(2250, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	490
+			justify    	0
+			label      	"ExportMessageListener")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7D34A030E"
+		    width      	508
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @61
+			location   	(2250, 705)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @62
+			location   	(2250, 840)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @63
+			location   	(2250, 990)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @64
+			location   	(2250, 1140)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @65
+			location   	(2250, 1320)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @66
+			location   	(2250, 1485)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @67
+			location   	(2250, 1680)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	135
+			y_coord    	75
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @68
+			location   	(2250, 1695)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	60
+			y_coord    	0
+			Nested     	TRUE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @69
+			location   	(2250, 1875)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @70
+			location   	(2250, 2010)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @71
+			location   	(2250, 2235)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @72
+			location   	(2250, 2235)
+			line_color 	3342489
+			InterObjView 	@60
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterObjView "ExportLinkL10nManager" @73
+		    location   	(4230, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@73
+			location   	(4230, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	640
+			justify    	0
+			label      	"ExportLinkL10nManager")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3CCCF00AA"
+		    width      	658
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @74
+			location   	(4230, 1875)
+			line_color 	3342489
+			InterObjView 	@73
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @75
+			location   	(4230, 2010)
+			line_color 	3342489
+			InterObjView 	@73
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "Request" @76
+		    location   	(3735, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@76
+			location   	(3735, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"Request")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3CB300085"
+		    width      	300
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @77
+			location   	(3735, 1485)
+			line_color 	3342489
+			InterObjView 	@76
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "RequestHandler" @78
+		    location   	(3390, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@78
+			location   	(3390, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	342
+			justify    	0
+			label      	"RequestHandler")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3CB2603C0"
+		    width      	360
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @79
+			location   	(3390, 1320)
+			line_color 	3342489
+			InterObjView 	@78
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "TuvManager" @80
+		    location   	(3030, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@80
+			location   	(3030, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	300
+			justify    	0
+			label      	"TuvManager")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3CB04026C"
+		    width      	318
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @81
+			location   	(3030, 1140)
+			line_color 	3342489
+			InterObjView 	@80
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "PageManager" @82
+		    location   	(2685, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(2685, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	318
+			justify    	0
+			label      	"PageManager")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AC3CADC000C"
+		    width      	336
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @83
+			location   	(2685, 840)
+			line_color 	3342489
+			InterObjView 	@82
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @84
+			location   	(2685, 990)
+			line_color 	3342489
+			InterObjView 	@82
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "PageExporterWLRMIImpl1" @85
+		    location   	(690, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@85
+			location   	(690, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	526
+			justify    	0
+			label      	"PageExporterWLRMIImpl1")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7D77900D3"
+		    width      	544
+		    height     	2220
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @86
+			location   	(690, 360)
+			line_color 	3342489
+			InterObjView 	@85
+			height     	150
+			y_coord    	90
+			Nested     	FALSE))
+		(object InterMessView "" @87
+		    location   	(15, 540)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @88
+			Parent_View 	@87
+			location   	(1454, 496)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AA7D5030056"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	725
+			justify    	0
+			label      	"performExport(List, ExportParameters)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@54
+		    supplier   	@57
+		    Focus_Src  	@56
+		    Focus_Entry 	@58
+		    origin     	(1215, 540)
+		    terminus   	(1694, 540)
+		    ordinal    	1)
+		(object InterMessView "" @89
+		    location   	(15, 705)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @90
+			Parent_View 	@89
+			location   	(1979, 661)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AA7D514028B"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	416
+			justify    	0
+			label      	"onMessage(Message)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@57
+		    supplier   	@60
+		    Focus_Src  	@59
+		    Focus_Entry 	@61
+		    origin     	(1725, 705)
+		    terminus   	(2234, 705)
+		    ordinal    	2)
+		(object NoteView @91
+		    location   	(330, 900)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@91
+			location   	(8, 362)
+			fill_color 	13434879
+			nlines     	21
+			max_width  	609
+			label      	
+|Here are the steps for a manual or automatic export:
+|1. A list of page ids, and an ExportParameters object are passed to the page exporter remote object.
+|2. Then delegated to the local object.  
+|The local object will invoke the performExport method of the ExportPageGenerator. 
+|3. ExportPageGenerator will then send the message to the JMS queue.
+|4. Finally one of the ExportMessageListener in the session pool will process the export event and finally send the result to CXE.
+			)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	669
+		    height     	1088)
+		(object InterMessView "" @92
+		    location   	(930, 390)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @93
+			Parent_View 	@92
+			location   	(944, 346)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AA7D7B30132"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	574
+			justify    	0
+			label      	"export(List, ExportParameters)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@85
+		    supplier   	@54
+		    Focus_Src  	@86
+		    Focus_Entry 	@55
+		    origin     	(705, 390)
+		    terminus   	(1184, 390)
+		    ordinal    	0)
+		(object InterMessView "" @94
+		    location   	(15, 840)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @95
+			Parent_View 	@94
+			location   	(2467, 796)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CB780350"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	378
+			justify    	0
+			label      	"getSourcePage(long)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@82
+		    Focus_Src  	@62
+		    Focus_Entry 	@83
+		    origin     	(2265, 840)
+		    terminus   	(2669, 840)
+		    ordinal    	3)
+		(object InterMessView "" @96
+		    location   	(15, 990)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @97
+			Parent_View 	@96
+			location   	(2467, 946)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CB990298"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	411
+			justify    	0
+			label      	"getTemplate(long, int)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@82
+		    Focus_Src  	@63
+		    Focus_Entry 	@84
+		    origin     	(2265, 990)
+		    terminus   	(2669, 990)
+		    ordinal    	4)
+		(object InterMessView "" @98
+		    location   	(15, 1140)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @99
+			Parent_View 	@98
+			location   	(2639, 1096)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CBA70308"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	463
+			justify    	0
+			label      	"getExportTuv(long, long)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@80
+		    Focus_Src  	@64
+		    Focus_Entry 	@81
+		    origin     	(2265, 1140)
+		    terminus   	(3014, 1140)
+		    ordinal    	5)
+		(object InterMessView "" @100
+		    location   	(2925, 1320)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @101
+			Parent_View 	@100
+			location   	(2828, 1082)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CBFF020A"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	0
+			justify    	0
+			label      	""
+			pctDist    	0.507799
+			height     	239
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@78
+		    Focus_Src  	@65
+		    Focus_Entry 	@79
+		    origin     	(2265, 1320)
+		    terminus   	(3374, 1320)
+		    ordinal    	6)
+		(object Label @102
+		    location   	(2671, 1260)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	1
+		    max_width  	316
+		    label      	"getRequest(long)")
+		(object InterMessView "" @103
+		    location   	(15, 1485)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @104
+			Parent_View 	@103
+			location   	(2992, 1441)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CCA90269"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	304
+			justify    	0
+			label      	"getMessageId( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@76
+		    Focus_Src  	@66
+		    Focus_Entry 	@77
+		    origin     	(2265, 1485)
+		    terminus   	(3719, 1485)
+		    ordinal    	7)
+		(object InterMessView "" @105
+		    location   	(3375, 1875)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @106
+			Parent_View 	@105
+			location   	(3239, 1831)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CD07028C"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	1073
+			justify    	0
+			label      	"updateSupportedLink(String, String, String, Tuv, boolean)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@73
+		    Focus_Src  	@69
+		    Focus_Entry 	@74
+		    origin     	(2265, 1875)
+		    terminus   	(4214, 1875)
+		    ordinal    	9)
+		(object InterMessView "" @107
+		    location   	(3375, 2010)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @108
+			Parent_View 	@107
+			location   	(3239, 1966)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3CD1303C8"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	863
+			justify    	0
+			label      	"updateImageLink(Tuv, String, String, boolean)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@73
+		    Focus_Src  	@70
+		    Focus_Entry 	@75
+		    origin     	(2265, 2010)
+		    terminus   	(4214, 2010)
+		    ordinal    	10)
+		(object SelfMessView "" @109
+		    location   	(15, 1695)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @110
+			Parent_View 	@109
+			location   	(2341, 1651)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3D43D0381"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	487
+			justify    	0
+			label      	"populatePage(String, List)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@60
+		    Focus_Src  	@67
+		    Focus_Entry 	@68
+		    origin     	(2266, 1695)
+		    terminus   	(2416, 1695)
+		    ordinal    	8)
+		(object SelfMessView "" @111
+		    location   	(15, 2235)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @112
+			Parent_View 	@111
+			location   	(2341, 2191)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3AC3D474032E"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	366
+			justify    	0
+			label      	"sendToCXE(String)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@60
+		    supplier   	@60
+		    Focus_Src  	@71
+		    Focus_Entry 	@72
+		    origin     	(2266, 2235)
+		    terminus   	(2416, 2235)
+		    ordinal    	11)
+		(object NoteView @113
+		    location   	(360, 2205)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@113
+			location   	(41, 1955)
+			fill_color 	13434879
+			nlines     	10
+			max_width  	602
+			label      	"Upon a successful export, PageEventObserver's notifyPageExportSuccess mehtod will be called for indexing the target page (Ling related).  If the export fails, the error will be logge and then the notifyPageExportFail will be called to notify the originator via email.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	662
+		    height     	513)))
+	(object InteractionDiagram "High Level Export"
+	    mechanism_ref 	@2
+	    quid       	"3E6FBD6F01B9"
+	    title      	"High Level Export"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "$UNNAMED$25" @114
+		    location   	(540, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@114
+			location   	(540, 250)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	360
+			justify    	0
+			label      	"")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBEB002DD"
+		    width      	336
+		    height     	1410
+		    icon_height 	162
+		    icon_width 	120
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @115
+			location   	(540, 345)
+			line_color 	3342489
+			InterObjView 	@114
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "JobExportControlFlowHelper" @116
+		    location   	(900, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@116
+			location   	(900, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	366
+			justify    	0
+			label      	"JobExportControlFlowHelper")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD85007C"
+		    width      	384
+		    height     	1410
+		    icon_height 	164
+		    icon_width 	157
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @117
+			location   	(900, 345)
+			line_color 	3342489
+			InterObjView 	@116
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @118
+			location   	(900, 450)
+			line_color 	3342489
+			InterObjView 	@116
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @119
+			location   	(900, 735)
+			line_color 	3342489
+			InterObjView 	@116
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "WorkflowHandlerHelper" @120
+		    location   	(1245, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@120
+			location   	(1245, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"WorkflowHandlerHelper")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD850071"
+		    width      	300
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @121
+			location   	(1245, 735)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @122
+			location   	(1245, 825)
+			line_color 	3342489
+			InterObjView 	@120
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "PageManager" @123
+		    location   	(1575, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@123
+			location   	(1575, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	318
+			justify    	0
+			label      	"PageManager")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD85007F"
+		    width      	336
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @124
+			location   	(1575, 825)
+			line_color 	3342489
+			InterObjView 	@123
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @125
+			location   	(1575, 915)
+			line_color 	3342489
+			InterObjView 	@123
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "CxeExportServlet" @126
+		    location   	(1905, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@126
+			location   	(1905, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"CxeExportServlet")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD850084"
+		    width      	300
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @127
+			location   	(1905, 915)
+			line_color 	3342489
+			InterObjView 	@126
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @128
+			location   	(1905, 1020)
+			line_color 	3342489
+			InterObjView 	@126
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "CapExportServlet" @129
+		    location   	(2655, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@129
+			location   	(2655, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"CapExportServlet")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD850089"
+		    width      	300
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @130
+			location   	(2655, 1110)
+			line_color 	3342489
+			InterObjView 	@129
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @131
+			location   	(2655, 1290)
+			line_color 	3342489
+			InterObjView 	@129
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "ExportEventObserver" @132
+		    location   	(2970, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@132
+			location   	(2970, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"ExportEventObserver")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E6FBD85008E"
+		    width      	300
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @133
+			location   	(2970, 450)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @134
+			location   	(2970, 540)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	135
+			y_coord    	75
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @135
+			location   	(2970, 555)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	60
+			y_coord    	0
+			Nested     	TRUE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @136
+			location   	(2970, 1290)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @137
+			location   	(2970, 1410)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	135
+			y_coord    	75
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @138
+			location   	(2970, 1425)
+			line_color 	3342489
+			InterObjView 	@132
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterObjView "Responsible Export Component" @139
+		    location   	(2280, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@139
+			location   	(2280, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	404
+			justify    	0
+			label      	"Responsible Export Component")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E71282D0344"
+		    width      	422
+		    height     	1410
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @140
+			location   	(2280, 1020)
+			line_color 	3342489
+			InterObjView 	@139
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @141
+			location   	(2280, 1110)
+			line_color 	3342489
+			InterObjView 	@139
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterMessView "" @142
+		    location   	(15, 345)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @143
+			Parent_View 	@142
+			location   	(761, 318)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC06F00A6"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	485
+			justify    	0
+			label      	"determineLinkToFollow(...)"
+			pctDist    	0.627907
+			height     	28
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@114
+		    supplier   	@116
+		    Focus_Src  	@115
+		    Focus_Entry 	@117
+		    origin     	(555, 345)
+		    terminus   	(884, 345)
+		    ordinal    	0)
+		(object InterMessView "" @144
+		    location   	(15, 450)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @145
+			Parent_View 	@144
+			location   	(1934, 406)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC0E70031"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	598
+			justify    	0
+			label      	"notifyBeginExportTargetPage(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@116
+		    supplier   	@132
+		    Focus_Src  	@118
+		    Focus_Entry 	@133
+		    origin     	(915, 450)
+		    terminus   	(2954, 450)
+		    ordinal    	1)
+		(object InterMessView "" @146
+		    location   	(15, 735)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @147
+			Parent_View 	@146
+			location   	(1072, 691)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC0ED00E3"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	279
+			justify    	0
+			label      	"exportPage(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@116
+		    supplier   	@120
+		    Focus_Src  	@119
+		    Focus_Entry 	@121
+		    origin     	(915, 735)
+		    terminus   	(1229, 735)
+		    ordinal    	3)
+		(object InterMessView "" @148
+		    location   	(15, 825)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @149
+			Parent_View 	@148
+			location   	(1409, 781)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC0F202CA"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	279
+			justify    	0
+			label      	"exportPage(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@120
+		    supplier   	@123
+		    Focus_Src  	@122
+		    Focus_Entry 	@124
+		    origin     	(1260, 825)
+		    terminus   	(1559, 825)
+		    ordinal    	4)
+		(object InterMessView "" @150
+		    location   	(15, 915)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @151
+			Parent_View 	@150
+			location   	(1739, 871)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC0FE01A5"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	138
+			justify    	0
+			label      	"doPost"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@123
+		    supplier   	@126
+		    Focus_Src  	@125
+		    Focus_Entry 	@127
+		    origin     	(1590, 915)
+		    terminus   	(1889, 915)
+		    ordinal    	5)
+		(object InterMessView "" @152
+		    location   	(15, 1290)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @153
+			Parent_View 	@152
+			location   	(2812, 1246)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC12802B4"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	554
+			justify    	0
+			label      	"notifyPageExportComplete(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@129
+		    supplier   	@132
+		    Focus_Src  	@131
+		    Focus_Entry 	@136
+		    origin     	(2670, 1290)
+		    terminus   	(2954, 1290)
+		    ordinal    	8)
+		(object SelfMessView "" @154
+		    location   	(15, 555)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @155
+			Parent_View 	@154
+			location   	(3061, 511)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC2440259"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	473
+			justify    	0
+			label      	"createExportBatchInfo(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@132
+		    supplier   	@132
+		    Focus_Src  	@134
+		    Focus_Entry 	@135
+		    origin     	(2986, 555)
+		    terminus   	(3136, 555)
+		    ordinal    	2)
+		(object SelfMessView "" @156
+		    location   	(15, 1425)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @157
+			Parent_View 	@156
+			location   	(3061, 1381)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FC25E01F2"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	482
+			justify    	0
+			label      	"updateExportBatchInfo(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@132
+		    supplier   	@132
+		    Focus_Src  	@137
+		    Focus_Entry 	@138
+		    origin     	(2986, 1425)
+		    terminus   	(3136, 1425)
+		    ordinal    	9)
+		(object NoteView @158
+		    location   	(255, 990)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@158
+			location   	(14, 331)
+			fill_color 	13434879
+			nlines     	32
+			max_width  	446
+			label      	
+|1.The User performs an export process.  Before exporting the page(s), the export event observer is notified and the export batch info object is created.
+|2.Then using the export batch id, the export process is invoked.  The complete process of export is not in the scope of this document, as our focus is on persisting the export information.
+|3.CXE will send the export result for each page and in turn the export event observer object is notified of the process completion.   The export batch info will be updated based on the CXE response whether it was a successful export or not.  If the system-wide flag for removal of a completed export batch is set to true, the object will be removed once the last result of the export batch is received.  Otherwise, the object will be updated and kept in the database.
+			)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	506
+		    height     	1331)
+		(object InterMessView "" @159
+		    location   	(15, 1020)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @160
+			Parent_View 	@159
+			location   	(2092, 976)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E712891026C"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	566
+			justify    	0
+			label      	"Merge and Conversion process"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@126
+		    supplier   	@139
+		    Focus_Src  	@128
+		    Focus_Entry 	@140
+		    origin     	(1920, 1020)
+		    terminus   	(2264, 1020)
+		    ordinal    	6)
+		(object InterMessView "" @161
+		    location   	(15, 1110)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @162
+			Parent_View 	@161
+			location   	(2467, 1066)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E71289C0290"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	201
+			justify    	0
+			label      	"doPost(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@139
+		    supplier   	@129
+		    Focus_Src  	@141
+		    Focus_Entry 	@130
+		    origin     	(2295, 1110)
+		    terminus   	(2639, 1110)
+		    ordinal    	7)))))

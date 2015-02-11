@@ -1,0 +1,1288 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "workflowmanager"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3AAD257D027E"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "WorkflowEventObserver"
+	    quid       	"3AAD259800E3"
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "notifyPageExportSuccess"
+		    quid       	"3AAD25B00232"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AAD26020059"
+			    type       	"long")
+			(object Parameter "p_workflow"
+			    quid       	"3AAD260A00D2"
+			    type       	"Workflow"
+			    quidu      	"38CEE29200B8"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "notifyPageExportCancel"
+		    quid       	"3AAD261201B0"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3AAD261F00FB"
+			    type       	"long")
+			(object Parameter "p_workflow"
+			    quid       	"3AAD2625021C"
+			    type       	"Workflow"
+			    quidu      	"38CEE29200B8"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "SecondaryTargetFile"
+	    quid       	"3E63DFA4018C"
+	    documentation 	"Represents an unextracted page in System4.  Note that unextracted page has a one-to-one relationship with the file."
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3E63E36303C5"
+		    supplier   	"Logical View::com::globalsight::everest::persistence::PersistentObject"
+		    quidu      	"3C47570F03C3"))
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"3E78D97F01C3"
+		    supplier   	"Logical View::com::globalsight::everest::workflowmanager::GenericPage"
+		    quidu      	"3E78D8AF0323"))
+	    operations 	(list Operations
+		(object Operation "getEventFlowXml"
+		    quid       	"3E83603D0339"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getFileSize"
+		    quid       	"3E6681AD033A"
+		    result     	"long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getLastUpdatedTime"
+		    quid       	"3E63E3F201E0"
+		    result     	"Timestamp"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getModifierUserId"
+		    quid       	"3E78DCD20253"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getStoragePath"
+		    quid       	"3E63E3E502B4"
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflow"
+		    quid       	"3E63E3DB0260"
+		    result     	"Workflow"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setEventFlowXml"
+		    quid       	"3E8360500278"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setFileSize"
+		    quid       	"3E6683DE0279"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setLastUpdatedTime"
+		    quid       	"3E63E3D201BC"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setModifierUserId"
+		    quid       	"3E78DCDC01E9"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setStoragePath"
+		    quid       	"3E63DFE001CE"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setWorkflow"
+		    quid       	"3E63DFD800B4"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "GenericPage"
+	    quid       	"3E78D8AF0323"
+	    stereotype 	"Interface")
+	(object Association "$UNNAMED$0"
+	    quid       	"3E63E3730396"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"3E63E37402DA"
+		    supplier   	"Logical View::com::globalsight::everest::workflowmanager::SecondaryTargetFile"
+		    quidu      	"3E63DFA4018C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"3E63E37402E4"
+		    supplier   	"Logical View::com::globalsight::everest::jobhandler::workflowhandler::Workflow"
+		    quidu      	"3AAE4DA80099"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "WorkflowManager"
+		    quid       	"3E63FA2C0070"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E63FC10018E"
+			    supplier   	"WorkflowServer"
+			    quidu      	"3E63FA3A02FB"
+			    messages   	(list Messages
+				(object Message "startWorkflow(String, long)"
+				    quid       	"3E63FC10018F"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    Operation  	"startWorkflow(WFSession, long)"
+				    quidu      	"39B8231A0367")))
+			(object Link
+			    quid       	"3E63FC1D020F"
+			    supplier   	"PageManager"
+			    quidu      	"3E63FA3C02B8"
+			    messages   	(list Messages
+				(object Message "exportPage(...)"
+				    quid       	"3E63FC1D0210"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"3"
+				    ordinal    	2
+				    Operation  	"exportPage()")))
+			(object Link
+			    quid       	"3E63FC2F0283"
+			    supplier   	"TaskManager"
+			    quidu      	"3E63FA4402B9"
+			    messages   	(list Messages
+				(object Message "updateTaskState(...)"
+				    quid       	"3E63FC2F0284"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"5"
+				    ordinal    	4
+				    Operation  	"updateTaskState")))
+			(object Link
+			    quid       	"3E6FB00902A8"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E63FA4000A1"
+			    messages   	(list Messages
+				(object Message "notifyBeginExportTargetPage(...)"
+				    quid       	"3E6FB00902A9"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    Operation  	"notifyBeginExportTargetPage"))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "WorkflowServer"
+		    quid       	"3E63FA3A02FB"
+		    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+		    quidu      	"39435E1300DC"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "PageManager"
+		    quid       	"3E63FA3C02B8"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E63FC230362"
+			    supplier   	"CxeExportServlet"
+			    quidu      	"3E63FA3E01CA"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"3E63FC230363"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"4"
+				    ordinal    	3))))
+		    class      	"Logical View::com::globalsight::everest::page::PageManager"
+		    quidu      	"3AA6CEB200A8"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "CxeExportServlet"
+		    quid       	"3E63FA3E01CA"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E63FC3B0140"
+			    supplier   	"CapExportServlet"
+			    quidu      	"3E63FA420126"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"3E63FC3B0141"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"6"
+				    ordinal    	5))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "ExportEventObserver"
+		    quid       	"3E63FA4000A1"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E63FC50026C"
+			    supplier   	"TaskManager"
+			    quidu      	"3E63FA4402B9"
+			    messages   	(list Messages
+				(object Message "updateTaskState(...)"
+				    quid       	"3E63FC50026D"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"8"
+				    ordinal    	7))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "CapExportServlet"
+		    quid       	"3E63FA420126"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"3E63FC4002B0"
+			    supplier   	"ExportEventObserver"
+			    quidu      	"3E63FA4000A1"
+			    messages   	(list Messages
+				(object Message "notifyPageExportComplete(...)"
+				    quid       	"3E63FC4002BA"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"7"
+				    ordinal    	6))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "TaskManager"
+		    quid       	"3E63FA4402B9"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Package Overview"
+	    quid       	"3AAD257D027F"
+	    title      	"Package Overview"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::workflowmanager::WorkflowEventObserver" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(660, 195)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(37, 111)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1246
+			justify    	0
+			label      	"WorkflowEventObserver")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(37, 61)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1246
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AAD259800E3"
+		    width      	1264
+		    height     	292
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "Domain Classes"
+	    quid       	"3E63DE540233"
+	    title      	"Domain Classes"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::persistence::PersistentObject" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1005, 375)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(834, 116)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	342
+			justify    	0
+			label      	"PersistentObject")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C47570F03C3"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(834, 231)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	8
+			max_width  	309)
+		    width      	360
+		    height     	542
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::workflowmanager::SecondaryTargetFile" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(990, 1125)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(765, 769)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"SecondaryTargetFile")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63DFA4018C"
+		    compartment 	(object Compartment
+			Parent_View 	@4
+			location   	(765, 830)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	13
+			max_width  	447)
+		    width      	468
+		    height     	736
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @5
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E63E36303C5"
+		    client     	@4
+		    supplier   	@3
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::jobhandler::workflowhandler::Workflow" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    location   	(300, 1050)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(88, 997)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	425
+			justify    	0
+			label      	"Workflow")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(88, 947)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	425
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AAE4DA80099"
+		    width      	443
+		    height     	231
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @7
+		    location   	(638, 1085)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E63E3730396"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @8
+			    Parent_View 	@7
+			    location   	(233, 755)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E63E37402DA"
+			    client     	@7
+			    supplier   	@4
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @9
+			    Parent_View 	@7
+			    location   	(233, 755)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3E63E37402E4"
+			    client     	@7
+			    supplier   	@6
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::com::globalsight::everest::workflowmanager::GenericPage" @10
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(630, 405)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(498, 376)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	264
+			justify    	0
+			label      	"GenericPage")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@10
+			location   	(498, 326)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	264
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E78D8AF0323"
+		    width      	282
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::page::Page" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(360, 750)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(235, 697)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	250
+			justify    	0
+			label      	"Page")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@11
+			location   	(235, 647)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	247
+			justify    	0
+			label      	"<<abstract>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A81DBBB01D0"
+		    width      	268
+		    height     	230
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @12
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E78D97F01C3"
+		    client     	@4
+		    supplier   	@10
+		    line_style 	0)
+		(object RealizeView "" @13
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E78D9E201C5"
+		    client     	@11
+		    supplier   	@10
+		    line_style 	0)))
+	(object InteractionDiagram "Dispatch"
+	    mechanism_ref 	@1
+	    quid       	"3E63FA080028"
+	    title      	"Dispatch"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	388
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "WorkflowManager" @14
+		    location   	(435, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(435, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"WorkflowManager")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA2C0070"
+		    width      	300
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @15
+			location   	(435, 390)
+			line_color 	3342489
+			InterObjView 	@14
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @16
+			location   	(435, 510)
+			line_color 	3342489
+			InterObjView 	@14
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @17
+			location   	(435, 690)
+			line_color 	3342489
+			InterObjView 	@14
+			height     	120
+			y_coord    	60
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @18
+			location   	(435, 915)
+			line_color 	3342489
+			InterObjView 	@14
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "WorkflowServer" @19
+		    location   	(795, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@19
+			location   	(795, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	344
+			justify    	0
+			label      	"WorkflowServer")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA3A02FB"
+		    width      	362
+		    height     	1140
+		    icon_height 	164
+		    icon_width 	157
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @20
+			location   	(795, 390)
+			line_color 	3342489
+			InterObjView 	@19
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "PageManager" @21
+		    location   	(1170, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(1170, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	318
+			justify    	0
+			label      	"PageManager")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA3C02B8"
+		    width      	336
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @22
+			location   	(1170, 690)
+			line_color 	3342489
+			InterObjView 	@21
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @23
+			location   	(1170, 780)
+			line_color 	3342489
+			InterObjView 	@21
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "CxeExportServlet" @24
+		    location   	(1515, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@24
+			location   	(1515, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"CxeExportServlet")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA3E01CA"
+		    width      	300
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @25
+			location   	(1515, 780)
+			line_color 	3342489
+			InterObjView 	@24
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @26
+			location   	(1515, 975)
+			line_color 	3342489
+			InterObjView 	@24
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "ExportEventObserver" @27
+		    location   	(2205, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@27
+			location   	(2205, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"ExportEventObserver")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA4000A1"
+		    width      	300
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @28
+			location   	(2205, 510)
+			line_color 	3342489
+			InterObjView 	@27
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @29
+			location   	(2205, 1050)
+			line_color 	3342489
+			InterObjView 	@27
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @30
+			location   	(2205, 1155)
+			line_color 	3342489
+			InterObjView 	@27
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "CapExportServlet" @31
+		    location   	(1860, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(1860, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"CapExportServlet")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA420126"
+		    width      	300
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @32
+			location   	(1860, 975)
+			line_color 	3342489
+			InterObjView 	@31
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @33
+			location   	(1860, 1050)
+			line_color 	3342489
+			InterObjView 	@31
+			height     	120
+			y_coord    	60
+			Nested     	FALSE))
+		(object InterObjView "TaskManager" @34
+		    location   	(2565, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@34
+			location   	(2565, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"TaskManager")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E63FA4402B9"
+		    width      	300
+		    height     	1140
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @35
+			location   	(2565, 915)
+			line_color 	3342489
+			InterObjView 	@34
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @36
+			location   	(2565, 1155)
+			line_color 	3342489
+			InterObjView 	@34
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @37
+		    location   	(15, 390)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @38
+			Parent_View 	@37
+			location   	(614, 346)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC10018F"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	488
+			justify    	0
+			label      	"startWorkflow(String, long)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@14
+		    supplier   	@19
+		    Focus_Src  	@15
+		    Focus_Entry 	@20
+		    origin     	(450, 390)
+		    terminus   	(779, 390)
+		    ordinal    	0)
+		(object InterMessView "" @39
+		    location   	(15, 690)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @40
+			Parent_View 	@39
+			location   	(802, 646)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC1D0210"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	279
+			justify    	0
+			label      	"exportPage(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@14
+		    supplier   	@21
+		    Focus_Src  	@17
+		    Focus_Entry 	@22
+		    origin     	(450, 690)
+		    terminus   	(1154, 690)
+		    ordinal    	2)
+		(object InterMessView "" @41
+		    location   	(15, 780)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @42
+			Parent_View 	@41
+			location   	(1342, 736)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC230363"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	0
+			justify    	0
+			label      	""
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@21
+		    supplier   	@24
+		    Focus_Src  	@23
+		    Focus_Entry 	@25
+		    origin     	(1185, 780)
+		    terminus   	(1499, 780)
+		    ordinal    	3)
+		(object InterMessView "" @43
+		    location   	(15, 915)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @44
+			Parent_View 	@43
+			location   	(1499, 871)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC2F0284"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	379
+			justify    	0
+			label      	"updateTaskState(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@14
+		    supplier   	@34
+		    Focus_Src  	@18
+		    Focus_Entry 	@35
+		    origin     	(450, 915)
+		    terminus   	(2549, 915)
+		    ordinal    	4)
+		(object InterMessView "" @45
+		    location   	(15, 975)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @46
+			Parent_View 	@45
+			location   	(1687, 931)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC3B0141"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	0
+			justify    	0
+			label      	""
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@24
+		    supplier   	@31
+		    Focus_Src  	@26
+		    Focus_Entry 	@32
+		    origin     	(1530, 975)
+		    terminus   	(1844, 975)
+		    ordinal    	5)
+		(object InterMessView "" @47
+		    location   	(15, 1050)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @48
+			Parent_View 	@47
+			location   	(2032, 1006)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC4002BA"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	555
+			justify    	0
+			label      	"notifyPageExportComplete(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@31
+		    supplier   	@27
+		    Focus_Src  	@33
+		    Focus_Entry 	@29
+		    origin     	(1875, 1050)
+		    terminus   	(2189, 1050)
+		    ordinal    	6)
+		(object InterMessView "" @49
+		    location   	(15, 1155)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @50
+			Parent_View 	@49
+			location   	(2384, 1111)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E63FC50026D"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	379
+			justify    	0
+			label      	"updateTaskState(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@27
+		    supplier   	@34
+		    Focus_Src  	@30
+		    Focus_Entry 	@36
+		    origin     	(2220, 1155)
+		    terminus   	(2549, 1155)
+		    ordinal    	7)
+		(object InterMessView "" @51
+		    location   	(15, 510)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @52
+			Parent_View 	@51
+			location   	(1319, 466)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"3E6FB00902A9"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	598
+			justify    	0
+			label      	"notifyBeginExportTargetPage(...)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@14
+		    supplier   	@27
+		    Focus_Src  	@16
+		    Focus_Entry 	@28
+		    origin     	(450, 510)
+		    terminus   	(2189, 510)
+		    ordinal    	1)
+		(object NoteView @53
+		    location   	(195, 615)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@53
+			location   	(13, 387)
+			fill_color 	13434879
+			nlines     	11
+			max_width  	328
+			label      	"This is a special case for dispatch where the first activity of the workflow is DTP type and secondary target files should be created.  Therefore, we'll also assume that target pages are getting exported.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	388
+		    height     	469)))))

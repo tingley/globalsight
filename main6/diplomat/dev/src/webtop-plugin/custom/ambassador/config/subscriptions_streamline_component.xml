@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!-- Component: IC:2 classic veiw of subscriptions                         -->
+<!-- Scope: None                                                           -->
+
+
+<config version='1.0'>
+   
+   <!-- the WebTop Streamline View version of the Subscriptions View -->
+   <scope>
+      
+      <!-- the classicw component definition -->
+      <component id="subscriptions_streamline" extends="subscriptions_drilldown:custom/ambassador/config/library/subscription/subscriptions_drilldown_component.xml">
+         
+         <!-- Component Layout -->
+         <pages>
+            <start>/webtop/streamline/streamlineview/subscriptions.jsp</start>
+         </pages>
+         
+         <class>com.documentum.webtop.webcomponent.subscription.SubscriptionsStreamlineView</class>
+
+         <!-- Component specific Configuration -->
+         <helpcontextid>subscriptions_streamline</helpcontextid>
+         
+      </component>
+      
+   </scope>
+</config>

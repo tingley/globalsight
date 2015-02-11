@@ -1,0 +1,10 @@
+<PUBLIC:ATTACH EVENT="onclick" ONEVENT="return noXref()" />
+
+<SCRIPT LANGUAGE="javascript">
+function noXref()
+{
+    // let event bubble to parent
+    window.event.cancelBubble = false;
+    window.event.returnValue = false;
+}
+</SCRIPT>

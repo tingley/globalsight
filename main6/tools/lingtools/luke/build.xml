@@ -1,0 +1,49 @@
+<project name="Luke" default="jar">
+	<property name="build.dir" value="build"/>
+	<property name="jarfile" value="${build.dir}/luke.jar"/>
+
+	<property name="toolsLib" value="../../lib/common" />
+	<property name="toolsBuild" value="../../build" />
+	<property name="cap" 
+	value="${toolsBuild}/capclasses/globalsight.ear/lib/classes" />
+        <property name="classpath" value="${cap}" />
+
+	<target name="init">
+		<tstamp/>
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>	
+	
+	<target name="compile" depends="init">
+		<javac nowarn="${nowarn}" classpath="${classpath}"
+		       sourcepath=""
+		       srcdir="src"
+		       destdir="${build.dir}">
+		       <classpath>
+      		       <fileset dir="${toolsLib}">
+        			<include name="**/*.jar"/>
+      		       </fileset>
+		       </classpath>
+		       <include name="**/*.java" />
+		</javac>
+	</target>
+
+	<target depends="compile" name="jar">
+		<copy todir="${build.dir}">
+			<fileset dir="src/">
+				<include name="**/*.gif"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+		<jar basedir="${build.dir}"
+			jarfile="${jarfile}"
+			includes="img/,org/getopt/,thinlet/,xml/" >
+			<manifest>
+				<attribute name="Main-Class" value="org.getopt.luke.Luke"/>
+			</manifest>
+		</jar>
+	</target>
+</project>

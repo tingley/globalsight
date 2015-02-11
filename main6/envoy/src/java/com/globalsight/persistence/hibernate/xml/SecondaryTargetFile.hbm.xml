@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class table="SECONDARY_TARGET_FILE"
+        name="com.globalsight.everest.secondarytargetfile.SecondaryTargetFile">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <many-to-one name="workflow" column="WORKFLOW_ID"
+            class="com.globalsight.everest.workflowmanager.WorkflowImpl"
+            not-null="true" />
+
+        <property name="storagePath" length="4000" column="STORAGE_PATH"
+            type="string" not-null="true" />
+
+        <property name="modifierUserId" length="80"
+            column="MODIFIER_USER_ID" type="string" not-null="true" />
+
+        <property name="lastUpdatedTime" column="LAST_MODIFIED"
+            type="long" not-null="true" />
+
+        <property name="fileSize" column="FILE_SIZE" type="long"
+            not-null="true" />
+
+        <property name="eventFlowXml" length="4000"
+            column="EVENT_FLOW_XML" type="string" />
+
+        <property name="state" length="20" column="STATE" type="string"
+            not-null="true" />
+
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

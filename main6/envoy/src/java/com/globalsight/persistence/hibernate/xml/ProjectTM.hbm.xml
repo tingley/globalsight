@@ -1,0 +1,22 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.everest.projecthandler.ProjectTM" table="PROJECT_TM">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="name" length="60" column="NAME" type="string" not-null="true" unique="false"/>	
+		<property name="companyId" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
+		<property name="organization" length="400" column="ORGANIZATION" type="string" not-null="false" unique="false"/>
+		<property name="description" length="500" column="DESCRIPTION" type="string" not-null="false" unique="false"/>
+		<property name="creationDate"  column="CREATION_DATE" type="timestamp" not-null="false" unique="false"/>
+		<property name="domain" length="500" column="DOMAIN" type="string" not-null="false" unique="false"/>	
+		<property name="creationUser" length="80" column="CREATION_USER" type="string" not-null="false" unique="false"/>
+		<property name="isRemoteTm" column="IS_REMOTE_TM" type="yes_no" not-null="false" unique="false" />
+		<property name="gsEditionId" column="GS_EDITION_ID" type="long" not-null="false" unique="false" />
+		<property name="remoteTmProfileId" column="REMOTE_TM_PROFILE_ID" type="long" not-null="false" unique="false" />
+		<property name="remoteTmProfileName" length="60" column="REMOTE_TM_PROFILE_NAME" type="string" not-null="false" unique="false"/>
+        <property name="tm3Id" type="long" column="TM3_ID" not-null="false" />
+
+	</class>
+</hibernate-mapping>

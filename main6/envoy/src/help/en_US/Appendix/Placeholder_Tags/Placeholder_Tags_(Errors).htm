@@ -1,0 +1,253 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>Placeholder Tags (Errors)</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=content-type content="text/html; charset=windows-1252">
+<meta name=date content="02 20, 2002 3:53:57 PM">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=931>
+<meta name=layout-width content=710>
+
+
+ <meta name="build tags" content="L10n_Participant"><!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+ul.whs1 {list-style: disc;}
+p.whs2 {margin-left: 40px;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nPlaceholder Tags\nPlaceholder Tags (Errors)");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>Placeholder Tags (Errors)</h1>
+
+<h2>General principles</h2>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>All tags that appear in the source must also appear 
+ in the target.</p></li>
+</ul>
+
+<p class="whs2">Exceptions: bold [b] and [/b], italic [I] 
+ and [/I], underline [u] and [/u], and non-breaking space [nbsp].</p>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>All tags must have an opening tag and a corresponding 
+ closing /tag. &nbsp;</p></li>
+</ul>
+
+<p class="whs2">Example: This is an opening font tag: [f1], 
+ and this is a closing font tag: [/f1]. </p>
+
+<p class="whs2">Exceptions: The [x] tag and the [nbsp] tag 
+ do not have closing tags. &nbsp;The 
+ [x] tag represents a tag that cannot be deleted. &nbsp;Usually 
+ this is because the first part appears in one segment and the last part 
+ appears in another segment. &nbsp;Both 
+ are represented by [x].</p>
+
+<h2>Error Messages</h2>
+
+<h3>“The following tags are missing:” </h3>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>You need to check to see that all tags in the 
+ source are also in the target.</p></li>
+</ul>
+
+<p class="whs2">Source example: Here is a pretty[f1] cat 
+ [/f1]. </p>
+
+<p class="whs2">Target example: Here is my translation of 
+ a pretty cat.</p>
+
+<p class="whs2">Resulting error message: The following tags 
+ are missing: [f1] [/f1].</p>
+
+<p class="whs2">How to fix this: Add the missing tags to 
+ continue: Here is my translation of a pretty[f1] cat [/f1].</p>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>You will also get this message when you need to 
+ check to see that each Placeholder tag has a left bracket [and a right 
+ bracket]</p></li>
+</ul>
+
+<p class="whs2">Source example: Here is a pretty [f1] cat 
+ [/f1]. </p>
+
+<p class="whs2">Target example: Here is my translation of 
+ a pretty [f1 cat [/f1].</p>
+
+<p class="whs2">Resulting error message: The following tags 
+ are missing: [f1].</p>
+
+<p class="whs2">How to fix this: Add the incorrect bracket 
+ to continue: Here is my translation of a pretty [f1] cat [/f1].</p>
+
+<h3>“The following tags are unbalanced:”</h3>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>You need to ensure that added tags are added in 
+ a pair. &nbsp;You 
+ may add or delete these tags as needed, but you must add or delete them 
+ as a pair. &nbsp;</p></li>
+</ul>
+
+<p class="whs2">Source example: &nbsp;Here 
+ is a missing [b] cat [/b]. </p>
+
+<p class="whs2">Target example: Here is my translation of 
+ a missing [b] cat.</p>
+
+<p class="whs2">Resulting error message: The following tags 
+ are unbalanced: [b].</p>
+
+<p class="whs2">How to fix this: Add the missing tag to continue: 
+ Here is my translation of a missing [b] cat [/b].</p>
+
+<p>&nbsp;</p>
+
+<h3>“The following tags cannot be added:” </h3>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>You’ll get this message when any tag that is not 
+ in the source (except bold, italic, underline in HTML only) cannot be 
+ added into the target. </p></li>
+</ul>
+
+<p class="whs2">Source example: &nbsp;Here 
+ is a missing cat.</p>
+
+<p class="whs2">Target example: Here is my translation of 
+ a missing [f1] cat[/f1].</p>
+
+<p class="whs2">Resulting error message: The following tags 
+ cannot be added: [f1] &nbsp;[/f1].</p>
+
+<p class="whs2">How to fix this: Here is my translation of 
+ a missing cat.</p>
+
+<ul type="disc" class="whs1">
+	
+	<li style="margin-left: -20px;"
+		class=kadov-p><p>You’ll also get this error message when you need 
+ to enter brackets into the text of a segment. Since the first bracket 
+ is reserved for GlobalSight Placeholder Tags, you must enter in a double-bracket 
+ (which is interpreted as a single bracket in the Main Editor).</p></li>
+</ul>
+
+<p class="whs2">Source example: &nbsp;Here 
+ is a missing cat.</p>
+
+<p class="whs2">Target example: Here is my translation of 
+ a missing [cat].</p>
+
+<p class="whs2">Resulting error message: The following tags 
+ cannot be added: [cat].</p>
+
+<p class="whs2">How to fix this: Here is my translation of 
+ a missing [[cat].</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

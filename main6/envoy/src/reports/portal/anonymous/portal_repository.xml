@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<PortalPage>
+<PortalStyle>
+<PortalData>
+<BroswserTitle><![CDATA[Style Report Viewer]]></BroswserTitle>
+<TitleText><![CDATA[Style%20Report%20Viewer]]></TitleText>
+<WelcomePage><![CDATA[%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20]]></WelcomePage>
+<Footer><![CDATA[]]></Footer>
+</PortalData>
+<PortalLayout>
+<Title Visible="true" TextAlign="2" IconAlign="1"/>
+<Content RepletIsTree="true" Command="1" Dashboard="3" Columns="3"/>
+<Footer Visible="false" Align="2"/>
+</PortalLayout>
+<PortalSkin Name="globalsight">
+<SkinIcon Style="globalsight" Width="100" WidthUnit="%"/>
+<SkinToolbar Style="light" Foreground="-1" SelectedForeground="-16777216"/>
+<SkinTree Style="light" Foreground="-16777216" Background="-1" />
+<SkinList Style="light" Foreground="-16777216" Background="-1" />
+<SkinTitle Font="Verdana-BOLD-37" Foreground="-16777216" Background="-1" />
+<SkinMenu Foreground="-1" Background="-9204299" />
+<SkinWelcomePage  Background="-1" />
+<SkinFooter Font="Serif-PLAIN-10" Foreground="-16777216" Background="-9204043" />
+</PortalSkin>
+</PortalStyle>
+</PortalPage>

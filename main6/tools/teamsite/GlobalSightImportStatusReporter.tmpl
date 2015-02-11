@@ -1,0 +1,93 @@
+#!../../iw-perl/bin/iwperl -w
+# This program receives the task id
+# It opens the task file to check the status 
+# of import for the files in it and accordingly
+# decides whether to callback the task with error 
+# or wait for the exported DCR.
+
+use strict;
+use TeamSite::WFtask;
+use TeamSite::WFworkflow;
+use Cwd;
+
+sub TimeStamp;
+sub log_entry;
+my $iw_home = "%%teamsite_home%%";
+my $TEMP = "$iw_home/report/tmp";
+my $username = "pgautam";
+my $importSuccess = "PENDING";
+my $importFailed = "IMPORT_FAILED";
+my $noStatus = "NO_STATUS";
+
+#
+# Sleep till the import completes in the GlobalSight.
+# If import did not completee in 5 minutes for some reason
+# callback the external task.
+#
+
+# get the task id
+my $taskId = $ARGV[0];
+
+# note that this TIMEOUT is only for UNIX machines
+# for windows machines this will be 0.
+my $TIMEOUT = $ARGV[1];
+sleep($TIMEOUT);
+#generate a log file in the iw-home report/tmp directory
+my $logfile="$iw_home/report/tmp/IW_GlobalSightImport.log";
+open(LOGFILE,">>$logfile") || die "$0:ERROR: can\'t open $logfile";
+
+if($taskId > 0)
+{
+        #
+        # Open the task file and check the first line 
+        # which contains the import status info.
+        #
+        my $task_file = "ts_" . $taskId;
+	if( -e "$TEMP/$task_file")
+        {
+            my $importStatus = readImportStatus($task_file);
+            log_entry "Import status is $importStatus\n";
+            if ($importStatus eq  $noStatus)
+            {
+                # Looks like the file did not
+                # reach the GlobalSight in a given 
+                # time. Let's callback the task 
+                log_entry "Import Error: The import did not complete in time OR GlobalSight server is not responding!\n";
+                my $task = TeamSite::WFtask->new($taskId);
+                log_entry "Calling back with import error for task $taskId \n";
+                $task->CallBack(1, "Import Error: The import did not complete in time OR GlobalSight server is not responding!");
+                unlink "$TEMP/$task_file";
+                close(LOGFILE);
+            }
+        }
+        else
+        {
+            # nothing needs to be done.
+            # Just log this to the log file.
+            log_entry "The task file was not found.\n";
+            log_entry "Looks like the task is already called back.\n";
+        }
+}
+sub readImportStatus
+{
+	my $task_file = shift;
+	open (IN, "< $TEMP/$task_file") || log_entry  "cannot open $!\n";
+        my $status = "NO_STATUS";
+	while (<IN>)
+	{
+            # Only first line has the status 
+            # so ignore all other lines in the file
+            chop;
+            $status = $_;
+            last;
+	}
+	close IN;
+        return $status;
+}
+sub log_entry {
+	my $entry = shift;
+	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	localtime(time);
+	my($date) = sprintf("%04d/%02d/%02d-%02d:%02d:%02d",($year+1900),$mon+1,$mday,$hour,$min,$sec);
+	print LOGFILE "$date:GlobalSightImportStatusReporter:$entry";
+}

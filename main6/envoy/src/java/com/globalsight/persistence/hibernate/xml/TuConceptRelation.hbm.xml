@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.terminology.TuConceptRelation" table="tu_concept_relation">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="tuId" length="20" column="TU_ID" type="long" not-null="true"/>
+        <property name="conceptId" length="50" column="CONCEPT_ID" type="long" not-null="true" />
+        <property name="addedLanguage" length="255" column="ADDED_LANGUAGE" type="string" />
+    </class>
+
+</hibernate-mapping>

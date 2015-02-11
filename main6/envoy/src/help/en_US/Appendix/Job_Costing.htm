@@ -1,0 +1,247 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>Job Costing</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=content-type content="text/html; charset=windows-1252">
+<meta name="build tags" content="Job_Management">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=839>
+<meta name=layout-width content=980>
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+ol.whs1 {list-style: decimal;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nJob Costing");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script><!--(Generated Script Links)========================================-->
+<!--(Generated Code)================================================-->
+<!--(WARNING: DO NOT EDIT OR DELETE THIS SECTION!)==================-->
+
+<script type="text/javascript" language="JavaScript1.2" src="../ehlpdhtm.js" x-save-method="compute-relative" name="EHELP_DHTM"></script>
+<script type="text/javascript"
+		language=JavaScript1.2>
+<!-- 
+if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function();if( typeof( kadovInitTrigger ) != 'function' ) kadovInitTrigger = new Function();if( typeof( kadovFilePopupInit ) != 'function' ) kadovFilePopupInit = new Function();if( typeof( kadovTextPopupInit ) != 'function' ) kadovTextPopupInit = new Function();
+ //-->
+</script>
+
+
+<!--(==============================================================)-->
+
+
+<h1>Job Costing</h1>
+
+<p>The GlobalSight Job Costing feature allows Project Managers to calculate 
+ the cost of localization jobs in a flexible and comprehensive way by providing 
+ in-progress cost estimation, surcharge additions, and final cost overrides. 
+ This section explains steps required to implement Job Costing in GlobalSight.</p>
+
+<p>&nbsp;</p>
+
+<ol type="1" class="whs1">
+	
+	<li class=kadov-p><p>Activate Job Costing During Installation<br>
+	During the installation of GlobalSight, set the &quot;Enable Job Costing&quot; 
+ parameter to &quot;true&quot; to activate GlobalSight Job Costing. <br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Create Rates<br>
+	Create Rates that are appropriate for you costing needs. There are 
+ four types of Rates:</p></li>
+	
+	<ol type="1" class="whs1">
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a1" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Word_Count_Rates.htm');return false;">Word Count</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a1');
+//--></script></p></li>
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a2" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Hourly_Rates.htm');return false;">Hourly</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a2');
+//--></script></p></li>
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a4" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Page_Rates.htm');return false;">Page</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a4');
+//--></script></p></li>
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a3" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Fixed_Rates.htm');return false;">Fixed</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a3');
+//--></script><br>&nbsp;</p></li>
+	</ol>
+	
+	<li class=kadov-p><p>Create a Workflow with Activities that uses the 
+ Rates you defined above.<br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Create a Localization Profile that uses the Workflow 
+ you defined above.<br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Create a Job.<br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Enter the estimated pages and the estimated hours 
+ for the job. <br>
+	As a Project Manager, you may want to estimate the cost of a job before 
+ the job is completed or even before work has begun on the job. You can 
+ do this as follows:</p></li>
+	
+	<ol type="1" class="whs1">
+		
+		<li class=kadov-p><p>You can manually enter the estimated number 
+ of pages in the job from the Job Details screen by clicking on the Pages 
+ &gt; Edit link. The default number of pages is determined by the GlobalSight 
+ extraction process. The reason that you may want to manually enter the 
+ number of pages is that for long Microsoft Word documents, for example, 
+ one multi-page document will become one single page in GlobalSight since 
+ GlobalSight ignores Microsoft Word page breaks. Therefore, you may want 
+ to enter in the Microsoft Word page count for accuracy. <br>&nbsp;</p></li>
+		
+		<li class=kadov-p><p>You can enter the estimated number of hours 
+ for each Activity in a workflow by opening the graphical workflow screen, 
+ right-clicking on each Activity and entering the number of hours.<span 
+ style="font-weight: bold; font-style: italic;"><I><B><br>
+		<br>
+		Note:</B></I></span> The number of pages and hours that you enter in this 
+ way will be stored and used to calculate the Estimated Cost of the job. 
+ The Actual Cost of the job will be calculated by taking the values that 
+ Localization Participants enter when then complete their Activities. <br>&nbsp;</p></li>
+	</ol>
+	
+	<li class=kadov-p><p>Start work on the job.<br>
+	As Localization Participants work on their Activities, they will use 
+ the Activity Details screen to enter in actual values for page pages and 
+ hours. These values will go into the Actual Cost calculation.<br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Add Surcharges to the job.<br>
+	At any point in the job, you can add Surcharges from the Job Details 
+ screen. Surcharges are non-rate-based charges. There are two types of 
+ Surcharges:</p></li>
+	
+	<ol type="1" class="whs1">
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a5" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Flat_Surcharge.htm');return false;">Flat</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a5');
+//--></script></p></li>
+		
+		<li class=kadov-p><p><a href="javascript:void(0);" id="a6" onMouseOver="if (parseInt(navigator.appVersion) >= 4 && typeof(BSPSPopupOnMouseOver) == 'function') BSPSPopupOnMouseOver(event);" class="BSSCPopup" onclick="BSSCPopup('../Glossary/Percentage_Surcharge.htm');return false;">Percentage</a><script 
+ type="text/javascript"
+	language=JavaScript1.2><!--
+kadovFilePopupInit('a6');
+//--></script><br>&nbsp;</p></li>
+	</ol>
+	
+	<li class=kadov-p><p>Finish the job.<br>&nbsp;</p></li>
+	
+	<li class=kadov-p><p>Final Cost<br>
+	GlobalSight calculates the Final Cost by adding the Actual Cost and 
+ the Surcharges. You can override this Final Cost by clicking the Final 
+ Cost &nbsp;&gt; 
+ Edit link and entering any Final Cost they choose. This Final Cost then 
+ becomes an Override Final Cost, meaning it &nbsp;has 
+ not been &quot;calculated&quot;, rather it has been entered manually. 
+ You can remove the override cost and revert the Final Cost to a calculated 
+ cost by checking the Remove Override checkbox on the Edit Final Cost screen.</p></li>
+</ol>
+
+<p>&nbsp;</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

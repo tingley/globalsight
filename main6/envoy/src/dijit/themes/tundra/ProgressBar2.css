@@ -1,0 +1,94 @@
+.tundra .dijitProgressBar {
+	margin:2px 0px 2px 0px;
+}
+.tundra .dijitProgressBarEmpty {
+	
+	background:#fff url(images/progressBarEmpty.png) repeat-x center center;
+	border-color: #a2a2a2 #b8b8b8 #b8b8b8 #a2a2a2;
+}
+.tundra .dijitProgressBarTile {
+	
+	background:#f0f0f0 url(images/progressBarFull.png) repeat-x center center;
+}
+.tundra .dijitProgressBarFull {
+	border-right:1px solid #b8b8b8;
+}
+.tundra .dijitProgressBarLabel {
+	
+	color:#293a4b;
+}
+.tundra .dijitProgressBarIndeterminate .dijitProgressBarTile {
+	
+	background:#cad2de url(images/progressBarAnim.gif) repeat-x center center;
+}
+
+.dijitProgressBarEmpty{
+	
+	position:relative;overflow:hidden;
+	border:1px solid black; 	
+	z-index:0;			
+}
+.dijitProgressBarFull {
+	
+	position:absolute;
+	overflow:hidden;
+	z-index:-1;
+	top:0;
+	width:100%;
+}
+.dj_ie6 .dijitProgressBarFull {
+	height:1.6em;
+}
+.dijitProgressBarTile {
+	
+	position:absolute;
+	overflow:hidden;
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	margin:0;
+	padding:0;
+	width:auto;
+	height:auto;
+	background-color:#aaa;
+	background-attachment: fixed;
+}
+.dijit_a11y .dijitProgressBarTile{
+	
+	border-width:4px;
+	border-style:solid;
+	background-color:transparent !important;
+}
+.dj_ie6 .dijitProgressBarTile {
+	
+	position:static;
+	
+	height:1.6em;
+}
+.dijitProgressBarIndeterminate .dijitProgressBarLabel {
+	visibility:hidden;
+}
+.dijitProgressBarIndeterminate .dijitProgressBarTile {
+	
+}
+.dijitProgressBarIndeterminateHighContrastImage {
+	display:none;
+}
+.dijit_a11y .dijitProgressBarIndeterminate .dijitProgressBarIndeterminateHighContrastImage {
+	display:block;
+	position:absolute;
+	top:0;
+	bottom:0;
+	margin:0;
+	padding:0;
+	width:100%;
+	height:auto;
+}
+.dijitProgressBarLabel {
+	display:block;
+	position:static;
+	width:100%;
+	text-align:center;
+	background-color:transparent !important;
+}

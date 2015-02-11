@@ -1,0 +1,480 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<TITLE>Appendix B: Changes from CSS1 - äëïöüÿ</TITLE>
+<link rel="prev" href="sample.html">
+<link rel="next" href="notes.html">
+<link rel="contents" href="cover.html#minitoc">
+<link rel="CSS-properties" href="propidx.html" title="properties">
+<link rel="index" href="indexlist.html" title="index">
+<SCRIPT src="http://www.nowhere.com/script.js"/>
+<STYLE src="http://www.nowhere.com/style.css"/>
+<STYLE type="text/css">
+.extractme { font: Verdana; }
+</STYLE>
+<STYLE type="text/xsl">
+.donotextractme { font: Verdana; }
+</STYLE>
+<STYLE>
+@charset "ISO-8859-1";
+@import url(http://where/is/my/file.com) screen, print;
+@import url("/where/is/my/file.txt") radio, tv;
+
+/*
+ * Style sheet for the CSS2 specification
+ * $Id: changes.html,v 1.1 2009/04/14 15:09:41 yorkjin Exp $
+ */
+
+BODY {
+    color: black;
+    /* text-align: justify; */
+    font-family: helvetica, sans-serif;
+    background: white;
+    margin: 2em;
+    /* For the REC: background: #def url(recbg.jpg); */
+}
+H1, H2, H3, H4, H5, H6 {
+    text-align: left;
+}
+
+H1 {
+    clear: left;
+    margin-top: 2em;
+    text-align: center;
+}
+
+PRE {
+    font-family: monospace;
+    margin-left: 1em;
+    font-size: 90%
+}
+
+ADDRESS {
+    text-align: right;
+    font-style: italic;
+}
+
+VAR {
+    font-style: normal;
+}
+IMG {
+    border: 0;
+}
+.toc {
+    text-indent: 0;
+}
+P.toc-line {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    text-indent: 0;
+}
+
+/* I don't like all that blue text, how about this: */
+/* It should be 'inherit', but Netscape inserts a random color :-( */
+A.noxref:link, A.noxref:visited {color: black; /*color: inherit*/}
+DIV.example A:link, DIV.example A:visited {color: maroon; /*color: inherit*/}
+DIV.deprecated-html-example A:link,
+DIV.deprecated-html-example A:visited {color: red; /*color: inherit*/}
+.note A:link, .note A:visited {color: green; /*color: inherit*/}
+
+A.propdef-title {
+  background: yellow;
+}
+
+A.descdef-title {
+  color: yellow;
+  background: green
+}
+
+/* TABLE {margin-left: 1em} */
+DIV.propdef {margin: 1.2em 0}
+
+div.example { color: maroon }
+pre.example { color: maroon }
+pre.illegal-example { color: red }
+div.illegal-example { color: red }
+div.illegal-example p { color: black }
+
+
+div.html-example { color: maroon }
+pre.html-example { color: maroon }
+pre.illegal-html-example { color: red }
+div.illegal-html-example { color: red }
+div.illegal-html-example p { color: black }
+pre.deprecated-html-example { color: red }
+div.deprecated-html-example { color: red }
+div.deprecated-html-example p { color: black }
+
+div.xml-example { color: maroon }
+pre.xml-example { color: maroon }
+pre.illegal-xml-example { color: red }
+div.illegal-xml-example { color: red }
+div.illegal-xml-example p { color: black }
+
+div.dtd-example { color: maroon }
+pre.dtd-example { color: maroon }
+pre.illegal-dtd-example { color: red }
+div.illegal-dtd-example { color: red }
+div.illegal-dtd-example p { color: black }
+
+.note {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 1em;
+    margin-right: 1em;
+    color: green
+}
+
+.normref { 
+    color: red;
+}       
+
+.informref {
+    color: green;
+}       
+
+DIV.propdef TH { 
+    text-align: right; 
+}
+
+DIV.descdef TH { 
+    text-align: right; 
+}
+
+UL.toc, OL.toc {list-style: none}
+DIV.toc UL UL, DIV.toc OL OL {margin-left: 0}
+DIV.toc UL UL UL, DIV.toc OL OL OL {margin-left: 1em}
+DIV.toc UL UL UL UL, DIV.toc OL OL OL OL {margin-left: 0}
+LI.tocline1 {font-weight: bold}
+LI.tocline2 {font-weight: normal}
+LI.tocline4 {font-style: italic}
+/* DIV.subtoc UL, DIV.subtoc OL {list-style: none} */
+/* The border in the following rule crashes NN4 on fonts.html :-(
+DIV.subtoc {padding: 1em; border: solid black thin; margin: 1em 0;
+    background: #ddd}
+*/
+UL.index {list-style: none}
+
+S, DEL {text-decoration: line-through; color: red}
+U, INS {text-decoration: underline; background: #bfa}
+
+DIV.figure {
+    text-align: center;
+    /*border: solid thin;
+    width: 100%;*/
+    margin: 2.5em 0
+}
+P.caption, CAPTION {
+    text-align: center;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 90%;
+    color: #088;
+    margin: 1.5em 25% 0 25%;
+}
+DIV.toc, UL.index, DT {
+    text-align: left
+}
+SUP {
+    vertical-align: super;
+    font-size: 80%
+}
+
+/* now here comes the wild stuff */
+.one { color: green; ;;; ; ;color: red;;;color: blue;;; }
+.two { mirror-image: (
+                     run-around [ color: blue ]
+		     );
+       color: purple;
+	 }
+.three { mirror-image: {
+                       run-around { color: blue }
+		       };
+       color: maroon;
+       }
+
+.four {
+	mirror-image: @say hello { {@why url(error.html)} @not } @fine;
+	color: navy;
+	}
+.five {
+	mirror-image: [ nothing ( much [ goes ( here ) ] but ) symbols ];
+	color: olive;
+	}
+
+</STYLE>
+<SCRIPT LANGUAGE="Javascript">
+<!-- 
+var i = 0;
+function bla(s)
+    {
+    i = 1;
+    if (i < 1)
+      alert("I'm a >message< and need translation: " + s);
+    else
+      alert("I'm a <B>HTML</B> message and need translation: " + s);
+    }
+// end of script -->
+</SCRIPT>
+<script language="VBScript">
+Dim j
+Sub foo
+  j = 1
+  MsgBox "I'm a message, too!"
+End Sub 
+</script>
+
+</HEAD>
+<BODY>
+<BASEFONT FACE="Verdana">
+<div href="javascript:geturl('test');"></DIV>
+<div href="javascript:alert('testing the <B>embedded</B> HTML extractor');">
+Now this one will be embedded:
+<a href="javascript:alert('testing the <B>embedded</B> HTML extractor');"></a>
+What has just happened?
+</DIV>
+
+<div id="1" class="navbar" align="center" onLoad="return bla('translate me!');">
+  <a href="sample.html">previous</a> &nbsp;
+  <a href="notes.html">next</a> &nbsp;
+  <a href="cover.html#minitoc">contents</a> &nbsp;
+  <a href="propidx.html">properties</a> &nbsp;
+  <a href="#" onClick="bla('translate me!'); return false;">index</a> &nbsp;
+  <a href="javascript:bla('translate me, too!')"
+     onClick="bla('I have been translated, right?'); return true;">index</a> &nbsp;
+</div>
+<hr class="navbar">
+
+<H1 id="2" align="center">Appendix B. Changes from CSS1</H1>
+<div class="subtoc">
+<p>javascript test:
+<A href="javascript:alert('translate me!');">don't click me</A>
+</P>
+
+<p id="3"><strong>Contents</strong> 
+<span style="color:red">red <span style="color:blue">blue</span> red</span>
+  <ul class="toc">
+    <li class="tocline2"><a href="changes.html#q1" class="tocxref">B.1 New functionality</a>
+    <li class="tocline2"><a href="changes.html#q2" class="tocxref">B.2 Updated descriptions</a>
+    <li class="tocline2"><a href="changes.html#changes-from-css1" class="tocxref">B.3 Semantic changes from CSS1</a>
+  </ul>
+</div>
+
+<P>
+<span style="color:red">red<SPAN style="color:blue">blue<BR/>blue</SPAN>red</span>
+<P>
+<span style="color:red">red<SPAN style="color:blue">blue<BR>blue</SPAN>red</span>
+<P>
+<span style="color:red">red<SPAN style="color:blue;font:Arial;">blue<HR/>blue</SPAN>red</span>
+<span style="color:red">red<SPAN style="color:blue;font:Arial;">blue<HR/>blue</SPAN>red</span>
+<div style="color:red;font:Arial;">red<div style="color:blue;font:Arial;">blue<HR/>blue</div>red</div>
+
+<span style="color:red">red<span style="color:blue">blue</font>blue</span>red</span>
+
+<P><SPAN style="font-weight: bolder">Attention:</SPAN> Beware the dog</P>
+
+<P><em>This appendix is informative, not normative.</em></P>
+
+<P>CSS2 builds on CSS1 and all valid CSS1 style sheets are valid CSS2
+style sheets. The changes between the CSS1 specification (see
+<a href="refs.html#ref-CSS1" rel="biblioentry" class="noxref"><span class="normref">[CSS1]</span></a>) and this specification fall into three groups: new
+functionality, updated descriptions of CSS1 functionality, and changes
+to CSS1.
+
+<H2><a name="q1">B.1 New functionality</a></H2>
+
+<P>
+<SPAN>In addition to the functionality of <I>CSS1</I>,<img src="br.gif"/><BR/> 
+<B>CSS2</B> supports:</SPAN>
+
+<NOBR><A href="http://www.microsoft.com/id=laksjdkdsjds;kjdkfdhgkjdffdfkjh">
+http://www.microsoft.com/id=laksjdkdsjds;kjdkfdhgkjd/ffdfkjhkjdkfdhgkjdffd<WBR/>fkjhkjdkfdhgkjdffdf<WBR/>kjhkjdkfdhgkjdf/<WBR/>fdfkjhkjdkfdh/ gkjdffdfkjh</A></NOBR>
+</p>
+
+<UL>
+
+<LI>The concept of <A HREF="media.html">media types</A>.
+
+<LI>The <a href="cascade.html#value-def-inherit">'inherit'</a> 
+value for all properties.
+
+<LI><A HREF="page.html">Paged media</A>
+
+<LI><A HREF="aural.html">Aural style sheets</A>
+
+<LI>Several internationalization features, including <a
+href="generate.html#lists">list numbering styles</a>, support for <a
+href="visuren.html#direction">bidirectional text</a>, and support for
+language-sensitive <a href="generate.html#quotes">quotation
+marks</a>.
+
+<LI><A HREF="fonts.html#font-selection">An extended font selection</A>
+mechanism, including intelligent matching, synthesis, and downloadable
+fonts. Also, the concept of system fonts has been is introduced, and a
+new property, <a href="fonts.html#propdef-font-size-adjust" class="noxref"><span
+class="propinst-font-size-adjust">'font-size-adjust'</span></a>, has been added.
+
+<LI><A HREF="tables.html">Tables</A>, including new values on <a href="visuren.html#propdef-display" class="noxref"><span
+class="propinst-display">'display'</span></a> and <a href="visudet.html#propdef-vertical-align" class="noxref"><span
+class="propinst-vertical-align">'vertical-align'</span></a>.
+
+<LI><A HREF="visuren.html#relative-positioning">Relative</A> and <A
+HREF="visuren.html#absolute-positioning">absolute positioning</A>,
+including <A HREF="visuren.html#fixed-positioning">fixed
+positioning</A>.
+
+<LI>New box types (along with block and inline): <a
+href="visuren.html#compact">compact</a> and <a href="visuren.html#run-in">
+run-in</a>.
+
+<LI>The ability to control content <a
+href="visufx.html#overflow">overflow</a>, <a
+href="visufx.html#clipping">clipping</a>, and <a
+href="visufx.html#visibility">visibility</a> in the visual formatting
+model.
+
+<LI>The ability to specify minimum and maximum <a
+href="visudet.html#min-max-widths">widths</a> and <a
+href="visudet.html#min-max-heights">heights</a> in the visual
+formatting model.
+
+<LI>An extended <A HREF="selector.html">selector</A> mechanism,
+including child selectors, adjacent selectors, and attribute selectors.
+
+<LI><A HREF="generate.html#generated-text">Generated content</a>,
+<a href="generate.html#counters">counters and automatic numbering</A>, and
+<a href="generate.html#markers">markers</a>.
+
+<LI>Text shadows, through the new <a href="text.html#propdef-text-shadow" class="noxref"><span
+class="propinst-text-shadow">'text-shadow'</span></a> property.
+
+<LI>Several new <A
+HREF="selector.html#pseudo-classes">pseudo-classes</A>, :first-child, :hover,
+:focus, :lang.
+
+<LI>System <A HREF="ui.html#system-colors">colors</A> and 
+<A href="ui.html#system-fonts">fonts</a>.
+
+<LI><A href="ui.html#cursor-props">Cursors</a>.
+
+<LI><A href="ui.html#dynamic-outlines">Dynamic outlines</a>.
+
+</UL>
+
+
+
+<H2><a name="q2">B.2 Updated descriptions</a></H2>
+
+<P>The CSS1 specification was short and concise. This specification is
+much more voluminous and more readable. Much of the additional content
+describes new functionality, but the description of CSS1 features has
+also been extended. Except in a few cases described below, the
+rewritten descriptions do not indicate a change in syntax nor
+semantics. 
+
+<H2>B.3 <a name="changes-from-css1">Semantic changes from CSS1</a></H2>
+
+<P>While all CSS1 style sheets are valid CSS2 style sheets, there are
+a few cases where the CSS1 style sheet will have a different meaning
+when interpreted as a CSS2 style sheet. Most changes are due to
+implementation experience feeding back into the specification, but
+there are also some error corrections.
+
+<UL>
+<LI>The meaning of "!important" has been changed. In CSS1,
+"!important" in an author's style sheet took precedence over
+one in a user style sheet. This has been reversed in CSS2.
+
+
+<LI>In CSS2 <A HREF="syndata.html#color-units">color values</A> are clipped
+with regard to the device gamut, not with regard to the sRGB gamut as
+in CSS1.
+
+<LI>CSS1 simply said that 'margin-right' was ignored if the both
+'margin-left' and 'width' were set. In CSS2 the choice between
+relaxing 'margin-right' or 'margin-left' depends on the writing direction.
+
+<LI>In CSS1, several properties (e.g., 'padding') had values referring
+to the width of the parent element. This was an error; the value
+should always refer to the width of a block-level element and this
+specification reflects this by introducing the term "containing block".
+
+<LI>The initial value of 'display' is 'inline' in CSS2, not 'block' as
+in CSS1.
+
+<LI>In CSS1, the 'clear' property applied to all elements. This was an
+error, and the property only applies to block-level elements in CSS2.
+
+<LI>In CSS1, <a name="x0"><span class="index-inst"
+title="pseudo-classes:::link|:link|link
+(pseudo-class)">':link'</span></a>, <a name="x3"><span class="index-inst"
+title="pseudo-classes:::visited|:visited|visited
+(pseudo-class)">':visited'</span></a> and <a name="x6"><span class="index-inst"
+title="pseudo-classes:::active|:active|active
+(pseudo-class)">':active'</span></a> were mutually exclusive; in CSS2, <a
+href="selector.html#dynamic-pseudo-classes">':active'</a> can occur
+together with <a href="selector.html#link-pseudo-classes">':link' or
+':visited'</a>.
+
+<LI>The suggested scaling factor between adjacent <a href="fonts.html#propdef-font-size" class="noxref"><span
+class="propinst-font-size">'font-size'</span></a> indexes in the table of font
+sizes has been reduced from 1.5 to 1.2.
+
+<LI>The computed value, not the actual value, of <a href="fonts.html#propdef-font-size" class="noxref"><span
+class="propinst-font-size">'font-size'</span></a> is inherited.
+
+<LI>The CSS1 description of 'inside' (for <a href="generate.html#propdef-list-style-position" class="noxref"><span
+class="propinst-list-style-position">'list-style-position'</span></a>)
+allowed the interpretation that the left margin of the text was
+affected, rather than the position of the bullet. In CSS2 that
+interpretation is ruled out.
+
+<li>Please also consult the <em>normative</em> section on the <a
+href="grammar.html#tokenizer-diffs">differences between the CSS1 and
+CSS2 tokenizer</a>.
+</UL>
+
+<hr class="navbar">
+
+<div  id="99" class="navbar" align="center">
+<p><a href="sample.html">previous</a> &nbsp;
+<a href="notes.html">next</a> &nbsp;
+<a href="cover.html#minitoc">contents</a> &nbsp;
+<a href="propidx.html">properties</a> &nbsp;
+<a href="indexlist.html">index</a> &nbsp;
+</div>
+
+<hr class="navbar">
+<TABLE>
+<GSA DELETE=1 ADD="product_table_row" EXTRACT="product_table_row">
+<TR>
+<TD>Product name in row one. Additional comment.</TD>
+<TD>Product description in row one.</TD>
+</TR>
+</GSA>
+<GSA DELETE=1 ADD="product_table_row">
+<TR>
+<TD>Product name one in row two.</TD>
+<TD>Product description in row two.</TD>
+</TR>
+</GSA>
+<GSA DELETE=1 ADDED="ja_JP">
+<TR>
+<TD>Localized product name in row three</TD>
+<TD>Localized product description in row three.</TD>
+</TR>
+</GSA>
+<GSA DELETE=1 ADDED="fr_CA">
+<TR>
+<TD>Localized product name in row three</TD>
+<TD>Localized product description in row three.</TD>
+</TR>
+</GSA>
+</TABLE>
+
+</BODY>
+</HTML>
+

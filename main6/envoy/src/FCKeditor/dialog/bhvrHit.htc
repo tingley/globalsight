@@ -1,0 +1,18 @@
+<PUBLIC:COMPONENT>
+<PUBLIC:ATTACH EVENT="onclick" ONEVENT="doClickHit()" />
+<PUBLIC:ATTACH EVENT="ondblclick" ONEVENT="doDblClickHit()" />
+<SCRIPT LANGUAGE="JScript">
+function doClickHit()
+{
+    txtTerm.value = this.innerText;
+    g_cid = this.getAttribute("cid");
+    g_tid = this.getAttribute("tid");
+}
+
+function doDblClickHit()
+{
+    doClickHit();
+    ok();
+}
+</SCRIPT>
+</PUBLIC:COMPONENT>

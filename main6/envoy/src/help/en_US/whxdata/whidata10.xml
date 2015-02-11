@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Level" >
+  <topic name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+  <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="New Field" url="Setup/Terminology/New_Field.htm" />
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Leverage Group Exact Match" >
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="What is a Leverage Group Exact Match (LGEM)" url="Appendix/Linguistic_FAQ/What_is_a_Leverage_Group_Exact_Match_(LGEM).htm" />
+</key>
+<key name="Local Content Management" >
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="Local Content Management equal" >
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="Locale" >
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
+  <topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="Generic Snippet" url="Glossary/Generic_Snippet.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Is segmentation customizable in GlobalSight" url="Appendix/Linguistic_FAQ/Is_segmentation_customizable_in_GlobalSight.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale" url="Glossary/Locale.htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Locale Pair" url="Glossary/Locale_Pair.htm" />
+  <topic name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Office Adapters" url="Appendix/Office_Adapter.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Preparing Documents for Import" url="Appendix/Preparing_Documents_for_Import.htm" />
+  <topic name="Preview Rules Sample" url="Appendix/Database_Integration/Preview_Rules_Sample.htm" />
+  <topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+  <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Snippet" url="Glossary/Snippet.htm" />
+  <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+  <topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Translation Unit Variant" url="Glossary/Translation_Unit_Variant.htm" />
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+  <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="Locale Manager" >
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Locale Pair" >
+  <topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Locale Pair" url="Glossary/Locale_Pair.htm" />
+  <topic name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+</key>
+<key name="Locale Pairs Main Screen" >
+  <topic name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+</key>
+<key name="Localizable records" >
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+</key>
+<key name="Localizable row" >
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+</key>
+<key name="Localizable segment" >
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+</key>
+
+</indexdata>

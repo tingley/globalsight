@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Type="StyleSheet" Top="1.0" Left="1.0" Bottom="1.0" Right="1.0" HeaderFromEdge="0.5" FooterFromEdge="0.75" PageNumbering="1" HorizontalWrap="false" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0">
+<ReportProperty Name="report.modified">
+<![CDATA[2003-07-02 17:25:18]]>
+</ReportProperty>
+<ReportProperty Name="TextMode">
+<![CDATA[true]]>
+</ReportProperty>
+<ReportProperty Name="edit.layout">
+<![CDATA[false]]>
+</ReportProperty>
+<ReportProperty Name="report.created">
+<![CDATA[2002-03-06 17:35:12]]>
+</ReportProperty>
+<Parameters>
+</Parameters>
+<RunningTotals>
+</RunningTotals>
+<Header Type="256">
+<ImageElement ID="imgLogo" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-4144960" PathType="3" Embedded="false" Layout="0" Wrapping="3" Rotation="0" Margin="1,1,1,1">
+<![CDATA[/images/bigGlobalSightLogo.gif]]>
+</ImageElement>
+<TextElement ID="Text8" Alignment="4" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{D}]]>
+</TextElement>
+</Header>
+<Header Type="512">
+<TextElement ID="txtPageNumber" Alignment="68" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{P}]]>
+</TextElement>
+</Header>
+<TextElement ID="txtReportTitle" Alignment="66" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Arial-BOLD-16"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[Translation Memory Analysis  Prototype Report]]>
+</TextElement>
+<NewlineElement ID="Newline1" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TextElement ID="Text5" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[You can use the Reports Composer to add grouping, conditions, hide columns, etc. and save your customized report as a new report. You can also change fonts, colors, styles, and text.
+
+The following table contains Translation Memory information. ]]>
+</TextElement>
+<NewlineElement ID="Newline3" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<NewlineElement ID="Newline4" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TableElement ID="Table5" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" TableWidth="0.0" Layout="1" TableAdvance="1" OrphanControl="false" Padding="0,1,0,1" EmbedWidth="false" Embedded="true">
+<property><name><![CDATA[query]]></name><value><![CDATA[tmAnalysis]]></value></property>
+<property><name><![CDATA[grow]]></name><value><![CDATA[true]]></value></property>
+<RowGroup>
+</RowGroup>
+<ColGroup>
+</ColGroup>
+<conditionFilter>
+<dataselection frommodel="false">
+<source><![CDATA[tmAnalysis]]></source>
+<attributeref entity="" attribute="Project">
+</attributeref>
+<attributeref entity="" attribute="Project Manager">
+</attributeref>
+<attributeref entity="" attribute="Creation Date">
+</attributeref>
+<attributeref entity="" attribute="Source Locale">
+</attributeref>
+<attributeref entity="" attribute="Target Locale">
+</attributeref>
+<attributeref entity="" attribute="Fuzzy Word Count">
+</attributeref>
+<attributeref entity="" attribute="Exact Match Word Count">
+</attributeref>
+<attributeref entity="" attribute="No Match Word Count">
+</attributeref>
+</dataselection>
+<hiddenColumn>
+</hiddenColumn>
+</conditionFilter>
+<Header>
+</Header>
+<Table Rows="2" Cols="8" HeaderRow="1" HeaderCol="0" TrailerRow="0" TrailerCol="0">
+<TR>
+<TD Type="String"><![CDATA[Project]]></TD><TD Type="String"><![CDATA[Project Manager]]></TD><TD Type="String"><![CDATA[Creation Date]]></TD><TD Type="String"><![CDATA[Source Locale]]></TD><TD Type="String"><![CDATA[Target Locale]]></TD><TD Type="String"><![CDATA[Fuzzy Word Count]]></TD><TD Type="String"><![CDATA[Exact Match Word Count]]></TD><TD Type="String"><![CDATA[No Match Word Count]]></TD></TR>
+<TR>
+<TD Type="String"><![CDATA[XXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="Date"><![CDATA[2003-07-02 17:25:11]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD></TR>
+</Table>
+</TableElement>
+</Report>

@@ -1,0 +1,117 @@
+<%
+
+    // Data
+    ArrayList wfTaskInfos = (ArrayList)sessionMgr.getAttribute("taskInfos");
+    TaskInfo taskInfo = (TaskInfo)request.getAttribute("taskInfo");
+    long taskId = -1;
+    ArrayList assignees = new ArrayList();
+    if (taskInfo != null)
+    {
+        taskId = taskInfo.getId();
+        assignees = (ArrayList)taskInfo.getTaskAssignees();
+    }
+
+%>
+<style type="text/css">
+.tableHeadingTan {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: black;
+    background: D6CFB2;
+}
+.list2 {
+	border: 1px solid D6CFB2;
+	padding: 0px;
+}
+</style>
+
+<!-- begin activities.jsp  -->
+<script language="JavaScript">
+var prevSelected;
+function submitView()
+{
+    <% if (edit) { %>
+        if (!confirm("<%=bundle.getString("jsmsg_change_workflow")%>"))
+        {
+            viewForm.infoList.selectedIndex = prevSelected;
+            return;
+        }
+    <% } %>
+    document.body.style.cursor='wait';
+    taskId = viewForm.infoList.options[viewForm.infoList.selectedIndex].value;
+    viewForm.action = "<%= viewUrl %>" + "&action=view&taskId="+ taskId;
+    viewForm.submit();
+}
+</script>
+    <form name="viewForm" method="post">
+<table width="70%" class="standardText">
+  <tr><td>
+    <fieldset>
+      <legend><b><%= bundle.getString("lb_view_estimated_dates")%></b></legend>
+        <table border="0" cellpadding="2" cellspacing="0" >
+        <tr>
+          <td class="standardText">
+            <%=bundle.getString("lb_select_activity")%>
+          </td>
+        </tr>
+        <tr>
+          <td class="standardText">
+            <%=bundle.getString("lb_activities_default_path")%>:
+          <select name="infoList" onChange="submitView()">
+            <option value='-1'>&nbsp</option>
+<%
+      for (int i = 0; i < wfTaskInfos.size(); i++)
+      {
+          WfTaskInfo ti = (WfTaskInfo)wfTaskInfos.get(i);
+          out.println("<option value='" + ti.getId() + "'");
+          if (taskId == ti.getId())
+          {
+              out.println(" selected ");
+          }
+          out.println(">" + ti.getDisplayName() + "</option>");
+      }
+%>
+          </td>
+        </tr>
+<%
+      if (assignees.size() > 0)
+      {
+%>
+        <tr>
+        <td>
+        <table border="0" cellpadding="4" cellspacing="0" class="list2">
+        <tr>
+          <td class="tableHeadingTan"><%=bundle.getString("lb_participant")%></td>
+          <td class="tableHeadingTan"><%=bundle.getString("lb_estimated_completion_date")%></td>
+        </tr>
+<%
+        for (int j = 0; j < assignees.size(); j++)
+        {
+            TaskAssignee ta = (TaskAssignee)assignees.get(j);
+            ts.setDate(ta.getEstimatedCompletionDate());
+%>
+          <tr>
+            <td class="standardText" ><%=ta.getUserFullName()%></td>
+            <td class="standardText" ><%=ts%></td>
+          </tr>
+<%
+        }
+%>
+        </table>
+<%
+      }
+%>
+        </td>
+        </tr>
+        </table>
+    </fieldset>
+</td></tr>
+</table>
+<script>
+prevSelected = viewForm.infoList.selectedIndex;
+</script>
+    
+    </form>
+
+<!-- end activities.jsp  -->

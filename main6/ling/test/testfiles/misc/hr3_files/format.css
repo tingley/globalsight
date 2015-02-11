@@ -1,0 +1,90 @@
+P.titel {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; COLOR: #ffffff; FONT-FAMILY: Helvetica, Arial
+}
+P.titel2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; COLOR: #ffffff; FONT-FAMILY: Helvetica, Arial
+}
+P.weiss12 {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; COLOR: #ffffff; FONT-FAMILY: Helvetica, Arial
+}
+P.normal {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Helvetica,Arial
+}
+P.bold {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Arial,Helvetica
+}
+P.text {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: #000000; FONT-FAMILY: Helvetica,Arial
+}
+P.port9 {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: #000000; FONT-FAMILY: Helvetica,Arial
+}
+P.port8 {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Helvetica,Arial
+}
+P.weiss {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ffffff; FONT-FAMILY: Arial,Helvetica
+}
+P.klein {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Helvetica, Arial
+}
+P.kleinweiss {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #ffffff; FONT-FAMILY: Helvetica, Arial
+}
+P.aqua {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: aqua; FONT-FAMILY: Arial,Helvetica
+}
+P.navy {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #00007a; FONT-FAMILY: Arial,Helvetica
+}
+P.navy8 {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #00007a; FONT-FAMILY: Arial,Helvetica
+}
+P.kursiv {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-STYLE: italic; FONT-FAMILY: Helvetica,Arial
+}
+SPAN.weiss {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; COLOR: #ffffff; FONT-FAMILY: Arial,Helvetica
+}
+SPAN.weisslarge {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; COLOR: #ffffff; FONT-FAMILY: Arial,Helvetica
+}
+SPAN.aqua {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: aqua; FONT-FAMILY: Arial,Helvetica
+}
+SPAN.schwarz {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: #000000; FONT-FAMILY: Arial,Helvetica
+}
+SPAN.klein {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Helvetica, Arial
+}
+LI.normal {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+TD {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+TD.normal {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+TD.sendungen {
+	FONT-WEIGHT: normal; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+TD.weiss {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ffffff; FONT-FAMILY: Arial, Helvetica
+}
+TD.blau {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: aqua; FONT-FAMILY: Arial, Helvetica
+}
+A:link {
+	FONT-WEIGHT: bold; COLOR: #fff000; TEXT-DECORATION: none
+}
+A:visited {
+	FONT-WEIGHT: bold; COLOR: #fff000; TEXT-DECORATION: none
+}
+A:active {
+	FONT-WEIGHT: bold; COLOR: #fff000; TEXT-DECORATION: none
+}
+A:hover {
+	FONT-WEIGHT: bold; COLOR: #fff000; TEXT-DECORATION: underline
+}

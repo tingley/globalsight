@@ -1,0 +1,11 @@
+/* The .ptag rule must come first in this file. */
+.ptag {
+        /* bright: 3366FF, dim: 808080,
+           illegal: FF0000, unbalanced: FF9900 */
+        color: #3366FF;
+        font-size: 90% !important;
+        cursor: default;
+      }
+
+.lre { direction: ltr; unicode-bidi: embed; }
+.rle { direction: rtl; unicode-bidi: embed; }

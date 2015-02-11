@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Copyright (c) 2001-2005. EMC Corporation.  All Rights Reserved.       -->
+<!--                                                                       -->
+<!-- Component: Webtop streamlineview                                        -->
+<!-- Scope: None                                                           -->
+
+
+<config version='1.0'>
+   
+   <!-- this component is the Webtop version of the streamline view and has unqualified scope -->
+   <scope>
+      
+      <!-- the streamlineview component definition -->
+      <component id="streamlineview" extends="drilldown:custom/ambassador/config/navigation/drilldown/drilldown_component.xml">
+         
+         <!-- Description (not NLS'd) -->
+         <desc>
+            WebTop Streamline View component: The WebTop specific version of the drilldown
+            component.
+         </desc>
+         
+         <!-- Component Layout -->
+         <pages>
+            <start>/webtop/streamline/streamlineview/streamlineview.jsp</start>
+         </pages>
+         
+         <!-- Component Behavior -->
+         <class>com.documentum.webtop.webcomponent.streamline.StreamlineView</class>
+         
+         <!-- Component specific Configuration -->
+         <helpcontextid>streamlineview</helpcontextid>
+      </component>
+      
+   </scope>
+</config>

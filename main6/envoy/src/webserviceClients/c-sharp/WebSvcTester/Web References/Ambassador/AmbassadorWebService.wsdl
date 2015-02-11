@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:s1="http://www.globalsight.com/webservices/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="http://webservices.globalsight.com" xmlns:s2="http://xml.apache.org/xml-soap" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://www.globalsight.com/webservices/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema targetNamespace="http://webservices.globalsight.com">
+      <s:import namespace="http://www.globalsight.com/webservices/" />
+      <s:import namespace="http://xml.apache.org/xml-soap" />
+      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <s:complexType name="WebServiceException">
+        <s:sequence />
+      </s:complexType>
+    </s:schema>
+    <s:schema targetNamespace="http://www.globalsight.com/webservices/">
+      <s:import namespace="http://xml.apache.org/xml-soap" />
+      <s:import namespace="http://webservices.globalsight.com" />
+      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <s:complexType name="ArrayOf_xsd_anyType">
+        <s:complexContent mixed="false">
+          <s:restriction base="soapenc:Array">
+            <s:attribute d7p1:arrayType="s:anyType[]" ref="soapenc:arrayType" xmlns:d7p1="http://schemas.xmlsoap.org/wsdl/" />
+          </s:restriction>
+        </s:complexContent>
+      </s:complexType>
+    </s:schema>
+    <s:schema targetNamespace="http://xml.apache.org/xml-soap">
+      <s:import namespace="http://www.globalsight.com/webservices/" />
+      <s:import namespace="http://webservices.globalsight.com" />
+      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <s:complexType name="Vector">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="item" type="s:anyType" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </types>
+  <message name="isInstalledRequest" />
+  <message name="exportJobResponse">
+    <part name="exportJobReturn" type="soapenc:string" />
+  </message>
+  <message name="cancelJobResponse">
+    <part name="cancelJobReturn" type="soapenc:string" />
+  </message>
+  <message name="helloWorldRequest" />
+  <message name="loginResponse">
+    <part name="loginReturn" type="soapenc:string" />
+  </message>
+  <message name="addCommentResponse">
+    <part name="addCommentReturn" type="soapenc:string" />
+  </message>
+  <message name="getStatusRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="getFileProfileInformationResponse">
+    <part name="getFileProfileInformationReturn" type="soapenc:string" />
+  </message>
+  <message name="getUserInfoResponse">
+    <part name="getUserInfoReturn" type="soapenc:string" />
+  </message>
+  <message name="getLocalizedDocumentsResponse">
+    <part name="getLocalizedDocumentsReturn" type="soapenc:string" />
+  </message>
+  <message name="getAllProjectsByUserRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="getAllProjectsResponse">
+    <part name="getAllProjectsReturn" type="soapenc:string" />
+  </message>
+  <message name="exportWorkflowResponse">
+    <part name="exportWorkflowReturn" type="soapenc:string" />
+  </message>
+  <message name="cancelWorkflowRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+    <part name="in2" type="soapenc:string" />
+  </message>
+  <message name="getAcceptedTasksInWorkflowRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="s:long" />
+  </message>
+  <message name="getLocalizedDocumentsRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="cancelJobByIdResponse">
+    <part name="cancelJobByIdReturn" type="soapenc:string" />
+  </message>
+  <message name="getAllActivityTypesRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="getTasksInJobResponse">
+    <part name="getTasksInJobReturn" type="soapenc:string" />
+  </message>
+  <message name="submitDocumentRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+    <part name="in2" type="soapenc:string" />
+    <part name="in3" type="soapenc:base64Binary" />
+    <part name="in4" type="soapenc:string" />
+  </message>
+  <message name="getAllProjectsByUserResponse">
+    <part name="getAllProjectsByUserReturn" type="soapenc:string" />
+  </message>
+  <message name="cancelJobByIdRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="s:long" />
+  </message>
+  <message name="WebServiceException">
+    <part name="fault" type="s0:WebServiceException" />
+  </message>
+  <message name="getUserInfoRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="submitDocumentResponse">
+    <part name="submitDocumentReturn" type="soapenc:string" />
+  </message>
+  <message name="loginRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="getAllUsersRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="getAllProjectsRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="getFileProfileInformationRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="getAllLocalePairsRequest">
+    <part name="in0" type="soapenc:string" />
+  </message>
+  <message name="isInstalledResponse">
+    <part name="isInstalledReturn" type="s:boolean" />
+  </message>
+  <message name="getStatusResponse">
+    <part name="getStatusReturn" type="soapenc:string" />
+  </message>
+  <message name="getAllLocalePairsResponse">
+    <part name="getAllLocalePairsReturn" type="soapenc:string" />
+  </message>
+  <message name="getAllActivityTypesResponse">
+    <part name="getAllActivityTypesReturn" type="soapenc:string" />
+  </message>
+  <message name="helloWorldResponse">
+    <part name="helloWorldReturn" type="soapenc:string" />
+  </message>
+  <message name="getAcceptedTasksInWorkflowResponse">
+    <part name="getAcceptedTasksInWorkflowReturn" type="soapenc:string" />
+  </message>
+  <message name="getAllUsersResponse">
+    <part name="getAllUsersReturn" type="soapenc:string" />
+  </message>
+  <message name="exportJobRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="cancelWorkflowResponse">
+    <part name="cancelWorkflowReturn" type="soapenc:string" />
+  </message>
+  <message name="exportWorkflowRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+    <part name="in2" type="soapenc:string" />
+  </message>
+  <message name="cancelJobRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="soapenc:string" />
+  </message>
+  <message name="addCommentRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="s:long" />
+    <part name="in2" type="s:int" />
+    <part name="in3" type="soapenc:string" />
+    <part name="in4" type="soapenc:string" />
+    <part name="in5" type="s1:ArrayOf_xsd_anyType" />
+    <part name="in6" type="s1:ArrayOf_xsd_anyType" />
+  </message>
+  <message name="getTasksInJobRequest">
+    <part name="in0" type="soapenc:string" />
+    <part name="in1" type="s:long" />
+    <part name="in2" type="soapenc:string" />
+  </message>
+  <portType name="Ambassador">
+    <operation name="getUserInfo" parameterOrder="in0 in1">
+      <input name="getUserInfoRequest" message="s1:getUserInfoRequest" />
+      <output name="getUserInfoResponse" message="s1:getUserInfoResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="login" parameterOrder="in0 in1">
+      <input name="loginRequest" message="s1:loginRequest" />
+      <output name="loginResponse" message="s1:loginResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getStatus" parameterOrder="in0 in1">
+      <input name="getStatusRequest" message="s1:getStatusRequest" />
+      <output name="getStatusResponse" message="s1:getStatusResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="isInstalled">
+      <input name="isInstalledRequest" message="s1:isInstalledRequest" />
+      <output name="isInstalledResponse" message="s1:isInstalledResponse" />
+    </operation>
+    <operation name="cancelJob" parameterOrder="in0 in1">
+      <input name="cancelJobRequest" message="s1:cancelJobRequest" />
+      <output name="cancelJobResponse" message="s1:cancelJobResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAllLocalePairs" parameterOrder="in0">
+      <input name="getAllLocalePairsRequest" message="s1:getAllLocalePairsRequest" />
+      <output name="getAllLocalePairsResponse" message="s1:getAllLocalePairsResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAllProjects" parameterOrder="in0">
+      <input name="getAllProjectsRequest" message="s1:getAllProjectsRequest" />
+      <output name="getAllProjectsResponse" message="s1:getAllProjectsResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="cancelWorkflow" parameterOrder="in0 in1 in2">
+      <input name="cancelWorkflowRequest" message="s1:cancelWorkflowRequest" />
+      <output name="cancelWorkflowResponse" message="s1:cancelWorkflowResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="addComment" parameterOrder="in0 in1 in2 in3 in4 in5 in6">
+      <input name="addCommentRequest" message="s1:addCommentRequest" />
+      <output name="addCommentResponse" message="s1:addCommentResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="helloWorld">
+      <input name="helloWorldRequest" message="s1:helloWorldRequest" />
+      <output name="helloWorldResponse" message="s1:helloWorldResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getFileProfileInformation" parameterOrder="in0">
+      <input name="getFileProfileInformationRequest" message="s1:getFileProfileInformationRequest" />
+      <output name="getFileProfileInformationResponse" message="s1:getFileProfileInformationResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAllActivityTypes" parameterOrder="in0">
+      <input name="getAllActivityTypesRequest" message="s1:getAllActivityTypesRequest" />
+      <output name="getAllActivityTypesResponse" message="s1:getAllActivityTypesResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAllUsers" parameterOrder="in0">
+      <input name="getAllUsersRequest" message="s1:getAllUsersRequest" />
+      <output name="getAllUsersResponse" message="s1:getAllUsersResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAllProjectsByUser" parameterOrder="in0">
+      <input name="getAllProjectsByUserRequest" message="s1:getAllProjectsByUserRequest" />
+      <output name="getAllProjectsByUserResponse" message="s1:getAllProjectsByUserResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="submitDocument" parameterOrder="in0 in1 in2 in3 in4">
+      <input name="submitDocumentRequest" message="s1:submitDocumentRequest" />
+      <output name="submitDocumentResponse" message="s1:submitDocumentResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getLocalizedDocuments" parameterOrder="in0 in1">
+      <input name="getLocalizedDocumentsRequest" message="s1:getLocalizedDocumentsRequest" />
+      <output name="getLocalizedDocumentsResponse" message="s1:getLocalizedDocumentsResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="cancelJobById" parameterOrder="in0 in1">
+      <input name="cancelJobByIdRequest" message="s1:cancelJobByIdRequest" />
+      <output name="cancelJobByIdResponse" message="s1:cancelJobByIdResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="exportWorkflow" parameterOrder="in0 in1 in2">
+      <input name="exportWorkflowRequest" message="s1:exportWorkflowRequest" />
+      <output name="exportWorkflowResponse" message="s1:exportWorkflowResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="exportJob" parameterOrder="in0 in1">
+      <input name="exportJobRequest" message="s1:exportJobRequest" />
+      <output name="exportJobResponse" message="s1:exportJobResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getAcceptedTasksInWorkflow" parameterOrder="in0 in1">
+      <input name="getAcceptedTasksInWorkflowRequest" message="s1:getAcceptedTasksInWorkflowRequest" />
+      <output name="getAcceptedTasksInWorkflowResponse" message="s1:getAcceptedTasksInWorkflowResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+    <operation name="getTasksInJob" parameterOrder="in0 in1 in2">
+      <input name="getTasksInJobRequest" message="s1:getTasksInJobRequest" />
+      <output name="getTasksInJobResponse" message="s1:getTasksInJobResponse" />
+      <fault name="WebServiceException" message="s1:WebServiceException" />
+    </operation>
+  </portType>
+  <binding name="AmbassadorWebServiceSoapBinding" type="s1:Ambassador">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <operation name="getUserInfo">
+      <soap:operation soapAction="" />
+      <input name="getUserInfoRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getUserInfoResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="login">
+      <soap:operation soapAction="" />
+      <input name="loginRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="loginResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getStatus">
+      <soap:operation soapAction="" />
+      <input name="getStatusRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getStatusResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="isInstalled">
+      <soap:operation soapAction="" />
+      <input name="isInstalledRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="isInstalledResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+    </operation>
+    <operation name="cancelJob">
+      <soap:operation soapAction="" />
+      <input name="cancelJobRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="cancelJobResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAllLocalePairs">
+      <soap:operation soapAction="" />
+      <input name="getAllLocalePairsRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAllLocalePairsResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAllProjects">
+      <soap:operation soapAction="" />
+      <input name="getAllProjectsRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAllProjectsResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="cancelWorkflow">
+      <soap:operation soapAction="" />
+      <input name="cancelWorkflowRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="cancelWorkflowResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="addComment">
+      <soap:operation soapAction="" />
+      <input name="addCommentRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="addCommentResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="helloWorld">
+      <soap:operation soapAction="" />
+      <input name="helloWorldRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="helloWorldResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getFileProfileInformation">
+      <soap:operation soapAction="" />
+      <input name="getFileProfileInformationRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getFileProfileInformationResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAllActivityTypes">
+      <soap:operation soapAction="" />
+      <input name="getAllActivityTypesRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAllActivityTypesResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAllUsers">
+      <soap:operation soapAction="" />
+      <input name="getAllUsersRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAllUsersResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAllProjectsByUser">
+      <soap:operation soapAction="" />
+      <input name="getAllProjectsByUserRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAllProjectsByUserResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="submitDocument">
+      <soap:operation soapAction="" />
+      <input name="submitDocumentRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="submitDocumentResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getLocalizedDocuments">
+      <soap:operation soapAction="" />
+      <input name="getLocalizedDocumentsRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getLocalizedDocumentsResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="cancelJobById">
+      <soap:operation soapAction="" />
+      <input name="cancelJobByIdRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="cancelJobByIdResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="exportWorkflow">
+      <soap:operation soapAction="" />
+      <input name="exportWorkflowRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="exportWorkflowResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="exportJob">
+      <soap:operation soapAction="" />
+      <input name="exportJobRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="exportJobResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getAcceptedTasksInWorkflow">
+      <soap:operation soapAction="" />
+      <input name="getAcceptedTasksInWorkflowRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getAcceptedTasksInWorkflowResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+    <operation name="getTasksInJob">
+      <soap:operation soapAction="" />
+      <input name="getTasksInJobRequest">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output name="getTasksInJobResponse">
+        <soap:body use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <fault name="WebServiceException">
+        <soap:fault use="encoded" namespace="http://www.globalsight.com/webservices/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </fault>
+    </operation>
+  </binding>
+  <service name="AmbassadorService">
+    <port name="AmbassadorWebService" binding="s1:AmbassadorWebServiceSoapBinding">
+      <soap:address location="http://dragade:7001/globalsight/services/AmbassadorWebService" />
+    </port>
+  </service>
+</definitions>

@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="User" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+  <topic name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Default Path" url="Glossary/Default_Path.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+  <topic name="Field Level Access" url="Setup/Users/Field_Level_Access.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
+  <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Output Options (Export p.2)2" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+  <topic name="Project" url="Glossary/Project.htm" />
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Projects" url="Setup/Users/Projects.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="System Shutdown" url="Setup/System_Shutdown/System_Shutdown.htm" />
+  <topic name="Termbase" url="Glossary/Termbase.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Calendars" url="Setup/Calendars/User_Calendars.htm" />
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+  <topic name="View Project" url="Setup/Projects/View_Project.htm" />
+  <topic name="View User Events" url="Setup/Users/View_User_Events.htm" />
+  <topic name="What is a Terminology Database" url="Appendix/Linguistic_FAQ/What_is_a_Terminology_Database.htm" />
+  <topic name="When are segments read from TM" url="Appendix/Linguistic_FAQ/When_are_segments_read_from_TM.htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+  <topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+</key>
+<key name="User accepts an activity" >
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+</key>
+<key name="User Calendars" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Calendars" url="Setup/Calendars/User_Calendars.htm" />
+</key>
+<key name="User Details" >
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+</key>
+<key name="User Events/Activities" >
+  <topic name="View User Events" url="Setup/Users/View_User_Events.htm" />
+</key>
+<key name="User Information" >
+  <topic name="Field Level Access" url="Setup/Users/Field_Level_Access.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+</key>
+<key name="User receives" >
+  <topic name="Email Notification" url="Email_Notification.htm" />
+</key>
+<key name="Users belonging" >
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+</key>
+<key name="Users completing" >
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+</key>
+<key name="Users during" >
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+</key>
+<key name="Users during the localization" >
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+</key>
+<key name="Users Main Screen" >
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+</key>
+<key name="Users matching" >
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+  <topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+</key>
+<key name="UTF-16" >
+  <topic name="What are UTF-8 and UTF-16" url="Appendix/Linguistic_FAQ/What_are_UTF-8_and_UTF-16.htm" />
+</key>
+<key name="UTF-8" >
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="Preview Rules Sample" url="Appendix/Database_Integration/Preview_Rules_Sample.htm" />
+  <topic name="Termbase Export" url="Setup/Terminology/Export.htm" />
+  <topic name="What are UTF-8 and UTF-16" url="Appendix/Linguistic_FAQ/What_are_UTF-8_and_UTF-16.htm" />
+  <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Vendor Details" >
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+</key>
+<key name="Vendor Ratings" >
+  <topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+  <topic name="Ratings" url="Vendor_Management/Ratings.htm" />
+</key>
+<key name="Vendors" >
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Contact Information1" url="Vendor_Management/Contact_Information1.htm" />
+  <topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+  <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+  <topic name="CV/Resume" url="Vendor_Management/CV_Resume.htm" />
+  <topic name="Edit Role (Edit Vendor)" url="Vendor_Management/Edit_Role_(Edit_Vendor).htm" />
+  <topic name="Field Level Access" url="Vendor_Management/Field_Level_Access.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="New Role (Edit Vendor)" url="Vendor_Management/New_Role_(Edit_Vendor).htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Projects" url="Vendor_Management/Projects.htm" />
+  <topic name="Rate Vendor" url="My_Jobs/Rate_Vendor.htm" />
+  <topic name="Ratings" url="Vendor_Management/Ratings.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+  <topic name="Vendors" url="Vendor_Management/Vendors.htm" />
+</key>
+<key name="Verify CSV Columns" >
+  <topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+</key>
+<key name="View Comments" >
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+</key>
+<key name="View File List" >
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="View File List" url="My_Jobs/Customer_Jobs/View_File_List.htm" />
+</key>
+<key name="View Project" >
+  <topic name="View Project" url="Setup/Projects/View_Project.htm" />
+</key>
+
+</indexdata>

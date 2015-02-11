@@ -1,0 +1,23 @@
+Import SDLX TMX files.
+
+How to Use:
+1. unzip the archive.
+2. start System 4.
+3. go to <weblogic home> and type "setenv.cmd".
+4. go to unzipped directory, system4_importer, and type
+   TmxImporter.bat and parameters. The commandline syntax is as
+   follows.
+
+Usage: TmxImporter [OPTOIN] FILE...
+  FILE,  A list of files to import separated by a space.
+         Wildcard can be used.
+  -t,    TM name to store data. If the specified TM doesn't exist in the
+         system, it will be created. The default is "TMX_import"
+  -d,    Delete the existing data from the specified TM by -t option.
+  -q,    Suppress the confirmation message.
+
+For example, 
+
+	TmxImporter -t MyTm *tmx
+
+imports all .tmx files in the current directory into MyTm TM.

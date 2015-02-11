@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Page" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Align Menu" url="Appendix/Alignment/Align_Menu.htm" />
+  <topic name="Aligning Segments" url="Appendix/Alignment/Aligning_Segments.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="GS-tagged Source Page" url="Glossary/GS-tagged_Source_Page.htm" />
+  <topic name="GS-Tagged Source Page Example" url="Appendix/Locale_Content_Management/GS-Tagged_Source_Page_Example.htm" />
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM highlighting work" url="Appendix/Linguistic_FAQ/How_does_TM_highlighting_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Page TM" url="Glossary/Page_TM.htm" />
+  <topic name="Preview Rules Sample" url="Appendix/Database_Integration/Preview_Rules_Sample.htm" />
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Snippet" url="Glossary/Snippet.htm" />
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+  <topic name="Starting an Alignment Project" url="Appendix/Alignment/Starting_an_Alignment_Project.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Term Audit" url="Reports/Term_Audit.htm" />
+  <topic name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+  <topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+  <topic name="View Project" url="Setup/Projects/View_Project.htm" />
+  <topic name="What is a Leverage Group Exact Match (LGEM)" url="Appendix/Linguistic_FAQ/What_is_a_Leverage_Group_Exact_Match_(LGEM).htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Page count" >
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+</key>
+<key name="Page name" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Page TM" url="Glossary/Page_TM.htm" />
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+</key>
+<key name="Page Rates" >
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+</key>
+<key name="Page TM" >
+  <topic name="Page TM" url="Glossary/Page_TM.htm" />
+  <topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+</key>
+<key name="Pending Jobs" >
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+</key>
+<key name="Pending Records Table" >
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+</key>
+<key name="Percentage Surcharge" >
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+</key>
+<key name="Placeholder Tags" >
+  <topic name="Colors" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Colors.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Placeholder Tags" url="Glossary/Placeholder_Tags.htm" />
+  <topic name="Placeholder Tags (Additional Information)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Preview Rules Sample" >
+  <topic name="Preview Rules Sample" url="Appendix/Database_Integration/Preview_Rules_Sample.htm" />
+</key>
+<key name="Primary Target File" >
+  <topic name="Primary Target File" url="Glossary/Primary_Target_File.htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+</key>
+<key name="Profiles Main Screen" >
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+  <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+  <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+</key>
+
+</indexdata>

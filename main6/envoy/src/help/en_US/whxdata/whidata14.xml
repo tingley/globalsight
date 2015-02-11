@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Progress" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Colors" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Colors.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Download in Progress" url="My_Activities/Download_in_Progress.htm" />
+  <topic name="Download Progress" url="My_Jobs/Customer_Jobs/Download_Progress.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  <topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Progress Bar" url="Appendix/Progress_Bar.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Replacing in Termbase" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+  <topic name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+  <topic name="Select Files to Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+  <topic name="Termbase Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+</key>
+<key name="Progress Activities" >
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+</key>
+<key name="Progress Activity Details" >
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+</key>
+<key name="Progress Bar" >
+  <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  <topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="Progress Bar" url="Appendix/Progress_Bar.htm" />
+  <topic name="Select Files to Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+  <topic name="Termbase Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+</key>
+<key name="Progress Jobs" >
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+</key>
+<key name="Project  Select a user" >
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+</key>
+<key name="Project Manager" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Contact Information" url="Contact_Information.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Flat Surcharge" url="Glossary/Flat_Surcharge.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+  <topic name="Project" url="Glossary/Project.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+</key>
+<key name="Project manager needs" >
+  <topic name="Contact Information" url="Contact_Information.htm" />
+</key>
+<key name="Project Users" >
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+</key>
+
+</indexdata>

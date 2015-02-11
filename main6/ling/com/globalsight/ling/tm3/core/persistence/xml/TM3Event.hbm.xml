@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.ling.tm3.core.TM3Event" table="TM3_EVENTS">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="type" column="type" type="int" not-null="true" />
+        <property name="username" column="userName" type="string" 
+                  not-null="true" />
+        <property name="argument" column="arg" type="text" not-null="false" />
+        <property name="timestamp" column="time" type="timestamp" 
+                  not-null="true" />
+
+        <many-to-one name="tm" column="tmId"
+            class="com.globalsight.ling.tm3.core.BaseTm" not-null="true"
+            lazy="false" />
+    </class>
+</hibernate-mapping>
+

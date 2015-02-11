@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!-- Component: IC:2 classic veiw of my files                              -->
+<!-- Scope: None                                                           -->
+
+<config version='1.0'>
+   
+   <!-- this component is the IC:2 version of the streamline myfiles view and has unqualified scope -->
+   <scope>
+      
+      <!-- the classicw component definition -->
+      <component id="myfiles_streamline" extends="myobjects_drilldown:custom/ambassador/config/library/myobjects/myobjects_drilldown_component.xml">
+         
+         <!-- Component Layout -->
+         <pages>
+            <start>/webtop/streamline/streamlineview/myfiles.jsp</start>
+         </pages>
+         
+         <!-- Component Behavior -->
+         <class>com.documentum.webtop.webcomponent.myfiles.MyFilesStreamlineView</class>
+         <nlsbundle>com.documentum.ambassador.library.myobjects.MyObjectsNlsProp</nlsbundle>
+
+         <!-- Component specific Configuration -->
+         <helpcontextid>myfiles_streamline</helpcontextid>
+         
+      </component>
+      
+   </scope>
+</config>

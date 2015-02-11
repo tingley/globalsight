@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.workflowmanager.WorkflowOwner"
+		table="WORKFLOW_OWNER">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		
+		<many-to-one name="workflow" column="WORKFLOW_ID"
+			class="com.globalsight.everest.workflowmanager.WorkflowImpl"
+			not-null="true" />
+		
+		<property name="ownerId" length="80" column="OWNER_ID"
+			type="string" not-null="true" unique="false" />
+		
+		<property name="ownerType" length="20" column="OWNER_TYPE"
+			type="string" not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

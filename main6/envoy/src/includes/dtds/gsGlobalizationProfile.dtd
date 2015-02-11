@@ -1,0 +1,25 @@
+<!--
+    Copyright (c) 2002, GlobalSight Corporation. All rights reserved.
+
+	DTD for a GlobalSight globalization profile used in GlobalSight
+	System 4 and other application integrations.
+
+    Globalization profile is runtime object which contains one
+    localization profile and one or more file profiles.
+    
+    Typical usage:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE gsGlobalizationProfile SYSTEM "/globalsight/includes/dtds/gsGlobalizationProfile.dtd">
+    <gsGlobalizationProfile>
+    	<localizationProfileID>1003</localizationProfileID>
+    	<fileProfileID>1001</fileProfileID>
+    	<fileProfileID>1002</fileProfileID>
+	</gsGlobalizationProfile>
+-->
+
+  <!ELEMENT gsGlobalizationProfile (localizationProfileID, fileProfileID+)>
+  
+  <!ELEMENT localizationProfileID (#PCDATA)>
+  
+  <!ELEMENT fileProfileID (#PCDATA)>

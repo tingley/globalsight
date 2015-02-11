@@ -1,0 +1,83 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Work Page</title>
+<base target="_self">
+</head>
+<body LEFTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0" RIGHTMARGIN="0">
+<!--Customer Change - Only if non default installation was used.-->
+<script src="SpellCheckNoApplet.js"></script>
+<!--End Change-->
+<FORM NAME="SpellForm" METHOD="post" ACTION="SC_process_htmlOnly.asp"
+ target="_self">
+<TEXTAREA NAME="comtexttocheck" ROWS="10" COLS="80"></TEXTAREA>
+<INPUT TYPE="hidden" NAME="language" VALUE="0">
+<INPUT TYPE="hidden" NAME="customDictionaryName" VALUE="none">
+<INPUT TYPE="submit" NAME="Submit" VALUE="Submit">
+</FORM>
+<script LANGUAGE="JavaScript">
+// (c)2001 XDE,Inc.  
+// Only for use with XDE products, no other use licensed
+// This copyright header must be shown in top of current file code.
+//
+	document.forms[0].action = SpellServerHref; //from js file
+	document.forms[0].method = "POST";
+
+	var pfdFrm = parent.footerframe.document.SpellForm;
+	var pdLoc = parent.document.location.toString();
+	var textobjectcheck = getQueryParm(pdLoc, "ctrl");
+	var controlType = getQueryParm(pdLoc, "typectrl");
+	var Languageobject = getQueryParm(pdLoc, "language");
+
+	if (Languageobject != "")
+	{
+		if (typeof(Languageobject) != 'undefined')
+		{
+			LanguageControl =
+                          eval('parent.opener.document.' + Languageobject);
+			pfdFrm.language.value = LanguageControl.value;
+		}
+		else
+		{
+			pfdFrm.language.value = "usenglish";
+		}
+	}
+	else
+	{
+		pfdFrm.language.value = "usenglish";
+	}
+
+	var customDictionaryName = getQueryParm(pdLoc, "customDictionaryName");
+	if (customDictionaryName!="")
+	{
+		pfdFrm.customDictionaryName.value=customDictionaryName;
+	}
+	else
+	{
+		pfdFrm.language.value="usenglish";
+	}
+
+	OriginalControl = eval('parent.opener.document.' + textobjectcheck) ||
+	  window.parent.opener.document.getElementById(textobjectcheck);
+	var originalText = getControlText(OriginalControl,controlType);
+	if (originalText == "")
+	{
+		uAlert("Type some text to be spell checked");
+	}
+	else
+	{
+                var text = StripPtags(StripHTML(originalText));
+
+		pfdFrm.comtexttocheck.value = escape(text);
+                // alert("text=" + originalText + "\nsubmitting=" + text);
+		parent.document.title = 'Checking Text...';
+		document.forms[0].submit();
+	}
+/* 
+$RCSfile: bottom.htm,v $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:52 $
+*/
+</script>
+</body>
+</html>

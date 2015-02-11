@@ -1,0 +1,216 @@
+<!--
+;; 
+;; Copyright (c) 2005 GlobalSight Corporation. All rights reserved.
+;; 
+;; THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
+;; GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
+;; IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
+;; OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
+;; AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
+;; 
+;; THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
+;; SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
+;; UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
+;; BY LAW.
+;; 
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html xmlns:m="http://www.w3.org/1998/Math/MathML">
+<head>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<link rel="stylesheet" type="text/css" href="../css/fck_dialog.css">
+<object id="MathPlayer" classid="clsid:32F66A20-7614-11D4-BD11-00104BD3F987"></object>
+<?IMPORT NAMESPACE="m" IMPLEMENTATION="#MathPlayer" ?>
+<script src="../js/dhtmled.js"></script>
+<script src="/globalsight/includes/ASCIIMathML-LGPL.js"></script>
+<style type="text/css">
+#idHelp {
+  float: right; color: blue; cursor: hand; text-decoration: underline;
+  margin-right: 10px; 
+}
+#idSource {
+  font-size: 10pt; width: 280; height: 80;
+  font-family: monospace;
+  }
+#idWarning   { float: right; font-weight: bold; color: red; }
+#idWarning A { color: blue; }
+#idPreview {
+  font: 10pt;
+  padding: 6px;
+  overflow: auto;
+  }
+</style>
+<script language="javascript">
+document.write("<title>" + dialogArguments.lang["DlgEqWindowTitle"] + "</title>");
+
+var oDOM = dialogArguments.objContent.DOM;
+var g_selection = null;
+var g_helpwin = null;
+var g_helpfile = 'mathsyntax.html';
+
+AMmathcolor = '';
+AMdisplaystyle = true;
+  
+function showHelp()
+{
+  if (!g_helpwin || g_helpwin.closed)
+  {
+    g_helpwin = window.open(g_helpfile, 'syntaxhelp',
+      'toolbar=no,menubar=no,scrollbars=yes,status=no,resizable=yes');
+  }
+  else
+  {
+    g_helpwin.focus();
+  }
+}
+  
+function ok(o)
+{
+  var formula = idSource.value;
+
+  if (formula == "")
+  {
+    window.returnValue = "";
+  }
+  else
+  {
+    AMunzoomMathPlayer(idPreview);
+  
+    var mathml = idPreview.innerHTML;
+    mathml = mathml.replace(/^<\?[^>]*>/, '');
+    var span = '<span formula="' + formula.replace(/"/g, "&quot;") +
+      '" unselectable="on">' +
+      mathml + '</span>';
+
+    // alert(span);
+
+    if (g_selection)
+    {
+      g_selection.outerHTML = span;
+      window.returnValue = null;
+    }
+    else
+    {
+      window.returnValue = span;
+    }
+  }
+  
+  window.close();
+}
+
+function mathPreview()
+{
+    var formula = idSource.value;
+    idPreview.innerText = "`" + formula + "`";
+  
+    AMprocessNode(idPreview);
+}
+
+function cancel()
+{
+  window.returnValue = null;
+  window.close() ;
+}
+
+function getSelection()
+{
+    var oParent;
+    var oRange;
+
+    if (oDOM.selection.type == "Control")
+    {
+        oRange = oDOM.selection.createRange();
+        for (i = 0 ; i < oRange.length ; i++)
+        {
+            if (oRange(i).parentNode)
+            {
+                oParent = oRange(i).parentNode;
+                break;
+            }
+        }
+    }
+    else
+    {
+        oRange  = oDOM.selection.createRange() ;
+        oParent = oRange.parentElement() ;
+    }
+
+    while (oParent && !oParent.formula)
+    {
+        oParent = oParent.parentElement;
+    }
+
+    if (oParent && oParent.nodeName == "SPAN" && oParent.formula)
+    {
+        return oParent;
+    }
+
+    return null;
+}
+  
+function setDefaults()
+{
+  // First of all, translate the dialog box texts
+  dialogArguments.AvailableLangs.TranslatePage(document);
+
+  g_selection = getSelection();
+  if (g_selection)
+  {
+    idSource.value = g_selection.formula;
+  }
+  
+  mathPreview();
+}
+
+function doOnBeforeUnload()
+{
+  try { g_helpwin.close(); } catch (e) {}
+}
+
+</script>
+</head>
+<body topmargin="0" rightmargin="0" bottommargin="0" leftmargin="0"
+ onload="setDefaults()" onbeforeunload="doOnBeforeUnload()">
+<table cellpadding="0" cellspacing="10" width="100%" height="100%">
+  <tr>
+    <td>
+      <table cellpadding="0" cellspacing="2" width="100%" height="100%">
+        <tr>
+          <td height="15" valign="top">
+            <span fckLang="DlgEqSyntaxHelp" id="idHelp"
+            onclick="showHelp()">Syntax Help</span>
+            <span fckLang="DlgEqEnterEquation">Enter equation:</span>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td width="100%" height="80" width="280" valign="top">
+            <!-- int_0^(pi/2) sinx\ dx = 1 -->
+            <textarea id="idSource" rows="5" cols="32"
+            onkeyup="mathPreview()">a^2 = b^2 + c^2</textarea>
+          </td>
+          <td align="right" valign="top">
+            <input type="button" fckLang="DlgBtnOK" value="Ok"
+	    style="WIDTH: 80px" onclick="ok();">
+            <br>
+            <input type="button" fckLang="DlgBtnCancel" value="Cancel"
+	    style="WIDTH: 80px" onclick="cancel();">
+          </td>
+        </tr>
+        <tr>
+          <td width="100%" height="15" colspan="2" valign="top">
+            <span id="idWarning"></span>
+            <span fckLang="DlgEqPreview">Preview:</span>
+          </td>
+        </tr>
+        <tr>
+          <td width="100%" height="120" colspan="2" valign="top">
+            <div id="idPreview" class="ImagePreviewArea"></div>
+          </td>
+        </tr>
+      </table>
+    </tr>
+  </td>
+</table>
+</body>
+</html>

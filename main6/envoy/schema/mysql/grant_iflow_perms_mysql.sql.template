@@ -1,0 +1,44 @@
+-- 
+--  This grants the system4 user permissions on the iflow tables
+GRANT SELECT ON ACTIVITYDATASET TO %%database_username%%;
+GRANT SELECT ON ACTIVITYDATASETDEFINITION TO %%database_username%%;
+GRANT SELECT ON ACTIVITYDEFINITION TO %%database_username%%;
+GRANT SELECT ON ACTIVITYINSTANCE TO %%database_username%%;
+GRANT SELECT ON ACTIVITYTIMERDEFINITION TO %%database_username%%;
+GRANT SELECT ON ACTIVITYTYPE TO %%database_username%%;
+GRANT SELECT ON ARCHIVEDPROCESSDEFINITION TO %%database_username%%;
+GRANT SELECT ON ARCHIVEDPROCESSINSTANCE TO %%database_username%%;
+GRANT SELECT ON ARROWDEFINITION TO %%database_username%%;
+GRANT SELECT ON ARROWINSTANCE TO %%database_username%%;
+GRANT SELECT ON ARROWTYPE TO %%database_username%%;
+GRANT SELECT ON DATASETDEFINITIONVALUES TO %%database_username%%;
+GRANT SELECT ON ELEMENTLOCK TO %%database_username%%;
+GRANT SELECT ON FILERECORD TO %%database_username%%;
+GRANT SELECT ON HISTORY TO %%database_username%%;
+GRANT SELECT ON JSPIHANDLE TO %%database_username%%;
+GRANT SELECT ON LOCKRECORD TO %%database_username%%;
+GRANT SELECT ON MAXID TO %%database_username%%;
+GRANT SELECT ON PROCESSDATASET TO %%database_username%%;
+GRANT SELECT ON PROCESSDATASETDEFINITION TO %%database_username%%;
+GRANT SELECT ON PROCDEFACCESS TO %%database_username%%;
+GRANT SELECT ON PROCESSDEFINITION TO %%database_username%%;
+GRANT SELECT ON PROCESSDEFINITIONLISTVIEW TO %%database_username%%;
+GRANT SELECT ON PROCESSDEFINITIONVERSION TO %%database_username%%;
+GRANT SELECT ON PROCESSINSTANCE TO %%database_username%%;
+GRANT SELECT ON PROCESSINSTANCELISTVIEW TO %%database_username%%;
+GRANT SELECT ON PROCESSINSTANCEOWNER TO %%database_username%%;
+GRANT SELECT ON PROCESSINSTANCEUDALISTVIEW TO %%database_username%%;
+GRANT SELECT ON PROCESSTIMERDEFINITION TO %%database_username%%;
+GRANT SELECT ON PROCESSTYPE TO %%database_username%%;
+GRANT SELECT ON PROCINSTACCESS TO %%database_username%%;
+GRANT SELECT ON TIMERINSTANCE TO %%database_username%%;
+GRANT SELECT ON TRIGGERDEFINITION TO %%database_username%%;
+GRANT SELECT ON UDAVALUES TO %%database_username%%;
+GRANT SELECT ON USERPROFILE TO %%database_username%%;
+GRANT SELECT ON VERSION TO %%database_username%%;
+GRANT SELECT ON WORKITEM TO %%database_username%%;
+GRANT SELECT ON WORKITEMLISTVIEW TO %%database_username%%;
+GRANT SELECT ON WORKITEMUDALISTVIEW TO %%database_username%%;
+GRANT SELECT ON WORKITEMVIEW TO %%database_username%%;
+COMMIT;
+

@@ -1,0 +1,53 @@
+<%@ page import="java.util.*,com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler"%>
+<!-- BEGIN SHUTDOWN BANNER -->
+        <% if (ShutdownMainHandler.shutdownBannerEnabled() &&
+	       ShutdownMainHandler.isShuttingDown()==true) { %>
+	 <center>
+	 <form name="countdownForm">
+         <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" BGCOLOR="red">
+         <TR><TD><FONT FACE="Arial" COLOR="white">
+	 <b>&nbsp;&nbsp;<%=ShutdownMainHandler.getShutdownMessage(false)%>&nbsp;
+	 <input type=text name="time" READONLY value="HH:MM:SS" maxlength="5" size="5"/></b></FONT>&nbsp;&nbsp;
+         </TD></TR>
+	 </TABLE>
+	 </form>
+	 </center>
+<SCRIPT LANGUAGE="JavaScript">
+var countdownForm = document.forms["countdownForm"];
+var shutdownTime = new Date(<%=ShutdownMainHandler.getShutdownTime().getTime()%>);
+var now = new Date(<%=System.currentTimeMillis()%>);
+var diff = shutdownTime - now.getTime();
+function finalCountdown()
+{
+        /* subtract a second, then do time calculations */
+	diff = diff - 1000;
+	tmp = diff;
+	if (tmp > 1000)
+	{
+		numHours = (tmp - (tmp % 3600000)) / 3600000;
+		tmp = tmp - (numHours * 3600000);
+		numMinutes = (tmp - (tmp % 60000)) / 60000;
+		tmp = tmp - (numMinutes * 60000);
+		numSecs = (tmp - (tmp % 1000)) / 1000;
+		if(numHours < 10) numHours = "0" + numHours;
+		if(numMinutes < 10) numMinutes = "0" + numMinutes;
+		if(numSecs < 10) numSecs = "0" + numSecs;
+	}
+	else
+	{
+		numHours = 'XX';
+		numMinutes = 'XX';
+		numSecs = 'XX';
+	}
+	countdownForm.time.value=numHours + ":" + numMinutes + ":" + numSecs;
+	setTimeout("finalCountdown()",1000);
+}
+
+//start the final countdown
+finalCountdown();
+</SCRIPT>
+
+
+        <%}%>
+<!----- END SHUTDOWN BANNER ---->	
+

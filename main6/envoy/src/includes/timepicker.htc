@@ -1,0 +1,80 @@
+<!--
+ * Copyright (c) 2005 GlobalSight Corporation. All rights reserved.
+ *
+ * Cornelis van der Laan (nils@globalsight.com) Tue Feb 19 20:18:09 2002
+ *
+ * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
+ * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
+ * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
+ * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
+ * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
+ *
+ * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
+ * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
+ * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
+ * BY LAW.
+-->
+<HTML XMLNS:gs>
+<HEAD>
+<public:component tagName="timepicker">
+<public:defaults  viewLinkContent="true"/> 
+<public:property  name="hours" PUT="setHours" GET="getHours"/>
+<public:property  name="minutes" PUT="setMinutes" GET="getMinutes"/>
+<public:attach    event="oncontentready" onevent="doInit()"/>
+</public:component>
+
+<style>
+gs\:spin   { behavior: url(/globalsight/includes/spin.htc); }
+</style>
+
+<script>
+var hours, minutes;
+
+function doInit()
+{
+	idHours.case_sensitive = false;
+	idHours.editable = true;
+	idHours.integer = true;
+	idHours.circular = true;
+	idHours.setLimits(0, 23);
+	idHours.setStep(1);
+
+	idMinutes.case_sensitive = false;
+	idMinutes.editable = true;
+	idMinutes.integer = true;
+	idMinutes.circular = true;
+	idMinutes.setLimits(0, 59);
+	idMinutes.setStep(1);
+}
+
+function setMinutes(p_arg)
+{
+	return idMinutes.setCurrentPos(p_arg);
+}
+
+function getMinutes()
+{
+	return idMinutes.getCurrentPos();
+}
+
+function setHours(p_arg)
+{
+	return idHours.setCurrentPos(p_arg);
+}
+
+function getHours()
+{
+	return idHours.getCurrentPos();
+}
+
+</script>
+</HEAD>
+
+<BODY>
+<SPAN>
+<gs:spin id="idHours" style="width: 20; font: 10pt Courier New; text-align: right;"></gs:spin>
+&nbsp; : &nbsp;
+<gs:spin id="idMinutes" style="width: 20; font: 10pt Courier New; text-align: right;"></gs:spin>
+</SPAN>
+</BODY>
+</HTML>

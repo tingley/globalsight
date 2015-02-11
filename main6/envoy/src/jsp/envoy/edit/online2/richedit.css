@@ -1,0 +1,11 @@
+#idRichtextEditor {
+                    font-family: Courier New;
+                    background-color: #FFFF99;
+                    color: black;
+                    font-size: 80%;
+                    word-wrap: break-word;
+                    margin: 1px;
+                  }
+
+.lre { display: inline-block; border-bottom: 1px dashed goldenrod; }
+.rle { display: inline-block; border-bottom: 1px dashed darkorange; }

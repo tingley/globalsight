@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<shortcuts>
+  <programGroup defaultName="Galign" location="applications/startMenu"/>
+  <shortcut
+  name="GAlign 1.0"
+  target="${INSTALLDIR}\galign.cmd"
+  commandLine=""
+  workingDirectory="${INSTALLDIR}"
+  description="Runs Welocalize GAlign"
+  iconFile="${INSTALLDIR}\galign.ico"
+  iconIndex="0"
+  initialState="noShow"
+  programGroup="yes"
+  desktop="yes"
+  applications="no"
+  startMenu="no"
+  startup="no">
+    <createForPack name="GAlign" />
+  </shortcut>
+
+  <shortcut
+     name="Uninstaller"
+     programGroup="yes"
+     desktop="no"
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="${INSTALLDIR}\Uninstaller\uninstaller.jar"
+     commandLine=""
+     description="GAlign uninstaller">
+     
+     <createForPack name="GAlign" />
+   </shortcut>
+</shortcuts>

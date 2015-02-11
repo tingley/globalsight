@@ -1,0 +1,46 @@
+<PUBLIC:COMPONENT>
+<PUBLIC:ATTACH EVENT="onclick" ONEVENT="doClick()" />
+<PUBLIC:ATTACH EVENT="ondetach" ONEVENT="cleanup()" />
+<SCRIPT src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
+<SCRIPT LANGUAGE="JScript">
+var normalColor;
+
+attachEvent ('onmouseover', Hilite);
+attachEvent ('onmouseout', Restore);
+
+function cleanup()
+{
+   detachEvent ('onmouseover', Hilite);
+   detachEvent ('onmouseout', Restore);
+}
+
+function Hilite()
+{
+   if (event.srcElement == element)
+   {
+     normalColor = style.color;
+     runtimeStyle.color = "#0C1476";
+     runtimeStyle.textDecoration = "underline";
+     runtimeStyle.cursor = "hand";
+   }
+}
+
+function Restore()
+{
+   if (event.srcElement == element)
+   {
+      runtimeStyle.color  = normalColor;
+      runtimeStyle.textDecoration = "none";
+      runtimeStyle.cursor = "";
+   }
+}
+
+function doClick()
+{
+    var conceptid = this.getAttribute("cid");
+    var termid = this.getAttribute("tid");
+
+    ShowTermbaseConceptTerm(g_defaultTermbaseId, conceptid, termid);
+}
+</SCRIPT>
+</PUBLIC:COMPONENT>

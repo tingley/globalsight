@@ -1,0 +1,150 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=Windows-1252">
+
+<title>Marcadores de posición (información adicional)</title>
+
+<!--(Meta)==========================================================-->
+
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=687>
+<meta name=layout-width content=694>
+<meta name=date content="02 20, 2002 3:53:01 PM">
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+p.whs1 {margin-left: 40px;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Apéndice\nMarcadores de posición (información adicional)");
+addButton("show",BTN_TEXT,"Mostrar","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../System4.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>Marcadores de posición (información adicional)</h1>
+
+<h2>Definición</h2>
+
+<p>Los marcadores de posición son representaciones de las etiquetas html. &nbsp;Dichos marcadores sólo se utilizan para representar las etiquetas html que posiblemente deban moverse de lugar durante el proceso de traducción, como los enlaces.</p>
+
+<h2>Ejemplo</h2>
+
+<p class="whs1">Necesito ir a la <span style="color: #0000ff; x-text-underline: normal; /*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ "><font color=blue ><U>tienda</U></font></span>.</p>
+
+<p>Si todas las etiquetas html se mostraran de esta forma:</p>
+
+<p class="whs1">Necesito ir a la &lt;a href=&quot;www.a-store.com&quot;&gt;tienda&lt;/a&gt;.</p>
+
+<p>existiría la posibilidad de dañar accidentalmente el código HTML borrando una comilla o un ángulo (&quot;  &gt;). &nbsp;Los marcadores de posición permiten proteger la integridad del código:  </p>
+
+<p class="whs1">Necesito ir a la [l1]tienda[/l1].</p>
+
+<p>&nbsp;</p>
+
+<p>Observe que la etiqueta HTML tiene un comienzo y un final. &nbsp;En el ejemplo anterior, esto indica dónde comienza y termina el enlace. &nbsp;Para asegurar que los participantes en la traducción han introducido las etiquetas inicial y final, y que no han borrado las etiquetas por completo, el sistema presenta mensajes de error.</p>
+
+<h2>Marcadores de posición optativos</h2>
+
+<p>Negrita: [b][/b]</p>
+
+<p>Cursiva: [i][/i]</p>
+
+<p>Subrayado: [u][/u]</p>
+
+<p>Espacio duro: [nbsp]</p>
+
+<p>&nbsp;</p>
+
+<p>Estas etiquetas pueden añadirse o quitarse según convenga para la correcta traducción del texto; esto resulta útil en los idiomas en los que no es posible utilizar la letra cursiva sin dificultar la lectura o en los que se debe intercalar un espacio duro como parte de la puntuación. </p>
+
+<h2>Etiquetas sin elemento de cierre</h2>
+
+<p>Observe que la etiqueta [nbsp] no tiene etiqueta de cierre. &nbsp;De forma análoga, cuando una etiqueta HTML abarca más de un segmento en el material original, se representa con una etiqueta [x]. &nbsp;Las etiquetas [x] no pueden eliminarse, incluso si representan una etiqueta &lt;b&gt; que simplemente abarca más de un segmento.</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

@@ -1,0 +1,648 @@
+<html xmlns:b3>            <!-- -*- Mode: html-helper -*- -->
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+<meta name="[B3 HTML Studio]" content="4.0.468.6">
+
+<title>Select Snippet</title>
+
+<style>.GSadded  { border: 1px solid blue;  cursor: hand; }
+.GSdelete { border: 1px dotted blue; cursor: hand; }
+.feedback {
+            font-weight: normal;
+            font-style: italic;
+            font-size: smaller;
+            color: gray;
+            padding-left: 10px;
+          }
+.link     {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #0C1476;
+            text-decoration: underline;
+            cursor: hand;
+          }
+</style>
+
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT src="/globalsight/includes/xmlextras.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/edit/snippets/protocol.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/terminology/viewer/error.js"></SCRIPT>
+<script>
+  var g_initialized = false;
+
+  // Global Dialog Arguments
+  var g_args;
+
+  var g_snippetName;
+  var g_snippetLocale;
+  var g_snippetDisplayLocale;
+
+  // global variable to keep the XMLHTTP objects alive during a request
+  var g_SnippetConnection = null;
+
+  // global variable to hold the Snippet XML from the server
+  var o_Snippets = null;
+
+function helpSwitch()
+{
+   helpWindow = window.open('/globalsight/help/en_US/My_Activities/Select_Snippet.htm',
+      'helpWindow', 'resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
+   helpWindow.focus();
+}
+</script>
+
+<script for=ok event=oncyberdialogloaded>
+  g_args = FB3_GetArgument("args");
+
+  if (g_args)
+  {
+    g_snippetName = g_args.name;
+    g_snippetLocale = g_args.locale;
+    g_snippetDisplayLocale = g_args.displayLocale;
+  }
+
+  init();
+</script>
+
+<script for=ok event=oncyberdialogvalidate>
+  var result = selectedSnippet;
+
+  FB3_SetArgument("args", result);
+</script>
+
+<!--cyber-preload{{------------------------------------------------------------>
+<?import
+	namespace="b3"
+	implementation="Cyber/B3/Table/CyberTable.htc"
+	b3-preload="true" />
+<?import
+	namespace="b3"
+	implementation="SnippetEditor.htc"
+	b3-preload="true" />
+<!--}}cyber-preload------------------------------------------------------------>
+
+
+<script>
+// Global key table
+function doKeydown() 
+{
+  if (event.keyCode == 27) // ESC
+  {
+    window.close();
+  }
+}
+</script>
+</head>
+
+<!--cyber-drag-and-drop{{-------------------------------------------------------
+<button id=newpopup 
+	onclick="window.event.srcElement.runModal(window.event.srcElement)"
+	style="behavior: url('SnippetSelect.htc'); 
+		position: absolute; 
+		top: 10px;
+		left: 10px;">Select Snippet</button>
+}}cyber-drag-and-drop---------------------------------------------------------->
+
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<link href="Cyber/B3/Dialogs/CyberDialogs.css" rel=stylesheet type="text/css"></link>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<body class=Page id=idBody scroll=no onkeydown="doKeydown()"
+  b3defaultcontrolid="ok" b3firstfocusid="ok" >
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogsHead.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<script>
+  var selectedSnippet = null;
+  var selectedLocale = "en_US";
+
+  // selected snippet position
+  var selectedPosition = null;
+  var allowedSnippetName = "";
+
+  var PREVIEW_MODE = 0;
+  var TEXT_MODE = 1;
+  var viewmode = PREVIEW_MODE;
+
+  // temporary JS representations of the snippet library
+  var g_snippets = new Array();
+  var g_emptySnippet = new Array();
+  var g_loadingSnippet = new Array();
+
+  function init()
+  {
+    ok.disabled = true;
+    idBody.style.cursor = "wait";
+
+    g_loadingSnippet.push(new Snippet("<span class='feedback'>Loading...</span>", "", "", "", 0, "0"));
+    g_emptySnippet.push(new Snippet("<span class='feedback'>No Snippets...</span>", "", "", "", 0, "0"));
+
+    initLibrary(g_loadingSnippet);
+
+    g_initialized = true;
+
+    // now trigger loading of the snippet library
+    loadSnippets(g_snippetName, g_snippetLocale);
+  }
+
+  function initLibrary(p_snippets, p_feedback)
+  {
+    ok.disabled = true;
+    selectedSnippet = null;
+
+    var itemArray = makeSnippetArray(p_snippets, p_feedback);
+    div_2.loadList(itemArray);
+
+    idSnippetDescription.innerHTML =
+      "<span class='feedback'>Select a snippet...</span>";
+    idSnippetPreview.innerHTML =
+      "<span class='feedback'>Select a snippet...</span>";
+
+    idSnippetCopy.disabled = true;
+    idSnippetModify.disabled = true;
+  }
+
+  function makeSnippetArray(p_snippets, p_feedback)
+  {
+    var result = new Array();
+
+    for (var i = 0; i < p_snippets.length; i++)
+    {
+      var snippet = p_snippets[i];
+      var o = new Object();
+      o.value = i;
+      o.tagName = new Object();
+      var row = new String();
+      if (p_feedback == true)
+      {
+        row += snippet.name;
+      }
+      else
+      {
+        row += encodeEntities(snippet.name) + " " +
+           (snippet.locale == "" ? "" : snippet.id);
+      }
+      // sets the display value of the row
+      o.innerHTML = row;
+      o.items = "";
+      result.push(o);
+    }
+
+    return result;
+  }
+
+  function encodeEntities(s)
+  {
+    // encodes &, < and >.
+    s = s.replace(/&/g, "&amp;");
+    s = s.replace(/</g, "&lt;");
+    s = s.replace(/>/g, "&gt;");
+    return s;
+  }
+
+  function doCreateSnippet(p_snippet)
+  {
+    idBody.style.cursor = "wait";
+    // initLibrary(g_loadingSnippet, true);
+
+    g_SnippetConnection = getSnippetConnection();
+    g_SnippetConnection.onreadystatechange = SetSnippets;
+
+    var request = makeSnippetRequest("createsnippet", p_snippet.name,
+      p_snippet.desc, p_snippet.locale, p_snippet.id, p_snippet.value);
+    g_SnippetConnection.send(request);
+  }
+
+  function doModifySnippet(p_snippet)
+  {
+    idBody.style.cursor = "wait";
+    // initLibrary(g_loadingSnippet, true);
+
+    g_SnippetConnection = getSnippetConnection();
+    g_SnippetConnection.onreadystatechange = SetSnippets;
+
+    var request = makeSnippetRequest("modifysnippet", p_snippet.name,
+      p_snippet.desc, p_snippet.locale, p_snippet.id, p_snippet.value);
+    g_SnippetConnection.send(request);
+  }
+
+  function doRemoveSnippet(p_snippet)
+  {
+    idBody.style.cursor = "wait";
+    // initLibrary(g_loadingSnippet, true);
+
+    g_SnippetConnection = getSnippetConnection();
+    g_SnippetConnection.onreadystatechange = SetSnippets;
+
+    var request = makeSnippetRequest("removesnippet", p_snippet.name,
+      p_snippet.locale, p_snippet.id);
+    g_SnippetConnection.send(request);
+  }
+
+  function loadSnippets(p_name, p_locale)
+  {
+    idBody.style.cursor = "wait";
+    initLibrary(g_loadingSnippet, true);
+
+    g_SnippetConnection = getSnippetConnection();
+    g_SnippetConnection.onreadystatechange = SetSnippets;
+
+    var request = makeSnippetRequest("getsnippets", p_name, p_locale);
+    g_SnippetConnection.send(request);
+  }
+
+  function SetSnippets()
+  {
+    if (!g_initialized) return;
+
+    if (g_SnippetConnection.readyState == 4)
+    {
+      idBody.style.cursor = "auto";
+      o_Snippets = g_SnippetConnection.responseXML;
+
+      if (g_SnippetConnection.status != 200)
+      {
+        // SnippetError("xml = " + g_SnippetConnection.responseText);
+
+        SnippetError("Server error " + g_SnippetConnection.status +
+          ": " + g_SnippetConnection.statusText, false);
+        // initLibrary(g_snippets);
+        return;
+      }
+
+      if (o_Snippets.parseError.errorCode != 0)
+      {
+        // SnippetError("xml = " + g_SnippetConnection.responseText, false);
+
+        SnippetError("Error in server response: = " +
+          o_Snippets.parseError.reason, false);
+
+        // initLibrary(g_snippets);
+        return;
+      }
+
+      o_Snippets = o_Snippets.documentElement;
+
+      if (o_Snippets.nodeName == "exception")
+      {
+        SnippetError(o_Snippets.text, false);
+        // initLibrary(g_snippets);
+        return;
+      }
+
+      try
+      {
+         var hits = o_Snippets.selectNodes("//snippet");
+         if (hits.length == 0)
+         {
+            initLibrary(g_emptySnippet, true);
+         }
+         else
+         {
+           g_snippets = new Array();
+
+           for (i = 0; i < hits.length; i++)
+           {
+             var hit = hits(i);
+
+             g_snippets.push(new Snippet(
+               hit.selectSingleNode("name").text,
+               hit.selectSingleNode("description").text,
+               hit.selectSingleNode("locale").text,
+               hit.selectSingleNode("displayLocale").text,
+               hit.selectSingleNode("id").text,
+               hit.selectSingleNode("value").text));
+           }
+
+           initLibrary(g_snippets);
+         }
+      }
+      catch (ex)
+      {
+        SnippetError("Cannot display snippets: " + ex + ".\n" +
+          ex.description, false);
+        return;
+      }
+    }
+  }
+
+  function SnippetError(strMessage, bFatal)
+  {
+    ShowError(strMessage);
+
+    if (bFatal)
+    {
+        // reset all elements
+        initLibrary(g_emptySnippet, true);
+
+        alert("Please close this window and try again.");
+    }
+  }
+
+  function newSnippet()
+  {
+    // idSnippetEditorDialog.b3Title
+    idSnippetEditorDialog.myarg = null;
+    idSnippetEditorDialog.adminMode = g_role;
+    var result = idSnippetEditorDialog.runModal(window.event.srcElement);
+    if (result)
+    {
+      var snippet = idSnippetEditorDialog.getArgument("myarg");
+      doCreateSnippet(snippet);
+    }
+  }
+
+  function copySnippet()
+  {
+    var arg = selectedSnippet.clone();
+    arg.locale = g_snippetLocale;
+    arg.displayLocale = g_snippetDisplayLocale;
+    idSnippetEditorDialog.myarg = arg;
+    var result = idSnippetEditorDialog.runModal(window.event.srcElement);
+    if (result)
+    {
+      var snippet = idSnippetEditorDialog.getArgument("myarg");
+      doCreateSnippet(snippet);
+    }
+  }
+
+  function modifySnippet()
+  {
+    idSnippetEditorDialog.myarg = selectedSnippet;
+    var result = idSnippetEditorDialog.runModal(window.event.srcElement);
+    if (result)
+    {
+      var snippet = idSnippetEditorDialog.getArgument("myarg");
+      doModifySnippet(snippet);
+    }
+  }
+
+  function removeSnippet()
+  {
+    if (selectedSnippet == null)
+    {
+      alert("Please select a snippet.");
+      return;
+    }
+
+    doRemoveSnippet(selectedSnippet);
+  }
+
+  //
+  // Actions
+  //
+  function selectSnippet()
+  {
+    var id = div_2.selectedIndex;
+    selectedSnippet = findSnippet(id);
+    if (selectedSnippet)
+    {
+      idSnippetDescription.innerText = selectedSnippet.desc;
+      idSnippetPreview.innerText = selectedSnippet.value;
+
+      if (selectedSnippet.isGeneric())
+      {
+        idSnippetCopy.disabled = false;
+        idSnippetModify.disabled = true;
+      }
+      else
+      {
+        idSnippetCopy.disabled = true;
+        idSnippetModify.disabled = false;
+      }
+
+      ok.disabled = false;
+    }
+  }
+
+  function findSnippet(id)
+  {
+    return g_snippets[id];
+  }
+
+</script>
+
+<input id=ok
+	style="z-index: 2 ;
+		left: 236px ;
+		width: 70px ;
+		position: absolute ;
+		top: 475px ;
+		height: 24px ;
+		text-align: center ;
+		b3-right: 107 ;
+		b3-bottom: 20 ;
+		b3-tooltip: 'OK Button' ;
+		b3-anchored-edges: right bottom"
+	tabIndex=4
+	type=button
+	value=OK >
+
+<input class=cancelbutton
+	id=cancel
+	style="left: 321px ;
+		width: 70px ;
+		position: absolute ;
+		top: 475px ;
+		b3-right: 22 ;
+		b3-bottom: 20 ;
+		b3-tooltip: 'Cancel Button' ;
+		b3-anchored-edges: right bottom"
+	tabIndex=5
+	type=button
+	value=Cancel >
+
+<div id=labeldiv
+	style="font-weight: bold ;
+		font-size: 16px ;
+		z-index: 20 ;
+		left: 20px ;
+		width: 145px ;
+		position: absolute ;
+		top: 15px ;
+		b3-right: 248 ;
+		b3-bottom: 485 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left top ;
+		b3-ui-type: label" >
+
+<p>Select Snippet</p>
+
+</div>
+
+<div id=div_11
+	style="font-weight: bold ;
+		z-index: 38 ;
+		left: 20px ;
+		width: 100px ;
+		position: absolute ;
+		top: 295px ;
+		b3-right: 293 ;
+		b3-bottom: 208 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left top ;
+		b3-ui-type: label" >
+
+<p>Value:</p>
+
+</div>
+
+<input class=button
+	id=idSnippetCopy
+	title="Copies the selected generic snippet"
+	style="left: 20px ;
+		width: 65px ;
+		position: absolute ;
+		top: 475px ;
+		height: 24px ;
+		text-align: center ;
+		b3-right: 328 ;
+		b3-bottom: 20 ;
+		b3-tooltip: 'Apply Button' ;
+		b3-anchored-edges: left bottom"
+	onclick="copySnippet(); return false;"
+	tabIndex=2
+	type=button
+	value=Copy >
+
+<input class=button
+	id=idSnippetModify
+	title="Modifies the selected snippet"
+	style="z-index: 42 ;
+		left: 100px ;
+		width: 60px ;
+		position: absolute ;
+		top: 475px ;
+		text-align: center ;
+		b3-right: 253 ;
+		b3-bottom: 20 ;
+		b3-tooltip: 'Apply Button' ;
+		b3-anchored-edges: left bottom"
+	onclick="modifySnippet(); return false;"
+	tabIndex=3
+	type=button
+	value=Modify >
+
+<div id=div_2
+	style="border-right: 2px inset ;
+		border-top: 2px inset ;
+		overflow-y: scroll ;
+		z-index: 18 ;
+		left: 20px ;
+		overflow-x: hidden ;
+		behavior: url('Cyber/B3/Table/CyberTable.htc') ;
+		border-left: 2px inset ;
+		width: 371px ;
+		cursor: default ;
+		border-bottom: 2px inset ;
+		position: absolute ;
+		top: 40px ;
+		height: 135px ;
+		background-color: white ;
+		b3-right: 22 ;
+		b3-bottom: 344 ;
+		b3-anchored-edges: top left right ;"
+	tabIndex=1
+	onchange="selectSnippet(); return false;" >
+
+<!--
+<div class=container style="display: none">
+ <div class=item value="0" items="Description">Name</div>
+ <div class=item value="1" items="Row in the address table.">Snippet-1</div>
+ <div class=item value="2" items="Company Logo">Snippet-2</div>
+</div>
+-->
+</div>
+
+<div id=div_3
+	style="font-weight: bold ;
+		left: 20px ;
+		width: 100px ;
+		position: absolute ;
+		top: 185px ;
+		b3-right: 293 ;
+		b3-bottom: 318 ;
+		b3-tooltip: 'Label' ;
+		b3-ui-type: label" >
+
+<p>Description:</p>
+
+</div>
+
+<div id=box
+	style="border-right: 2px inset ;
+		border-top: 2px inset ;
+		overflow-y: auto ;
+		z-index: 40 ;
+		left: 18px ;
+		overflow-x: auto ;
+		border-left: 2px inset ;
+		width: 376px ;
+		border-bottom: 2px inset ;
+		position: absolute ;
+		top: 315px ;
+		height: 140px ;
+		background-color: white ;
+		b3-right: 19 ;
+		b3-bottom: 64 ;
+		b3-anchored-edges: top left right bottom"
+	b3ParseClass="b3Box" >
+
+<p id=idSnippetPreview ><span class=feedback >Select a snippet...</span> </p>
+
+</div>
+
+<!-- Object for the Snippet Editor Dialog - invoked by script. -->
+<div id=idSnippetEditorDialog
+ style="behavior: url('SnippetEditor.htc'); display: none;" ></div>
+
+<div id=idHelp
+	style="left: 345px ;
+		width: 45px ;
+		position: absolute ;
+		top: 15px ;
+		text-align: right ;
+		b3-right: 23 ;
+		b3-bottom: 488 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: right top ;
+		b3-ui-type: label" >
+
+<span class="link" onclick="helpSwitch(); return false;">Help</span>
+
+</div>
+
+<div id=idSnippetDescription
+	style="border-right: 2px inset ;
+		border-top: 2px inset ;
+		left: 20px ;
+		overflow: auto ;
+		border-left: 2px inset ;
+		width: 371px ;
+		border-bottom: 2px inset ;
+		position: absolute ;
+		top: 205px ;
+		height: 80px ;
+		background-color: white ;
+		b3-right: 22 ;
+		b3-bottom: 234 ;
+		b3-anchored-edges: top left right"
+	b3ParseClass="b3Box" >
+
+</div>
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogs.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+
+</body>
+
+</html>
+

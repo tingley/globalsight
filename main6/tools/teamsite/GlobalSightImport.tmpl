@@ -1,0 +1,702 @@
+#!../../iw-perl/bin/iwperl -w
+
+#
+# This program receives a file name and the file data.
+# AJG - In the future it may need to receive meta-data (ie is a dcr, etc..)
+# Write to a log file in $iwhome/report/tmp/IW_GlobalSightImport.log
+# Makes a call to the program /usr/bin/GSNotifyIWImport passing the
+# absolute filename returned to IW and in the future possibly some meta-data
+# This external program can then start an IW workflow, log to a file, perform an
+# IWSubmit, or any other desired functionality.
+
+use strict;
+use CGI;
+use vars qw($logfile);
+use lib qw(../../iw-perl/lib/perl5/site_perl/5.005);
+use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Response;
+use MIME::Base64;
+use TeamSite::CGI_lite;
+use TeamSite::WFtask;
+use TeamSite::WFworkflow;
+use Cwd;
+
+sub TimeStamp;
+sub log_entry;
+my $iw_home = "%%teamsite_home%%";
+my $TEMP = "$iw_home/report/tmp";
+my $username = "%%teamsite_master%%";
+my $previewPrefix = "Ambassador_preview";
+my $importSuccess = "PENDING";
+my $importFailed = "IMPORT_FAILED";
+my $noStatus = "NO_STATUS";
+
+my %exportStatus = ();
+my %importStatus = ();
+# Get IW home
+open(GETDATA, "%%teamsite_home%%/bin/iwgethome|");
+my($iwhome)= <GETDATA>;
+chomp($iwhome);
+close(GETDATA);
+
+# Get IW mount
+open(GETDATA, "$iw_home/bin/iwgetmount|");
+my($iwmount)= <GETDATA>;
+chomp($iwmount);
+close(GETDATA);
+
+# Get IW CGI Mount
+open(GETDATA, "$iw_home/bin/iwgetlocation iwcgimount|");
+my($iwcgimount)= <GETDATA>;
+chomp($iwcgimount);
+close(GETDATA);
+
+#generate a log file in the iw-home report/tmp directory
+$logfile="$iw_home/report/tmp/IW_GlobalSightImport.log";
+open(LOGFILE,">>$logfile") || die "$0:ERROR: can\'t open $logfile";
+my $timeoutFile="$iw_home/properties/GlobalSightTimer.properties";
+my $TIMEOUT = 100;
+open (DELAY, "< $timeoutFile") || log_entry  "cannot open $!\n";
+while(<DELAY>)
+{
+        unless (/^#/)
+        {
+            $TIMEOUT = $_;
+            chop($TIMEOUT);
+            last;
+        }
+}
+close (DELAY);
+log_entry "The timeout interval is $TIMEOUT\n";
+my $TASKS="$iw_home/report/tmp/tasks";
+if (! -d $TASKS) {
+	my $result = eval{mkdir($TASKS, 0777)};
+}
+
+print "Content-type: text/html\n\n";
+log_entry "Start\n";
+my $q = new CGI;
+log_entry "Intialized CGI object\n";
+
+my $taskId	= $q->param('taskId');
+my $overwriteSource	= $q->param('overwriteSource');
+my $callbackImmediately	= $q->param('callbackImmediately');
+my $datafile	= $q->param('datafile');
+my $datafiletype  = $q->param('datafiletype');
+my $dir		= $q->param('dir');
+my $relpath		= $q->param('relpath');
+my $filename	= $q->param('filename');
+my $filetype	= $q->param('filetype');
+my $prvmode	      = $q->param('teamsiteMode');
+my $isimport	= $q->param('isimport');
+my $targetLocale  = $q->param('targetLocale');
+my $teamsiteBranches  = $q->param('teamsiteBranches');
+my $sourceBranch  = $q->param('sourceBranch');
+my $targetBranch  = $q->param('targetBranch');
+my $cxeRequestType  = $q->param('cxeRequestType');
+my $teamsiteJobState = $q->param('teamsiteJobState');
+my $teamsiteMessage = $q->param('teamsiteMessage');
+my $sourceLocale  = $q->param('sourceLocale');
+
+# remove extra newlines
+chomp($sourceLocale);
+chomp($sourceLocale);
+
+my $iwtemplating_root = "";
+my $tmpl_dcr_type = "";
+$dir	=~ s/$iwcgimount/$iwmount/;
+
+my $prspath = $relpath;
+my $dcrtmpl = "";
+my $isDcr = 0;
+
+log_entry "GlobalSightImport: taskId:$taskId:\n";
+log_entry "GlobalSightImport: overwriteSource:$overwriteSource:\n";
+log_entry "GlobalSightImport: callbackImmediately:$callbackImmediately:\n";
+log_entry "GlobalSightImport: datafile:$datafile:\n";
+log_entry "GlobalSightImport: datafileType:$datafiletype:\n";
+log_entry "GlobalSightImport: dir:$dir:\n";
+log_entry "GlobalSightImport: relpath:$relpath:\n";
+log_entry "GlobalSightImport: filename:$filename:\n";
+log_entry "GlobalSightImport: filetype:$filetype:\n";
+log_entry "GlobalSightImport: teamsiteMode:$prvmode:\n";
+log_entry "GlobalSightImport: isimport:$isimport:\n";
+log_entry "GlobalSightImport: sourceLocale:$sourceLocale:\n";
+log_entry "GlobalSightImport: targetLocale:$targetLocale:\n";
+log_entry "GlobalSightImport: teamsiteBranches:$teamsiteBranches:\n";
+log_entry "GlobalSightImport: sourceBranch:$sourceBranch:\n";
+log_entry "GlobalSightImport: targetBranch:$targetBranch:\n";
+log_entry "GlobalSightImport: cxeRequestType:$cxeRequestType:\n";
+log_entry "GlobalSightImport: teamsiteJobState:$teamsiteJobState\n";
+log_entry "GlobalSightImport: teamsiteMessage:$teamsiteMessage\n";
+
+
+my $url = "";
+# enter proper CXE hostname and port number in $url assignment
+$url="http://%%server_host%%:%%server_port%%/globalsight/wl";
+
+$| = 1;
+my $ua = LWP::UserAgent->new();
+$ua->agent("Mozilla/5.0");
+$ua->timeout(60);
+my $req = HTTP::Request->new(GET => $url);
+$req->referer("http://www.globalsight.com");
+my $response = $ua->request($req);
+if ($response->is_error()) 
+{
+     log_entry " GlobalSight Server Not Reachable \n";
+     log_entry $response->status_line. " \n";
+     log_entry " Aborting the Operation... \n";
+     if($taskId > 0) 
+     {
+	     my $task_file = "ts_" . $taskId;
+	     my $task = TeamSite::WFtask->new($taskId);
+	     log_entry "Calling back for task $taskId \n";
+	     $task->CallBack(1, "Import Error: Returning the control to TeamSite");
+	     unlink "$TEMP/$task_file";
+     }
+} 
+else 
+{
+    log_entry " GlobalSight Server Was Reachable \n";
+    log_entry $response->status_line. " \n";
+    if($taskId > 0 && ($overwriteSource =~ m/true/i))
+    {
+            if($sourceBranch ne "")
+            {
+                    $dir =~ s#$targetBranch#$sourceBranch#;
+            }
+            log_entry "GlobalSightImport: dir:$dir:\n";
+    }
+    if ($isimport == 2) 
+    {
+            print "Intialized CGI object\n";
+            print "status=OK\n";
+            my $task_file = "ts_" . $taskId;
+            if(($taskId > 0) && ($callbackImmediately =~ m/true/i))
+            {
+                    my $task = TeamSite::WFtask->new($taskId);
+                    log_entry "Calling back for task $taskId \n";
+                    if($teamsiteJobState eq $importFailed)
+                    {
+                            $task->CallBack(1, "Import Error: Returning the control to TeamSite");
+                    }
+                    else
+                    {
+                            $task->CallBack(0, "Returning the control to TeamSite");
+                    }
+                    unlink "$TEMP/$task_file";
+            }
+            elsif($taskId > 0)
+            {
+                    updateImportStatus($task_file, $teamsiteJobState);
+            }
+    }
+    elsif ($isimport == 1) {
+    	 if($taskId > 0)
+	 {
+                if($0 =~ ".cgi")
+                {
+                    log_entry  ":$0:This is NT/Windows 2000 so Services will take care of background timer. \n";
+                    system("$iw_home/httpd/iw-bin/GlobalSightImportStatusReporter.cgi $taskId  $TIMEOUT &");
+                }
+                else
+                {
+                    log_entry  ":$0:This is NT/Windows 2000 so Services will take care of background timer. \n";
+                    open(TASKFILE,">>$TASKS/$taskId") || log_entry "$0:ERROR: can\'t open $taskId";
+                    print TASKFILE "Timer file. Do not delete.\n";
+                    close(TASKFILE);
+                }
+	 }
+        open(DATA, "< $filename") ||
+                ((log_entry "ERROR:Couldn't open $filename for reading: $!\n") &&
+                die "ERROR:Couldn't open $filename for reading: $!\n");
+        binmode(DATA);
+        $/ = undef;
+        my $content = <DATA>;
+        close (DATA);
+        print $content;
+    }
+    else
+    {
+        print "Intialized CGI object\n";
+        my $data = get_file($datafile,$datafiletype);
+        $iwtemplating_root = "";
+
+        open(GETDATA, "$iw_home/bin/iwconfig teamsite_templating data_root|");
+        ($iwtemplating_root)= <GETDATA>;
+        chomp($iwtemplating_root);
+        $iwtemplating_root =~ s/^\///;
+        close(GETDATA);
+
+        my $abs_filename ="$dir/$relpath/$filename";
+        if ($abs_filename =~ 	/^$iwmount\/(.*)\/WORKAREA\/(.*)\/$iwtemplating_root\/(.*)\/data\/(.*)\/?$filename$/) 
+        {
+            log_entry("This is a dcr");
+            $isDcr = 1;
+          print "dcr=dcr\n";
+        }
+        else
+        {	
+            log_entry("This is NOT a dcr");
+          print "dcr=none\n";
+        }
+        if($teamsiteBranches eq "on"  || $isDcr == 1)
+        {	
+            $relpath =~ s#$targetLocale/##;
+        }
+
+        my $gen_filename;
+        if ($prvmode =~ /preview/) {
+            $abs_filename=create_file($iwmount,$data,$dir,$relpath,$filename,$filetype, $dcrtmpl, $prvmode, $sourceLocale, $targetLocale);
+            #
+            # The following is for the generation of presentation html pages.
+            # Currently it's not required to generate presentation template here.
+            # Commenting out the generation part.
+            #
+            if ($isDcr == 1)
+            {
+                my $template_list = get_template_info();
+                print "templates=$template_list\n";
+                log_entry "The template list is :$template_list:\n"
+            }
+        } else {
+                    $abs_filename=create_file($iwmount,$data,$dir,$relpath,$filename,$filetype, $dcrtmpl, $prvmode, $sourceLocale, $targetLocale);
+        }
+
+        # AJG - Temporary meta-data code for DCRs. Change to get the meta-data
+        # from caller who acquires data from original source file. Should make
+        # more robust and handle when iwconfig returns error message.
+        # Get IW teamsite data root
+
+        open(GETDATA, "$iw_home/bin/iwconfig teamsite_templating data_root|");
+        ($iwtemplating_root)= <GETDATA>;
+        chomp($iwtemplating_root);
+        $iwtemplating_root =~ s/^\///;
+        close(GETDATA);
+        log_entry "Finished CGI object\n";
+        print "status=OK\n";
+
+            if($taskId > 0 && !($callbackImmediately =~ m/true/i) && $cxeRequestType == "1")
+            {
+                my $file_entry = "";
+                $file_entry = $relpath . "/" . $filename;
+                my $file = $file_entry;
+                if($teamsiteBranches eq "on")
+                {
+                    $file_entry = $targetLocale . "/" . $file_entry;
+                }
+                $file_entry =~ s#$targetLocale#$sourceLocale#;
+                my $export_status = "y";
+                my $task_file = "ts_" . $taskId;
+                updateStatus($task_file, $file_entry, $export_status);
+                if(isReadyToCallBack($task_file) == 1)
+                {
+                   log_entry "overwritesource is $overwriteSource \n" ;
+                   if(($overwriteSource =~ m/false/i) && ($teamsiteBranches ne "on"))
+                   {
+                          log_entry "$iw_home/bin/iwaddtaskfile $taskId $file \"Added by External Task\"\n" ;
+                          system("$iw_home/bin/iwaddtaskfile $taskId $file \" Added by External Task\"");
+                   }
+                   my $task = TeamSite::WFtask->new($taskId);
+                   log_entry "Calling back for task $taskId \n";
+                   $task->CallBack(0, "returning the control to TeamSite");
+                   unlink "$TEMP/$task_file";
+                }
+            }
+    }
+}
+close(LOGFILE);
+
+sub readFiles
+{
+	my $task_file = shift;
+	%exportStatus = ();
+	open (IN, "< $TEMP/$task_file") || log_entry  "cannot open $!\n";
+        my $count =0;
+	while (<IN>)
+	{
+                if($count > 0)
+                {
+                    my ($key, $value) = split("=");
+                    log_entry "reading exportStatus key $key, value $value \n";
+                    $exportStatus{$key}=$value;	
+                }
+                $count++;
+	}
+	close IN;
+}
+sub updateImportStatus
+{
+        my $task_file = shift;
+        my $importStatus = shift;
+        readFiles($task_file);
+        open (OUT, "> $TEMP/$task_file") || log_entry  "cannot open $!\n";
+        # enter the status info
+        print OUT "$importStatus\n";
+        # then the file info
+        for (keys %exportStatus)
+        {
+                print OUT $_."=$exportStatus{$_}";
+        }
+        close OUT;
+}
+sub readImportStatus
+{
+	my $task_file = shift;
+	open (IN, "< $TEMP/$task_file") || log_entry  "cannot open $!\n";
+	my $importStatus = <IN>;
+	close IN;
+        return $importStatus;
+}
+
+sub updateStatus
+{
+	my $task_file = shift;
+	my $file_name = shift;
+	my $status = shift;
+	readFiles($task_file);
+        my $importStatus = readImportStatus($task_file);
+	$exportStatus{$file_name} = "$status\n";
+	open (OUT, "> $TEMP/$task_file") || log_entry  "cannot open $!\n";
+        # enter the status info
+	print OUT "$importStatus\n";
+        # then the file info
+	for (keys %exportStatus)
+	{
+		print OUT $_."=$exportStatus{$_}";
+	}
+	close OUT;
+        log_entry "Updating task file status for $file_name \n";
+
+}
+sub isReadyToCallBack
+{
+	my $task_file = shift;
+	readFiles($task_file);
+	my $ret = 0;
+	$ret = 1 unless(grep {/n/} values %exportStatus);
+	log_entry "ReadyToCallBack::The return value is $ret \n";
+	return $ret;
+}
+
+sub log_entry {
+	my $entry = shift;
+	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	localtime(time);
+	my($date) = sprintf("%04d/%02d/%02d-%02d:%02d:%02d",($year+1900),$mon+1,$mday,$hour,$min,$sec);
+	print LOGFILE "$date:$entry";
+}
+
+
+sub create_dir {
+	my ($basedir,$relpath) = @_;
+	createBranchAndWorkArea($basedir, $relpath);
+
+	my @dirs = split '/', $relpath;
+	my $fullpath = $basedir;
+
+	if (! -d $basedir) {
+	   log_entry "ERROR:Base Directory does not exist: $basedir\n";
+	   die "ERROR:Base Directory does not exist: $basedir\n";
+	}
+
+	foreach my $dir (@dirs) {
+		$fullpath .= "/$dir";
+		if (! -e $fullpath) {
+		  my $result = eval{mkdir($fullpath, 0777)};
+		  # return result sometimes returns true even when failure occurs
+		  if (!$result) {
+		    log_entry "ERROR:Couldn't create the directory: $fullpath\n";
+		    die "ERROR:Couldn't create directory: $fullpath\n";
+		  } else {
+		    system("chmod 0777 \"$fullpath\"");
+		    # system("chown nobody:nobody  $fullpath");
+		    log_entry "\tCreated directory $fullpath\n";
+		  }
+		}
+	}
+	# Check since $result above may be erroneous
+	opendir(DIRHANDLE, "$basedir/$relpath") ||
+	((log_entry "ERROR:Directory creation failed\n") &&
+	  die "ERROR:Directory creation failed!\n");
+	closedir(DIRHANDLE);
+	return 1;
+}
+
+
+# create the requested file and create the directory if not present
+# only allow file creation within the interwoven file system
+sub create_file {
+	my ($iwmount,$data,$dir,$relpath,$filename,$filetype, $dcrtmpl, $mode, $sourceLocale, $targetLocale) = @_;
+	my $abs_filename;
+	my $dcr_filename;
+	if ($mode eq "final")
+	{
+	    if($isDcr == 1)
+	    {
+		if($teamsiteBranches eq "on")
+		{
+			#nothing
+		}
+		else
+		{
+			if($taskId > 0 && ($overwriteSource =~ m/true/i))
+			{
+				# nothing
+			}
+			else
+			{
+				$relpath .= "/$targetLocale";
+			}
+		}
+		$abs_filename = "$dir/$relpath/$filename";
+		remove_preview_files();
+	    }
+	    else
+	    {
+		my $temp_path = "";
+		if($taskId > 0 && ($overwriteSource =~ m/true/i))
+		{
+			
+			if($teamsiteBranches eq "on")
+			{
+				$relpath = "/$sourceLocale/" . $relpath;
+			}
+			else
+			{
+				$relpath =~ s#$targetLocale#$sourceLocale#;
+			}
+		}
+		$abs_filename = "$dir/$relpath/$filename";
+		$filename = $previewPrefix 
+			. "_" . $targetLocale 
+			. "_" . $filename;
+		$temp_path = "$dir/$relpath/$filename";
+		unlink $temp_path;
+	    }
+	    log_entry "Done cleaning up ...\n";
+	}	
+	if ($mode eq "preview")
+	{
+	    if($isDcr == 1)
+	    {	
+		$abs_filename ="$dir/$relpath/$previewPrefix/$targetLocale/$filename";
+	      $relpath .= "/$previewPrefix/$targetLocale";
+	    }
+	    else
+	    {
+             $abs_filename ="$dir/$relpath/$previewPrefix" 
+			. "_" . $targetLocale
+			. "_" . $filename;
+	    }
+	}
+	if ($dir =~ /^$iwmount/i)
+      {
+    	   if (create_dir($dir,$relpath)) {
+		if($mode eq "generate"){
+		    # Do nothing this part is moved to a separate GlobalSightDcrGen.ipl script.
+		}
+		else
+		{
+		    open(DATA, "> $abs_filename") ||
+		    ((log_entry "ERROR:Couldn't open $abs_filename for writing: $!\n") &&  die "ERROR:Couldn't open $abs_filename for writing: $!\n");
+		    log_entry("Created file: $abs_filename \n");
+		    if ($filetype =~ 'binary')
+                {
+                    #	Binary files come in as Base64 encoded, so decode
+                    #	the data and save it as a binary file
+                    #
+			  log_entry "GlobalSightImport FileType is binary \n";
+                    binmode(DATA);
+                    print DATA (decode_base64($data));
+                }
+                 else
+                {
+			  log_entry "GlobalSightImport FileType is non-binary \n";
+                    print DATA $data;
+                }
+		    close(DATA);
+		    system("chmod 0666 \"$abs_filename\"");
+		    if($isDcr == 1)
+		    {
+		    	$tmpl_dcr_type = $abs_filename;
+			$tmpl_dcr_type =~ s#(.*)/data/.*#$1#;
+		    	$tmpl_dcr_type =~ s#^$iwmount\/(.*)\/WORKAREA\/(.*)\/$iwtemplating_root\/##;
+		    	log_entry "$iw_home/bin/iwextattr -s TeamSite/Templating/DCR/Type=$tmpl_dcr_type $abs_filename";
+		    	system("$iw_home/bin/iwextattr -s TeamSite/Templating/DCR/Type=$tmpl_dcr_type \"$abs_filename\"");
+		    }
+		}
+	   }
+	}
+      else 
+      {
+		((log_entry "ERROR:Illegal file path for writing file $abs_filename : $!\n") &&	die "ERROR:Illegal file path for writing file  $abs_filename : $!\n");
+	}
+      return ($abs_filename);
+}
+sub get_file {
+	my ($datafile,$datafiletype) = @_;
+	if ($datafiletype == 1) { # Open file from the local file system
+		open(DATA, "< $datafile") ||
+		((log_entry "ERROR:Couldn't open $datafile for reading: $!\n") &&
+			die "ERROR:Couldn't open $datafile for reading: $!\n");
+		log_entry("Opened file: $datafile");
+		my $data;
+		read (DATA,$data,(stat(DATA))[7]);
+		close (DATA);
+		return $data;
+	} elsif ($datafiletype == 2) { # Open file from URI
+		((log_entry "Error: Handling for filetype '2' not yet implemented : $!\n") &&
+		die "Error: Handling for filetype '2' not yet implemented : $!\n");
+	} else {
+		return $datafile;
+	}
+}
+
+#
+# This is a sub that reads the templating.cfg file and gets the attributes required 
+# for template generation and preview. This is copied to GlobalSightDcrGen.ipl
+# So if you change something in this routine then you might also want to change
+# the get_template_info sub of GlobalSightDcrGen.ipl
+#
+sub get_template_info
+{
+        my $required_category = "";
+        my $required_datatype = "";
+        my $extension="";
+        my $current_datatype="";
+        my $current_template="";
+        my $template_list="";
+        # Let's open the templating.cfg file and read the extension for the
+        # required template.
+        local $/;
+        open (DATA ,"<$iw_home/local/config/templating.cfg") || print "Unable to
+ open $!<BR>";
+        my $current_category = <DATA>;
+        close DATA;
+        my $temp_path = $relpath;
+        $temp_path =~ s#$iwtemplating_root/(.*?)/(.*?)/data
+                       #$required_category=$1;
+                        $required_datatype = $2;
+                       #gmsxe;
+        # Get the category info.
+        $current_category =~ s#(<category\s*name\s*=\s*"$required_category"
+                               (.*?)
+                               <\/category>)
+                              #$current_datatype=$1
+                              #gmxse;
+        # Get the data-type info.
+        $current_datatype =~ s#(<data-type\s*name\s*=\s*"$required_datatype"
+                               (.*?)
+                               <\/data-type>)
+                              #$current_template=$1
+                              #gmxse;
+        # Get the template and extension info
+        $current_template =~ s#(<template\s*name\s*=\s*"(.*?)"\s*
+                               extension\s*=\s*"(.*?)"\s*>
+                               (.*?)
+                               <branch(.*?)preview-dir\s*=\s*"(.*?)"\s*>
+                               (.*?)
+                               <\/template>)
+                              #$template_list .= $2.",".$3.",".$6."|";
+                              #gmxse;
+        chop($template_list);
+        return $template_list;
+}
+#
+# Removing the preview generated files for Cleaning up
+# We tried unlink command to directly remove the files 
+# but unlink is not allowed on those files. It says
+# files are being used by other application cannot delete.
+# 
+# So we have a workaround here.
+# We rename the files to deleteit.del and then remove 
+# deleteit.del.
+#
+
+sub remove_preview_files
+{
+	      log_entry "Cleaning up the preview files if any ...\n";
+	      my $fl;
+	      my $cnt;
+	      my $temp_path = "$dir";
+	      opendir(DIR, $temp_path ) || log_entry "could not open $temp_path \n";
+            while(defined($fl = readdir(DIR)))
+            {
+		my $pattern = "$previewPrefix" . "_(.*?)$filename";
+                if($fl =~ m/$pattern/)
+                {
+                        $cnt = rename "$temp_path/$fl", "$temp_path/deleteit.del";
+                }
+		    unlink "$temp_path/deleteit.del";
+            }
+	      closedir(DIR);
+		unlink "$temp_path/$targetLocale/deleteit.del";
+	      $temp_path = "$dir/$relpath/$previewPrefix/$targetLocale";
+	      opendir(DIR, $temp_path ) || log_entry "could not open $temp_path \n";
+            while(defined($fl = readdir(DIR)))
+            {
+                if($fl =~ m/$filename/)
+                {
+                        $cnt = rename "$temp_path/$fl", "$temp_path/deleteit.del";
+                }
+            }
+	      closedir(DIR);
+		unlink "$temp_path/deleteit.del";
+	      $temp_path = "$dir/$relpath/$previewPrefix/";
+	      opendir(DIR, $temp_path ) || log_entry "could not open $temp_path \n";
+            while(defined($fl = readdir(DIR)))
+            {
+                if($fl =~ m/$filename/)
+                {
+                      $cnt = rename "$temp_path/$fl", "$temp_path/$targetLocale/deleteit.del";
+                }
+            }
+            closedir(DIR);
+	      unlink "$temp_path/$targetLocale/deleteit.del";
+}
+# Creates branches and workareas if they do not exist.
+sub createBranchAndWorkArea {
+	my ($basedir, $relpath) = @_;
+	log_entry "\n GlobalSightImport:basedir is $basedir";
+        (my $branch       = $basedir) =~ s#/WORKAREA/.*##m;
+        (my $root         = $branch)  =~ s#(.*)/(.*)#$1#m;
+        (my $branchname   = $branch)  =~ s#(.*)/(.*)#$2#m;
+        (my $workareaname = $basedir) =~ s#.*/WORKAREA/(.*)#$1#m;
+
+	# Create Branches if required.
+	createBranches($basedir);
+
+        # Find out if the Workarea exists
+        if (! -d $basedir)
+        {
+                log_entry("WORKAREA $basedir does not exist. Creating it...\n");
+                # Create the workarea.
+                log_entry("$iw_home/bin/iwmkwa \"$branch\" \"$workareaname\"  \"Created by CLT\" INITIAL $username");
+                system("$iw_home/bin/iwmkwa \"$branch\" \"$workareaname\"  \"Created by CLT\" INITIAL $username");
+        }
+}
+sub createBranches()
+{
+        my $basedir = shift;
+	(my $root = $basedir) =~ s#((.*)/main)/(.*)#$1#m;
+	$basedir =~ s#$root##;
+	(my $branch       = $basedir) =~ s#/WORKAREA/.*##m;
+        foreach my $br (split "/", $branch)
+        {
+                if($br ne "")
+                {
+			# Check if the branch exists
+			if (! -d "$root/$br")
+			{
+				# Branch does not exist. Create it
+				log_entry("GlobalSightImport:$br doesn't exist. Creating it...\n");
+				log_entry("$iw_home/bin/iwmkbr \"$root\" \"$br\"  \"Created by CLT\" INITIAL $username");
+				system("$iw_home/bin/iwmkbr \"$root\" \"$br\"  \"Created by CLT\" INITIAL $username");
+			}
+                        $root .= "/".$br;
+                }
+        }
+}

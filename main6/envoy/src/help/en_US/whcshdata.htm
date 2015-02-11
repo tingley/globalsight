@@ -1,0 +1,224 @@
+<html>
+<head>
+<title>GlobalSight</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta name="generator" content="RoboHelp by eHelp Corporation   www.ehelp.com">
+<meta name "description" content="WebHelp 5.10">
+</head>
+<body>
+<script language="javascript1.2" src="whver.js"></script>
+<script language="javascript1.2" src="whutils.js"></script>
+<script language="JavaScript">
+<!--
+var gaCsh=new Array();
+
+var gaWindow=new Array();
+
+var gaRmtProj=new Array();
+
+var gsProjPath=_getPath(document.location.href);
+
+function CshEntityItem(strAliasId,nTopicNum,strUrl)
+{
+	this.strAliasId=strAliasId;
+	this.nTopicNum=nTopicNum;
+	this.strUrl=strUrl;
+}
+
+function CshWindow(sWName,bBUseDefault,nWBOptions,sWBLeft,sWBTop,sWBWidth,sWBHeight,sWCaption,nWPanes,nWPOptions,sWPButtons,sWPDefBtn)
+{
+	this.sName=sWName;
+	this.bUseDefault=bBUseDefault;
+	if(!this.bUseDefault)
+	{
+		this.nBOptions=nWBOptions;
+		this.sBLeft=sWBLeft;
+		this.sBTop=sWBTop;
+		this.sBWidth=sWBWidth;
+		this.sBHeight=sWBHeight;
+	}
+	this.sCaption=sWCaption;
+	this.nPanes=nWPanes;
+	if(this.nPanes==2)
+	{
+		this.nPOptions=nWPOptions;
+		this.sPButtons=sWPButtons;
+		this.sPDefBtn=sWPDefBtn;
+	}
+}
+
+function addRemoteProject(sPath)
+{
+	if(sPath.length!=0)
+	{
+		if(sPath.lastIndexOf("/")!=sPath.length-1)
+			sPath+="/";
+		gaRmtProj[gaRmtProj.length]=sPath;	
+	}
+}
+
+//Set Context-sensitive help entity...
+function SetCsh(n,strAliasId,nTopicNum,strUrl)
+{
+	gaCsh[n]=new CshEntityItem(strAliasId,nTopicNum,strUrl);
+}
+
+function addWindow(sWName,bBUseDefault,nWBOptions,sWBLeft,sWBTop,sWBWidth,sWBHeight,sWCaption,nWPanes,nWPOptions,sWPButtons,sWPDefBtn)
+{
+	gaWindow[gaWindow.length]=new CshWindow(sWName,bBUseDefault,nWBOptions,sWBLeft,sWBTop,sWBWidth,sWBHeight,sWCaption,nWPanes,nWPOptions,sWPButtons,sWPDefBtn);
+}
+
+SetCsh(0,"Activity_Type",4,"Glossary/Activity_Type.htm");
+SetCsh(1,"Customizing_Extraction_Settings",29,"Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm");
+SetCsh(2,"DB_Profiles_Main_Screen",37,"Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm");
+SetCsh(3,"Job_Details",95,"My_Jobs/Job_Details.htm");
+SetCsh(4,"Job_Details_Report",96,"Reports/Job_Details_Report.htm");
+SetCsh(5,"Locale_Manager",108,"Glossary/Locale_Manager.htm");
+SetCsh(6,"Localization_Profiles_Main_Screen",113,"Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm");
+SetCsh(7,"Main_Editor_Unlock",117,"My_Activities/Main_Editor.htm#Unlock");
+SetCsh(8,"Placeholder_Tags_Errors_",126,"Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm");
+SetCsh(9,"Projects_Main_Screen",128,"Setup/Projects/Projects_Main_Screen.htm");
+SetCsh(10,"Segment_Editor_Image_",141,"My_Activities/Segment_Editor_(Image).htm");
+SetCsh(11,"Specific_Snippet",154,"Glossary/Specific_Snippet.htm");
+SetCsh(12,"TeamSite_Source_Branches",158,"Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm");
+SetCsh(13,"Upload",166,"My_Activities/Upload.htm");
+SetCsh(14,"DB_Preview_Rules_Main_Screen",35,"Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm");
+SetCsh(15,"Graphical_Workflow",83,"Setup/Workflows/Graphical_Workflow.htm");
+SetCsh(16,"Local_Content_Management_Snippets_Exporting_Source_Pages_With_Snippets",103,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Exporting Source Pages With Snippets");
+SetCsh(17,"Rejected_Activity_Tab",132,"My_Activities/Rejected_Activity_Tab.htm");
+SetCsh(18,"DB_Preview_SQL",36,"Data_Sources/Database_Profiles/DB_Preview_SQL.htm");
+SetCsh(19,"Download",42,"My_Activities/Download.htm");
+SetCsh(20,"Local_Content_Management_Snippets_Adding_Snippets_to_Target_Pages",99,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Adding Snippets to Target Pages");
+SetCsh(21,"Pending_Records_Table",122,"Appendix/Database_Integration/Pending_Records_Table.htm");
+SetCsh(22,"Project",127,"Glossary/Project.htm");
+SetCsh(23,"Reports_Main_Screen",133,"Reports/Reports_Main_Screen.htm");
+SetCsh(24,"Snippet_Import_File",151,"Glossary/Snippet_Import_File.htm");
+SetCsh(25,"Upload_Support_Files",167,"Setup/Support_Files/Upload_Support_Files.htm");
+SetCsh(26,"Archived_Workflow_Tab",6,"My_Jobs/Archived_Workflow_Tab.htm");
+SetCsh(27,"DB_Write_SQL",39,"Data_Sources/Database_Profiles/DB_Write_SQL.htm");
+SetCsh(28,"GS_Tag_Syntax",87,"Appendix/Locale_Content_Management/GS_Tag_Syntax.htm");
+SetCsh(29,"Local_Content_Management_Snippets_",98,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm");
+SetCsh(30,"Local_Content_Management_Snippets_Creating_Snippets",100,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Creating Snippets");
+SetCsh(31,"Select_Files_To_Import",143,"Data_Sources/Import/Select_Files_To_Import.htm");
+SetCsh(32,"Supported_Data_Formats",156,"Appendix/Supported_Data_Formats.htm");
+SetCsh(33,"Create_EditTranslation_Memory",27,"Setup/Translation_Memory/Create_Modify_Translation_Memory.htm");
+SetCsh(34,"Export_Locations_Main_Screen",45,"Data_Sources/Export_Locations/Export_Locations_Main_Screen.htm");
+SetCsh(35,"User_Account_Information",168,"Setup/Users/User_Information.htm");
+SetCsh(36,"DB_Connections_Main_Screen",33,"Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm");
+SetCsh(37,"Finished_Activity_Tab",50,"My_Activities/Finished_Activity_Tab.htm");
+SetCsh(38,"GS_tagged_Source_Page",84,"Glossary/GS-tagged_Source_Page.htm");
+SetCsh(39,"GS_Tag",86,"Glossary/GS_Tag.htm");
+SetCsh(40,"Import",88,"Setup/Terminology/Import.htm");
+SetCsh(41,"Locale_Pairs_Main_Screen",110,"Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm");
+SetCsh(42,"Snippet",147,"Glossary/Snippet.htm");
+SetCsh(43,"Snippet_Import",150,"Setup/Snippet_Import/Import_Snippet_Files.htm");
+SetCsh(44,"Terminology_Main_Screen",161,"Setup/Terminology/Terminology_Main_Screen.htm");
+SetCsh(45,"Users_Main_Screen",169,"Setup/Users/Users_Main_Screen.htm");
+SetCsh(46,"Attach_Workflows_to_Target_Locales",7,"Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm");
+SetCsh(47,"Create_Locale_Pair",14,"Setup/Locale_Pairs/Create_Locale_Pair.htm");
+SetCsh(48,"Create_Edit_Import_Settings",22,"Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm");
+SetCsh(49,"Create_Edit_Rate",24,"Setup/Rates/Create_Modify_Rate.htm");
+SetCsh(50,"Define_Termbase_Column",40,"Setup/Terminology/Define_Termbase_Column.htm");
+SetCsh(51,"Deletable_Content",41,"Glossary/Deletable_Content.htm");
+SetCsh(52,"Job_Timers",97,"Setup/Localization_Profiles/Job_Timers.htm");
+SetCsh(53,"Local_Content_Management_Snippets_Locale_Manager_Group",106,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Locale Manager Group");
+SetCsh(54,"Log_Files",115,"Setup/Logs/Log_Files.htm");
+SetCsh(55,"My_Activities",119,"My_Activities/My_Activities.htm");
+SetCsh(56,"Roles",134,"Setup/Users/Edit_Roles.htm");
+SetCsh(57,"Setup_Menus",146,"Setup/Setup.htm");
+SetCsh(58,"Create_Edit_Column",17,"Data_Sources/Database_Profiles/Create_Modify_Column.htm");
+SetCsh(59,"Import_Main_Screen",90,"Data_Sources/Import/Import_Main_Screen.htm");
+SetCsh(60,"New_TeamSite_Branch_Definition",120,"Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm");
+SetCsh(61,"Placeholder_Tags",124,"Glossary/Placeholder_Tags.htm");
+SetCsh(62,"Ready_Workflow_Tab",130,"My_Jobs/Ready_Workflow_Tab.htm");
+SetCsh(63,"Snippet_Library",153,"Glossary/Snippet_Library.htm");
+SetCsh(64,"Termbase",160,"Glossary/Termbase.htm");
+SetCsh(65,"Workflow_Status_Report",172,"Reports/Workflow_Status_Report.htm");
+SetCsh(66,"Exported_Workflow_Tab",47,"My_Jobs/Exported_Workflow_Tab.htm");
+SetCsh(67,"GS_Tagged_Source_Page_Example",85,"Appendix/Locale_Content_Management/GS-Tagged_Source_Page_Example.htm");
+SetCsh(68,"Job",94,"Glossary/Job.htm");
+SetCsh(69,"Local_Content_Management_Snippets_Glossary_of_Terms",105,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Glossary of Terms");
+SetCsh(70,"Localization_Profile",111,"Glossary/Localization_Profile.htm");
+SetCsh(71,"Select_Snippet",144,"My_Activities/Select_Snippet.htm");
+SetCsh(72,"Set_Import_Options_Import_p_3_",145,"Setup/Terminology/Set_Import_Options_(Import_p.3).htm");
+SetCsh(73,"Snippet_Import_File_Example",152,"Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm");
+SetCsh(74,"TeamSite_Target_Branches",159,"Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm");
+SetCsh(75,"Verify_CSV_Columns_Import_p_2_",170,"Setup/Terminology/Verify_CSV_Columns_(Import_p.2).htm");
+SetCsh(76,"Workflow",171,"Glossary/Workflow.htm");
+SetCsh(77,"Writing_XML_Rules",177,"Appendix/Writing_XML_Rules.htm");
+SetCsh(78,"Average_Percent_Complete_Report",10,"Reports/Average_Percent_Complete_Report.htm");
+SetCsh(79,"Browse_Termbase",11,"Setup/Terminology/Browse_Termbase.htm");
+SetCsh(80,"Create_Edit_DB_Connection",19,"Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm");
+SetCsh(81,"Generic_Snippet",81,"Glossary/Generic_Snippet.htm");
+SetCsh(82,"In_Progress_Activity_Details",91,"My_Activities/In_Progress_Activity_Details.htm");
+SetCsh(83,"In_Progress_Workflow_Tab",93,"My_Jobs/In_Progress_Workflow_Tab.htm");
+SetCsh(84,"Local_Content_Management_Snippets_Exporting_Target_Pages_with_Snippets",104,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Exporting Target Pages with Snippets");
+SetCsh(85,"Localized_Workflow_Tab",114,"My_Jobs/Localized_Workflow_Tab.htm");
+SetCsh(86,"Placeholder_Tags_Additional_Information_",125,"Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm");
+SetCsh(87,"TM_Matches",163,"Glossary/TM_Matches.htm");
+SetCsh(88,"TM_Report",164,"Reports/TM_Report.htm");
+SetCsh(89,"Activity",2,"Glossary/Activity.htm");
+SetCsh(90,"Create_Edit_Duplicate_Termbase",26,"Setup/Terminology/Create_Modify_Clone_Termbase.htm");
+SetCsh(91,"Customizing_Segmentation_Settings",30,"Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm");
+SetCsh(92,"DB_Import_Settings_Main_Screen",34,"Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm");
+SetCsh(93,"File_Extensions_Main_Screen",48,"Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm");
+SetCsh(94,"Import_Error",89,"My_Jobs/Import_Error.htm");
+SetCsh(95,"In_Progress_Activity_Tab",92,"My_Activities/In_Progress_Activity_Tab.htm");
+SetCsh(96,"Locale",107,"Glossary/Locale.htm");
+SetCsh(97,"Overview",121,"Overview.htm");
+SetCsh(98,"System_Parameters",157,"Setup/System_Parameters/System_Parameters.htm");
+SetCsh(99,"TM",162,"Glossary/TM.htm");
+SetCsh(100,"Available_Activity_Details",8,"My_Activities/Available_Activity_Details.htm");
+SetCsh(101,"Create_Edit_Currency",18,"Setup/Currency/Create_Modify_Currency.htm");
+SetCsh(102,"Local_Content_Management_Snippets_Enabling_the_Local_Content_Management_Feature",102,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Enabling the Local Content Management Feature");
+SetCsh(103,"Main_Editor",116,"My_Activities/Main_Editor.htm");
+SetCsh(104,"Translation_Memory_Main_Screen",165,"Setup/Translation_Memory/Translation_Memory_Main_Screen.htm");
+SetCsh(105,"Writing_DB_Preview_Rules",176,"Appendix/Database_Integration/Writing_DB_Preview_Rules.htm");
+SetCsh(106,"Activity_Status_Summary",3,"Glossary/Activity_Status_Summary.htm");
+SetCsh(107,"Columns",12,"Data_Sources/Database_Profiles/Columns.htm");
+SetCsh(108,"Create_Edit_Activity_Type",16,"Setup/Activity_Types/Create_Modify_Activity_Type.htm");
+SetCsh(109,"Database_Profiles_Basic_Information",32,"Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm");
+SetCsh(110,"File_Profiles_Main_Screen",49,"Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm");
+SetCsh(111,"Locale_Pair",109,"Glossary/Locale_Pair.htm");
+SetCsh(112,"Localization_Profile_Basic_Information",112,"Setup/Localization_Profiles/Basic_Information_LP.htm");
+SetCsh(113,"Pending_Workflow_Tab",123,"My_Jobs/Pending_Workflow_Tab.htm");
+SetCsh(114,"Segment",140,"Glossary/Segment.htm");
+SetCsh(115,"Snippet_and_Content_Editor",148,"My_Activities/Snippet_and_Content_Editor.htm");
+SetCsh(116,"XML_Rules_Main_Screen",178,"Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm");
+SetCsh(117,"Activity_Types_Main_Screen",5,"Setup/Activity_Types/Activity_Types_Main_Screen.htm");
+SetCsh(118,"Create_Edit_File_Profile",21,"Data_Sources/File_Profiles/Create_Modify_File_Profile.htm");
+SetCsh(119,"Create_Edit_Project",23,"Setup/Projects/Create_Modify_Project.htm");
+SetCsh(120,"Snippet_Editor",149,"My_Activities/Snippet_Editor.htm");
+SetCsh(121,"Support_Files_Main_Screen",155,"Setup/Support_Files/Support_Files_Main_Screen.htm");
+SetCsh(122,"Currency_Main_Screen",28,"Setup/Currency/Currency_Main_Screen.htm");
+SetCsh(123,"Exclude_Item_Types",44,"Appendix/Exclude_Item_Types.htm");
+SetCsh(124,"Local_Content_Management_Snippets_Deleting_Snippets_from_Target_Pages",101,"Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm#Deleting Snippets from Target Pages");
+SetCsh(125,"Workflows",174,"Setup/Workflows/Workflows.htm");
+SetCsh(126,"Account_Information",1,"My_Account.htm");
+SetCsh(127,"Available_Activity_Tab",9,"My_Activities/Available_Activity_Tab.htm");
+SetCsh(128,"Create_Edit_XML_Rules",25,"Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm");
+SetCsh(129,"Data_Sources_Menu",31,"Data_Sources/Data_Sources_Menu.htm");
+SetCsh(130,"DB_Read_SQL",38,"Data_Sources/Database_Profiles/DB_Read_SQL.htm");
+SetCsh(131,"Rate_Main_Screen",129,"Setup/Rates/Rate_Main_Screen.htm");
+SetCsh(132,"Create_File_Extension",13,"Data_Sources/File_Extensions/Create_File_Extension.htm");
+SetCsh(133,"Create_Edit_DB_Preview_Rules",20,"Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm");
+SetCsh(134,"Enter_Basic_Information_for_New_Workflow",43,"Setup/Workflows/Basic_Information_Workflows.htm");
+SetCsh(135,"Segment_Editor_Text_",142,"My_Activities/Segment_Editor_(Text).htm");
+SetCsh(136,"Workflow_Status_Summary",173,"Glossary/Workflow_Status_Summary.htm");
+
+
+
+
+window.onload=window_OnLoad;
+
+function window_OnLoad()
+{
+	if(parent&&parent!=this&&parent.putCshData)
+	{
+		parent.putCshData(gsProjPath,gaCsh,gaWindow,gaRmtProj);
+	}
+}
+//-->
+</script>
+</body>
+</html>

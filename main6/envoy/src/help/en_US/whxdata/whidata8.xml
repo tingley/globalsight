@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Handled" >
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+</key>
+<key name="Help Menu" >
+  <topic name="Help Menu" url="Appendix/Alignment/Help_Menu.htm" />
+</key>
+<key name="Hourly Rates" >
+  <topic name="Hourly Rates" url="Glossary/Hourly_Rates.htm" />
+</key>
+<key name="Import" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Auto-Import Configuration" url="Appendix/Auto-Import_Configuration.htm" />
+  <topic name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Enter Job Name (Import p.3)" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+  <topic name="Exclude Item Types" url="Appendix/Exclude_Item_Types.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+  <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
+  <topic name="Import" url="Setup/Terminology/Import.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+  <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+  <topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+  <topic name="Job" url="Glossary/Job.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Office Adapters" url="Appendix/Office_Adapter.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page TM" url="Glossary/Page_TM.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+  <topic name="Preparing Documents for Import" url="Appendix/Preparing_Documents_for_Import.htm" />
+  <topic name="Primary Target File" url="Glossary/Primary_Target_File.htm" />
+  <topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+  <topic name="Select Files To Import" url="Data_Sources/Import/Select_Files_To_Import.htm" />
+  <topic name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
+  <topic name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="Testing Import" url="Setup/Snippet_Import/Testing_Import.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Unextracted File" url="Glossary/Unextracted_File.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  <topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Import Error" >
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+</key>
+<key name="Import into Termbase" >
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+</key>
+<key name="Import Schedule Data" >
+  <topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
+</key>
+<key name="Import Schedules" >
+  <topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+</key>
+<key name="Import screen" >
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Import setting" >
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+</key>
+<key name="Import Settings" >
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="Import Settings Main Screen" >
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="Import Snippet File" >
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+</key>
+<key name="Import TeamSite File into GlobalSight" >
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+</key>
+<key name="Import TM" >
+  <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+</key>
+<key name="Indexing Termbase" >
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+</key>
+<key name="Insert Image" >
+  <topic name="Insert Image" url="Setup/Terminology/Insert_Image.htm" />
+</key>
+<key name="Introduction" >
+  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
+</key>
+
+</indexdata>

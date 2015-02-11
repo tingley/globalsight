@@ -1,0 +1,3 @@
+-- for GBS-533
+ALTER TABLE file_profile ADD COLUMN JS_FILTER_REGEX VARCHAR(255);
+commit;

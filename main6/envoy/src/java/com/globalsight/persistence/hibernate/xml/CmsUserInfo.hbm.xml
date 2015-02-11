@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.mediasurface.CmsUserInfo"
+		table="CMS_USER">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="ambassadorUserId" length="80"
+			column="AMBASSADOR_USER_ID" type="string" not-null="true"
+			unique="true" />
+		<property name="cmsUserId" length="25" column="CMS_USER_ID"
+			type="string" not-null="true" unique="false" />
+		<property name="cmsPassword" length="4000" column="CMS_PASSWORD"
+			type="string" not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

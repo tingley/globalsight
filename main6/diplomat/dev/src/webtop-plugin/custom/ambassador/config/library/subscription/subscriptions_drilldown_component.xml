@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         Subscription List                                      -->
+<!-- File           subscriptions_drilldown_component.xml                    -->
+<!-- Description    Columned list of subscription                          -->
+<!-- Created on     19 Sept 2001                                         -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   <scope>
+
+      <!-- the drilldown style Subscriptions component -->
+      <component id="subscriptions_drilldown">
+
+         <!-- Description (not NLS'd) -->
+         <desc>
+            Subscriptions streamline view component: a viewer displaying subscriptions for the current session user.
+         </desc>
+
+         <!-- Component Contract -->
+         <params>
+         </params>
+
+         <!-- Component Layout -->
+         <pages>
+            <start>/webcomponent/library/subscription/subscriptions_drilldown.jsp</start>
+         </pages>
+
+         <!-- Component Behavior -->
+         <class>com.documentum.webcomponent.library.subscription.Subscriptions</class>
+         <nlsbundle>com.documentum.ambassador.library.subscription.SubscriptionsNlsProp</nlsbundle>
+
+         <!-- If this component supports failover/replication, the failoverenabled needs to be set to true-->
+         <failoverenabled>true</failoverenabled>
+
+         <!-- visibility and order of attribute columns -->
+         <!-- NOTE: this component does not support repeating attribute columns -->
+         <columns>
+
+            <!-- load invisible attribute flag -->
+            <!-- set the value to "true" means that all the invisible attributes
+                 will be added to the columns map. The default value is "false" -->
+
+            <loadinvisibleattribute>true</loadinvisibleattribute>
+
+            <column>
+               <attribute>object_name</attribute>
+               <label><nlsid>MSG_NAME</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>title</attribute>
+               <label><nlsid>MSG_TITLE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>a_content_type</attribute>
+               <label><nlsid>MSG_FORMAT</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_content_size</attribute>
+               <label><nlsid>MSG_SIZE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>owner_name</attribute>
+               <label><nlsid>MSG_OWNER_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>group_name</attribute>
+               <label><nlsid>MSG_GROUP_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_creator_name</attribute>
+               <label><nlsid>MSG_CREATOR_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_object_type</attribute>
+               <label><nlsid>MSG_OBJECT_TYPE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_creation_date</attribute>
+               <label><nlsid>MSG_CREATION_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_modify_date</attribute>
+               <label><nlsid>MSG_MODIFIED_DATE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_modifier</attribute>
+               <label><nlsid>MSG_MODIFIER</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_access_date</attribute>
+               <label><nlsid>MSG_ACCESS_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_lock_owner</attribute>
+               <label><nlsid>MSG_LOCK_OWNER</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>events</attribute>
+               <label><nlsid>MSG_EVENTS</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>topic_status</attribute>
+               <label><nlsid>MSG_DISCUSSION</nlsid></label>
+               <visible>true</visible>
+            </column>
+         </columns>
+
+        <!-- Component level preferences -->
+        <preferences>
+
+          <!-- Not required for out-of-the-box configuration
+          <preference id="subscriber">
+             <label><nlsid>MSG_SUBSCRIBER_LABEL</nlsid></label>
+             <description><nlsid>MSG_SUBSCRIBER_DESC</nlsid></description>
+             <type>string</type>
+          </preference>
+          -->
+
+          <preference id="isolate">
+             <label><nlsid>PREF_LBL_ISOLATE</nlsid></label>
+             <description><nlsid>PREF_DESC_ISOLATE</nlsid></description>
+             <type>boolean</type>
+             <value>false</value>
+          </preference>
+
+        </preferences>
+
+         <dragdrop>
+             <sourceactions>
+             </sourceactions>
+             <targetactions>
+                <targetaction>com.documentum.web.formext.control.dragdrop.CopyToFolderTargetAction</targetaction>
+                <targetaction>com.documentum.web.formext.control.dragdrop.LinkToFolderTargetAction</targetaction>
+                <targetaction>com.documentum.web.formext.control.dragdrop.SubscribeAction</targetaction>
+             </targetactions>
+             <dataproviders>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.ObjectIdData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.ObjectIdDataProvider</provider>
+                </dataprovider>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.FileDescriptorData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.FileDescriptorDataProvider</provider>
+                </dataprovider>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.FileContentsData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.FileContentsDataProvider</provider>
+                </dataprovider>
+             </dataproviders>
+          </dragdrop>
+
+         <!-- Component specific Configuration -->
+         <helpcontextid>subscriptions_drilldown</helpcontextid>
+
+      </component>
+
+   </scope>
+</config>

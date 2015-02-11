@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+
+<HEAD>
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=iso-8859-1">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+
+	<META NAME="GENERATOR" Content="Visual Page 2.0 for Windows - Trial Version">
+	<TITLE>pxgen - Proxy Generator</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1><B><FONT SIZE="5" FACE="Arial">pxgen - Proxy Generator</FONT></B></H1>
+<P>Revision 1.1.0<B><FONT SIZE="5" FACE="Arial"><BR>
+</FONT></B>Date: April 20, 2000</P>
+<P><B><FONT SIZE="5" FACE="Arial"><BR>
+</FONT></B>This is a utility for the Envoy Server Registry Service. It generates the remote interface and remote
+implementation of a server's interface. For example, the Linguistics Subsystem has a public interface LingServer.
+This interface is implemented as a local server class LingServerLocal. In order to make this work as a remote server
+in the Envoy Server Registry Service, two types need to be generated:</P>
+
+<OL>
+	<LI>a Java interface LingServerXXXRemote that extends LingServer and a remote interface (e.g. java.rmi.remote)
+	<LI>a class LingServerXXXRMIImpl that extends a remote object (e.g. java.rmi.server.UnicasetRemoteObject) and implements
+	the LingServerXXXRemote and the Envoy Server Registry interface EvRemote.
+</OL>
+
+<P>The Proxy Generator generates the above two types automatically, given just the compiled binary file of the
+component interface (LingServer).</P>
+<P><FONT SIZE="2">&nbsp;</FONT></P>
+<P>
+<H2><B><FONT SIZE="4" FACE="Arial">New Feature</FONT></B></H2>
+
+<OL>
+	<LI><B>WebLogic support</B>.  When the -w switch is specified on the command line, pxgen will generate code that
+	subclass from WebLogic RMI classes.<B><FONT SIZE="4" FACE="Arial"></FONT></B>
+</OL>
+
+<P><FONT SIZE="4"></FONT></P>
+
+<P><B><FONT SIZE="4" FACE="Arial"></FONT></B></P>
+<H2><B><FONT SIZE="4" FACE="Arial">How to Run pxgen</FONT></B></H2>
+<P>pxgen is a Java application that is run from the command line as follows:</P>
+
+<BLOCKQUOTE>
+	<PRE>java -cp .;pxgen.jar com.globalsight.tools.pxgen.pxgen [-w] interface_name</PRE>
+</BLOCKQUOTE>
+
+<P>where</P>
+
+<BLOCKQUOTE>
+	<P><FONT FACE="Courier New">pxgen.jar</FONT> is the jar file that contains all the pxgen binaries.</P>
+
+	<P><FONT FACE="Courier New, Courier">-w</FONT> is the optional switch that makes pxgen generate code that implements
+	and subclasses WebLogic RMI classes.  If this switch is not specified, the code that is generated will subclass
+	JDK RMI classes.<FONT FACE="Courier New"></FONT></P>
+
+	<P><FONT FACE="Courier New">interface_name</FONT> is the fully qualified name of the interface to generate proxy
+	types for; <FONT FACE="Courier New">interface_name.class</FONT> must exist in the classpath.</P>
+</BLOCKQUOTE>
+
+<P>For example, for the LingServer interface, the command will be as follows (assuming pxgen.jar is in the default
+directory and <FONT FACE="Courier New">com.globalsight.ling.LingServer</FONT> is in the classpath):</P>
+
+<BLOCKQUOTE>
+	<PRE><FONT FACE="Courier New">java -cp .;pxgen.jar com.globalsight.tools.pxgen.pxgen com.globalsight.ling.LingServer</FONT></PRE>
+</BLOCKQUOTE>
+
+<P>This command generates two files in the directory where LingServer.class resides:</P>
+
+<BLOCKQUOTE>
+	<PRE><FONT FACE="Courier New">LingServerJDKRemote.java
+LingServerJDKRMIImpl.java</FONT></PRE>
+</BLOCKQUOTE>
+
+<P>The first one is the remote interface</P>
+
+<BLOCKQUOTE>
+	<PRE>public interface LingServerJDKRemote extends LingServer, java.rmi.Remote
+{
+}</PRE>
+</BLOCKQUOTE>
+
+<P>The second one is the implementation class for the remote interface</P>
+
+<BLOCKQUOTE>
+	<PRE>public class LingServerJDKRMIImpl extends java.rmi.server.UnicastRemoteObject
+    implements LingServerJDKRemote, EvRemote
+{
+    LingServerJDKRMIImpl(LingServer p_local) throws java.rmi.RemoteException
+    {
+        ...
+    }
+    ...
+}</PRE>
+</BLOCKQUOTE>
+
+<P>Note that the constructor generated for LingServerJDKRMIImpl takes a LingServer instance as input parameter.
+This is the local implementation of LingServer, i.e. LingServerLocal. The code that initializes the Linguistics
+Subsystem must first create an instance of LingServerLocal and then use it as an input parameter to instantiate
+LingServerJDKRMIImpl.</P>
+<P>The generated Java files need to be compiled before they can be used, just like any other Java files.</P>
+<P>&nbsp;</P>
+<H2><B><FONT SIZE="4" FACE="Arial">Where to Get pxgen</FONT></B></H2>
+<P>pxgen is checked into source control under tools/pxgen. Under that directory, the bin directory contains the
+latest pxgen.jar; the com directory tree contains the make file, manifest file and source code.</P>
+<P>&nbsp;</P>
+<H2><B><FONT SIZE="4" FACE="Arial">Limitations</FONT></B></H2>
+
+<OL>
+	<LI>pxgen generates remote implementation code in <FONT FACE="Courier New, Courier">*Impl.java</FONT>. Each method
+	in the class delegates to the local counterpart without doing any other processing. For example, if there is a
+	method called <FONT FACE="Courier New, Courier">createProject()</FONT> in the <FONT FACE="Courier New, Courier">LingServer</FONT>
+	interface, the code that is generated for this method in <FONT FACE="Courier New, Courier">LingServerJDKRMIImpl</FONT>
+	will look like:<BR>
+	<BR>
+	
+	<PRE><FONT FACE="Courier New, Courier">void createProject(int projectId)
+{
+    m_localReference.createProject(projectId);
+}</FONT></PRE>
+	<P>where <FONT FACE="Courier New, Courier">m_localReference</FONT> is the reference to an instance of a local class
+	that implements the <FONT FACE="Courier New, Courier">LingServer</FONT> interface.</P>
+	<P>If your implementation class needs to do more processing that this, then you <B>should not</B> use pxgen to
+	generate it for you.</P>
+	<P>
+	<LI>pxgen will generate the output files (i.e. LingServerJDKRemote.java and LingServerJDKRMIImpl.java above) regardless
+	of whether the files already exist in the destination directory or not. It will overwrite the existing files if
+	they are there.
+</OL>
+
+<P>
+<HR ALIGN="CENTER">
+</P>
+<H2>Document Change History</H2>
+<P>
+<TABLE BORDER="1" WIDTH="100%">
+	<TR>
+		<TD WIDTH="25%" VALIGN="TOP"><B>Author</B></TD>
+		<TD WIDTH="25%" VALIGN="TOP"><B>Date</B></TD>
+		<TD WIDTH="50%" VALIGN="TOP"><B>Description</B></TD>
+	</TR>
+	<TR>
+		<TD WIDTH="25%" VALIGN="TOP">Marvin Lau</TD>
+		<TD WIDTH="25%" VALIGN="TOP">03/28/2000</TD>
+		<TD WIDTH="50%" VALIGN="TOP">Initial version. Supports JDK RMI only.</TD>
+	</TR>
+	<TR>
+		<TD WIDTH="25%" VALIGN="TOP">Marvin Lau</TD>
+		<TD WIDTH="25%" VALIGN="TOP">04/20/2000</TD>
+		<TD WIDTH="50%" VALIGN="TOP">Added support for WebLogic RMI.</TD>
+	</TR>
+</TABLE>
+
+
+</BODY>
+
+</HTML>

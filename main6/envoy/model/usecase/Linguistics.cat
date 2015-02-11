@@ -1,0 +1,23 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Linguistics"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"388EBBEF024D"
+    documentation 	"This package contains component level use cases for the Linguistics subsystem."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list)
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Linguistics"
+	    quid       	"388EBC2C01DC"
+	    title      	"Linguistics"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list))))

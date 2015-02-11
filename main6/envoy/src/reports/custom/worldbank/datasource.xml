@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<registry>
+<datasource name="eservices_db" type="jdbc">
+<ds_jdbc url="jdbc:oracle:thin:@elrond:1521:gsor" driver="oracle.jdbc.driver.OracleDriver" requireLogin="true" user="eservices" password="password">
+<description>E-Services Oracle database connection.</description>
+</ds_jdbc>
+</datasource>
+</registry>

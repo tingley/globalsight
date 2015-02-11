@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.costing.IsoCurrency"
+        table="CURRENCY">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="40" column="NAME" type="string"
+            not-null="true" />
+
+        <property name="code" length="3" column="ISO_CURRENCY_CODE"
+            type="string" not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

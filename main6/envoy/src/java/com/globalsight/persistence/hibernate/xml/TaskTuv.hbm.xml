@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.tuv.TaskTuv"
+		table="TASK_TUV">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<many-to-one name="currentTuv" column="CURRENT_TUV_ID"
+			class="com.globalsight.everest.tuv.TuvImpl" not-null="true" />
+		
+		<many-to-one name="task" column="TASK_ID"
+			class="com.globalsight.everest.taskmanager.TaskImpl" not-null="true" />
+		
+		<property name="version" length="3" column="VERSION" type="int"
+			not-null="true" unique="false" />
+		
+		<many-to-one name="previousTuv" column="PREVIOUS_TUV_ID"
+			class="com.globalsight.everest.tuv.TuvImpl" not-null="true" />
+		
+		<property name="taskName" length="40" column="TASK_NAME"
+			type="string" not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

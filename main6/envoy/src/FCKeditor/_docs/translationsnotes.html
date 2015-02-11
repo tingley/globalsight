@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<HTML>
+	<HEAD>
+		<TITLE>FCKeditor - Notes for Translations</TITLE>
+		<META name="GENERATOR" content="Microsoft Visual Studio 7.0">
+	</HEAD>
+	<BODY>
+		<P>
+			<STRONG><FONT size="6">Notes for Translations<BR>
+				</FONT></STRONG><EM>(Revised:&nbsp;23rd July 2003)</EM></P>
+		<P>The languages files must be created inside the lang directory of the project. 
+			You can use the file <STRONG>en.js</STRONG> as the base file for your 
+			translations. The file names respect the <STRONG>RFC 1766</STRONG> standards 
+			(but in lowercase). So, for example, a file for the <STRONG>Portuguese language</STRONG>
+			should be called “<STRONG>pt.js</STRONG>”.</P>
+		<P>Translation could also be localized for a specific country. In this case, for 
+			example, a Brazilian Portuguese translation file should be called <STRONG>pt-br.js</STRONG>.</P>
+		<P>The client’s language auto detection system uses the first available language 
+			that best fits the client settings. For example, if a client computer is set to 
+			Brazilian Portuguese and there is no pt-br.js file available, the pt.js is used 
+			if available. If not, the default language is used (from the fck_config.js 
+			file).</P>
+		<P>To test the translations you need to add a line in the fck_lang.js file like:
+			<BR>
+			<STRONG>AvailableLangs["pt"] = true ;</STRONG></P>
+		<P>An important think is to save the files in a <STRONG>UTF-8</STRONG> encoded 
+			format. In other case, some strange characters could appear instead of some 
+			special chars, like accented letters, symbols, etc.
+		</P>
+		<P>All translated files must be sent by e-mail to <A href="mailto:fckeditor@fredck.com">
+				fckeditor@fredck.com</A>.
+		</P>
+	</BODY>
+</HTML>

@@ -1,0 +1,98 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object SubSystem "Envoy Server"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3890C34D0021"
+    documentation 	"Handles business rules."
+    visible_modules 	(list dependency_list
+	(object Module_Visibility_Relationship
+	    quid       	"38BA526402A6"
+	    supplier   	"Component View::Linguistics"
+	    quidu      	"388EB6D70049"
+	    supplier_is_subsystem 	TRUE)
+	(object Module_Visibility_Relationship
+	    quid       	"38BA546E00EE"
+	    supplier   	"Component View::User Management"
+	    quidu      	"38BA54500109"
+	    supplier_is_subsystem 	TRUE)
+	(object Module_Visibility_Relationship
+	    quid       	"38BA5471000C"
+	    supplier   	"Component View::Workflow"
+	    quidu      	"38BA54570221"
+	    supplier_is_subsystem 	TRUE))
+    physical_models 	(list unit_reference_list
+	(object module "Job Handler" "NotAModuleType" "NotAModulePart"
+	    quid       	"38BA509F0010"
+	    stereotype 	"")
+	(object module "Request Processor" "NotAModuleType" "NotAModulePart"
+	    quid       	"38BA5162004C"
+	    stereotype 	""))
+    physical_presentations 	(list unit_reference_list
+	(object Module_Diagram "Envoy Server"
+	    quid       	"38BA50700379"
+	    title      	"Envoy Server"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ModView "Component View::Envoy Server::Job Handler" "NotAModuleType" "NotAModulePart" @1
+		    location   	(1840, 800)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(1801, 775)
+			fill_color 	13434879
+			anchor_loc 	3
+			nlines     	2
+			max_width  	145
+			label      	"Job Handler")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA509F0010"
+		    width      	260
+		    autoResize 	TRUE
+		    width      	260
+		    height     	162)
+		(object ModView "Component View::Envoy Server::Request Processor" "NotAModuleType" "NotAModulePart" @2
+		    location   	(1264, 800)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1212, 775)
+			fill_color 	13434879
+			anchor_loc 	3
+			nlines     	2
+			max_width  	192
+			label      	"Request Processor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA5162004C"
+		    width      	346
+		    autoResize 	TRUE
+		    width      	346
+		    height     	162)))))

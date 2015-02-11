@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Job" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+  <topic name="Auto-Import Configuration" url="Appendix/Auto-Import_Configuration.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Contact Information" url="Contact_Information.htm" />
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Edit Final Cost" url="My_Jobs/Edit_Final_Cost.htm" />
+  <topic name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
+  <topic name="Edit Planned Completion Date" url="My_Jobs/Edit_Planned_Completion_Date.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Enter Job Name (Import p.3)" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Flat Surcharge" url="Glossary/Flat_Surcharge.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Job" url="Glossary/Job.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+  <topic name="Job Information" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Job_Information.htm" />
+  <topic name="Job Timers" url="Setup/Localization_Profiles/Job_Timers.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="No Match Repetitions" url="Glossary/No_Match_Repetitions.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview_LP" url="Overview_LP.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+  <topic name="Project" url="Glossary/Project.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+  <topic name="Segment Comments" url="My_Jobs/Customer_Jobs/Segment_Comments.htm" />
+  <topic name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Surcharges" url="My_Jobs/Surcharges.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+  <topic name="View File List" url="My_Jobs/Customer_Jobs/View_File_List.htm" />
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+</key>
+<key name="Job Comments" >
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+</key>
+<key name="Job Costing" >
+  <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+</key>
+<key name="Job Details" >
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Job Details Report" >
+  <topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+</key>
+<key name="Job Information" >
+  <topic name="Job Information" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Job_Information.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+</key>
+<key name="Job meets" >
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="Job Name" >
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Auto-Import Configuration" url="Appendix/Auto-Import_Configuration.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Basic Information" url="Customer_Upload/Basic_Information.htm" />
+  <topic name="Enter Job Name (Import p.3)" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Job" url="Glossary/Job.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+</key>
+<key name="Job name contains" >
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+</key>
+<key name="Job Timers" >
+  <topic name="Job Timers" url="Setup/Localization_Profiles/Job_Timers.htm" />
+</key>
+<key name="Jobs belonging" >
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+</key>
+<key name="Jobs containing exported" >
+  <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+</key>
+<key name="Jobs containing workflows" >
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+</key>
+<key name="Jobs created" >
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+</key>
+<key name="Jobs link" >
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+</key>
+<key name="Jobs listing" >
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Jobs matching" >
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+</key>
+<key name="Jobs ready" >
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+</key>
+<key name="Large RTF Files" >
+  <topic name="Tips For Working With Large RTF Files" url="Appendix/Working_Offline/RTF_(List_View)/Tips_For_Working_With_Large_RTF_Files.htm" />
+</key>
+
+</indexdata>

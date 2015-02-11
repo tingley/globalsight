@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.tuv.TuImpl"
+		table="TRANSLATION_UNIT">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="order" column="ORDER_NUM" type="long"
+			not-null="true" unique="false" />
+			
+		<property name="tmId" column="TM_ID" type="long"
+			not-null="false" unique="false" />
+			
+		<property name="dataType" length="20" column="DATA_TYPE"
+			type="string" not-null="false" unique="false" />
+			
+		<property name="tuType" length="50" column="TU_TYPE"
+			type="string" not-null="false" unique="false" />
+			
+		<property name="localizableType" length="1"
+			column="LOCALIZE_TYPE" type="char" not-null="true" unique="false" />
+			
+		<many-to-one name="leverageGroup" column="LEVERAGE_GROUP_ID"
+			class="com.globalsight.everest.tuv.LeverageGroupImpl"
+			not-null="true" />
+			
+		<property name="pid" column="PID" type="long" not-null="true"
+			unique="false" />
+			
+		<property name="sourceTmName" length="60"
+			column="SOURCE_TM_NAME" type="string" not-null="false"
+			unique="false" />
+            
+        <map name="tuvAsSet" inverse="true" cascade="save-update">
+            <key column="TU_ID" />
+            <index column="LOCALE_ID" type="long"/>
+            <one-to-many class="com.globalsight.everest.tuv.TuvImpl" />
+        </map>
+        
+    <property name="xliffTarget" length="2000"
+            column="XLIFF_TARGET_SEGMENT" type="string" not-null="false" />
+
+    <property name="xliffTargetLanguage" length="2000"
+            column="XLIFF_TARGET_LANGUAGE" type="string" not-null="false" />
+     
+    <property name="xliffTranslationType" length="60"
+            column="XLIFF_TRANSLATION_TYPE" type="string" not-null="false" />
+	<property name="xliffLocked" column="XLIFF_LOCKED" type="yes_no"
+		not-null="false" />
+	<property name="iwsScore" column="IWS_SCORE" type="string"
+		not-null="false" />
+		
+	<set name="removedTags" inverse="true" cascade="all">
+       <key column="TU_ID"/>
+       <one-to-many  class="com.globalsight.everest.tuv.RemovedTag"/>
+    </set>
+
+	<one-to-one name="prefixTag"  property-ref="tu"
+		class="com.globalsight.everest.tuv.RemovedPrefixTag" cascade="all" />
+		
+     <one-to-one name="suffixTag" property-ref="tu"
+        class="com.globalsight.everest.tuv.RemovedSuffixTag" cascade="all" />
+        
+    <property name="generateFrom" column="GENERATE_FROM" type="string"
+        not-null="false" />
+        
+    <property name="sourceContent" column="SOURCE_CONTENT" type="string"
+        not-null="false" />
+	</class>
+</hibernate-mapping>

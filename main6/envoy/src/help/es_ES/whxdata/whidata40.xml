@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="navegar más rápidamente" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="nbsp" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="necesaria" >
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="necesario" >
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="necesario introducir ángulos" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="necesidad" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="necesitan traducirse" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="necesitará crearlo" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="Necesito" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="negrita" >
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="New" >
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+</key>
+<key name="ni tampoco" >
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="ni tampoco crear" >
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="ninguno" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="nivel" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="nivel intermedio" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="NO" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="No seleccionar" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="nodo" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="Nodo condicional" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="nodo inicial" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="Nodo inicial/final" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="nodo predeterminado" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="nodos" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="nodos condicionales permiten crear varias rutas" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+
+</indexdata>

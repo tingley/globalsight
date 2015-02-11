@@ -1,0 +1,11 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.everest.vendormanagement.CommunicationInfo" table="VENDOR_COMMUNICATION">
+		<composite-id >
+			<key-property name="type_char" column="COMMUNICATION_TYPE" type="character"/>
+			<key-many-to-one name="vendor" column="VENDOR_ID" class="com.globalsight.everest.vendormanagement.Vendor"/>
+		</composite-id>
+		<property name="value" length="200" column="COMMUNICATION_VALUE" type="string" not-null="false" unique="false"/>
+	</class>	
+</hibernate-mapping>

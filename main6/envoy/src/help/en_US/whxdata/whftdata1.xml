@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<ftstdata>
+<topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+<topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+<topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+<topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+<topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+<topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+<topic name="Create/Edit Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
+<topic name="Export Locations Main Screen" url="Data_Sources/Export_Locations/Export_Locations_Main_Screen.htm" />
+<topic name="Create File Extension" url="Data_Sources/File_Extensions/Create_File_Extension.htm" />
+<topic name="File Extensions Main Screen" url="Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm" />
+<topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+<topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+<topic name="Enter Job Name (Import p.3)" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+<topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+<topic name="Map Files" url="Data_Sources/Import/Map_Files.htm" />
+<topic name="Select Files To Import" url="Data_Sources/Import/Select_Files_To_Import.htm" />
+<topic name="Create DTD" url="Data_Sources/SGML_Rules/Create_DTD.htm" />
+<topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+<topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+<topic name="Upload DTD" url="Data_Sources/SGML_Rules/Upload_DTD.htm" />
+<topic name="New TeamSite Branch Definition" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
+<topic name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
+<topic name="TeamSite Source Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Source_Branches.htm" />
+<topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+<topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+<topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+<topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+<topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+<topic name="XML Rules Main Screen" url="Data_Sources/XML_Rules/XML_Rules_Main_Screen.htm" />
+<topic name="Detailed Word Counts" url="Detailed_Word_Counts.htm" />
+<topic name="Email Notification" url="Email_Notification.htm" />
+<topic name="Activity" url="Glossary/Activity.htm" />
+<topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+<topic name="Activity Type" url="Glossary/Activity_Type.htm" />
+<topic name="Default Path" url="Glossary/Default_Path.htm" />
+<topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+<topic name="Extracted File" url="Glossary/Extracted_File.htm" />
+<topic name="Fixed Rates" url="Glossary/Fixed_Rates.htm" />
+<topic name="Flat Surcharge" url="Glossary/Flat_Surcharge.htm" />
+<topic name="Generic Snippet" url="Glossary/Generic_Snippet.htm" />
+<topic name="GS-tagged Source Page" url="Glossary/GS-tagged_Source_Page.htm" />
+<topic name="GS Tag" url="Glossary/GS_Tag.htm" />
+<topic name="Hourly Rates" url="Glossary/Hourly_Rates.htm" />
+<topic name="Job" url="Glossary/Job.htm" />
+<topic name="Locale" url="Glossary/Locale.htm" />
+<topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+<topic name="Locale Pair" url="Glossary/Locale_Pair.htm" />
+<topic name="Localizables" url="Glossary/Localizables.htm" />
+<topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+<topic name="No Match Repetitions" url="Glossary/No_Match_Repetitions.htm" />
+<topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+<topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+<topic name="Page TM" url="Glossary/Page_TM.htm" />
+<topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+<topic name="Placeholder Tags" url="Glossary/Placeholder_Tags.htm" />
+<topic name="Primary Target File" url="Glossary/Primary_Target_File.htm" />
+<topic name="Project" url="Glossary/Project.htm" />
+<topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+<topic name="Segment" url="Glossary/Segment.htm" />
+<topic name="Snippet" url="Glossary/Snippet.htm" />
+<topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+<topic name="Snippet Library" url="Glossary/Snippet_Library.htm" />
+<topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
+<topic name="Termbase" url="Glossary/Termbase.htm" />
+<topic name="TM" url="Glossary/TM.htm" />
+<topic name="TM Matches" url="Glossary/TM_Matches.htm" />
+<topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+<topic name="Translation Unit" url="Glossary/Translation_Unit.htm" />
+<topic name="Translation Unit Variant" url="Glossary/Translation_Unit_Variant.htm" />
+<topic name="Type" url="Glossary/Type.htm" />
+<topic name="Unextracted File" url="Glossary/Unextracted_File.htm" />
+<topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+<topic name="Workflow" url="Glossary/Workflow.htm" />
+<topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+<topic name="Home" url="Home.htm" />
+<topic name="Add Comments1" url="My_Activities/Add_Comments1.htm" />
+<topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+<topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+<topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+<topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+<topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+<topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+<topic name="Detailed Word Counts" url="My_Activities/Detailed_Word_Counts.htm" />
+<topic name="Detailed Word Counts2" url="My_Activities/Detailed_Word_Counts2.htm" />
+<topic name="Download" url="My_Activities/Download.htm" />
+<topic name="Download in Progress" url="My_Activities/Download_in_Progress.htm" />
+<topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+<topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+<topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+<topic name="List Comments" url="My_Activities/List_Comments.htm" />
+<topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+<topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+<topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+<topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+<topic name="My Activities" url="My_Activities/My_Activities.htm" />
+<topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+<topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+<topic name="Review Window" url="My_Activities/Review_Window.htm" />
+<topic name="Segment Comments" url="My_Activities/Segment_Comments.htm" />
+<topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+<topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+<topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+<topic name="Select a Termbase" url="My_Activities/Select_a_Termbase.htm" />
+<topic name="Select Snippet" url="My_Activities/Select_Snippet.htm" />
+<topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+<topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+<topic name="Source Word Count" url="My_Activities/Source_Word_Count.htm" />
+<topic name="Support Files" url="My_Activities/Support_Files.htm" />
+<topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+<topic name="Upload" url="My_Activities/Upload.htm" />
+<topic name="Upload Error" url="My_Activities/Upload_Error.htm" />
+<topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
+<topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+<topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+<topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+<topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+<topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+<topic name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+<topic name="Download Progress" url="My_Jobs/Customer_Jobs/Download_Progress.htm" />
+<topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+<topic name="Segment Comments" url="My_Jobs/Customer_Jobs/Segment_Comments.htm" />
+
+</ftstdata>  

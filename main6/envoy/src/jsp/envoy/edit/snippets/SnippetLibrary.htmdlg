@@ -1,0 +1,924 @@
+<html xmlns:b3>            <!-- -*- Mode: html-helper -*- -->
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+<meta name="[B3 HTML Studio]" content="4.0.468.6">
+
+<title>Snippet and Content Editor</title>
+
+<style>
+.GSposition,
+.GSadded,
+.GSaddedGeneric,
+.GSdelete,
+.GSdeleted    {
+                behavior: url("/globalsight/envoy/edit/snippets/gs-tag.htc");
+                display: block;
+                cursor: hand; 
+              }
+  
+.GSadded  { border: 1px solid blue;  padding: 2px 10px 2px 2px; }
+.GSdelete { border: 1px dotted blue; padding: 2px 10px 2px 2px; }
+.feedback {
+            font-weight: normal;
+            font-style: italic;
+            font-size: smaller;
+            color: gray;
+            padding-left: 10px;
+          }
+.link     {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #0C1476;
+            text-decoration: underline;
+            cursor: hand;
+          }
+</style>
+
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT src="/globalsight/includes/xmlextras.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/edit/snippets/protocol.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/terminology/viewer/error.js"></SCRIPT>
+<script>
+  var g_initialized = false;
+
+  // Global Dialog Arguments
+  var g_args;
+
+  var g_pageId;
+  var g_pageName;
+  var g_locale;
+  var g_displayLocale;
+
+  // Locale Manager, Administrator, or who else are you?
+  var g_role;
+
+  // global variable to keep the XMLHTTP objects alive during a request
+  var g_PageConnection = null;
+  var g_SnippetConnection = null;
+
+  // global variable to hold the Snippet XML and Page Xml from the server
+  var o_Snippets = null;
+  var o_Page = null;
+
+function helpSwitch()
+{
+   helpWindow = window.open('/globalsight/help/en_US/My_Activities/Snippet_and_Content_Editor.htm',
+      'helpWindow', 'resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
+   helpWindow.focus();
+}
+</script>
+
+<script for=idok event=oncyberdialogloaded>
+  g_args = FB3_GetArgument("args");
+
+  if (g_args)
+  {
+    g_pageId = g_args.pageId;
+    g_pageName = g_args.pageName;
+    g_locale = g_args.locale;
+    g_displayLocale = g_args.displayLocale;
+    g_role = g_args.role;
+
+    idPageName.value /*innerText*/ = g_pageName;
+    idPageName.readOnly = true;
+
+    idTitle.innerText = idTitle.innerText + " (" + g_locale + ")";
+
+    if (g_role == "admin")
+    {
+    }
+    else
+    {
+    }
+  }
+
+  init();
+</script>
+
+<script for=idok event=oncyberdialogvalidate>
+  // FB3_SetReturnValue(null);
+</script>
+
+<!--cyber-preload{{------------------------------------------------------------>
+<?import namespace="b3" implementation="SnippetEditor.htc" b3-preload="true" />
+<?import namespace="b3" implementation="SnippetSelect.htc" b3-preload="true" />
+<!--}}cyber-preload------------------------------------------------------------>
+
+<script>
+// Global key table for "find on page" feature (attached to body)
+function doKeydown() 
+{
+  if (event.keyCode == 70 && event.ctrlKey) // "^F"
+  {
+    idSearchString.focus();
+  }
+  if (event.keyCode == 114) // "F3"
+  {
+    searchAgain();
+  }
+  else if (event.keyCode == 27) // ESC
+  {
+    window.close();
+  }
+}
+</script>
+</head>
+
+<!--cyber-drag-and-drop{{-------------------------------------------------------
+<button id=newpopup 
+	onclick="window.event.srcElement.runModal(window.event.srcElement)"
+	style="behavior: url('SnippetLibrary.htc'); 
+		position: absolute; 
+		top: 10px;
+		left: 10px;">Snippet Editor</button>
+}}cyber-drag-and-drop---------------------------------------------------------->
+
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<link href="Cyber/B3/Dialogs/CyberDialogs.css" rel=stylesheet type="text/css"></link>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<body id="idBody" class=Page scroll=no b3defaultcontrolid="ok"
+  onkeydown="doKeydown()">
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogsHead.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<script>
+  // selected snippet position
+  var selectedPosition = null;
+  var allowedSnippetPos = "";
+  var allowedSnippetName = "";
+  var allowedSnippetVersion = 0;
+
+  var PREVIEW_MODE = 1;
+  var TEXT_MODE = 2;
+  var g_viewmode = PREVIEW_MODE;
+
+  // temporary JS representations of the snippet library
+  var g_snippets = new Array();
+  var g_emptySnippet = new Array();
+  var g_loadingSnippet = new Array();
+
+  function init()
+  {
+    idBody.style.cursor = "wait";
+
+    initPage("<span class='feedback'>Loading...</span>");
+
+    g_initialized = true;
+
+    // now trigger loading of the source page 
+    loadPage(g_pageId, g_locale, g_role, g_viewmode);
+
+    defaultMessage();
+  }
+
+  function defaultMessage()
+  {
+    idLabel.innerHTML =
+      "<p>Select a + icon or text highlighted in red to manage snippets.</p>" +
+      "<p>Select a - icon or text highlighted in blue to manipulate content.</p>";
+  }
+  
+  function initPage(p_html)
+  {
+    idPagePreview.innerHTML = p_html;
+    disableLinks();
+    selectedPosition = null;
+    defaultMessage();
+  }
+
+  function cancelNavigation()
+  {
+    window.event.returnValue = false;
+    window.event.cancelBubble = true;
+    return false;
+  }
+
+  function disableLinks()
+  {
+    // disable links that are not editor links
+    var links = idPagePreview.getElementsByTagName("A");
+    if (links != null)
+    {
+        for (var i = 0; i < links.length; ++i)
+        {
+            var link = links(i);
+
+            link.onclick = cancelNavigation;
+            link.style.cursor = "default";
+            link.style.textDecoration = "underline";
+        }
+    }
+
+    var links = idPagePreview.getElementsByTagName("A_DISABLED");
+    if (links != null)
+    {
+        for (var i = 0; i < links.length; ++i)
+        {
+            var link = links(i);
+            link.runtimeStyle.textDecoration = "underline";
+        }
+    }
+  }
+  
+  function encodeEntities(s)
+  {
+    // encodes &, < and >.
+    s = s.replace(/&/g, "&amp;");
+    s = s.replace(/</g, "&lt;");
+    s = s.replace(/>/g, "&gt;");
+    return s;
+  }
+
+  function getSnippet(p_name, p_locale, p_id)
+  {
+    idBody.style.cursor = "wait";
+
+    g_SnippetConnection = getSnippetConnection(false);
+
+    var request = makeSnippetRequest("getsnippet", p_name, p_locale, p_id);
+    g_SnippetConnection.send(request);
+
+    idBody.style.cursor = "auto";
+    var dom = g_SnippetConnection.responseXML;
+
+    if (g_SnippetConnection.status != 200)
+    {
+      // debug
+      // SnippetError("xml = " + g_SnippetConnection.responseText);
+
+      SnippetError("Server error " + g_SnippetConnection.status +
+        ": " + g_SnippetConnection.statusText, false);
+
+      return null;
+    }
+
+    if (dom.parseError.errorCode != 0)
+    {
+      // debug
+      // SnippetError("xml = " + g_SnippetConnection.responseText, false);
+
+      SnippetError("Error in server response: = " + dom.parseError.reason,
+        false);
+
+      return null;
+    }
+
+    var node = dom.documentElement;
+    if (node.nodeName == "exception")
+    {
+      SnippetError(node.text, false);
+      return;
+    }
+
+    var result = new Snippet(
+               node.selectSingleNode("name").text,
+               node.selectSingleNode("description").text,
+               node.selectSingleNode("locale").text,
+               node.selectSingleNode("displayLocale").text,
+               node.selectSingleNode("id").text,
+               node.selectSingleNode("value").text);
+
+    return result;
+  }
+
+  function sendPageRequest(p_command, arg1, arg2, arg3, arg4, arg5,
+    arg6, arg7, arg8, arg9)
+  {
+    idBody.style.cursor = "wait";
+
+    g_PageConnection = getSnippetConnection(true);
+    g_PageConnection.onreadystatechange = SetPage;
+
+    var request = makeSnippetRequest(p_command, arg1, arg2, arg3, arg4, arg5,
+      arg6, arg7, arg8, arg9);
+    g_PageConnection.send(request);
+  }
+
+  function doModifySnippet(p_snippet)
+  {
+    sendPageRequest("modifysnippetgetpage",
+      g_pageId, g_locale, g_role, g_viewmode, 
+      p_snippet.name, p_snippet.desc, /*p_snippet.locale,*/
+      p_snippet.id, p_snippet.value);
+  }
+
+  function doAddSnippet(p_pageId, p_locale, p_role, p_viewmode,
+    p_pos, p_name, p_snippetLocale, p_id)
+  {
+    sendPageRequest("addsnippetgetpage", p_pageId, p_locale,
+      p_role, p_viewmode, p_pos, p_name, p_snippetLocale, p_id);
+  }
+
+  function doRemoveAddedSnippet(p_pageId, p_locale, p_role, p_viewmode, p_pos)
+  {
+    sendPageRequest("removesnippetgetpage",
+      p_pageId, p_locale, p_role, p_viewmode, p_pos);
+  }
+
+  function doDeleteContent(p_pageId, p_locale, p_role, p_viewmode, p_pos)
+  {
+    sendPageRequest("deletecontentgetpage",
+      p_pageId, p_locale, p_role, p_viewmode, p_pos);
+  }
+
+  function doUndeleteContent(p_pageId, p_locale, p_role, p_viewmode, p_pos)
+  {
+    sendPageRequest("undeletecontentgetpage",
+      p_pageId, p_locale, p_role, p_viewmode, p_pos);
+  }
+
+  function loadPage(p_pageId, p_locale, p_role, p_viewmode)
+  {
+    sendPageRequest("getpage", p_pageId, p_locale, p_role, p_viewmode);
+  }
+
+  function SetPage()
+  {
+    if (!g_initialized) return;
+
+    if (g_PageConnection.readyState == 4)
+    {
+      o_Page = g_PageConnection.responseXML;
+
+      if (g_PageConnection.status != 200)
+      {
+        // debug
+        // SnippetError("xml = " + g_PageConnection.responseText);
+
+        SnippetError("Server error " + g_PageConnection.status +
+          ": " + g_PageConnection.statusText, false);
+
+        // initPage("<span class='feedback'>No Page...</span>");
+        idBody.style.cursor = "auto";
+        return;
+      }
+
+      if (o_Page.parseError.errorCode != 0)
+      {
+        // debug
+        // SnippetError("xml = " + g_PageConnection.responseText, false);
+
+        SnippetError("Error in server response: " +
+          o_Page.parseError.reason, false);
+
+        idBody.style.cursor = "auto";
+        return;
+      }
+
+      o_Page = o_Page.documentElement;
+
+      if (o_Page.nodeName == "exception")
+      {
+        SnippetError(o_Page.text, false);
+        // initPage("<span class='feedback'>No Page...</span>");
+        idBody.style.cursor = "auto";
+        return;
+      }
+
+      try
+      {
+        var page = o_Page.selectSingleNode("//page");
+        if (page == null)
+        {
+          initPage("<span class='feedback'>No Page...</span>");
+        }
+        else
+        {
+          initPage(page.text);
+        }
+      }
+      catch (ex)
+      {
+        SnippetError("Cannot display page: " + ex + ".\n" +
+          ex.description, false);
+        return;
+      }
+
+    idBody.style.cursor = "auto";
+    }
+  }
+
+  function SnippetError(strMessage, bFatal)
+  {
+    ShowError(strMessage);
+
+    if (bFatal)
+    {
+        // reset all elements
+        initPage("<span class='feedback'>No Page...</span>");
+
+        alert("Please close this window and try again.");
+    }
+  }
+
+  function setViewMode(elem)
+  {
+    if (elem.options[elem.selectedIndex].value == "Preview")
+    {
+      g_viewmode = PREVIEW_MODE;
+      loadPage(g_pageId, g_locale, g_role, g_viewmode);
+    }
+    else
+    {
+      g_viewmode = TEXT_MODE;
+      loadPage(g_pageId, g_locale, g_role, g_viewmode);
+    }
+  }
+
+  //
+  // Actions
+  //
+  function addSnippet()
+  {
+    if (selectedPosition == null)
+    {
+      return;
+    }
+
+    var args = new Snippet(allowedSnippetName, "", g_locale,
+      g_displayLocale, 0, "");
+    idSnippetSelectDialog.args = args;
+    var result = idSnippetSelectDialog.runModal(window.event.srcElement);
+    if (result)
+    {
+      var snippet = idSnippetSelectDialog.getArgument("args");
+      if (snippet == null)
+      {
+        return;
+      }
+
+      doAddSnippet(g_pageId, g_locale, g_role, g_viewmode,
+        allowedSnippetPos, snippet.name, snippet.locale, snippet.id);
+    }
+  }
+
+  function removeAddedSnippet()
+  {
+    if (selectedPosition == null)
+    {
+      return;
+    }
+
+    unHighlightElement(selectedPosition);
+
+    if (allowedSnippetPos != "")
+    {
+      doRemoveAddedSnippet(g_pageId, g_locale, g_role, g_viewmode,
+        allowedSnippetPos);
+    }
+
+    defaultMessage();
+  }
+
+  function editSnippet()
+  {
+    if (selectedPosition == null)
+    {
+      return;
+    }
+
+    if (allowedSnippetVersion == "0")
+    {
+      alert("A generic snippet cannot be modified.");
+      return;
+    }
+
+    // Retrieve the snippet from the server, pass it to the editor,
+    // then save it back and update the page.
+    var snippet = getSnippet(allowedSnippetName, g_locale,
+      allowedSnippetVersion);
+    if (snippet)
+    {
+      idSnippetEditorDialog.myarg = snippet;
+      var result = idSnippetEditorDialog.runModal(window.event.srcElement);
+      if (result)
+      {
+        var snippet = idSnippetEditorDialog.getArgument("myarg");
+        doModifySnippet(snippet);
+      }
+    }
+  }
+
+  function deleteContent()
+  {
+    if (selectedPosition == null)
+    {
+      return;
+    }
+
+    // unHighlightElement(selectedPosition);
+    // selectedPosition = null;
+    if (allowedSnippetPos != "")
+    {
+      doDeleteContent(g_pageId, g_locale, g_role, g_viewmode,
+        allowedSnippetPos);
+    }
+  }
+
+  function undeleteContent()
+  {
+    if (selectedPosition == null)
+    {
+      alert("Please select the page content to un-delete.");
+      return;
+    }
+
+    // unHighlightElement(selectedPosition);
+
+    if (allowedSnippetPos != "")
+    {
+      doUndeleteContent(g_pageId, g_locale, g_role, g_viewmode,
+        allowedSnippetPos);
+    }
+  }
+
+  //
+  // Position Selections
+  //
+  function selectPosition(element)
+  {
+    if (selectedPosition != null)
+    {
+      unHighlightElement(selectedPosition);
+    }
+
+    selectedPosition = element;
+    allowedSnippetPos = element.GSpos;
+    allowedSnippetName = element.GSname;
+    allowedSnippetVersion = element.GSversion;
+
+    highlightElement(selectedPosition);
+
+    idLabel.innerHTML =
+      "<p><span class='link' onclick='addSnippet(); return false;'>Add</span> snippet at the selected position.</p>" 
+  }
+
+  function highlightElement(element)
+  {
+    element.tempBorderWidth = element.runtimeStyle.borderWidth;
+    element.tempBorderStyle = element.runtimeStyle.borderStyle;
+    element.tempBorderColor = element.runtimeStyle.borderColor;
+    element.style.borderWidth = '2px';
+    element.style.borderStyle = 'solid';
+    element.style.borderColor = 'red';
+  }
+
+  function unHighlightElement(element)
+  {
+    if (element != null)
+    {
+      element.style.borderWidth = element.tempBorderWidth;
+      element.style.borderStyle = element.tempBorderStyle;
+      element.style.borderColor = element.tempBorderColor;
+    }
+  }
+
+  function selectAddedSnippet(element)
+  {
+    if (selectedPosition != null)
+    {
+      unHighlightElement(selectedPosition);
+    }
+
+    selectedPosition = element;
+    allowedSnippetPos = element.GSpos;
+    allowedSnippetName = element.GSname;
+    allowedSnippetVersion = element.GSversion;
+
+    highlightElement(selectedPosition);
+
+    if (allowedSnippetName != null && allowedSnippetName != "")
+    {
+      // added snippet that can be edited
+      idLabel.innerHTML =
+        "<p><span class='link' onclick='editSnippet(); return false;'>Edit</span> or <span class='link' onclick='removeAddedSnippet(); return false;'>remove</span> the selected snippet.</p>";
+    }
+    else
+    {
+      // added snippet that has been deleted
+      idLabel.innerHTML =
+        "<p><span class='link' onclick='removeAddedSnippet(); return false;'>Remove</span> the selected snippet.</p>";
+    }
+  }
+
+  function selectDeletableContent(element)
+  {
+    if (selectedPosition != null)
+    {
+      unHighlightElement(selectedPosition);
+    }
+
+    selectedPosition = element;
+    allowedSnippetPos = element.GSpos;
+
+    highlightElement(selectedPosition);
+
+    idLabel.innerHTML =
+      "<p><span class='link' onclick='deleteContent(); return false;'>Delete</span> the selected content.</p>" 
+  }
+
+  function selectDeletedContent(element)
+  {
+    if (selectedPosition != null)
+    {
+      unHighlightElement(selectedPosition);
+    }
+
+    selectedPosition = element;
+    allowedSnippetPos = element.GSpos;
+
+    highlightElement(selectedPosition);
+
+    idLabel.innerHTML =
+      "<p><span class='link' onclick='undeleteContent(); return false;'>Un-delete</span> the selected content.</p>" 
+  }
+</script>
+<script>
+var n_index = 0;
+var oldSearch = "";
+
+function resetSearch()
+{
+  // onchange seems to get fired too often, so be careful
+  if (idSearchString.value != oldSearch)
+  {
+    n_index = 0;
+  }
+
+  oldSearch = idSearchString.value;
+}
+
+function searchAgain()
+{
+  if (oldSearch == "" || idSearchString.value == "")
+  {
+    idSearchString.focus();
+  }
+  else
+  {
+    findInPage(idSearchString.value);
+  }
+}
+
+function maybeSearch()
+{
+  if (event.keyCode == 13)
+  {
+    findInPage(idSearchString.value);
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+function findInPage(str)
+{
+  var txt, page, i, found;
+
+  if (str == "")
+  {
+    return false;
+  }
+
+  txt = document.body.createTextRange();
+  txt.moveToElementText(idPagePreview);
+  for (i = 0; i <= n_index && (found = txt.findText(str)) != false; i++)
+  {
+    txt.moveStart("character", 1);
+    txt.moveEnd("textedit");
+  }
+  if (found)
+  {
+    txt.moveStart("character", -1);
+    txt.findText(str);
+    txt.select();
+    txt.scrollIntoView();
+    n_index++;
+  }
+  else
+  {
+    if (n_index > 0)
+    {
+      n_index = 0;
+      findInPage(str);
+    }
+    else
+    {
+      alert("`" + str + "' was not found on this page.");
+    }
+  }
+  // search.searchString.focus();
+
+  return false;
+}
+</script>
+
+<div id=div_26
+	style="font-weight: bold ;
+		font-size: 16px ;
+		z-index: 30 ;
+		left: 20px ;
+		width: 500px ;
+		position: absolute ;
+		top: 10px ;
+		b3-right: 462 ;
+		b3-bottom: 574 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left top ;
+		b3-ui-type: label" >
+
+<p id="idTitle">Snippet and Content Editor</p>
+</div>
+
+<input id=idok
+	style="z-index: 2 ;
+		left: 606px ;
+		width: 65px ;
+		position: absolute ;
+		top: 546px ;
+		text-align: center ;
+		b3-right: 17 ;
+		b3-bottom: 29 ;
+		b3-tooltip: 'OK Button' ;
+		b3-anchored-edges: right bottom"
+	tabIndex=13
+	type=button
+	value=Done
+        onclick="window.close()">
+
+<div id=div_6
+	style="z-index: 22 ;
+		left: 20px ;
+		width: 100px ;
+		position: absolute ;
+		top: 50px ;
+		height: 20px ;
+		b3-right: 572 ;
+		b3-bottom: 533 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left top ;
+		b3-ui-type: label" >
+
+<p>Page Name:</p>
+
+</div>
+
+<div id=div_10
+	style="z-index: 28 ;
+		left: 360px ;
+		width: 75px ;
+		position: absolute ;
+		top: 50px ;
+		b3-right: 253 ;
+		b3-bottom: 533 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left top ;
+		b3-ui-type: label" >
+
+<p>View Mode:</p>
+
+</div>
+
+<select id=select_34
+	style="z-index: 36 ;
+		left: 435px ;
+		width: 75px ;
+		position: absolute ;
+		top: 47px ;
+		b3-right: 178 ;
+		b3-bottom: 527 ;
+		b3-tooltip: Combo ;
+		b3-anchored-edges: left top"
+	tabIndex=8
+	onchange="setViewMode(this); return false;" >
+
+<option value="Preview" selected>Preview</option>
+<option value="Text">Text</option>
+</select>
+
+<div id=idLabel
+	style="left: 20px ;
+		width: 440px ;
+		position: absolute ;
+		top: 546px ;
+		height: 50px ;
+		b3-right: 232 ;
+		b3-bottom: 3 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: left bottom ;
+		b3-ui-type: label" >
+
+</div>
+
+<div id=idPagePreview
+	style="border-right: 2px inset ;
+		border-top: 2px inset ;
+		z-index: 1 ;
+		left: 20px ;
+		overflow: auto ;
+		border-left: 2px inset ;
+		width: 651px ;
+		border-bottom: 2px inset ;
+		position: absolute ;
+		top: 85px ;
+		height: 441px ;
+		background-color: white ;
+		b3-right: 17 ;
+		b3-bottom: 73 ;
+		b3-anchored-edges: left right top bottom"
+	b3ParseClass="b3Box" >
+
+<!-- Page Preview Area -->
+</div>
+
+<!-- Object for the Snippet Editor Dialog - invoked by script. -->
+<div id=idSnippetEditorDialog
+ style="behavior: url('SnippetEditor.htc'); display: none;" ></div>
+
+<!-- Object for the Snippet Select Dialog - invoked by script. -->
+<div id=idSnippetSelectDialog
+ style="behavior: url('SnippetSelect.htc'); display: none;" ></div>
+
+<div id=idHelp
+	style="left: 605px ;
+		width: 65px ;
+		position: absolute ;
+		top: 10px ;
+		text-align: right ;
+		b3-right: 18 ;
+		b3-bottom: 573 ;
+		b3-tooltip: 'Label' ;
+		b3-anchored-edges: right top ;
+		b3-ui-type: label" >
+
+<span class="link" onclick="helpSwitch(); return false;">Help</span>
+
+</div>
+
+<div id=lbFind
+	style="left: 525px ;
+		width: 35px ;
+		position: absolute ;
+		top: 50px ;
+		b3-right: 128 ;
+		b3-bottom: 533 ;
+		b3-tooltip: 'Label' ;
+                b3-anchored-edges: right top ;
+		b3-ui-type: label" >
+
+<p>Find:</p>
+
+</div>
+
+<INPUT id=idSearchString
+	style="left: 560px ;
+		width: 90px ;
+		position: absolute ;
+		top: 47px ;
+		b3-right: 38 ;
+		b3-bottom: 527 ;
+                b3-anchored-edges: right top ;
+		b3-tooltip: 'Text field'"
+        onchange="resetSearch()"
+        onkeypress="this.onchange(); maybeSearch();"
+        title="^F to activate, F3 to search..."
+        >
+
+<input id=idPageName
+	style="left: 105px ;
+		width: 240px ;
+		position: absolute ;
+		top: 47px ;
+		b3-right: 343 ;
+		b3-bottom: 527 ;
+		b3-tooltip: 'Text field'"
+	value=input>
+
+<img id=image_76
+	style="left: 670px ;
+		position: absolute ;
+		top: 50px ;
+		b3-right: 22 ;
+		b3-bottom: 533 ;
+		b3-anchored-edges: right top ;"
+        onclick="searchAgain()"
+	src="arrow.gif" altsrc="fwd.gif"
+        title="Search...">
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogs.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+
+</body>
+
+</html>

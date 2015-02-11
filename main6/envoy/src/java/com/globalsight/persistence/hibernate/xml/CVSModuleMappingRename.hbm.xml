@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.globalsight.everest.cvsconfig.modulemapping.ModuleMappingRename"
+        table="MODULE_RENAME">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="sourceName" length="40"
+            column="SOURCE_NAME" type="string" not-null="true" />
+
+        <property name="targetName" length="40"
+            column="TARGET_NAME" type="string" not-null="true" />
+
+		<many-to-one name="moduleMapping"
+			class="com.globalsight.everest.cvsconfig.modulemapping.ModuleMapping"
+			column="MODULE_MAPPING_ID"
+			not-null="true" />
+    </class>
+</hibernate-mapping>

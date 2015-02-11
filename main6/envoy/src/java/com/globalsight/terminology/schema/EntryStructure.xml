@@ -1,0 +1,276 @@
+<?xml version ="1.0" encoding="iso-8859-1" ?>
+<?xml-stylesheet type="text/xsl" href="xdr-schema.xsl" ?>
+
+<Schema name="TermEntry" 
+ xmlns="urn:schemas-microsoft-com:xml-data" 
+ xmlns:dt="urn:schemas-microsoft-com:datatypes"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+
+<description><DIV style="font-size:normal;">
+<P><B>Termbase Entry Format</B> - description of the internal format
+of entries in a Terminology Database.<BR/>
+</P>
+<P><B>Notes:</B> Formatted text fields could contain HTML markup,
+but that markup has to be escaped (i.e., all XML special characters 
+have to be replaced by character entities) so that the content looks 
+like a simple text string to the XML parser.</P>
+</DIV>
+</description>
+
+<!-- LANGUAGE AND TERM ATTRIBUTES --> <!-- 
+Additional language attributes that are not stored in the 
+database itself but may be added for easier display and 
+transformation routines. The database will ignore them 
+on input, but may generate them in output.
+
+· user-lang: the user's preferred language (aka UI language)
+· source-lang: the user's selected search language
+· target-lang: the user's selected target language 
+· search-term: the user's search term 
+
+· source: attribute that marks the search language
+· target: attribute that marks the target language
+· term:   attribute that marks the search term
+-->
+
+	<AttributeType name="user-lang"   dt:type="string" required="no"/>
+	<AttributeType name="source-lang" dt:type="string" required="no"/>
+	<AttributeType name="target-lang" dt:type="string" required="no"/>
+	<AttributeType name="search-term" dt:type="string" required="no"/>
+
+
+<!-- DEFAULT ATTRIBUTES --> <!-- 
+These attributes can in general be applied to all elements.
+Note: 'type' is defined here, but for many elements, it will 
+be overridden in favor of a restricted version that is specific
+to that element's requirements.
+-->
+
+<AttributeType name="id"       dt:type="string" />
+<AttributeType name="lang"     dt:type="string" />
+<AttributeType name="type"     dt:type="string" />
+<AttributeType name="datatype" dt:type="string" />
+
+<!-- LINK ATTRIBUTES --> <!-- 
+· CLink: link points to a concept 
+· TLink: link points to a term 
+· PLink: link points to a person
+· GLink: link points to a graphics file or other binary data object
+· ULink: universal link points to any external entity using URL syntax
+--> 
+
+<AttributeType name="Clink"   dt:type="string" required="no">
+  <description>Link to a concept (stored in the same database). 
+  The link target is an entrynumber.</description>
+</AttributeType>
+<AttributeType name="Glink"   dt:type="string" required="no">
+  <description>Link to a graphics file (not stored in the database).
+  The link target is a filename.</description>
+</AttributeType>
+<AttributeType name="Plink"   dt:type="string" required="no">
+  <description>Link to a user (stored in a user database). 
+  The link target is the user name (user id).</description>
+</AttributeType>
+<AttributeType name="Tlink"   dt:type="string" required="no">
+  <description>Link to a term (stored in the same database). 
+  The link target is "index:term".</description>
+</AttributeType>
+<AttributeType name="Ulink"   dt:type="string" required="no">
+  <description>Link to a URL. The link target is specified in 
+  standard URL syntax.</description>
+</AttributeType>
+
+<!-- ELEMENTS (IN HIERARCHICAL ORDER) -->
+
+<!-- start element -->
+<ElementType name="entry" content="eltOnly" order="seq" model="closed">
+  <description>The root node of a terminology entry. 
+  An entry must contain at least one concept.
+  </description>
+  <element type="conceptGrp" minOccurs="1" maxOccurs="*"/>
+</ElementType>
+
+
+<!-- concept container -->
+<ElementType name="conceptGrp" content="eltOnly" order="many" model="closed">
+  <description>The container for one concept. A concept has concept-level 
+  language-independent fields, and at least one language group which 
+  contains at least one term.
+  </description>
+  <attribute type="user-lang"/>
+  <attribute type="source-lang"/>
+  <attribute type="target-lang"/>
+  <element type="concept" minOccurs="1" maxOccurs="1"/>
+  <!-- contains concept-level info and languages -->
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="descrip" minOccurs="0" maxOccurs="*"/>
+  <element type="descripGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="source" minOccurs="0" maxOccurs="*"/>
+  <element type="sourceGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="note" minOccurs="0" maxOccurs="*"/>
+  <element type="noteGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="languageGrp" minOccurs="1" maxOccurs="*"/>
+</ElementType>
+
+
+<ElementType name="concept" content="textOnly" model="closed" dt:type="ui4">
+  <description>Primary element of a conceptGrp. 
+  Content is the entry number.</description>
+</ElementType>
+
+
+<ElementType name="date" content="textOnly" dt:type="dateTime" model="closed">
+  <description>A date in ISO-8601:1988 format.</description>
+</ElementType>
+
+
+<ElementType name="transacGrp" content="eltOnly" order="many" model="closed">
+  <description>Contains a transaction and date.</description>
+  <element type="transac" minOccurs="1" maxOccurs="1"/>
+  <element type="date" minOccurs="1" maxOccurs="1"/>
+</ElementType>
+
+<ElementType name="transac" content="textOnly" model="closed">
+  <description>Contains a transaction type and responsible person. 
+  The type can be one of origination, modification, review, approval. 
+  The content of the tag is the textual representation of the associated 
+  person link (Plink), i.e., the person's user id. 
+  </description> 
+  <AttributeType name="type" dt:type="enumeration" required="yes"
+                 dt:values="origination modification review approval">
+    <description>A transac tag can be of type origination 
+    (the associated field has been created), modification 
+    (the associated field has been modified), review (the 
+    terms or concept has been reviewed), and approval
+    (the term or concept has been approved).</description>
+  </AttributeType>
+  <attribute type="type" required="yes"/>
+  <attribute type="Plink"/>
+</ElementType>
+
+
+<ElementType name="descripGrp" content="eltOnly" order="many" model="closed">
+  <description>Contains a descriptive element, and optionally 
+  a source, transactional info, and a note.
+  </description>
+  <element type="descrip"    minOccurs="1" maxOccurs="1"/>
+  <element type="note"       minOccurs="0" maxOccurs="*"/>
+  <element type="noteGrp"    minOccurs="0" maxOccurs="*"/>
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="source"     minOccurs="0" maxOccurs="*"/>
+  <element type="sourceGrp"  minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<ElementType name="descrip" content="mixed" model="closed">
+  <description>Contains a descriptive, free-text element 
+  like a definition or an explanation field. Content is formatted
+  text, and the tag can carry a link attribute (link to concept,
+  term, graphics file, URL).
+  </description>
+  <attribute type="type" required="yes"/>
+  <attribute type="lang"/>
+  <attribute type="Clink"/>
+  <attribute type="Glink"/>
+  <attribute type="Plink"/>
+  <attribute type="Tlink"/>
+  <attribute type="Ulink"/>
+    <!-- contains formatted text -->
+    <element type="xref"/>
+</ElementType>
+
+ 
+<ElementType name="sourceGrp" content="eltOnly" order="many" model="closed">
+  <description>Contains a source reference, optionally a note and 
+  transactional info.
+  </description>
+  <element type="source"     minOccurs="1" maxOccurs="1"/>
+  <element type="note"       minOccurs="0" maxOccurs="*"/>
+  <element type="noteGrp"    minOccurs="0" maxOccurs="*"/>
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<ElementType name="source" content="textOnly" model="closed">
+  <description>A source reference is either free text, 
+  or a link to a person or URL.
+  </description>
+  <attribute type="lang"/>
+  <attribute type="Plink"/>
+  <attribute type="Ulink"/>
+</ElementType>
+
+
+<ElementType name="noteGrp" content="eltOnly" order="many" model="closed">
+  <description>A note with transactional information.</description>
+  <element type="note"/>
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<ElementType name="note" content="mixed" model="closed">
+  <description>A general note. Contains formatted text with embedded
+  cross-references.</description>
+  <attribute type="lang"/>
+    <!-- contains formatted text -->
+    <element type="xref"/>
+</ElementType>
+
+
+<ElementType name="languageGrp" content="eltOnly" order="many" model="closed">
+  <description>The container for information about all terms 
+  in one language.</description>
+  <element type="language"   minOccurs="1" maxOccurs="1"/>
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="descrip"    minOccurs="0" maxOccurs="*"/>
+  <element type="descripGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="source"     minOccurs="0" maxOccurs="*"/>
+  <element type="sourceGrp"  minOccurs="0" maxOccurs="*"/>
+  <element type="note"       minOccurs="0" maxOccurs="*"/>
+  <element type="noteGrp"    minOccurs="0" maxOccurs="*"/>
+  <element type="termGrp"    minOccurs="1" maxOccurs="*"/>
+</ElementType>
+
+<ElementType name="language" content="empty">
+  <description>A language specifier. The type attribute holds 
+  the "name" of the language as specified in the database definition,
+  the lang attribute holds the locale in the form "en_US". 
+  </description>
+  <attribute type="type" required="yes"/>
+  <attribute type="lang" required="yes"/>
+  <attribute type="source-lang"/>
+  <attribute type="target-lang"/>
+</ElementType>
+
+
+<ElementType name="termGrp" content="eltOnly" order="many" model="closed">
+  <description>Groups one term and all its associated information, 
+  which can be descriptions, source references, notes, and 
+  transactional information.
+  </description>
+  <element type="term"       minOccurs="1" maxOccurs="1"/>
+  <element type="transacGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="descrip"    minOccurs="0" maxOccurs="*"/>
+  <element type="descripGrp" minOccurs="0" maxOccurs="*"/>
+  <element type="source"     minOccurs="0" maxOccurs="*"/>
+  <element type="sourceGrp"  minOccurs="0" maxOccurs="*"/>
+  <element type="note"       minOccurs="0" maxOccurs="*"/>
+  <element type="noteGrp"    minOccurs="0" maxOccurs="*"/>
+</ElementType>
+
+<ElementType name="term" content="textOnly" model="closed">
+  <description>Contains a term as plain text.</description>
+  <attribute type="id"/>
+  <attribute type="search-term"/>
+    <!-- contains PCDATA-->
+</ElementType>
+
+<ElementType name="xref" content="textOnly" model="closed">
+  <description>A cross-reference.</description>
+  <attribute type="id"/>
+  <attribute type="Clink"/>
+  <attribute type="Glink"/>
+  <attribute type="Plink"/>
+  <attribute type="Tlink"/>
+  <attribute type="Ulink"/>
+  <!-- contains PCDATA -->
+</ElementType>
+
+</Schema>

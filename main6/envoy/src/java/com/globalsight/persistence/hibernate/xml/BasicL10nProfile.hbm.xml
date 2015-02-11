@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.foundation.BasicL10nProfile"
+        table="L10N_PROFILE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="60" column="NAME" type="string"
+            not-null="true" />
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" />
+        <property name="priority" length="3" column="PRIORITY"
+            type="int" not-null="true" />
+        <property name="autoDispatch" column="IS_AUTO_DISPATCH"
+            type="yes_no" not-null="true" />
+        <property name="timestamp" column="TIMESTAMP" type="timestamp"
+            not-null="true" />
+        <property name="runScript"
+            column="IS_SCRIPT_RUN_AT_JOB_CREATION" type="yes_no"
+            not-null="true" />
+        <property name="jobCreationScriptName"
+            column="JOB_CREATION_SCRIPT_NAME" type="string"
+            length="2000" not-null="false" />
+        <property name="tmChoice" column="TM_CHOICE" type="int"
+            length="1" not-null="true" />
+        <property name="isExactMatchEditing"
+            column="IS_EXACT_MATCH_EDIT" type="yes_no" not-null="false" />
+        <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" />
+        <property name="companyId" column="COMPANYID" type="string"
+            not-null="true" />
+
+        <component name="tmProfile"
+            class="com.globalsight.everest.projecthandler.TranslationMemoryProfile">
+
+            <property name="tuTypes" column="JOB_EXCLUDE_TU_TYPES"
+                type="string" length="2000" not-null="false" />
+        </component>
+
+        <component name="dispatchCriteria"
+            class="com.globalsight.everest.foundation.DispatchCriteria">
+            <property name="condition" column="DISPATCH_CONDITION"
+                type="int" not-null="true" />
+
+            <component name="timer"
+                class="com.globalsight.everest.foundation.PeriodOfTime">
+                <property name="interval" column="DISPATCH_INTERVAL"
+                    length="10" type="int" not-null="false" />
+                <property name="unit" column="DISPATCH_TIME_UNIT"
+                    length="1" type="int" not-null="false" />
+                <property name="daysAsString"
+                    column="DISPATCH_ABSOLUTE_DAYS" length="10"
+                    type="string" not-null="false" />
+                <property name="timerType" column="DISPATCH_TIMER_TYPE"
+                    type="character" not-null="false" />
+                <component name="startTime"
+                    class="com.globalsight.everest.foundation.Timestamp">
+                    <property name="date" column="DISPATCH_START_TIME"
+                        type="timestamp" not-null="false" unique="false" />
+                </component>
+            </component>
+
+            <component name="volume"
+                class="com.globalsight.everest.foundation.VolumeOfData">
+                <property name="volume" column="DISPATCH_WORD_COUNT"
+                    type="int" not-null="false" />
+            </component>
+        </component>
+
+        <many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale"
+            not-null="true" />
+
+        <many-to-one name="project" column="PROJECT_ID"
+            class="com.globalsight.everest.projecthandler.ProjectImpl"
+            not-null="true" />
+
+        <set name="tmProfiles" table="L10N_PROFILE_TM_PROFILE"
+            cascade="save-update">
+            <key column="L10N_PROFILE_ID" />
+            <many-to-many
+                class="com.globalsight.everest.projecthandler.TranslationMemoryProfile"
+                column="TM_PROFILE_ID" />
+        </set>
+
+        <set name="workflowTemplates"
+            table="L10N_PROFILE_WFTEMPLATE_INFO"
+            cascade="none" inverse="true" lazy="false">
+            <key column="L10N_PROFILE_ID" />
+          
+            <many-to-many
+                class="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
+                column="WF_TEMPLATE_ID" />
+           
+        </set>
+        
+        <set name="fileProfiles" inverse="true"  lazy="false">
+            <key column="L10N_PROFILE_ID" />
+            <one-to-many class="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" />
+        </set>
+
+    </class>
+</hibernate-mapping>

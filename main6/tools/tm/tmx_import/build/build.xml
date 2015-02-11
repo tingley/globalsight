@@ -1,0 +1,84 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *               TMX Importer Tool Build FILE                  * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="TmxImporter" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="importer_src" value=".." />
+    <property name="importer_bin" value="importer_classes" />
+    <property name="importer_dist" value="dist" />
+    <property name="importer_resources" value="../resources" />
+    <property name="toolsLib" value="../../../lib/common" />
+    <property name="toolsLibNt" value="../../../lib/nt" />
+    <property name="toolsBuild" value="../../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <property name="xerces" value="${toolsLib}/xerces1.4.4.jar" />
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    <property name="oracle" value="${toolsLibNt}/O817NTclasses12.zip" />
+    <property name="cap"
+        value="${toolsBuild}/capclasses/globalsight/WEB-INF/classes" />
+
+    <property name="importer_classpath"
+        value="${xerces}:${regexp}:${cap}:${weblogic}:${ldap}:${oracle}" />
+
+    <property name="batch_file" value="TmxImporter.bat"/>
+    <property name="sh_file" value="TmxImporter.sh"/>
+    <property name="importer_jar" value="importer.jar"/>
+    <property name="importer_zip"
+        value="${importer_dist}/importer.zip"/>
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling importer tool..." />
+    <mkdir dir="${importer_bin}" />
+    <javac classpath="${importer_classpath}"
+	   destdir="${importer_bin}" >
+      <src path="${importer_src}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <mkdir dir="${importer_bin}/resources"/>
+    <copy todir="${importer_bin}/resources">
+      <fileset dir="${importer_resources}"/>
+    </copy>
+
+    <jar jarfile="${importer_bin}/${importer_jar}"
+         basedir="${importer_bin}"
+	 includes="com/**, resources/**" />
+
+    <copy file="${importer_src}/${batch_file}"
+         todir="${importer_bin}"/>
+    <copy file="${importer_src}/${sh_file}" todir="${importer_bin}"/>
+    <chmod file="${importer_bin}/${sh_file}" perm="ugo+rx"/>
+    <mkdir dir="${importer_bin}/globalsight"/>
+    <touch file="${importer_bin}/globalsight/CAP.log"/>
+
+    <mkdir dir="${importer_dist}" />
+    <zip zipfile="${importer_zip}">
+        <zipfileset dir="${importer_bin}"
+	     includes="${importer_jar},${batch_file},${sh_file},globalsight/*"
+	      prefix="system4_importer" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${importer_bin}" />
+    <delete dir="${importer_dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.customform.CustomForm"
+        table="CUSTOM_FORM">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="modifiedDate" column="MODIFIED_DATE" type="timestamp"
+            not-null="true" unique="false" />
+        <property name="modifierUserId" length="80"
+            column="MODIFIER_USER_ID" type="string" not-null="true"
+            unique="false" />
+        <property name="name" length="30" column="PAGE_NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="xmlDesign" length="4000" column="FORM_XML"
+            type="string" not-null="false" unique="false" />
+        <many-to-one name="locale" column="LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale"
+            not-null="true" />
+    </class>
+</hibernate-mapping>

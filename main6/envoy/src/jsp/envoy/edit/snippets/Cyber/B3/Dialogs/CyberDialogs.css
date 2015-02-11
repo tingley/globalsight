@@ -1,0 +1,119 @@
+
+/*-{{B3}}--------------------------------------------------------
+
+//
+// Copyright (C) 2001-2002 [B3] - [Buckland, Buchman and Backlund]
+//
+//
+// WARNING: DO NOT EDIT OR DELETE THIS FILE!
+// IT MAY BE UPDATED BY B3 CYBER DIALOGS AT ANY TIME
+//
+//
+
+---------------------------------------------------------------*/
+
+/*b3-meta{{
+<version>
+	<major>6</major>
+	<minor>7</minor>
+</version>
+}}b3-meta*/
+
+/*-------------------------------------------------------------*/
+
+BODY
+	{
+		background-color: threedface;
+		font-family: Arial;
+		font-size: 13px;
+		margin: 13px;
+		border: none;
+	}
+
+BODY.Palette
+	{
+		background-color: threedface;
+		font-family: Arial;
+		font-size: 13px;
+		margin: 2px;
+		border: solid 2px threedface;
+	}
+
+BODY.Popup
+	{
+		background-color: white;
+		font-family: Arial;
+		font-size: 13px;
+		border: solid 1px black;
+	}
+
+BODY.Page
+	{
+		background-color: white;
+		font-family: Arial;
+		font-size: 13px;
+		border: inset 2px threedface;
+	}
+
+P
+	{
+		margin: 0px;
+	}
+
+P.CyberTableItem 
+	{
+		font-size: 13px;
+	}
+
+P.CyberListItem 
+	{
+		font-size: 13px;
+	}
+
+P.CyberComboItem 
+	{
+		font-size: 13px;
+	}
+
+P.CyberTabItem 
+	{
+		font-size: 13px;
+	}
+
+P.CyberMenuItem 
+	{
+		font-size: 13px;
+	}
+
+INPUT {
+		font-size: 13px;
+}
+
+SELECT {
+		font-size: 13px;
+}
+
+MARQUEE {
+		font-size: 13px;
+}
+
+TEXTAREA {
+		font-size: 13px;
+}
+
+TABLE {
+		font-size: 13px;
+}
+
+DIV {
+		font-size: 13px;
+}
+
+BUTTON {
+		font-size: 13px;
+}
+
+A DIV {
+		cursor: hand;
+}
+

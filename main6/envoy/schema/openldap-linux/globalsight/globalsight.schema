@@ -1,0 +1,169 @@
+#########################
+# globalsight ldap directory schema
+#
+### OID distribution plan:
+#
+#        OID                   distribution              Data Type
+#
+#        1.1                   Local
+#        1.1.2                 ldap elements
+##
+#        1.1.2.1               Attribute Type
+#                              Name                Syntax            Multi-valued
+#        1.1.2.1.1             activitytype        DirectoryString   Unchecked
+#        1.1.2.1.2             defaultuilocale     DirectoryString   Unchecked
+#        1.1.2.1.3             email               DirectoryString   Unchecked
+#        1.1.2.1.4             emailcc             DirectoryString   Unchecked
+#        1.1.2.1.5             emailbcc            DirectoryString   Unchecked
+#        1.1.2.1.6             iflownotification   DirectoryString   Unchecked
+#        1.1.2.1.7             roletype            DirectoryString   Unchecked
+#        1.1.2.1.8             sourcelocale        DirectoryString   Unchecked
+#        1.1.2.1.9             status              DirectoryString   Unchecked
+#        1.1.2.1.10            targetlocale        DirectoryString   Unchecked
+#        1.1.2.1.11            cost                Integer           Unchecked
+#        1.1.2.1.12            rateid              DirectoryString   Checked
+#        1.1.2.1.13            permission          DirectoryString   Checked
+#        1.1.2.1.14            companyname         DirectoryString   Unchecked
+#        1.1.2.1.15            isinallprojects     Boolean           Unchecked
+##
+#        1.1.2.2                Object Class
+#                               Name                 Parent               Required Attributes   Allowed Attributes
+#        1.1.2.2.1              accessgroup          groupofuniquenames                         permission
+#        1.1.2.2.2              iflowperson          inetorgperson                              email
+#                                                                                               emailcc
+#                                                                                               emailbcc
+#                                                                                               iflownotification
+#        1.1.2.2.3              localizationperson   inetorgperson                              companyname
+#                                                                                               defaultuilocale
+#                                                                                               email
+#                                                                                               emailcc
+#                                                                                               emailbcc
+#                                                                                               isinallprojects
+#                                                                                               status
+#        1.1.2.2.4              localizationrole     groupofuniquenames   activitytype
+#                                                                         sourcelocale
+#                                                                         targetlocale
+#########################
+
+objectIdentifier localOID 1.1
+
+objectIdentifier ldapElem localOID:2
+
+objectIdentifier attrType ldapElem:1
+objectIdentifier objType  ldapElem:2
+
+#########################
+
+attributetype ( attrType:1
+	NAME 'activitytype'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:2
+	NAME 'defaultuilocale'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+# conficted with email in core.schema
+#attributetype ( attrType:3
+#	NAME 'email'
+#	EQUALITY caseIgnoreMatch
+#	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+#	SINGLE-VALUE )
+
+attributetype ( attrType:4
+	NAME 'emailcc'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:5
+	NAME 'emailbcc'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:6
+	NAME 'iflownotification'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:7
+	NAME 'roletype'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:8
+	NAME 'sourcelocale'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:9
+	NAME 'status'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:10
+	NAME 'targetlocale'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:11
+	NAME 'cost'
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+	SINGLE-VALUE )
+
+attributetype ( attrType:12
+	NAME 'rateid'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+attributetype ( attrType:13
+	NAME 'permission'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+attributetype ( attrType:14
+	NAME 'companyname'
+    EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( attrType:15
+	NAME 'isinallprojects'
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+	SINGLE-VALUE )
+
+#########################
+
+objectclass ( objType:1
+	NAME 'accessgroup'
+	SUP groupofuniquenames
+	MAY permission )
+
+objectclass ( objType:2
+	NAME 'iflowperson'
+	SUP inetorgperson
+	MAY ( email $ emailcc $ emailbcc $ iflownotification ) )
+
+objectclass ( objType:3
+	NAME 'localizationperson'
+	SUP inetorgperson
+	MAY ( companyname $ defaultuilocale $ email $ emailcc $ emailbcc $ isinallprojects $ status ) )
+
+objectclass ( objType:4
+	NAME 'localizationrole'
+	SUP groupofuniquenames
+	MUST ( activitytype $ sourcelocale $ targetlocale )
+	MAY ( cost $ rateid $ roletype $ status ) )
+
+
+
+### END

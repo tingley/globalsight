@@ -1,0 +1,90 @@
+<!-- diplomat.dtd created on May 15, 2000 -->
+<!--            version 1.0 -->
+<!--		by Shigemichi Yazawa, GlobalSight Corp. -->
+
+<!ELEMENT diplomat (translatable|localizable|skeleton|gs)*>
+<!ATTLIST diplomat 
+	version		CDATA	#REQUIRED
+	locale		CDATA	#REQUIRED
+	datatype	CDATA	#REQUIRED
+	targetEncoding	CDATA	#IMPLIED
+	wordcount	CDATA	#IMPLIED>
+
+
+<!-- !ELEMENT translatable ((segment+)|(#PCDATA|bpt|ept|it|ph|ut|localizable)*)> -->
+<!ELEMENT translatable (segment)+>
+<!ATTLIST translatable
+	blockId		CDATA	#REQUIRED
+	datatype	CDATA	#IMPLIED
+	type		CDATA	"TEXT"
+	wordcount	CDATA	#IMPLIED>
+
+<!ELEMENT localizable (#PCDATA|bpt|ept|it|ph|ut)*>
+<!ATTLIST localizable 
+	blockId		CDATA	#REQUIRED
+	datatype	CDATA	#IMPLIED
+	type		CDATA	#IMPLIED
+	wordcount	CDATA	#IMPLIED>
+
+<!ELEMENT segment (#PCDATA|bpt|ept|it|ph|ut|localizable)*>
+<!ATTLIST segment
+	segmentId	CDATA	#REQUIRED
+	wordcount	CDATA	#IMPLIED>
+
+<!ELEMENT gs (translatable|localizable|skeleton|presentation|gs)*>
+<!ATTLIST gs
+	extract		CDATA	#IMPLIED
+	add		CDATA	#IMPLIED
+	delete		CDATA	#IMPLIED
+	added		CDATA	#IMPLIED
+	deleted		CDATA	#IMPLIED
+        name            CDATA   #IMPLIED
+        id              CDATA   #IMPLIED>
+
+<!ELEMENT skeleton (#PCDATA)>
+
+
+<!ELEMENT bpt (#PCDATA|sub)*>
+<!ATTLIST bpt
+	i	 CDATA	#REQUIRED
+	x	 CDATA	#IMPLIED
+	type	 CDATA	#IMPLIED
+        erasable (yes|no)  "no"
+        movable  (yes|no)  "yes"
+>
+
+<!ELEMENT ept (#PCDATA|sub)*>
+<!ATTLIST ept
+	i	CDATA	#REQUIRED
+>
+
+<!ELEMENT sub (#PCDATA|bpt|ept|it|ph|ut)*>
+<!ATTLIST sub
+        locType         (translatable|localizable) "translatable"
+	datatype	CDATA	#IMPLIED
+	type		CDATA	#IMPLIED>
+
+<!ELEMENT it (#PCDATA|sub)*>
+<!ATTLIST it
+	pos	(begin|end)	#REQUIRED
+	x	CDATA	#IMPLIED
+	type	CDATA	#IMPLIED
+        erasable (yes|no)  "no"
+        movable  (yes|no)  "yes"
+>
+
+<!ELEMENT ph (#PCDATA|sub)*>
+<!ATTLIST ph
+	assoc	(p|f|b)	#IMPLIED
+	x	CDATA	#IMPLIED
+	type	CDATA	#IMPLIED
+        erasable (yes|no)  "no"
+        movable  (yes|no)  "yes"
+>
+
+<!ELEMENT ut (#PCDATA)>
+<!ATTLIST ut
+	x	CDATA	#IMPLIED
+        erasable (yes|no)  "no"
+        movable  (yes|no)  "yes"
+>

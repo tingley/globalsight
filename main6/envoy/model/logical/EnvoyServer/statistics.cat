@@ -1,0 +1,395 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "statistics"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A7F16D103A4"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "StatisticsService"
+	    quid       	"3A7F16FC0003"
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "generatePageStatistics"
+		    quid       	"3A7F170D0314"
+		    documentation 	"Generates linguistic statistics and stores them in database."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F1778034A"
+			    type       	"long"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "generateTaskStatistics"
+		    quid       	"3A7F178B02B1"
+		    documentation 	"Generate statistics for a Task and stores in database."
+		    parameters 	(list Parameters
+			(object Parameter "p_taskId"
+			    quid       	"3A7F17B8031A"
+			    type       	"long"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInternalRepetitions"
+		    quid       	"3A7F17C80042"
+		    parameters 	(list Parameters
+			(object Parameter "p_taskId"
+			    quid       	"3A7F17DF03AC"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTextOnlyMatches"
+		    quid       	"3A7F17F70234"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F180402AB"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A92975802AD"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getExactMatches"
+		    quid       	"3A7F180E0241"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F18260047"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A92976A012C"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getFuzzyMatches"
+		    quid       	"3A7F18430193"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F188C0026"
+			    type       	"long"))
+		    result     	"FuzzyMatches"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTranslated"
+		    quid       	"3A7F193B01AE"
+		    documentation 	"Word count translated so far."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F19540128"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A9297780187"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getRemaining"
+		    quid       	"3A7F195D03C0"
+		    documentation 	"Word count remaining to translate."
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F198C0291"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A92978700DE"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSegmentCount"
+		    quid       	"3A7F199300BA"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F19AE03E4"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSegmentsTranslatedCount"
+		    quid       	"3A7F19B80212"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F19D40045"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A9297C50282"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSegmentsRemainingCount"
+		    quid       	"3A7F19DA0207"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A7F19F000FA"
+			    type       	"long")
+			(object Parameter "p_targetLocale"
+			    quid       	"3A9297D40016"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSegmentsTranslatedCount"
+		    quid       	"3A8304900178"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A8304B2007C"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWordCount"
+		    quid       	"3A8472B6021C"
+		    parameters 	(list Parameters
+			(object Parameter "p_pageId"
+			    quid       	"3A8472C103E5"
+			    type       	"long"))
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "FuzzyMatches"
+	    quid       	"3A7F18DC02C0"
+	    operations 	(list Operations
+		(object Operation "getFuzzyMatchRanges"
+		    quid       	"3A9298A3008C"
+		    documentation 	"List of FuzzyMatchRange"
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "m_matchesRange1"
+		    quid       	"3A7F18EB0195"
+		    type       	"int")
+		(object ClassAttribute "m_matchesRange2"
+		    quid       	"3A7F1903004F"
+		    type       	"int")
+		(object ClassAttribute "m_matchesRange3"
+		    quid       	"3A7F190B0105"
+		    type       	"int")
+		(object ClassAttribute "m_matchesRange4"
+		    quid       	"3A7F191401DA"
+		    type       	"int")
+		(object ClassAttribute "m_matchesRange5"
+		    quid       	"3A7F191D001A"
+		    type       	"int")))
+	(object Class "FuzzyMatchRange"
+	    quid       	"3A9298490015"
+	    operations 	(list Operations
+		(object Operation "getRangeStart"
+		    quid       	"3A92985A0037"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getRangeEnd"
+		    quid       	"3A92986C0228"
+		    result     	"int"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "StatisticsService"
+	    quid       	"3A7F16E702DD"
+	    title      	"StatisticsService"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	26
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::statistics::StatisticsService" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(660, 420)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(4, 97)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1312
+			justify    	0
+			label      	"StatisticsService")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(4, 52)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1312
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A7F16FC0003"
+		    compartment 	(object Compartment
+			Parent_View 	@1
+			location   	(4, 153)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	14
+			max_width  	1310)
+		    width      	1330
+		    height     	758
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::statistics::FuzzyMatches" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1695, 240)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1419, 55)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	552
+			justify    	0
+			label      	"FuzzyMatches")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A7F18DC02C0"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(1419, 111)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	7
+			max_width  	550)
+		    width      	570
+		    height     	392
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object NoteView @3
+		    location   	(1770, 705)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1475, 634)
+			fill_color 	13434879
+			nlines     	3
+			max_width  	555
+			label      	"FuzzyMatch ranges comes from SystemConfiguration values.")
+		    line_color 	3342489
+		    fill_color 	13434879
+		    width      	615
+		    height     	155)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::statistics::FuzzyMatchRange" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1695, 1020)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1500, 925)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	390
+			justify    	0
+			label      	"FuzzyMatchRange")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A9298490015"
+		    compartment 	(object Compartment
+			Parent_View 	@4
+			location   	(1500, 981)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	388)
+		    width      	408
+		    height     	212
+		    annotation 	8
+		    autoResize 	TRUE)))))

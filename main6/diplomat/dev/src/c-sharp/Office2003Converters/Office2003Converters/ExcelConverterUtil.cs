@@ -1,0 +1,67 @@
+using System.Collections.Generic;
+using System.Text;
+using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using GlobalSight.Common;
+
+namespace GlobalSight.Office2003Converters
+{
+    class ExcelConverterUtil
+    {
+        private Logger m_log = null;
+        //maintain a separate ConverterRunner for import and export
+        private ConverterRunner m_importConverterRunner = null;
+        private ConverterRunner m_exportConverterRunner = null;
+
+        public void stop()
+        {
+            if (m_importConverterRunner != null)
+            {
+                m_importConverterRunner.Stop();
+            }
+
+            if (m_exportConverterRunner != null)
+            {
+                m_exportConverterRunner.Stop();
+            }
+        }
+
+        public void start(String dir)
+        {
+            try
+            {
+                String excelDir = dir + "\\excel";
+                DirectoryInfo watchDir = new DirectoryInfo(excelDir);
+                watchDir.Create();
+
+                if (m_log == null)
+                {
+                    Logger.Initialize(excelDir + @"\excel2003Converter.log");
+                    m_log = Logger.GetLogger();
+                }
+
+                m_log.Log("Excel 2003 Converter starting up.");
+                m_log.Log("Creating and starting threads to watch directory " +
+                    excelDir);
+
+                m_importConverterRunner = new ConverterRunner(
+                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.IMPORT), excelDir);
+                m_exportConverterRunner = new ConverterRunner(
+                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.EXPORT), excelDir);
+
+                m_importConverterRunner.Start();
+                m_exportConverterRunner.Start();
+            }
+            catch (Exception e)
+            {
+                string msg = "Excel 2003 Converter failed to initialize because of: " +
+                    e.Message + "\r\n" + e.StackTrace;
+                Logger.LogWithoutException(msg);
+                throw e;
+            }
+        }
+    }
+}

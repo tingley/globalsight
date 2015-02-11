@@ -1,0 +1,225 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="eliminarse" >
+  <topic name="Contenido que puede eliminarse" url="Glosario/Deletable_Content.htm" />
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="eliminarse respeta" >
+  <topic name="Contenido que puede eliminarse" url="Glosario/Deletable_Content.htm" />
+</key>
+<key name="ellas" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="embargo" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="emergente" >
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="empezar" >
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+</key>
+<key name="emplea entre" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="emplea reglas basadas" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="empleada" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="emplean" >
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+</key>
+<key name="emplear" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="empleará" >
+  <topic name="Pantalla principal de importación" url="Fuentes_de_datos/Importaci_n/Import_Main_Screen.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="Empresa" >
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="TM" url="Glosario/TM.htm" />
+</key>
+<key name="empresa emplea" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="En curso" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Reasignar una actividad" url="Mis_trabajos/Procedimientos/Reassign_an_Activity_howdoI.htm" />
+</key>
+<key name="en_GB" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="en_US" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="encabezado" >
+  <topic name="Ficha de actividades Disponibles" url="Mis_actividades/Available_Activity_Tab.htm" />
+  <topic name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+</key>
+<key name="encaminarse este" >
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="encoding" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="encoding CDATA" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="encontrar" >
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Encontrará" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="encontrará instrucciones al respecto" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="encontrará más adelante contiene todos" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="encontrarse" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="enlace" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="enlace Aceptar" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlace Añadir comentario" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlace aparece junto" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="enlace Ayuda" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="enlace azul" >
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="enlace Cerrar" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="enlace Cerrar sesión" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlace Editor" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="enlace Exportar" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+</key>
+<key name="enlace Rechazar" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlace Terminar" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlace Un-Accept" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="enlaces" >
+  <topic name="Marcadores de posición" url="Glosario/Placeholder_Tags.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Pantalla principal Informes" url="Informes/Reports_Main_Screen.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="enseñanza" >
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+</key>
+<key name="entornos multilingües" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="entrada" >
+  <topic name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+</key>
+<key name="entradas" >
+  <topic name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+</key>
+<key name="entran" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="entre" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="entre  Encontrará instrucciones" >
+  <topic name="Archivo de importación de fragmentos" url="Glosario/Snippet_Import_File.htm" />
+</key>
+<key name="entre Participante" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="entrega" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="entrega indicada" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="Enumera" >
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="Enumera todos" >
+  <topic name="Seleccionar fragmento" url="Mis_actividades/Select_Snippet.htm" />
+</key>
+<key name="envía" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Enviar" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+  <topic name="Pantalla principal Glosarios" url="Configuraci_n/Archivos_de_referencia/Support_Files_Main_Screen.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="Enviar archivos" >
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+</key>
+<key name="enviarle todos" >
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+</key>
+<key name="envíela al servidor" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+</key>
+
+</indexdata>

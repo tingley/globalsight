@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="com.globalsight.calendar.UserCalendarWorkingHour"
+		table="USER_CALENDAR_WORKING_HOUR">
+
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="order" length="1" type="integer" not-null="true"
+			column="ORDER_NUM" />
+		<property name="startHour" length="2" type="integer"
+			not-null="true" column="START_HOUR" />
+		<property name="startMinute" length="2" type="integer"
+			not-null="true" column="START_MINUTE" />
+		<property name="endHour" length="2" type="integer"
+			not-null="true" column="END_HOUR" />
+		<property name="endMinute" length="2" type="integer"
+			not-null="true" column="END_MINUTE" />
+		<property name="durationExpression" length="8" type="string"
+			column="DURATION_EXPRESSION" not-null="true" />
+		<property name="startDate" type="timestamp" not-null="true"
+			column="START_DATE" />
+
+		<many-to-one name="workingDay"
+			column="USER_CALENDAR_WORKING_DAY_ID"
+			class="com.globalsight.calendar.UserCalendarWorkingDay"
+			not-null="true" />
+	</class>
+
+</hibernate-mapping>

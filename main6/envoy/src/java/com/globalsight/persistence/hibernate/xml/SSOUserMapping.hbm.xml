@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.foundation.SSOUserMapping"
+		table="SSO_USER_MAPPING">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="companyId" column="COMPANY_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="userId" length="80" column="USER_ID" type="string"
+			not-null="true" unique="false" />
+		<property name="ssoUserId" length="100" column="SSO_USER_ID"
+			type="string" not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

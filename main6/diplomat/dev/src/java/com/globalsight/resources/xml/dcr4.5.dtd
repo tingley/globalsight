@@ -1,0 +1,15 @@
+<!ELEMENT record (item*) >
+	<!ATTLIST record
+	  type	(metadata|content|workflow)	#REQUIRED
+	  name	CDATA				#REQUIRED
+	  >
+
+<!ELEMENT item (value*) >
+	<!-- items are enumerations of values -->
+	<!ATTLIST item
+	  name	CDATA		#REQUIRED
+	  >
+
+<!ELEMENT value  (#PCDATA|item)* >
+	<!-- values are either CDATA or a vector of items     -->
+	<!-- this DTD is actually looser than what is allowed -->

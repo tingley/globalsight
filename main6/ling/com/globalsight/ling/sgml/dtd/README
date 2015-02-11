@@ -1,0 +1,23 @@
+Wutka Parser 
+
+www.wutka.com/dtdparser.html 
+
+Problems:
+
+- no inline comments (FIXED)
+- PUBLIC entities need SYSTEM id (FIXED)
+- no parsed entity parsing: does not turn <!ENTITY lt "&#38;#60;"> into "<" (FIXED)
+
+==========================================================================
+
+- no multi-element decls: <!ELEMENT (a|b) (stuff)>
+- no optionality in element decls: <!ELEMENT a - - (stuff)> (FIXED)
+- no allowed/disallowed specs in element decls: <!ELEMENT a (s) +(stuff) -(stuff)>
+  Note: there is a grammar ambiguity between (s)+ and (s) +(t)
+
+	-------------------------------------------------------------------
+	| Restriction: only single-element decls                          |
+	| Restriction: no inclusion/exclusion conditions on content model |
+	| Restriction: no parsed entity parsing                           |
+	-------------------------------------------------------------------
+

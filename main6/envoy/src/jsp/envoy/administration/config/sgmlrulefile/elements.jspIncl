@@ -1,0 +1,361 @@
+<script>
+
+var selectedElem;
+
+//
+// User selected an element.  Update the editable fields.
+//
+function updateEditFields(value)
+{
+    selectedElem = value;
+    editTable = document.getElementById("editElemsFields");
+    editTable.style.display = "block";
+
+    var elem = elems[value];
+    var tmp = elem.split("\t");
+    oForm.origelemName.value = tmp[0];
+    oForm.elemName.value = tmp[0];
+    var tmp2 = tmp[1].split(",");
+    if (tmp2[0] == "false")
+        oForm.elemType.options[0].selected = true;
+    else
+        oForm.elemType.options[1].selected = true;
+    if (tmp2[1] == "true")
+        oForm.elemPaired.checked = true
+    else
+        oForm.elemPaired.checked = false
+
+    oForm.changeBtn.disabled=false;
+    <% if (!dtd) { %>
+        oForm.addAttrBtn.disabled=false;
+        oForm.removeBtn.disabled=false;
+    <% } %>
+}
+
+function doChange()
+{
+    if (hasSpecialChars(oForm.elemName.value))
+    {
+        alert("<%= bundle.getString("lb_name") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+        return false;
+    }
+    oForm.action = "<%=urlUpdate%>" + "&action=changeElement";
+    oForm.submit();
+}
+
+//
+// User hit add button.  Submit to server since # items in list
+// changes.
+//
+function doAdd()
+{
+    // check if name already exists
+    if (elemExists())
+    {
+        alert("<%= bundle.getString("lb_sgml_attri_name_exists") %>");
+        return;
+    }
+    if (hasSpecialChars(oForm.elemName.value))
+    {
+        alert("<%= bundle.getString("lb_name") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+        return false;
+    }
+    oForm.action = "<%=urlUpdate%>" + "&action=changeElement";
+    oForm.action = "<%=urlUpdate%>" + "&action=addElement";
+    oForm.submit();
+}
+
+//
+// User hit remove button.  Submit to server since # items in list
+// changes.
+//
+
+function doRemove()
+{
+    oForm.action = "<%=urlUpdate%>" + "&action=removeElement";
+    oForm.submit();
+}
+
+function elemExists()
+{
+    for (var i = 0; i < elems.length; i++)
+    {
+        var tmp = elems[i].split("\t");
+        if (tmp[0] == oForm.elemName.value)
+            return true;
+    }
+    return false;
+}
+
+function enableAdd()
+{
+    editTable = document.getElementById("editElemsFields");
+    editTable.style.display = "block";
+    oForm.elemName.value = "";
+}
+
+
+</script>
+<%
+    String selectedElement = (String)request.getAttribute("selectElem");
+    int elemRadioIndex = -1;
+    String nameCol = bundle.getString("lb_name");
+    String typeCol = bundle.getString("lb_type");
+    String pairedCol = bundle.getString("lb_paired");
+
+    // Data for the page
+    List elems = (List)request.getAttribute(com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.ELEM_LIST);
+
+    // Paging Info
+    int pageNum = ((Integer)request.getAttribute(com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM)).intValue();
+
+    int numPages = ((Integer)request.getAttribute(com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.NUM_PAGES)).intValue()
+;
+
+    int listSize = elems == null ? 0 : elems.size();
+    int totalElems = ((Integer)request.getAttribute(com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.LIST_SIZE)).intValue
+();
+
+    int elemsPerPage = ((Integer)request.getAttribute(
+        com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.NUM_PER_PAGE_STR)).intValue();
+    int elemPossibleTo = pageNum * elemsPerPage;
+    int elemTo = elemPossibleTo > totalElems ?
+                                 totalElems : elemPossibleTo;
+    int elemFrom = (elemTo - listSize) + 1;
+    Integer sortChoice = (Integer)sessionMgr.getAttribute(com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING);
+
+%>
+<script>
+// init elements array
+var elems = new Array();
+<%
+if (elems != null)
+{
+    for (int i = 0; i < elems.size(); i++)
+    {
+        Element elem = (Element)elems.get(i);
+        StringBuffer buf = new StringBuffer();
+        buf.append(elem.m_name);
+        buf.append("\t");
+        buf.append(Boolean.toString(elem.m_extract));
+        buf.append(",");
+        buf.append(Boolean.toString(elem.m_paired));
+%>
+        elems[<%=i%>] = "<%=buf.toString()%>";
+<%
+    }
+}
+%>
+
+// init attribute array
+var attrs = new Array();
+<%
+if (elems != null)
+{
+    for (int i = 0; i < elems.size(); i++)
+    {
+        Element elem = (Element)elems.get(i);
+        ArrayList attrs = elem.m_attributes;
+        boolean first = true;
+        if (attrs != null)
+        {
+            Collections.sort(attrs, new AttributeComparator(uiLocale));
+            StringBuffer buf = new StringBuffer("");
+            for (int j = 0; j < attrs.size(); j++)
+            {
+                if (!first)
+                {
+                    buf.append("\t");
+                }
+                first = false;
+                Attribute attr = (Attribute)attrs.get(j);
+                buf.append(attr.m_name);
+                buf.append(",");
+                buf.append(attr.m_translatable);
+                buf.append(",");
+                buf.append(attr.m_type);
+            }
+%>
+            attrs[<%=i%>] = "<%=buf.toString()%>";
+<%
+        }
+    }
+}
+%>
+</script>
+
+<input type="hidden" name="origelemName" >
+<% if (dtd) { %>
+    <input type="hidden" name="elemName" >
+<% } %>
+<fieldset>
+  <legend id="elemLegend"><%=bundle.getString("lb_elements")%></legend>
+    <table cellpadding=0 cellspacing=4 border=0 class="standardText" id="elemtable">
+        <tr valign="top">
+            <td align="right">
+        <%
+        // Make the Paging widget
+        if (listSize > 0)
+        {
+            Object[] args = {new Integer(elemFrom), new Integer(elemTo),
+                     new Integer(totalElems)};
+
+            // "Displaying x to y of z"
+        out.println(MessageFormat.format(
+                    bundle.getString("lb_displaying_records"), args));
+
+            out.println("<br>");
+            out.println("&lt; ");
+
+            // The "Previous" link
+            if (pageNum == 1) {
+                // Don't hyperlink "Previous" if it's the first page
+                out.print(bundle.getString("lb_previous"));
+            }
+            else
+            {
+%>
+                <a href="<%=selfUrl%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=pageNum - 1%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=sortChoice%>"><%=bundle.getString("lb_previous")%></A>
+<%
+            }
+
+            out.print(" ");
+            // Print out the paging numbers
+            int group = (pageNum / 10) * 10;
+            for (int i = group + 1; i <= group + 10 && i <= numPages; i++)
+            {
+                // Don't hyperlink the page you're on
+                if (i == pageNum)
+                {
+                    out.print("<b>" + i + "</b>");
+                }
+                // Hyperlink the other pages
+                else
+                {
+%>
+                    <a href="<%=selfUrl%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=i%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=sortChoice%>"><%=i%></A>
+<%
+                }
+                out.print(" ");
+            }
+            // The "Next" link
+            if (elemTo >= totalElems) {
+                // Don't hyperlink "Next" if it's the last page
+                out.print(bundle.getString("lb_next"));
+            }
+            else
+            {
+%>
+                <a href="<%=selfUrl%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=pageNum + 1%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=sortChoice%>"><%=bundle.getString("lb_next")%></A>
+
+<%
+            }
+            out.println(" &gt;");
+        }
+%>
+        </td>
+      </tr>
+      <tr>
+        <td>
+<!-- Elements data table -->
+          <table id=elemsTable border="0" cellspacing="0" cellpadding="5" class="list">
+            <tr class="tableHeadingBasic" valign="bottom" style="padding-bottom: 3px;">
+              <td>&nbsp;</td>
+              <td>
+                <a class="sortHREFWhite" href="<%=selfUrl%>&<%= com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=pageNum%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=ElementComparator.NAME%>&doSort=true"> <%=nameCol%></a>
+              </td>
+              <td style="padding-left: 20px;" >
+                <a class="sortHREFWhite" href="<%=selfUrl%>&<%= com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=pageNum%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=ElementComparator.EXTERNAL%>&doSort=true"> <%=typeCol%></a>
+              </td>
+              <td style="padding-left: 20px;" >
+                <a class="sortHREFWhite" href="<%=selfUrl%>&<%= com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.PAGE_NUM%>=<%=pageNum%>&<%=com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.SgmlRuleConstants.SORTING%>=<%=ElementComparator.PAIRED%>&doSort=true"> <%=pairedCol%></a>
+              </td>
+            </tr>
+<%
+            if (listSize == 0)
+            {
+%>
+            <tr>
+              <td colspan=3 class='standardText'><%=bundle.getString("msg_no_rules")%></td>
+            </tr>
+<%
+            }
+            else
+            {
+              for (int i=0; i < listSize; i++)
+              {
+                 String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
+                 Element elem = (Element)elems.get(i);
+                 String external = "external";
+                 if (elem.m_extract == true)
+                    external = "inline";
+                 String selected = "";
+                 if (elem.m_name.equals(selectedElement)) 
+                 {
+                    selected = "checked";
+                    elemRadioIndex = i;
+                 }
+                    
+%>
+                 <tr style="padding-bottom:5px; padding-top:5px;" valign=top bgcolor="<%=color%>">
+                  <td>
+                    <input type=radio name=radioBtn value=<%=i%> <%=selected%> onclick="updateAttrs(this.value); updateEditFields(this.value)">
+                  </td>
+                  <td class=standardText>
+                    <%= elem.m_name %>
+                  </td>
+                  <td class=standardText style="padding-left:20px">
+                    <%= external %>
+                  </td>
+                  <td class=standardText style="padding-left:20px">
+                    <% if (elem.m_paired) { %>
+                    <img src="/globalsight/images/checkmark.gif"
+                     height=9 width=13 hspace=10 vspace=3>
+                    <% } %>
+                  </td>
+                 </tr>
+<%
+              }
+            } 
+%>
+          </table>
+<!-- End Elements data table -->
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <table border=0 id=editElemsFields style="display:block">
+         <% if (!dtd) { %>
+          <tr>
+            <td class=standardText><%=bundle.getString("lb_name")%>:</td>
+            <td><input type="text" name="elemName" ></td>
+            </td>
+          </tr>
+         <% } %>
+          <tr>
+            <td class=standardText><%=bundle.getString("lb_type")%>:</td>
+            <td>
+                <select name="elemType">
+                    <option value="false">external</option>
+                    <option value="true">inline</option>
+                </select>
+            </td>
+          </tr>
+          <tr>
+            <td class=standardText><%=bundle.getString("lb_paired")%>:</td>
+            <td><input type="checkbox" name="elemPaired" checked ></td>
+          </tr>
+          <tr>
+            <td colspan=2>
+              <input type="button" value="<%=bundle.getString("lb_change")%>" name="changeBtn" onclick="doChange()"  disabled>
+<% if (!dtd) { %>
+              <input type="button" value="<%=bundle.getString("lb_remove")%>" name="removeBtn" onclick="doRemove()"  disabled>
+              <input type="button" value="<%=bundle.getString("lb_add")%>" name="addBtn" onclick="doAdd()" >
+<% } %>
+            </td>
+          </tr>
+        </td>
+        </table>
+      </tr>
+    </table>
+</fieldset>

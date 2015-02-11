@@ -1,0 +1,372 @@
+A {
+	COLOR: #000000; TEXT-DECORATION: underline
+}
+A:hover {
+	COLOR: #cc0000
+}
+BODY {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial
+}
+TD {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial
+}
+.HdrSearch {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial
+}
+.HdrSearchTitle {
+	FONT-WEIGHT: bold; COLOR: #ffffff
+}
+.HdrSearchBox {
+	WIDTH: 105px
+}
+.HdrSearchDrop {
+	WIDTH: 120px
+}
+.HdrPropertiesBarNavOn {
+	COLOR: #ffffff; FONT-FAMILY: Verdana; TEXT-DECORATION: underline
+}
+.HdrPropertiesBarNavOff {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; BACKGROUND: #ffffff; COLOR: #000000; FONT-FAMILY: Verdana
+}
+.HdrPromoDate {
+	FONT-WEIGHT: bold; FONT-SIZE: 13pt; COLOR: white; FONT-FAMILY: Verdana
+}
+.HdrPromoEntry {
+	WIDTH: 80px; FONT-FAMILY: Verdana; HEIGHT: 20px
+}
+.HdrPromoSearch {
+	FONT-SIZE: 10px; FONT-FAMILY: Verdana
+}
+.HdrPromoBreak {
+	LINE-HEIGHT: 100%
+}
+A.HdrPromoBarTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 7pt; COLOR: #ffffff; FONT-FAMILY: Verdana
+}
+.FooterText {
+	FONT-SIZE: 8pt; COLOR: #ffffff; FONT-FAMILY: Arial
+}
+.FooterLink {
+	FONT-SIZE: 8pt; COLOR: #ffffff; FONT-FAMILY: Arial; TEXT-DECORATION: underline
+}
+.ChannelsNav {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: black; FONT-FAMILY: Verdana; TEXT-DECORATION: underline
+}
+.PersonaliseBar {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #ffffff
+}
+.PersonaliseBarTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #ffffc0
+}
+A.PersonaliseBarLink {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #ffffc0
+}
+A.PersonaliseBar {
+	FONT-WEIGHT: normal; FONT-SIZE: 8pt; COLOR: #ffffff
+}
+.btitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; COLOR: #ffffff; FONT-FAMILY: verdana,sans-serif
+}
+.messageTitle {
+	MARGIN-TOP: 4px; FONT-WEIGHT: bold; FONT-SIZE: 10pt; MARGIN-BOTTOM: -5px; COLOR: black; FONT-FAMILY: verdana
+}
+.messageHMTitle {
+	MARGIN-TOP: 0px; FONT-WEIGHT: bold; FONT-SIZE: 8pt; MARGIN-BOTTOM: -1px; FONT-FAMILY: verdana
+}
+.messageHMinfo {
+	FONT-SIZE: 8pt; FONT-FAMILY: verdana
+}
+.messageHMInput {
+	BORDER-TOP-WIDTH: 1px; BORDER-LEFT-WIDTH: 1px; FONT-SIZE: 8pt; BORDER-BOTTOM-WIDTH: 0px; MARGIN-LEFT: 0px; WIDTH: 97%; FONT-FAMILY: verdana; HEIGHT: 16px; BORDER-RIGHT-WIDTH: 0px
+}
+.messageHMSubmit {
+	BORDER-TOP-WIDTH: 1px; BORDER-LEFT-WIDTH: 1px; FONT-SIZE: 8pt; BORDER-BOTTOM-WIDTH: 1px; FONT-FAMILY: verdana; BORDER-RIGHT-WIDTH: 1px
+}
+A.messageHMPromo {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #346699; FONT-FAMILY: verdana; LETTER-SPACING: -1pt
+}
+.messageHR {
+	MARGIN-BOTTOM: -30px
+}
+TD.ChnlTlbarOn {
+	CURSOR: hand; TEXT-DECORATION: none
+}
+TD.ChnlTlbarTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ffffff; FONT-FAMILY: verdana
+}
+A.ChnlTlbarTitleLink {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ffffff; FONT-FAMILY: verdana; TEXT-DECORATION: underline
+}
+TD.ChnlTlbarTitleSuche {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: verdana
+}
+A.ChnlTlbarTitleLinkSuche {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: verdana; TEXT-DECORATION: none
+}
+A.ChnlTlbarTitleLinkSucheUl {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: verdana; TEXT-DECORATION: underline
+}
+A.ChnlTlbarTitleLinkSucheHl {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #666666; FONT-FAMILY: verdana; TEXT-DECORATION: none
+}
+A.ChnlTlbarTitleLinkInv {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #336699; FONT-FAMILY: verdana; TEXT-DECORATION: underline
+}
+TD.ChnlTlbarOnInv {
+	BACKGROUND: #ffffff
+}
+A.PartnerNewsQL {
+	FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: verdana; TEXT-DECORATION: underline
+}
+TD.GenContent {
+	FONT-SIZE: 9pt; COLOR: black; FONT-FAMILY: verdana
+}
+TD.PartnerNewsTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: black; FONT-FAMILY: verdana
+}
+TD.HelpSection {
+	FONT-WEIGHT: bold; FONT-SIZE: 14pt; COLOR: #7898c9; FONT-FAMILY: verdana
+}
+TD.HelpMainTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 11pt; COLOR: #000000; FONT-FAMILY: verdana
+}
+TD.HelpSubTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #7898c9; FONT-FAMILY: verdana
+}
+TD.HelpTitle {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: verdana
+}
+TD.HelpCopy {
+	FONT-SIZE: 9pt; COLOR: #000000; FONT-FAMILY: arial
+}
+A.Help {
+	FONT-SIZE: 9pt; COLOR: #7898c9; FONT-FAMILY: arial; TEXT-DECORATION: underline
+}
+.PersHeading {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; BORDER-LEFT-COLOR: #6699cc; COLOR: #6699cc; BORDER-TOP-COLOR: #6699cc; BORDER-BOTTOM: #6699cc 1px solid; FONT-FAMILY: Verdana; BORDER-RIGHT-COLOR: #6699cc
+}
+.PersNormal {
+	FONT-SIZE: 10pt; FONT-FAMILY: Verdana
+}
+.PersCategoryHeading {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ffffff; FONT-FAMILY: Verdana
+}
+.PersCategory {
+	BORDER-RIGHT: #336699 1px solid; BORDER-TOP: #336699 1px solid; FONT-WEIGHT: bold; FONT-SIZE: 10pt; BORDER-LEFT: #336699 1px solid; CURSOR: hand; COLOR: #000000; BORDER-BOTTOM: #336699 2px solid; FONT-FAMILY: Verdana; BACKGROUND-COLOR: #ffffff
+}
+.PersArrow {
+	CURSOR: hand
+}
+.contName {
+	FONT-WEIGHT: bold; FONT-SIZE: 13pt; COLOR: red; FONT-FAMILY: arial
+}
+A.chan {
+	FONT: x-small 'arial','sans-serif'; MARGIN-LEFT: 5px; COLOR: #003366; MARGIN-RIGHT: 5px; TEXT-DECORATION: none
+}
+A.chan:active {
+	COLOR: #003366
+}
+A.chan:visited {
+	COLOR: #003366
+}
+A.chan:hover {
+	COLOR: #cc0000
+}
+A.chlnk {
+	FONT: x-small 'arial','sans-serif'; COLOR: #003366
+}
+A.webdir {
+	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: red; FONT-FAMILY: verdana,sans-serif; TEXT-DECORATION: underline
+}
+A.ql {
+	FONT: xx-small arial,sans-serif; COLOR: #000000
+}
+A.ql:visited {
+	COLOR: #000000
+}
+A.ql:hover {
+	COLOR: #cc0000
+}
+A.supplier {
+	FONT-SIZE: xx-small; COLOR: #9999cc; TEXT-DECORATION: none
+}
+A.srch {
+	FONT-SIZE: xx-small; COLOR: #003366; MARGIN-RIGHT: 5px; TEXT-DECORATION: none
+}
+FORM {
+	MARGIN-TOP: 5px; MARGIN-BOTTOM: 0px
+}
+FORM.srch {
+	MARGIN-TOP: 2px; MARGIN-BOTTOM: 3px
+}
+INPUT {
+	FONT-SIZE: 9pt
+}
+SELECT {
+	FONT: 9pt 'arial','sans-serif'
+}
+TABLE.Category {
+	BORDER-TOP: #336699 1px solid; BORDER-BOTTOM: #ffffff 4px solid
+}
+TD.category {
+	PADDING-LEFT: 4px; FONT-WEIGHT: bold; FONT-SIZE: 8pt; CURSOR: default; COLOR: #ffffff
+}
+TD.com {
+	FONT: xx-small 'arial','sans-serif'; COLOR: #000000; TEXT-DECORATION: none
+}
+TD.stockhd {
+	FONT: bold xx-small 'arial','sans-serif'; COLOR: #000000
+}
+TD.sym {
+	FONT: bold xx-small 'arial','sans-serif'; COLOR: #336699; TEXT-DECORATION: none
+}
+.a1 {
+	BACKGROUND-COLOR: #666699
+}
+.chHd {
+	MARGIN-TOP: 30px; FONT: bold x-small 'arial','sans-serif'; MARGIN-LEFT: 5px; COLOR: #9999cc
+}
+.ch0 {
+	MARGIN-TOP: -2px; MARGIN-LEFT: 10px; MARGIN-RIGHT: 5px
+}
+.ch1 {
+	MARGIN-TOP: 0px; MARGIN-LEFT: 5px; MARGIN-RIGHT: 5px
+}
+.ch2 {
+	MARGIN-TOP: 5px; MARGIN-LEFT: 5px; MARGIN-RIGHT: 5px
+}
+.ch3 {
+	FONT-WEIGHT: bold; FONT-SIZE: 13pt; MARGIN-BOTTOM: 6px; MARGIN-LEFT: 10px; COLOR: #006600; MARGIN-RIGHT: 5px
+}
+.customize {
+	FONT: xx-small 'arial','sans-serif'
+}
+.hand {
+	CURSOR: hand
+}
+.hmErr {
+	MARGIN-TOP: 4px; FONT: x-small 'arial','sans-serif'
+}
+.heading {
+	FONT-WEIGHT: bold; FONT-SIZE: xx-small; COLOR: #000000
+}
+.provider {
+	FONT-WEIGHT: bold; FONT-SIZE: x-small; COLOR: #000000
+}
+.spacer {
+	MARGIN-TOP: 3px
+}
+.ad {
+	MARGIN-TOP: 3px
+}
+.date {
+	FONT-SIZE: xx-small; COLOR: #666699
+}
+.promo {
+	LEFT: 5px; POSITION: relative; TOP: 5px
+}
+.reordertitle {
+	FONT: 11pt 'arial','sans-serif'; COLOR: #000000
+}
+.helpBold {
+	FONT-WEIGHT: bold
+}
+.startline1 {
+	FONT: bold small 'arial','sans-serif'; COLOR: #ffffff; TEXT-DECORATION: none
+}
+.startline2 {
+	FONT: italic x-small 'arial','sans-serif'; COLOR: #ffffff; TEXT-DECORATION: none
+}
+.supplier {
+	FONT-SIZE: xx-small; COLOR: #9999cc
+}
+.helpTitle {
+	FONT: bold 8pt 'arial','sans-serif'
+}
+.today {
+	FONT: bold 10pt 'arial','sans-serif'; COLOR: #ffffff
+}
+.headlineTitle {
+	FONT-WEIGHT: bold
+}
+.headlineAbstract {
+	
+}
+TD.wwhead {
+	FONT-WEIGHT: normal; FONT-SIZE: small; COLOR: #ff3300; LINE-HEIGHT: normal; FONT-STYLE: normal; FONT-VARIANT: normal
+}
+.wwcon {
+	FONT-WEIGHT: normal; FONT-SIZE: x-small; COLOR: #003366; LINE-HEIGHT: normal; FONT-STYLE: normal; FONT-VARIANT: normal; TEXT-DECORATION: none
+}
+A.wwcon:hover {
+	COLOR: #cc0000
+}
+.feedback {
+	FONT: bold 16pt 'arial'
+}
+.feedback11 {
+	FONT: bold 11pt 'arial'
+}
+.help14 {
+	FONT-WEIGHT: bold; FONT-SIZE: 14pt
+}
+.small {
+	FONT: x-small 'arial','sans-serif'
+}
+BLOCKQUOTE {
+	FONT: 9pt Arial,sans-serif; COLOR: black
+}
+.messC {
+	FONT-SIZE: 7pt; FONT-FAMILY: 'verdana','sans-serif'
+}
+A.clip-link:link {
+	COLOR: #000000
+}
+A.clip-link:visited {
+	COLOR: #000000
+}
+A.clip-link:active {
+	COLOR: #cc0000
+}
+A.clip-link:hover {
+	COLOR: #cc0000
+}
+.clip-body {
+	FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+.clip-headline {
+	FONT-WEIGHT: bold; FONT-SIZE: 14pt; COLOR: #336699; FONT-FAMILY: Arial, Helvetica
+}
+A.topic-link:link {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+A.topic-link:visited {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+A.topic-link:active {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #cc0000; FONT-FAMILY: Arial, Helvetica
+}
+A.topic-link:hover {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #cc0000; FONT-FAMILY: Arial, Helvetica
+}
+.abstract {
+	FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+.right-headline {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+}
+A.dir-link:link {
+	FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+A.dir-link:visited {
+	FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Arial, Helvetica
+}
+A.dir-link:active {
+	FONT-SIZE: 8pt; COLOR: #cc0000; FONT-FAMILY: Arial, Helvetica
+}
+A.dir-link:hover {
+	FONT-SIZE: 8pt; COLOR: #cc0000; FONT-FAMILY: Arial, Helvetica
+}
+.dir-headline {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+}

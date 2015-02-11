@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Registry>
+<Replet name="TmReport" folder="false" class="com.globalsight.reports.TmReportReplet" alias="TmReportReplet" visible="false">
+</Replet>
+<Replet name="JobDetails" folder="false" class="com.globalsight.reports.JobDetailsReplet" alias="JobDetails" visible="false">
+</Replet>
+<Replet name="AvgPerComp" folder="false" class="com.globalsight.reports.AvgPercentCompletion" alias="AvgPerComp" visible="false">
+</Replet>
+<Replet name="WorkflowStatus" folder="false" class="com.globalsight.reports.WorkflowStatusReplet" alias="WorkflowStatus" visible="false">
+</Replet>
+<Replet name="Costing" folder="false" class="com.globalsight.reports.CostingReplet" alias="Costing" visible="false">
+</Replet>
+<Replet name="MissingTerms" folder="false" class="com.globalsight.reports.MissingTermsReplet" alias="MissingTerms" visible="false">
+</Replet>
+<Replet name="TermAudit" folder="false" class="com.globalsight.reports.TermAuditReplet" alias="TermAudit" visible="false">
+</Replet>
+<Replet name="/" folder="true"></Replet>
+<Replet name="standardReports" folder="true"></Replet>
+<Replet name="customizedReports" folder="true"></Replet>
+<Prototype name="protoJobInfo" alias="" template="/templates/protoJobInfo.srt"></Prototype>
+<Prototype name="protoJobStatus" alias="" template="/templates/protoJobStatus.srt"></Prototype>
+<Prototype name="protoDetails" alias="" template="/templates/protoDetails.srt"></Prototype>
+<Prototype name="protoDetailsLite" alias="" template="/templates/protoDetailsLite.srt"></Prototype>
+<Prototype name="protoWorkflowLevel" alias="" template="/templates/protoWorkflowLevel.srt"></Prototype>
+<Prototype name="protoTaskDuration" alias="" template="/templates/protoTaskDuration.srt"></Prototype>
+<Prototype name="protoTmAnalysis" alias="" template="/templates/protoTmAnalysis.srt"></Prototype>
+<Replet name="standardReports/costsByLocale" folder="false" class="inetsoft.sree.TemplateReplet" alias="Costs by Project Locale Pair" template="/templates/costsByLocale.srt" visible="true"></Replet>
+<Replet name="standardReports/taskDuration" folder="false" class="inetsoft.sree.TemplateReplet" alias="Task Durations" template="/templates/taskDuration.srt" visible="true"></Replet>
+</Registry>
+

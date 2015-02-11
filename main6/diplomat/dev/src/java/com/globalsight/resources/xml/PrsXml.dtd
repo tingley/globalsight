@@ -1,0 +1,30 @@
+<!ELEMENT paginatedResultSetXml (record+)>
+<!ATTLIST paginatedResultSetXml
+	version CDATA "1.0"
+	id ID #REQUIRED
+	locale CDATA #REQUIRED
+>
+<!ELEMENT record (acqSqlParm?, column+, context*)>
+<!ATTLIST record
+	recordProfileId CDATA #REQUIRED
+	sequenceNumber ID #REQUIRED
+>
+<!ELEMENT acqSqlParm (#PCDATA)>
+<!ELEMENT column (label?, content)>
+<!ATTLIST column
+	name CDATA "unknown"
+	tableName CDATA "unknown"
+	dataType CDATA "plaintext"
+	maxLength CDATA "-1"
+	ruleId CDATA "0"
+	contentMode (translatable | contextual | invisible) "translatable"
+>
+<!ELEMENT context (columnHeader*, row+)>
+<!ATTLIST context
+	numRows CDATA #REQUIRED
+	numCols CDATA #REQUIRED
+>
+<!ELEMENT columnHeader (#PCDATA)>
+<!ELEMENT row (label?, column+)>
+<!ELEMENT label (#PCDATA)>
+<!ELEMENT content (#PCDATA)>

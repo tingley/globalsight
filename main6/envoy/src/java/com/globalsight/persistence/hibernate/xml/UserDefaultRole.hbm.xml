@@ -1,0 +1,19 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.webapp.pagehandler.administration.users.UserDefaultRole" table="USER_DEFAULT_ROLES">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="sourceLocaleId" length="22" column="SOURCE_LOCALE" type="long" not-null="true" unique="false"/>
+		<property name="targetLocaleId" length="22" column="TARGET_LOCALE" type="long" not-null="true" unique="false"/>
+		<property name="userId" length="40" column="USER_ID" type="string" not-null="true" unique="false"/>
+		
+        <set name="activities" table="USER_DEFAULT_ACTIVITY" cascade="all-delete-orphan" inverse="true" lazy="false">
+            <key column="DEFAULT_ROLE_ID" />
+            <one-to-many class="com.globalsight.everest.webapp.pagehandler.administration.users.UserDefaultActivity" />
+        </set>
+	</class>
+	
+</hibernate-mapping>

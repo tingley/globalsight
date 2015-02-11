@@ -1,0 +1,7 @@
+dn: cn=Customer, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+description: Provides permissions for uploading and downloading files.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: Customer
+uniquemember: ou=People,o=%%ldap_base%%

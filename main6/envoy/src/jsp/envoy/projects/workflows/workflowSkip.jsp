@@ -1,0 +1,234 @@
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page 
+    contentType="text/html; charset=UTF-8"
+    errorPage="/envoy/common/activityError.jsp"
+    import="com.globalsight.everest.servlet.util.SessionManager,
+             com.globalsight.everest.taskmanager.Task, 
+             com.globalsight.everest.taskmanager.TaskAssignee,
+             com.globalsight.everest.webapp.WebAppConstants,
+             com.globalsight.everest.webapp.javabean.NavigationBean,
+             com.globalsight.everest.webapp.pagehandler.PageHandler,
+             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,             
+             com.globalsight.everest.usermgr.UserInfo,
+             com.globalsight.everest.util.system.SystemConfigParamNames,
+             com.globalsight.everest.util.system.SystemConfiguration,             
+             java.util.Hashtable,
+             java.util.Enumeration, 
+             java.util.ResourceBundle"
+    session="true" 
+%>
+
+<jsp:useBean id="save" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="cancel" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+
+ <% 
+    ResourceBundle bundle = PageHandler.getBundle(session);
+    SessionManager sessionMgr =
+      (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);    
+    
+	boolean b_isDell = false;
+    try
+    {
+        SystemConfiguration sc = SystemConfiguration.getInstance();
+        b_isDell = sc.getBooleanParameter(SystemConfigParamNames.IS_DELL);
+    }
+    catch (Exception ge)
+    {}
+    String title = bundle.getString("lb_skip_full");
+    if (b_isDell)
+        title = bundle.getString("lb_saveAll");
+                                 
+    //Button names
+    String saveBtn = bundle.getString("lb_save");
+    String cancelBtn = bundle.getString("lb_cancel");
+
+    //Urls of the links on this page
+    String doneUrl = save.getPageURL() + "&"+ 
+      JobManagementHandler.SKIP_PARAM +"=skipActivities";
+    String cancelUrl = cancel.getPageURL();
+
+    //DataskipActivities
+
+%>
+
+<!-- This JSP is: envoy/projects/workflows/assign.jsp -->
+<HTML>
+<HEAD>
+  <TITLE><%= title %></TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT language="JavaScript1.2" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<%@ include file="/envoy/common/warning.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript">
+
+var needWarning = false;
+var helpFile = "<%=bundle.getString("help_workflows_skip")%>";
+var guideNode = "myJobs";
+
+function $(name) {
+   return document.getElementById(name);
+}
+
+function $N(name) {
+  return document.getElementsByName(name);
+}
+
+function verify(name) {
+  var ch = $N(name);
+  if(checked(ch)){
+  	return true;
+  }else {
+	return false;
+  }
+}
+
+function checked(obj) {
+  for(var i = 0 ; i <  obj.length ; i++ ) {
+	if(obj[i].checked) {
+	  return true;
+	}
+  }
+
+  return false;
+}
+
+function doOnload()
+{
+    loadGuides();
+
+}
+
+function getSelectedCheckBox()
+{
+	var selectedCheckBox = new Array();
+	var allCheckbox = $N("workflowId");
+	for(var i = 0; i < allCheckbox.length; i++)
+	{
+		if(allCheckbox[i].checked)
+		{
+			//Save the workflow id to the array
+			selectedCheckBox[selectedCheckBox.length] = allCheckbox[i].id.substring(1);
+		}
+	}
+	return selectedCheckBox;
+}
+
+function buildParams(selCheckBox)
+{
+	var params = "&";
+	for(var i = 0; i < selCheckBox.length; i++)
+	{
+		var selectBoxName = "activity" + selCheckBox[i];
+		params += "activity_" + selCheckBox[i] + "=";
+		var obj = $N(selectBoxName)[0];
+		var index = obj.selectedIndex;
+		params += index;
+//		params += "&";
+//		params += "skipToActivity_" + selCheckBox[i] + "=";
+//		var selectedObj = obj.options[index].value;
+//		params += selectedObj;
+		if(i != selCheckBox.length - 1 )
+		{
+			params += "&";
+		}
+	}
+	return params;
+}
+
+function submitPage(button)
+{
+       if (button == "save")
+       {
+           if(verify('workflowId')){
+	     if(confirm('<%=bundle.getString("jsmsg_workflow_skip_activity") %>')) {
+	       var selectedCheckBox = getSelectedCheckBox();
+	       var params = buildParams(selectedCheckBox);
+	       assignForm.action = "<%=doneUrl%>" + params;
+	       assignForm.submit();
+	     }
+	   }else {
+	     alert('<%=bundle.getString("jsmsg_workflow_skip_activity_select") %>');
+	     return;
+	   }
+
+       }
+       else
+       {
+           assignForm.action = "<%=cancelUrl%>";
+           assignForm.submit();
+       }
+}
+
+</SCRIPT>
+</HEAD>
+<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" 
+ ONLOAD="doOnload();">
+
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
+<DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
+<amb:header title="<%=title%>" />
+<FORM NAME="assignForm" METHOD="POST"  >
+
+  <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0">
+    <tr height="22" valign="bottom" align="center">
+      <td CLASS="tableHeadingBasic" width="5%">
+      </td>
+      <td CLASS="tableHeadingBasic" width="40%">
+	<SPAN CLASS="whiteBold">
+	 <%=bundle.getString("lb_target_locale")%>
+        </span>
+      </td>
+      <td CLASS="tableHeadingBasic" width="55%">
+	<SPAN CLASS="whiteBold">
+	 <%=bundle.getString("lb_activities_default_path")%>
+        </span>
+      </td>
+    </tr>
+
+    <c:forEach var="vo" items="${skiplist}" varStatus="rowCounter">
+      <c:choose>
+      <c:when test="${rowCounter.count%2==0}">
+      <tr align="center" BGCOLOR="#EEEEEE" class="standardText">
+      </c:when>
+      <c:otherwise>
+      <tr align="center" BGCOLOR="#FFFFFF" class="standardText">
+      </c:otherwise>
+      </c:choose>
+	<td STYLE="word-wrap: break-word">
+	  <input type="checkbox" id="_${vo.workflowId}" name="workflowId" value="${vo.workflowId}" />
+	</td>
+	<td STYLE="word-wrap: break-word">
+	  ${vo.targetLocale}
+	</td>
+	<td STYLE="word-wrap: break-word">
+	  <select name="activity${vo.workflowId}" style="width:120">
+	    <c:forEach var="activity" items="${vo.list}">
+	      <option value="${activity.value}">${activity.key}</option>
+	    </c:forEach>
+	  </select>
+	</td>
+      </tr>
+    </c:forEach>
+    <tr align="right">
+      <td colspan="3">
+	&nbsp;
+      </td>
+    </tr>
+    <tr align="right">
+      <td colspan="3">
+	<INPUT TYPE="button" name="saveBtn" VALUE="<%=cancelBtn %>" onclick="submitPage('cancel');" >
+	<INPUT TYPE="button" name="cancelBtn" VALUE="<%=saveBtn %>" onclick="submitPage('save');" >
+      </td>
+    </tr>
+  </table>
+
+
+</FORM>
+</BODY>
+</HTML>
+

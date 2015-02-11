@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.page.pageimport.TemplateFormat"
+        table="TEMPLATE_FORMAT">
+        
+        <composite-id>
+            <key-property name="name" column="NAME" type="string" length="20"/>
+            <key-property name="templateType" column="TEMPLATE_TYPE" type="string" length="3"/>
+            <key-property name="sourceType" column="SOURCE_TYPE" type="string" length="4"/>
+        </composite-id>
+
+        <property name="text" length="4000" column="TEXT" type="string"
+            not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

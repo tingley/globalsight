@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="com.globalsight.calendar.UserCalendarWorkingDay"
+		table="USER_CALENDAR_WORKING_DAY">
+
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="day" length="1" column="WORKING_DAY"
+			type="integer" not-null="true" />
+
+		<many-to-one name="baseFluxCalendar" column="CALENDAR_ID"
+			class="com.globalsight.calendar.UserFluxCalendar" not-null="true" />
+
+		<bag name="workingHours" inverse="true" cascade="all">
+			<key column="USER_CALENDAR_WORKING_DAY_ID" />
+			<one-to-many
+				class="com.globalsight.calendar.UserCalendarWorkingHour" />
+		</bag>
+	</class>
+
+</hibernate-mapping>

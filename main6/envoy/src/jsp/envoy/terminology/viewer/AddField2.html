@@ -1,0 +1,393 @@
+<html xmlns:m="http://www.w3.org/1998/Math/MathML">
+<head>
+<title>Add Field</title>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<OBJECT ID="MathPlayer" CLASSID="clsid:32F66A20-7614-11D4-BD11-00104BD3F987"></OBJECT>
+<?IMPORT NAMESPACE="m" IMPLEMENTATION="#MathPlayer" ?>
+<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
+<script SRC="/globalsight/FCKeditor/fckeditor.js"></script>
+<script LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/management/FireFox.js"></script>
+<style>
+/* TO BE REMOVED AND REPLACED BY SetStylesheet.js */
+BODY,
+LABEL,
+#idDescription {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 10pt;
+}
+#idDescription {
+    height: 5em;
+    width: 100%;
+    overflow: auto;
+    padding: 1px 3px 1px 1px;
+    background-color: lightblue;
+}
+FORM { display: inline; }
+</style>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT   LANGUAGE="JavaScript">  
+   <!--
+   //make the window in the center position  
+   function   centerWindow()   
+   {
+       var xMax = screen.width;
+       var yMax = screen.height;
+       
+       window.moveTo(xMax/2 - 200, yMax/2 - 100 - 80);
+   }
+     
+   centerWindow();  
+  //-->  
+</SCRIPT>
+<SCRIPT>
+var g_args;
+
+var g_currentFields;
+var g_currentAttributes;
+
+var g_termbaseLanguages;
+var g_language;
+
+var g_editor;
+
+function setup(level, definedFields)
+{
+  g_currentFields = new Array().concat(definedFields);
+
+  if (g_currentFields.length == 0)
+  {
+    if (level == 'concept')
+    {
+      g_currentFields = g_currentFields.concat(g_conceptFields);
+    }
+    else if (level == 'language')
+    {
+      g_currentFields = g_currentFields.concat(g_languageFields);
+    }
+    else if (level == 'term')
+    {
+      g_currentFields = g_currentFields.concat(g_termFields);
+    }
+    else if (level == 'field')
+    {
+      g_currentFields = g_currentFields.concat(g_fieldFields);
+    }
+    else if (level == 'source')
+    {
+      g_currentFields = g_currentFields.concat(g_sourceFields);
+    }
+  }
+
+  // override field and source level fields
+  if (level == 'field')
+  {
+    g_currentFields = g_fieldFields;
+  }
+  else if (level == 'source')
+  {
+    g_currentFields = g_sourceFields;
+  }
+
+  fillSelect(myform.idType, g_currentFields);
+  setValues(0);
+}
+
+function clearSelect(select)
+{
+    select.options.length=0; 
+    /*
+    var options = select.options;
+    for (var i = options.length; i >= 1; --i)
+    {
+        options.remove(i-1);
+    }
+    */
+}
+
+function fillSelect(select, fields)
+{
+    clearSelect(select);
+
+    var options = select.options;
+
+    for (var i = 0; i < fields.length; i++)
+    {
+        var field = fields[i];
+
+        var option = document.createElement('OPTION');
+        option.text = field.getDisplayName() + ' ';
+        option.value = i;
+        options.add(option);
+    }
+
+    setDescription(0);
+}
+
+function fillAttributes(select, values)
+{
+    g_currentAttributes = values;
+
+    clearSelect(select);
+
+    var options = select.options;
+
+    for (var i = 0; i < values.length; i++)
+    {
+        var value = values[i];
+
+        var option = document.createElement('OPTION');
+        option.text = Trim(value) + '\u00a0';
+        option.value = i;
+        options.add(option);
+    }
+}
+
+function fillAttributesWithDummy(select)
+{
+    clearSelect(select);
+
+    var options = select.options;
+    var option = document.createElement('OPTION');
+    option.text = "text field ";
+    options.add(option);
+}
+
+function fillAttributesWithDummy2(select)
+{
+    clearSelect(select);
+
+    var options = select.options;
+    var option = document.createElement('OPTION');
+    option.text = "attribute field with no known value, enter below";
+    options.add(option);
+}
+
+function setDescription(index)
+{
+  var field = g_currentFields[index];
+
+  document.getElementById("idDescription").innerText = field.getDescription();
+}
+
+function setValues(index)
+{
+  var field = g_currentFields[index];
+
+  // System-defined fields may have no value set, treat as text.
+  if (field.isAttribute() && field.getValues())
+  {
+    fillAttributes(myform.idAttrValue, field.getValues().split(","));
+
+    if (g_currentFields.length == 1)
+    {
+      myform.idAttrValue.focus();
+    }
+
+    myform.idAttrValue.disabled = false;
+    document.getElementById("idAttrValueLabel").disabled = false;
+    document.getElementById("idValueLabel").disabled = true;
+    myform.editor.disabled = true;
+  }
+  else
+  {
+    if (field.isAttribute())
+    {
+      fillAttributesWithDummy2(myform.idAttrValue);
+    }
+    else
+    {
+      fillAttributesWithDummy(myform.idAttrValue);
+    }
+
+    if (g_currentFields.length == 1)
+    {
+      // idValue.focus();
+    }
+
+    myform.idAttrValue.disabled = true;
+    document.getElementById("idAttrValueLabel").disabled = true;
+    document.getElementById("idValueLabel").disabled = false;
+    myform.editor.disabled = false;
+  }
+}
+
+function changeType()
+{
+  var index = myform.idType.options[myform.idType.selectedIndex].value;
+
+  setValues(index);
+  setDescription(index);
+}
+
+function getTextFromHTML(html)
+{
+  idConversion.innerHTML = html;
+  return idConversion.innerText;
+}
+
+function submitDummyForm()
+{
+  // Need to let attached onsubmit handler update the fake form field.
+  //window.event.returnValue = false;
+  window.setTimeout('doClose(true)', 100, 'JavaScript');
+  
+  return false;
+}
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var index = myform.idType.options[myform.idType.selectedIndex].value;
+    var field = g_currentFields[index];
+    var type = field.getType();
+    var value;
+
+    if (field.isAttribute() && field.getValues())
+    {
+      index = myform.idAttrValue.options[myform.idAttrValue.selectedIndex].value;
+      value = Trim(g_currentAttributes[index]);
+    }
+    else
+    {
+      if (field.isAttribute() && !field.getValues())
+      {
+        value = getTextFromHTML(myform.editor.value);
+      }
+      else
+      {
+        // value = Trim(idValue.value);
+        value = myform.editor.value;
+      }
+    }
+    
+    if(hasHtmlSpecialChars(value)) {
+        myform.editor.focus();
+        alert("Invalid term. '<' or '>' can't be included.");
+        return;
+    }
+
+    g_args.setType(type);
+    g_args.setValue(value);
+
+    window.returnValue = g_args;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function hasHtmlSpecialChars(theField) {
+	var iChars = "<>";
+    for (var i = 0; i < theField.length; i++)
+    {
+        if (iChars.indexOf(theField.charAt(i)) != -1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+function doKeypress(event)
+{
+  var evt = event ? event : (window.event ? window.event : null);
+  var key = evt.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  var level = g_args.getLevel();
+  idLevel.innerText = Trim(level);
+
+  var definedFields = g_args.getDefinedFields();
+  setup(level, definedFields);
+
+  g_termbaseLanguages = g_args.getTermbaseLanguages();
+  g_language = g_args.getLanguage();
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress(event)">
+
+<div id="idConversion" style="display:none"></div>
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<form name="myform" onsubmit="return submitDummyForm();">
+<SPAN ID="idHeading" CLASS="mainHeading">
+New field at <span id="idLevel"></span> &nbsp;level</SPAN>
+<BR><BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <THEAD>
+    <COL WIDTH="25%">
+    <COL WIDTH="75%">
+  </THEAD>
+  <TR>
+    <TD>
+      <LABEL FOR="idType">Field type:</LABEL>
+    </TD>
+    <TD>
+      <select id="idType" TABINDEX="1" onchange="changeType()"></select>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top">
+      <LABEL id="idAttrValueLabel" FOR="idAttrValue">Attribute Value:</LABEL>
+    </TD>
+    <TD valign="top">
+      <SELECT id="idAttrValue" TABINDEX="2"></SELECT>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top">
+      <LABEL id="idValueLabel" FOR="idValue">Text Value:</LABEL>
+    </TD>
+    <TD valign="top">
+        <textarea ID="editor" name="editor" style="width:370;height:330"></textarea>
+      <script>
+        /*
+      g_editor = new FCKeditor("editor", "350", "330", "Terminology", "");
+      g_editor.Config.AutoDetectLanguage = false;
+      g_editor.Config.DefaultLanguage =
+        window.dialogArguments.window.g_uiLocale;
+      g_editor.Create();
+      */
+      </script>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top"><LABEL>Explanation:</LABEL></TD>
+    <TD ROWSPAN="2" valign="top"><P id="idDescription" style="width:370"></P></TD>
+  </TR>
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE="SUBMIT" VALUE=" Ok " TABINDEX="3">
+<INPUT id="idCancel" TYPE="BUTTON" VALUE="Cancel" TABINDEX="4"
+ onclick="doClose(false);">
+</DIV>
+</form>
+
+</DIV>
+</body>
+</html>

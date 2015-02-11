@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<!-- 
+    To compile it :
+    - go in the bin directory where you installed IzPack
+    - call "compile ../sample/install.xml -b ../sample"
+-->
+
+<installation version="1.0">
+
+    <!-- 
+        The info section.
+    -->
+    <info>
+        <appname>GAlign</appname>
+        <appversion>1.0</appversion>
+	<!--
+        <authors>
+            <author name="JPz" email="jpz@superman.org"/>
+            <author name="Hidden Man" email="hidden@hisdomain.com"/>
+        </authors>
+	-->
+        <url>http://www.Welocalize.com</url>
+	<javaversion>1.4</javaversion>
+	<uninstaller write="yes" />
+    </info>
+
+    <variables>
+      <variable name="INSTALLDIR" value="${INSTALL_PATH}" />
+    </variables>
+    
+    <!-- 
+        The gui preferences indication. 
+    -->
+    <guiprefs width="450" height="400" resizable="no"/>
+    
+    <!-- 
+        The locale section. Include any language packs you want.
+    -->
+    <locale>
+        <langpack iso3="eng"/>
+        <langpack iso3="cat"/>
+        <langpack iso3="dan"/>
+        <langpack iso3="deu"/>
+        <langpack iso3="fin"/>
+        <langpack iso3="fra"/>
+        <langpack iso3="hun"/>
+        <langpack iso3="ita"/>
+        <langpack iso3="jpn"/>
+        <langpack iso3="ned"/>
+        <langpack iso3="pol"/>
+        <langpack iso3="por"/>
+        <langpack iso3="rom"/>
+        <langpack iso3="rus"/>
+        <langpack iso3="spa"/>
+        <langpack iso3="svk"/>
+        <langpack iso3="swe"/>
+        <langpack iso3="ukr"/>
+    </locale>
+    
+    <!-- 
+        The resources section.
+        The ids must be these ones if you want to use the LicencePanel 
+	and/or the InfoPanel.
+    -->
+    <resources>
+        <!-- <res id="LicencePanel.licence" src="Licence.txt"/> -->
+        <res id="InfoPanel.info"   src="installer/Readme.txt"/>
+	<res id="shortcutSpec.xml" src="installer/install-shortcuts.xml" 
+	 type="xml" parse="yes"/>
+    </resources>
+    
+    <!-- 
+        The panels section.
+        We indicate here which panels we want to use. 
+	The order will be respected.
+    -->
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <!-- <panel classname="LicencePanel"/> -->
+        <panel classname="TargetPanel"/> 
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>
+        <panel classname="SimpleFinishPanel"/>
+    </panels>
+    
+    <!-- 
+        The packs section.
+        We specify here our packs.
+    -->
+    <packs>
+        <pack name="GAlign" required="yes" preselected="yes">
+            <description>The base GAlign application.</description>
+            <file src="installer/Readme.txt" targetdir="$INSTALL_PATH"/>
+            <file src="lib" targetdir="$INSTALL_PATH"/>
+            <file src="classes/resources" targetdir="$INSTALL_PATH"/>
+            <singlefile src="bin/galign.cmd" target="$INSTALL_PATH/galign.cmd" 
+	     os="windows"/>
+            <singlefile src="bin/galign.sh" target="$INSTALL_PATH/galign" 
+	     os="unix"/>
+            <file src="installer/galign.ico" targetdir="$INSTALL_PATH"/>
+            <file src="classes/galign.jar" targetdir="$INSTALL_PATH"/>
+
+	    <!-- Perform variable substitution -->
+            <parsable targetfile="$INSTALL_PATH/galign.cmd" os="windows"/>
+            <parsable targetfile="$INSTALL_PATH/galign"     os="unix"/>
+
+	    <!-- Set +x on Unix -->
+	    <executable targetfile="$INSTALL_PATH/galign.sh" stage="never"/>
+        </pack>
+	<!--
+        <pack name="Docs" required="no">
+            <description>GAlign documentation.</description>
+	     < !-- Recursive adding -- >
+            <file src="doc" targetdir="$INSTALL_PATH"/>
+        </pack>
+	-->
+    </packs>
+
+    <native type="izpack" name="ShellLink.dll"/>
+
+</installation>
+
+<!-- Local Variables: -->
+<!-- compile-command: "cd ..; ant -emacs dist" -->
+<!-- End: -->

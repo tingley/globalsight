@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<!-- ===========================Build file for Envoy Testcases - System 4====================================-->
+
+<!--  ==============Set up properties==============================================  -->
+<project name="envoy" default="build_all" basedir=".">
+	<target name="init">
+    	<tstamp></tstamp>
+    	<property name="ProjectName" value="Envoy"></property>
+    
+		<!-- modify the following 4 parameters to work on your own machine -->
+		<!-- weblogic.home = the path where weblogic is. -->
+		<property name="weblogic.home" value="/export/home/weblogic"></property>
+		<!-- classesdir = the path where to place the *.class files for the server code -->
+		<property name="classesdir" value="${weblogic.home}/myserver/serverclasses"></property>
+		<!-- lib.dir = the path where all the library files for Envoy can be found.
+			Assumes all are in the same directory. -->
+		<property name="lib.dir" value="${weblogic.home}/lib"></property>
+		
+		<!-- junit jar files -->
+		<property name="junit.jar" value="/export/home/junit/junit3.2/junit.jar"></property>
+		
+		<!-- =======set the classpath============-->
+		<property name="classpath" value="${classesdir};${lib.dir}\iFlow.jar;${lib.dir}\iFlowSuper.jar;
+			${lib.dir}\Tools.jar;${lib.dir}\jaxp.jar;${lib.dir}\parser.jar;
+			${lib.dir}\O816classes12.zip;${lib.dir}\xerces-1.0.1.jar;${lib.dir}\CoffeeTable_AWT.jar;
+			${weblogic.home}\classes;${weblogic.home}\lib\weblogicaux.jar;${junit.jar}">
+		</property>
+	<property name="version" value="First iteration test cases"></property>
+	<filter token="year" value="2000"></filter>
+	<echo message="==============${ProjectName} ${version}================================"></echo>
+	</target>
+  
+  	<!--  ================compile all Java server test classes ====================================  -->
+
+	<target name="foundation_test" depends="init">
+		<echo message="=========Building the foundation Testcases=========="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\foundation" 
+			includes="**/*.java" excludes="l10nprofile/src/**" destdir="${classesdir}"></javac>
+		<copy todir="${classesdir}"> 
+			<fileset dir="${basedir}\component\foundation\l10nprofile\com\globalsight\test\everest\foundation" 
+			includes="*.xml" />
+		</copy>
+	</target>
+
+	<target name="locale_mgr_test" depends="init">
+		<echo message="==========Building the LocaleManager Testcases======="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\localemgr" 
+			includes="**/*.java" destdir="${classesdir}"></javac>
+	</target>		
+
+	<target name="project_handler_test" depends="foundation_test">
+		<echo message="==========Building the ProjectHandler Testcases======="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\projecthandler" 
+			includes="**/ProjectHandlerTestCases.java" destdir="${classesdir}"></javac>
+	</target>		
+
+	<target name="job_handler_test" depends="init">
+		<echo message="==========Building the JobHandler Testcases======="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\jobhandler" 
+			includes="**/JobHandlerTester.java" destdir="${classesdir}"></javac>
+	</target>		
+	
+	<target name="request_handler_test" depends="init">
+		<echo message="==========Building the RequestHandler Testcases======="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\request" 
+			includes="**/*.java" destdir="${classesdir}"></javac>
+		<copy todir="${classesdir}"> 
+			<fileset dir="${basedir}\component\request\com\globalsight\test\everest\request"
+			 includes="*.xml, *.dtd" />
+		</copy>
+	</target>	
+	
+	<target name="workflow_test" depends="init">
+		<echo message="==========Building the Workflow Testcases======="></echo>
+		<javac classpath="${classpath}" srcdir="${basedir}\component\workflow" 
+			includes="**/*.java" destdir="${classesdir}"></javac>
+	</target>	
+
+		
+	<target name="build_all" depends="locale_mgr_test,project_handler_test,job_handler_test,request_handler_test,workflow_test">
+	</target>
+	
+	
+	<!--  =============== clean all code  ==================================================  -->
+	<target name="clean" depends="init">
+		<delete dir="${classesdir}/com/globalsight/test"/>
+	</target>
+
+</project>

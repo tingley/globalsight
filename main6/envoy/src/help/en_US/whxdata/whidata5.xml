@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Create/Edit" >
+  <topic name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Create/Edit Currency" url="Setup/Currency/Create_Modify_Currency.htm" />
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+  <topic name="Create/Edit Field" url="Setup/Terminology/Create_Edit_Field.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+  <topic name="Create/Edit Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+  <topic name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
+  <topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
+  <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+</key>
+<key name="Create/Edit a User Calendar" >
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+</key>
+<key name="Create/Edit Activity Type" >
+  <topic name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+</key>
+<key name="Create/Edit Column Profile" >
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+</key>
+<key name="Create/Edit Connection" >
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+</key>
+<key name="Create/Edit Currency" >
+  <topic name="Create/Edit Currency" url="Setup/Currency/Create_Modify_Currency.htm" />
+</key>
+<key name="Create/Edit Database Preview Rules" >
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+</key>
+<key name="Create/Edit Export Location" >
+  <topic name="Create/Edit Location" url="Data_Sources/Export_Locations/Create_Edit_Location.htm" />
+</key>
+<key name="Create/Edit Field" >
+  <topic name="Create/Edit Field" url="Setup/Terminology/Create_Edit_Field.htm" />
+</key>
+<key name="Create/Edit File Profile" >
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+</key>
+<key name="Create/Edit Import Settings" >
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="Create/Edit Input Model" >
+  <topic name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+</key>
+<key name="Create/Edit profiles" >
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+</key>
+<key name="Create/Edit Project" >
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+</key>
+<key name="Create/Edit Rates" >
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+</key>
+<key name="Create/Edit Rating" >
+  <topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+</key>
+<key name="Create/Edit Surcharges" >
+  <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+</key>
+<key name="Create/Edit System Calendar" >
+  <topic name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
+</key>
+<key name="Create/Edit System Holiday" >
+  <topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
+</key>
+<key name="Create/Edit TeamSite Server" >
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+</key>
+<key name="Create/Edit Translation Memory" >
+  <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
+</key>
+<key name="Create/Edit XML Rules" >
+  <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+</key>
+<key name="Create/Edit/Duplicate Termbase" >
+  <topic name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
+</key>
+<key name="Create/Modify TM Profile" >
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+</key>
+<key name="Currency Main Screen" >
+  <topic name="Currency Main Screen" url="Setup/Currency/Currency_Main_Screen.htm" />
+</key>
+<key name="Custom Form Designer" >
+  <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+</key>
+<key name="Customer" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Reports Main Screen" url="Reports/Reports_Main_Screen.htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Customizing Extraction Settings" >
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="Customizing Segmentation Settings" >
+  <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
+</key>
+<key name="CV/Resume" >
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="CV/Resume" url="Vendor_Management/CV_Resume.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+</key>
+<key name="Data Sources" >
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Database" >
+  <topic name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+  <topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page TM" url="Glossary/Page_TM.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="What is a Leverage Group Exact Match (LGEM)" url="Appendix/Linguistic_FAQ/What_is_a_Leverage_Group_Exact_Match_(LGEM).htm" />
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+  <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="Database Column Profiles" >
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+</key>
+<key name="Database Connections Main Screen" >
+  <topic name="Database Connections Main Screen" url="Data_Sources/Database_Connections/DB_Connections_Main_Screen.htm" />
+</key>
+<key name="Database Import Settings Main Screen" >
+  <topic name="Database Import Settings Main Screen" url="Data_Sources/Database_Import_Settings/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="Database Preview Rules" >
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+</key>
+<key name="Database Preview Rules Main Screen" >
+  <topic name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+</key>
+<key name="Database Preview SQL" >
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+</key>
+<key name="Database Profiles" >
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+  <topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+</key>
+<key name="Database Profiles Basic Information" >
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+</key>
+<key name="Database Profiles Main Screen" >
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+</key>
+
+</indexdata>

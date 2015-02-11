@@ -1,0 +1,47 @@
+dn: ou=VendorManagement, ou=AccessGroups,o=%%ldap_base%%
+ou: AccessGroups
+ou: VendorManagement
+description: All the possible access groups and permissions for the Vendor Management module.
+objectclass: top
+objectclass: organizationalunit
+
+dn: cn=VendorAdministrator, ou=VendorManagement, ou=AccessGroups, o=%%ldap_base%%
+description: Adminstrator for Vendor Management functionality.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: VendorAdministrator
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: cn=VendorManager, ou=VendorManagement, ou=AccessGroups, o=%%ldap_base%%
+description: Manages vendors within  Vendor Management.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: VendorManager
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: uid=anonymous_vendor_viewer, ou=People, o=%%ldap_base%%
+ou: People
+objectclass: localizationperson
+objectclass: inetorgperson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+o: %%ldap_base%%
+uid: anonymous_vendor_viewer
+userPassword: {SSHA}miksm9kEfNpKgwSVS01W5PJ0ctZQZU9pZFHCSw==
+cn: Anonymous Vendor Viewer
+givenname: Anonymous
+employeetype: ANONYMOUS
+sn: Vendor Viewer
+defaultuilocale: en_US
+status: ACTIVE
+
+dn: cn=VendorViewer, ou=VendorManagement, ou=AccessGroups, o=%%ldap_base%%
+description: User allowed to view vendor information but not edit any of it.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: VendorViewer
+uniquemember: uid=anonymous_vendor_viewer,ou=People,o=%%ldap_base%%

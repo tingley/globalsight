@@ -1,0 +1,241 @@
+<html>
+<head>
+<title>Validation Results</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<STYLE>
+BODY  { margin: 15px; }
+.mainHeading { font-weight: bold; }
+.DUP  { color: blue; cursor: pointer;}
+</STYLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<script LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/management/FireFox.js"></script>
+<SCRIPT   LANGUAGE="JavaScript">  
+   <!--
+   //make the window in the center position  
+   function   centerWindow()   
+   {
+       var xMax = screen.width;
+       var yMax = screen.height;
+       
+       window.moveTo(xMax/2 - 100, yMax/2 - 100 - 80);
+   }
+     
+   centerWindow();  
+  //-->  
+</SCRIPT>
+<SCRIPT language="Javascript">
+var g_args;
+
+var g_duplicates = new Array();
+
+function Duplicate(language, term, dupLanguage, dupTerm, cid, tid)
+{
+  this.language = language;
+  this.term = term;
+  this.dupLanguage = dupLanguage;
+  this.dupTerm = dupTerm;
+  this.cid = cid;
+  this.tid = tid;
+}
+
+function parseValidationResults(dom)
+{
+  if (!dom) return;
+
+  var nodes, node, nodes2, node2, nodes3, node3;
+  var language, dupLanguage, term, dupTerm, cid, tid;
+
+  nodes = dom.selectNodes('//validation/duplicates');
+  for (var i = 0; i < nodes.length; ++i)
+  {
+    node = nodes[i];
+
+    language = node.selectSingleNode('original/language').text;
+    term = node.selectSingleNode('original/term').text;
+
+    nodes2 = node.selectNodes('others/other');
+    for (var j = 0; j < nodes2.length; ++j)
+    {
+      node2 = nodes2[j];
+
+      dupLanguage = node2.selectSingleNode('language').text;
+
+      nodes3 = node2.selectNodes('term');
+      for (var k = 0; k < nodes3.length; ++k)
+      {
+        node3 = nodes3[k];
+
+        dupTerm = node3.text;
+        cid = node3.attributes.getNamedItem('cid').value;
+        tid = node3.attributes.getNamedItem('tid').value;
+
+        g_duplicates.push(new Duplicate(language, term,
+          dupLanguage, dupTerm, cid, tid));
+      }
+    }
+  }
+}
+
+function showDuplicates(dups)
+{
+   var tbody = idTableBody;
+
+   for (var i = tbody.rows.length; i > 0; --i)
+   {
+      tbody.deleteRow(i-1);
+   }
+
+   var row, cell;
+   var dup, lastdup = null;
+   var samelang = false, sameterm = false;
+   var bg = 'white';
+
+   for (var i = 0; i < dups.length; ++i)
+   {
+      dup = dups[i];
+
+      samelang = lastdup && lastdup.language == dup.language;
+      sameterm = lastdup && samelang && lastdup.term == dup.term;
+
+      if (!(samelang))
+      {
+        bg = (bg == 'white' ? '#EEEEEE' : 'white');
+      }
+
+      row = tbody.insertRow(-1);
+      row.style.background = bg;
+/*
+      cell = row.insertCell(-1);
+      
+      if (samelang)
+      {
+        cell.innerHTML = '';
+      }
+      else
+      {
+        cell.innerHTML = dup.language;
+      }
+
+      cell = row.insertCell(-1);
+      cell.innerText = sameterm ? '' : dup.term;
+*/
+      cell = row.insertCell(-1);
+      cell.innerText = dup.dupLanguage;
+
+      cell = row.insertCell(-1);
+      cell.innerText = dup.cid;
+      
+      cell = row.insertCell(-1);
+      cell.innerHTML = '<span cid=' + dup.cid + ' tid=' + dup.tid +
+        ' class=DUP onclick="showDUPItem('+ dup.cid + ',' + dup.tid +')">' + dup.dupTerm + '</span>';
+
+      lastdup = dup;
+   }
+}
+
+function showDUPItem(cid, tid) {
+    g_args.getWindow().showViewer();
+	  g_args.getWindow().GetEntry(cid, tid);
+}
+
+function init()
+{
+  var result = g_args.getResult();
+
+  // g_args.getResult() is a xmlhttp.responseXML object (DOMDocument I think)
+  parseValidationResults(result);
+
+  if (result && g_duplicates.length > 0)
+  {
+    showDuplicates(g_duplicates);
+    idConflicts.style.display = '';
+  }
+  else
+  {
+    idNoConflicts.style.display = '';
+  }
+
+  //idHeading.focus();
+}
+
+function doClose(ok)
+{
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  window.focus();
+
+  init();
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="idHeading" CLASS="mainHeading">Validation Results</DIV>
+<BR>
+<DIV ID="idNoConflicts" CLASS="standardText" STYLE="display:none;">
+<B>Validation succeeded</B>:
+No duplicate terms were found for this entry.
+</DIV>
+
+<DIV ID="idConflicts" STYLE="display:none;">
+<DIV ID="idExplanation" CLASS="standardText">
+Duplicate terms exist in the termbase for this entry.
+Click a term to open its entry in the Viewer and make sure
+the terms describe different concepts.
+(<B>This window will stay open.</B>)
+</DIV>
+<BR>
+
+<TABLE id="idTable" width="100%"
+  CELLPADDING=1 CELLSPACING=0 BORDER=1 CLASS="standardText"
+  style="border-style:solid">
+  <THEAD>
+    <TR>
+
+      <TD colspan=3 align="center"
+        style="background-color: #a6b8ce">Duplicate Terms
+      </TD>
+    </TR>
+    <TR>
+      <COL width="10%" valign="top">
+      <COL width="10%" valign="top" align=center>
+      <COL width="40%" valign="top">
+    </TR>
+    <TR style="background-color: #b6c8de; border-top-color: #b6c8de">
+      <TD>Language</TD>
+      <TD>Entry</TD>
+      <TD>Term</TD>
+    </TR>
+  </THEAD>
+  <TBODY id="idTableBody"></TBODY>
+</TABLE>
+</DIV>
+
+<BR>
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE="Close" TABINDEX="3" onclick="doClose();">
+</DIV>
+
+</body>
+</html>

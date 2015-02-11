@@ -1,0 +1,9 @@
+# Automatic File Import Mapping File
+# The format is as follows:
+# <directory> | <jobNamePrefix> | <FileProfileName>  | <space delimited extensions allowed> | <boolean overWriteSource> | <boolean callbackImmediately>
+# for example
+# /default/main/English/WORKAREA/html | job_one | HtmlEnFr | html htm | true | true
+#
+# NOTE: Make sure to always use the slash "/" for the
+# directory paths independent of the operating system.
+

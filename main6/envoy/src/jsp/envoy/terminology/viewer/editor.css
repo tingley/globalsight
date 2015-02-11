@@ -1,0 +1,131 @@
+.menuHeader     {
+                  margin-left: 3px;
+                  font-weight: bold;
+                  margin-bottom: 5px;
+                  margin-top: 5px;
+                }
+.menuLabel      {
+                  margin-left: 3px;
+                }
+
+.menuItem       {
+                  margin-left: 3px;
+                  color: blue;
+                  cursor: pointer;
+                }
+
+.menuSubItem    {
+                  margin-left: 12px;
+                  color: blue;
+                  cursor: pointer;
+                }
+
+/* IE 5.0 does not support .disabled on general elements like DIV,
+   so we need to use styles that look like disabled menus. */
+.menuItemD      {
+                  margin-left: 3px;
+                  color: gray;
+                }
+
+.menuSubItemD    {
+                  margin-left: 12px;
+                  color: gray;
+                }
+
+/* Entry Layout */
+
+
+#idEditorEntry P,
+#idEditorEntry OL,
+#idEditorEntry UL {
+                   margin-top: 0px;
+                   margin-bottom: 0px;
+                 }
+
+#idEditorEntry A {
+                   color: blue;
+                 }
+
+#idEditorEntry .xref {
+                       behavior: url(/globalsight/envoy/terminology/viewer/bhvrNoXref.htc)
+                     }
+
+.conceptGrp     {
+
+                }
+.languageGrp    {
+                  margin-left: 10px;
+                  margin-top: 0.1em;
+
+                }
+.termGrp        {
+                  margin-left: 10px;
+                  margin-top: 0.1em;
+
+                }
+.transacGrp     {
+                  margin-left: 10px;
+                  display: block;
+                }
+
+.conceptlabel   {
+                  font-weight: bold;
+                  margin-right: 0.5ex;
+                }
+.concept        {
+                  font-weight: bold;
+                }
+.languagelabel  {
+                  display: none;
+                  margin-right: 0.5ex;
+                }
+.language       {
+                  font-weight: bold;
+                  font-style: italic;
+                  color: cadetblue;
+                }
+
+.termlabel      {
+                  display: inline/*none*/;
+                  font-weight: bold;
+                  margin-right: 0.5ex;
+                }
+.term           {
+                  font-weight: bold;
+                  color: blue;
+                }
+
+.fakeConceptGrp {
+                  display: block;
+                }
+
+.fieldGrp       {
+                  margin-left: 10px;
+                  border: 1px solid thistle;
+                }
+.fieldlabel     {
+                  font-weight: bold;
+                  margin-right: 0.5ex;
+                }
+.fieldvalue     {
+                  font-weight: normal;
+                }
+.transaclabel   {
+                  font-size: 11;
+                  font-weight: bold;
+                  margin-right: 0.5ex;
+                }
+.transacvalue   {
+                  font-size:11;
+                  font-style: italic;
+                  color: gray;
+                }
+
+.highlighted    {
+                  border: 1px dashed gray !important;
+                }
+
+.selected       {
+                  border: 1px solid black !important;
+                }
+

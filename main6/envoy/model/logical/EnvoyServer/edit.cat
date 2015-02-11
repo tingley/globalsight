@@ -1,0 +1,23 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "edit"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A7F16430396"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class_Category "offline"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\editoffline.cat"
+	    quid       	"3A842B7D0341")
+	(object Class_Category "online"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\editonline.cat"
+	    quid       	"3AA6CC5F0110"))
+    logical_presentations 	(list unit_reference_list))

@@ -1,0 +1,144 @@
+/*****************************************************************************
+******************************************************************************
+%MS_COPYRIGHT%
+%MS_NAME%
+%MS_ADDRESS_LONG1%
+%MS_ADDRESS_LONG2%
+%MS_ADDRESS_LONG3%
+%MS_ADDRESS_LONG4%
+%MS_TEL%
+%MS_FAX%
+%MS_WEB%
+%MS_EMAIL%
+******************************************************************************
+File Information
+================
+
+%PID% %PRT% %PO%
+%PM% - %PD%
+
+******************************************************************************
+*****************************************************************************/
+
+/* Default values */
+table {font-family:Arial;font-size:9pt;}
+body {font-family:Arial; font-size:9pt; color:black; font-weight:Normal;text-decoration: none; background-color:white;
+}
+input {font-size:9pt;font-family:Arial;}
+select {font-size:9pt;font-family:Arial;}
+
+/* Hyperlink styles */
+a:active {font-family:Arial; font-size:9pt; color:#000000; /*font-weight:bold;*/text-decoration: none;}
+a:link {font-family:Arial; font-size:9pt; color:#000000; /*font-weight:bold;*/text-decoration: none;}
+a:visited {font-family:Arial; font-size:9pt; color:#000000; /*font-weight:bold;*/text-decoration: none;}
+a:hover {font-family:Arial; font-size:9pt; color:#000000; /*font-weight:bold;*/text-decoration: underline;}
+
+/* *** Custom classes *** */
+/* tab menu styles */
+.tabNotSelected
+{
+	/*font-weight: bold;*/
+	font-size: 8pt;
+	color: white;
+	font-family: Arial;
+	background-color: #738EB5;
+	text-decoration: none;
+}
+.tabSelected
+{
+	font-size: 8pt;
+	color: white;
+	font-family: Arial;
+	background-color: #0C1476;
+	text-decoration: none;
+}
+
+.tabDisabled
+{
+	font-weight: bold;
+	font-size: 8pt;
+	color: gray;
+	font-family: Arial;
+	background-color: #738EB5;
+	text-decoration: none;
+}
+
+/* base colours and styles */
+.banner
+{
+	background-color: #yellow;
+}
+
+.foregroundLight
+{
+	background-color: #d6dadc;
+}
+.foregroundDark
+{
+	background-color: red;
+}
+.rowHighlightDark
+{
+	background-color: #efefef;
+}
+.rowHighlightLight {background-color:#ffffff;}
+/*.columnHeaderHighlight {background-color:#708EB3;}*/
+.columnHeaderHighlight {background-color:beige;}
+/*.columnHeaderLowlight {background-color:#0C1476;}*/
+.columnHeaderLowlight {background-color:#738EB5;}
+
+.pagingBackground {background-color:#FDE7B2;}
+.statusBar {background-color:#738EB5; color: white; font-weight:normal ;text-decoration: none;}
+
+/* special text styles */
+.editHelpText {font-family:Arial; font-size:8pt; color:#173776; text-decoration: none;}
+.errorText {font-family:Arial; font-size:small; color:red; font-weight:bold; text-decoration: none;}
+.pageWarningText {font-family:Arial; font-size:9pt; color:red; font-weight:bold; text-decoration: none;}
+.announcement {font-family:Arial; font-size:12pt; color:#264989; font-weight:bold;}
+
+/* login page */
+.loginHighlight {font-family:Arial; font-size:10pt; font-weight:bold; color:black; background-color:white;text-decoration: none;}
+.loginLowLight {background-color:white;}
+.pageBackground {background-color:white;}
+
+/* site tree styles */
+.siteTreeItemSelected {font-family:Arial; font-size:9pt; font-weight:bold;}
+.siteTreeItemSelected:hover {font-weight:Normal; text-decoration:underline; font-weight:bold;}
+.siteTreeHostSelected {font-family:Arial; font-size:9pt; font-weight:bold; }
+.siteTreeHostSelected:hover {font-weight:Normal; text-decoration:underline; font-weight:bold;}
+.siteTreeHostUnSelected {font-family:Arial; font-size:9pt; }
+.siteTreeHostUnSelected:hover {text-decoration:underline; }
+.impactReportSelected {font-family:Arial; font-size:9pt; font-weight:bold;}
+.impactReportDependent {font-family:Arial; font-size:9pt; color:#C0C0C0; }
+
+/* text box styles */
+.fieldeditbox      { padding:2px;background-color:FFFFFF;foreground-color:000000;font-family:Arial;font-size:9pt;color:Black;overflow:auto;BORDER-RIGHT:'2px inset';BORDER-TOP:'2px inset';BORDER-LEFT:'2px inset'; BORDER-BOTTOM:'2px inset'; }
+.comparisontextbox { padding:2px;background-color:DDDDDD;foreground-color:000000;font-family:Arial;font-size:9pt;color:Black;overflow:auto;width:100%;height:100%;border:2px inset;position:relative; }
+.smallTextBox      { padding:2px;background-color:FFFFFF;foreground-color:000000;font-family:Arial;font-size:9pt;color:Black;overflow:auto;width:300px;height:70px }
+.largeTextBox      { padding:2px;background-color:FFFFFF;foreground-color:000000;font-family:Arial;font-size:9pt;color:Black;overflow:auto;width:350px;height:100px }
+
+/* custom wysiwyg style */
+.wysiwyg a:active,.wysiwyg a:link,.wysiwyg a:visited,.wysiwyg a:hover  {font-family:Arial; font-size:9pt; color:#0000ff;font-weight:normal;text-decoration:underline;}
+.wysiwyg {font-family:Arial; font-size:9pt; color:#000000;font-weight:normal;foreground-color:#000000;overflow:auto;}
+.wysiwyg table {font-family:Arial;font-size:9pt; color:#000000;}
+
+/* Popup Styles */
+popup.body { background-color: #e4e4e4;cursor:pointer; }
+popup.a:active {font-family:Arial; font-size:9pt; color:#000000; font-weight:bold;text-decoration: none;}
+popup.a:link {font-family:Arial; font-size:9pt; color:#000000; font-weight:bold;text-decoration: none;}
+popup.a:visited {font-family:Arial; font-size:9pt; color:#000000; font-weight:bold;text-decoration: none;}
+popup.a:hover {font-family:Arial; font-size:9pt; color:#000000; font-weight:bold;background-color: #8faee8;}
+
+/* Image Preview Styles */
+.previewUnselected {border-color:#FFFFFF;cursor:pointer;}
+.previewSelected {border-color:#2965BD;cursor:pointer;}
+
+/* DropDown styles */
+.headerMenuPane,.headerMenuPane a:active,.headerMenuPane a:link,.headerMenuPane a:visited,.headerMenuPane a:hover  {color:white; background-color: #738EB5;}
+.headerMenuHighlight {color:white;background-color: #738EB5;}
+.menuTop{ font-family:Arial; font-size:9pt; color:white; font-weight:bold;text-decoration: none;cursor:pointer;}
+.menuStyle {position:absolute;background-color:#738EB5;color:white; width:110;visibility:hidden;padding:4px}
+.menuUnselected {font-family:Arial; font-size:10pt; color:white!important; background-color: #738EB5; font-weight:bold;text-decoration: none;cursor:pointer;}
+/*.menuUnselected:hover {font-family:Arial; font-size:10pt; color:#8faee8; background-color: #738EB5; font-weight:bold;text-decoration: none;cursor:pointer;}
+*/
+

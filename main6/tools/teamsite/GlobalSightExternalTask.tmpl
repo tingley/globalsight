@@ -1,0 +1,128 @@
+#!%%teamsite_home%%/iw-perl/bin/iwperl -w
+##
+# This is the perl script that is called from
+# TeamSite's external task.
+# The arguments passed to this script are
+# 1. JobId 
+# 2. TaskId 
+# 3. AreaVPath
+# 4..end file names, that belong to the task.
+# This script then calls the java code to import
+# files into GlobalSight. When the files are done 
+# translating they are exported back and the the
+# GlobalSightImport script makes a callback to 
+# the external task so that the next task in the
+# workflow starts.
+##
+
+use CGI;
+use vars qw($logfile);
+use lib qw(../../iw-perl/lib/perl5/site_perl/5.005);
+use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Response;
+use MIME::Base64;
+use TeamSite::CGI_lite;
+use TeamSite::WFtask;
+use TeamSite::WFworkflow;
+use Cwd;
+use FindBin ();
+
+sub TimeStamp;
+sub log_entry;
+sub writeFiles;
+# This temporary directory is used to store
+# the taskfiles.
+my $iw_home = "%%teamsite_home%%";
+my $TEMP = "$iw_home/report/tmp";
+
+# generate a log file in the iw-home report/tmp directory
+$logfile="$iw_home/report/tmp/IW_GlobalSightImport.log";
+open(LOGFILE,">>$logfile") || log_entry "$0:ERROR: can\'t open $logfile";
+&TimeStamp;
+log_entry "GlobalSightExternalTask::The parameters are @ARGV \n";
+# If the parameter has multiple values, just use its first value.
+my($cgi) = TeamSite::CGI_lite->new();
+$cgi->parse_data();
+my $taskId = $ARGV[1];
+log_entry "\n GlobalSightExternalTask::Task id is $taskId \n";
+my $task_file = "ts_" . $taskId;
+my $task = TeamSite::WFtask->new($taskId);
+
+my $url = "";
+# enter proper CXE hostname and port number in $url assignment
+$url="http://%%server_host%%:%%server_port%%/globalsight/wl";
+
+$| = 1;
+my $ua = LWP::UserAgent->new();
+$ua->agent("Mozilla/5.0");
+$ua->timeout(60);
+my $req = HTTP::Request->new(GET => $url);
+$req->referer("http://www.globalsight.com");
+my $response = $ua->request($req);
+if ($response->is_error()) 
+{
+     log_entry " GlobalSight Server Not Reachable \n";
+     log_entry $response->status_line. " \n";
+     log_entry " Aborting the Operation... \n";
+     if($taskId > 0) 
+     {
+            log_entry "Calling back for task $taskId \n";
+            $task->CallBack(1, "Import Error: Returning the control to TeamSite");
+     }
+} 
+else 
+{
+    log_entry " GlobalSight Server Was Reachable \n";
+    log_entry $response->status_line. " \n";
+    # The individual task files are named as ts_taskId
+    my @files = $task->GetFiles();
+    writeFiles($task_file, @files);
+    my $PATH = "../";
+    # Let's find out the directory in which this
+    # perl script resides.
+    chdir ($FindBin::Bin);
+    # change the current working directory to lib
+    # so that java code can find all classes properly
+    chdir("../lib");
+    $ENV{"CLASSPATH"} = "$PATH;$PATH/lib;$PATH/lib/log4j.jar;$PATH/lib/tsAutoImport.jar;$PATH/properties";
+    my $cur_dir = cwd;
+    log_entry "\nGlobalSightExternalTask::Current directory is $cur_dir\n";
+    my $java_home = $ENV{"JAVA_HOME"};
+    # This is the java code that actually sends all the files to 
+    # GlobalSight.
+    my $cmd = "$java_home/bin/java com.globalsight.cxe.adapter.teamsite.autoimport.AutomaticImporter ";
+    for (my $c = 0; $c < @ARGV; $c++) {
+        $cmd .= " \"$ARGV[$c]\" "; 	
+    }
+    log_entry " $cmd \n";
+    $result = `$cmd 2>&1`;
+    log_entry " GlobalSightExternalTask::$result\n ";
+}
+close(LOGFILE);
+
+sub TimeStamp {
+   my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+   localtime(time);
+   my($date) = sprintf("%04d/%02d/%02d-%02d:%02d:%02d",($year+1900),$mon+1,$mday,$hour,$min,$sec);
+   log_entry "$date\n";
+}
+
+sub log_entry {
+	my $entry = shift;
+	print LOGFILE $entry;
+}
+sub writeFiles
+{
+	my $task_file = shift;
+	my @files = @_;
+	mkdir ("$TEMP", 0777);
+	open (OUT, "> $TEMP/$task_file") || log_entry "cannot open $!\n";
+	print OUT "NO_STATUS\n";
+	for (@files)
+	{
+		s#\\#/#sg;
+		print OUT $_."=n\n";
+	}
+	close OUT;
+}

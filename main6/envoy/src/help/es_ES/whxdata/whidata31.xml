@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="guardar" >
+  <topic name="Adjuntar procesos de producción a idiomas de destino" url="Configuraci_n/Perfiles_de_traducci_n/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Añadir/Modificar procesos de producción" url="Configuraci_n/Perfiles_de_traducci_n/Add_Edit_Workflows.htm" />
+  <topic name="Cargos" url="Configuraci_n/Usuarios/Roles.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Reasignar una actividad" url="Mis_trabajos/Procedimientos/Reassign_an_Activity_howdoI.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="guardarlo" >
+  <topic name="Archivos de registro" url="Configuraci_n/Archivos_de_registro/Log_Files.htm" />
+</key>
+<key name="guarde" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+</key>
+<key name="guían paso" >
+  <topic name="Descripción general" url="Overview.htm" />
+</key>
+<key name="Guías" >
+  <topic name="Descripción general" url="Overview.htm" />
+</key>
+<key name="GXML" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="H1&gt;Página" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="H2&gt;Mi lista&lt;/H2" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="ha aceptado" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="ha alcanzado" >
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="ha añadido" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="ha escrito" >
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+</key>
+<key name="ha habilitado" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="ha introducido" >
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+</key>
+<key name="ha sido eliminado" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="ha sido importado" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="ha terminado" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="ha traducido" >
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="haber" >
+  <topic name="Adjuntar procesos de producción a idiomas de destino" url="Configuraci_n/Perfiles_de_traducci_n/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="haber guardado" >
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+</key>
+<key name="haber más" >
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+</key>
+<key name="haber múltiples elementos ruleset" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="Habilita" >
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="habilitar" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="Habilitar autenticación" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="habilitar si" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="hace falta" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="hace falta traducirlos" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="hacerlo" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="hacerse" >
+  <topic name="Crear/modificar tipo de actividad" url="Configuraci_n/Tipos_de_actividades/Create_Modify_Activity_Type.htm" />
+</key>
+<key name="haga se guardará" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="han borrado" >
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="han pasado" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="han publicado" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="han sido archivados" >
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="han sido creados" >
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+</key>
+<key name="han sido terminadas" >
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+</key>
+<key name="hasta" >
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="hay" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="hay junto" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="hay junto al nombre" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="hay restricciones" >
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="hay varias agencias" >
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+</key>
+<key name="hay varias regiones" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="haya aceptado se muestran" >
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="haya definido" >
+  <topic name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+</key>
+<key name="haya rechazado" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="haya seleccionado" >
+  <topic name="Seleccionar fragmento" url="Mis_actividades/Select_Snippet.htm" />
+</key>
+<key name="haya trabajo" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="he aceptado" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="HEAD" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="hecho" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+</key>
+<key name="Heinrich Schmidt" >
+  <topic name="Actividad" url="Glosario/Activity.htm" />
+  <topic name="Proceso de producción" url="Glosario/Workflow.htm" />
+</key>
+<key name="Helvetica&quot;&gt;&lt;/FONT" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Hemos creado" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="hemos incluido" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="Here is" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="herramientas" >
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="Herzlich Willkommen zu Acme Corporation" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+</key>
+<key name="hiperenlaces" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="hiperenlaces activos" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="hiperenlaces visitados" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+</key>
+<key name="historial" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+
+</indexdata>

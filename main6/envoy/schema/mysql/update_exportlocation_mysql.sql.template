@@ -1,0 +1,8 @@
+-- 
+--  Updates the default export location
+-- 
+      
+DELETE FROM EXPORT_LOCATION WHERE ID=1;
+INSERT INTO EXPORT_LOCATION (ID, NAME, DESCRIPTION, LOCATION, COMPANY_ID) VALUES (1,'CXE Docs Dir','The CXE Document Dir','%%cxe_docsDir%%',1);
+commit;
+

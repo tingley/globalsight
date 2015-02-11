@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.comment.IssueImpl"
+        table="ISSUE">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="createDate" column="CREATE_DATE" type="timestamp"
+            not-null="false" unique="false" />
+
+        <property name="creatorId" length="25" column="CREATOR_USER_ID"
+            type="string" not-null="false" unique="false" />
+
+        <property name="levelObjectId" column="ISSUE_OBJECT_ID"
+            type="long" not-null="true" unique="false" />
+
+        <property name="logicalKey" length="200" column="LOGICAL_KEY"
+            type="string" not-null="false" unique="false" />
+
+        <property name="title" length="200" column="TITLE" type="string"
+            not-null="true" unique="false" />
+
+        <property name="status" length="20" column="STATUS"
+            type="string" not-null="true" unique="false" />
+
+        <property name="category" length="100" column="CATEGORY"
+            type="string" not-null="true" unique="false" />
+
+        <property name="levelObjectTypeAsString" length="1"
+            column="ISSUE_OBJECT_TYPE" type="string" not-null="true"
+            unique="false" />
+
+        <property name="priorityInDb" length="1" column="PRIORITY"
+            type="string" not-null="true" unique="false" />
+            
+        <property name="overwrite" column="OVERWRITE" type="yes_no" not-null="true"
+			unique="false" />
+        <property name="share" column="SHARE" type="yes_no" not-null="true"
+			unique="false" />
+
+        <set name="issueHistory" inverse="true" cascade="save-update">
+            <key column="ISSUE_ID" />
+            <one-to-many
+                class="com.globalsight.everest.comment.IssueHistoryImpl" />
+        </set>
+
+    </class>
+
+</hibernate-mapping>

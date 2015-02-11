@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.everest.webapp.pagehandler.administration.config.remoteip.RemoteIp"
+        table="REMOTE_IP">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="ip" length="40" column="IP" type="string"
+            not-null="true" unique="false" />
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+    </class>
+</hibernate-mapping>

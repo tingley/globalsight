@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!-- NOTE: The RequestDispatcher is used to forward to these JSPS -->
+<!--       and it knows the context-root of the application. So -->
+<!--       there is no reason to specify "/globalsight/envoy/...." -->
+
+<WebApplication webAppName="Report">
+  <ReportModule reportName="WorkflowStatus">
+    <AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.WorkflowStatusReportHandler"/>
+  </ReportModule>
+  <ReportModule reportName="AvgPerComp">
+  	<AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.AvgPerCompReportHandler"/>
+  </ReportModule>
+  <ReportModule reportName="JobDetails">
+    <AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.JobDetailsReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="MissingTerms">
+  	<AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.MissingTermsReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="TmReport">
+    <AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.TmReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="TermAudit">
+  	<AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.TermAuditReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="CostingReport">
+  	<AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.CostingReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="CostsByLocaleReport">
+    <AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.CostsByLocaleReportHandler"/>
+  </ReportModule>
+  
+  <ReportModule reportName="TaskDurationReport">
+    <AccessRight accessGroup="all"></AccessRight>
+    <ReportHandler class="com.globalsight.reports.handler.TaskDurationReportHandler"/>
+  </ReportModule>
+  
+  <ReportUrl jspName="costingReportCreate" targetUrl="/envoy/administration/reports/costingReport.jsp"/>
+  
+  <ReportUrl jspName="tmReportCreate" targetUrl="/envoy/administration/reports/tmReport.jsp"/>
+  
+  <ReportUrl jspName="costsByLocaleReportCreate" targetUrl="/envoy/administration/reports/costsByLocaleReport.jsp"/>
+  
+  <ReportUrl jspName="taskDurationReportCreate" targetUrl="/envoy/administration/reports/taskDurationReport.jsp"/>
+  
+  <ReportUrl jspName="jobDetailsReportPrepare" targetUrl="/envoy/administration/reports/jobDetailsReportParameter.jsp"/>
+  <ReportUrl jspName="jobDetailsReportCreate" targetUrl="/envoy/administration/reports/jobDetailsReport.jsp"/>
+  
+  <ReportUrl jspName="workflowstatusReportPrepare" targetUrl="/envoy/administration/reports/workflowStatusReportParameter.jsp"/>
+  <ReportUrl jspName="workflowstatusReportCreate" targetUrl="/envoy/administration/reports/workflowStatusReport.jsp"/>
+  
+  <ReportUrl jspName="avgpercompReportPrepare" targetUrl="/envoy/administration/reports/avgpercompReportParameter.jsp"/>
+  <ReportUrl jspName="avgpercompReportCreate" targetUrl="/envoy/administration/reports/avgpercompReport.jsp"/>
+  
+  <ReportUrl jspName="missingtermsReportPrepare" targetUrl="/envoy/administration/reports/missingTermsReportParameter.jsp"/>
+  <ReportUrl jspName="missingtermsReportCreate" targetUrl="/envoy/administration/reports/missingTermsReport.jsp"/>
+  
+  <ReportUrl jspName="termauditReportPrepare" targetUrl="/envoy/administration/reports/termauditReportParameter.jsp"/>
+  <ReportUrl jspName="termauditReportCreate" targetUrl="/envoy/administration/reports/termauditReport.jsp"/>
+</WebApplication>

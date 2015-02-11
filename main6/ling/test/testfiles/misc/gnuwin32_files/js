@@ -1,0 +1,26 @@
+test=1;
+dt=(new Date()).getHours();sv=10;ce="na";ss="na";sc="na";ln="";pl="";
+rf=escape(document.referrer)+"";
+if((rf=="undefined")||(rf=="")){rf="bookmark";};
+bn=navigator.appName;if(bn.substring(0,9)=="Microsoft"){bn="MSIE";};
+bv=Math.round(parseFloat(navigator.appVersion)*100);
+if((bn=="MSIE")&&(parseInt(bv)==2))bv=301; ja="na";
+if(navigator.appName=="Netscape") {
+if(bv>=400) ln=navigator.language;
+if(bv>300) for(var i=0;i<navigator.plugins.length;i++)
+pl +=navigator.plugins[i].name+":" };
+sv=11;ja=(navigator.javaEnabled()==true)?"y":"n";
+document.write("<script language=javascript1.2>");
+document.write("sv=12;ss=screen.width+'*'+screen.height;sc=(bn=='MSIE')?screen.colorDepth:screen.pixelDepth;if(sc=='undefined'){sc='na';}");
+document.write("</"+"script>");
+document.write("<script language=javascript1.3>");
+document.write("sv=13;");
+document.write("</"+"script>");
+arg="&bn="+bn+"&bv="+bv+"&ce="+ce+"&ss="+ss+"&sc="+sc+"&dt="+dt+"&sv="+sv;
+arg+="&ja="+ja+"&rf="+rf+"&ln="+ln+"&pl="+escape(pl);
+x1="<a href='http://rd1.hitbox.com/rd?acct=WQ59083157AZ28EN5' target='_top'>";
+x2="<img src='http://hg1.hitbox.com/HG?hc=w135&hb=WQ59083157AZ28EN5&n=MainPage";
+x3="&cd=1&jf=7' border=0 height=15 width=468";
+x4=" alt='Interested? Click Here.'></a>";
+document.write(x1+x2+arg+x3+x4);
+

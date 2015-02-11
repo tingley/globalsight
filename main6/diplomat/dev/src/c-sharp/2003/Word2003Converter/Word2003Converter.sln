@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Word2003Converter", "Word2003Converter\Word2003Converter.csproj", "{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug.ActiveCfg = Debug|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug.Build.0 = Debug|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release.ActiveCfg = Release|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

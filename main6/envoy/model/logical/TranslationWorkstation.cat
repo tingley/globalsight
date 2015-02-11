@@ -1,0 +1,81 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Localization Workstation"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA3CA6036B"
+    documentation 	"This package is the Localization Workstation subsystem."
+    visible_categories 	(list visibility_relationship_list
+	(object Visibility_Relationship
+	    quid       	"38C4CC57023B"
+	    supplier   	"Logical View::Envoy::EV Interface"
+	    quidu      	"38BA37170148"))
+    visible_modules 	(list dependency_list
+	(object Dependency_Relationship
+	    quid       	"394180140288"
+	    supplier   	"Logical View::Envoy::EV Interface::LWServletProxy"
+	    quidu      	"38BE253F0034")
+	(object Dependency_Relationship
+	    quid       	"3941813A01C2"
+	    supplier   	"Logical View::Linguistics::TranslationServer"
+	    quidu      	"394180620117"))
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "LWServlet"
+	    quid       	"3943CDF803C6"
+	    documentation 	"This is a Java servlet that talks to the Localization Workstation UI.  It generates all the HTML and JavaScript that the user's browser works with."
+	    stereotype 	"Interface"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "External Interface"
+	    quid       	"3949E9DE0238"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Localization Workstation::LWServlet" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(608, 432)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(480, 403)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	256
+			justify    	0
+			label      	"LWServlet")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(480, 353)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	253
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3943CDF803C6"
+		    width      	274
+		    height     	182
+		    annotation 	8
+		    autoResize 	TRUE)))))

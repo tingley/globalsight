@@ -1,0 +1,266 @@
+# log4j configuration properties file.
+# File must be named log4j.properties and be in the classpath to be used as the
+# default configuration. It cannot be placed under a "properties" directory unless
+# that directory is included in the classpath. For GlobalSight, we place this file
+# in the globalsight.ear/lib/classes directory.
+
+# LoggerFactory for GlobalSightCategory
+log4j.loggerFactory=com.globalsight.log.GlobalSightCategoryFactory
+
+# GlobalSight.log settings
+log4j.rootLogger=INFO, FILE
+log4j.appender.FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.FILE.File=%%system_log_directory_forwardslash%%/GlobalSight.log
+log4j.appender.FILE.Encoding=UTF-8
+# Roll the log file over at 100000KB
+log4j.appender.FILE.MaxFileSize=100000KB
+log4j.appender.FILE.MaxBackupIndex=5
+log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+# Print the date in ISO 8601 format;[thread name];priority;category;message line separator 
+log4j.appender.FILE.layout.ConversionPattern=%d;[%t];%-5p;%c;%m%n
+
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender 
+log4j.appender.Threshold=ERROR
+log4j.appender.CONSOLE.Target=System.err
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout 
+log4j.appender.CONSOLE.layout.ConversionPattern=%d{ABSOLUTE} %-5p [%c{1}] %m%n
+#log4j.appender.CONSOLE.layout.ConversionPattern = [start] % d  {DATE} [DATE] % n % p[PRIORITY] % n % x[NDC] % n % t[THREAD] n % c[CATEGORY] % n % m[MESSAGE] % n % n
+
+# The Terminology Audit Log (JMS)
+log4j.appender.J1=org.apache.log4j.net.JMSAppender
+log4j.appender.J1.TopicBindingName=%%Jboss_JNDI_prefix%%com.globalsight.terminology.jms.TermAuditLog
+log4j.appender.J1.TopicConnectionFactoryBindingName=com.globalsight.jms.GlobalSightTopicConnectionFactory
+
+# The Terminology Audit Log (File)
+log4j.appender.J2=org.apache.log4j.RollingFileAppender
+log4j.appender.J2.File=%%system_log_directory_forwardslash%%/term_audit.log
+log4j.appender.J2.MaxFileSize=100000KB
+log4j.appender.J2.MaxBackupIndex=5
+log4j.appender.J2.layout=org.apache.log4j.PatternLayout
+log4j.appender.J2.layout.ConversionPattern=%m%n
+
+# Terminology Audit Messages go both to JMS and File
+#WS log4j.logger.TermAuditLog=INFO, J1, J2
+log4j.logger.TermAuditLog=INFO, J2
+
+# The Customer Upload Log (File)
+log4j.appender.U2=org.apache.log4j.RollingFileAppender
+log4j.appender.U2.File=%%system_log_directory_forwardslash%%/customer_upload.log
+log4j.appender.U2.MaxFileSize=100000KB
+log4j.appender.U2.MaxBackupIndex=5
+log4j.appender.U2.layout=org.apache.log4j.PatternLayout
+log4j.appender.U2.layout.ConversionPattern=%m%n
+log4j.logger.CustomerUpload=INFO, U2
+
+# Assign priorities to meta categories
+log4j.logger.Export=INFO
+log4j.logger.Import=INFO
+log4j.logger.Snippets=INFO
+log4j.logger.EditSourcePage=INFO
+log4j.logger.Images=INFO
+
+# Avoid performance hit of walking the category hierarchy 
+# by assigning a priority here to packages that have classes.
+log4j.logger.com.globalsight=INFO
+log4j.logger.com.globalsight.config=INFO
+log4j.logger.com.globalsight.everest=INFO
+log4j.logger.com.globalsight.everest.aligner=INFO
+log4j.logger.com.globalsight.everest.comment=INFO
+log4j.logger.com.globalsight.everest.corpus.CorpusContext=INFO
+log4j.logger.com.globalsight.everest.corpus.CorpusContextHolder=INFO
+log4j.logger.com.globalsight.everest.corpus.CorpusDoc=INFO
+log4j.logger.com.globalsight.everest.corpus.CorpusDocGroup=INFO
+log4j.logger.com.globalsight.everest.corpus.CorpusManagerLocal=INFO
+log4j.logger.com.globalsight.everest.edit.online=INFO
+log4j.logger.com.globalsight.everest.edit.online.imagereplace=INFO
+log4j.logger.com.globalsight.everest.edit.offline=INFO
+log4j.logger.com.globalsight.everest.edit.offline.download=INFO
+log4j.logger.com.globalsight.everest.edit.offline.rtf=INFO
+log4j.logger.com.globalsight.everest.edit.offline.upload=INFO
+log4j.logger.com.globalsight.everest.foundation=INFO
+log4j.logger.com.globalsight.everest.glossaries=INFO
+log4j.logger.com.globalsight.everest.integration=INFO
+log4j.logger.com.globalsight.everest.integration.ling=INFO
+log4j.logger.com.globalsight.everest.integration.ling.tm=INFO
+log4j.logger.com.globalsight.everest.integration.ling.tm2=INFO
+log4j.logger.com.globalsight.everest.jobhandler=INFO
+log4j.logger.com.globalsight.everest.jobhandler.jobcreation=INFO
+log4j.logger.com.globalsight.everest.jobhandler.jobmanagement=INFO
+log4j.logger.com.globalsight.everest.jobhandler.jobmanagement.dispatch=INFO
+log4j.logger.com.globalsight.everest.jobreportingmanager=INFO
+log4j.logger.com.globalsight.everest.localemgr=INFO
+log4j.logger.com.globalsight.everest.page=INFO
+log4j.logger.com.globalsight.everest.page.pageimport=INFO
+log4j.logger.com.globalsight.everest.page.pageexport=INFO
+log4j.logger.com.globalsight.everest.page.pageupdate=INFO
+log4j.logger.com.globalsight.everest.persistence=INFO
+log4j.logger.com.globalsight.everest.persistence.activity=INFO
+log4j.logger.com.globalsight.everest.persistence.codeset=INFO
+log4j.logger.com.globalsight.everest.persistence.job=INFO
+log4j.logger.com.globalsight.everest.persistence.l10nprofile=INFO
+log4j.logger.com.globalsight.everest.persistence.locale=INFO
+log4j.logger.com.globalsight.everest.persistence.page=INFO
+log4j.logger.com.globalsight.everest.persistence.project=INFO
+log4j.logger.com.globalsight.everest.persistence.request=INFO
+log4j.logger.com.globalsight.everest.persistence.templateformat=INFO
+log4j.logger.com.globalsight.everest.persistence.tm=INFO
+log4j.logger.com.globalsight.everest.persistence.tuv=INFO
+log4j.logger.com.globalsight.everest.persistence.workflow=INFO
+log4j.logger.com.globalsight.everest.persistence.task=INFO
+log4j.logger.com.globalsight.everest.projecthandler=INFO
+log4j.logger.com.globalsight.everest.projecthandler.importer=INFO
+log4j.logger.com.globalsight.everest.projecthandler.exporter=INFO
+log4j.logger.com.globalsight.everest.request=INFO
+log4j.logger.com.globalsight.everest.securitymgr=INFO
+log4j.logger.com.globalsight.everest.segmentationhelper=INFO
+log4j.logger.com.globalsight.everest.servlet=INFO
+#log4j.logger.com.globalsight.everest.servlet.ClasspathServlet=INFO
+#log4j.logger.com.globalsight.everest.servlet.util=INFO
+log4j.logger.com.globalsight.everest.snippet=INFO
+log4j.logger.com.globalsight.everest.snippet.importer=INFO
+log4j.logger.com.globalsight.everest.statistics=INFO
+log4j.logger.com.globalsight.everest.taskmanager=INFO
+log4j.logger.com.globalsight.everest.tm=INFO
+log4j.logger.com.globalsight.everest.tm.exporter=INFO
+log4j.logger.com.globalsight.everest.tm.importer=INFO
+log4j.logger.com.globalsight.everest.tm.searchreplace=INFO
+log4j.logger.com.globalsight.everest.tm.util=INFO
+log4j.logger.com.globalsight.everest.tuv=INFO
+log4j.logger.com.globalsight.everest.usermgr=INFO
+log4j.logger.com.globalsight.everest.util=INFO
+log4j.logger.com.globalsight.everest.util.jms=INFO
+log4j.logger.com.globalsight.everest.util.server=INFO
+log4j.logger.com.globalsight.everest.util.system=INFO
+log4j.logger.com.globalsight.everest.vendormanagement=INFO
+log4j.logger.com.globalsight.everest.webapp=INFO
+log4j.logger.com.globalsight.everest.webapp.javabean=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.activity=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.autodispatch=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.dbconnection=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.dbdispatch=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.fileextension=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.previewurl=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.segmentationrulefile=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.teamsite=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.config.xmlrulefile=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.dbprofile=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.fileprofile=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.glossaries=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.imp=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.localepairs=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.projects=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.usergroups=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.administration.users=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.aligner=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.edit=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.edit.offline=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.edit.online=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.edit.online2=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.edit.sourcepage=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.error=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.exportlocation=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.login=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.offline=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.offline.download=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.offline.upload=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.projects=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.projects.workflows=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.snippets=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.tasks=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.terminology.maintenance=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.terminology.management=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.terminology.viewer=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.tm.maintenance=INFO
+log4j.logger.com.globalsight.everest.webapp.pagehandler.tm.management=INFO
+#log4j.logger.com.globalsight.everest.webapp.servlet=INFO
+log4j.logger.com.globalsight.everest.webapp.webnavigation=INFO
+log4j.logger.com.globalsight.everest.workflow=INFO
+log4j.logger.com.globalsight.everest.workflowmanager=INFO
+log4j.logger.com.globalsight.exporter=INFO
+log4j.logger.com.globalsight.importer=INFO
+log4j.logger.com.globalsight.io=INFO
+log4j.logger.com.globalsight.log=INFO
+log4j.logger.com.globalsight.naming=INFO
+log4j.logger.com.globalsight.ling=INFO
+log4j.logger.com.globalsight.ling.lucene=INFO
+log4j.logger.com.globalsight.ling.rtf=INFO
+log4j.logger.com.globalsight.ling.sgml.sgmlrules=INFO
+log4j.logger.com.globalsight.ling.tm=INFO
+log4j.logger.com.globalsight.ling.tm2=INFO
+log4j.logger.com.globalsight.ling.tm2.indexer=INFO
+log4j.logger.com.globalsight.ling.tm2.leverage=INFO
+log4j.logger.com.globalsight.ling.tm2.persistence=INFO
+log4j.logger.com.globalsight.ling.tm2.population=INFO
+# TM3 is too noisy at INFO
+log4j.logger.com.globalsight.ling.tm3=WARN
+log4j.logger.com.globalsight.machineTranslation=INFO
+log4j.logger.com.globalsight.machineTranslation.babelfish=INFO
+log4j.logger.com.globalsight.machineTranslation.freetranslation=INFO
+log4j.logger.com.globalsight.machineTranslation.google=INFO
+log4j.logger.com.globalsight.machineTranslation.systran=INFO
+log4j.logger.com.globalsight.persistence=INFO
+log4j.logger.com.globalsight.persistence.pageupdate=INFO
+log4j.logger.com.globalsight.terminology=INFO
+log4j.logger.com.globalsight.terminology.audit=INFO
+log4j.logger.com.globalsight.terminology.exporter=INFO
+log4j.logger.com.globalsight.terminology.importer=INFO
+log4j.logger.com.globalsight.terminology.servlet=INFO
+log4j.logger.com.globalsight.terminology.searchreplace=INFO
+log4j.logger.com.globalsight.terminology.termleverager=INFO
+log4j.logger.com.globalsight.terminology.termleverager.replacer=INFO
+log4j.logger.com.globalsight.terminology.termleverager.recognizer=INFO
+log4j.logger.com.globalsight.terminology.tokenizer=INFO
+log4j.logger.com.globalsight.terminology.userdata=INFO
+log4j.logger.com.globalsight.terminology.util=INFO
+log4j.logger.com.globalsight.util=INFO
+#log4j.logger.com.globalsight.util.database=INFO
+log4j.logger.com.globalsight.util.date=INFO
+log4j.logger.com.globalsight.util.edit=INFO
+log4j.logger.com.globalsight.util.exception=INFO
+log4j.logger.com.globalsight.util.gxml=INFO
+log4j.logger.com.globalsight.util.j2ee=INFO
+log4j.logger.com.globalsight.util.j2ee.weblogic=INFO
+log4j.logger.com.globalsight.util.j2ee.weblogic.TimerControl=INFO
+log4j.logger.com.globalsight.util.mail=INFO
+log4j.logger.com.globalsight.util.resourcebundle=INFO
+log4j.logger.com.globalsight.util.system=INFO
+log4j.logger.Ambassador=INFO
+
+#CXE Adapter Categories
+log4j.logger.CXE=INFO
+log4j.logger.Extractor=INFO
+log4j.logger.Merger=INFO
+log4j.logger.CapSourceAdapter=INFO
+log4j.logger.CapTargetAdapter=INFO
+log4j.logger.FileSystemSourceAdapter=INFO
+log4j.logger.FileSystemTargetAdapter=INFO
+log4j.logger.MsOfficeSourceAdapter=INFO
+log4j.logger.MsOfficeTargetAdapter=INFO
+
+log4j.logger.com.globalsight.cxe.adapter.adobe=INFO
+log4j.logger.PdfSourceAdapter=INFO
+log4j.logger.PdfTargetAdapter=INFO
+
+log4j.logger.QuarkFrameSourceAdapter=INFO
+log4j.logger.QuarkFrameTargetAdapter=INFO
+log4j.logger.CopyFlowSourceAdapter=INFO
+log4j.logger.CopyFlowTargetAdapter=INFO
+
+# For jBPM categories
+log4j.logger.org.hibernate=ERROR
+log4j.logger.org.jbpm=ERROR
+log4j.logger.net.sf.ehcache=ERROR
+log4j.logger.org.apache=ERROR
+
+# Set the mailer to log only errors
+log4j.logger.com.globalsight.util.mail.MailerLocal=ERROR
+
+# Control Servlet Logging
+#log4j.logger.com.globalsight.everest.servlet.ControlServlet=DEBUG
+
+# Quartz categories
+log4j.logger.org.quartz=ERROR

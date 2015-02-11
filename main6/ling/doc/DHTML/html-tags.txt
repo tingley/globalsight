@@ -1,0 +1,104 @@
+# TAG, BLOCK=1-OR-INLINE=0-OR-NOTRENDERED=-1?, REQUIRES-CLOSING?, DESCRIPTION
+!DOCTYPE,0,0,"document type declaration"
+A,0,1,"link"
+ACRONYM,0,1,
+ADDRESS,1,1,
+APPLET,1,1,
+AREA,-1,1,
+B,0,1,
+BASE,-1,0,
+BASEFONT,-1,0,
+BDO,0,1,"Bidi Override"
+BGSOUND,-1,0,
+BIG,0,1,
+BLOCKQUOTE,1,1,
+BODY,1,1,
+BR,0,0,
+BUTTON,0,1,
+CAPTION,1,1,
+CENTER,1,1,
+CITE,0,1,
+CODE,0,1,"inline code sample, fixed with"
+COL,1,1,"column-based defaults in a table header"
+COLGROUP,1,1,"closing tag only if it contains <col>" 
+COMMENT,-1,1,
+DD,1,0,
+DEL,0,1,"indicates that text has been deleted from the document"
+DFN,0,1,"defining instance of a term"
+DIR,1,1,"directory list"
+DIV,1,1,
+DL,1,1,"definition list"
+DT,1,0,"definition term"
+EM,0,1,
+EMBED,1,0,"embedded objects"
+FIELDSET,1,1,"draws a box around contained elements"
+FONT,-1,1,
+FORM,1,1,
+FRAME,1,0,
+FRAMESET,1,1,
+HEAD,-1,1,
+H1,1,1,
+H2,1,1,
+H3,1,1,
+H4,1,1,
+H5,1,1,
+H6,1,1,
+HR,1,0,
+HTML,-1,1,
+I,0,1,
+IFRAME,1,1,
+IMG,0,0,
+INPUT,0,0,
+INS,0,1,"text that has been inserted in the document"
+ISINDEX,0,0,
+KBD,0,1,"fixed width font"
+LABEL,0,1,"associates a label with another element"
+LEGEND,1,1,"caption in a <fieldgroup>"
+LI,0,0,
+LINK,-1,0,
+LISTING,1,1,"small fixed width font -> use <pre> or <samp>"
+MAP,-1,1,
+MARQUEE,1,1,
+MENU,1,1,"same as <UL>"
+META,-1,0,
+NOBR,0,1,"text with no line breaks"
+NOFRAMES,1,1,
+NOSCRIPT,1,1,"text for browsers without script support"
+OBJECT,1,1,
+OL,1,1,
+OPTION,0,0,"an option in a drop-down list"
+P,1,0,
+PARAM,0,0,
+PLAINTEXT,0,1,"fixed-width CDATA -> use <xmp>" 
+PRE,1,1,
+Q,0,1,"quotation"
+RT,0,0,"ruby text for <ruby>"
+RUBY,0,1,"annotation or pronounciation guide for a 'base'"
+S,0,1,"strike-through text"
+SAMP,0,1,"inline code sample, fixed-width font"
+SCRIPT,1,1,
+SELECT,0,1,
+SMALL,0,1,
+SPAN,0,1,
+STRIKE,0,1,
+STRONG,0,1,
+STYLE,1,1,
+SUB,0,1,
+SUP,0,1,
+TABLE,1,1,
+TBODY,1,1,
+TD,1,1,
+TEXTAREA,0,1,
+TFOOT,1,1,
+TH,1,1,
+THEAD,1,1,
+TITLE,1,1,
+TR,1,1,
+TT,0,1,
+U,0,1,"underline"
+UL,1,1,
+VAR,0,1,"small fixed-width font"
+WBR,-1,0,"soft linebreak inside <nobr>"
+XML,-1,1,
+XMP,0,1,"fixed width font -> use <pre> or <samp>"
+

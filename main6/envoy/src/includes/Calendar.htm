@@ -1,0 +1,75 @@
+<html xmlns:IE>
+<head>
+<title>Calendar</title>
+<style>
+@media all 
+{
+  IE\:Calendar 
+  {
+   behavior: url("/globalsight/includes/Calendar.htc") ;
+  }
+}
+</style>
+<script>
+// Gets the selected date and calls the unload function.
+function CloseCalendar()
+{
+  var val = Calendar.value;
+  var id = parent.document.body.children[0].ParentId;
+  parent.parent.document.getElementById(id).Unload(val)
+}
+</script>
+</head>
+<body style="background-color:buttonface;">
+<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0" >
+  <tr>
+    <td align="center"><ie:calendar oncalendardblclick="CloseCalendar()"
+      id="Calendar" 
+      style="
+      BORDER-RIGHT: white 1px solid; 
+      BORDER-TOP: white 1px solid; 
+      BORDER-LEFT: white 1px solid; 
+      WIDTH: 100%; 
+      BORDER-BOTTOM: white 1px solid; 
+      HEIGHT:100%;
+      cal--currentMonth-background-color:white;
+      cal--currentMonth-color:#006699;
+      cal--currentMonth-font-family:Tahoma;
+      cal--currentMonth-font-size:8pt;
+      cal--currentMonth-font-weight:normal;
+      cal--currentMonth-text-align:center;
+      cal--currentMonth-vertical-align:middle;
+      cal--dayTitle-background-color:#006699;
+      cal--dayTitle-color:white;
+      cal--dayTitle-font-family:Tahoma;
+      cal--dayTitle-font-size:8pt;
+      cal--dayTitle-font-Weight:bold;
+      cal--dayTitle-text-align:center;
+      cal--offMonth-background-color:#F8F7D3;
+      cal--offMonth-color:#006699;
+      cal--offMonth-font-family:Tahoma;
+      cal--offMonth-font-size:8pt;
+      cal--offMonth-font-weight:normal;
+      cal--offMonth-text-align:center;
+      cal--offMonth-vertical-align:middle;
+      cal--selectedDay-background-color:#F7EED5;
+      cal--selectedDay-color:#006699;
+      cal--selectedDay-font-family:Tahoma;
+      cal--selectedDay-font-size:8pt;
+      cal--selectedDay-font-weight:bold;
+      cal--selectedDay-text-align:center;
+      cal--selectedDay-vertical-align:middle;
+      cal--selectedDay-border-left-color:#006699;
+      cal--title-color:black;
+      cal--title-font-family:Tahoma;
+      cal--title-font-size:10pt;
+      cal--title-font-Weight:bold;
+      cal--title-text-align:left;
+      dayLength:short;
+      GRIDCELLEFFECT:flat;
+      GRIDLINESCOLOR:black;
+      "></ie:calendar></td>
+    </tr>
+</table>
+</body>
+</html>

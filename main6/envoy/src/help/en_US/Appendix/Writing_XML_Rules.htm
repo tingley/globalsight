@@ -1,0 +1,528 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>Writing XML Rules</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=content-type content="text/html; charset=windows-1252">
+<meta name=date content="02 7, 2002 5:46:34 PM">
+<meta name="build tags" content="Configuration">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=2691>
+<meta name=layout-width content=638>
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+table.whs1 {x-cell-content-align: top; width: 100%; border-spacing: 0px; border-spacing: 0px;}
+col.whs2 {width: 13.995%;}
+col.whs3 {width: 72.302%;}
+col.whs4 {width: 13.703%;}
+tr.whs5 {x-cell-content-align: top;}
+td.whs6 {width: 13.995%; border-left-width: 1px; border-left-color: #000000; border-left-style: Solid; border-top-style: Solid; border-top-color: #000000; border-top-width: 1px; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+p.whs7 {font-weight: bold;}
+td.whs8 {width: 72.302%; border-top-style: Solid; border-top-color: #000000; border-top-width: 1px; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+td.whs9 {width: 13.703%; border-top-style: Solid; border-top-color: #000000; border-top-width: 1px; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+td.whs10 {width: 13.995%; border-left-width: 1px; border-left-color: #000000; border-left-style: Solid; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+td.whs11 {width: 72.302%; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+td.whs12 {width: 13.703%; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px; padding-right: 10px; padding-left: 10px;}
+td.whs13 {width: 13.995%; padding-right: 10px; padding-left: 10px; border-left-style: Solid; border-left-color: #000000; border-left-width: 1px; border-right-style: Solid; border-right-color: #000000; border-right-width: 1px; border-bottom-width: 1px; border-bottom-color: #000000; border-bottom-style: Solid;}
+td.whs14 {width: 72.302%; padding-right: 10px; padding-left: 10px; border-right-style: Solid; border-right-color: #000000; border-right-width: 1px; border-bottom-width: 1px; border-bottom-color: #000000; border-bottom-style: Solid;}
+td.whs15 {width: 13.703%; padding-right: 10px; padding-left: 10px; border-right-style: Solid; border-right-color: #000000; border-right-width: 1px; border-bottom-width: 1px; border-bottom-color: #000000; border-bottom-style: Solid;}
+td.whs16 {width: 13.995%; padding-right: 10px; padding-left: 10px; border-left-width: 1px; border-left-color: #000000; border-left-style: Solid; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px;}
+td.whs17 {width: 72.302%; padding-right: 10px; padding-left: 10px; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px;}
+td.whs18 {width: 13.703%; padding-right: 10px; padding-left: 10px; border-right-width: 1px; border-right-color: #000000; border-right-style: Solid; border-bottom-style: Solid; border-bottom-color: #000000; border-bottom-width: 1px;}
+ul.whs19 {list-style: disc;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nWriting XML Rules");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>Writing XML Rules</h1>
+
+<p>The XML rules file defines the rules by which an XML file with a given 
+ Schema is read by GlobalSight.</p>
+
+<p>&nbsp;</p>
+
+<p>The rule file for the XML extractor is an XML document itself. A single 
+ rule file can include rules for multiple document types by using multiple 
+ rulesets. If the rule doesn’t define some of an element’s or an attribute’s 
+ extraction rule, they will be extracted according to the default rule. 
+ A rule file consists of four kinds of elements.</p>
+
+<p>&nbsp;</p>
+
+<h2>Rule file specification</h2>
+
+<h3>&lt;schemarules&gt; element</h3>
+
+<p>This is the document root element. It contains one or more &lt;ruleset&gt; 
+ elements.</p>
+
+<h3>&lt;ruleset&gt; element</h3>
+
+<p>The &lt;ruleset&gt; defines the rules for a document type.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>schema </td>
+<td width="72.302%" class="whs11">
+<p>This is the name of the document root element. Note that the name is 
+ case sensitive. </td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<p>The &lt;ruleset&gt; element contains one or more &lt;translate&gt; and 
+ &lt;dont-translate&gt; attributes. &nbsp;You 
+ can use more than one &lt;ruleset&gt; element to define the rules for 
+ more than one document type (schema) in a single Rule file.</p>
+
+<h3>&lt;translate&gt; element</h3>
+
+<p>The &lt;translate&gt; element specifies elements or attributes that 
+ are to be extracted for the translation. </p>
+
+<p>Attribute Description Required</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are to 
+ be extracted for the translation.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs13">
+<p>loctype </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs14">
+<p>Localization type. It specifies whether the extracted data are translatable 
+ or localizable. The possible values are “translatable” or “localizable”. 
+ The default value is “translatable”. &nbsp;All 
+ of the words in a translatable item are counted toward the file’s wordcount. 
+ &nbsp;Localizable 
+ items are given a wordcount of 1, regardless of the number of words. &nbsp;Examples 
+ of localizable items include image source paths that may need to be changed, 
+ but should not be considered part of the wordcount. </td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs15">
+<p>Optional</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>datatype </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<p>Format of the data. If the extracted data needs further extraction, 
+ the data format should be specified in this attribute. The typical use 
+ case is that a HTML snippet is stored in an XML element. When the datatype 
+ attribute has a value “html”, the XML extractor extracts the content of 
+ the element and call the HTML extractor passing the extracted content. 
+ &nbsp;Note that 
+ in order for HTML to be correctly interpreted within XML The ‘&lt;’ and 
+ ‘&gt;’ components of an HTML tag must be escaped in XML as &amp;lt; and 
+ &amp;gt; respectively. </td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs13">
+<p>type </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs14">
+<p>Type of the data. This attribute is used when the type of the extracted 
+ data needs to be explicitly specified. These types can be excluded using 
+ the Exclude Item entry in Localization Profiles. &nbsp;You 
+ can list an item type that already exists (see <a href="Exclude_Item_Types.htm">Exclude 
+ Item Types</a>) or specify a new item type and exclude this item on an 
+ as needed basis. </td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs15">
+<p>Optional</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>inline </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<p>This attribute specifies if the elements specified by path attribute 
+ break a segment. If an element breaks a segment, the element tag is not 
+ included in the extracted data. If an element doesn’t break a segment 
+ (if the tag is in-line), the element tag is included in the extracted 
+ data. The possible values for the attribute are “yes” or “no”. “yes” means 
+ the tag doesn’t break segments. “no” means the tag breaks segments. The 
+ default value is “no”. &nbsp;For 
+ example, if an element appears in the middle of a sentence it should be 
+ marked “yes” – otherwise the sentence would be broken into two pieces, 
+ split by the element, which would be linguistically incorrect. </td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="13.995%" class="whs16">
+<p>containedInHtml </td>
+<td colspan="1" rowspan="1" width="72.302%" class="whs17">
+<P>Use if the given element is contained within another element whose datatype is HTML.
+The possible values for the attribute are “yes” or “no”.</P>
+<P> To use this tag, you will also need to edit Tags.properties in the
+properties folder, and set InlineTag_html and PairedTag_html to include the element name.
+This is so that the tag can be treated as if it were an HTML tag.</P>
+<P>Additionally, you may want to edit LingAdapter.properties and set the unescapedTags
+property to include the name of the element. This is so that the tag can be unescaped
+when exported. For example if the tag is left as <B>&amp;lt;reg&amp;gt;</B> instead of
+<B>&lt;reg&gt;</B> when exported then this property should be set.</P>
+<P> For example:<BR>
+<FONT SIZE="-1"><EM> &lt;paragraph&gt;Although in an &lt;bigBold&gt;XML&lt;/bigBold&gt; file,
+this contains pseudo-HTML.&lt;/paragraph&gt;</EM></FONT><BR>
+would require adding the tag <EM>bigBold</EM>
+to the above mentioned property files.</P>
+</td>
+<td colspan="1" rowspan="1" width="13.703%" class="whs18">
+<p>Optional</td></tr>
+
+
+
+
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<p>&nbsp;</p>
+
+<h3>&lt;dont-translate&gt; element</h3>
+
+<p>The &lt;dont-translate&gt; element specifies elements or attributes 
+ that are not to be extracted. Use this element on any items extracted 
+ by default that are not to be translated.</p>
+
+<p>&nbsp;</p>
+
+<!--(Table)=========================================================-->
+<table x-use-null-cells cellspacing="0" width="100%" class="whs1">
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table><table x-use-null-cells cellspacing='0' width='100%' border='1' bordercolor='black' bordercolorlight='black' bordercolordark='black'>");
+//--></script>
+<col class="whs2">
+<col class="whs3">
+<col class="whs4">
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs6">
+<p class="whs7">Attribute </td>
+<td width="72.302%" class="whs8">
+<p class="whs7">Description </td>
+<td width="13.703%" class="whs9">
+<p class="whs7">Required</td></tr>
+
+<tr valign="top" class="whs5">
+<td width="13.995%" class="whs10">
+<p>path </td>
+<td width="72.302%" class="whs11">
+<p>XPath expression to address the elements and attributes that are not 
+ to be extracted for localization.</td>
+<td width="13.703%" class="whs12">
+<p>Yes</td></tr>
+<script language='JavaScript'><!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4)) document.write("</table></table><table>");
+//--></script>
+</table>
+
+<h3>XPath</h3>
+
+<p>The “path” attribute in &lt;translate&gt; and &lt;dont-translate&gt; 
+ element uses XPath expression. XPath is a language for addressing parts 
+ of an XML document. It is a W3C Recommendation. This document doesn’t 
+ discuss the specification of the language other than showing a couple 
+ of examples. The W3C Recommendation can be found at <a href="http://www.w3.org/TR/xpath.html"
+														target=_blank>http://www.w3.org/TR/xpath.html</a>. 
+ There is also a web page that lists examples of XPath expressions at <a 
+ href="http://www.zvon.org/HTMLonly/XPathTutorial/General/examples.html"
+	target=_blank>http://www.zvon.org/HTMLonly/XPathTutorial/General/examples.html</a>.</p>
+
+<h3>Default rule</h3>
+
+<p>If an XML document or element is not associated with a rule, the default 
+ rule is applied to extract the document.</p>
+
+<ul type="disc" class="whs19">
+	
+	<li class=kadov-p><p>Contents of all the elements are extracted as 
+ translatable.</p></li>
+	
+	<li class=kadov-p><p>All the element tags break segments. In other 
+ words, all the tags go into skeleton and no tag is included in an extracted 
+ translatable segment.</p></li>
+	
+	<li class=kadov-p><p>No attributes are extracted.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+<h3>Character encoding</h3>
+
+<p>As with any XML document, a character encoding used in the rule file 
+ must be listed in the XML declaration unless the file is encoded in UTF-8.</p>
+
+<h2>Example:<span style="font-size: 10pt;"><font size=2 style="font-size:10pt;"><br>
+XML Rule:</font></span></h2>
+
+<p class=code>&lt;?xml version=&quot;1.0&quot;?&gt;</p>
+
+<p class=code>&lt;schemarules&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;ruleset 
+ schema=&quot;sample&quot;&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ &quot;aaa&quot; element under sample is not extracted --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;dont-translate 
+ path=&quot;/sample/aaa&quot;/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ Any element that has &quot;translate&quot; attribute and the --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ value of it is &quot;no&quot; is not extracted --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;dont-translate 
+ path='//*[@translate=&quot;no&quot;]'/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ Nothing under &quot;bbb&quot; is extracted --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;dont-translate 
+ path=&quot;/sample/bbb&quot;/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;dont-translate 
+ path=&quot;/sample/bbb//*&quot;/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ All attributes in &quot;ccc&quot; is extracted --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;translate 
+ path=&quot;/sample/ccc/@*&quot;/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- 
+ &quot;ccc&quot; tag itself is extracted --&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;translate 
+ path=&quot;/sample/ccc&quot; inline=&quot;yes&quot;/&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ruleset&gt;</p>
+
+<p class=code>&lt;/schemarules&gt;</p>
+
+<p class=code>&nbsp;</p>
+
+<p class=code
+	style="font-family: Arial, sans-serif; font-weight: bold;">XML File 
+ (use this file with the XML Rule above):</p>
+
+<p class=code>&lt;?xml version=&quot;1.0&quot;?&gt;</p>
+
+<p class=code>&lt;sample&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;aaa&gt;This 
+ is aaa text.&lt;/aaa&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;bbb 
+ translate=&quot;no&quot;&gt;This is bbb text.</p>
+
+<p class=code><span style="margin-left: 40px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;bbb2&gt;This 
+ is bbb2 text.&lt;/bbb2&gt;</span></p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/bbb&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;ccc 
+ sampleAttribute=&quot;<span style="color: #ff0000;"><font color=red >MySampleAttribute</font></span>&quot;&gt;</p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;<span 
+ style="color: #ff0000;"><font color=red >This is ccc text.</font></span></p>
+
+<p class=code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ccc&gt;</p>
+
+<p class=code>&lt;/sample&gt;</p>
+
+<p class=code>&nbsp;</p>
+
+<p>The text in <span style="color: #ff0000;"><font color=red >red</font></span> will be translatable 
+ when you import the file into GlobalSight.</p>
+
+<p>&nbsp;</p>
+
+<h2>DTD Used For XML Rules Files</h2>
+
+<p class=code>&lt;!-- schemarules.dtd created on Aug 31, 2000 version 1.0 
+ --&gt;</p>
+
+<p class=code>&lt;!-- Document root --&gt;</p>
+
+<p class=code>&lt;!ELEMENT schemarules (ruleset)+&gt;</p>
+
+<p class=code>&lt;!-- One ruleset element for each document type. --&gt;</p>
+
+<p class=code>&lt;!-- There can be multiple ruleset elements --&gt;</p>
+
+<p class=code>&lt;!ELEMENT ruleset (translate|dont-translate)+&gt;</p>
+
+<p class=code>&lt;!ATTLIST ruleset</p>
+
+<p class=code>schema &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA 
+ #REQUIRED&gt;</p>
+
+<p class=code>&lt;!-- Specify an element that is to be translated --&gt;</p>
+
+<p class=code>&lt;!ELEMENT translate EMPTY&gt;</p>
+
+<p class=code>&lt;!ATTLIST translate</p>
+
+<p class=code>path CDATA #REQUIRED</p>
+
+<p class=code>loctype (translatable|localizable) &quot;translatable&quot;</p>
+
+<p class=code>datatype CDATA #IMPLIED</p>
+
+<p class=code>type CDATA #IMPLIED</p>
+
+<p class=code>inline (yes|no) &quot;no&quot;&gt;</p>
+
+<p class=code>&lt;!-- Specify an element that is not to be translated --&gt;</p>
+
+<p class=code>&lt;!ELEMENT dont-translate EMPTY&gt;</p>
+
+<p class=code>&lt;!ATTLIST dont-translate</p>
+
+<p class=code>path CDATA #REQUIRED&gt;</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

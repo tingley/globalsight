@@ -1,0 +1,87 @@
+BODY {
+	FONT-SIZE: 9pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+P {
+	FONT-SIZE: 9pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+UL {
+	FONT-SIZE: 10pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif; LIST-STYLE-TYPE: disc
+}
+LI {
+	FONT-SIZE: 10pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif; LIST-STYLE-TYPE: disc
+}
+TD {
+	FONT-SIZE: 10pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.fuss {
+	FONT-SIZE: 8pt; COLOR: #cccccc; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.fuss A:link {
+	FONT-SIZE: 8pt; COLOR: #559f55; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.fuss A:active {
+	FONT-SIZE: 8pt; COLOR: #559f55; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.fuss A:visited {
+	FONT-SIZE: 8pt; COLOR: #559f55; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.fuss A:hover {
+	FONT-SIZE: 8pt; COLOR: #ff0000; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+A:link {
+	TEXT-DECORATION: none
+}
+A:active {
+	TEXT-DECORATION: underline
+}
+A:visited {
+	TEXT-DECORATION: none
+}
+A:hover {
+	COLOR: #ff0000
+}
+.sub {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; COLOR: #e8f0b0; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.sub A:link {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; COLOR: #e8f0b0; TEXT-DECORATION: none
+}
+.sub A:active {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; COLOR: #e8f0b0; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.sub A:visited {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; COLOR: #e8f0b0; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.sub A:hover {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; COLOR: #ff0000; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+.hyp {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; COLOR: #559f55; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.hyp A:link {
+	FONT-WEIGHT: bold; COLOR: #559f55; TEXT-DECORATION: none
+}
+.hyp A:active {
+	FONT-WEIGHT: bold; COLOR: #ce2d25; TEXT-DECORATION: underline
+}
+.hyp A:visited {
+	FONT-WEIGHT: bold; COLOR: #89949a; TEXT-DECORATION: none
+}
+.hyp A:hover {
+	FONT-WEIGHT: bold; COLOR: #ce2d25; TEXT-DECORATION: underline
+}
+.hyp2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 8pt; COLOR: #00406e; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.hyp2 A:link {
+	FONT-WEIGHT: bold; TEXT-DECORATION: none
+}
+.hyp2 A:active {
+	FONT-WEIGHT: bold; COLOR: #00406e; TEXT-DECORATION: underline
+}
+.hyp2 A:visited {
+	FONT-WEIGHT: bold; COLOR: #00406e; TEXT-DECORATION: none
+}
+.hyp2 A:hover {
+	FONT-WEIGHT: bold; COLOR: #ce2d25; TEXT-DECORATION: underline
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Module         Webtop                                                 -->
+<!-- File           dm_folder_actions.xml                                  -->
+<!-- Description    Folder actions                                         -->
+<!-- Created on     March 1, 2002                                          -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   <scope>
+
+      <!-- Filter file profile action -->
+      <action id="filterfileprofile">
+         <params>
+            <param name="targetLocale" required="true"></param>
+         </params>
+         <preconditions>
+            <precondition class="com.documentum.ambassador.actions.FilterFileProfilePreCondition">
+            </precondition>
+         </preconditions>
+         <execution class="com.documentum.ambassador.actions.FilterFileProfileExecution"/>
+      </action>
+
+
+   </scope>
+</config>

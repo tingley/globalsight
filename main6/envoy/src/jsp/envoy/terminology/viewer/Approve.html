@@ -1,0 +1,125 @@
+<html>
+<head>
+<title>Approve Entry</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT>
+var g_args;
+
+function init()
+{
+  // enable the correct radio button
+}
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var state = '';
+
+    if (form.status[0].checked)
+    {
+      state = 'proposed';
+    }
+    else if (form.status[1].checked)
+    {
+      state = 'reviewed';
+    }
+    else if (form.status[2].checked)
+    {
+      state = 'approved';
+    }
+
+    g_args.setStatus(state);
+
+    window.returnValue = g_args;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  init();
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">Set Approval Status Of Entry</SPAN>
+<BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <FORM name="form">
+  <TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>
+      <table border=0 CLASS="standardText">
+        <tr><td>
+          <input type="radio" name="status" id="idProposed" checked>
+        </td><td>
+           Proposed
+        </td></tr>
+      </table>
+    </TD>
+  </TR>
+  <TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>
+      <table border=0 CLASS="standardText">
+        <tr><td>
+          <input type="radio" name="status" id="idReviewed" checked>
+        </td><td>
+           Reviewed
+        </td></tr>
+      </table>
+    </TD>
+  </TR>
+  <TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD valign="middle">
+      <table border=0 CLASS="standardText">
+        <tr><td>
+          <input type="radio" name="status" id="idApproved" checked>
+        </td><td>
+           Approved
+        </td></tr>
+      </table>
+    </TD>
+  </TR>
+  </FORM>
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="3" onclick="doClose(true);">
+<INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="4" onclick="doClose(false);">
+</DIV>
+
+</DIV>
+</body>
+</html>

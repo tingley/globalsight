@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration"
+        table="filter_configuration">
+        <id name="id" column="ID" type="int">
+            <generator class="native" />
+        </id>
+        <property name="companyId" column="COMPANY_ID" type="long"
+            not-null="true" unique="false" />
+        <property name="name" length="100" column="NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="knownFormatId" type="string" column="KNOWN_FORMAT_ID"
+            not-null="true" unique="false" />
+        <property name="filterTableName" length="60" column="FILTER_TABLE_NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+    </class>
+</hibernate-mapping>

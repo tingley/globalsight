@@ -1,0 +1,239 @@
+<SCRIPT LANGUAGE="JAVASCRIPT">
+var ua = navigator.userAgent;
+var opera = /opera [56789]|opera\/[56789]/i.test(ua);
+var webkit = /webkit/i.test(ua);
+var ie = !opera && /MSIE/.test(ua);
+var ie50 = ie && /MSIE 5\.[01234]/.test(ua);
+var ie6 = ie && /MSIE [6789]/.test(ua);
+var ie7 = ie && /MSIE [789]/.test(ua);
+var ieBox = ie && (document.compatMode == null || document.compatMode != "CSS1Compat");
+var moz = !opera && !webkit && /gecko/i.test(ua);
+var nn6 = !opera && /netscape.*6\./i.test(ua);
+
+if(!ie)
+{
+
+  	Element.prototype.selectNodes = function (p_xPath)
+  	{
+		var m_Evaluator = new XPathEvaluator();
+		var m_Result = m_Evaluator.evaluate(p_xPath, this, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+		var m_Nodes = new Array;
+		if(m_Result != null)
+		{
+			var m_Element = m_Result.iterateNext();
+			while(m_Element)
+			{
+				m_Nodes.push(m_Element);
+				m_Element = m_Result.iterateNext();
+			}// while
+		}// if
+		return m_Nodes;
+  	};
+
+  	Element.prototype.selectSingleNode = function (p_xPath)
+  	{
+		var m_Evaluator = new XPathEvaluator();
+		var m_Result = m_Evaluator.evaluate(p_xPath, this, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+	
+		if(m_Result != null)
+		{
+			return m_Result.singleNodeValue;
+		}
+		else
+		{
+			return null;
+		}
+  	};
+	
+  	Element.prototype.attachEvent = function (event_name, event_function)
+  	{
+       	this.addEventListener(event_name, event_function, false);
+  	};
+  	
+	//GBS-344, firefox compatibility, add 2 more methods
+	
+	XMLDocument.prototype.selectNodes = function(cXPathString,xNode)
+    {
+    	var oNSResolver = this.createNSResolver(this.documentElement)
+    	var aItems = this.evaluate(cXPathString, xNode, oNSResolver,
+        	XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+    	var aResult = [];
+    	for( var i = 0; i < aItems.snapshotLength; i++)
+    	{
+    		aResult[i] = aItems.snapshotItem(i);
+    	}
+    	return aResult;
+    };
+    
+    XMLDocument.prototype.selectNodes = function(cXPathString)
+    {
+    	var oNSResolver = this.createNSResolver(this.documentElement)
+    	var aItems = this.evaluate(cXPathString, this, oNSResolver,
+        	XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+    	var aResult = [];
+    	for( var i = 0; i < aItems.snapshotLength; i++)
+    	{
+    		aResult[i] = aItems.snapshotItem(i);
+    	}
+    	return aResult;
+    };
+   
+    XMLDocument.prototype.selectSingleNode = function(cXPathString)
+    {
+    	var xItems = this.selectNodes(cXPathString, this);
+    	if( xItems.length > 0 )
+    	{
+    		return xItems[0];
+    	}
+    	else
+    	{
+    		return null;
+    	}
+    };    
+
+   XML.getDataIsland = function(id)
+   {
+     	var dom = document.implementation.createDocument("","",null);
+     	dom.preserveWhiteSpace = true;
+     	dom.async = false;
+        
+     	var doc = document.getElementById(id);   
+     	var docelt = doc.firstChild;
+     	if (docelt)
+     	{
+        	dom.appendChild(dom.importNode(docelt, true));
+     	}
+     	return dom;
+   };
+   
+  XML.getDomString = function(dom)
+  {
+		var serialized;
+	
+		// XMLSerializer exists in current Mozilla browsers
+		serializer = new XMLSerializer();
+		serialized = serializer.serializeToString(dom, "text/xml");
+	
+		return serialized;
+  };
+  
+  function disableDiv(divID, disabled)
+  {
+    	var div = document.getElementById(divID);
+    	if(div)
+    	{
+        	var inputs = div.getElementsByTagName("input");
+        	var selects = div.getElementsByTagName("select");
+        	var textareas = div.getElementsByTagName("textarea");
+        	var labels = div.getElementsByTagName("label");
+
+        	for(var i = 0; i < inputs.length; i++)
+        	{
+            	inputs[i].disabled = disabled;
+        	}
+
+        	for(var i = 0; i < selects.length; i++)
+        	{
+            	selects[i].disabled = disabled;
+        	}
+
+        	for(var i = 0; i < textareas.length; i++)
+        	{
+            	textareas[i].disabled = disabled;
+        	}
+        
+        	if (disabled)
+        	{
+	        	for(var i = 0; i < labels.length; i++)
+	        	{   
+	            	labels[i].style.color = "grey";
+	        	}
+        	}
+        	else
+        	{
+        		for(var i = 0; i < labels.length; i++)
+	        	{   
+	            	labels[i].style.color = "black";
+	        	}
+        	}
+    	}
+  };
+    
+}
+
+if (moz)
+{
+	//refer to ieemu.js
+	emulateHTMLModel();
+	emulateAllModel();
+	emulateEvent();
+}
+
+function emulateAllModel() {
+	var allGetter = function () {
+		var a = this.getElementsByTagName("*");
+		var node = this;
+		a.tags = function (sTagName) {
+			return node.getElementsByTagName(sTagName);
+		};
+		return a;
+	};
+	HTMLDocument.prototype.__defineGetter__("all", allGetter);
+	HTMLElement.prototype.__defineGetter__("all", allGetter);
+	
+	HTMLElement.prototype.__defineSetter__("innerText",function(sText){
+		this.textContent=sText;
+    });
+}
+
+function emulateHTMLModel() 
+{
+
+	Element.prototype.__defineSetter__("text", function (sText) 
+	{
+		this.textContent = sText;
+		return sText;		
+	});
+
+	Element.prototype.__defineGetter__("text", function () 
+	{
+		return this.textContent;
+	});
+	
+	HTMLSelectElement.prototype.add = function(opt)
+	{
+	   	this.appendChild(opt);
+	};
+	
+	Window.prototype.navigate = function(url)
+	{
+	   	this.location.href = url;
+	   	this.location.load();
+	};
+
+	window.attachEvent = function (event_name, event_function)
+  	{
+		this.addEventListener(event_name, event_function, false);
+  	};
+  	
+  	Document.prototype.attachEvent = function (event_name, event_function)
+  	{
+       	this.addEventListener(event_name, event_function, false);
+  	};
+	
+}
+
+function emulateEvent() 
+{
+	Event.prototype.__defineGetter__("srcElement",function(){
+		var node=this.target;
+		while(node.nodeType!=1)node=node.parentNode;
+		return node;
+	});
+	
+	Event.prototype.__defineGetter__("parentElement",function(){
+		return this.parentElement||this.parentNode;;
+	});
+}
+</SCRIPT>

@@ -1,0 +1,726 @@
+<public:component>
+
+<!-- ----------------------------------------------------------------------- -->
+<!-- WARNING: This is a generated file - DO NOT EDIT MANUALLY--------------- -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- Dialog URL ------------------------------------------------------------ -->
+
+<public:property
+    name="dialogUrl"
+    initial="SnippetLibrary.htmdlg"
+    put="FPut_dialogUrl"
+    get="FGet_dialogUrl" />
+
+<!-- Features -------------------------------------------------------------- -->
+
+<public:property
+    name="dialogWidth"
+    initial="700px"
+    put="FPut_dialogWidth"
+    get="FGet_dialogWidth">
+
+<public:property
+    name="dialogHeight"
+    initial="630px"
+    put="FPut_dialogHeight"
+    get="FGet_dialogHeight">
+
+<public:property
+    name="dialogLeft"
+    initial="10px"
+    put="FPut_dialogLeft"
+    get="FGet_dialogLeft" />
+
+<public:property
+    name="dialogTop"
+    initial="10px"
+    put="FPut_dialogTop"
+    get="FGet_dialogTop" />
+
+<public:property
+    name="dialogHide"
+    initial="yes"
+    put="FPut_dialogHide"
+    get="FGet_dialogHide" />
+
+<public:property
+    name="center"
+    initial="yes"
+    put="FPut_center"
+    get="FGet_center" />
+
+<public:property
+    name="edge"
+    initial="raised"
+    put="FPut_edge"
+    get="FGet_edge">
+
+<public:property
+    name="help"
+    initial="no"
+    put="FPut_help"
+    get="FGet_help">
+
+<public:property
+    name="resizable"
+    initial="yes"
+    put="FPut_resizable"
+    get="FGet_resizable" />
+
+<public:property
+    name="scroll"
+    initial="no"
+    put="FPut_scroll"
+    get="FGet_scroll" />
+
+<public:property
+    name="status"
+    initial="no"
+    put="FPut_status"
+    get="FGet_status">
+
+<public:property
+    name="unadorned"
+    initial="yes"
+    put="FPut_unadorned"
+    get="FGet_unadorned">
+
+<public:property
+    name="b3Placement"
+    initial="center-screen"
+    put="FPut_b3Placement"
+    get="FGet_b3Placement" />
+
+
+<!-- Arguments ------------------------------------------------------------- -->
+
+<public:property
+    name="b3DialogMaxWidth"
+    initial="0px"
+    b3-arg="true"
+    put="FPut_b3DialogMaxWidth"
+    get="FGet_b3DialogMaxWidth" />
+
+<public:property
+    name="b3DialogMinWidth"
+    initial="700px"
+    b3-arg="true"
+    put="FPut_b3DialogMinWidth"
+    get="FGet_b3DialogMinWidth" />
+
+<public:property
+    name="b3DialogMaxHeight"
+    initial="0px"
+    b3-arg="true"
+    put="FPut_b3DialogMaxHeight"
+    get="FGet_b3DialogMaxHeight" />
+
+<public:property
+    name="b3DialogMinHeight"
+    initial="630px"
+    b3-arg="true"
+    put="FPut_b3DialogMinHeight"
+    get="FGet_b3DialogMinHeight" />
+
+<public:property
+    name="b3RememberSize"
+    initial="true"
+    b3-arg="true"
+    put="FPut_b3RememberSize"
+    get="FGet_b3RememberSize" />
+
+<public:property
+    name="b3RegistryVersion"
+    initial="1"
+    b3-arg="true"
+    put="FPut_b3RegistryVersion"
+    get="FGet_b3RegistryVersion" />
+
+<public:property
+    name="b3Title"
+    initial="Snippet Editor"
+    b3-arg="true"
+    put="FPut_b3Title"
+    get="FGet_b3Title" />
+
+<public:property
+    name="args"
+    initial="MyValue"
+    b3-arg="true"
+    put="FPut_args"
+    get="FGet_args" />
+
+
+<!-- Methods --------------------------------------------------------------- -->
+
+<public:method
+    name="runModal"
+    internalname="FRun" />
+
+<public:method
+    name="show"
+    internalname="FShow" />
+
+<public:method
+    name="setArgument"
+    internalname="FSetArgument" />
+
+<public:method
+    name="getArgument"
+    internalname="FGetArgument" />
+
+<public:method
+    name="resetArguments"
+    internalname="FResetArguments" />
+
+
+<!-- Script ---------------------------------------------------------------- -->
+
+<script language=javascript>
+
+// Init Global Variables ///////////////////////////////////////////////////////
+
+var gModelessReference;
+var gArguments  = null;
+
+
+// Init URL ////////////////////////////////////////////////////////////////////
+
+var g_dialogUrl = "SnippetLibrary.htmdlg";
+
+
+// Init Features ///////////////////////////////////////////////////////////////
+
+var g_dialogWidth   = "700px";
+var g_dialogHeight  = "630px";
+var g_dialogLeft    = "10px";
+var g_dialogTop = "10px";
+var g_dialogHide    = "yes";
+var g_center    = "yes";
+var g_edge  = "raised";
+var g_help  = "no";
+var g_resizable = "yes";
+var g_scroll    = "no";
+var g_status    = "no";
+var g_unadorned = "yes";
+var g_b3Placement   = "center-screen";
+
+
+// Init Arguments //////////////////////////////////////////////////////////////
+
+function FResetArguments()
+{
+    gArguments = new ActiveXObject("Scripting.Dictionary");
+    gArguments.Add( "b3DialogMaxWidth", "0px" );
+    gArguments.Add( "b3DialogMinWidth", "700px" );
+    gArguments.Add( "b3DialogMaxHeight", "0px" );
+    gArguments.Add( "b3DialogMinHeight", "630px" );
+    gArguments.Add( "b3RememberSize", "true" );
+    gArguments.Add( "b3RegistryVersion", "1" );
+    gArguments.Add( "b3Title", "Snippet Editor" );
+    gArguments.Add( "args", "MyValue" );
+}
+
+FResetArguments();
+
+
+// API /////////////////////////////////////////////////////////////////////////
+
+function FRun(refEl, placement)
+{
+    return FShow(true, refEl, placement);
+}
+
+function FShow(modal, refEl, placement)
+{
+    FLoadDefaults();
+
+    var features = "";
+
+    if(!placement) placement = g_b3Placement;
+    var lastwidth = FGetDefault( "b3OutDialogWidth" );
+    var lastheight = FGetDefault( "b3OutDialogHeight" );
+    var remember = gArguments.Item( "b3RememberSize" );
+    var bRem = false;
+    if( remember && remember != "false" ) {
+
+        bRem = true;
+        if( lastwidth && lastwidth != "0" && lastwidth != "" )
+            g_dialogWidth = lastwidth;
+        if( lastheight && lastheight != "0" && lastheight != "" )
+            g_dialogHeight = lastheight;
+    }
+
+
+    var url = FGetBaseURL() + g_dialogUrl;
+
+    var dw = parseInt(g_dialogWidth);
+    var dh = parseInt(g_dialogHeight);
+
+    if( placement == "replace" && refEl ) {
+
+        var genid = element.document.uniqueID;
+
+        frameHTML = "<iframe frameborder=no ";
+        frameHTML += (" id=" + genid);
+        frameHTML += (" width=" + dw);
+        frameHTML += (" height=" + dh );
+        frameHTML += (" src='" + url + "'");
+        frameHTML += "></iframe>";
+
+        var doc = element.document;
+        var savedHTML = element.outerHTML;
+        element.outerHTML = frameHTML;
+
+        var frameel = doc.getElementById(genid);
+        frameel.savedHTML = outerHTML;
+
+        var script = "frame.outerHTML = frame.savedHTML;";
+
+        frameel.oncloseframe = new Function( "value", "frame", script );
+
+        return;
+
+    }
+
+    if(refEl) {
+
+        var screenx = FGetWindowLeft(refEl);
+        screenx += refEl.document.parentWindow.screenLeft;
+        var screeny = FGetWindowTop(refEl);
+        screeny += refEl.document.parentWindow.screenTop;
+
+        if( placement == "below" ) {
+            g_center = 'no';
+            g_dialogTop = screeny + refEl.offsetHeight;
+            g_dialogLeft = screenx;
+        }
+        else if( placement == "right" ) {
+            g_center = 'no';
+            g_dialogLeft = screenx + refEl.offsetWidth;
+            g_dialogTop = screeny;
+        }
+        else if( placement == "above" ) {
+            g_center = 'no';
+            g_dialogTop = screeny - dh;
+            g_dialogLeft = screenx;
+        }
+        else if( placement == "left" ) {
+            g_center = 'no';
+            g_dialogLeft = screenx - dw;
+            g_dialogTop = screeny;
+        }
+        else if( placement == "center" ) {
+            g_center = 'no';
+            g_dialogLeft = (screenx + refEl.offsetWidth) - (dw/2.0);
+            g_dialogTop = ( screeny + refEl.offsetHeight) - (dh/2.0);
+        }
+        else if( placement == "center-screen" ) {
+            g_center = 'yes';
+        }
+        else if( placement == "absolute" ) {
+            g_center = 'no';
+        }
+
+    }
+
+    features += "dialogWidth: " + g_dialogWidth + ";"
+    features += "dialogHeight: " + g_dialogHeight + ";"
+    if( g_center != 'yes' ) features += "dialogLeft: " + g_dialogLeft + ";"
+    if( g_center != 'yes' ) features += "dialogTop: " + g_dialogTop + ";"
+    features += "dialogHide: " + g_dialogHide + ";"
+    features += "center: " + g_center + ";"
+    features += "edge: " + g_edge + ";"
+    features += "help: " + g_help + ";"
+    features += "resizable: " + g_resizable + ";"
+    features += "scroll: " + g_scroll + ";"
+    features += "status: " + g_status + ";"
+    features += "unadorned: " + g_unadorned + ";"
+    features += "b3Placement: " + g_b3Placement + ";"
+
+    if(modal) {
+        var ret = window.showModalDialog( url, gArguments, features );
+        if(bRem) {
+            FSetDefault( "b3OutDialogWidth", gArguments.Item("b3OutDialogWidth") );
+            FSetDefault( "b3OutDialogHeight", gArguments.Item("b3OutDialogHeight") );
+            FSaveDefaults();
+        }
+        return ret;
+    }
+
+    gModelessReference = window.showModelessDialog( url, gArguments, features );
+
+    return gModelessReference;
+
+}
+
+function FSetArgument(arg, val)
+{
+    gArguments.Item(arg) = val;
+}
+
+function FGetArgument(arg)
+{
+    return gArguments.Item(arg);
+}
+
+function FGetWindowLeft(el)
+{
+    var coord = el.offsetLeft;
+    var theBody = document.body;
+    var parent = el.offsetParent;
+
+    while( parent && parent != theBody ) {
+
+        coord += parent.offsetLeft;
+        coord += parent.clientLeft;
+        coord -= parent.scrollLeft;
+
+        parent = parent.offsetParent;
+
+    }
+    return coord;
+}
+
+function FGetWindowTop(el)
+{
+    var coord = el.offsetTop;
+    var theBody = document.body;
+    var parent = el.offsetParent;
+
+    while( parent && parent != theBody ) {
+
+        coord += parent.offsetTop;
+        coord += parent.clientTop;
+        coord -= parent.scrollTop;
+
+        parent = parent.offsetParent;
+
+    }
+    return coord;
+}
+
+
+// Helper Functions ////////////////////////////////////////////////////////////
+
+function FPut_dialogUrl(arg)
+{
+     g_dialogUrl = arg;
+}
+function FGet_dialogUrl()
+{
+     return g_dialogUrl;
+}
+function FPut_dialogWidth(arg)
+{
+     g_dialogWidth = arg;
+}
+function FGet_dialogWidth()
+{
+     return g_dialogWidth;
+}
+
+function FPut_dialogHeight(arg)
+{
+     g_dialogHeight = arg;
+}
+function FGet_dialogHeight()
+{
+     return g_dialogHeight;
+}
+
+function FPut_dialogLeft(arg)
+{
+     g_dialogLeft = arg;
+}
+function FGet_dialogLeft()
+{
+     return g_dialogLeft;
+}
+
+function FPut_dialogTop(arg)
+{
+     g_dialogTop = arg;
+}
+function FGet_dialogTop()
+{
+     return g_dialogTop;
+}
+
+function FPut_dialogHide(arg)
+{
+     g_dialogHide = arg;
+}
+function FGet_dialogHide()
+{
+     return g_dialogHide;
+}
+
+function FPut_center(arg)
+{
+     g_center = arg;
+}
+function FGet_center()
+{
+     return g_center;
+}
+
+function FPut_edge(arg)
+{
+     g_edge = arg;
+}
+function FGet_edge()
+{
+     return g_edge;
+}
+
+function FPut_help(arg)
+{
+     g_help = arg;
+}
+function FGet_help()
+{
+     return g_help;
+}
+
+function FPut_resizable(arg)
+{
+     g_resizable = arg;
+}
+function FGet_resizable()
+{
+     return g_resizable;
+}
+
+function FPut_scroll(arg)
+{
+     g_scroll = arg;
+}
+function FGet_scroll()
+{
+     return g_scroll;
+}
+
+function FPut_status(arg)
+{
+     g_status = arg;
+}
+function FGet_status()
+{
+     return g_status;
+}
+
+function FPut_unadorned(arg)
+{
+     g_unadorned = arg;
+}
+function FGet_unadorned()
+{
+     return g_unadorned;
+}
+
+function FPut_b3Placement(arg)
+{
+     g_b3Placement = arg;
+}
+function FGet_b3Placement()
+{
+     return g_b3Placement;
+}
+
+function FPut_b3DialogMaxWidth(arg)
+{
+     gArguments.Item("b3DialogMaxWidth") = arg;
+}
+function FGet_b3DialogMaxWidth()
+{
+     gArguments.Item("b3DialogMaxWidth");
+}
+
+function FPut_b3DialogMinWidth(arg)
+{
+     gArguments.Item("b3DialogMinWidth") = arg;
+}
+function FGet_b3DialogMinWidth()
+{
+     gArguments.Item("b3DialogMinWidth");
+}
+
+function FPut_b3DialogMaxHeight(arg)
+{
+     gArguments.Item("b3DialogMaxHeight") = arg;
+}
+function FGet_b3DialogMaxHeight()
+{
+     gArguments.Item("b3DialogMaxHeight");
+}
+
+function FPut_b3DialogMinHeight(arg)
+{
+     gArguments.Item("b3DialogMinHeight") = arg;
+}
+function FGet_b3DialogMinHeight()
+{
+     gArguments.Item("b3DialogMinHeight");
+}
+
+function FPut_b3RememberSize(arg)
+{
+     gArguments.Item("b3RememberSize") = arg;
+}
+function FGet_b3RememberSize()
+{
+     gArguments.Item("b3RememberSize");
+}
+
+function FPut_b3RegistryVersion(arg)
+{
+     gArguments.Item("b3RegistryVersion") = arg;
+}
+function FGet_b3RegistryVersion()
+{
+     gArguments.Item("b3RegistryVersion");
+}
+
+function FPut_b3Title(arg)
+{
+     gArguments.Item("b3Title") = arg;
+}
+function FGet_b3Title()
+{
+     gArguments.Item("b3Title");
+}
+
+function FPut_args(arg)
+{
+     gArguments.Item("args") = arg;
+}
+function FGet_args()
+{
+     gArguments.Item("args");
+}
+
+
+function FGetBaseURL()
+{
+    var b_IE50 = false;
+
+    var base = '';
+    var strurl = document.URLUnencoded;
+    if (typeof(strurl) == "undefined")
+    {
+        // Aaargh, this is not implemented (*&*&%^%@^*@
+        // strurl = document.URL; // IE5.0
+        strurl = window.location.href;
+        b_IE50 = true;
+    }
+
+    var last = strurl.lastIndexOf( '\\' );
+    var last2 = strurl.lastIndexOf( '/' );
+    if(last2 > last) last = last2;
+    if( last >= 0 ) {
+        var i;
+        var len = strurl.length;
+        var tmp = '';
+            for(i=0; i<len; i++) {
+            var cc = strurl.charAt(i);
+            if( cc == '\\' )
+                tmp += "/";
+            else tmp += cc;
+        }
+        strurl = tmp;
+    }
+
+    if(last >= 0) {
+        strurl = strurl.substring( 0, last );
+        base = strurl;
+        base += "/";
+    }
+
+    if (b_IE50)
+    {
+        base += "envoy/edit/snippets/";
+    }
+
+    return base;
+}
+
+
+// Registry Helpers ////////////////////////////////////////////////////////////
+
+function FGetDefault( prop )
+{
+    return gDefaults.getAttribute(prop);
+}
+
+function FSetDefault( prop, value )
+{
+    return gDefaults.setAttribute(prop, value);
+}
+
+function FLoadDefaults()
+{
+    if( gInEditor ) return;
+
+    var strurl = document.URLUnencoded;
+    if (typeof(strurl) != "undefined" &&
+        strurl.substring( 0, 3 ) == 'mk:' )
+    {
+        return; // Need this in IE5.5 - test removing in IE6
+    }
+    var regversion = gArguments.Item( "b3RegistryVersion" );
+    var name = "b3DefaultsSnippetLibrary";
+    if(regversion) name += regversion;
+    gDefaults.load( name );
+}
+
+function FSaveDefaults()
+{
+    if( gInEditor ) return;
+
+    var strurl = document.URLUnencoded;
+    if (typeof(strurl) != "undefined" &&
+            strurl.substring( 0, 3 ) == 'mk:' )
+    {
+        return; // Need this in IE5.5 - test removing in IE6
+    }
+    var regversion = gArguments.Item( "b3RegistryVersion" );
+    var name = "b3DefaultsSnippetLibrary";
+    if(regversion) name += regversion;
+    gDefaults.save( name );
+}
+
+
+// Startup /////////////////////////////////////////////////////////////////////
+
+var gDefaults = null;
+var gInEditor = false;
+
+function FCreateHTML()
+{
+    gInEditor = ( typeof(FB3_InEditor) == "function" && FB3_InEditor(element) );
+    if( gInEditor ) {
+        var label = 'Dialog Button (' + g_dialogUrl + ')';
+        element.runtimeStyle.setAttribute( 'b3-temp-ui-label', label );
+        element.b3TempOpenURLType = 'Dialog';
+        element.b3TempOpenURL = FGetBaseURL() + g_dialogUrl;
+        FB3_SendOnReady( element.id );
+        return;
+    };
+    if( element.tagName == "A" || element.tagName == "SPAN" || element.tagName == "INPUT" || element.tagName == "IMG" ) {
+        gDefaults = element;
+    } else {
+        element.insertAdjacentHTML( "beforeEnd", "<div style='display:none'></div>" );
+        gDefaults = element.children[ element.children.length-1 ];
+    }
+    gDefaults.addBehavior( "#default#userData" );
+}
+
+FCreateHTML();
+
+</script>
+
+
+</public:component>
+

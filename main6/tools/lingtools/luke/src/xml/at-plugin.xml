@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel name="at-plugin" columns="1" gap="4" halign="fill" valign="fill" weightx="1" weighty="1">
+	<label text="Available analyzers found on the current classpath:" />
+	<combobox name="analyzers" enabled="true" editable="false" halign="fill" weightx="1"/>
+	<label text="Text to be analyzed:" />
+	<textarea name="inputText" wrap="true" text="Welcome to the analysis viewer. This tool is used to demonstrate how different analyzers process text into tokens. You can edit this text to try different input such as numbers like 23231.23 or characters (mharwood@apache.org). Once happy, select an Analyzer from the list of analyzers found on the current classpath and then hit the Analyze button. The tokens produced are shown below and the hilite button can be used to show where each token was found in the original text." rows="5" weightx="1"/>
+	<panel columns="2">
+		<button text="Analyze" alignment="left" tooltip="Save changes to this record" action="analyze"/>
+	</panel>
+
+	<panel columns="2" gap="2">
+		<panel columns="2" gap="2">
+			<panel columns="1" >  	 
+				<label text="Tokens found" />	    	  
+				<list name="resultsList" selection="single" />
+			</panel>
+			<panel columns="1" >  	 
+				<label text="" />	    	  
+				<button text="hilite-&gt;" tooltip="highlight this token in the original text" action="tokenChange" />
+			</panel>		
+		</panel>
+		<panel columns="1" weightx="1">
+			<label text="original text" />	    	  
+			<textarea name="outputText" editable="false" wrap="true" text="" rows="5" weightx="1" />
+		</panel>
+	</panel>
+	<panel height="30">
+		<label name="errorLabel" foreground="#ff0000" text=" " />
+	</panel>
+</panel>

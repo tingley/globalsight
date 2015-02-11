@@ -1,0 +1,252 @@
+BODY {
+	BACKGROUND: #ffffff; COLOR: #000000; FONT-FAMILY: Arial,Helvetica,serif
+}
+P {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+A {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+BR {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+UL {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+OL {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+TD {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+TH {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+LI {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+SMALL {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+BLOCKQUOTE {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+H1 {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+H2 {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+H3 {
+	FONT-FAMILY: Arial,Helvetica,serif
+}
+UL LI {
+	LIST-STYLE-TYPE: disc
+}
+UL UL LI {
+	LIST-STYLE-TYPE: circle
+}
+UL UL UL LI {
+	LIST-STYLE-TYPE: square
+}
+OL LI {
+	LIST-STYLE-TYPE: decimal
+}
+PRE {
+	FONT-FAMILY: monospace
+}
+CODE {
+	FONT-FAMILY: monospace
+}
+XMP {
+	MARGIN-LEFT: 48px
+}
+EM {
+	FONT-WEIGHT: bold; FONT-STYLE: italic
+}
+BLOCKQUOTE {
+	COLOR: #336600
+}
+HR {
+	COLOR: #ffffff
+}
+H1 {
+	COLOR: maroon
+}
+H2 {
+	COLOR: maroon
+}
+H3 {
+	COLOR: maroon
+}
+EM {
+	COLOR: maroon
+}
+.highlight {
+	FONT-WEIGHT: bold; FONT-SIZE: large; COLOR: white; FONT-FAMILY: Arial,Helvetica,serif
+}
+.hl100 {
+	FONT-WEIGHT: bold; FONT-SIZE: large; COLOR: white; FONT-FAMILY: Arial,Helvetica,serif
+}
+.highlightsmall {
+	FONT-WEIGHT: bold; FONT-SIZE: large; COLOR: white; FONT-FAMILY: Arial,Helvetica,serif
+}
+.highlightsmall {
+	WIDTH: 75px
+}
+.highlight {
+	BACKGROUND: #aaaaff
+}
+.hl100 {
+	BACKGROUND: #aaaaff
+}
+.highlightsmall {
+	BACKGROUND: #aaaaff
+}
+.bluebackground {
+	BACKGROUND: #aaaaff
+}
+.bbg {
+	BACKGROUND: #aaaaff
+}
+.itemTitle {
+	BACKGROUND: #ffcc99
+}
+.itemSynopsis {
+	BACKGROUND: #ffffcc
+}
+.code {
+	BACKGROUND: #ffffcc
+}
+.red {
+	COLOR: #ff0000
+}
+.right {
+	TEXT-ALIGN: left
+}
+.center {
+	TEXT-ALIGN: center
+}
+.article {
+	VISIBILITY: hidden; POSITION: absolute
+}
+.noline {
+	COLOR: #0000ff; TEXT-DECORATION: none
+}
+.different {
+	COLOR: #ff0000; TEXT-DECORATION: none
+}
+.normal {
+	COLOR: #0000ff; TEXT-DECORATION: none
+}
+.page {
+	PAGE-BREAK-AFTER: always
+}
+.h-home {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-article {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-faq {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-new {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-game {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-software {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-news {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-book {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-bbs {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-download {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-search {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-about {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-beta {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-resource {
+	FONT-WEIGHT: 900; FONT-SIZE: 15pt; COLOR: #aaaaff; TEXT-DECORATION: none
+}
+.h-article {
+	COLOR: #99cc99
+}
+.h-faq {
+	COLOR: #ff9900
+}
+.h-game {
+	COLOR: #ff9999
+}
+.h-software {
+	COLOR: #cc99cc
+}
+.h-book {
+	COLOR: #ffcc99
+}
+.h-download {
+	COLOR: #cccccc
+}
+.h-about {
+	COLOR: #cccc66
+}
+.h-beta {
+	COLOR: #cc9900
+}
+.h-resource {
+	COLOR: #ffcc00
+}
+.white1 {
+	FONT-WEIGHT: bold; BACKGROUND: #ffffff; COLOR: white; FONT-FAMILY: Arial, Helvetica; TEXT-ALIGN: right
+}
+.white2 {
+	FONT-WEIGHT: bold; BACKGROUND: #ffffff; COLOR: white; FONT-FAMILY: Arial, Helvetica; TEXT-ALIGN: right
+}
+.white3 {
+	FONT-WEIGHT: bold; BACKGROUND: #ffffff; COLOR: white; FONT-FAMILY: Arial, Helvetica; TEXT-ALIGN: right
+}
+.white4 {
+	FONT-WEIGHT: bold; BACKGROUND: #ffffff; COLOR: white; FONT-FAMILY: Arial, Helvetica; TEXT-ALIGN: right
+}
+.white1 {
+	BACKGROUND: green
+}
+.white2 {
+	BACKGROUND: silver
+}
+.white3 {
+	BACKGROUND: maroon
+}
+.white4 {
+	BACKGROUND: #ff9900
+}
+.note {
+	FONT-SIZE: 10pt; FONT-FAMILY: Arial,Helvetica; TEXT-ALIGN: center
+}
+.game1 {
+	BACKGROUND: #ff9999
+}
+.game2 {
+	BACKGROUND: #99ff99
+}
+.game3 {
+	BACKGROUND: #9999ff
+}
+.ffcc99 {
+	BACKGROUND: #ffcc99
+}

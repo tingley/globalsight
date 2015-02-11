@@ -1,0 +1,83 @@
+
+DROP PROCEDURE IF EXISTS DROP_JBPM_TABLES ;   
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE DROP_JBPM_TABLES()
+BEGIN
+
+DECLARE done INT DEFAULT 0;
+DECLARE tan CHAR(46);
+DECLARE constraintName CHAR(46);
+
+DECLARE cur1 CURSOR FOR 
+SELECT table_name, CONSTRAINT_NAME 
+from
+INFORMATION_SCHEMA.table_constraints 
+where table_name like 'JBPM_%'  
+and TABLE_SCHEMA = '%%database_instance_name%%'
+and CONSTRAINT_TYPE = 'FOREIGN KEY';
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+OPEN cur1;
+
+REPEAT
+    FETCH cur1 INTO tan, constraintName;
+    IF NOT done THEN
+    set @sqltext:=concat('alter table ',tan, ' drop foreign key ', constraintName);
+    prepare stmt from @sqltext;
+    execute stmt;
+    DEALLOCATE PREPARE stmt;
+    
+    END IF;
+UNTIL done END REPEAT;
+
+CLOSE cur1;
+
+
+drop table if exists JBPM_ACTION;
+drop table if exists JBPM_BYTEARRAY;
+drop table if exists JBPM_BYTEBLOCK;
+drop table if exists JBPM_COMMENT;
+drop table if exists JBPM_DECISIONCONDITIONS;
+drop table if exists JBPM_DELEGATION;
+drop table if exists JBPM_EVENT;
+drop table if exists JBPM_EXCEPTIONHANDLER;
+drop table if exists JBPM_ID_GROUP;
+drop table if exists JBPM_ID_MEMBERSHIP;
+drop table if exists JBPM_ID_PERMISSIONS;
+drop table if exists JBPM_ID_USER;
+drop table if exists JBPM_LOG;
+drop table if exists JBPM_MESSAGE;
+drop table if exists JBPM_MODULEDEFINITION;
+drop table if exists JBPM_MODULEINSTANCE;
+drop table if exists JBPM_NODE;
+drop table if exists JBPM_POOLEDACTOR;
+drop table if exists JBPM_PROCESSDEFINITION;
+drop table if exists JBPM_PROCESSINSTANCE;
+drop table if exists JBPM_RUNTIMEACTION;
+drop table if exists JBPM_SWIMLANE;
+drop table if exists JBPM_SWIMLANEINSTANCE;
+drop table if exists JBPM_TASK;
+drop table if exists JBPM_TASKACTORPOOL;
+drop table if exists JBPM_TASKCONTROLLER;
+drop table if exists JBPM_TASKINSTANCE;
+drop table if exists JBPM_TIMER;
+drop table if exists JBPM_TOKEN;
+drop table if exists JBPM_TOKENVARIABLEMAP;
+drop table if exists JBPM_TRANSITION;
+drop table if exists JBPM_VARIABLEACCESS;
+drop table if exists JBPM_VARIABLEINSTANCE;
+drop table if exists JBPM_GS_VARIABLE;
+
+
+END //
+
+DELIMITER ;
+
+call DROP_JBPM_TABLES();
+
+DROP PROCEDURE DROP_JBPM_TABLES;   

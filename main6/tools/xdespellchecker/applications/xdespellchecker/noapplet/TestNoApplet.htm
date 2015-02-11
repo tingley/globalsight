@@ -1,0 +1,210 @@
+﻿<HTML>
+<!--
+$RCSfile: TestNoApplet.htm,v $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:52 $
+-->
+<HEAD>
+<TITLE>XDE No Applet Spell Check</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<style type="text/css">
+body	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: normal;
+	background-color: #FFFFFF;
+	}
+input	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	border-style: ridge;
+	}
+</style>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+<!--
+Developer :
+Note if you did not use the default installation, update SpellingWindowURL
+in the SpellCheckNoApplet.js file to reflect the installation location
+of the spellWindow:
+
+SpellingWindowURL="http://127.0.0.1/globalsight/xdespellchecker/noapplet/SpellWindow.htm";
+
+Verify SpellServerHref matches your desired processing page.
+
+Add The following script src include into your own page.
+Customer Change - Only if non default installation was used.
+
+Note relative path is used in our samples, yours will likely be absolute.
+e.g. /globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js
+
+-->
+<!--Developer, include this into your html page-->
+<script src="SpellCheckNoApplet.js"></script>
+
+<P>This sample form demonstrates the no applet spell check for use
+with existing web based email, message forums etc.. </P>
+<P>View page source for comments on inclusion into your web page.</P>
+
+<FORM NAME="form1" id="form1" METHOD="post" ACTION="your action">
+<TABLE  BORDER="1">
+  <TR>
+    <TD>
+      <p>Language to Use :
+      <!-- Developer :
+      The below select is for language control, if left out
+      the spell checker will default to usenglish.
+      -->
+
+      <SELECT NAME="language" SIZE="1" onchange="changeLanguage()"
+	onblur="changeLanguage()">
+	<OPTION VALUE="usenglish;usenglish2002;usenglishfirstname;usenglishlastname" SELECTED>English </OPTION>
+	<OPTION VALUE="africansouth">Southafrican </OPTION>
+	<OPTION VALUE="arabic">Arabic </OPTION>
+	<OPTION VALUE="argentina">Argentinian </OPTION>
+	<OPTION VALUE="australian">Australian </OPTION>
+	<OPTION VALUE="bolivian">Bolivian </OPTION>
+	<OPTION VALUE="brazilianportuguese">Brazilian_Portuguese </OPTION>
+	<OPTION VALUE="canadian">Canadian </OPTION>
+	<OPTION VALUE="canadianfrench">Canadian_French </OPTION>
+	<OPTION VALUE="chinese">Chinese </OPTION>
+	<OPTION VALUE="colombian">Colombian </OPTION>
+	<OPTION VALUE="czech2002">Czech </OPTION>
+	<OPTION VALUE="danish">Danish </OPTION>
+	<OPTION VALUE="dutch;dutch2002">Dutch </OPTION>
+	<OPTION VALUE="estonian">Estonian </OPTION>
+	<OPTION VALUE="finnish2002">Finnish </OPTION>
+	<OPTION VALUE="french;french2002">French </OPTION>
+	<OPTION VALUE="german">German </OPTION>
+	<OPTION VALUE="greek">Greek </OPTION>
+	<OPTION VALUE="italian;italian2002">Italian </OPTION>
+	<OPTION VALUE="japanesesanscript">Japanese </OPTION>
+	<OPTION VALUE="norwegian">Norwegian </OPTION>
+	<OPTION VALUE="polish">Polish </OPTION>
+	<OPTION VALUE="portuguese">Portuguese </OPTION>
+	<OPTION VALUE="russian">Russian </OPTION>
+	<OPTION VALUE="spanish;spanish2002">Spanish </OPTION>
+	<OPTION VALUE="swedish">Swedish </OPTION>
+	<OPTION VALUE="ukenglish;ukenglish2002">British </OPTION>
+	<OPTION VALUE="ukrainian">Ukrainian </OPTION>
+      </SELECT>
+
+      Custom Word List name:
+      <input type="text" name="customDictionaryName" value="userDictionary">
+
+      <!-- Developer :
+      Add the following image link to your own page,
+      be sure to update the 2nd and 3rd parameters(form1.textfield)
+      to match your form name and control names.
+      -->
+
+      <br>&nbsp;&nbsp;
+      
+      <IMG SRC="spellcheck.gif" BORDER="0" style="cursor:hand;"
+      onclick="doSpell( this,'form1.language','form1.textfield', true, document.form1.customDictionaryName.value,'');">
+
+      <!--Developer, include this into your html page-->
+      or <A HREF="javascript:doSpell( this,'form1.language','form1.textfield', true, document.form1.customDictionaryName.value,'');">Spell Check</A>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      <!-- Developer :
+      The below textarea will be spell checked once one of the above
+      button/link is clicked.
+      -->
+      <TEXTAREA NAME="textfield" COLS="80" rows="5">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</TEXTAREA>
+      <br>
+    </TD>
+  </TR>
+</TABLE>
+</form>
+
+<hr>
+
+<!-- ==================================================================== -->
+
+<div id="idEnglish" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+
+<div id="idSpanish" style="display:none">Este <i>version</i> is del <b>no applet</b> ideal para los sitios que no desean utilizar applet, margen de beneficio simple del HTML ser rendido en la ventana del inspector del encanto. Amo a inspector del encanto.</div>
+
+<div id="idFrench" style="display:none">Cett version sans applet est idale pour les sites qui ne souhaitent pas utiliser des applet, un simple marquage HTML sera rendu dans la fentre de correcteur orthographique. J'aim le correcteur orthographique.</div>
+
+<div id="idGerman" style="display:none">Dieses <b>no applet</b> <i>version ist</i> gut für Aufstellungsorte, die nicht applet benutzen möchten, einfacher HTML Preisaufschlag wird im Bannkontrolleurfenster übertragen. Ich liebe den Bannkontrolleur.</div>
+
+<div id="idDutch" style="display:none">Deze Java-applet loze versie is ideaal voor websites die geen gebruik wensen te maken van Java-applets. Simpele HTML markeringen zullen weergegeven worden in het spell checker venster. Ik hou van de spell checker.</div>
+
+<div id="idRussian" style="display:none">Этот вариант applet нет идеально для мест не желают использовать applets, просто повышение цены html будет представлен в окне контролера произношения по буквам. Я люблю контролера произношения по буквам. 
+</div>
+
+<div id="idArabic" style="display:none">الدوحة - قنا : عقد سمو الشيخ عبدالله بن خليفة آل ثاني رئيس مجلس الوزراء في الديوان الأميري مساء أمس جلسة مباحثات مع دولة السيد عمر كرامي رئيس وزراء الجمهورية اللبنانية الشقيقة. حضر الجلسة سعادة السيد احمد بن عبدالله آل محمود وزير الدولة للشؤون الخارجية وسعادة السيد يوسف حسين كمال وزير المالية
+</div>
+
+<div id="idCzech" style="display:none">News Report/Direct Info - vychází v anglické a francouzské verzi hlavně během týdnů, kdy zasedají výbory. Přináší informace o činnosti výborů, o slyšeních, atd.</div>
+
+<div id="idDanish" style="display:none">News report/Direct info er en daglig pressemeddelelse på engelsk og fransk, hvori der fortælles om udvalgsmøder, høringer, osv. Den udsendes især i de uger, hvor der afholdes møde i de stående udvalg.</div>
+
+<div id="idEstonian" style="display:none">News Report/Direct Info (Uudisraport/Otseinfo) on igapäevane inglise ja prantsuse keeles avaldatav uudisväljaanne, mis kajastab komisjonide tööd, kuulamisi jne. Ilmub peamiselt komsjonide toimumise nädalatel.</div>
+
+<div id="idFinnish" style="display:none">News report/Direct info ilmestyy pääasiassa valiokuntaviikkojen aikana päivittäin englanniksi. Se tiedottaa mm.valiokuntien työstä ja julkisista kuulemistilaisuuksista.</div>
+
+<div id="idGreek" style="display:none">Το News Report/Direct info είναι ένα καθημερινό ενημερωτικό δελτίο που εκδίδεται στα Αγγλικά και στα Γαλλικά, με αναφορές στις εργασίες των κοινοβουλευτικών επιτροπών, ακροάσεις κλπ. Εκδίδεται κυρίως κατά τη διάρκεια των εβδομάδων συνεδριάσεων των κοινοβουλευτικών επιτροπών.</div>
+
+<div id="idItalian" style="display:none">II Direct info/News Report è un bollettino quotidiano d'informazione, in francese ed in inglese, sulle attività delle commissioni parlamentari, le audizioni pubbliche, etc. E' pubblicato durante le settimane in cui si riuniscono le commissioni parlamentari.</div>
+
+<div id="idJapanese" style="display:none">奈良市の小１女児誘拐殺害で、女児の携帯電話から、女児の家族の携帯に、新たな犯行を予告する内容のメールがあったことがわかった。県警捜査本部は、誘拐犯が再び連絡してきた可能性が極めて高いとみている。(02:10) 全文 </div>
+
+<div id="idNorwegian" style="display:none">Miljøorganisasjonen WWF hevder i en ny rapport at virkningene av klimaendringer større og mer vidtgående enn tidligere antatt. Virkningene kan nå sees over det meste av verden, heter det.</div>
+
+<div id="idPolish" style="display:none">News Report/Direct Info to dzienny biuletyn informacyjny na temat działalności komisji, posiedzeń, itd. Wydawany jest głównie podczas tygodni spotkań komisji, po angielsku i po francusku.</div>
+
+<div id="idPortuguese" style="display:none">Direct info / News Report é um boletim informativo diário, em francês e inglês, sobre a actividade das comissões parlementares, as audições públicas, etc.. É publicado durante as semanas de reunião das comissões parlamentares.</div>
+
+<div id="idSwedish" style="display:none">News Report/Direct info är ett dagligt nyhetsbrev på engelska och franska innehållande rapporter från verksamheten i utskotten, offentliga utfrågningar och liknande. Det publiceras framförallt under utskottsveckorna.</div>
+
+<div id="idUkrainian" style="display:none"></div>
+
+
+<div id="idChinese" style="display:none">財經事務及庫務局歡迎高院裁決   2004年12月14日 HKT: 18:29
+高等法院就兩名公屋居民要求阻止領匯基金上市的司法覆核及禁制令，於下午裁定兩名公屋居民敗訴。財經事務及庫務局長馬時亨歡迎高院裁決，希望兩名原訴人尊重法庭判決，令領匯可以如期上市。 </div>
+
+<div id="idAustralian" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+
+<div id="idCanadian" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+
+<div id="idBritish" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+
+<div id="idSouthafrican" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+
+<div id="idArgentinian" style="display:none">Este <i>version</i> is del <b>no applet</b> ideal para los sitios que no desean utilizar applet, margen de beneficio simple del HTML ser rendido en la ventana del inspector del encanto. Amo a inspector del encanto.</div>
+
+<div id="idBolivian" style="display:none">Este <i>version</i> is del <b>no applet</b> ideal para los sitios que no desean utilizar applet, margen de beneficio simple del HTML ser rendido en la ventana del inspector del encanto. Amo a inspector del encanto.</div>
+
+<div id="idColombian" style="display:none">Este <i>version</i> is del <b>no applet</b> ideal para los sitios que no desean utilizar applet, margen de beneficio simple del HTML ser rendido en la ventana del inspector del encanto. Amo a inspector del encanto.</div>
+
+<div id="idCanadian_French" style="display:none">Cett version sans applet est idale pour les sites qui ne souhaitent pas utiliser des applet, un simple marquage HTML sera rendu dans la fentre de correcteur orthographique. J'aim le correcteur orthographique.</div>
+
+<div id="idBrazilian_Portuguese" style="display:none">Direct info / News Report é um boletim informativo diário, em francês e inglês, sobre a actividade das comissões parlementares, as audições públicas, etc.. É publicado durante as semanas de reunião das comissões parlamentares.</div>
+
+<script language="JavaScript">
+document.form1.customDictionaryName.value = randomString(3);
+document.form1.language.focus();
+
+//Change the language to be used, this in turn is passed back
+// to the URL to use as a parameter.
+function changeLanguage()
+{
+  var activeLanguage =
+    form1.language.options[form1.language.selectedIndex].text;
+
+  var sampleText = document.getElementById("id" + activeLanguage).innerHTML;
+
+  document.form1.textfield.value = sampleText;
+}
+</script>
+
+</BODY>
+</HTML>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.ling.tm3.core.TM3Attribute" table="TM3_ATTR">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <many-to-one name="tm" column="tmId"
+            class="com.globalsight.ling.tm3.core.BaseTm" not-null="true"
+            lazy="false" />
+
+        <property name="name" length="128" column="name" 
+            type="string" not-null="false" />
+        <property name="columnName" length="32" column="columnName" 
+            type="string" not-null="false" />
+        <property name="valueTypeClass" length="128" column="valueType" 
+            type="string" not-null="false" />
+    </class>
+</hibernate-mapping>
+

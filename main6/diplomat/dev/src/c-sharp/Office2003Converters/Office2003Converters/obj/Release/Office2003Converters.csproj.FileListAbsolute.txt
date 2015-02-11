@@ -1,0 +1,30 @@
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\GlobalSight.Office2003Converters.MainForm.resources
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\Office2003Converters.csproj.GenerateResource.Cache
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\GlobalSight.Common.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.Excel.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.PowerPoint.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.Word.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Office.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Microsoft.Vbe.Interop.dll
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Office2003Converters.exe.config
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Office2003Converters.exe
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\bin\Release\Office2003Converters.pdb
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\Office2003Converters.Properties.Resources.resources
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\Office2003Converters.exe
+C:\Documents and Settings\ares\桌面\f\Office2007Converters\Office2003Converters\obj\Release\Office2003Converters.pdb
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Office2003Converters.exe.config
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.exe
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.pdb
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Office2003Converters.exe
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Office2003Converters.pdb
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\GlobalSight.Common.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.Excel.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.PowerPoint.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Microsoft.Office.Interop.Word.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Office.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\bin\Release\Microsoft.Vbe.Interop.dll
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\ResolveAssemblyReference.cache
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\GlobalSight.Office2003Converters.MainForm.resources
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.Properties.Resources.resources
+C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.csproj.GenerateResource.Cache

@@ -1,0 +1,95 @@
+
+(object Petal
+    version    	46
+    _written   	"Rose 7.7.0204.3001"
+    charSet    	0)
+
+(object Class_Category "Envoy Server"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3890C2BE02C5"
+    visible_categories 	(list visibility_relationship_list
+	(object Visibility_Relationship
+	    quid       	"3890C2CF0070"
+	    supplier   	"Logical View::Linguistics"
+	    quidu      	"388BA1C8010E")
+	(object Visibility_Relationship
+	    quid       	"38C4CC970048"
+	    supplier   	"Logical View::com::globalsight::everest::usermanager"
+	    quidu      	"38BA3D1A0014")
+	(object Visibility_Relationship
+	    quid       	"38C4CCA000AF"
+	    supplier   	"Logical View::Envoy::Workflow"
+	    quidu      	"38C558E803DD"))
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class_Category "Job Handler"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\EnvoyServer\\JobHandler.cat"
+	    quid       	"38BA37380127")
+	(object Class_Category "Request Processor"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$CURDIR\\EnvoyServer\\RequestProcessor.cat"
+	    quid       	"38BA3D240023"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"38BD4F8602DA"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object CategoryView "Logical View::Envoy::Envoy Server::Request Processor" @1
+		    location   	(1344, 624)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(1200, 540)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"Request Processor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA3D240023"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::Envoy::Envoy Server::Job Handler" @2
+		    location   	(560, 624)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(416, 540)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"Job Handler")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA37380127"
+		    width      	300
+		    height     	180)))))

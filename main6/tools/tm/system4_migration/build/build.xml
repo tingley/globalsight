@@ -1,0 +1,73 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                   Migration Build FILE                      * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Migration" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="migration_src" value=".." />
+    <property name="migration_bin" value="migration_classes" />
+    <property name="migration_dist" value="dist" />
+    <property name="toolsLib" value="../../lib/common" />
+    <property name="toolsBuild" value="../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    <property name="cap" value="${toolsBuild}/capclasses/globalsight/serverclasses" />
+
+    <property name="migration_classpath"
+        value="${regexp}:${cap}:${weblogic}:${ldap}" />
+
+    <property name="batch_file"
+        value="${migration_src}/System4Migration.bat"/>
+    <property name="sh_file"
+        value="${migration_src}/System4Migration.sh"/>
+    <property name="config_file" value="${migration_src}/config.properties"/>
+    <property name="migration_jar" value="${migration_bin}/migration.jar"/>
+    <property name="migration_zip" value="${migration_dist}/migration.zip"/>
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling migration tool..." />
+    <mkdir dir="${migration_bin}" />
+    <javac classpath="${migration_classpath}"
+	   destdir="${migration_bin}" >
+      <src path="${migration_src}" />
+      <include name="com/**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <jar jarfile="${migration_jar}"
+         basedir="${migration_bin}"
+	 includes="com/**" />
+
+    <copy file="${batch_file}" todir="${migration_bin}"/>
+    <copy file="${sh_file}" todir="${migration_bin}"/>
+    <copy file="${config_file}" todir="${migration_bin}"/>
+    <mkdir dir="${migration_bin}/globalsight"/>
+    <touch file="${migration_bin}/globalsight/CAP.log"/>
+
+    <mkdir dir="${migration_dist}" />
+    <zip zipfile="${migration_zip}">
+        <zipfileset dir="${migration_bin}" includes="migration.jar,System4Migration.bat,System4Migration.sh,config.properties,globalsight/*" prefix="system4_migration" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${migration_bin}" />
+    <delete dir="${migration_dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

@@ -1,0 +1,146 @@
+<html>
+<head>
+<title>Termbase Statistics</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<STYLE></STYLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<script LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/management/FireFox.js"></script>
+<SCRIPT   LANGUAGE="JavaScript">  
+   <!--
+   //make the window in the center position  
+   function   centerWindow()   
+   {
+       var xMax = screen.width;
+       var yMax = screen.height;
+       
+       window.moveTo(xMax/2 - 100, yMax/2 - 100 - 80);
+   }
+     
+   centerWindow();  
+  //-->  
+</SCRIPT>
+<SCRIPT language="Javascript">
+var g_args;
+
+function parseStatistics(dom)
+{
+  var tbody = idTableBody;
+
+  for (var i = tbody.rows.length; i > 0; --i)
+  {
+     tbody.deleteRow(i-1);
+  }
+
+  var row, cell;
+
+  var nodes, node;
+  var termbase, entries, language, number;
+
+  termbase = dom.selectSingleNode('/statistics/termbase').text;
+  entries  = dom.selectSingleNode('/statistics/terms').text;
+
+  idTermbaseName.innerText = termbase;
+  idTermbaseEntries.innerText = entries;
+
+  nodes = dom.selectNodes('//indexes/index');
+  for (var i = 0; i < nodes.length; ++i)
+  {
+    node = nodes[i];
+
+    row = tbody.insertRow(-1);
+
+    language = node.selectSingleNode('language').text;
+    number = node.selectSingleNode('terms').text;
+
+    cell = row.insertCell(-1);
+    cell.innerHTML = language;
+
+    cell = row.insertCell(-1);
+    cell.align = 'right';
+    cell.innerHTML = number;
+  }
+}
+
+function init()
+{
+  // g_args is a xmlhttp.responseXML object (DOMDocument I think)
+  parseStatistics(g_args);
+
+  idOk.focus();
+}
+
+function doClose(ok)
+{
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  window.focus();
+
+  init();  
+  
+  document.getElementById("idTable").style.width =  document.body.clientWidth - 20;
+}
+
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<DIV ID="idHeading" CLASS="mainHeading">Termbase Statistics</DIV>
+<BR>
+
+<DIV ID="idStatistics">
+<TABLE id="idTable" width="100%"
+  CELLPADDING=1 CELLSPACING=0 BORDER=1 CLASS="standardText"
+  style="border-collapse: collapse;width:100%">
+  <THEAD>
+    <TR>
+      <TD colspan=1 align="left"
+        style="background-color: #a6b8ce">Termbase
+      </TD>
+      <TD colspan=1 align="right"
+        style="background-color: #a6b8ce">Total Terms
+      </TD>
+    </TR>
+    <TR>
+      <TD align="left" id="idTermbaseName"></TD>
+      <TD align="right"id="idTermbaseEntries"></TD>
+    </TR>
+    <TR style="background-color: #b6c8de; border-top-color: #b6c8de">
+      <TD width="50%" valign="top" align="left">Language</TD>
+      <TD width="50%" valign="top" align="right">Terms</TD>
+    </TR>
+  </THEAD>
+  <TBODY id="idTableBody"></TBODY>
+</TABLE>
+</DIV>
+
+<BR>
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE="Close" TABINDEX="3" onclick="doClose();">
+</DIV>
+
+</DIV>
+</body>
+</html>

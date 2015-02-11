@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.tuv.TuvImpl" table="TRANSLATION_UNIT_VARIANT">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="order" length="22" column="ORDER_NUM" type="long"
+			not-null="true" unique="false" />
+
+		<many-to-one name="globalSightLocale" column="LOCALE_ID"
+			class="com.globalsight.util.GlobalSightLocale" not-null="true" />
+		<many-to-one name="tu" column="TU_ID"
+			class="com.globalsight.everest.tuv.TuImpl" not-null="true" />
+
+		<property name="isIndexed" column="IS_INDEXED" type="yes_no"
+			not-null="true" unique="false" />
+
+		<property name="segmentClob" column="SEGMENT_CLOB" type="string"
+			not-null="false" unique="false" />
+		<property name="segmentString" column="SEGMENT_STRING" type="string"
+			not-null="false" unique="false" />
+		<property name="wordCount" length="10" column="WORD_COUNT"
+			type="int" not-null="false" unique="false" />
+		<property name="exactMatchKey" column="EXACT_MATCH_KEY" type="long"
+			not-null="false" unique="false" />
+
+		<property name="m_state" length="40" column="STATE" type="string"
+			access="field" not-null="true" unique="false" />
+
+		<property name="mergeState" length="20" column="MERGE_STATE"
+			type="string" not-null="true" unique="false" />
+
+		<property name="timestamp" column="TIMESTAMP" type="timestamp"
+			not-null="true" unique="false" />
+
+		<property name="lastModified" column="LAST_MODIFIED" type="timestamp"
+			not-null="true" unique="false" />
+		<property name="lastModifiedUser" length="80" column="MODIFY_USER"
+			type="string" not-null="false" unique="false" />
+
+		<property name="createdDate" column="CREATION_DATE" type="timestamp"
+			not-null="true" unique="false" />
+
+		<property name="createdUser" length="80" column="CREATION_USER"
+			type="string" not-null="false" unique="false" />
+
+				<property name="updatedProject" length="40" column="UPDATED_BY_PROJECT"
+			type="string" not-null="false" unique="false" />
+
+		<property name="sid" length="255" column="SID" type="string"
+			not-null="false" unique="false" />
+            
+    <set name="xliffAlt" table="xliff_alt" inverse="true" cascade="save-update">
+       <key column="TUV_ID"/>
+       <one-to-many  class="com.globalsight.ling.docproc.extractor.xliff.XliffAlt"/>
+    </set>
+    
+    <set name="issueEditionRelation" table="ISSUE_EDITION_RELATION" inverse="true" cascade="save-update">
+       <key column="TUV_ID"/>
+       <one-to-many  class="com.globalsight.everest.comment.IssueEditionRelation"/>
+    </set>
+	</class>
+</hibernate-mapping>

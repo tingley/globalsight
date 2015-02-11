@@ -1,0 +1,49 @@
+#********************* Configuration for DataSource ****************************
+#
+#-------- DataSource Properties
+#
+#               Property Name 	             Required 	  Type 	  Default Value
+#  org.quartz.dataSource.NAME.driver 	       yes 	     String 	     null
+#  org.quartz.dataSource.NAME.URL 	           yes 	     String 	     null
+#  org.quartz.dataSource.NAME.user 	            no 	     String 	      ""
+#  org.quartz.dataSource.NAME.password 	        no 	     String 	      ""
+#  org.quartz.dataSource.NAME.maxConnections 	no 	       int 	          10
+#  org.quartz.dataSource.NAME.validationQuery   no 	     String 	     null
+#
+#-------- The "NAME" will be used by other configuration properties.
+#         Such as JobStore.
+#-------- Different DataSources use different "NAME" to differentiate.
+#
+
+#-------- DataSource for MySql
+org.quartz.dataSource.amb_mysql.driver=com.mysql.jdbc.Driver
+org.quartz.dataSource.amb_mysql.URL=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
+org.quartz.dataSource.amb_mysql.user=%%database_username%%
+org.quartz.dataSource.amb_mysql.password=%%database_password%%
+
+#-------- DataSource for Oracle
+#org.quartz.dataSource.amb_oracle.driver=oracle.jdbc.driver.OracleDriver
+#org.quartz.dataSource.amb_oracle.URL=jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=%%database_server%%)(PORT=%%database_port%%)))(CONNECT_DATA=(SID=%%database_instance_name%%)(SERVER=DEDICATED)))
+#org.quartz.dataSource.amb_oracle.user=%%database_username%%
+#org.quartz.dataSource.amb_oracle.password=%%database_password%% 
+
+#-------- DataSource for Application Server
+#org.quartz.dataSource.jboss.jndiURL=UserTransaction
+#org.quartz.dataSource.weblogic.jndiURl=javax/transaction/UserTransaction
+
+#********************* Configurations for JobStore *****************************
+#-- Configuration of Transaction 
+org.quartz.jobStore.class = org.quartz.impl.jdbcjobstore.JobStoreTX
+#org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.oracle.OracleDelegate
+#org.quartz.jobStore.tablePrefix = QRTZ_
+#org.quartz.jobStore.dataSource=amb_oracle
+
+#org.quartz.jobStore.class = org.quartz.impl.jdbcjobstore.JobStoreCMT
+org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+org.quartz.jobStore.tablePrefix = QRTZ_
+#org.quartz.jobStore.dataSource=jboss
+org.quartz.jobStore.dataSource=amb_mysql
+#org.quartz.jobStore.nonManagedTXDataSource=amb_mysql
+
+org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool
+org.quartz.threadPool.threadCount=5

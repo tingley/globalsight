@@ -1,0 +1,678 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Data Source Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"393C3385028A"
+    documentation 	"This package contains use cases that manages the web data source."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Add Data Source"
+	    quid       	"393C388D02FA"
+	    documentation 	
+|Normal Course of Events
+|====================
+|
+|The Data Source Maintainer (DSM) invokes the Web Content Interface GUI and selects the option to configure data source information. The system displays a list of actions that the DSM can take: Add, Modify and Delete.  The DSM selects the "Add" option and the type of data source to add (database table or flat file).  The system prompts the DSM for the name of the data source, the user name and password to access the data source, and then displays a data source type specific data entry panel.  The DSM enters the data source information (see "Use Case 25 - Enter Database Data Source Information" and "Use Case 26 - Enter File System Data Source Information").
+|
+|After the DSM has entered the data source type specific data, the system displays the Localization Profiles entry window where the DSM can enter the following information:
+|
+|a.	The default source locale
+|b.	The list of locales (target locales) that the data source shall be localized to
+|c.	The workflow for each target locale where workflow is specified as a sequence of workflow tasks (e.g., Translation, Cultural, Legal, QA, and Review) and the participant for each of the stages.
+|d.	The list of Translation Memories that shall be used as the default TMs.
+|e.	The requirement of whether or not the localization request go through authorization before localization process is started
+|f.	The default project for change to this data source
+|
+|The DSM enters the new data source information and either confirms or cancel the data.  If the DSM confirms the data entered, the system adds the new data source information to its data source configuration information database.
+|
+|
+|Alternative Courses
+|================
+|a.	If the name entered by the DSM already exist, the DSM is prompted to enter a new name, or cancel the operation.
+|b.	If the DSM cancels the data entered, the system redisplays the action options: Add, Modify and Delete.
+|
+	    )
+	(object UseCase "Modify Data Source"
+	    quid       	"393C390603DB"
+	    documentation 	
+|Normal Course of Events
+|====================
+|
+|The Data Source Maintainer invokes the Web Content Interface GUI and selects the option to configure data source information. The system displays a list of actions that the DSM can take: Add, Modify and Delete. The DSM selects the "Modify" option. The system brings up a list of data source names for the DSM to choose. The DSM selects one of the names. The system displays the appropriate data source type specific data entry panel and fills in the input fields with data of the selected data source. The DSM modifies the data source information (see "Use Case 25 - Enter Database Data Source Information" and "Use Case 26 - Enter File System Data Source Information").  The DSM confirms the data entered, the system replaces the old data source information with the new information in its data source configuration information database.
+|
+|Alternative Courses
+|===============
+|
+|The DSM cancels the data entered, the system redisplays the action options: Add, Modify and Delete.
+|
+	    )
+	(object UseCase "Delete Data Source"
+	    quid       	"393C3951031A"
+	    documentation 	
+|Normal Course
+|============
+|
+|The Data Source Maintainer invokes the Web Content Interface GUI and selects the option to configure data source information. The system displays a list of actions that the DSM can take: Add, Modify and Delete. The DSM selects the "Delete" option and the type of data source to modify (database table or flat file). The system brings up a list of data source names of the specified type for the DSM to choose. The DSM selects one of the names.  The system displays details about the data source.  The DSM confirms the decision to delete the data source. The system deletes the information about the specified data source from its data source configuration information database.
+	    )
+	(object UseCase "Enter Database Data Source Information"
+	    quid       	"393F9F94012E"
+	    documentation 	
+|3.20.2	Actor
+|Data Source Maintainer.
+|3.20.3	Description
+|The Data Source Maintainer enters information about a database schema in the web site data source.  This information will be used by the system to read source content data from and write localized data to the web site data source.
+|3.20.4	Preconditions
+|The Data Source Maintainer is either entering new data source information (use case 1) or modifying data source information (use case 2).  In the former case, the input fields in the Database Information panel are empty; in the latter case, the input fields are already filled in by the system with the data from the data source that the Data Source Maintainer is trying to modify.
+|3.20.5	Normal Course of Events
+|The Data Source Maintainer selects "database" as the data source type in the Web Content Interface GUI.  The system displays the Database Information input panel for the Data Source Maintainer to enter Layout Profile information about the data source.  If the Data Source Maintainer had selected a data source to modify prior to entering this use case, the system fills in the input field with information about the data source before letting the Data Source Maintainer enter data.   The Layout Profile information that the Data Source Maintainer can enter or modify include:
+|
+|1)	Access information of the table:
+|a)	The URL (JDBC compliant, e.g. everest.globalsight.com:1521:gsOR) for the database.
+|b)	The name of the schema (this is usually the name of the account that owns the table).
+|c)	The name of the table.
+|2)	The locale of the data in the table.
+|3)	A human readable description of the table, to be used in the localization process.
+|4)	Information about each column in the table:
+|a)	The localizability (localizable or not) of the data in the column.
+|b)	A human readable description to be used in the localization process.
+|5)	The access information of the tables that contains localized versions of the data in this table.  This information is to be used, after the data from this table has been localized, to write the localized data to the other tables.
+|
+|The Data Source Manager can add or remove as many columns as desired and enter the column information as necessary.
+|
+	    )
+	(object UseCase "Enter File System Data Source Information"
+	    quid       	"393FAE9B01B2"
+	    documentation 	
+|3.21.2	Actor
+|Data Source Maintainer
+|3.21.3	Description
+|The Data Source Maintainer enters information about a file system in the web site data source.  This information will be used by the system to read source content data from and write localized data to the web site data source.
+|3.21.4	Preconditions
+|The Data Source Maintainer is either entering new data source information (use case 1) or modifying data source information (use case 2).  In the former case, the input fields in the File System Information window are empty; in the latter case, the input fields are already filled in by the system with the data from the data source that the Data Source Maintainer is trying to modify.
+|3.21.5	Normal Course of Events
+|The Data Source Maintainer selects "file system" as the data source type in the Web Content Interface GUI.  The system displays the File System Information input panel for the Data Source Maintainer to enter Layout Profile information about the data source.  If the Data Source Maintainer had selected a data source to modify prior to entering this use case, the system fills in the input field with information about the data source before letting the Data Source Maintainer enter data.   The Layout Profile information that the Data Source Maintainer can enter or modify include:
+|
+|1)	Access information of the file system directory or file: the URI of the directory or file, including the IP address of the host machine where the directory or file is located.
+|2)	The locale of the data in the data source.
+|3)	A human readable description of the data source, to be used in the localization process.
+|4)	The localizability (localizable or not) of the data in the data source
+|5)	The access information of the directories or files that contains localized versions of the data in this data source.  This information is to be used, after the data from this data source has been localized, to write the localized data to the other data sources.
+|
+	    )
+	(object UseCase "Add Data Record Metadata"
+	    quid       	"39401FAB0052"
+	    documentation 	
+|3.30.1	Actor
+|Data Source Maintainer. Maintains multilingual records in the data source
+|3.30.2	Priority
+|3.30.3	Description
+|The Data Source Maintainer assigns a localization profile to a specific record to override the localization profile that the record would otherwise inherit from its container (such as a table or a file system directory).
+|3.30.4	Normal Course Of Events
+|The Data Source Maintainer (DSM) invokes the system's Web Content Interface GUI selects the option to configure data record information.  The system displays a list of actions that the DSM can take: Add, Modify and Delete.  The DSM selects the "Add".  The system prompts the DSM for the name of the data record, the user name and password to access the data record, the name of data source that the data record belongs to, and then displays the appropriate data record information entry window.
+|
+|With a File-based Data Record Information Entry Window, the DSM can enter the following information:
+|a.	The name of file.  A list of files under the specified data source name shall be displayed for the DSM to choose
+|b.	The localizability of the data source
+|c.	The contextual representation during the localization process
+|
+|With a  Database Data Record Information Entry Window, the DSM can enter the following information:
+|a.	The primary key of the data record.  A list of relational database rows shall be displayed for the DSM to choose
+|b.	The localizability of the data record
+|c.	The contextual representation during the localization process
+|
+|After the DSM closes either the File-based Data Source Information Entry Window or the Database Data Record Information Entry Window, the system displays the Data Record Localization Profiles Entry Window where the DSM can enter the following information:
+|
+|a.	The default source locale
+|b.	The primary locale
+|c.	The list of locales (target locales) that the data source shall be localized to
+|d.	The workflow for each target locale where workflow is specified as a sequence of workflow stages (For examples, Translation, Cultural, Legal, QA, and Review) and the responsible person for each of the stages.
+|e.	The list of Translation Memories that shall be used as the default TMs
+|f.	The requirement of whether or not the localization process go through authorization before localization process is started
+|g.	The default project for change to this data record
+|
+|3.30.5	Alternative Courses
+|a.	If the name entered by the DSM already exist, the DSM is prompted to enter a new name, or cancel the operation
+|b.	If the DSM cancels the data entered, the system redisplays the action options: Add, Modify and Delete
+|
+|3.30.6	Notes and Issues
+|In Envoy, Data Record corresponds to a row in a relational database table or a file in a file system directory.
+|
+	    )
+	(object UseCase "Delete Data Record Metadata"
+	    quid       	"39401FFB001B"
+	    documentation 	
+|3.31.1	Actor
+|Data Source Maintainer. Maintains multilingual records in the data source.
+|3.31.2	Priority
+|3.31.3	Description
+|The Data Source Maintainer removes the localization profile from a data record so that the data record inherits the localization profile from its container (such as a database table or a file system directory).
+|3.31.4	Normal Course Of Events
+|The Data Source Maintainer invokes the system's Web Content Interface GUI and selects the option to configure data record information. The system displays a list of actions that the DSM can take: Add, Modify and Delete. The DSM selects the "Delete" option and the type of data record to modify (database table or flat file). The system brings up a list of data record names of the specified type for the DSM to choose. The DSM selects one of the names and confirms the decision to delete the data source. The system deletes the information about the specified data source from its data source configuration information database.
+|
+	    )
+	(object Association "$UNNAMED$0"
+	    quid       	"393C38E50116"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"393C38E60059"
+		    supplier   	"Use Case View::Data Source Management::Add Data Source"
+		    quidu      	"393C388D02FA"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"393C38E60063"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$3"
+	    quid       	"393C394703AC"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"393C39480335"
+		    supplier   	"Use Case View::Data Source Management::Modify Data Source"
+		    quidu      	"393C390603DB"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"393C39480336"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$6"
+	    quid       	"393C3979021D"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"393C397A0175"
+		    supplier   	"Use Case View::Data Source Management::Delete Data Source"
+		    quidu      	"393C3951031A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"393C397A0176"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$9"
+	    quid       	"393F9FA40236"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"393F9FA501FB"
+		    supplier   	"Use Case View::Data Source Management::Enter Database Data Source Information"
+		    quidu      	"393F9F94012E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"393F9FA50205"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$12"
+	    quid       	"393FAEB601ED"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"393FAEB7016D"
+		    supplier   	"Use Case View::Data Source Management::Enter File System Data Source Information"
+		    quidu      	"393FAE9B01B2"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"393FAEB70177"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$15"
+	    quid       	"39401FB70014"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"39401FB703AD"
+		    supplier   	"Use Case View::Data Source Management::Add Data Record Metadata"
+		    quidu      	"39401FAB0052"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"39401FB703AE"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275")))
+	(object Association "$UNNAMED$18"
+	    quid       	"394020050323"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"39402006036A"
+		    supplier   	"Use Case View::Data Source Management::Delete Data Record Metadata"
+		    quidu      	"39401FFB001B"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"39402006036B"
+		    supplier   	"Use Case View::Data Source Maintainer"
+		    quidu      	"393C385A0275"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Data Source Management"
+	    quid       	"393C384603DF"
+	    title      	"Data Source Management"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::Data Source Management::Add Data Source" @1
+		    location   	(672, 128)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(672, 266)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add Data Source")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"393C388D02FA"
+		    height     	118)
+		(object UseCaseView "Use Case View::Data Source Management::Modify Data Source" @2
+		    location   	(1104, 256)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1104, 394)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify Data Source")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"393C390603DB"
+		    height     	118)
+		(object UseCaseView "Use Case View::Data Source Management::Delete Data Source" @3
+		    location   	(1712, 464)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1712, 602)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete Data Source")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"393C3951031A"
+		    height     	118)
+		(object UseCaseView "Use Case View::Data Source Management::Enter Database Data Source Information" @4
+		    location   	(1872, 800)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1872, 938)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Enter Database Data Source Information")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"393F9F94012E"
+		    height     	118)
+		(object UseCaseView "Use Case View::Data Source Management::Enter File System Data Source Information" @5
+		    location   	(1904, 1200)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1904, 1338)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Enter File System Data Source Information")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"393FAE9B01B2"
+		    height     	118)
+		(object UseCaseView "Use Case View::Data Source Management::Add Data Record Metadata" @6
+		    location   	(1232, 1136)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(1232, 1274)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add Data Record Metadata")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39401FAB0052"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Data Source Maintainer" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(336, 480)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(336, 640)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	325
+			justify    	0
+			label      	"Data Source Maintainer")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"393C385A0275"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @8
+		    location   	(454, 354)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393C38E50116"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @9
+			    Parent_View 	@8
+			    location   	(118, -126)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C38E60059"
+			    client     	@8
+			    supplier   	@1
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @10
+			    Parent_View 	@8
+			    location   	(118, -126)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C38E60063"
+			    client     	@8
+			    supplier   	@7
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$3" @11
+		    location   	(656, 382)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393C394703AC"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @12
+			    Parent_View 	@11
+			    location   	(320, -98)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C39480335"
+			    client     	@11
+			    supplier   	@2
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @13
+			    Parent_View 	@11
+			    location   	(320, -98)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C39480336"
+			    client     	@11
+			    supplier   	@7
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$6" @14
+		    location   	(997, 469)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393C3979021D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @15
+			    Parent_View 	@14
+			    location   	(661, -11)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C397A0175"
+			    client     	@14
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @16
+			    Parent_View 	@14
+			    location   	(661, -11)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393C397A0176"
+			    client     	@14
+			    supplier   	@7
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$9" @17
+		    location   	(1076, 632)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393F9FA40236"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @18
+			    Parent_View 	@17
+			    location   	(740, 152)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393F9FA501FB"
+			    client     	@17
+			    supplier   	@4
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @19
+			    Parent_View 	@17
+			    location   	(740, 152)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393F9FA50205"
+			    client     	@17
+			    supplier   	@7
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$12" @20
+		    location   	(1092, 825)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393FAEB601ED"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @21
+			    Parent_View 	@20
+			    location   	(756, 345)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393FAEB7016D"
+			    client     	@20
+			    supplier   	@5
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @22
+			    Parent_View 	@20
+			    location   	(756, 345)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393FAEB70177"
+			    client     	@20
+			    supplier   	@7
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$15" @23
+		    location   	(806, 823)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39401FB70014"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$16" @24
+			    Parent_View 	@23
+			    location   	(470, 343)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401FB703AD"
+			    client     	@23
+			    supplier   	@6
+			    line_style 	0)
+			(object RoleView "$UNNAMED$17" @25
+			    Parent_View 	@23
+			    location   	(470, 343)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401FB703AE"
+			    client     	@23
+			    supplier   	@7
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Data Source Management::Delete Data Record Metadata" @26
+		    location   	(1088, 1536)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@26
+			location   	(1088, 1674)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete Data Record Metadata")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39401FFB001B"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$18" @27
+		    location   	(784, 1110)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394020050323"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @28
+			    Parent_View 	@27
+			    location   	(448, 630)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402006036A"
+			    client     	@27
+			    supplier   	@26
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @29
+			    Parent_View 	@27
+			    location   	(448, 630)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402006036B"
+			    client     	@27
+			    supplier   	@7
+			    line_style 	0)))))))

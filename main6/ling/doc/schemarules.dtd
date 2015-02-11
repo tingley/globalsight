@@ -1,0 +1,34 @@
+<!-- schemarules.dtd created on Aug 31, 2000 -->
+<!--            version 1.0 -->
+<!--		by Shigemichi Yazawa, GlobalSight Corp. -->
+
+<!-- Document root -->
+<!ELEMENT schemarules (ruleset)+>
+<!ATTLIST schemarules
+	use-empty-tag   (true|false)	"true">
+
+
+<!-- One rule element for each XML instance. There can be multiple -->
+<!-- rule elements -->
+<!ELEMENT ruleset (translate|dont-translate)+>
+<!ATTLIST ruleset
+	schema	        CDATA	#REQUIRED>
+
+
+<!-- Specify an element that is to be translated -->
+<!ELEMENT translate EMPTY>
+<!ATTLIST translate
+	path		CDATA	#REQUIRED   <!-- XPath expression -->
+	loctype		(translatable|localizable) "translatable"
+	datatype	CDATA	#IMPLIED    <!-- new extraction format -->
+	type		CDATA	#IMPLIED
+	inline		(yes|no) "no"       <!-- non-breaking tag? -->
+	movable        (yes|no) "no"       <!-- movable tag? -->
+	erasable       (yes|no) "no"       <!-- can it be deleted? -->
+>
+
+
+<!-- Specify an element that is not to be translated -->
+<!ELEMENT dont-translate EMPTY>
+<!ATTLIST dont-translate
+	path		CDATA	#REQUIRED>   <!-- XPath expression -->

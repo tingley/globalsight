@@ -1,0 +1,617 @@
+<!--
+ Spincontrol "[inputbox] ^v".
+-->
+
+<PUBLIC:COMPONENT tagName="spin">
+
+<PUBLIC:METHOD NAME = "getCurrentPos" />
+<PUBLIC:METHOD NAME = "setCurrentPos" />
+<PUBLIC:METHOD NAME = "getStep" />
+<PUBLIC:METHOD NAME = "setStep" />
+<PUBLIC:METHOD NAME = "getLowerLimit" />
+<PUBLIC:METHOD NAME = "getUpperLimit" />
+<PUBLIC:METHOD NAME = "setLimits" />
+<PUBLIC:METHOD NAME = "setCurrentPos" />
+<PUBLIC:METHOD NAME = "getLimits" />
+<PUBLIC:METHOD NAME = "getUpperLimit" />
+<PUBLIC:METHOD NAME = "setSpinValues" />
+
+<PUBLIC:PROPERTY NAME="case_sensitive" />
+<PUBLIC:PROPERTY NAME="integer" ID="propid_integer" PUT="setInteger" GET="getInteger"/>
+<PUBLIC:PROPERTY NAME="editable" ID="propid_editable" PUT="setReadOnly" GET="getReadOnly"/>
+<PUBLIC:PROPERTY NAME="circular" />
+
+<PUBLIC:EVENT NAME = "spin_onchange" ID="event_onchange"/>
+
+<PUBLIC:attach event="ondocumentready" handler="initSpin" />
+
+</PUBLIC:COMPONENT>
+
+<SCRIPT language="JScript">
+var oTextCtrl   = null;
+var oBtnUp      = null;
+var oBtnDown    = null;
+var oSpinTable  = null;
+
+var iCurrentPos;
+var iStep;
+var iLowerLimit;
+var iUpperLimit;
+
+var bNumeric    = true;
+var bInteger    = false;
+var asValues    = null;
+
+function initSpin()
+{
+    var iInitialWidth;
+
+    if (currentStyle.width != "auto")
+    {
+        iInitialWidth =  style.pixelWidth;
+    }
+    else
+    {
+        iInitialWidth = 50;
+    }
+
+    innerHTML = "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 ROWS=2 COLS=2>" +
+                "<TR>" +
+                    "<TD ROWSPAN=2><INPUT TYPE='text'></TD>" +
+                    "<TD><INPUT TYPE='button'></TD>" +
+                "</TR>" +
+                "<TR>" +
+                    "<TD><INPUT TYPE='button'></TD>" +
+                "</TR>" +
+                "</TABLE>";
+
+    oSpinTable = children(0);
+
+    oTextCtrl = oSpinTable.rows(0).cells(0).children(0);
+    oTextCtrl.id = uniqueID + "_text";
+    oTextCtrl.name = name;
+    oTextCtrl.style.borderWidth = "0px";
+    oTextCtrl.attachEvent("onchange", onEditChange);
+    oTextCtrl.attachEvent("onkeydown", onKeyDown);
+
+    oTextCtrl.style.pixelHeight = 12;
+    oTextCtrl.style.pixelWidth = iInitialWidth;
+    oTextCtrl.style.margin = "0";
+    oTextCtrl.style.padding = "0";
+
+    oSpinTable.bgColor =  oTextCtrl.currentStyle.backgroundColor;
+
+    // Supported styles: background color, color, font,
+    // letter-spacing, margin, text-align
+    var sProperty;
+    var sPropertyValue;
+
+    sPropertyValue = style.getAttribute("backgroundColor");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oTextCtrl.style.setAttribute("backgroundColor", sPropertyValue);
+        oTextCtrl.parentElement.style.setAttribute("backgroundColor", sPropertyValue);
+    }
+    sPropertyValue = style.getAttribute("color");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oTextCtrl.style.setAttribute("color", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("font");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oTextCtrl.style.setAttribute("font", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("letterSpacing");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oTextCtrl.style.setAttribute("letterSpacing", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("textAlign");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oTextCtrl.style.setAttribute("textAlign", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("margin");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oSpinTable.style.setAttribute("margin", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("marginLeft");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oSpinTable.style.setAttribute("marginLeft", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("marginTop");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oSpinTable.style.setAttribute("marginTop", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("marginRight");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oSpinTable.style.setAttribute("marginRight", sPropertyValue);
+    }
+
+    sPropertyValue = style.getAttribute("marginBottom");
+    if ((sPropertyValue != null) && (sPropertyValue != "")) {
+        oSpinTable.style.setAttribute("marginBottom", sPropertyValue);
+    }
+
+    // Create UP button
+    oBtnUp = children(0).rows(0).cells(1).children(0);
+    oBtnUp.id = uniqueID + "_btnup";
+    oBtnUp.tabIndex = -1;
+
+    oBtnUp.style.pixelWidth = 15; // 20
+    oBtnUp.style.pixelHeight = 6; // oTextCtrl.offsetHeight / 2;
+
+    oBtnUp.style.borderWidth = "0px";
+    oBtnUp.style.font  = "bold 5px wingdings 3";
+    oBtnUp.value = "p";
+
+    oBtnUp.attachEvent("onclick", onClickUp);
+    oBtnUp.attachEvent("ondblclick", onClickUp);
+
+    // Create DOWN button
+    oBtnDown = children(0).rows(1).cells(0).children(0);
+    oBtnDown.id = uniqueID + "_btndown";
+    oBtnDown.tabIndex = -1;
+
+    oBtnDown.style.pixelWidth = 15; // 20
+    oBtnDown.style.pixelHeight = 6; // oTextCtrl.offsetHeight / 2;
+
+    oBtnDown.style.borderWidth = "0px";
+    oBtnDown.style.font  = "bold 5px wingdings 3";
+    oBtnDown.value = "q";
+
+    oBtnDown.attachEvent("onclick", onClickDown);
+    oBtnDown.attachEvent("ondblclick", onClickDown);
+
+    // member variables
+    circular = false;
+    case_sensitive = false;
+    editable = true;
+
+    bNumeric = true;
+    iCurrentPos = 0;
+    iStep = 1;
+    iLowerLimit = 0;
+    iUpperLimit = 100;
+
+    oTextCtrl.value = iCurrentPos;
+
+    attachEvent("onpropertychange", changeStyle);
+}
+
+function setSpinValues(asValuesArray)
+{
+    if (asValuesArray == null || asValuesArray.length == 0)
+    {
+        return;
+    }
+    asValues = asValuesArray;
+    bNumeric = false;
+    bInteger = true;
+
+    iLowerLimit = 0;
+    iUpperLimit = asValuesArray.length - 1;
+
+    case_sensitive = true;
+}
+
+function onClickDown()
+{
+    var iNext;
+    if (bInteger)
+    {
+        iNext = iCurrentPos - iStep;
+    }
+    else
+    {
+        iNext = _floatAdd(iCurrentPos, -iStep);
+    }
+
+    if (iNext < iLowerLimit)
+    {
+        if (!circular)
+        {
+            return;
+        }
+
+        if (bInteger)
+        {
+            var delta = iLowerLimit - iNext;
+            iNext = (iUpperLimit + 1) - delta;
+        }
+        else
+        {
+            var delta = _floatAdd(iLowerLimit, -iNext);
+            iNext = _floatAdd(iUpperLimit, -delta);
+        }
+    }
+    iCurrentPos = iNext;
+    _updateEditCtrl();
+}
+
+function onClickUp()
+{
+    var iNext;
+
+    if (bInteger)
+    {
+        iNext = iCurrentPos + iStep;
+    }
+    else
+    {
+        iNext = _floatAdd(iCurrentPos, iStep);
+    }
+
+    if (iNext > iUpperLimit)
+    {
+        if (!circular)
+        {
+            return;
+        }
+        if (bInteger)
+        {
+            var delta = iNext - iUpperLimit;
+            iNext = (iLowerLimit - 1) + delta;
+
+        }
+        else
+        {
+
+            var delta = _floatAdd(iNext, -iUpperLimit);
+            iNext = _floatAdd(iLowerLimit,  delta);
+        }
+    }
+    iCurrentPos = iNext;
+    _updateEditCtrl();
+}
+
+function onEditChange()
+{
+    setCurrentPos(oTextCtrl.value);
+}
+
+function onKeyDown()
+{
+    var bDown = (event.keyCode == 40);
+    var bUp = (event.keyCode == 38);
+
+    if (!bUp && !bDown)
+    {
+        return;
+    }
+
+    if (bDown)
+    {
+        onClickDown();
+    }
+    else if (bUp)
+    {
+        onClickUp();
+    }
+}
+
+function setCurrentPos(iPos)
+{
+    var bError = false;
+
+    if (bNumeric)
+    {
+        if (bInteger)
+        {
+            if (!_isInteger(iPos))
+            {
+                alert("Specified value is not an integer.");
+                bError = true;
+            }
+            iPos = parseInt(iPos);
+        }
+        else
+        {
+            if (isNaN(iPos))
+            {
+                alert("Specified value is not a number.");
+                bError = true;
+            }
+            iPos = parseFloat(iPos);
+        }
+
+        if (!bError)
+        {
+            if (iPos < iLowerLimit || iPos > iUpperLimit)
+            {
+                alert("Specified position is outside the current limits (" +
+                    iLowerLimit + "-" + iUpperLimit + ")");
+                bError = true;
+            }
+            else
+            {
+                iCurrentPos = iPos;
+            }
+        }
+    }
+    else
+    {
+        // For string spin, specifying either index or actual value is allowed
+        if (_isInteger(iPos))
+        {
+            if (iPos < iLowerLimit || iPos > iUpperLimit)
+            {
+                alert("Specified position is outside the current limits.");
+                bError = true;
+            }
+            else
+            {
+                iCurrentPos = parseInt(iPos);
+            }
+        }
+        else
+        {
+            var iInd, iLen;
+            var bFound = false;
+            var bEqual;
+
+            iLen = asValues.length;
+            for (iInd = 0; iInd < iLen; iInd++)
+            {
+                bEqual = case_sensitive ? (asValues[ iInd ] == iPos)
+                    : (asValues[ iInd ].toLowerCase() == iPos.toLowerCase());
+                if (bEqual)
+                {
+                    iCurrentPos = iInd;
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound)
+            {
+                alert("Specified value is invalid.");
+                bError = true;
+            }
+        }
+    }
+    _updateEditCtrl(bError);
+}
+
+function getCurrentPos()
+{
+    if (bNumeric)
+    {
+        return iCurrentPos;
+    }
+    else
+    {
+        return oTextCtrl.value;
+    }
+}
+
+function setLimits(iLower, iUpper)
+{
+    if (!bNumeric)
+    {
+        // limits for string spin are always 0 and length of values array
+        return;
+    }
+
+    if (iLower == null) {
+        iLower = iLowerLimit;
+    }
+    if (iUpper == null) {
+        iUpper = iUpperLimit;
+    }
+    if (bInteger) {
+        if (!_isInteger(iLower) || !_isInteger(iUpper)) {
+            alert("Limit value is not an integer");
+            return;
+        }
+        iLower = parseInt(iLower);
+        iUpper = parseInt(iUpper);
+    }
+    else {
+        if (isNaN(iLower) || isNaN(iUpper)) {
+            alert("Limit value is not a number");
+            return;
+        }
+        iLower = parseFloat(iLower);
+        iUpper = parseFloat(iUpper);
+    }
+
+    if (iLower >= iUpper) {
+        alert("Lower limit must be less then upper limit");
+        return;
+    }
+    iLowerLimit = iLower;
+    iUpperLimit = iUpper;
+
+    // Update current position in case it is out of limits
+    if (iCurrentPos < iLower) {
+        this.setCurrentPos(iLower);
+    }
+    if (iCurrentPos > iUpper) {
+        this.setCurrentPos(iUpper);
+    }
+}
+
+function getLowerLimit()
+{
+    return iLowerLimit;
+}
+
+function getUpperLimit()
+{
+    return iUpperLimit;
+}
+
+function setStep(iNewStep)
+{
+    if (bInteger) {
+        if (!_isInteger(iNewStep)) {
+            alert("Step value is not an integer");
+            return;
+        }
+        iNewStep = parseInt(iNewStep);
+    }
+    else {
+        if (isNaN(iNewStep)) {
+            alert("Specified step is not a number");
+            return;
+        }
+        iNewStep = parseFloat(iNewStep);
+    }
+
+    if (iNewStep <= 0) {
+        alert("Specified step is not a positive number");
+        return;
+    }
+    iStep = iNewStep;
+}
+
+function getStep()
+{
+    return iStep;
+}
+
+function setReadOnly(bNotReadOnly)
+{
+    oTextCtrl.readOnly = !bNotReadOnly;
+    propid_editable.fireChange();
+}
+
+function getReadOnly()
+{
+    return oTextCtrl.readOnly;
+}
+
+function setInteger(bSetInteger)
+{
+    if (bSetInteger) {
+        if (!_isInteger(iCurrentPos)) {
+            alert("Current position is not an integer");
+            return;
+        }
+        if (!_isInteger(iStep)) {
+            alert("Step is not an integer");
+            return;
+        }
+        if (!_isInteger(iUpperLimit)) {
+            alert("Upper limit is not an integer");
+            return;
+        }
+        if (!_isInteger(iLowerLimit)) {
+            alert("Lower limit is not an integer");
+            return;
+        }
+    }
+    bInteger = bSetInteger;
+    propid_integer.fireChange();
+}
+
+function getInteger()
+{
+    return bInteger;
+}
+
+function changeStyle()
+{
+    if (event.propertyName.substring(0, 5) != 'style') {
+        return;
+    }
+
+    var sValue;
+
+    switch (event.propertyName) {
+        case "style.backgroundColor":
+            sValue = style.getAttribute("backgroundColor");
+            oTextCtrl.style.setAttribute("backgroundColor", sValue);
+            oTextCtrl.parentElement.style.setAttribute("backgroundColor", sValue);
+            break;
+
+        case "style.color":
+            sValue = style.getAttribute("color");
+            oTextCtrl.style.setAttribute("color", sValue);
+            break;
+
+        case "style.font":
+            sValue = style.getAttribute("font");
+            oTextCtrl.style.setAttribute("font", sValue);
+            break;
+
+        case "style.letterSpacing":
+            sValue = style.getAttribute("letterSpacing");
+            oTextCtrl.style.setAttribute("letterSpacing", sValue);
+            break;
+
+        case "style.textAlign":
+            sValue = style.getAttribute("textAlign");
+            oTextCtrl.style.setAttribute("textAlign", sValue);
+            break;
+
+        case "style.margin":
+            sValue = style.getAttribute("margin");
+            oSpinTable.style.setAttribute("margin", sValue);
+            break;
+
+        case "style.marginLeft":
+            sValue = style.getAttribute("marginLeft");
+            oSpinTable.style.setAttribute("marginLeft", sValue);
+            break;
+
+        case "style.marginTop":
+            sValue = style.getAttribute("marginTop");
+            oSpinTable.style.setAttribute("marginTop", sValue);
+            break;
+
+        case "style.marginRight":
+            sValue = style.getAttribute("marginRight");
+            oSpinTable.style.setAttribute("marginRight", sValue);
+            break;
+
+        case "style.marginBottom":
+            sValue = style.getAttribute("marginBottom");
+            oSpinTable.style.setAttribute("marginBottom", sValue);
+            break;
+    }
+}
+
+function _updateEditCtrl(bNoChange)
+{
+    if (bNoChange == null)
+    {
+        bNoChange = false;
+    }
+
+    if (bNumeric)
+    {
+        oTextCtrl.value = iCurrentPos.toString(10);
+    }
+    else
+    {
+        oTextCtrl.value = asValues[ iCurrentPos ];
+    }
+
+    if (bNoChange)
+    {
+        return;
+    }
+    var oEvent = createEventObject()
+    event_onchange.fire(oEvent);
+}
+
+function _isInteger(iNumber)
+{
+    if (isNaN(iNumber)) {
+        return false;
+    }
+    return (iNumber == parseInt(iNumber, 10));
+}
+
+function _floatAdd(a, b)
+{
+    return (a*10000 + b*10000)/10000.0;  //JScript floating numbers bug
+}
+
+</SCRIPT>
+
+<BODY></BODY>

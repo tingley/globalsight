@@ -1,0 +1,189 @@
+.main_table
+{
+	width:800px;
+	border-color:#0c1476;
+}
+
+.main_table_even_tr
+{
+	padding:6px;
+	border:1px;
+	border-color:#0c1476;
+	background:white;
+}
+
+.main_table_odd_tr
+{
+	padding:6px;
+	border:1px;
+	border-color:#0c1476;
+	background:#eeeeee;
+}
+
+.main_table_head
+{
+	border:1px;
+	border-color:#0c1476;
+}
+.main_table_head_tr
+{
+	background:#0c1476;
+}
+
+.main_table_head_label
+{
+	color:white;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+}
+
+.main_table_tr_label
+{
+	color:black;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:10pt;
+}
+
+.img_click
+{
+	cursor:hand;
+}
+
+.split_tr_div
+{
+	position:relation;
+	background:#0c1476;
+	font-size:0;
+	border:0px;
+	margin:-1px;
+	height:3px;
+	padding:0px;
+}
+
+.specialFilter_td
+{
+	color:black;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+}
+
+.specialFilter_div
+{
+	display:none;
+	margin-left:10px;
+}
+
+.specialFilter_dialog_label
+{
+	color:black;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+}
+
+.htmlFilter_emptyTable_tr
+{
+	background-color:#7B8EB6;
+}
+
+.deleteTagsDialog_header
+{
+	background-color:#7B8EB6;
+	padding:6px;
+}
+
+.deleteTagsMoreInfo
+{
+	color:#EAC654;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+	cursor:hand;
+}
+
+.tagName_td
+{
+	color:#EAC654;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+	font-weight:bold
+}
+
+.tagValue_td
+{
+	color:black;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+}
+
+.htmlFilter_left_td
+{
+	background-color:#7B8EB6;
+	color:white;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+	font-weight:bold;
+}
+
+.xml_translate_rule_td
+{
+	color:white;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:9pt;
+	font-weight:bold;
+}
+
+.htmlFilter_right_td
+{
+	background-color:#DFE3EE;
+}
+
+.htmlFilter_split_tr
+{
+	background-color:white;
+}
+
+.div_show
+{
+	margin:2px;
+	margin-bottom:0px;
+	border:1px #7B8EB6 solid; 
+	float:left;
+}
+
+.filterName_big_dialog
+{
+	width:340px;
+}
+
+.filterName_small_dialog
+{
+	width:179px;
+}
+
+.not_display
+{
+	display:none;
+}
+
+.specialfilter_a
+{
+	text-decoration: underline;
+	color:#810081;
+	font-family:Arial,Helvetica,sans-serif;
+    font-size:9pt;
+}
+
+.translate_rule_table
+{
+    width:490px;
+}
+
+.wordcountfilter_addregex_div
+{
+    display:none;
+    margin-left:40px;
+}
+
+.xml_filter_select
+{
+	min-width:150px;
+}

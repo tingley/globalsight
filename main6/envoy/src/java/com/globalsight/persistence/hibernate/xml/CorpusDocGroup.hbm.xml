@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.corpus.CorpusDocGroup"
+        table="CORPUS_UNIT">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="corpusName" length="4000" column="NAME"
+            type="string" not-null="true" unique="false" />
+
+        <set name="docs" inverse="true">
+            <key column="CU_ID" />
+            <one-to-many
+                class="com.globalsight.everest.corpus.CorpusDoc" />
+        </set>
+    </class>
+</hibernate-mapping>

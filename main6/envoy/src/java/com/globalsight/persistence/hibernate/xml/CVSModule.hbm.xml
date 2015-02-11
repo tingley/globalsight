@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.cvsconfig.CVSModule"
+        table="cvs_module">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="100"
+            column="NAME" type="string" />
+
+        <property name="modulename" length="2000"
+            column="MODULENAME" type="string" not-null="true" />
+
+        <property name="branch" length="100"
+            column="BRANCH" type="string" not-null="true" />
+
+        <property name="realPath" length="2000"
+            column="REALPATH" type="string" not-null="true" />
+
+        <property name="lastCheckout" length="25"
+            column="LAST_CHECKOUT" type="string" not-null="false" />
+
+        <property name="isActive" column="ISACTIVE" type="yes_no"
+            not-null="true" />
+            
+        <many-to-one name="server" column="SERVER"
+            class="com.globalsight.everest.cvsconfig.CVSServer"
+            not-null="true" lazy="false" />
+
+    </class>
+
+</hibernate-mapping>

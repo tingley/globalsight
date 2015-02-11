@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         New Document                                           -->
+<!-- File           newdocument_component.xml                              -->
+<!-- Description    Generic New Document Component Definition              -->
+<!-- Created on     24 August 2001                                         -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   
+   <!-- this component is the generic version so has unqualified scope -->
+   <scope>
+      
+      <!-- the document list component definition -->
+      <component id="translate">
+         
+         <!-- Component Contract -->
+         <params>
+            <param name="objectId" required="true"></param>
+            <param name="fileProfiles" required="false"></param>
+         </params>                  
+         
+         <!-- Component Layout -->
+         <pages>
+            <start>/custom/ambassador/library/translate/translate.jsp</start>
+         </pages>
+         
+         <!-- Component Behavior -->
+         <class>com.documentum.ambassador.library.translate.Translate</class>
+         <nlsbundle>com.documentum.ambassador.library.translate.TranslateNlsProp</nlsbundle>
+         
+         <!-- Component specific Configuration -->
+         <helpcontextid>translate</helpcontextid>
+         
+         <!-- default settings to use for type/format/template combos when launching the newdocument component -->
+         <combo_defaults>
+            <!-- base type for types to show in the type combo -->
+            <!-- Accepted values: dm_sysobject or its sub types -->
+            <base_type>dm_document</base_type>
+            <!-- default selected type to show in the type combo:  -->
+            <!-- Accepted values: <base_type> value or its sub types -->
+            <type>dm_document</type>
+            <!-- default selected format to show in the format combo: -->
+            <!-- make sure a document with this format is available in the /Templates cabinet or its folders -->
+            <!-- Accepted values: 'name' attribute values from dm_format object -->
+            <format>msw8</format>                       
+         </combo_defaults>
+         
+      </component>
+      
+   </scope>
+</config>

@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+<item name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+<item name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+<item name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+<item name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+<item name="Source Word Count" url="My_Activities/Source_Word_Count.htm" />
+<item name="Detailed Word Counts" url="My_Activities/Detailed_Word_Counts2.htm" />
+<book name="Available" >
+  <item name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <item name="Download Progress" url="My_Activities/Download_in_Progress.htm" />
+  <item name="Detailed Word Counts" url="My_Activities/Detailed_Word_Counts.htm" />
+</book>
+<book name="In Progress" >
+  <item name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <item name="Add/Edit Comments" url="My_Activities/Add_Comments1.htm" />
+  <item name="Upload Comment Reference File" url="My_Activities/Attach_Files1.htm" />
+  <item name="Download" url="My_Activities/Download.htm" />
+  <item name="Download Progress" url="My_Activities/Download_in_Progress.htm" />
+  <item name="Upload" url="My_Activities/Upload.htm" />
+  <item name="Upload Error" url="My_Activities/Upload_Error.htm" />
+  <item name="Detailed Word Counts" url="My_Activities/Detailed_Word_Counts.htm" />
+</book>
+<book name="comments" >
+  <item name="Comments" url="My_Activities/List_Comments.htm" />
+  <item name="Segment Comments" url="My_Activities/Segment_Comments.htm" />
+</book>
+<book name="Main Editor" >
+  <item name="Support Files" url="My_Activities/Support_Files.htm" />
+  <item name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <item name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <item name="Select a Termbase" url="My_Activities/Select_a_Termbase.htm" />
+  <item name="Review Window" url="My_Activities/Review_Window.htm" />
+  <book name="Main Editor (Popup)" >
+    <item name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+    <item name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+    <item name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+    <item name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+    <item name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+    <item name="Segment Editor Options (Popup)" url="My_Activities/Segment_Editor_Options.htm" />
+  </book>
+  <book name="Main Editor (Inline)" >
+    <item name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+    <item name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+    <item name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  </book>
+</book>
+<book name="Snippet Editor" >
+  <item name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+  <item name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+  <item name="Select Snippet" url="My_Activities/Select_Snippet.htm" />
+</book>
+<book name="Search/Replace" >
+  <item name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+  <item name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+</book>
+
+</tocdata>

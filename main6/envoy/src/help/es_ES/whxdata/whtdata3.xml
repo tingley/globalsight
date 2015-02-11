@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="Ejemplo de archivo de importación de fragmentos" url="Ap_ndice/Snippet_Library_File_Example.htm" />
+<item name="Ejemplo de una página de origen con etiquetas GS" url="Ap_ndice/GS-Tagged_Source_Page_Example.htm" />
+<item name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+<item name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+<item name="Formatos de datos compatibles" url="Ap_ndice/Supported_Data_Formats.htm" />
+<book name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" >
+  <item name="Locale Manager Group" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Locale Manager Group" />
+  <item name="Glossary of Terms" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Glossary of Terms" />
+  <item name="Exporting Source Pages With Snippets" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Exporting Source Pages With Snippets" />
+  <item name="Exporting Target Pages with Snippets" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Exporting Target Pages with Snippets" />
+  <item name="Deleting Snippets from Target Pages" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Deleting Snippets from Target Pages" />
+  <item name="Creating Snippets" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Creating Snippets" />
+  <item name="Adding Snippets to Target Pages" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Adding Snippets to Target Pages" />
+  <item name="Enabling the Local Content Management Feature" url="Ap_ndice/Local_Content_Management_(Snippets).htm#Enabling the Local Content Management Feature" />
+</book>
+<item name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+<item name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+<item name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+<item name="Personalizar la configuración de segmentación" url="Ap_ndice/Customizing_Segmentation_Rules.htm" />
+<book name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" >
+  <item name="high_lock" url="Ap_ndice/lingfaq.html#high_lock" />
+  <item name="exact_matches" url="Ap_ndice/lingfaq.html#exact_matches" />
+  <item name="formatting" url="Ap_ndice/lingfaq.html#formatting" />
+  <item name="decide" url="Ap_ndice/lingfaq.html#decide" />
+  <item name="locked_matches" url="Ap_ndice/lingfaq.html#locked_matches" />
+  <item name="highlighting" url="Ap_ndice/lingfaq.html#highlighting" />
+  <item name="demoted_exact_matches" url="Ap_ndice/lingfaq.html#demoted_exact_matches" />
+  <item name="locking" url="Ap_ndice/lingfaq.html#locking" />
+  <item name="lgem" url="Ap_ndice/lingfaq.html#lgem" />
+  <item name="exclude" url="Ap_ndice/lingfaq.html#exclude" />
+  <item name="ext_localizable" url="Ap_ndice/lingfaq.html#ext_localizable" />
+  <item name="int_localizable" url="Ap_ndice/lingfaq.html#int_localizable" />
+  <item name="localizable" url="Ap_ndice/lingfaq.html#localizable" />
+  <item name="extraction" url="Ap_ndice/lingfaq.html#extraction" />
+  <item name="translatable" url="Ap_ndice/lingfaq.html#translatable" />
+  <item name="fuzzy_matches" url="Ap_ndice/lingfaq.html#fuzzy_matches" />
+  <item name="wordcount" url="Ap_ndice/lingfaq.html#wordcount" />
+  <item name="wordcount_word" url="Ap_ndice/lingfaq.html#wordcount_word" />
+  <item name="utf8" url="Ap_ndice/lingfaq.html#utf8" />
+  <item name="wordcount_trados" url="Ap_ndice/lingfaq.html#wordcount_trados" />
+  <item name="saved" url="Ap_ndice/lingfaq.html#saved" />
+  <item name="read" url="Ap_ndice/lingfaq.html#read" />
+  <item name="score" url="Ap_ndice/lingfaq.html#score" />
+  <item name="seg_customizable" url="Ap_ndice/lingfaq.html#seg_customizable" />
+  <item name="segment_trados" url="Ap_ndice/lingfaq.html#segment_trados" />
+  <item name="segment" url="Ap_ndice/lingfaq.html#segment" />
+  <item name="term" url="Ap_ndice/lingfaq.html#term" />
+  <item name="tm" url="Ap_ndice/lingfaq.html#tm" />
+  <item name="importing" url="Ap_ndice/lingfaq.html#importing" />
+</book>
+<item name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+<item name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+
+</tocdata>

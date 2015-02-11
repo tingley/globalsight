@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<registry>
+<datasource name="JobInfo" type="xml">
+<ds_xml url="http://%%server_host%%:%%server_port%%/globalsight/XmlQueryServlet" method="post">
+<description>Provides XML Queries</description>
+<request>
+<name>jobInfo</name>
+<parameters>
+<param>
+<name type="string" null="false"><![CDATA[queryName]]></name>
+<value type="string" null="false"><![CDATA[jobInfo]]></value>
+</param>
+</parameters>
+<output type="jobInfo">
+<type name="jobInfo">
+<element name="job" type="job" minOccurs="0" maxOccurs="*"/>
+</type>
+<type name="job">
+<element name="jobId" type="string"/>
+<element name="jobName" type="string"/>
+<element name="priority" type="string"/>
+<element name="project" type="string"/>
+<element name="projectManager" type="string"/>
+<element name="sourceLocale" type="string"/>
+<element name="workflow" type="workflow" minOccurs="0" maxOccurs="*"/>
+</type>
+<type name="workflow">
+<element name="targetLocale" type="string"/>
+<element name="state" type="string"/>
+<element name="currentActivity" type="string"/>
+<element name="accepter" type="string"/>
+<element name="wcExact" type="string"/>
+<element name="wcFuzzy" type="string"/>
+<element name="wcNoMatch" type="string"/>
+<element name="perComplete" type="string"/>
+<element name="duration" type="string"/>
+<element name="cost" type="string"/>
+<element name="actualCost" type="string"/>
+<element name="revenue" type="string"/>
+<element name="actualRevenue" type="string"/>
+</type>
+</output>
+</request>
+</ds_xml>
+</datasource>
+<datasource name="system4db" type="jdbc">
+<ds_jdbc url="jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%" driver="com.mysql.jdbc.Driver" requireLogin="true" user="%%database_username%%" password="%%database_password%%">
+<description>The Welocalize GlobalSight DB</description>
+</ds_jdbc>
+</datasource>
+</registry>
+

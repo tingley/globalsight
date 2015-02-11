@@ -1,0 +1,15 @@
+#!../../iw-perl/bin/iwperl
+
+###########################################################
+# GLOBAL SIGHT/INTERWOVEN INTEGRATION SCRIPT
+#
+# This script is called by the 'GlobalSight' menu item in
+# option in TeamSite.
+#
+###########################################################
+
+# Redirect to the GlobalSight server
+$url="http://%%server_host%%:%%server_port%%/globalsight/cxe/html/IWAbout.html";
+
+print "Location: $url\n\n";
+exit;

@@ -1,0 +1,124 @@
+<public:component>
+<public:property name="movelr" />
+<public:property name="moveud" />
+<public:property name="livemove" />
+<public:attach EVENT="oncontentready" ONEVENT="initialize()" />
+
+<script>
+var dragElement;
+var dragParent;
+var mx, my;
+
+function initialize()
+{
+    var p;
+
+    element.style.cursor = "move";
+    element.style.backgroundColor = "silver";
+    element.style.border = "2px outset";
+    element.style.fontSize = "1px";
+    element.style.zIndex = "100";
+
+    if (element.movelr == "true")
+    {
+        element.style.width = "6px";
+    }
+
+    if (element.moveud == "true")
+    {
+        element.style.height = "6px";
+    }
+
+    if (element.livemove == "true")
+    {
+        element.attachEvent("onmousedown", startDrag);
+        dragElement = element;
+        dragParent = element;
+    }
+    else
+    {
+        element.attachEvent("onmousedown", startDrag);
+        // insert moveable separator here
+        dragElement = element.document.createElement("DIV");
+        dragElement.style.position = "absolute";
+        dragElement.style.top = element.style.top;
+        dragElement.style.left = element.style.left;
+        dragElement.style.height = element.style.height;
+        dragElement.style.width = element.style.width;
+        dragElement.style.zIndex = "100";
+        dragElement.style.backgroundColor = "black";
+        dragElement.style.filter = "alpha(opacity=50)";
+        dragElement.style.cursor = "move";
+        dragElement.style.display = "none";
+        dragElement.style.fontSize = "1px";
+        dragElement.moveud = element.moveud;
+        dragElement.movelr = element.movelr;
+
+        p = element.parentElement;
+        p.insertBefore(dragElement, element);
+
+        dragParent = element;
+    }
+}
+
+function startDrag(e, p)
+{
+    dragElement.setCapture();
+
+    mx = window.event.clientX;
+    my = window.event.clientY;
+
+    dragElement.style.top = element.style.top;
+    dragElement.style.left = element.style.left;
+    dragElement.style.height = element.style.height;
+    dragElement.style.width = element.style.width;
+    dragElement.onmousemove = doDrag;
+    dragElement.onmouseup = endDrag;
+    dragElement.style.display = "";
+
+    // window.status = "start";
+}
+
+function doDrag()
+{
+    dx = window.event.clientX - mx;
+    dy = window.event.clientY - my;
+
+    if (dragElement.movelr)
+    {
+        dragElement.style.posLeft += dx;
+    }
+    if (dragElement.moveud)
+    {
+        dragElement.style.posTop += dy;
+    }
+
+    mx = window.event.clientX;
+    my = window.event.clientY;
+
+    // window.status = dx;
+}
+
+function endDrag()
+{
+    dragElement.onmousemove = null;
+    dragElement.onmouseup = null;
+
+    dragElement.releaseCapture();
+
+    if (dragElement != element)
+    {
+        dragElement.style.display = "none";
+
+        if (dragElement.movelr)
+        {
+            dragParent.style.posLeft = dragElement.style.posLeft;
+        }
+        if (dragElement.moveud)
+        {
+            dragParent.style.posTop = dragElement.style.posTop;
+        }
+    }
+}
+</script>
+</public:component>

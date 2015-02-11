@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<ftstdata>
+<topic name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+<topic name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
+<topic name="Term Link" url="Setup/Terminology/Term_Link.htm" />
+<topic name="Termbase Indexes" url="Setup/Terminology/Termbase_Indexes.htm" />
+<topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+<topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+<topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+<topic name="Verify CSV Columns (Import p.2)" url="Setup/Terminology/Verify_CSV_Columns_(Import_p.2).htm" />
+<topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
+<topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+<topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+<topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+<topic name="Output Options (Export p.2)" url="Setup/Translation_Memory/Output_Options_(Export_p.2).htm" />
+<topic name="Reindex TM" url="Setup/Translation_Memory/Reindex_TM.htm" />
+<topic name="Reindexing TM" url="Setup/Translation_Memory/Reindexing_TM.htm" />
+<topic name="Remove TM" url="Setup/Translation_Memory/Remove_TM.htm" />
+<topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+<topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+<topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+<topic name="Segment Deletion Results" url="Setup/Translation_Memory/Segment_Deletion_Results.htm" />
+<topic name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
+<topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+<topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+<topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+<topic name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+<topic name="Contact Info" url="Setup/Users/Contact_Info.htm" />
+<topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+<topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+<topic name="Field Level Access" url="Setup/Users/Field_Level_Access.htm" />
+<topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+<topic name="Permission Group" url="Setup/Users/New_User_-_Permission_Group.htm" />
+<topic name="Projects" url="Setup/Users/Projects.htm" />
+<topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+<topic name="User Details" url="Setup/Users/User_Details.htm" />
+<topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+<topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+<topic name="View User Events" url="Setup/Users/View_User_Events.htm" />
+<topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+<topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+<topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+<topic name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
+<topic name="Looping Workflow" url="Setup/Workflows/Sample_Workflows/Looping_Workflow.htm" />
+<topic name="Looping Workflow with Finish Options" url="Setup/Workflows/Sample_Workflows/Looping_Workflow_with_Finish_Options.htm" />
+<topic name="One Activity Workflow" url="Setup/Workflows/Sample_Workflows/One_Activity_Workflow.htm" />
+<topic name="Two Activity Workflow" url="Setup/Workflows/Sample_Workflows/Two_Activity_Workflow.htm" />
+<topic name="Search Workflows" url="Setup/Workflows/Search_Workflows.htm" />
+<topic name="Workflows" url="Setup/Workflows/Workflows.htm" />
+<topic name="Workflows - Search" url="Setup/Workflows/Workflows_-_Search.htm" />
+<topic name="tempmr" url="tempmr.htm" />
+<topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+<topic name="Contact Information1" url="Vendor_Management/Contact_Information1.htm" />
+<topic name="Create/Edit Rating" url="Vendor_Management/Create_Edit_Rating.htm" />
+<topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+<topic name="CV/Resume" url="Vendor_Management/CV_Resume.htm" />
+<topic name="Edit Role (Edit Vendor)" url="Vendor_Management/Edit_Role_(Edit_Vendor).htm" />
+<topic name="Edit Vendor - New Roles" url="Vendor_Management/Edit_Vendor_-_Roles.htm" />
+<topic name="Field Level Access" url="Vendor_Management/Field_Level_Access.htm" />
+<topic name="New Role (Edit Vendor)" url="Vendor_Management/New_Role_(Edit_Vendor).htm" />
+<topic name="New Topic" url="Vendor_Management/New_Topic.htm" />
+<topic name="Permissions" url="Vendor_Management/Permissions.htm" />
+<topic name="Projects" url="Vendor_Management/Projects.htm" />
+<topic name="Ratings" url="Vendor_Management/Ratings.htm" />
+<topic name="Roles" url="Vendor_Management/Roles.htm" />
+<topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+<topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+<topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+<topic name="Vendors" url="Vendor_Management/Vendors.htm" />
+
+</ftstdata>  

@@ -1,0 +1,144 @@
+<!--
+ * Copyright (c) 2002 GlobalSight Corporation. All rights reserved.
+ *
+ * Cornelis van der Laan (nils@globalsight.com) Tue Feb 19 20:18:09 2002
+ *
+ * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
+ * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
+ * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
+ * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
+ * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
+ *
+ * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
+ * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
+ * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
+ * BY LAW.
+-->
+
+<HTML>
+<HEAD>
+
+<!-- 
+---- Spincontrol "< label > texttext". 
+---- Usage:
+---- <spinControl data="name_of_JS_array_variable" 
+----              onclick="alert(this.value)">
+---- 
+---- The Javascript array holds objects of the form:
+---- a[0] = { label: "Label", text: "Display text (html) to be shown", 
+----           data: "return value when display text clicked"
+----           lang: "value of LANG attribute for the text (optional)"
+----           dir:  "value of DIR attribute to set (optional)" };
+-->
+
+<public:component tagName="spinControl">
+<public:defaults viewLinkContent/> 
+<public:property name="value"/>
+<public:event name="onclick" id="myclick"/>
+<public:event name="onerror" id="myerror"/>
+<public:attach event="oncontentready" onevent="doInit()"/>
+</public:component>
+
+<style>
+.clickable { font-family:Arial, Helvetica, sans-serif; font-size: 9pt; 
+	     color: blue; cursor: hand; }
+.label     { font-family:Arial, Helvetica, sans-serif; font-size: 9pt;
+	     font-weight: bold; }
+A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none; }
+</style>
+
+<script>
+var value;
+var data = new Array();
+var index = 0;
+
+function doInit()
+{
+  try
+  {
+    data = eval(element.data);
+    if (data.length > 0)
+    {
+      showData(0);
+    }
+  }
+  catch (e)
+  {
+    myerror.fire(createEventObject());
+  }
+}
+
+function showData(index)
+{
+  idLabel.innerText = data[index].label;
+  idText.innerHTML  = data[index].text;
+  if (data[index].lang)
+  {
+    idText.lang = data[index].lang;
+  }
+  if (data[index].dir)
+  {
+    idText.dir = data[index].dir;
+  }
+}
+
+function goLeft()
+{
+  if (data.length > 0)
+  {
+    if (index == 0)
+    {
+      index = data.length - 1;
+    }
+    else
+    {
+      --index;
+    }
+  }
+  showData(index);
+}
+
+function goRight()
+{
+  if (data.length > 0)
+  {
+    if (index == (data.length - 1))
+    {
+      index = 0;  
+    }
+    else
+    {
+      ++index;
+    }
+  }
+  showData(index);
+}
+
+function doClick(sel)
+{
+  value = data[index].data;
+  myclick.fire(createEventObject());
+}
+</script>
+</HEAD>
+<BODY>
+<DIV onclick="event.cancelBubble=true; event.returnValue=false;">
+<TABLE CELLPADDING=2 CELLSPACING=0 BORDER=0>
+<TR VALIGN=TOP>
+<TD>
+<IMG SRC="/globalsight/images/previousMatchArrow.gif" id="idLeft" class="clickable" 
+        onclick="goLeft();return false;">
+</TD>
+<TD>
+<SPAN id="idLabel" class="label" onclick="return false;">label</SPAN>
+</TD>
+<TD>
+<IMG SRC="/globalsight/images/nextMatchArrow.gif" id="idRight" class="clickable" 
+        onclick="goRight();return false;">
+</TD>
+<TD id="idText" class="clickable" onclick="doClick()">text</TD>
+</TR>
+</TABLE>
+</DIV>
+</BODY>
+</HTML>

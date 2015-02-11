@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.Attribute" table="ATTRIBUTE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="displayName" length="40" column="DISPLAY_NAME" type="string"
+			not-null="true" unique="true" />
+		<property name="description" length="4000" column="DESCRIPTION" type="string"
+			not-null="false" unique="false" />
+		<property name="companyId" column="COMPANY_ID" type="string"
+			not-null="true" />
+		<property name="visible" column="VISIBLE" type="yes_no" not-null="true"
+			unique="false" />
+		<property name="editable" column="EDITABLE" type="yes_no" not-null="true"
+			unique="false" />
+		<property name="required" column="REQUIRED" type="yes_no" not-null="true"
+			unique="false" />
+
+		<set name="attributeSets" table="ATTRIBUTE_SET_ATTRIBUTE" cascade="save-update">
+			<key column="ATTRIBUTE_ID" />
+			<many-to-many class="com.globalsight.cxe.entity.customAttribute.AttributeSet"
+				column="SET_ID" />
+		</set>
+
+		<any name="condition" id-type="long" meta-type="string" cascade="all">
+			<meta-value value="choice list"
+				class="com.globalsight.cxe.entity.customAttribute.ListCondition" />
+			<meta-value value="file"
+				class="com.globalsight.cxe.entity.customAttribute.FileCondition" />
+			<meta-value value="int"
+				class="com.globalsight.cxe.entity.customAttribute.IntCondition" />
+			<meta-value value="float"
+				class="com.globalsight.cxe.entity.customAttribute.FloatCondition" />
+			<meta-value value="text"
+				class="com.globalsight.cxe.entity.customAttribute.TextCondition" />
+			<meta-value value="date"
+				class="com.globalsight.cxe.entity.customAttribute.DateCondition" />
+			<column name="TYPE" />
+			<column name="CONDITION_ID" />
+		</any>
+	</class>
+</hibernate-mapping>

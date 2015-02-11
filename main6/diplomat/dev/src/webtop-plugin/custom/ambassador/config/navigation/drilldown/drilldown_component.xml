@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!-- Copyright (c) 2001-2005. EMC Corporation.  All Rights Reserved.       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         Drilldown                                              -->
+<!-- File           drilldown_component.xml                                -->
+<!-- Description    Generic Drilldown Component Definition                 -->
+<!-- Created on     24 August 2001                                         -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+
+   <!-- this component is the generic version so has unqualified scope -->
+   <scope>
+
+      <!-- the drilldown component definition -->
+      <component id="drilldown">
+
+         <!-- Description (not NLS'd) -->
+         <desc>
+            Webcomponent Drilldown List component: Displays a drill-down style list of
+            file and folders for the specified folder path or folder id.
+         </desc>
+
+         <!-- Component Contract -->
+         <params>
+            <param name="folderPath" required="false"></param>
+            <param name="folderId" required="false"></param>
+            <param name="home_component" required="false"></param>
+            <param name="home_component_args" required="false"></param>
+            <param name="isolate" required="false"></param>
+            <param name="showAllVersions" required="false"></param>            
+         </params>
+
+         <!-- Component Layout -->
+         <pages>
+            <start>/webcomponent/navigation/drilldown/drilldown.jsp</start>
+         </pages>
+
+         <!-- Component Behavior -->
+         <class>com.documentum.webcomponent.navigation.drilldown.DrillDown</class>
+         <nlsbundle>com.documentum.ambassador.navigation.drilldown.DrillDownNlsProp</nlsbundle>
+
+         <!-- If this component supports failover/replication, the failoverenabled needs to be set to true-->
+         <failoverenabled>true</failoverenabled>
+         
+         <!-- Component specific Configuration -->
+
+         <!-- show object type filter drop-down -->
+         <showfilters>true</showfilters>
+
+         <!-- object type filters -->
+         <!-- This component displays of documents (or any other object type).
+              You can customize which object type to display.-->
+         <objectfilters>
+
+            <!-- show only the documents -->
+            <objectfilter>
+               <label><nlsid>MSG_FILTER_FILES</nlsid></label>
+               <type>dm_document</type>
+            </objectfilter>
+
+            <!-- show all objects -->
+            <objectfilter>
+               <label><nlsid>MSG_FILTER_ALL</nlsid></label>
+               <type>dm_sysobject</type>
+               <showallversions>true</showallversions>
+            </objectfilter>
+
+         </objectfilters>
+
+         <!-- visibility and order of attribute columns -->
+         <columns>
+
+            <!-- load invisible attribute flag -->
+            <!-- set the value to "true" means that all the invisible attributes
+                 will be added to the columns map. The default value is "false" -->
+
+            <!-- <loadinvisibleattribute>true</loadinvisibleattribute> -->
+
+            <column>
+               <attribute>object_name</attribute>
+               <label><nlsid>MSG_NAME</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>title</attribute>
+               <label><nlsid>MSG_TITLE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>authors</attribute>
+               <label><nlsid>MSG_AUTHORS</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>a_content_type</attribute>
+               <label><nlsid>MSG_FORMAT</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_content_size</attribute>
+               <label><nlsid>MSG_SIZE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>owner_name</attribute>
+               <label><nlsid>MSG_OWNER_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>group_name</attribute>
+               <label><nlsid>MSG_GROUP_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_creator_name</attribute>
+               <label><nlsid>MSG_CREATOR_NAME</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_object_type</attribute>
+               <label><nlsid>MSG_OBJECT_TYPE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_version_label</attribute>
+               <label><nlsid>MSG_VERSION_LABEL</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_creation_date</attribute>
+               <label><nlsid>MSG_CREATION_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_modify_date</attribute>
+               <label><nlsid>MSG_MODIFIED_DATE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_modifier</attribute>
+               <label><nlsid>MSG_MODIFIER</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_access_date</attribute>
+               <label><nlsid>MSG_ACCESS_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>r_lock_owner</attribute>
+               <label><nlsid>MSG_LOCK_OWNER</nlsid></label>
+               <visible>true</visible>
+            </column>
+	         <column>
+               <attribute>topic_status</attribute>
+               <label><nlsid>MSG_DISCUSSION</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>room_status</attribute>
+               <label><nlsid>MSG_ROOM_ICON</nlsid></label>
+               <visible>true</visible>
+            </column>
+         </columns>
+
+        <!-- Component level preferences -->
+        <preferences>
+          <preference id="folder_path">
+             <label><nlsid>PREF_LBL_FLDRPATH</nlsid></label>
+             <description><nlsid>PREF_DESC_FLDRPATH</nlsid></description>
+             <type>string</type>
+          </preference>
+        </preferences>
+
+         <dragdrop>
+             <sourceactions>
+             </sourceactions>
+             <targetactions>
+                <targetaction>com.documentum.web.formext.control.dragdrop.CopyToFolderTargetAction</targetaction>
+                <targetaction>com.documentum.web.formext.control.dragdrop.MoveToFolderTargetAction</targetaction>
+                <targetaction>com.documentum.web.formext.control.dragdrop.LinkToFolderTargetAction</targetaction>
+                <targetaction>com.documentum.web.formext.control.dragdrop.ImportTargetAction</targetaction>
+             </targetactions>
+             <dataproviders>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.ObjectIdData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.ObjectIdDataProvider</provider>
+                </dataprovider>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.ChildIdData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.ChildIdDataProvider</provider>
+                </dataprovider>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.FileDescriptorData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.FileDescriptorDataProvider</provider>
+                </dataprovider>
+                <dataprovider>
+                   <format>com.documentum.web.formext.control.dragdrop.FileContentsData</format>
+                   <provider>com.documentum.web.formext.control.dragdrop.FileContentsDataProvider</provider>
+                </dataprovider>
+             </dataproviders>
+          </dragdrop>
+
+         <!-- Component specific Configuration -->
+         <helpcontextid>drilldown</helpcontextid>
+      </component>
+
+   </scope>
+</config>

@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Ejemplos" >
+  <topic name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Idioma" url="Glosario/Locale.htm" />
+  <topic name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Tipo de actividad" url="Glosario/Activity_Type.htm" />
+</key>
+<key name="El envío concluyó correctamente" >
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+</key>
+<key name="elegir" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="elegir todos" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="ELEMENT arg" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT dont-translate EMPTY" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ELEMENT href" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT label" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT locale" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT parameter" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT previewUrlXml" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT ruleset" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ELEMENT schemarules" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ELEMENT sourceUrls" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT targetUrls" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT translate EMPTY" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="ELEMENT url" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="ELEMENT value" >
+  <topic name="Escribir reglas de vista previa de la base de datos" url="Ap_ndice/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="elementos" >
+  <topic name="Crear/modificar actividad" url="Configuraci_n/Perfiles_de_traducci_n/Create_Modify_Activity.htm" />
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="elementos adaptables" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="elementos adicionales" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="elementos especificados" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="elementos excluidos" >
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="elementos marcados" >
+  <topic name="Crear/modificar actividad" url="Configuraci_n/Perfiles_de_traducci_n/Create_Modify_Activity.htm" />
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="elementos rompen" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="elementos se extrae" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+</key>
+<key name="elija" >
+  <topic name="Adjuntar procesos de producción a idiomas de destino" url="Configuraci_n/Perfiles_de_traducci_n/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Enviar un glosario" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+  <topic name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="Elija esta opción si" >
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+</key>
+<key name="Elija esta opción si traduce" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="Elija esta opción sólo si" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="elija Guardar" >
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+</key>
+<key name="Elimina" >
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="eliminables" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="eliminado fragmentos" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="eliminado realmente" >
+  <topic name="Etiqueta GS" url="Glosario/GS_Tag.htm" />
+</key>
+<key name="eliminados" >
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="eliminar" >
+  <topic name="Editor de fragmentos y contenido" url="Mis_actividades/Snippet_and_Content_Editor.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="eliminar contenido" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="eliminar contenido utilice" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="eliminar estas etiquetas según resulte necesario" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="eliminar fragmentos" >
+  <topic name="Editor de fragmentos y contenido" url="Mis_actividades/Snippet_and_Content_Editor.htm" />
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="eliminar fragmentos sólo" >
+  <topic name="Gerente de idiomas" url="Glosario/Locale_Manager.htm" />
+</key>
+<key name="eliminar regiones se produzca" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="eliminar regiones se produzca código HTML válido" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="eliminar secciones" >
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="eliminarlas" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+
+</indexdata>

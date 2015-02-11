@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE srx PUBLIC "-//SRX//DTD SRX//EN" "srx.dtd">
+<srx version="1.0">
+ <header segmentsubflows="no">
+  <formathandle type="start" include="no"/>
+  <formathandle type="end" include="yes"/>
+  <formathandle type="isolated" include="yes"/>
+ </header>
+ <body>
+  <languagerules>
+   <languagerule languagerulename="Default">
+    <rule break="yes">
+     <beforebreak>[\.\?!]+</beforebreak>
+     <afterbreak>\s</afterbreak>
+    </rule>
+    <rule break="no">
+     <beforebreak>^\s*[0-9]+\.</beforebreak>
+     <afterbreak>\s</afterbreak>
+    </rule>
+    <rule break="no">
+     <beforebreak>[Ee][Tt][Cc]\.</beforebreak>
+     <afterbreak>\s[a-z]</afterbreak>
+    </rule>
+    <rule break="no">
+     <beforebreak>\s(Mr|Mrs|Dr)\.</beforebreak>
+     <afterbreak>\s</afterbreak>
+    </rule>
+   </languagerule>
+
+   <languagerule languagerulename="Japanese">
+    <rule break="no">
+     <beforebreak>[Ee][Tt][Cc]\.</beforebreak>
+     <afterbreak></afterbreak>
+    </rule>
+    <rule break="yes">
+     <beforebreak>[\.\?!]+</beforebreak>
+     <afterbreak>\s</afterbreak>
+    </rule>
+    <rule break="yes">
+     <beforebreak>[。？！．｡]+</beforebreak>
+     <afterbreak></afterbreak>
+    </rule>
+   </languagerule>
+  </languagerules>
+  <maprules>
+   <maprule maprulename="Default">
+    <languagemap languagepattern="JA.*" languagerulename="Japanese"/>
+    <languagemap languagepattern=".*" languagerulename="Default"/>
+   </maprule>
+  </maprules>
+ </body>
+</srx>

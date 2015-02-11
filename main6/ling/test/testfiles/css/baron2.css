@@ -1,0 +1,20 @@
+.one { color: green; ;;; ; ;color: red;;;color: blue;;; }
+.two { mirror-image: (
+                     run-around [ color: blue ]
+		             );
+       color: purple;
+	 }
+.three { mirror-image: {
+                       run-around { color: blue }
+		               };
+       color: maroon;
+	 }
+
+.four {
+	mirror-image: @say hello { {@why url(error.html)} @not } @fine;
+	color: navy;
+	}
+.five {
+	mirror-image: [ nothing ( much [ goes ( here ) ] but ) symbols ];
+	color: olive;
+	}

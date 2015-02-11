@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.cvsconfig.CVSFileProfile"
+        table="CVS_FILE_PROFILE">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="filePath" length="1000"
+            column="FILE_PATH" type="string" not-null="false" />
+
+        <property name="fileExt" length="100"
+            column="FILE_EXT" type="string" not-null="false"/>
+
+        <property name="sourceLocale" length="40"
+            column="SOURCE_LOCALE" type="string" not-null="false" />
+
+        <property name="companyId" length="20" column="COMPANY_ID"
+            type="long" not-null="true" />
+            
+        <many-to-one name="project" column="PROJECT_ID"
+            class="com.globalsight.everest.projecthandler.ProjectImpl"
+            not-null="false" lazy="false"/>
+            
+        <many-to-one name="module" column="MODULE_ID"
+            class="com.globalsight.everest.cvsconfig.CVSModule"
+            not-null="false" lazy="false"/>
+        
+        <many-to-one name="fileProfile" column="FILE_PROFILE_ID"
+            class="com.globalsight.cxe.entity.fileprofile.FileProfileImpl"
+            not-null="false" lazy="false"/>
+    </class>
+
+</hibernate-mapping>

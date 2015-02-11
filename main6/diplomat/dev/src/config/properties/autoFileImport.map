@@ -1,0 +1,16 @@
+# Automatic File Import Mapping File
+# The format is as follows:
+# <directory> | <jobNamePrefix> | <FileProfileName>
+# 
+# NOTE: Directories must be relative to the CXE docs directory.
+#
+# For example (on Windows 2000 or Windows NT)
+# en_US\pressReleases | PressReleases | HtmlFrDe_HP
+#
+# For example (on Solaris)
+# en_US/pressReleases | PressReleases | HtmlFrDe_HP
+
+# NOTE: Make sure the slash "/" or "\" that is used in the
+# directory paths is correct for the operating system.
+# However if this is TeamSite AutoImport, always use "/"
+

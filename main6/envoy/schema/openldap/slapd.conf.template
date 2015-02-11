@@ -1,0 +1,107 @@
+#
+# See slapd.conf(5) for details on configuration options.
+# This file should NOT be world readable.
+#
+ucdata-path	./ucdata
+
+# include schema
+include		./schema/core.schema
+#include		./schema/corba.schema
+include		./schema/cosine.schema
+#include		./schema/dyngroup.schema
+include		./schema/inetorgperson.schema
+include		./schema/java.schema
+include		./schema/misc.schema
+include		./schema/nis.schema
+include		./schema/openldap.schema
+
+# include local schema
+include		./globalsight/globalsight.schema
+include		./globalsight/globalsight.acl
+
+# enable a lot of logging - we might need it
+# but generates huge logs
+#loglevel	-1 
+
+sizelimit -1
+
+# Define global ACLs to disable default read access.
+
+# Do not enable referrals until AFTER you have a working directory
+# service AND an understanding of referrals.
+#referral	ldap:/root.openldap.org
+
+pidfile		./run/slapd.pid
+argsfile	./run/slapd.args
+
+# Load dynamic backend modules:
+# modulepath	./libexec/openldap
+# moduleload	back_bdb.la
+# moduleload	back_ldap.la
+# moduleload	back_ldbm.la
+# moduleload	back_passwd.la
+# moduleload	back_shell.la
+
+# Sample security restrictions
+#	Require integrity protection (prevent hijacking)
+#	Require 112-bit (3DES or better) encryption for updates
+#	Require 63-bit encryption for simple bind
+# security ssf=1 update_ssf=112 simple_bind=64
+
+# Sample access control policy:
+#	Root DSE: allow anyone to read it
+#	Subschema (sub)entry DSE: allow anyone to read it
+#	Other DSEs:
+#		Allow self write access
+#		Allow authenticated users read access
+#		Allow anonymous users to authenticate
+#	Directives needed to implement policy:
+# access to dn.base="" by * read
+# access to dn.base="cn=Subschema" by * read
+# access to *
+#	by self write
+#	by users read
+#	by anonymous auth
+#
+# if no access controls are present, the default policy
+# allows anyone and everyone to read anything but restricts
+# updates to rootdn.  (e.g., "access to * by * read")
+#
+# rootdn can always read and write EVERYTHING!
+
+#######################################################################
+# LDBM database definitions
+#######################################################################
+
+database	ldbm
+suffix		"o=%%ldap_base%%"
+rootdn		"cn=root,o=%%ldap_base%%"
+# Cleartext passwords, especially for the rootdn, should
+# be avoid.  See slappasswd(8) and slapd.conf(5) for details.
+# Use of strong authentication encouraged.
+rootpw		{MD5}X03MO1qnZdYdgyfeuILPmQ==
+# The database directory MUST exist prior to running slapd AND 
+# should only be accessible by the slapd and slap tools.
+# Mode 700 recommended.
+directory	./globalsight/data
+
+# Indices to maintain for this directory
+# unique id so equality match only
+index	uid	eq
+# allows general searching on commonname, givenname and email
+index	cn,gn,mail	eq,sub
+# allows multiple variants on surname searching
+index	sn	eq,sub
+# sub above includes subintial,subany,subfinal
+# optimise department searches
+index	ou	eq
+# if searches will include objectClass uncomment following
+index	objectClass	eq
+# shows use of default index parameter
+# indices missing - uses default eq,sub
+index	default	eq,sub
+
+# other database parameters
+# read more in slapd.conf reference section
+cachesize 10000
+checkpoint 128 15

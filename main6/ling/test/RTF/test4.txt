@@ -1,0 +1,44 @@
+﻿# Ambassador Download File - Do not modify this line.
+# Encoding: utf-8
+# Original Format: HTML
+# Current Format: PTAG-VERBOSE
+# Source Locale: ja
+# Target Locale: en-US
+# Page ID: 1
+# Job ID: 2
+# Current Stage ID: 3
+
+# 123
+Morgan Stanley Dean Witter
+
+# 249
+[font1][font2][b]唐手[/b][/font1][x3][/font2]
+
+# 259
+[font1][u]寿司[u][x2][/font1]
+
+# 273
+[link1][font2][u]US 忍者 [[床尾] Commentario[u][/font2][/link1]
+
+# 276
+[font1][link2][u]祖に[u][/link2][/font1]
+
+# 278
+[x1]
+
+# 283
+[x1]Morgan Stanley Dean Witter's Institutional Securities business is built up 
+around its unrivaled global network of clients, investors, capital, intellectual 
+capital, ideas, partners and information that keeps the. Company at the forefront of 
+its industry.
+
+# 296
+A place where you're connected to the best people, who have access to the 
+[link1]best  resources[/link1].
+
+# 306
+Learn more about our presence at [link1]WestFest![/link1][x2]
+
+# 306
+Company News
+# END Ambassador Download File - Do not modify this line.

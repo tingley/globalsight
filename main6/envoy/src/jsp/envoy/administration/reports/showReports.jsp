@@ -1,0 +1,541 @@
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ page contentType="text/html; charset=UTF-8"
+        errorPage="/envoy/common/error.jsp"
+        import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
+                com.globalsight.everest.foundation.User,
+                com.globalsight.everest.webapp.pagehandler.administration.reports.ReportsMainHandler,
+                com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean,
+                com.globalsight.everest.webapp.WebAppConstants,
+                com.globalsight.everest.permission.Permission,
+                com.globalsight.everest.permission.PermissionSet,
+                com.globalsight.everest.company.CompanyWrapper,
+                java.util.Date,
+                java.util.ResourceBundle,
+                java.util.ArrayList,
+                java.util.Iterator" session="true" 
+%>
+<%!
+    //colors to use for the table background
+    private static final String WHITE_BG         = "#FFFFFF";
+    private static final String LT_GREY_BG       = "#EEEEEE";
+
+    //  for "Dell Reviewer PO Report older Issue" "Dell_Review"; "reports.activity"
+    private static final String REPORTS_ACTIVITY = SystemConfiguration.getInstance().getStringParameter(SystemConfigParamNames.REPORTS_ACTIVITY);
+
+    // Toggles the background color of the rows used between WHITE and LT_GREY
+    private static String toggleBgColor(int p_rowNumber)
+    {
+        return p_rowNumber % 2 == 0 ? WHITE_BG : LT_GREY_BG;  
+    }
+%>
+<%
+    String EMEA = CompanyWrapper.getCurrentCompanyName() + " ";
+    ResourceBundle bundle = PageHandler.getBundle(session);
+    String title= bundle.getString("lb_reports");
+    String pagetitle= bundle.getString("lb_globalsight") 
+            + bundle.getString("lb_colon") + " " + title;
+    int rowNum = 0;
+    Locale theUiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+
+    boolean hasAtLeastOneReport = false;
+%>
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
+<TITLE><%= title %></TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<%@ include file="/envoy/common/warning.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript">
+    var needWarning = false;
+    var objectName = "";
+    var guideNode = "reports";
+    var helpFile = "<%=bundle.getString("help_reports_main_screen")%>";
+
+    var windownum = 1;
+    function popup(url, target)
+    {
+       target = target + parent.windx + windownum++;
+       parent.windx++;
+       var newurl = url+'&target=' + target; 
+       window.open(newurl,target,
+       'height=500,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+    };
+
+    function popup2(url, target)
+    {
+       target = target + parent.windx + windownum++;
+       parent.windx++;
+       var newurl = url+'&target=' + target; 
+       window.open(newurl,target,
+       'height=880,width=800,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+    };
+
+    function popupExternal(url, target)
+    {
+       target = target + parent.windx + windownum++;
+       parent.windx++;
+       window.open(url,target,
+       'height=700,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+    }
+</SCRIPT>
+
+<STYLE>
+TR.standardText 
+{
+    vertical-align: top;
+}
+</STYLE>
+</HEAD>
+<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
+    ONLOAD="loadGuides()">
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
+<DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+<SPAN CLASS="mainHeading">
+<%=title%>
+</SPAN>
+<P>
+<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
+<TR><TD WIDTH=538><%=bundle.getString("helper_text_reports")%></TD></TR>
+</TABLE>
+<P>
+    <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH=600 CLASS="standardText">
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN)) {%>
+        <TR>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("reportName")%></TD>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("reportDesc")%></TD>
+        </TR>
+
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_TM)) {
+        hasAtLeastOneReport=true;
+    %>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=TmReport&act=Create","TmReport")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=TmReport&act=Create'; return true"><%=bundle.getString("tm_report")%></A>
+            </TD>            
+            <TD><%=bundle.getString("desc_tmReport")%>
+            </TD>
+        </TR>
+        <% } %>
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_WF_STATUS)) { 
+        hasAtLeastOneReport=true;
+    %>        
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD NOWRAP>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=WorkflowStatus&act=Prepare","WorkflowStatus")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=WorkflowStatus&act=Prepare'; return true"><%=bundle.getString("workflow_status")%></A>
+            </TD>
+            <TD><%=bundle.getString("desc_workflowStatus")%>
+            </TD>
+        </TR>
+        <% } %>
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_JOB_DETAILS)) { 
+        hasAtLeastOneReport=true;
+    %>                
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=JobDetails&act=Prepare","JobDetails")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=JobDetails&act=Prepare'; return true"><%=bundle.getString("job_details")%></A></TD>
+            <TD><%=bundle.getString("desc_jobDetails")%>
+            </TD>
+        </TR>
+        <% } %>
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_AVG_PER_COMP)) { 
+        hasAtLeastOneReport=true;
+    %>                        
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight//TranswareReports?reportPageName=AvgPerComp&act=Prepare","AvgPerComp")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=AvgPerComp&act=Prepare'; return true"><%=bundle.getString("avg_per_comp")%></A>
+            </TD>
+            <TD><%=bundle.getString("desc_avgPerComp")%>
+            </TD>
+        </TR>
+        <% } %>        
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_MISSING_TERMS)) { 
+        hasAtLeastOneReport=true;
+    %> 
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=MissingTerms&act=Prepare","MissingTerms")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=MissingTerms&act=Prepare'; return true"><%=bundle.getString("missing_terms")%></A>
+            </TD>
+            <TD><%=bundle.getString("desc_missingTerms")%>
+            </TD>
+        </TR>
+        <% } %>        
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_TERM_AUDIT)) { 
+        hasAtLeastOneReport=true;
+    %>                                        
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+                <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=TermAudit&act=Prepare","TermAudit")'
+                onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=TermAudit&act=Prepare'; return true"><%=bundle.getString("term_audit")%></A>
+            </TD>
+            <TD><%=bundle.getString("desc_termAudit")%>
+            </TD>
+        </TR>
+        <% } %>
+
+<%
+	String reportUrl="";
+	String reportName="";
+	String reportDesc="";
+	String reportWindowName="";
+%>
+
+<% if (userPerms.getPermissionFor(Permission.REPORTS_COMMENT)) {
+        hasAtLeastOneReport=true;
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportComment";
+        reportWindowName="CommentsReport";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=bundle.getString("comments")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("comments_desc")%></TD>
+        </TR>
+        <% } %>
+
+    <%
+        //new added for word count report
+        if (userPerms.getPermissionFor(Permission.REPORTS_WORD_COUNT)) {
+
+        hasAtLeastOneReport=true;
+        reportUrl="/globalsight/ControlServlet?activityName=xlsWordCount";
+        reportWindowName= "WordCount";
+        %>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=bundle.getString("word_count")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("word_count_desc")%></TD>
+        </TR>
+        <% } %>
+
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_JOB_STATUS)) {
+    
+        hasAtLeastOneReport=true;
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportJobStatus";
+        reportName= EMEA + bundle.getString("job_status");
+        reportWindowName= "JobStatus";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("job_status_desc")%></TD>
+        </TR>
+        <% } %>      
+        
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ACT_DUR)) {
+        hasAtLeastOneReport=true;
+    %>
+<%
+            reportUrl="/globalsight/ControlServlet?activityName=xlsReportActivityDuration";
+            reportName=EMEA + bundle.getString("activity_duration");
+            reportWindowName="ActivityDuration";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("activity_duration_desc")%></TD>
+        </TR>
+        <% } %>        
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_JOBS)) {
+        hasAtLeastOneReport=true;
+    %>
+<%
+            reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineJobs";
+            reportName=EMEA + bundle.getString("online_jobs");
+            reportWindowName="OnlineJobs";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("online_jobs_desc")%></TD>
+        </TR>
+<% }
+
+    if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_REVIEW_STATUS))
+    {
+        hasAtLeastOneReport=true;
+
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineRevStatus";
+        reportName=EMEA + bundle.getString("online_review_status");
+        reportWindowName="OnlineRevStatus";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("online_review_status_desc")%></TD>
+        </TR>
+        
+<% }
+
+    // GBS-576, add "File List" report
+    if (userPerms.getPermissionFor(Permission.REPORTS_DELL_FILE_LIST))
+    {
+        hasAtLeastOneReport=true;
+
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportFileList";
+        reportName=EMEA + bundle.getString("file_list_report");
+        reportWindowName="FileList";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("file_list_report_desc")%></TD>
+        </TR>        
+        
+        
+<% }
+
+    if (userPerms.getPermissionFor(Permission.REPORTS_DELL_VENDOR_PO))
+    {
+        hasAtLeastOneReport=true;
+
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportVendorPO";
+        reportName=EMEA + bundle.getString("vendor_po");
+        reportDesc=EMEA + bundle.getString("vendor_po_desc");
+        reportWindowName="VendorPO";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=reportDesc%></TD>
+        </TR>
+<% }
+
+    // Old "Dell_Review" Report
+    if (userPerms.getPermissionFor(Permission.REPORTS_DELL_REVIEWER_VENDOR_PO) 
+            && REPORTS_ACTIVITY != null && REPORTS_ACTIVITY.trim().length() > 1)
+    {
+        hasAtLeastOneReport=true;
+
+        reportUrl="/globalsight/ControlServlet?activityName=xlsReportReviewerVendorPO";
+        reportName=EMEA + bundle.getString("reviewer_vendor_po");
+        reportDesc=EMEA + bundle.getString("reviewer_vendor_po_desc");
+        reportWindowName="ReviewerVendorPO";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+             </A>
+            </TD>
+            <TD><%=reportDesc%></TD>
+        </TR>
+        <% } %>
+
+		<amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportLanguageSignOff","LanguageSignOff")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportLanguageSignOff'; return true"><%=bundle.getString("review_reviewers_comments")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_reviewers_comments_desc")%></TD>
+        </TR>
+        </amb:permission>
+
+		<amb:permission name="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportCommentsAnalysis","CommentsAnalysis")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportCommentsAnalysis'; return true"><%=bundle.getString("review_comments")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_comments_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
+        <!--    Character count report Start-->
+        <amb:permission name="<%=Permission.REPORTS_CHARACTER_COUNT%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+             <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportCharacterCount","CharacterCount")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportCharacterCount'; return true"><%=bundle.getString("character_count_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("character_count_report_desc")%></TD>
+        </TR>
+        </amb:permission>
+        <!--    Character count report End-->
+        
+		<amb:permission name="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportTranslationsEdit","TranslationsEdit")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportTranslationsEdit'; return true"><%=bundle.getString("review_translations_edit_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_translations_edit_report_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
+        <amb:permission name="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportTranslationProgress","TranslationProgress")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportTranslationProgress'; return true"><%=bundle.getString("review_translation_progress_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_translation_progress_report_desc")%></TD>
+        </TR>
+        </amb:permission>
+                
+
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_SLA)) {
+        hasAtLeastOneReport=true;
+    %>
+<%
+            reportUrl="/globalsight/ControlServlet?activityName=xlsReportSlaPerformance";
+            reportWindowName="TranslationSLAPerformance";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+             onMouseOver="window.status='<%=reportUrl%>'; return true"><%=bundle.getString("translation_sla_performance")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("translation_sla_performance_desc")%></TD>
+        </TR>
+        <% } %>
+        
+<!--  Customize Reports -->
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_CUSTOMIZE)) {
+        hasAtLeastOneReport=true;
+    %>
+<%
+        String customizeReportUrl="/globalsight/ControlServlet?activityName=customizeReports";
+        String customizeReportWindowName="CustomizeReports";
+%>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=customizeReportUrl%>","<%=customizeReportWindowName%>")'
+             onMouseOver="window.status='<%=customizeReportUrl%>'; return true"><%=bundle.getString("customize_reports_implementation")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("customize_reports_implementation_desc")%></TD>
+        </TR>    
+    <% } %>     
+ <!-- Implemented Commented Check --> 
+    <amb:permission name="<%=Permission.REPORTS_IMPLEMENTED_COMMENTS_CHECK%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=implementedCommentsCheck","ImplementedCommentsCheck")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=implementedCommentsCheck'; return true"><%=bundle.getString("implemented_comments_check_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("implemented_comments_check_report_desc")%></TD>
+        </TR>
+     </amb:permission>
+     
+     <amb:permission name="<%=Permission.JOB_ATTRIBUTE_REPORT%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+           	 <A CLASS=standardHREF HREF='javascript: popup2("/globalsight/ControlServlet?activityName=jobAttributeReport&action=create","JobAttributeReport")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=jobAttributeReport'; return true"><%=bundle.getString("lb_job_attribute_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("lb_job_attribute_report_desc")%></TD>
+        </TR>
+     </amb:permission>
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.REPORTS_CUSTOM)) {
+        hasAtLeastOneReport=true;
+%>
+        <TR>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("customReportName")%></TD>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("customReportAlias")%></TD>
+        </TR>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=CostsByLocaleReport&act=Create","customReport")'
+             onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=CostsByLocaleReport&act=Create'; return true"><%=bundle.getString("standard_reports_costs_Locale")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("standard_reports_costs_Locale_desc")%></TD>
+        </TR>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popup("/globalsight/TranswareReports?reportPageName=TaskDurationReport&act=Create","customReport")'
+             onMouseOver="window.status='/globalsight/TranswareReports?reportPageName=TaskDurationReport&act=Create'; return true"><%=bundle.getString("standard_reports_task_duration")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("standard_reports_task_duration_desc")%></TD>
+        </TR>
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.REPORTS_CUSTOM_EXTERNAL)) {%>
+<!-- Custom External Reports (URLs) -->
+<%
+ArrayList customExternalReports = (ArrayList) request.getAttribute(
+    ReportsMainHandler.ATTR_CUSTOM_EXTERNAL_REPORTS);
+
+if (customExternalReports.size() > 0)
+{
+    hasAtLeastOneReport=true;
+%>
+        <TR>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("customExternalReportName")%></TD>
+            <TD CLASS="tableHeadingBasic"><%=bundle.getString("customExternalReportDesc")%></TD>
+        </TR>
+<%
+    rowNum = 0;
+    Iterator iter = customExternalReports.iterator();
+    while (iter.hasNext())
+    {
+        CustomExternalReportInfoBean info = (CustomExternalReportInfoBean) iter.next();
+        String url = info.getUrl();
+        %>
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          <A CLASS=standardHREF HREF='javascript: popupExternal("<%=url%>","custom<%=info.getNumber()%>")'
+             onMouseOver="window.status='<%=url%>'; return true"><%=info.getName()%>
+             </A>
+            </TD>
+            <TD><%=info.getDesc()%></TD>
+        </TR>
+<%
+    }
+%>
+<%}%>
+
+</TABLE>
+<% }%>
+
+<% if (hasAtLeastOneReport==false) { %>
+    <EM><%=bundle.getString("no_reports_permissions")%></EM>
+<% } %>
+
+</DIV>
+</BODY>
+</HTML>
+

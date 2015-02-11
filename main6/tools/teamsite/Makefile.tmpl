@@ -1,0 +1,56 @@
+#
+# Installation info
+# 
+INSTALLDIR=%%teamsite_home%%/httpd/iw-bin/
+INSTALLIMPORT=GlobalSightImport.cgi
+DINSTALLIMPORT=GlobalSightImportd.cgi
+INSTALLDCR=GlobalSightDcrGen.cgi
+DINSTALLDCR=GlobalSightDcrGend.cgi
+INSTALLPERMS="u=srx,g=x"
+INSTALLOWNER=root
+INSTALLGROUP=root
+
+#
+# Other Compiler Flags
+#
+CC= gcc
+
+all: GlobalSightImport.cgi GlobalSightImportd.cgi GlobalSightDcrGen.cgi GlobalSightDcrGend.cgi
+
+GlobalSightImport.cgi: cgiwrap.c Makefile
+	$(CC) -O cgiwrap.c -o GlobalSightImport.cgi
+
+GlobalSightImportd.cgi: cgiwrap.c Makefile
+	$(CC) -O -DDEBUG cgiwrap.c -o  GlobalSightImportd.cgi
+
+GlobalSightDcrGen.cgi: cgiwrapDcr.c Makefile
+	$(CC) -O cgiwrapDcr.c -o GlobalSightDcrGen.cgi
+
+GlobalSightDcrGend.cgi: cgiwrapDcr.c Makefile
+	$(CC) -O -DDEBUG cgiwrapDcr.c -o  GlobalSightDcrGend.cgi
+
+install: cgiwrap
+	cp GlobalSightImport.cgi $(INSTALLDIR)/$(INSTALLIMPORT)
+	chgrp $(INSTALLGROUP) $(INSTALLDIR)/$(INSTALLIMPORT)
+	chown $(INSTALLOWNER) $(INSTALLDIR)/$(INSTALLIMPORT)
+	chmod $(INSTALLPERMS) $(INSTALLDIR)/$(INSTALLIMPORT)
+	cp GlobalSightDcrGen.cgi $(INSTALLDIR)/$(INSTALLDCR)
+	chgrp $(INSTALLGROUP) $(INSTALLDIR)/$(INSTALLDCR)
+	chown $(INSTALLOWNER) $(INSTALLDIR)/$(INSTALLDCR)
+	chmod $(INSTALLPERMS) $(INSTALLDIR)/$(INSTALLDCR)
+
+installd: cgiwrapd
+	cp GlobalSightImportd.cgi $(INSTALLDIR)/$(DINSTALLIMPORT)
+	chgrp $(INSTALLGROUP) $(INSTALLDIR)/$(DINSTALLIMPORT)
+	chown $(INSTALLOWNER) $(INSTALLDIR)/$(DINSTALLIMPORT)
+	chmod $(INSTALLPERMS) $(INSTALLDIR)/$(DINSTALLIMPORT)
+	cp GlobalSightDcrGend.cgi $(INSTALLDIR)/$(DINSTALLDCR)
+	chgrp $(INSTALLGROUP) $(INSTALLDIR)/$(DINSTALLDCR)
+	chown $(INSTALLOWNER) $(INSTALLDIR)/$(DINSTALLDCR)
+	chmod $(INSTALLPERMS) $(INSTALLDIR)/$(DINSTALLDCR)
+
+installboth: install installd
+
+clean:
+	rm -f *.o cgiwrap cgiwrapd core *.cgi
+

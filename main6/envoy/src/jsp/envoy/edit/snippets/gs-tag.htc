@@ -1,0 +1,17 @@
+<public:component>
+<public:attach event="oncontentready" onevent="doInit()" />
+</public:component>
+
+<script>
+function doInit()
+{
+    if (element.GSonclick) 
+    {
+      element.onclick = new Function(element.GSonclick);
+    }
+    if (element.GSondblclick)
+    {
+      element.ondblclick = new Function(element.GSondblclick);
+    }
+}
+</script>

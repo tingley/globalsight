@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.foundation.L10nProfileWFTemplateInfo"
+        table="l10n_profile_wftemplate_info">
+		<composite-id name="key" class="com.globalsight.everest.foundation.L10nProfileWFTemplateInfoKey">
+			<key-property name="l10nProfileId" column="L10N_PROFILE_ID"></key-property>
+			<key-property name="wfTemplateId" column="WF_TEMPLATE_ID"></key-property>
+		</composite-id>
+        
+        <property name="isActive"
+            column="is_active" type="yes_no"
+            not-null="true" unique="false" />
+    </class>
+
+</hibernate-mapping>

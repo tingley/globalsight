@@ -1,0 +1,735 @@
+<%@ page
+    import="java.util.*,
+            com.globalsight.everest.webapp.pagehandler.PageHandler,
+            com.globalsight.everest.webapp.WebAppConstants,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+            java.util.Locale, 
+            com.globalsight.util.modules.Modules,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+            java.util.ResourceBundle"
+ %>
+<%!
+    static boolean b_teamsiteGuideJs = Modules.isTeamSiteAdapterInstalled();
+    static boolean b_databaseGuideJs = Modules.isDatabaseAdapterInstalled();
+    static boolean b_costingGuideJs = Modules.isCostingInstalled();
+    static boolean b_calendarGuideJs = Modules.isCalendaringInstalled();
+%>
+<%
+    ResourceBundle guideBundle = PageHandler.getBundle(session);
+    Locale guideLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+    String localeSubDir = guideLocale.toString();
+%>
+<%
+		//It's a very ugly implementation for multicompany prototype. Modify it in real version.
+    boolean isSuperAdmin1 = UserUtil.isSuperAdmin(
+        (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
+    PermissionSet userPers = (PermissionSet) session.getAttribute( 
+                    WebAppConstants.PERMISSIONS);
+%>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+// Load the wizard images first
+var dot_top_off = new Image();
+dot_top_off.src = "/globalsight/images/dot_gray_guide_top.gif";
+var dot_top_on = new Image();
+dot_top_on.src = "/globalsight/images/dot_red_guide_top.gif";
+       
+var dot_bottom_off = new Image();
+dot_bottom_off.src = "/globalsight/images/dot_gray_guide_bottom.gif";
+var dot_bottom_on = new Image();
+dot_bottom_on.src = "/globalsight/images/dot_red_guide_bottom.gif";
+
+var layersArray = ["generic", 
+                   "fileSystem2" 
+                   <%if (b_teamsiteGuideJs) {%>,"teamSite2" <%}%>
+                   <%if (b_databaseGuideJs) {%>,"database2"<%}%>
+                  ]; 
+
+function loadGuides() {
+   
+   var guide = getGuide();
+
+   if (guide != "none") 
+   {
+      // Show the guide
+      showGuide(guide);
+   }
+}
+
+function showGuide(guide)
+{ 
+
+   // Set the cookie to the guide selected
+   document.cookie = "guide=" + guide;
+
+   if (guideNode == null)
+   {
+      guideNode = "none";
+   }
+   //alert(guide)
+   //alert(guideNode)
+   // Push the contentLayer down by 30px (to 138px) to 
+   // make room for the guide
+   contentLayer.style.top = 138;
+   
+   // Load the correct part (part 1 or part 2) of the guide 
+   // based on the guideNode when
+   // they are jumping around the product 
+   if ((guide == "fileSystem") && 
+       ((guideNode == "workflows") ||
+        (guideNode == "locProfiles") || 
+        (guideNode == "xmlRules") || 
+        (guideNode == "xmlDtds") || 
+        (guideNode == "segmentationRules") || 
+        (guideNode == "fileExtensions") ||
+        (guideNode == "fileProfiles") || 
+        (guideNode == "filterConfiguration") ||
+        (guideNode == "import") ||
+        (guideNode == "finish")))
+   {
+      guide = "fileSystem2";
+   }
+   else if ((guide == "fileSystem2") && 
+            ((guideNode != "workflows") ||
+             (guideNode != "locProfiles") || 
+             (guideNode != "xmlRules") || 
+             (guideNode != "xmlDtds") || 
+             (guideNode != "segmentationRules") || 
+             (guideNode != "fileExtensions") ||
+             (guideNode != "filterConfiguration") ||
+             (guideNode != "fileProfiles") || 
+             (guideNode != "import") ||
+             (guideNode != "finish")))
+   {
+      guide = "generic_fileSystem";
+   }
+   <%if (b_teamsiteGuideJs) {%>
+      else if ((guide == "teamSite") && 
+       ((guideNode == "workflows") ||
+        (guideNode == "locProfiles") || 
+        (guideNode == "xmlRules") || 
+        (guideNode == "xmlDtds") || 
+        (guideNode == "segmentationRules") || 
+        (guideNode == "fileExtensions") ||
+        (guideNode == "filterConfiguration") ||
+        (guideNode == "fileProfiles") || 
+        (guideNode == "teamsiteServers") || 
+        (guideNode == "teamsiteBranches") || 
+        (guideNode == "import") ||
+        (guideNode == "finish")))
+   {
+      guide = "teamSite2";
+   }
+   else if ((guide == "teamSite2") && 
+            ((guideNode != "workflows") ||
+             (guideNode != "locProfiles") || 
+             (guideNode != "xmlRules") || 
+             (guideNode != "xmlDtds") || 
+             (guideNode != "segmentationRules") || 
+             (guideNode != "fileExtensions") ||
+             (guideNode != "filterConfiguration") ||
+             (guideNode != "fileProfiles") || 
+             (guideNode != "teamsiteServers") || 
+             (guideNode != "teamsiteBranches") || 
+             (guideNode != "import") ||
+             (guideNode != "finish")))
+   {
+      guide = "generic_teamSite";
+   }
+   <%}%>
+   <%if (b_databaseGuideJs) {%>
+   else if ((guide == "database") && 
+            ((guideNode == "workflows") ||
+             (guideNode == "locProfiles") || 
+             (guideNode == "xmlRules") || 
+             (guideNode == "xmlDtds") || 
+             (guideNode == "segmentationRules") || 
+             (guideNode == "dbConnections") ||
+             (guideNode == "dbImportSettings") || 
+             (guideNode == "dbPreviewRules") || 
+             (guideNode == "dbProfiles") || 
+             (guideNode == "import") ||
+             (guideNode == "finish")))
+   {
+      guide = "database2";
+   }
+   else if ((guide == "database2") && 
+            ((guideNode != "workflows") ||
+             (guideNode != "locProfiles") || 
+             (guideNode != "xmlRules") || 
+             (guideNode != "xmlDtds") || 
+             (guideNode != "segmentationRules") || 
+             (guideNode != "dbConnections") ||
+             (guideNode != "dbImportSettings") || 
+             (guideNode != "dbPreviewRules") || 
+             (guideNode != "dbProfiles") || 
+             (guideNode != "import") ||
+             (guideNode != "finish")))
+   {
+      guide = "generic_database";
+   }
+   <%}%>
+   else
+   {  
+      guide = (guide.indexOf("generic_") == 0) ? guide : "generic_" + guide;
+   }
+   
+   var layerToActivate = (guide.indexOf("generic") == 0) ? "generic" : guide;
+
+   // Turn ON the layer that was selected and turn OFF
+   // all others
+   
+   for(var x = 0; x < layersArray.length; x++) {
+
+      if (layersArray[x] == layerToActivate)
+      {
+         eval(layersArray[x] + ".style.visibility = \"visible\"");
+      }
+      else
+      {
+         eval(layersArray[x] + ".style.visibility = \"hidden\"");
+      }
+   }
+
+   // Load the correct Guide logo
+   if (guide.indexOf("fileSystem") != -1)
+   {
+      document["guideLogo1"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_fileSystem.gif";
+      document["guideLogo2"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_fileSystem.gif";      
+   }
+   else if (guide.indexOf("teamSite") != -1)
+   {
+      document["guideLogo1"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_teamSite.gif";
+      document["guideLogo2"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_teamSite.gif";      
+   }
+   else if (guide.indexOf("database") != -1)
+   {
+      document["guideLogo1"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_database.gif";
+      document["guideLogo2"].src = "/globalsight/images/" + "<%=localeSubDir%>" + "/guide_logo_database.gif";      
+   }
+
+   // Make the correct guideNode active, based on the 
+   // page that is loaded in the body 
+   obj = getRef(guideNode); 
+   activateNodes(obj, guide);
+}
+
+function hideGuide()
+{ 
+   contentLayer.style.top = 108;
+
+   // Make all Guide layers hidden
+   for (var i = 0; i < layersArray.length; i++)
+   {
+      eval(layersArray[i] + ".style.visibility = \"hidden\"");
+   }
+   document.cookie = "guide=none";
+}
+
+function loadUrl(url, wizard) 
+{
+   document.location= url;
+}
+
+function activateNodes(obj, guide)
+{
+   // Get all the table cell objects in the page that we 
+   // want to be toggle-able
+   var objects = new Array(); 
+   if (guide.indexOf("generic") != -1)
+   {
+      obj_start = getRef('start');
+<% if (isSuperAdmin1) { %>
+      obj_companies = getRef('companies');
+<% } %>      
+      obj_attributes = getRef('attributes');
+      obj_attributeGroups = getRef('attributeGroups');
+      obj_localePairs = getRef('localePairs');
+      obj_autoAction = getRef('autoAction');
+      obj_gsEdition = getRef('gsEdition');
+      obj_gsEditionAction = getRef('gsEditionAction');
+      obj_activityType = getRef('activityType');
+      obj_permissionGroups = getRef('permissionGroups');
+      obj_users = getRef('users');
+      obj_tm = getRef('tm');
+      obj_tmProfiles = getRef('tmProfiles');
+      obj_terminology = getRef('terminology');
+      obj_projects = getRef('projects');
+<%if (b_costingGuideJs) {%>
+      obj_currency =  getRef('currency');
+      obj_rate =  getRef('rate');
+<%}%>
+<% if (b_calendarGuideJs) { %>
+      obj_cal =  getRef('calendars');
+<%}%>
+
+      objects = [obj_start,
+<% if (isSuperAdmin1) { %>      
+                 obj_companies,
+<% } %>                  
+<% if (userPers.getPermissionFor(Permission.ATTRIBUTE_VIEW)) { %>
+                 obj_attributes,
+<% } %>
+<% if (userPers.getPermissionFor(Permission.ATTRIBUTE_GROUP_VIEW)) { %>
+                 obj_attributeGroups,
+<% } %>                 
+                 obj_localePairs,
+<% if (userPers.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) { %>
+                 obj_autoAction,
+<% } %>
+<% if (userPers.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
+                 obj_gsEdition,
+<% } %>
+<% if (userPers.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) { %>
+                 obj_gsEditionAction,
+<% } %>
+                 obj_activityType, 
+<%if (b_costingGuideJs) {%>
+                 obj_currency,
+                 obj_rate, 
+<%}%>
+<% if (b_calendarGuideJs) { %>
+                 obj_cal,
+<%}%>
+                 obj_permissionGroups,
+<% if (userPers.getPermissionFor(Permission.USERS_VIEW) && (userPers.getPermissionFor(Permission.USERS_EDIT) || 
+        userPers.getPermissionFor(Permission.USERS_REMOVE) || userPers.getPermissionFor(Permission.USERS_NEW))) { %>
+                 obj_users,
+<%}%>
+                 obj_tm,
+                 obj_tmProfiles,
+                 obj_terminology,
+                 obj_projects];
+
+   }
+   else if (guide == 'fileSystem2') {
+              obj_workflows = getRef('workflows');
+              obj_locProfiles = getRef('locProfiles');
+              obj_xmlRules = getRef('xmlRules');
+              obj_xmlDtds = getRef('xmlDtds');
+              obj_segmentationRules = getRef('segmentationRules');
+              obj_fileExtensions = getRef('fileExtensions');
+              obj_fileProfiles = getRef('fileProfiles');
+              obj_filterConfiguration = getRef('filterConfiguration');
+              obj_import = getRef('import');
+              obj_finish = getRef('finish');
+              objects = [obj_workflows,
+                         obj_locProfiles,
+                         obj_xmlRules,
+                         obj_xmlDtds,
+                         obj_segmentationRules,
+                         obj_fileExtensions,
+                         obj_filterConfiguration,
+                         obj_fileProfiles,
+                         obj_import,
+                         obj_finish];
+    }
+   <%if (b_teamsiteGuideJs) {%>
+    else if (guide == 'teamSite2') 
+    {
+         obj_workflows = getRef('workflowsTeamSite');
+         obj_locProfiles = getRef('locProfilesTeamSite');
+         obj_xmlRules = getRef('xmlRulesTeamSite');
+         obj_xmlDtds = getRef('xmlDtdsTeamSite');
+         obj_segmentationRules = getRef('segmentationRulesTeamSite');
+         obj_fileExtensions = getRef('fileExtensionsTeamSite');
+         obj_filterConfiguration = getRef('filterConfiguration');
+         obj_fileProfiles = getRef('fileProfilesTeamSite');
+         obj_teamsiteServers = getRef('teamsiteServers');
+         obj_teamsiteBranches = getRef('teamsiteBranches');
+         obj_import = getRef('importTeamSite');
+         obj_finish = getRef('finishTeamSite');
+         objects = [obj_workflows,
+                    obj_locProfiles,
+                    obj_xmlRules,
+                    obj_xmlDtds,
+                    obj_segmentationRules,
+                    obj_fileExtensions,
+                    obj_filterConfiguration,
+                    obj_fileProfiles,
+                    obj_teamsiteServers,
+                    obj_teamsiteBranches,
+                    obj_import,
+                    obj_finish];
+
+    }
+    <%}%>
+    <%if (b_databaseGuideJs) {%>
+    else if (guide == 'database2')
+    {
+       obj_workflows = getRef('workflowsDatabase');
+       obj_locProfiles = getRef('locProfilesDatabase');
+       obj_xmlRules = getRef('xmlRulesDatabase');
+       obj_xmlDtds = getRef('xmlDtdsDatabase');
+       obj_segmentationRules = getRef('segmentationRulesDatabase');
+       obj_dbConnections = getRef('dbConnections');
+       obj_dbImportSettings = getRef('dbImportSettings');
+       obj_dbPreviewRules = getRef('dbPreviewRules');
+       obj_dbProfiles = getRef('dbProfiles');
+       obj_dbImport = getRef('importDatabase');
+       obj_finish = getRef('finishDatabase');
+       objects = [obj_workflows,
+                  obj_locProfiles,
+                  obj_xmlRules,
+                  obj_xmlDtds,
+                  obj_segmentationRules,
+                  obj_dbConnections,
+                  obj_dbImportSettings,
+                  obj_dbPreviewRules,
+                  obj_dbProfiles,
+                  obj_dbImport,
+                  obj_finish];
+    } 
+    <%}%>
+       
+    // Some screens are not part of the Guides so
+    // turn all nodes OFF when on these screens
+    var nodeFound = (obj == null) ? false : true;
+
+    if (nodeFound)
+    {
+       // This is the node that was clicked on
+       activeObject= getRef(obj);
+ //      alert(activeObject.id)
+       activeBarObject = activeObject.id + "Bar";
+       activeBarObject = getRef(activeBarObject);
+       activeBarObject.style["background"] = "#E90104"; // red
+
+       // Turn ON the node that was clicked on
+       var indexOfActiveObject;
+       var indexOfInactiveObjectsStart;
+       var dotTop;
+       var dotBottom;
+       for (var i = 0; i < objects.length; i++)
+       {
+          if (objects[i].id.indexOf(activeObject.id) != -1)
+          {
+             // Found the active object!
+             // This was the one that was clicked on, so make it active
+             indexOfActiveObject = i;
+
+             // Set the style of the table cell
+             objects[i].style["background"] = "#EEEEEE"; // gray
+             objects[i].style["border"] = "1px outset";
+
+             // Set the style of the bar above the cell
+             barObject = objects[i].id + "Bar";
+             barObject = getRef(barObject);
+             barObject.style["background"] = "#E90104"; // red
+
+             // Set the style of the spacer cell following 
+             // the current cell
+             barSpacerObject = objects[i].id + "BarSpacer";
+             barSpacerObject = getRef(barSpacerObject);
+             barSpacerObject.style["background"] = "silver";
+
+             // Set the style of the HREF in the cell
+             linkObject = objects[i].id + "Link";
+             linkObject = getRef(linkObject);
+             linkObject.style["color"] = "navy";
+
+             // Load the red top dot  
+             dotTop = objects[i].id + "DotTop";
+             document[dotTop].src = dot_top_on.src;
+
+             // Load the red bottom dot 
+             dotBottom = objects[i].id + "DotBottom";
+             document[dotBottom].src = dot_bottom_on.src;
+
+             if (objects[i].id == "projects")
+             {
+                // If you are at the last node on the right, 
+                // which is the Projects node, then 
+                // make the bar red and make the Next button active
+                makeNextButtonActive();
+             }
+             else
+             {
+                makeNextButtonInActive();
+             }
+
+
+             if (objects[i].id.indexOf("workflows") != -1)
+             {
+                // If you are at the first node on the left, 
+                // which is the Workflows node, then 
+                // make the bar red and make the Back button active
+                makeBackButtonActive();
+             }
+             else
+             {
+                makeBackButtonInActive();
+             }
+
+             break;
+          }
+       }
+
+       // Make the nodes before the active one "visited" style
+       for (var i = 0; i < indexOfActiveObject; i++)
+       {
+          // Set the style of the table cell
+          objects[i].style["background"] = "#EEEEEE";
+          objects[i].style["border"] = "1px outset";
+
+          // Set the style of the bar above the cell
+          barObject = objects[i].id + "Bar";
+          barObject = getRef(barObject);
+          barObject.style["background"] = "#E90104"; // red
+
+          // Set the style of the spacer cell following 
+          // the current cell
+          barSpacerObject = objects[i].id + "BarSpacer";
+          barSpacerObject = getRef(barSpacerObject);
+          barSpacerObject.style["background"] = "#E90104"; // red
+
+          // Set the style of the HREF in the cell
+          linkObject = objects[i].id + "Link";
+          linkObject = getRef(linkObject);
+          linkObject.style["hover"] = "navy";
+
+          // Load the red top dot  
+          dotTop = objects[i].id + "DotTop";
+          document[dotTop].src = dot_top_on.src;
+
+          // Load the red bottom dot 
+          dotBottom = objects[i].id + "DotBottom";
+          document[dotBottom].src = dot_bottom_on.src;
+
+          if (objects[i].id.indexOf("workflows") != -1)
+          {
+             // If you are at the first node on the left, 
+             // which is the Workflows node, then 
+             // make Back button Visited also
+             makeBackButtonVisited();
+          }
+       }
+
+       // Subtract "0" to make this var a number 
+       indexOfInactiveObjectsStart = (indexOfActiveObject - 0) + 1;
+    }
+    else
+    {  
+       // The loaded page is not part of the any of the guides
+       indexOfInactiveObjectsStart =  (0 - 0); // subtract 0 to make it a number
+    }
+
+    // BB - 7/22/03 This piece of code appears to be unnecessary and was 
+    //              causing the "workflow" guide node to always be inactive
+    //
+    // The loaded page is not part of the loaded guide
+    //if (!indexOfActiveObject) 
+    //{
+    //   indexOfInactiveObjectsStart =  (0 - 0); // subtract 0 to make it a number
+    //}
+    //alert("indexOfActiveObject=" + indexOfActiveObject + ", indexOfInactiveObjectsStart=" + indexOfInactiveObjectsStart);
+
+    // Make the nodes after the active one "inactive" style
+    for (var i = indexOfInactiveObjectsStart; i < objects.length; i++)
+    {
+       // Set the style of the table cell
+       objects[i].style["border"] = "1px solid silver";
+
+       // Set the style of the bar above the cell
+       barObject = objects[i].id + "Bar";
+       barObject = getRef(barObject);
+       barObject.style["background"] = "silver";
+
+       // Set the style of the spacer cell following 
+       // the current cell
+       barSpacerObject = objects[i].id + "BarSpacer";
+       barSpacerObject = getRef(barSpacerObject);
+       barSpacerObject.style["background"] = "silver";
+
+       // Set the style of the HREF in the cell
+       linkObject = objects[i].id + "Link";
+       linkObject = getRef(linkObject);
+       linkObject.style["color"] = "silver";
+
+       // Load the gray top dot  
+       dotTop = objects[i].id + "DotTop";
+       document[dotTop].src = dot_top_off.src;
+
+       // Load the gray bottom dot  
+       dotBottom = objects[i].id + "DotBottom";
+       document[dotBottom].src = dot_bottom_off.src;
+
+       if (objects[i].id == "projects")
+       {
+          makeNextButtonInActive();
+       }
+       else if (objects[i].id.indexOf("workflows") != -1)
+       {
+          makeBackButtonInActive();
+       }
+    }
+}
+
+function getRef(obj)
+{
+    return(typeof obj == "string") ? document.getElementById(obj) : obj;
+}
+
+function getGuide()
+{
+   // Load the Guides based on cookie setting
+   var guide = "none";
+
+   if (document.cookie.length > 0)
+   {
+      offset = document.cookie.indexOf("guide");
+      if (offset != -1)
+      {
+         offset += 6; // 'guide=' is 6 chars, thus offset of 6
+         end = document.cookie.indexOf(";", offset);
+         if (end == -1)
+         {
+            end = document.cookie.length;
+         }
+      
+         guide = unescape(document.cookie.substring(offset, end));
+      }
+   }
+   return guide;
+}
+
+function makeNextButtonActive()
+{   
+   // Set the style of the bar above the cell
+   document["rightArrowBar"].src = "/globalsight/images/dotted_line_right_red.gif";
+
+   // Set the style of the table cell
+   obj_next = getRef("next");
+   obj_next.style["border"] = "1px outset";
+
+   // Set the style of the HREF in the cell
+   linkObject = obj_next.id + "Link";
+   linkObject = getRef(linkObject);
+   linkObject.style["color"] = "navy";
+
+   // Make the spacer before the Next button red
+   barSpacerObject = getRef("projectsBarSpacer");
+   barSpacerObject.style["background"] = "#E90104";
+}
+
+function makeNextButtonInActive()
+{   
+   obj_next = getRef("next");
+
+   // Set the style of the bar above the cell
+   document["rightArrowBar"].src = "/globalsight/images/dotted_line_right.gif";
+
+   // Set the style of the table cell
+   obj_next.style["border"] = "1px solid silver";
+
+   // Set the style of the HREF in the cell
+   linkObject = obj_next.id + "Link";
+   linkObject = getRef(linkObject);
+   linkObject.style["color"] = "silver";
+
+   // Make the spacer before the Next button red
+   barSpacerObject = getRef("projectsBarSpacer");
+   barSpacerObject.style["background"] = "silver";
+}
+
+function makeBackButtonActive()
+{   
+   var guide = getGuide();
+   var arrowBar = guide + "LeftArrowBar";
+   var backCellId = guide + "Back";
+   // Set the style of the bar above the cell
+   document[arrowBar].src = "/globalsight/images/dotted_line_left_red.gif";
+
+   // Set the style of the table cell
+   obj_back = getRef(backCellId);
+   obj_back.style["border"] = "1px outset";
+
+   // Set the style of the HREF in the cell
+   linkObject = obj_back.id + "Link";
+   linkObject = getRef(linkObject);
+   linkObject.style["color"] = "navy";
+
+   // Make the spacer before the Next button red
+   barSpacerObject = obj_back.id + "LeftArrowBarSpacer";
+   barSpacerObject = getRef(barSpacerObject);
+   barSpacerObject.style["background"] = "#E90104";
+}
+
+function makeBackButtonInActive()
+{   
+   var guide = getGuide();
+   var arrowBar = guide + "LeftArrowBar";
+   var backCellId = guide + "Back";
+   // Set the style of the bar above the cell
+   document[arrowBar].src = "/globalsight/images/dotted_line_left.gif";
+
+   // Set the style of the table cell
+   obj_back = getRef(backCellId);
+   obj_back.style["border"] = "1px solid silver";
+
+   // Set the style of the HREF in the cell
+   linkObject = obj_back.id + "Link";
+   linkObject = getRef(linkObject);
+   linkObject.style["color"] = "silver";
+
+   // Make the spacer before the Next button red
+   barSpacerObject = obj_back.id + "LeftArrowBarSpacer";
+   barSpacerObject = getRef(barSpacerObject);
+   barSpacerObject.style["background"] = "silver";
+}
+
+function makeBackButtonVisited()
+{   
+   var guide = getGuide();
+   var arrowBar = guide + "LeftArrowBar";
+   var backCellId = guide + "Back";
+
+   // Set the style of the bar above the cell
+   document[arrowBar].src = "/globalsight/images/dotted_line_left_red.gif";
+
+   // Set the style of the table cell
+   obj_back = getRef(backCellId);
+   obj_back.style["border"] = "1px outset";
+
+   // Set the style of the HREF in the cell
+   linkObject = obj_back.id + "Link";
+   linkObject = getRef(linkObject);
+   linkObject.style["hover"] = "navy";
+
+   // Make the spacer before the Next button red
+   barSpacerObject = obj_back.id + "LeftArrowBarSpacer";
+   barSpacerObject = getRef(barSpacerObject);
+   barSpacerObject.style["background"] = "#E90104";
+}
+
+function openHelpWindow(url) {
+   w_editor = window.open(url,'wizardHelpWindow',
+                             'resizable=yes,scrollbars=yes,top=150,left=150,height=300,width=400');
+}
+
+function printf(template, replacement)
+{
+    document.write(template.replace(/%s/, replacement));
+}
+
+function guideName()
+{
+    var guide = getGuide();
+    var guideName = "";
+
+    if (guide.indexOf("fileSystem") != -1)
+    {   
+        guideName = "<%= guideBundle.getString("lb_filesystem") %>";
+    }
+    else if (guide.indexOf("teamSite") != -1)
+    {
+        guideName = "<%= guideBundle.getString("lb_teamsite") %>";
+    }
+    else if (guide.indexOf("database") != -1)
+    {
+        guideName = "<%= guideBundle.getString("lb_database") %>";
+    }
+    return guideName;
+}
+</SCRIPT>
+

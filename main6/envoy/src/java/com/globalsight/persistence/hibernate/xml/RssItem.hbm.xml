@@ -1,0 +1,21 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.everest.webapp.pagehandler.rss.Item" table="RSS_ITEM">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="title" length="200" column="TITLE" type="string" not-null="true" unique="false"/>
+		<property name="link" length="200" column="LINK" type="string" not-null="true" unique="false"/>
+		<property name="description" column="DESCRIPTON" type="string" not-null="false" unique="false"/>
+		<property name="author" length="30" column="AUTHOR" type="string" not-null="false" unique="false"/>
+		<property name="pubDate" length="30" column="PUBDATE" type="string" not-null="false" unique="false"/>
+		<property name="status" length="30" column="STATUS" type="integer" not-null="false" unique="false"/>
+		<property name="publishedDate" column="PUBLISHED_DATE" type="calendar" not-null="false" unique="false"/>
+		<property name="isRead" length="30" column="IS_READ" type="integer" not-null="false" unique="false"/>
+		
+		<many-to-one name="feed" column="FEED_ID" cascade="none" access="field"
+		        class="com.globalsight.everest.webapp.pagehandler.rss.Feed" not-null="false" />
+	</class>
+</hibernate-mapping>

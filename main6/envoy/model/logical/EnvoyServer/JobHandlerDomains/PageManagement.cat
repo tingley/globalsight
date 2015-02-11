@@ -1,0 +1,14 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Page Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"39A4420F00B3"
+    documentation 	"This is the Page Management sub-domain of the Job Handler component."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list)
+    logical_presentations 	(list unit_reference_list))

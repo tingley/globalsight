@@ -1,0 +1,77 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *       Exact match key migration Tool Build FILE             * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="ExactMatchKeyMigration" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="src" value=".." />
+    <property name="bin" value="classes" />
+    <property name="dist" value="dist" />
+    <property name="toolsLib" value="../../../lib/common" />
+    <property name="toolsLibNt" value="../../../lib/nt" />
+    <property name="toolsBuild" value="../../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    <property name="oracle" value="${toolsLibNt}/O817NTclasses12.zip" />
+    <property name="cap"
+        value="${toolsBuild}/capclasses/globalsight/serverclasses" />
+
+    <property name="classpath"
+        value="${regexp}:${cap}:${weblogic}:${ldap}:${oracle}" />
+
+    <property name="batch_file" value="System4ExactMatchKey.bat"/>
+    <property name="sh_file" value="System4ExactMatchKey.sh"/>
+    <property name="jar" value="ExactMatchKey.jar"/>
+    <property name="zip"
+        value="${dist}/ExactMatchKey.zip"/>
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling normalization tool..." />
+    <mkdir dir="${bin}" />
+    <javac classpath="${classpath}"
+	   destdir="${bin}" >
+      <src path="${src}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <jar jarfile="${bin}/${jar}"
+         basedir="${bin}"
+	 includes="com/**" />
+
+    <copy file="${src}/${batch_file}"
+         todir="${bin}"/>
+    <copy file="${src}/${sh_file}" todir="${bin}"/>
+    <chmod file="${bin}/${sh_file}" perm="ugo+rx"/>
+    <mkdir dir="${bin}/globalsight"/>
+    <touch file="${bin}/globalsight/CAP.log"/>
+
+    <mkdir dir="${dist}" />
+    <zip zipfile="${zip}">
+        <zipfileset dir="${bin}"
+	     includes="${jar},${batch_file},${sh_file},globalsight/*"
+	      prefix="system4_exactmatchkey" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${bin}" />
+    <delete dir="${dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

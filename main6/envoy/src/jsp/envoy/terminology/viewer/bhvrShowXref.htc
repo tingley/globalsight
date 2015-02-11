@@ -1,0 +1,15 @@
+<PUBLIC:ATTACH EVENT="onclick" ONEVENT="showXref()" />
+
+<SCRIPT LANGUAGE="javascript">
+function showXref()
+{
+    var event = window.event;
+	event.cancelBubble = true;
+    event.returnValue = false;
+
+    var xref = event.srcElement;
+    // alert("Xref [" + xref.language + ":" + xref.term + "]");
+    var viewer = window.document.getElementById('idViewer');
+    viewer.ShowXref(xref);
+}
+</SCRIPT>

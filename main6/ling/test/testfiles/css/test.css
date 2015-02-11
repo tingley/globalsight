@@ -1,0 +1,22 @@
+ { font: Arial 12pt italic; }
+
+BODY #abc {
+    background-color: #abc;
+    background-color: #abcde;
+    color: black;
+    /* text-align: justify; */
+    font-family: helvetica, sans-serif;
+    margin: 2em;
+    background: #def url( recbg.jpg);
+    background: #def url( "recbg.jpg" )
+}
+
+H1, H2 #id, H3.class .class, H4, H5, H6 {
+    text-align: left;
+}
+
+/* CSS1: class names can start with digits, .55ft is fine
+   CSS2: parses this as unknown dimension. Escape the first digit: .\55ft
+*/
+DIV.55ft { this: worked; }
+

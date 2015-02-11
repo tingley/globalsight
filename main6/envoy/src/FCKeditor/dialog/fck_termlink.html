@@ -1,0 +1,363 @@
+<!--
+ * FCKeditor - The text editor for internet
+ * Copyright (C) 2003 Frederico Caldeira Knabben
+ *
+ * Licensed under the terms of the GNU Lesser General Public License
+ * (http://www.opensource.org/licenses/lgpl-license.php)
+ *
+ * For further information go to http://www.fredck.com/FCKeditor/
+ * or contact fckeditor@fredck.com.
+ *
+ * fck_link.html: Link dialog box.
+ *
+ * Authors:
+ *   Frederico Caldeira Knabben (fckeditor@fredck.com)
+-->
+<html>
+<head>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<link rel="stylesheet" type="text/css" href="../css/fck_dialog.css">
+<style>
+#idHitList {
+  width: 100%; height: 180; overflow-y: auto;
+  }
+#idHitList .clsTerm  {
+  font-size: 10pt;
+  behavior: url(bhvrHit.htc)
+  }
+</style>
+<script language="javascript" src="../js/dhtmled.js"></script>
+<script src="/globalsight/includes/xmlextras.js"></script>
+<script language="javascript">
+// Gets the document DOM
+var oDOM = dialogArguments.objContent.DOM ;
+
+// Load the available termbase languages (array of LangLoc, see editor.js)
+var g_languages = dialogArguments.parent.g_termbaseLanguages;
+var g_language  = dialogArguments.parent.g_language;
+
+var g_cid = -1;
+var g_tid = -1;
+
+String.prototype.trim = function ()
+{
+    return this.replace(/^\s*|\s*$/g, "");
+}
+  
+document.write("<title>" + dialogArguments.lang["DlgTLnkWindowTitle"] + "</title>");
+
+function setDefaults()
+{
+    // First of all, translate the dialog box texts
+    dialogArguments.AvailableLangs.TranslatePage(document);
+
+    // Populate languages box
+    for (var i = 0; i < g_languages.length; i++)
+    {
+        var langloc = g_languages[i];
+        var lang = langloc.getLanguage();
+
+        var oOption = document.createElement("OPTION");
+        selLang.options.add(oOption);
+
+        oOption.innerText = lang;
+        oOption.value     = lang;
+
+        if (lang == g_language)
+        {
+            oOption.selected = true;
+        }
+    }
+
+    var oLink = getSelectionLink() ;
+
+    if (oLink != null)
+    {
+        var term = oLink.getAttribute("term",2);
+        var lang = oLink.getAttribute("language",2);
+        var cid = oLink.getAttribute("cid",2);
+        var tid = oLink.getAttribute("tid",2);
+
+        term = term.trim();
+  
+        txtTerm.value = term ? term : "";
+        selectValue(selLang, lang);
+
+        g_cid = cid ? cid : -1;
+        g_tid = tid ? tid : -1;
+    }
+}
+
+function getSelectionLink()
+{
+    var oParent;
+    var oRange;
+
+    if (oDOM.selection.type == "Control")
+    {
+        oRange = oDOM.selection.createRange();
+        for ( i = 0; i < oRange.length; i++)
+        {
+            if (oRange(i).parentNode)
+            {
+                oParent = oRange(i).parentNode;
+                break;
+            }
+        }
+    }
+    else
+    {
+        oRange  = oDOM.selection.createRange();
+        oParent = oRange.parentElement();
+    }
+
+    while (oParent && oParent.nodeName != "A")
+    {
+        oParent = oParent.parentNode;
+    }
+
+    if (oParent && oParent.nodeName == "A")
+    {
+        oDOM.selection.empty();
+        oRange = oDOM.selection.createRange();
+        oRange.moveToElementText(oParent);
+        oRange.select();
+
+        return oParent;
+    }
+    else
+        return null;
+}
+
+function selectValue(select, value)
+{
+  for (var i = 0; i < select.options.length; ++i)
+  {
+    if (select.options(i).value == value)
+    {
+      select.selectedIndex = i;
+      return;
+    }
+  }
+}
+
+function selectedValue(select)
+{
+  return select.options[select.selectedIndex].value;
+}
+
+function ok()
+{
+    var sTerm = txtTerm.value.trim();
+    var sLang = selectedValue(selLang);
+
+    if (sTerm == "")
+    {
+        dialogArguments.decCommand(DECMD_UNLINK);
+    }
+    else
+    {
+        dialogArguments.decCommand(DECMD_HYPERLINK,
+            OLECMDEXECOPT_DONTPROMPTUSER,
+            "javascript:void(0);/*fckeditortemplink*/");
+
+        for (i = 0; i < oDOM.links.length; i++)
+        {
+            var link = oDOM.links[i];
+
+            if (link.href == "javascript:void(0);/*fckeditortemplink*/")
+            {
+                link.className = 'xref';
+                link.href = 'javascript:void(0)';
+                link.term = sTerm;
+                link.innerText = sTerm;
+                link.language = sLang;
+                link.cid = g_cid;
+                link.tid = g_tid;
+                break;
+            }
+        }
+    }
+
+    cancel();
+}
+
+// Fired when the user press the CANCEL button.
+function cancel()
+{
+    window.returnValue = null;
+    window.close();
+}
+
+function isRTLLanguage(lang)
+{
+    for (var i = 0; i < g_languages.length; i++)
+    {
+        var langloc = g_languages[i];
+
+        if (lang == langloc.getLanguage())
+        {
+            return isRTLLocale(langloc.getLocale());
+        }
+    }
+
+    return false;
+}
+
+function isRTLLocale(locale)
+{
+  if (locale.indexOf('ar') == 0 || locale.indexOf('he') == 0 ||
+      locale.indexOf('fa') == 0 || locale.indexOf('ur') == 0)
+  {
+    return true;
+  }
+
+  return false;
+}
+
+function browse()
+{
+    var source = selectedValue(selLang);
+    var start = txtTerm.value;
+
+    doBrowse(source, start, 1);
+}
+
+function browsePrevious()
+{
+    var source = selectedValue(selLang);
+    var start = '';
+
+    try
+    {
+        var o = idHitList.firstChild;
+
+        if (o.tagName == 'UL')
+        {
+            start = o.firstChild.firstChild.innerText;
+        };
+    }
+    catch (ex)
+    {
+        // probably no hitlist, use empty string
+    }
+
+    doBrowse(source, start, 0);
+}
+
+function browseNext()
+{
+    var source = selectedValue(selLang);
+    var start = '';
+
+    try
+    {
+        var o = idHitList.firstChild;
+
+        if (o.tagName == 'UL')
+        {
+            start = o.lastChild.firstChild.innerText;
+        };
+    }
+    catch (ex)
+    {
+        // probably no hitlist, use empty string
+    }
+
+    doBrowse(source, start, 1);
+}
+
+function doBrowse(source, query, direction)
+{
+    var xmlhttp = XmlHttp.create();
+    if (!xmlhttp)
+    {
+        alert("Fatal Error: XMLHTTP object not found, cannot browse.");
+    }
+
+    idBody.style.cursor = 'wait';
+
+    xmlhttp.open('POST', '/globalsight/envoy/terminology/viewer/browse.jsp?' +
+        '&SOURCE=' + escape(escape(source)) +
+        '&QUERY=' + escape(escape(query)) +
+        '&DIRECTION=' + direction, false);
+    xmlhttp.send();
+
+    // alert(xmlhttp.responseXML.xml);
+    var hits = xmlhttp.responseXML;
+
+    if (hits.parseError.errorCode != 0)
+    {
+        idHitList.innerHTML = '<p>The server returned invalid XML response:<br>' +
+          hits.parseError.reason + '</p>';
+    }
+    else if (hits.nodeName == 'exception')
+    {
+        idHitList.innerHTML = '<p>The server encountered an exception:<br>' +
+          hits.documentElement.text + '</p>';
+    }
+    else
+    {
+        var html;
+
+        if (isRTLLanguage(source))
+        {
+            html = hits.transformNode(xmlHitlistRtl.XMLDocument);
+        }
+        else
+        {
+            html = hits.transformNode(xmlHitlist.XMLDocument);
+        }
+
+        idHitList.innerHTML = html;
+    }
+
+    idBody.style.cursor = 'auto';
+}
+</script>
+</head>
+<body bottommargin="5" leftmargin="5" topmargin="5" rightmargin="5"
+ onload="setDefaults()" id="idBody">
+<XML id="xmlHitlist" src="/globalsight/envoy/terminology/viewer/hitlist.xsl"></XML>
+<XML id="xmlHitlistRtl" src="/globalsight/envoy/terminology/viewer/hitlist-rtl.xsl"></XML>
+<table cellspacing="1" cellpadding="1" border="0" class="dlg"
+  width="100%" height="100%">
+  <tr>
+    <td>
+      <table cellspacing="0" cellpadding="0" width="100%" border="0">
+	<tr>
+	  <td valign="top">
+	    <span fckLang="DlgTLnkTerm">Link to Term</span>
+	    <input style="width:200px" type="text" id="txtTerm">
+	    <br>
+	    <span fckLang="DlgTLnkLang">Language</span>
+	    <select id="selLang"></select>
+	    <br>
+	    <nobr style="position: relative; width: 100%; margin-top: 4px">
+	    <input type="button" fckLang="DlgTLnkBtnBrowse"
+	    value="Browse Language" onclick="browse();">
+	    &nbsp;&nbsp;&nbsp;
+	    <input type="button" fckLang="DlgTLnkBtnPrevious"
+	    value="Previous" onclick="browsePrevious();">
+	    &nbsp;
+	    <input type="button" fckLang="DlgTLnkBtnNext"
+	    value="Next" onclick="browseNext();">
+	    </nobr>
+	  </td>
+	  <td width="10">&nbsp;&nbsp;&nbsp;</td>
+	  <td valign="top" width="100">
+	    <input style="WIDTH: 100%" onclick="ok();" type="button"
+	    fckLang="DlgBtnOK" value="Ok">
+	    <br>
+	    <input style="WIDTH: 100%" onclick="cancel();" type="button"
+	    fckLang="DlgBtnCancel" value="Cancel" >
+	  </td>
+	</tr>
+      </table>
+      <hr width="100%" color="#000000" size="2">
+      <div id="idHitList"></div>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

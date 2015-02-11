@@ -1,0 +1,14 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Job Creation"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"39A441D90304"
+    documentation 	"This is the Job Creation sub-domain of the Job Handler component."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list)
+    logical_presentations 	(list unit_reference_list))

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Registry>
+<Replet name="TmReport" class="com.globalsight.reports.TmReportReplet" alias="TmReportReplet" visible="true">
+</Replet>
+<Replet name="WorkflowStatus" class="com.globalsight.reports.WorkflowStatusReplet" alias="WorkflowStatus" visible="true">
+</Replet>
+<Replet name="JobDetails" class="com.globalsight.reports.JobDetailsReplet" alias="JobDetails" visible="true">
+</Replet>
+<Replet name="AvgPerComp" class="com.globalsight.reports.AvgPercentCompletion" alias="AvgPerComp" visible="true">
+</Replet>
+<Replet name="Costing" class="com.globalsight.reports.CostingReplet" alias="Costing" visible="true">
+</Replet>
+<Replet name="WB_LSMIS" folder="false" class="inetsoft.sree.TemplateReplet" alias="WB_LSMIS" template="/templates/LSMIS.srt" visible="true" />
+<Replet name="WB_TrialBill" folder="false" class="inetsoft.sree.TemplateReplet" alias="WB_TrialBill" template="/templates/TrialBill.srt" visible="true" />
+</Registry>

@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="trabajo" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+  <topic name="Crear/modificar tipo de actividad" url="Configuraci_n/Tipos_de_actividades/Create_Modify_Activity_Type.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Enviar" url="Mis_actividades/Upload.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+  <topic name="Personalizar la configuración de extracción" url="Ap_ndice/Customizing_Extraction_Rules.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+  <topic name="Reasignar una actividad" url="Mis_trabajos/Procedimientos/Reassign_an_Activity_howdoI.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="trabajo alcance" >
+  <topic name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+</key>
+<key name="trabajo Automático" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+</key>
+<key name="trabajo del traductor" >
+  <topic name="Tipos de elementos excluidos" url="Ap_ndice/Exclude_Item_Types.htm" />
+</key>
+<key name="trabajo hecho" >
+  <topic name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+  <topic name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+</key>
+<key name="trabajo más tarde" >
+  <topic name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</key>
+<key name="trabajo pendiente" >
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="trabajo permanecerá" >
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+</key>
+<key name="trabajo permanentemente del sistema" >
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+</key>
+<key name="trabajo realizado se guardará" >
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+</key>
+<key name="trabajo satisface" >
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+</key>
+<key name="trabajo se basan" >
+  <topic name="Trabajo" url="Glosario/Job.htm" />
+</key>
+<key name="trabajo se creó automáticamente" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+</key>
+<key name="trabajo se guarda constantemente" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="trabajo seleccionado" >
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+</key>
+<key name="trabajos" >
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Gestión del contenido local (fragmentos)" url="Ap_ndice/Local_Content_Management_(Snippets).htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="trabajos asignados" >
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+</key>
+<key name="trabajos creados" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Perfil de traducción" url="Glosario/Localization_Profile.htm" />
+</key>
+<key name="trabajos permanecen" >
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="trabajos se asignan" >
+  <topic name="Proyecto" url="Glosario/Project.htm" />
+</key>
+<key name="trabajos se trasladan" >
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="trabajos seleccionados" >
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+</key>
+<key name="trabajos seleccionados.Todo" >
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+</key>
+<key name="trabajos siguientes" >
+  <topic name="Descripción general" url="Overview.htm" />
+  <topic name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="Trados" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="Trados Workbench" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="Trados Workbench cuenta" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+
+</indexdata>

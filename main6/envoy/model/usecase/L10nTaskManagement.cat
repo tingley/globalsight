@@ -1,0 +1,6637 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "Localization Task Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"394022CE00BB"
+    documentation 	"This package contains use cases that manage (or operate on) localization tasks, excluding the actual manipulation of page content."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Accept a Localization Task"
+	    quid       	"3940229602B9"
+	    documentation 	
+|3.42.1	Actor
+|Localization Participant.
+|3.42.2	Priority
+|3.42.3	Description
+|A Localization Participant accepts a localization task that is assigned to her.
+|3.42.4	Normal Course Of Events
+|The Localization Participant brings up a list of localization tasks that are assigned to her (see "Use Case  57 - View a List of Localization Tasks").  She selects one of the tasks on the list and opts to accept the task.  The system prompts the Localization Participant to confirm.  The Localization Participant confirms.  The system assigns the selected task to the Localization Participant and makes the task unavailable to all other Localization Participants.
+|3.42.5	Alternative Courses
+|When the system prompts the Localization Participant to confirm her decision to accept the selected task, the Localization Participant cancels her decision instead.  The system displays the list of tasks again.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @1
+		    logical_models 	(list unit_reference_list
+			(object Object "browser"
+			    quid       	"3943DA710146"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3943DA85034E"
+				    supplier   	"$UNNAMED$0"
+				    quidu      	"3943DA8100B3"
+				    messages   	(list Messages
+					(object Message "accept specified task"
+					    quid       	"3943DA85034F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "response \"task accepted\""
+					    quid       	"394442460397"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.2"
+					    ordinal    	5)))
+				(object Link
+				    quid       	"3948E0370051"
+				    supplier   	"browser"
+				    quidu      	"3943DA710146"
+				    messages   	(list Messages
+					(object Message "select a task"
+					    quid       	"3948E0370052"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$0"
+			    quid       	"3943DA8100B3"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980BC51026F"
+				    supplier   	"$UNNAMED$1"
+				    quidu      	"3980BC0102CA"
+				    messages   	(list Messages
+					(object Message "acceptTask( )"
+					    quid       	"3980BC510270"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"394440A201EE"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$1"
+			    quid       	"3980BC0102CA"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980BC0102C9"
+				    supplier   	"$UNNAMED$2"
+				    quidu      	"3980BC0102CB"
+				    messages   	(list Messages
+					(object Message "acceptTask(p_sessionId : String, p_assignee : String, p_nodeInstanceId : long)"
+					    quid       	"3980BC0102C8"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	3
+					    quidu      	"394441410110"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$2"
+			    quid       	"3980BC0102CB"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980BC92039F"
+				    supplier   	"$UNNAMED$3"
+				    quidu      	"3980BC8D022F"
+				    messages   	(list Messages
+					(object Message "accept the specified task for the specified user"
+					    quid       	"3980BC9203A0"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1"
+					    ordinal    	4))))
+			    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+			    quidu      	"39435E1300DC"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$3"
+			    quid       	"3980BC8D022F"
+			    class      	"Use Case View::Workflow Engine"
+			    quidu      	"3943D8180051"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@1
+		    quid       	"3943DA0F02A4"
+		    title      	"Component API"
+		    documentation 	
+|Localization Workstation's realization of the use case "Accept a Localization Task".
+		    
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	594
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "browser" @2
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@2
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3943DA710146"
+			    width      	300
+			    height     	1197
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @3
+				location   	(448, 416)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	916
+				y_coord    	856
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @4
+				location   	(448, 464)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @5
+				location   	(448, 1152)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$0" @6
+			    location   	(896, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@6
+				location   	(896, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3943DA8100B3"
+			    width      	300
+			    height     	1197
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @7
+				location   	(896, 656)
+				line_color 	3342489
+				InterObjView 	@6
+				height     	616
+				y_coord    	556
+				Nested     	FALSE))
+			(object InterMessView "" @8
+			    location   	(784, 656)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @9
+				Parent_View 	@8
+				location   	(672, 608)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3943DA85034F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	432
+				justify    	0
+				label      	"accept specified task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@2
+			    supplier   	@6
+			    Focus_Src  	@3
+			    Focus_Entry 	@7
+			    origin     	(463, 656)
+			    terminus   	(880, 656)
+			    ordinal    	1)
+			(object InterMessView "" @10
+			    location   	(688, 1152)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @11
+				Parent_View 	@10
+				location   	(672, 1104)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394442460397"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	513
+				justify    	0
+				label      	
+|response "task accepted"
+				
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@6
+			    supplier   	@2
+			    Focus_Src  	@7
+			    Focus_Entry 	@5
+			    origin     	(880, 1152)
+			    terminus   	(464, 1152)
+			    ordinal    	5)
+			(object Label @12
+			    location   	(368, 1648)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	1
+			    max_width  	1472
+			    label      	
+|This use case continues from the use case "View a List of Localization Tasks".
+			    )
+			(object SelfMessView "" @13
+			    location   	(16, 464)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @14
+				Parent_View 	@13
+				location   	(544, 416)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3948E0370052"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	282
+				justify    	0
+				label      	"select a task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@2
+			    supplier   	@2
+			    Focus_Src  	@3
+			    Focus_Entry 	@4
+			    origin     	(464, 464)
+			    terminus   	(614, 464)
+			    ordinal    	0)
+			(object InterObjView "$UNNAMED$1" @15
+			    location   	(1248, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@15
+				location   	(1248, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BC0102CA"
+			    width      	300
+			    height     	1197
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @16
+				location   	(1248, 704)
+				line_color 	3342489
+				InterObjView 	@15
+				height     	436
+				y_coord    	376
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$2" @17
+			    location   	(1584, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@17
+				location   	(1584, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	288
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BC0102CB"
+			    width      	306
+			    height     	1197
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @18
+				location   	(1584, 848)
+				line_color 	3342489
+				InterObjView 	@17
+				height     	232
+				y_coord    	172
+				Nested     	FALSE))
+			(object InterMessView "" @19
+			    location   	(1408, 848)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @20
+				Parent_View 	@19
+				location   	(1408, 800)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BC0102C8"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"acceptTask(p_sessionId : String, p_assignee : String, p_nodeInstanceId : long)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@15
+			    supplier   	@17
+			    Focus_Src  	@16
+			    Focus_Entry 	@18
+			    origin     	(1263, 848)
+			    terminus   	(1568, 848)
+			    ordinal    	3)
+			(object InterMessView "" @21
+			    location   	(16, 704)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @22
+				Parent_View 	@21
+				location   	(1072, 656)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BC510270"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	294
+				justify    	0
+				label      	"acceptTask( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@6
+			    supplier   	@15
+			    Focus_Src  	@7
+			    Focus_Entry 	@16
+			    origin     	(911, 704)
+			    terminus   	(1232, 704)
+			    ordinal    	2)
+			(object InterObjView "$UNNAMED$3" @23
+			    location   	(1995, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@23
+				location   	(1995, 280)
+				anchor_loc 	1
+				nlines     	2
+				max_width  	360
+				justify    	0
+				label      	"")
+			    icon       	"Actor"
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BC8D022F"
+			    width      	336
+			    height     	1197
+			    icon_height 	162
+			    icon_width 	120
+			    icon_y_offset 	-33
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @24
+				location   	(1995, 960)
+				line_color 	3342489
+				InterObjView 	@23
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @25
+			    location   	(1808, 960)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @26
+				Parent_View 	@25
+				location   	(1789, 916)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BC9203A0"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	888
+				justify    	0
+				label      	"accept the specified task for the specified user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@17
+			    supplier   	@23
+			    Focus_Src  	@18
+			    Focus_Entry 	@24
+			    origin     	(1599, 960)
+			    terminus   	(1979, 960)
+			    ordinal    	4)))))
+	(object UseCase "View a List of Localization Tasks"
+	    quid       	"394022510346"
+	    documentation 	
+|3.41.1	Actor
+|Localization Participant.
+|3.41.2	Priority
+|3.41.3	Description
+|A Localization Participant asks the system to show a list of tasks that is assigned to her.
+|3.41.4	Normal Course Of Events
+|The Localization Participant logs into the Localization Workstation and requests to see a list of tasks that are assigned to her.  She can optionally specify any combination of the following criteria to narrow down the list of task to be displayed:
+|
+|1)	The task has been accepted by the Localization Participant.
+|2)	The task was assigned to the Localization Participant on or after a specific date.
+|
+|The system fetches all the tasks that satisfies the specified search criteria and displays them in a list.  The list includes tasks that are assigned to the Localization Participant by her user name, and ones that are assigned to roles that the Localization Participant is a member of.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @27
+		    logical_models 	(list unit_reference_list
+			(object Object "$UNNAMED$4"
+			    quid       	"3943CD9B02C8"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3949496603E5"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"3943CD9B02C8")
+				(object Link
+				    quid       	"3980BDC40205"
+				    supplier   	"$UNNAMED$5"
+				    quidu      	"394945EC034F"
+				    messages   	(list Messages
+					(object Message "create"
+					    quid       	"3980BDC40206"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.1"
+					    ordinal    	1)
+					(object Message "login(  )"
+					    quid       	"3980BDCD0077"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.2"
+					    ordinal    	2
+					    quidu      	"394941B301EC")))
+				(object Link
+				    quid       	"3980BE9301D0"
+				    supplier   	"$UNNAMED$6"
+				    quidu      	"39494A0D00B0"
+				    messages   	(list Messages
+					(object Message "getJobHandler( )"
+					    quid       	"3980BE9301D1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	4
+					    quidu      	"38BDC40B021E")))
+				(object Link
+				    quid       	"3980BEAC00FA"
+				    supplier   	"$UNNAMED$7"
+				    quidu      	"3943D1840118"
+				    messages   	(list Messages
+					(object Message "getWorkflowsByUser( )"
+					    quid       	"3980BEAC00FB"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	5
+					    Operation  	"getWorkflowsByUser(p_userId : long)"
+					    quidu      	"38CD75AE0197"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$7"
+			    quid       	"3943D1840118"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980C0190249"
+				    supplier   	"$UNNAMED$8"
+				    quidu      	"3980C0100200"
+				    messages   	(list Messages
+					(object Message "getActiveTaskListForUser(p_sessionId : String)"
+					    quid       	"3980C019024A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4.1"
+					    ordinal    	6
+					    quidu      	"3943D69F00AA"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$5"
+			    quid       	"394945EC034F"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"39494A1F037D"
+				    supplier   	"$UNNAMED$6"
+				    quidu      	"39494A0D00B0"))
+			    class      	"Logical View::Envoy::EV Interface::Key"
+			    quidu      	"394941860010"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$6"
+			    quid       	"39494A0D00B0"
+			    class      	"Logical View::Envoy::EV Interface::ServerProxy"
+			    quidu      	"38BDB46D0297"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "browser"
+			    quid       	"3980BD6300C5"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980BD6300CA"
+				    supplier   	"browser"
+				    quidu      	"3980BD6300C5"
+				    messages   	(list Messages
+					(object Message "display assigned tasks"
+					    quid       	"3980BD6300CB"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	9)))
+				(object Link
+				    quid       	"3980BD9803A6"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"3943CD9B02C8"
+				    messages   	(list Messages
+					(object Message "login"
+					    quid       	"3980BD9803A7"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "show a list of assigned tasks"
+					    quid       	"3980BE560287"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	3)
+					(object Message "list of assigned tasks"
+					    quid       	"3980BF860216"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"1.3"
+					    ordinal    	8))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$9"
+			    quid       	"3980BFDD03E0"
+			    class      	"Use Case View::Workflow Engine"
+			    quidu      	"3943D8180051"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$8"
+			    quid       	"3980C0100200"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980C0370206"
+				    supplier   	"$UNNAMED$9"
+				    quidu      	"3980BFDD03E0"
+				    messages   	(list Messages
+					(object Message "get active tasks for specified user"
+					    quid       	"3980C0370207"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4.1.1"
+					    ordinal    	7))))
+			    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+			    quidu      	"39435E1300DC"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@27
+		    quid       	"3943CD690366"
+		    title      	"Component API"
+		    documentation 	
+|EV Interface's realization of the use case "View a List of Localization Tasks".
+		    
+		    zoom       	75
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	717
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "$UNNAMED$4" @28
+			    location   	(816, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@28
+				location   	(816, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	298
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3943CD9B02C8"
+			    width      	316
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @29
+				location   	(816, 384)
+				line_color 	3342489
+				InterObjView 	@28
+				height     	1090
+				y_coord    	1030
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @30
+				location   	(816, 672)
+				line_color 	3342489
+				InterObjView 	@28
+				height     	742
+				y_coord    	682
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @31
+				location   	(816, 688)
+				line_color 	3342489
+				InterObjView 	@28
+				height     	720
+				y_coord    	660
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$7" @32
+			    location   	(1968, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@32
+				location   	(1968, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3943D1840118"
+			    width      	300
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @33
+				location   	(1968, 960)
+				line_color 	3342489
+				InterObjView 	@32
+				height     	388
+				y_coord    	328
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$6" @34
+			    location   	(1605, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@34
+				location   	(1605, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	394
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39494A0D00B0"
+			    width      	412
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @35
+				location   	(1605, 780)
+				line_color 	3342489
+				InterObjView 	@34
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$5" @36
+			    location   	(1264, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@36
+				location   	(1264, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394945EC034F"
+			    width      	300
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @37
+				location   	(1264, 416)
+				line_color 	3342489
+				InterObjView 	@36
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @38
+				location   	(1264, 544)
+				line_color 	3342489
+				InterObjView 	@36
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object NoteView @39
+			    location   	(1424, 1488)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@39
+				location   	(1271, 1379)
+				fill_color 	13434879
+				nlines     	4
+				max_width  	271
+				label      	
+|see use case "Login to the System"
+				)
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	331
+			    height     	231)
+			(object InterObjView "browser" @40
+			    location   	(352, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@40
+				location   	(352, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BD6300C5"
+			    width      	300
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @41
+				location   	(352, 384)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	1252
+				y_coord    	1192
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @42
+				location   	(352, 1312)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	318
+				y_coord    	258
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @43
+				location   	(352, 1424)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object SelfMessView "" @44
+			    location   	(16, 1424)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @45
+				Parent_View 	@44
+				location   	(448, 1376)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BD6300CB"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	741
+				justify    	0
+				label      	"display assigned tasks"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@40
+			    Focus_Src  	@42
+			    Focus_Entry 	@43
+			    origin     	(368, 1424)
+			    terminus   	(518, 1424)
+			    ordinal    	9)
+			(object InterMessView "" @46
+			    location   	(1040, 384)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @47
+				Parent_View 	@46
+				location   	(576, 336)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BD9803A7"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	212
+				justify    	0
+				label      	"login"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@28
+			    Focus_Src  	@41
+			    Focus_Entry 	@29
+			    origin     	(367, 384)
+			    terminus   	(800, 384)
+			    ordinal    	0)
+			(object InterMessView "" @48
+			    location   	(16, 416)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @49
+				Parent_View 	@48
+				location   	(1040, 368)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BDC40206"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	245
+				justify    	0
+				label      	"create"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@28
+			    supplier   	@36
+			    Focus_Src  	@29
+			    Focus_Entry 	@37
+			    origin     	(831, 416)
+			    terminus   	(1248, 416)
+			    ordinal    	1)
+			(object InterMessView "" @50
+			    location   	(2144, 544)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @51
+				Parent_View 	@50
+				location   	(1040, 496)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BDCD0077"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	279
+				justify    	0
+				label      	"login(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@28
+			    supplier   	@36
+			    Focus_Src  	@29
+			    Focus_Entry 	@38
+			    origin     	(831, 544)
+			    terminus   	(1248, 544)
+			    ordinal    	2)
+			(object AttachView "" @52
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@39
+			    supplier   	@50
+			    line_style 	0)
+			(object InterMessView "" @53
+			    location   	(624, 672)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @54
+				Parent_View 	@53
+				location   	(576, 624)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BE560287"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	866
+				justify    	0
+				label      	"show a list of assigned tasks"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@28
+			    Focus_Src  	@41
+			    Focus_Entry 	@30
+			    origin     	(367, 672)
+			    terminus   	(800, 672)
+			    ordinal    	3)
+			(object InterMessView "" @55
+			    location   	(1440, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @56
+				Parent_View 	@55
+				location   	(1210, 740)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BE9301D1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	520
+				justify    	0
+				label      	"getJobHandler( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@28
+			    supplier   	@34
+			    Focus_Src  	@31
+			    Focus_Entry 	@35
+			    origin     	(831, 784)
+			    terminus   	(1589, 784)
+			    ordinal    	4)
+			(object InterMessView "" @57
+			    location   	(2080, 960)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @58
+				Parent_View 	@57
+				location   	(1392, 912)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BEAC00FB"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	700
+				justify    	0
+				label      	"getWorkflowsByUser( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@28
+			    supplier   	@32
+			    Focus_Src  	@31
+			    Focus_Entry 	@33
+			    origin     	(831, 960)
+			    terminus   	(1952, 960)
+			    ordinal    	5)
+			(object InterMessView "" @59
+			    location   	(656, 1312)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @60
+				Parent_View 	@59
+				location   	(592, 1264)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BF860216"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	658
+				justify    	0
+				label      	"list of assigned tasks"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@28
+			    supplier   	@40
+			    Focus_Src  	@29
+			    Focus_Entry 	@42
+			    origin     	(800, 1312)
+			    terminus   	(368, 1312)
+			    ordinal    	8)
+			(object InterObjView "$UNNAMED$9" @61
+			    location   	(2820, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@61
+				location   	(2820, 295)
+				anchor_loc 	1
+				nlines     	2
+				max_width  	360
+				justify    	0
+				label      	"")
+			    icon       	"Actor"
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BFDD03E0"
+			    width      	336
+			    height     	1501
+			    icon_height 	162
+			    icon_width 	120
+			    icon_y_offset 	-48
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @62
+				location   	(2820, 1170)
+				line_color 	3342489
+				InterObjView 	@61
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$8" @63
+			    location   	(2336, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@63
+				location   	(2336, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	288
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980C0100200"
+			    width      	306
+			    height     	1501
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @64
+				location   	(2336, 1072)
+				line_color 	3342489
+				InterObjView 	@63
+				height     	216
+				y_coord    	156
+				Nested     	FALSE))
+			(object InterMessView "" @65
+			    location   	(2096, 1072)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @66
+				Parent_View 	@65
+				location   	(2144, 1024)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C019024A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"getActiveTaskListForUser(p_sessionId : String)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@32
+			    supplier   	@63
+			    Focus_Src  	@33
+			    Focus_Entry 	@64
+			    origin     	(1983, 1072)
+			    terminus   	(2320, 1072)
+			    ordinal    	6)
+			(object InterMessView "" @67
+			    location   	(2688, 1168)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @68
+				Parent_View 	@67
+				location   	(2577, 1124)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980C0370207"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	991
+				justify    	0
+				label      	"get active tasks for specified user"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@63
+			    supplier   	@61
+			    Focus_Src  	@64
+			    Focus_Entry 	@62
+			    origin     	(2351, 1168)
+			    terminus   	(2804, 1168)
+			    ordinal    	7)))))
+	(object UseCase "Reject a Localization Task"
+	    quid       	"394023BD0097"
+	    documentation 	
+|3.43.1	Actor
+|Localization Participant.
+|3.43.2	Priority
+|3.43.3	Description
+|A Localization Participant rejects a localization task that is assigned to her.
+|3.43.4	Normal Course Of Events
+|The Localization Participant brings up a list of localization tasks that are assigned to her (see "Use Case  57 - View a List of Localization Tasks").  She selects one of the tasks on the list and opts to reject the task.  The system prompts the Localization Participant to enter a comment and confirm.  The Localization Participant enters a comment and confirms.  The system records the comment and the rejection in its database.  If the Localization Participant is the only person who was assigned to the task, or if all other members of the role that was assigned to the task has rejected the task, the system escalates this situation by sending an email to the Project Manager of the localization job that owns this task to inform her that all assigned users have rejected the task.  The email includes the Localization Participant's comment.
+|3.43.5	Alternative Courses
+|When the system prompts the Localization Participant to confirm her decision to reject the selected task, the Localization Participant cancels her decision instead.  The system displays the list of tasks again.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @69
+		    logical_models 	(list unit_reference_list
+			(object Object "browser"
+			    quid       	"3948E04F006A"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3948E04F006B"
+				    supplier   	"$UNNAMED$10"
+				    quidu      	"3948E04F0076"
+				    messages   	(list Messages
+					(object Message "reject specified task"
+					    quid       	"3948E04F006C"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "respond task rejected"
+					    quid       	"3949093E01B1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.2"
+					    ordinal    	5)))
+				(object Link
+				    quid       	"3948E04F006E"
+				    supplier   	"browser"
+				    quidu      	"3948E04F006A"
+				    messages   	(list Messages
+					(object Message "select a task"
+					    quid       	"3948E04F006F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$10"
+			    quid       	"3948E04F0076"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3948E04F0075"
+				    supplier   	"$UNNAMED$11"
+				    quidu      	"3948E04F0077"
+				    messages   	(list Messages
+					(object Message "rejectTask( )"
+					    quid       	"3948E04F0074"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"3948E09E0398"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$11"
+			    quid       	"3948E04F0077"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F734202E8"
+				    supplier   	"$UNNAMED$12"
+				    quidu      	"394907C9024B"
+				    messages   	(list Messages
+					(object Message "rejectTask( )"
+					    quid       	"397F734202E9"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1.1"
+					    ordinal    	3
+					    quidu      	"394908AD014F"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$12"
+			    quid       	"394907C9024B"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3949090103BD"
+				    supplier   	"$UNNAMED$13"
+				    quidu      	"394908FD0385"
+				    messages   	(list Messages
+					(object Message "rejectTask(p_sessionId : String, p_assignee : String, p_nodeInstanceId : long)"
+					    quid       	"3949090103BE"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	4
+					    quidu      	"39490907002C"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$13"
+			    quid       	"394908FD0385"
+			    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+			    quidu      	"39435E1300DC"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@69
+		    quid       	"3948E04502C8"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "browser" @70
+			    location   	(592, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@70
+				location   	(592, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3948E04F006A"
+			    width      	300
+			    height     	1174
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @71
+				location   	(592, 416)
+				line_color 	3342489
+				InterObjView 	@70
+				height     	893
+				y_coord    	833
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @72
+				location   	(592, 464)
+				line_color 	3342489
+				InterObjView 	@70
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @73
+				location   	(592, 1088)
+				line_color 	3342489
+				InterObjView 	@70
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$10" @74
+			    location   	(1056, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@74
+				location   	(1056, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3948E04F0076"
+			    width      	300
+			    height     	1174
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @75
+				location   	(1056, 656)
+				line_color 	3342489
+				InterObjView 	@74
+				height     	552
+				y_coord    	492
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$11" @76
+			    location   	(1488, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@76
+				location   	(1488, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3948E04F0077"
+			    width      	340
+			    height     	1174
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @77
+				location   	(1488, 784)
+				line_color 	3342489
+				InterObjView 	@76
+				height     	244
+				y_coord    	184
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$12" @78
+			    location   	(1952, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@78
+				location   	(1952, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394907C9024B"
+			    width      	300
+			    height     	1174
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @79
+				location   	(1952, 816)
+				line_color 	3342489
+				InterObjView 	@78
+				height     	152
+				y_coord    	92
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$13" @80
+			    location   	(2288, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@80
+				location   	(2288, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	288
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394908FD0385"
+			    width      	306
+			    height     	1174
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @81
+				location   	(2288, 848)
+				line_color 	3342489
+				InterObjView 	@80
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @82
+			    location   	(16, 464)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @83
+				Parent_View 	@82
+				location   	(688, 416)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3948E04F006F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	281
+				justify    	0
+				label      	"select a task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@70
+			    supplier   	@70
+			    Focus_Src  	@71
+			    Focus_Entry 	@72
+			    origin     	(608, 464)
+			    terminus   	(758, 464)
+			    ordinal    	0)
+			(object InterMessView "" @84
+			    location   	(784, 656)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @85
+				Parent_View 	@84
+				location   	(816, 608)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3948E04F006C"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	409
+				justify    	0
+				label      	"reject specified task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@70
+			    supplier   	@74
+			    Focus_Src  	@71
+			    Focus_Entry 	@75
+			    origin     	(607, 656)
+			    terminus   	(1040, 656)
+			    ordinal    	1)
+			(object InterMessView "" @86
+			    location   	(1376, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @87
+				Parent_View 	@86
+				location   	(1264, 736)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3948E04F0074"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	282
+				justify    	0
+				label      	"rejectTask( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@74
+			    supplier   	@76
+			    Focus_Src  	@75
+			    Focus_Entry 	@77
+			    origin     	(1071, 784)
+			    terminus   	(1472, 784)
+			    ordinal    	2)
+			(object Label @88
+			    location   	(32, 304)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	7
+			    max_width  	369
+			    label      	
+|This use case continues from the use case "View a List of Localization Tasks".
+			    )
+			(object InterMessView "" @89
+			    location   	(2544, 848)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @90
+				Parent_View 	@89
+				location   	(2112, 800)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949090103BE"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"rejectTask(p_sessionId : String, p_assignee : String, p_nodeInstanceId : long)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@78
+			    supplier   	@80
+			    Focus_Src  	@79
+			    Focus_Entry 	@81
+			    origin     	(1967, 848)
+			    terminus   	(2272, 848)
+			    ordinal    	4)
+			(object InterMessView "" @91
+			    location   	(832, 1088)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @92
+				Parent_View 	@91
+				location   	(832, 1040)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949093E01B1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	438
+				justify    	0
+				label      	"respond task rejected"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@74
+			    supplier   	@70
+			    Focus_Src  	@75
+			    Focus_Entry 	@73
+			    origin     	(1040, 1088)
+			    terminus   	(608, 1088)
+			    ordinal    	5)
+			(object InterMessView "" @93
+			    location   	(16, 816)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @94
+				Parent_View 	@93
+				location   	(1712, 768)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F734202E9"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	282
+				justify    	0
+				label      	"rejectTask( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@76
+			    supplier   	@78
+			    Focus_Src  	@77
+			    Focus_Entry 	@79
+			    origin     	(1503, 816)
+			    terminus   	(1936, 816)
+			    ordinal    	3)))))
+	(object UseCase "Complete a Task"
+	    quid       	"39402636023C"
+	    documentation 	
+|3.48.1	Actor
+|Localization Participant.
+|3.48.2	Priority
+|3.48.3	Description
+|The Localization Participant finishes the localization task after having worked on all the text segments in the task.
+|3.48.4	Normal Course Of Events
+|After having worked on all the text segments in a task in the Localization Workstation (e.g. a Translator translated all the text segments in the task), the Localization Participant tells the system that the task is complete.  The system marks that task as complete, which means that the Localization Participant will not see the task in her list of assigned tasks.
+|
+|If there is another task following the completed task, the system makes that task active.  This active task will appear in the task lists of the people who are assigned to the task.
+|
+|If there are no more tasks following the completed task, the system marks the whole job as complete.  If the job contains data from automatically detected changes or data from database tables, the system finalizes the job by writing the localized data to the data source (see "Use Case 21 - Finalize Dynamic L10N").  Otherwise the job is held in the system until a Project Manager tells the system to finalize it (see "Use Case 20 - Finalize Static Page Data L10N").
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @95
+		    logical_models 	(list unit_reference_list
+			(object Object "L10n Workstation"
+			    quid       	"394490100070"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394490270100"
+				    supplier   	"$UNNAMED$14"
+				    quidu      	"394490230190"
+				    messages   	(list Messages
+					(object Message "finishTask(p_sessionId : Integer, p_projectId : Integer, p_workflowId : Integer)"
+					    quid       	"394490270101"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    quidu      	"39448F040328"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$14"
+			    quid       	"394490230190"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F5C05033E"
+				    supplier   	"$UNNAMED$15"
+				    quidu      	"3944909C01A8"
+				    messages   	(list Messages
+					(object Message "getWorkflowById( )"
+					    quid       	"397F5C05033F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"38FB6D8F0213")))
+				(object Link
+				    quid       	"397F5C1A02EE"
+				    supplier   	"$UNNAMED$16"
+				    quidu      	"3944927E0241"
+				    messages   	(list Messages
+					(object Message "setTaskFinished(p_taskComplete : Boolean)"
+					    quid       	"397F5C1A02EF"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2"
+					    ordinal    	3
+					    quidu      	"39449290028D"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$15"
+			    quid       	"3944909C01A8"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$16"
+			    quid       	"3944927E0241"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F5C5A0336"
+				    supplier   	"$UNNAMED$17"
+				    quidu      	"397F5C5400F2"
+				    messages   	(list Messages
+					(object Message "advanceTask(p_workflowInstanceId : long, p_sessionId : String, p_assignee : String)"
+					    quid       	"397F5C5A0337"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2.1"
+					    ordinal    	4
+					    quidu      	"394494150016")))
+				(object Link
+				    quid       	"397F5C7D017D"
+				    supplier   	"$UNNAMED$16"
+				    quidu      	"3944927E0241"
+				    messages   	(list Messages
+					(object Message "finalizeWorkflow( )"
+					    quid       	"397F5C7D017E"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2.2"
+					    ordinal    	6
+					    quidu      	"38CFC76001D6"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$17"
+			    quid       	"397F5C5400F2"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F5D61006D"
+				    supplier   	"$UNNAMED$18"
+				    quidu      	"397F5D3B0311"
+				    messages   	(list Messages
+					(object Message "set current task finished"
+					    quid       	"397F5D61006E"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2.1.1"
+					    ordinal    	5))))
+			    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+			    quidu      	"39435E1300DC"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "translator's browser"
+			    quid       	"397F5CE803E4"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F5CEF02A4"
+				    supplier   	"L10n Workstation"
+				    quidu      	"394490100070"
+				    messages   	(list Messages
+					(object Message "set current task finished"
+					    quid       	"397F5CEF02A5"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "update task list"
+					    quid       	"397F5D7B00BA"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"3"
+					    ordinal    	7))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$18"
+			    quid       	"397F5D3B0311"
+			    class      	"Use Case View::Workflow Engine"
+			    quidu      	"3943D8180051"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@95
+		    quid       	"39448FD7024F"
+		    title      	"Component API"
+		    documentation 	
+|EV Interface's realization of the use case "Finish a Completed Localization Task".
+		    
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "L10n Workstation" @96
+			    location   	(688, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@96
+				location   	(688, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	336
+				justify    	0
+				label      	"L10n Workstation")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394490100070"
+			    width      	354
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @97
+				location   	(688, 400)
+				line_color 	3342489
+				InterObjView 	@96
+				height     	1096
+				y_coord    	1036
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @98
+				location   	(688, 416)
+				line_color 	3342489
+				InterObjView 	@96
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$14" @99
+			    location   	(1216, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@99
+				location   	(1216, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394490230190"
+			    width      	340
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @100
+				location   	(1216, 592)
+				line_color 	3342489
+				InterObjView 	@99
+				height     	774
+				y_coord    	714
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$15" @101
+			    location   	(1696, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@101
+				location   	(1696, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3944909C01A8"
+			    width      	300
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @102
+				location   	(1696, 672)
+				line_color 	3342489
+				InterObjView 	@101
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$16" @103
+			    location   	(2055, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@103
+				location   	(2055, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3944927E0241"
+			    width      	300
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @104
+				location   	(2055, 825)
+				line_color 	3342489
+				InterObjView 	@103
+				height     	474
+				y_coord    	414
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @105
+				location   	(2055, 1110)
+				line_color 	3342489
+				InterObjView 	@103
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterMessView "" @106
+			    location   	(944, 592)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @107
+				Parent_View 	@106
+				location   	(944, 544)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394490270101"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"finishTask(p_sessionId : Integer, p_projectId : Integer, p_workflowId : Integer)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@96
+			    supplier   	@99
+			    Focus_Src  	@97
+			    Focus_Entry 	@100
+			    origin     	(703, 592)
+			    terminus   	(1200, 592)
+			    ordinal    	1)
+			(object InterMessView "" @108
+			    location   	(1648, 672)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @109
+				Parent_View 	@108
+				location   	(1456, 624)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5C05033F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	398
+				justify    	0
+				label      	"getWorkflowById( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@99
+			    supplier   	@101
+			    Focus_Src  	@100
+			    Focus_Entry 	@102
+			    origin     	(1231, 672)
+			    terminus   	(1680, 672)
+			    ordinal    	2)
+			(object InterMessView "" @110
+			    location   	(16, 832)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @111
+				Parent_View 	@110
+				location   	(1635, 788)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5C1A02EF"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"setTaskFinished(p_taskComplete : Boolean)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@99
+			    supplier   	@103
+			    Focus_Src  	@100
+			    Focus_Entry 	@104
+			    origin     	(1231, 832)
+			    terminus   	(2039, 832)
+			    ordinal    	3)
+			(object InterObjView "$UNNAMED$17" @112
+			    location   	(2464, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@112
+				location   	(2464, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	288
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397F5C5400F2"
+			    width      	306
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @113
+				location   	(2460, 900)
+				line_color 	3342489
+				InterObjView 	@112
+				height     	200
+				y_coord    	140
+				Nested     	FALSE))
+			(object InterMessView "" @114
+			    location   	(1904, 896)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @115
+				Parent_View 	@114
+				location   	(2259, 852)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5C5A0337"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"advanceTask(p_workflowInstanceId : long, p_sessionId : String, p_assignee : String)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@103
+			    supplier   	@112
+			    Focus_Src  	@104
+			    Focus_Entry 	@113
+			    origin     	(2070, 896)
+			    terminus   	(2448, 896)
+			    ordinal    	4)
+			(object NoteView @116
+			    location   	(2272, 624)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@116
+				location   	(2119, 527)
+				fill_color 	13434879
+				nlines     	3
+				max_width  	271
+				label      	"set flag to advance to next task")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	331
+			    height     	206)
+			(object AttachView "" @117
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@116
+			    supplier   	@114
+			    line_style 	0)
+			(object SelfMessView "" @118
+			    location   	(16, 1104)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @119
+				Parent_View 	@118
+				location   	(2146, 1060)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5C7D017E"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	385
+				justify    	0
+				label      	"finalizeWorkflow( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@103
+			    supplier   	@103
+			    Focus_Src  	@104
+			    Focus_Entry 	@105
+			    origin     	(2071, 1104)
+			    terminus   	(2221, 1104)
+			    ordinal    	6)
+			(object NoteView @120
+			    location   	(1584, 1408)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@120
+				location   	(1387, 967)
+				fill_color 	13434879
+				nlines     	17
+				max_width  	358
+				label      	
+|Input parameter to JobHandler.setTaskFinished() indicates that the task is completed.  Therefore, if there are no more tasks in the job, finish the job by sending each localized page back to Diplomat: 
+|
+|loop for each request in the job.
+				)
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	418
+			    height     	894)
+			(object AttachView "" @121
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@120
+			    supplier   	@118
+			    line_style 	0)
+			(object InterObjView "translator's browser" @122
+			    location   	(320, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@122
+				location   	(320, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"translator's browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397F5CE803E4"
+			    width      	300
+			    height     	1361
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @123
+				location   	(320, 416)
+				line_color 	3342489
+				InterObjView 	@122
+				height     	120
+				y_coord    	60
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @124
+				location   	(320, 1376)
+				line_color 	3342489
+				InterObjView 	@122
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @125
+			    location   	(16, 416)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @126
+				Parent_View 	@125
+				location   	(496, 368)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5CEF02A5"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	482
+				justify    	0
+				label      	"set current task finished"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@122
+			    supplier   	@96
+			    Focus_Src  	@123
+			    Focus_Entry 	@98
+			    origin     	(335, 416)
+			    terminus   	(672, 416)
+			    ordinal    	0)
+			(object InterObjView "$UNNAMED$18" @127
+			    location   	(2940, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@127
+				location   	(2940, 235)
+				anchor_loc 	1
+				nlines     	2
+				max_width  	360
+				justify    	0
+				label      	"")
+			    icon       	"Actor"
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397F5D3B0311"
+			    width      	336
+			    height     	1361
+			    icon_height 	162
+			    icon_width 	120
+			    icon_y_offset 	12
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @128
+				location   	(2940, 975)
+				line_color 	3342489
+				InterObjView 	@127
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @129
+			    location   	(2672, 976)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @130
+				Parent_View 	@129
+				location   	(2701, 932)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5D61006E"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	482
+				justify    	0
+				label      	"set current task finished"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@112
+			    supplier   	@127
+			    Focus_Src  	@113
+			    Focus_Entry 	@128
+			    origin     	(2479, 976)
+			    terminus   	(2924, 976)
+			    ordinal    	5)
+			(object InterMessView "" @131
+			    location   	(16, 1376)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @132
+				Parent_View 	@131
+				location   	(512, 1328)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5D7B00BA"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	325
+				justify    	0
+				label      	"update task list"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@96
+			    supplier   	@122
+			    Focus_Src  	@97
+			    Focus_Entry 	@124
+			    origin     	(672, 1376)
+			    terminus   	(336, 1376)
+			    ordinal    	7)))))
+	(object UseCase "Open a Localization Task"
+	    quid       	"394026DC038F"
+	    documentation 	
+|3.50.1	Actor
+|Localization Participant.
+|3.50.2	Priority
+|3.50.3	Description
+|The Localization Participant selects a localization task and opens it in order to work on it.
+|3.50.4	Normal Course Of Events
+|The Localization Participant brings up a list of localization tasks that she has accepted in the Localization Workstation (see "Use Case  57 - View a List of Localization Tasks").  She selects one of the tasks and request to open it.  The Localization Workstation displays a list of pages in the task.  It retrieves the first page in the task, displays the page and navigates to the first segment in the page.
+|3.50.5	Alternative Courses
+|3.50.6	Notes and Issues
+|
+|3.51	Use Case 68 - Open a Previous Localization Task
+|3.51.1	Actor
+|Localization Participant.
+|3.51.2	Priority
+|3.51.3	Description
+|The Localization Participant uses a bookmark to open a previous localization task at the position where it was left off.
+|3.51.4	Normal Course Of Events
+|The Localization Participant logs into the Localization Workstation and requests to see a list of her bookmarks.  The system displays a list of bookmarks that the Localization Participant created in previous sessions.  The Localization Participant selects one of the bookmarks and requests to open go to that bookmark.  The system retrieves the task and the page within the task as specified by the bookmark.  The system navigates to the segment within the page as specified by the bookmark.  The Localization Participant can then resume the work that she left off in a previous session.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @133
+		    logical_models 	(list unit_reference_list
+			(object Object "L10n Workstation"
+			    quid       	"394445AF017F"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394445DF000C"
+				    supplier   	"$UNNAMED$19"
+				    quidu      	"394445DA0217"
+				    messages   	(list Messages
+					(object Message "getPagesForTask(Integer, Integer, Integer)"
+					    quid       	"394445DF000D"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    Operation  	"getPagesForTask(sessionID : Integer, projectID : Integer, workflowID : Integer)"
+					    quidu      	"38BE334300F2")
+					(object Message "return page list"
+					    quid       	"3944469702AF"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.3"
+					    ordinal    	4)
+					(object Message "getOnlineTranslationPackage(Integer, Integer, Integer, Integer)"
+					    quid       	"3944470C02CB"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	5
+					    Operation  	"getOnlineTranslationPackage(sessionID : Integer, projectID : Integer, jobID : Integer, pageID : Integer)"
+					    quidu      	"38BE342B01AA")
+					(object Message "return page package for localization"
+					    quid       	"3944472700B7"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"3.2"
+					    ordinal    	8))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$19"
+			    quid       	"394445DA0217"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397F5F4101E0"
+				    supplier   	"$UNNAMED$20"
+				    quidu      	"3944488E00B4"
+				    messages   	(list Messages
+					(object Message "getWorkflowById( )"
+					    quid       	"397F5F4101E1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"38FB6D8F0213")))
+				(object Link
+				    quid       	"397F5F850025"
+				    supplier   	"$UNNAMED$21"
+				    quidu      	"394448F1002A"
+				    messages   	(list Messages
+					(object Message "getL10nPageInfo( )"
+					    quid       	"397F5F850026"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2"
+					    ordinal    	3
+					    quidu      	"38CEE2B9038F")
+					(object Message "getOnlineTranslationPackage( )"
+					    quid       	"397F5FB00063"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1"
+					    ordinal    	6
+					    Operation  	"getOnlineTranslationPackage(p_pageId : long)"
+					    quidu      	"38FB6E1F036F"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$20"
+			    quid       	"3944488E00B4"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$21"
+			    quid       	"394448F1002A"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398B168B0020"
+				    supplier   	"$UNNAMED$22"
+				    quidu      	"398B166C0061"
+				    messages   	(list Messages
+					(object Message "getOnlineTranslationPackage(pageId : PageIdentifier, assetURL : )"
+					    quid       	"398B168B0021"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1.1"
+					    ordinal    	7
+					    quidu      	"38ADDE800088"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$22"
+			    quid       	"398B166C0061"
+			    class      	"Logical View::Linguistics::LingServer"
+			    quidu      	"388BA2370262"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "browser"
+			    quid       	"398B170F02AA"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398B1779036B"
+				    supplier   	"L10n Workstation"
+				    quidu      	"394445AF017F"
+				    messages   	(list Messages
+					(object Message "display list of page for specified task"
+					    quid       	"398B1779036C"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "display pages, segments and cursor at first segment"
+					    quid       	"398B17AC021A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"4"
+					    ordinal    	9))))
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@133
+		    quid       	"394445940022"
+		    title      	"Component API"
+		    documentation 	
+|EV Interface's realization of the use case "Open a Localization Task".
+		    
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	1469
+		    origin_y   	50
+		    items      	(list diagram_item_list
+			(object InterObjView "L10n Workstation" @134
+			    location   	(1312, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@134
+				location   	(1312, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	336
+				justify    	0
+				label      	"L10n Workstation")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394445AF017F"
+			    width      	354
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @135
+				location   	(1312, 432)
+				line_color 	3342489
+				InterObjView 	@134
+				height     	1454
+				y_coord    	1394
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @136
+				location   	(1312, 576)
+				line_color 	3342489
+				InterObjView 	@134
+				height     	1304
+				y_coord    	1244
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @137
+				location   	(1312, 864)
+				line_color 	3342489
+				InterObjView 	@134
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @138
+				location   	(1312, 1616)
+				line_color 	3342489
+				InterObjView 	@134
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$19" @139
+			    location   	(1712, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@139
+				location   	(1712, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394445DA0217"
+			    width      	340
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @140
+				location   	(1712, 576)
+				line_color 	3342489
+				InterObjView 	@139
+				height     	408
+				y_coord    	348
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @141
+				location   	(1712, 1344)
+				line_color 	3342489
+				InterObjView 	@139
+				height     	392
+				y_coord    	332
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$20" @142
+			    location   	(2272, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@142
+				location   	(2272, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3944488E00B4"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @143
+				location   	(2272, 656)
+				line_color 	3342489
+				InterObjView 	@142
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$21" @144
+			    location   	(2700, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@144
+				location   	(2700, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394448F1002A"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @145
+				location   	(2700, 780)
+				line_color 	3342489
+				InterObjView 	@144
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @146
+				location   	(2700, 1380)
+				line_color 	3342489
+				InterObjView 	@144
+				height     	216
+				y_coord    	156
+				Nested     	FALSE))
+			(object InterMessView "" @147
+			    location   	(1504, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @148
+				Parent_View 	@147
+				location   	(1504, 528)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394445DF000D"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	807
+				justify    	0
+				label      	"getPagesForTask(Integer, Integer, Integer)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@134
+			    supplier   	@139
+			    Focus_Src  	@136
+			    Focus_Entry 	@140
+			    origin     	(1327, 576)
+			    terminus   	(1696, 576)
+			    ordinal    	1)
+			(object InterMessView "" @149
+			    location   	(736, 864)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @150
+				Parent_View 	@149
+				location   	(1520, 816)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3944469702AF"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	316
+				justify    	0
+				label      	"return page list"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@139
+			    supplier   	@134
+			    Focus_Src  	@140
+			    Focus_Entry 	@137
+			    origin     	(1696, 864)
+			    terminus   	(1328, 864)
+			    ordinal    	4)
+			(object InterMessView "" @151
+			    location   	(736, 1344)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @152
+				Parent_View 	@151
+				location   	(1504, 1296)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3944470C02CB"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1163
+				justify    	0
+				label      	"getOnlineTranslationPackage(Integer, Integer, Integer, Integer)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@134
+			    supplier   	@139
+			    Focus_Src  	@136
+			    Focus_Entry 	@141
+			    origin     	(1327, 1344)
+			    terminus   	(1696, 1344)
+			    ordinal    	5)
+			(object InterMessView "" @153
+			    location   	(720, 1616)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @154
+				Parent_View 	@153
+				location   	(1520, 1568)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3944472700B7"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	709
+				justify    	0
+				label      	"return page package for localization"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@139
+			    supplier   	@134
+			    Focus_Src  	@141
+			    Focus_Entry 	@138
+			    origin     	(1696, 1616)
+			    terminus   	(1328, 1616)
+			    ordinal    	8)
+			(object InterMessView "" @155
+			    location   	(1984, 656)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @156
+				Parent_View 	@155
+				location   	(1984, 608)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5F4101E1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	398
+				justify    	0
+				label      	"getWorkflowById( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@139
+			    supplier   	@142
+			    Focus_Src  	@140
+			    Focus_Entry 	@143
+			    origin     	(1727, 656)
+			    terminus   	(2256, 656)
+			    ordinal    	2)
+			(object InterMessView "" @157
+			    location   	(1488, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @158
+				Parent_View 	@157
+				location   	(2205, 740)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5F850026"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	394
+				justify    	0
+				label      	"getL10nPageInfo( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@139
+			    supplier   	@144
+			    Focus_Src  	@140
+			    Focus_Entry 	@145
+			    origin     	(1727, 784)
+			    terminus   	(2684, 784)
+			    ordinal    	3)
+			(object InterMessView "" @159
+			    location   	(16, 1376)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @160
+				Parent_View 	@159
+				location   	(2205, 1332)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397F5FB00063"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	634
+				justify    	0
+				label      	"getOnlineTranslationPackage( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@139
+			    supplier   	@144
+			    Focus_Src  	@141
+			    Focus_Entry 	@146
+			    origin     	(1727, 1376)
+			    terminus   	(2684, 1376)
+			    ordinal    	6)
+			(object InterObjView "$UNNAMED$22" @161
+			    location   	(3136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@161
+				location   	(3136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398B166C0061"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @162
+				location   	(3135, 1470)
+				line_color 	3342489
+				InterObjView 	@161
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @163
+			    location   	(2192, 1472)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @164
+				Parent_View 	@163
+				location   	(2917, 1428)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398B168B0021"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	10
+				justify    	0
+				label      	"getOnlineTranslationPackage(pageId : PageIdentifier, assetURL : )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@144
+			    supplier   	@161
+			    Focus_Src  	@146
+			    Focus_Entry 	@162
+			    origin     	(2715, 1472)
+			    terminus   	(3120, 1472)
+			    ordinal    	7)
+			(object InterObjView "browser" @165
+			    location   	(848, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@165
+				location   	(848, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398B170F02AA"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @166
+				location   	(848, 400)
+				line_color 	3342489
+				InterObjView 	@165
+				height     	1546
+				y_coord    	1486
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @167
+				location   	(848, 1760)
+				line_color 	3342489
+				InterObjView 	@165
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object Label @168
+			    location   	(64, 192)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	24
+			    max_width  	475
+			    label      	
+|The brower sends an HTTP request to the web server.  The web server sends the request to the servlet engine, which invokes LWServlet.
+|
+|LWServlet gets a list of all the pages in the task specified by the HTTP request.  It gets a translation package for the first page.
+|
+|LWServlet generates HTML and JavaScript response to display the list of pages, the first page in source and target frames, and the first segment in the segment editor.
+			    )
+			(object InterMessView "" @169
+			    location   	(16, 432)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @170
+				Parent_View 	@169
+				location   	(1072, 384)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398B1779036C"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	703
+				justify    	0
+				label      	"display list of page for specified task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@165
+			    supplier   	@134
+			    Focus_Src  	@166
+			    Focus_Entry 	@135
+			    origin     	(863, 432)
+			    terminus   	(1296, 432)
+			    ordinal    	0)
+			(object InterMessView "" @171
+			    location   	(1088, 1760)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @172
+				Parent_View 	@171
+				location   	(1088, 1712)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398B17AC021A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1019
+				justify    	0
+				label      	"display pages, segments and cursor at first segment"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@134
+			    supplier   	@165
+			    Focus_Src  	@136
+			    Focus_Entry 	@167
+			    origin     	(1296, 1760)
+			    terminus   	(864, 1760)
+			    ordinal    	9)))))
+	(object UseCase "Open a Previous Localization Task"
+	    quid       	"394027560268"
+	    documentation 	
+|3.51.1	Actor
+|Localization Participant.
+|3.51.2	Priority
+|3.51.3	Description
+|The Localization Participant uses a bookmark to open a previous localization task at the position where it was left off.
+|3.51.4	Normal Course Of Events
+|The Localization Participant logs into the Localization Workstation and requests to see a list of her bookmarks.  The system displays a list of bookmarks that the Localization Participant created in previous sessions.  The Localization Participant selects one of the bookmarks and requests to open go to that bookmark.  The system retrieves the task and the page within the task as specified by the bookmark.  The system navigates to the segment within the page as specified by the bookmark.  The Localization Participant can then resume the work that she left off in a previous session.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @173
+		    logical_models 	(list unit_reference_list
+			(object Object "L10n Workstation"
+			    quid       	"398EC520025D"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC520025E"
+				    supplier   	"$UNNAMED$23"
+				    quidu      	"398EC5200263"
+				    messages   	(list Messages
+					(object Message "getPagesForTask(Integer, Integer, Integer)"
+					    quid       	"398EC520025F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    Operation  	"getPagesForTask(sessionID : Integer, projectID : Integer, workflowID : Integer)"
+					    quidu      	"38BE334300F2")
+					(object Message "return page list"
+					    quid       	"398EC5200260"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.3"
+					    ordinal    	4)
+					(object Message "getOnlineTranslationPackage(Integer, Integer, Integer, Integer)"
+					    quid       	"398EC5200261"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	6
+					    Operation  	"getOnlineTranslationPackage(sessionID : Integer, projectID : Integer, jobID : Integer, pageID : Integer)"
+					    quidu      	"38BE342B01AA")
+					(object Message "return page package for localization"
+					    quid       	"398EC5200262"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"4.2"
+					    ordinal    	9)))
+				(object Link
+				    quid       	"398EC55102A3"
+				    supplier   	"$UNNAMED$24"
+				    quidu      	"398EC520026E"
+				    messages   	(list Messages
+					(object Message "getBookmark( )"
+					    quid       	"398EC55102A4"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	5
+					    quidu      	"398EC56801A2"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$23"
+			    quid       	"398EC5200263"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC5200267"
+				    supplier   	"$UNNAMED$25"
+				    quidu      	"398EC5200274"
+				    messages   	(list Messages
+					(object Message "getWorkflowById( )"
+					    quid       	"398EC5200268"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"38FB6D8F0213")))
+				(object Link
+				    quid       	"398EC5200269"
+				    supplier   	"$UNNAMED$24"
+				    quidu      	"398EC520026E"
+				    messages   	(list Messages
+					(object Message "getL10nPageInfo( )"
+					    quid       	"398EC520026A"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.2"
+					    ordinal    	3
+					    quidu      	"38CEE2B9038F")
+					(object Message "getOnlineTranslationPackage( )"
+					    quid       	"398EC520026B"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4.1"
+					    ordinal    	7
+					    Operation  	"getOnlineTranslationPackage(p_pageId : long)"
+					    quidu      	"38FB6E1F036F"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$25"
+			    quid       	"398EC5200274"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$24"
+			    quid       	"398EC520026E"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC520026D"
+				    supplier   	"$UNNAMED$26"
+				    quidu      	"398EC520026F"
+				    messages   	(list Messages
+					(object Message "getOnlineTranslationPackage(pageId : PageIdentifier, assetURL : )"
+					    quid       	"398EC520026C"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4.1.1"
+					    ordinal    	8
+					    quidu      	"38ADDE800088"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$26"
+			    quid       	"398EC520026F"
+			    class      	"Logical View::Linguistics::LingServer"
+			    quidu      	"388BA2370262"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "browser"
+			    quid       	"398EC5200272"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC5200271"
+				    supplier   	"L10n Workstation"
+				    quidu      	"398EC520025D"
+				    messages   	(list Messages
+					(object Message "display list of page for specified task"
+					    quid       	"398EC5200273"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "display pages, segments and cursor at first segment"
+					    quid       	"398EC5200270"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"5"
+					    ordinal    	10))))
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@173
+		    quid       	"398EC5160190"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "L10n Workstation" @174
+			    location   	(1312, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@174
+				location   	(1312, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	336
+				justify    	0
+				label      	"L10n Workstation")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC520025D"
+			    width      	354
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @175
+				location   	(1305, 435)
+				line_color 	3342489
+				InterObjView 	@174
+				height     	1454
+				y_coord    	1394
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @176
+				location   	(1312, 576)
+				line_color 	3342489
+				InterObjView 	@174
+				height     	1304
+				y_coord    	1244
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @177
+				location   	(1305, 870)
+				line_color 	3342489
+				InterObjView 	@174
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @178
+				location   	(1305, 1620)
+				line_color 	3342489
+				InterObjView 	@174
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$23" @179
+			    location   	(1712, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@179
+				location   	(1712, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC5200263"
+			    width      	340
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @180
+				location   	(1710, 570)
+				line_color 	3342489
+				InterObjView 	@179
+				height     	408
+				y_coord    	348
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @181
+				location   	(1710, 1350)
+				line_color 	3342489
+				InterObjView 	@179
+				height     	392
+				y_coord    	332
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$25" @182
+			    location   	(2272, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@182
+				location   	(2272, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC5200274"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @183
+				location   	(2265, 660)
+				line_color 	3342489
+				InterObjView 	@182
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$24" @184
+			    location   	(2700, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@184
+				location   	(2700, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC520026E"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @185
+				location   	(2700, 780)
+				line_color 	3342489
+				InterObjView 	@184
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @186
+				location   	(2700, 1095)
+				line_color 	3342489
+				InterObjView 	@184
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @187
+				location   	(2700, 1380)
+				line_color 	3342489
+				InterObjView 	@184
+				height     	216
+				y_coord    	156
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$26" @188
+			    location   	(3136, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@188
+				location   	(3136, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC520026F"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @189
+				location   	(3135, 1470)
+				line_color 	3342489
+				InterObjView 	@188
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "browser" @190
+			    location   	(848, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@190
+				location   	(848, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC5200272"
+			    width      	300
+			    height     	1811
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @191
+				location   	(848, 400)
+				line_color 	3342489
+				InterObjView 	@190
+				height     	1546
+				y_coord    	1486
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @192
+				location   	(855, 1755)
+				line_color 	3342489
+				InterObjView 	@190
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterMessView "" @193
+			    location   	(1504, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @194
+				Parent_View 	@193
+				location   	(1511, 532)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC520025F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	807
+				justify    	0
+				label      	"getPagesForTask(Integer, Integer, Integer)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@174
+			    supplier   	@179
+			    Focus_Src  	@176
+			    Focus_Entry 	@180
+			    origin     	(1327, 576)
+			    terminus   	(1696, 576)
+			    ordinal    	1)
+			(object InterMessView "" @195
+			    location   	(736, 864)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @196
+				Parent_View 	@195
+				location   	(1512, 820)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200260"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	316
+				justify    	0
+				label      	"return page list"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@179
+			    supplier   	@174
+			    Focus_Src  	@180
+			    Focus_Entry 	@177
+			    origin     	(1696, 864)
+			    terminus   	(1328, 864)
+			    ordinal    	4)
+			(object InterMessView "" @197
+			    location   	(736, 1344)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @198
+				Parent_View 	@197
+				location   	(1511, 1300)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200261"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1163
+				justify    	0
+				label      	"getOnlineTranslationPackage(Integer, Integer, Integer, Integer)"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@174
+			    supplier   	@179
+			    Focus_Src  	@176
+			    Focus_Entry 	@181
+			    origin     	(1327, 1344)
+			    terminus   	(1696, 1344)
+			    ordinal    	6)
+			(object InterMessView "" @199
+			    location   	(720, 1616)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @200
+				Parent_View 	@199
+				location   	(1512, 1572)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200262"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	709
+				justify    	0
+				label      	"return page package for localization"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@179
+			    supplier   	@174
+			    Focus_Src  	@181
+			    Focus_Entry 	@178
+			    origin     	(1696, 1616)
+			    terminus   	(1328, 1616)
+			    ordinal    	9)
+			(object InterMessView "" @201
+			    location   	(1984, 656)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @202
+				Parent_View 	@201
+				location   	(1991, 612)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200268"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	398
+				justify    	0
+				label      	"getWorkflowById( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@179
+			    supplier   	@182
+			    Focus_Src  	@180
+			    Focus_Entry 	@183
+			    origin     	(1727, 656)
+			    terminus   	(2256, 656)
+			    ordinal    	2)
+			(object InterMessView "" @203
+			    location   	(1488, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @204
+				Parent_View 	@203
+				location   	(2205, 740)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC520026A"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	394
+				justify    	0
+				label      	"getL10nPageInfo( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@179
+			    supplier   	@184
+			    Focus_Src  	@180
+			    Focus_Entry 	@185
+			    origin     	(1727, 784)
+			    terminus   	(2684, 784)
+			    ordinal    	3)
+			(object InterMessView "" @205
+			    location   	(16, 1376)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @206
+				Parent_View 	@205
+				location   	(2205, 1332)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC520026B"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	634
+				justify    	0
+				label      	"getOnlineTranslationPackage( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@179
+			    supplier   	@184
+			    Focus_Src  	@181
+			    Focus_Entry 	@187
+			    origin     	(1727, 1376)
+			    terminus   	(2684, 1376)
+			    ordinal    	7)
+			(object InterMessView "" @207
+			    location   	(2192, 1472)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @208
+				Parent_View 	@207
+				location   	(2917, 1428)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC520026C"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1153
+				justify    	0
+				label      	"getOnlineTranslationPackage(pageId : PageIdentifier, assetURL : )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@184
+			    supplier   	@188
+			    Focus_Src  	@187
+			    Focus_Entry 	@189
+			    origin     	(2715, 1472)
+			    terminus   	(3120, 1472)
+			    ordinal    	8)
+			(object InterMessView "" @209
+			    location   	(16, 432)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @210
+				Parent_View 	@209
+				location   	(1079, 388)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200273"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	703
+				justify    	0
+				label      	"display list of page for specified task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@190
+			    supplier   	@174
+			    Focus_Src  	@191
+			    Focus_Entry 	@175
+			    origin     	(863, 432)
+			    terminus   	(1296, 432)
+			    ordinal    	0)
+			(object InterMessView "" @211
+			    location   	(1088, 1760)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @212
+				Parent_View 	@211
+				location   	(1080, 1716)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC5200270"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1019
+				justify    	0
+				label      	"display pages, segments and cursor at first segment"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@174
+			    supplier   	@190
+			    Focus_Src  	@176
+			    Focus_Entry 	@192
+			    origin     	(1296, 1760)
+			    terminus   	(864, 1760)
+			    ordinal    	10)
+			(object InterMessView "" @213
+			    location   	(16, 1088)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @214
+				Parent_View 	@213
+				location   	(2005, 1044)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC55102A4"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	335
+				justify    	0
+				label      	"getBookmark( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@174
+			    supplier   	@184
+			    Focus_Src  	@176
+			    Focus_Entry 	@186
+			    origin     	(1327, 1088)
+			    terminus   	(2684, 1088)
+			    ordinal    	5)
+			(object NoteView @215
+			    location   	(288, 624)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@215
+				location   	(66, 430)
+				fill_color 	13434879
+				nlines     	7
+				max_width  	409
+				label      	"The brower sends an HTTP request to the web server.  The web server sends the request to the servlet engine, which invokes LWServlet.")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	469
+			    height     	400)
+			(object AttachView "" @216
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@215
+			    supplier   	@209
+			    line_style 	0)
+			(object NoteView @217
+			    location   	(368, 1216)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@217
+				location   	(102, 981)
+				fill_color 	13434879
+				nlines     	9
+				max_width  	496
+				label      	"LWServlet gets a list of all the pages in the task specified by the HTTP request.  It retrieves the bookmark in the task, and gets the translation package for page specified by the bookmark.")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	556
+			    height     	482)
+			(object NoteView @218
+			    location   	(336, 2016)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@218
+				location   	(73, 1810)
+				fill_color 	13434879
+				nlines     	8
+				max_width  	490
+				label      	"LWServlet generates HTML and JavaScript response to display the list of pages, the bookmarked page in source and target frames, and the bookmarked segment in the segment editor.")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	550
+			    height     	425)
+			(object AttachView "" @219
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@218
+			    supplier   	@211
+			    line_style 	0)
+			(object AttachView "" @220
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@217
+			    supplier   	@213
+			    line_style 	0)))))
+	(object UseCase "Set a Bookmark for the Current Localization Task"
+	    quid       	"394027B001B3"
+	    documentation 	
+|3.52.1	Actor
+|Localization Participant.
+|3.52.2	Priority
+|3.52.3	Precondition
+|The Localization Participant is working on a task.
+|3.52.4	Description
+|The Localization Participant sets a bookmark for the localization task at the current location so that she can open the task at the same position again in later sessions.
+|3.52.5	Normal Course Of Events
+|The Localization Participant requests the system to set a bookmark at the current location of the task that she is working on.  The system sets a bookmark in the task that indicates the current task, page and segment that the Localization Participant is at.
+|3.52.6	Alternative Courses
+|1)	The system finds that a bookmark has already been set previously.  The system asks the Localization Participant whether she wants to overwrite the existing bookmark.  The Localization Participant confirms.  The system creates a new bookmark for the current location to replace the existing bookmark.
+|2)	The system finds that a bookmark has already been set previously.  The system asks the Localization Participant whether she wants to overwrite the existing bookmark.  The Localization Participant says no.  The system leaves the existing bookmark unchanged.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @221
+		    logical_models 	(list unit_reference_list
+			(object Object "Localization Workstation"
+			    quid       	"398EC76001BB"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC76001BC"
+				    supplier   	"$UNNAMED$27"
+				    quidu      	"398EC76001C0"
+				    messages   	(list Messages
+					(object Message "set bookmark"
+					    quid       	"398EC76001BD"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$27"
+			    quid       	"398EC76001C0"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC76001BF"
+				    supplier   	"$UNNAMED$28"
+				    quidu      	"398EC76001C3"
+				    messages   	(list Messages
+					(object Message "setBookmark(Integer, Integer, Integer, )"
+					    quid       	"398EC76001BE"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.1"
+					    ordinal    	1
+					    Operation  	"setBookmark(p_sessionId : Integer, p_projectId : Integer, p_workflowId : Integer, p_bookmark : )"
+					    quidu      	"398EC76F0271"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$28"
+			    quid       	"398EC76001C3"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC76001C2"
+				    supplier   	"$UNNAMED$29"
+				    quidu      	"398EC76001C6"
+				    messages   	(list Messages
+					(object Message "setBookmark()"
+					    quid       	"398EC76001C1"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.1.1"
+					    ordinal    	2
+					    Operation  	"setBookmark(p_bookmark : )"
+					    quidu      	"398EC7F1012D"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$29"
+			    quid       	"398EC76001C6"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@221
+		    quid       	"398EC7590201"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "Localization Workstation" @222
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@222
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"Localization Workstation")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC76001BB"
+			    width      	300
+			    height     	793
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @223
+				location   	(448, 432)
+				line_color 	3342489
+				InterObjView 	@222
+				height     	496
+				y_coord    	436
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$27" @224
+			    location   	(784, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@224
+				location   	(784, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC76001C0"
+			    width      	300
+			    height     	793
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @225
+				location   	(784, 432)
+				line_color 	3342489
+				InterObjView 	@224
+				height     	436
+				y_coord    	376
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$28" @226
+			    location   	(1120, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@226
+				location   	(1120, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC76001C3"
+			    width      	340
+			    height     	793
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @227
+				location   	(1120, 560)
+				line_color 	3342489
+				InterObjView 	@226
+				height     	248
+				y_coord    	188
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$29" @228
+			    location   	(1500, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@228
+				location   	(1500, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC76001C6"
+			    width      	300
+			    height     	793
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @229
+				location   	(1500, 690)
+				line_color 	3342489
+				InterObjView 	@228
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @230
+			    location   	(16, 432)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @231
+				Parent_View 	@230
+				location   	(615, 388)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC76001BD"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	294
+				justify    	0
+				label      	"set bookmark"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@222
+			    supplier   	@224
+			    Focus_Src  	@223
+			    Focus_Entry 	@225
+			    origin     	(463, 432)
+			    terminus   	(768, 432)
+			    ordinal    	0)
+			(object InterMessView "" @232
+			    location   	(992, 560)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @233
+				Parent_View 	@232
+				location   	(944, 512)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC76001BE"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	763
+				justify    	0
+				label      	"setBookmark(Integer, Integer, Integer, )"
+				pctDist    	0.495082
+				height     	43
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@224
+			    supplier   	@226
+			    Focus_Src  	@225
+			    Focus_Entry 	@227
+			    origin     	(799, 560)
+			    terminus   	(1104, 560)
+			    ordinal    	1)
+			(object InterMessView "" @234
+			    location   	(1312, 688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @235
+				Parent_View 	@234
+				location   	(1309, 644)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC76001C1"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	323
+				justify    	0
+				label      	"setBookmark()"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@226
+			    supplier   	@228
+			    Focus_Src  	@227
+			    Focus_Entry 	@229
+			    origin     	(1135, 688)
+			    terminus   	(1484, 688)
+			    ordinal    	2)))))
+	(object UseCase "Close a Localization Task"
+	    quid       	"394027F101A2"
+	    documentation 	
+|3.53.1	Actor
+|Localization Participant.
+|3.53.2	Priority
+|3.53.3	Precondition
+|The Localization Participant is working on a task.
+|3.53.4	Description
+|The Localization Participant closes the current localization task without finishing it so that she can work on it in a later session.
+|3.53.5	Normal Course Of Events
+|While working on a localization task, the Localization Participant requests to close the task so that she can stop working on it and return to it later.  If the current text segment that the Localization Participant has been edited, the system saves the text segment (see "Use Case 90 - Save a Segment").  The system saves all current state data about the task and closes the task while keeping it assigned to the Localization Participant.  The system displays the main screen; the Localization Participant is still logged into the system and can work on other tasks.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @236
+		    logical_models 	(list unit_reference_list
+			(object Object "Localization Workstation"
+			    quid       	"3949683102FB"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3949684C0318"
+				    supplier   	"$UNNAMED$30"
+				    quidu      	"3949683C0239"
+				    messages   	(list Messages
+					(object Message "save current segment"
+					    quid       	"3949684C0319"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "save task context"
+					    quid       	"39496C3C02D2"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)
+					(object Message "close current task"
+					    quid       	"3949733E014B"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	4))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$30"
+			    quid       	"3949683C0239"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"39496C760253"
+				    supplier   	"$UNNAMED$31"
+				    quidu      	"39496C5F01AF"
+				    messages   	(list Messages
+					(object Message "setBookmark(Integer, Integer, Integer, )"
+					    quid       	"39496C760254"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    Operation  	"setBookmark(p_sessionId : Integer, p_projectId : Integer, p_workflowId : Integer, p_bookmark : )"
+					    quidu      	"398EC76F0271"))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$31"
+			    quid       	"39496C5F01AF"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"398EC97400B1"
+				    supplier   	"$UNNAMED$32"
+				    quidu      	"398EC96E027F"
+				    messages   	(list Messages
+					(object Message "setBookmark()"
+					    quid       	"398EC97400B2"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1.1"
+					    ordinal    	3
+					    Operation  	"setBookmark(p_bookmark : )"
+					    quidu      	"398EC7F1012D"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$32"
+			    quid       	"398EC96E027F"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@236
+		    quid       	"3949682001DE"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	250
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "Localization Workstation" @237
+			    location   	(608, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@237
+				location   	(608, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"Localization Workstation")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949683102FB"
+			    width      	300
+			    height     	1185
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @238
+				location   	(608, 432)
+				line_color 	3342489
+				InterObjView 	@237
+				height     	888
+				y_coord    	828
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$30" @239
+			    location   	(944, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@239
+				location   	(944, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3949683C0239"
+			    width      	300
+			    height     	1185
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @240
+				location   	(944, 432)
+				line_color 	3342489
+				InterObjView 	@239
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @241
+				location   	(944, 576)
+				line_color 	3342489
+				InterObjView 	@239
+				height     	372
+				y_coord    	312
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @242
+				location   	(944, 1200)
+				line_color 	3342489
+				InterObjView 	@239
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$31" @243
+			    location   	(1360, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@243
+				location   	(1360, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39496C5F01AF"
+			    width      	340
+			    height     	1185
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @244
+				location   	(1360, 688)
+				line_color 	3342489
+				InterObjView 	@243
+				height     	200
+				y_coord    	140
+				Nested     	FALSE))
+			(object InterMessView "" @245
+			    location   	(16, 432)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @246
+				Parent_View 	@245
+				location   	(775, 388)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949684C0319"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	439
+				justify    	0
+				label      	"save current segment"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@237
+			    supplier   	@239
+			    Focus_Src  	@238
+			    Focus_Entry 	@240
+			    origin     	(623, 432)
+			    terminus   	(928, 432)
+			    ordinal    	0)
+			(object NoteView @247
+			    location   	(240, 448)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@247
+				location   	(99, 367)
+				fill_color 	13434879
+				nlines     	3
+				max_width  	246
+				label      	
+|see use case "Save a Segment"
+				)
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	306
+			    height     	175)
+			(object AttachView "" @248
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@247
+			    supplier   	@246
+			    line_style 	0)
+			(object InterMessView "" @249
+			    location   	(608, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @250
+				Parent_View 	@249
+				location   	(775, 532)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39496C3C02D2"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	366
+				justify    	0
+				label      	"save task context"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@237
+			    supplier   	@239
+			    Focus_Src  	@238
+			    Focus_Entry 	@241
+			    origin     	(623, 576)
+			    terminus   	(928, 576)
+			    ordinal    	1)
+			(object InterMessView "" @251
+			    location   	(1152, 688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @252
+				Parent_View 	@251
+				location   	(1152, 640)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39496C760254"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	763
+				justify    	0
+				label      	"setBookmark(Integer, Integer, Integer, )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@239
+			    supplier   	@243
+			    Focus_Src  	@241
+			    Focus_Entry 	@244
+			    origin     	(959, 688)
+			    terminus   	(1344, 688)
+			    ordinal    	2)
+			(object InterMessView "" @253
+			    location   	(16, 1200)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @254
+				Parent_View 	@253
+				location   	(768, 1152)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3949733E014B"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	372
+				justify    	0
+				label      	"close current task"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@237
+			    supplier   	@239
+			    Focus_Src  	@238
+			    Focus_Entry 	@242
+			    origin     	(623, 1200)
+			    terminus   	(928, 1200)
+			    ordinal    	4)
+			(object InterObjView "$UNNAMED$32" @255
+			    location   	(1815, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@255
+				location   	(1815, 225)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"398EC96E027F"
+			    width      	300
+			    height     	1185
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @256
+				location   	(1815, 765)
+				line_color 	3342489
+				InterObjView 	@255
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @257
+			    location   	(1584, 768)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @258
+				Parent_View 	@257
+				location   	(1587, 724)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398EC97400B2"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	323
+				justify    	0
+				label      	"setBookmark()"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@243
+			    supplier   	@255
+			    Focus_Src  	@244
+			    Focus_Entry 	@256
+			    origin     	(1375, 768)
+			    terminus   	(1799, 768)
+			    ordinal    	3)))))
+	(object Association "$UNNAMED$33"
+	    quid       	"394023A103C2"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$34"
+		    quid       	"394023A202A1"
+		    supplier   	"Use Case View::Localization Task Management::View a List of Localization Tasks"
+		    quidu      	"394022510346"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$35"
+		    quid       	"394023A202AB"
+		    supplier   	"Use Case View::Localization Task Management::Accept a Localization Task"
+		    quidu      	"3940229602B9")))
+	(object Association "$UNNAMED$36"
+	    quid       	"394023D7001C"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$37"
+		    quid       	"394023D702C5"
+		    supplier   	"Use Case View::Localization Task Management::Reject a Localization Task"
+		    quidu      	"394023BD0097"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$38"
+		    quid       	"394023D702C6"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA")))
+	(object Association "$UNNAMED$39"
+	    quid       	"394023D902E6"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$40"
+		    quid       	"394023DA01ED"
+		    supplier   	"Use Case View::Localization Task Management::View a List of Localization Tasks"
+		    quidu      	"394022510346"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$41"
+		    quid       	"394023DA01F7"
+		    supplier   	"Use Case View::Localization Task Management::Reject a Localization Task"
+		    quidu      	"394023BD0097")))
+	(object Association "$UNNAMED$42"
+	    quid       	"394026680157"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$43"
+		    quid       	"394026690040"
+		    supplier   	"Use Case View::Localization Task Management::Complete a Task"
+		    quidu      	"39402636023C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$44"
+		    quid       	"394026690041"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA")))
+	(object Association "$UNNAMED$45"
+	    quid       	"3940268F003B"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$46"
+		    quid       	"3940268F0226"
+		    supplier   	"Use Case View::Job Processing::Automatically Export Workflow Pages"
+		    quidu      	"38BA4854002B"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$47"
+		    quid       	"3940268F0230"
+		    supplier   	"Use Case View::Localization Task Management::Complete a Task"
+		    quidu      	"39402636023C")))
+	(object Association "$UNNAMED$48"
+	    quid       	"3940270000DE"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$49"
+		    quid       	"39402701002B"
+		    supplier   	"Use Case View::Localization Task Management::Open a Localization Task"
+		    quidu      	"394026DC038F"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$50"
+		    quid       	"394027010035"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA")))
+	(object Association "$UNNAMED$51"
+	    quid       	"39402721024E"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$52"
+		    quid       	"39402722014B"
+		    supplier   	"Use Case View::Localization Task Management::View a List of Localization Tasks"
+		    quidu      	"394022510346"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$53"
+		    quid       	"394027220155"
+		    supplier   	"Use Case View::Localization Task Management::Open a Localization Task"
+		    quidu      	"394026DC038F")))
+	(object Association "$UNNAMED$54"
+	    quid       	"394027910277"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$55"
+		    quid       	"3940279201B0"
+		    supplier   	"Use Case View::Localization Task Management::Open a Previous Localization Task"
+		    quidu      	"394027560268"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$56"
+		    quid       	"3940279201BA"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA")))
+	(object Association "$UNNAMED$57"
+	    quid       	"394027C80226"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$58"
+		    quid       	"394027C90097"
+		    supplier   	"Use Case View::Localization Task Management::Set a Bookmark for the Current Localization Task"
+		    quidu      	"394027B001B3"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$59"
+		    quid       	"394027C900A1"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA")))
+	(object Association "$UNNAMED$60"
+	    quid       	"3940280602BB"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$61"
+		    quid       	"39402807019A"
+		    supplier   	"Use Case View::Localization Task Management::Close a Localization Task"
+		    quidu      	"394027F101A2"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$62"
+		    quid       	"3940280701A4"
+		    supplier   	"Use Case View::Localization Participant"
+		    quidu      	"38BA482603AA"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Localization Task Management"
+	    quid       	"39402387000D"
+	    title      	"Localization Task Management"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	44
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::Job Processing::Automatically Export Workflow Pages" @259
+		    location   	(1920, 2576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@259
+			location   	(1920, 2714)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Automatically Export Workflow Pages")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BA4854002B")
+		(object UseCaseView "Use Case View::Localization Task Management::View a List of Localization Tasks" @260
+		    location   	(1888, 800)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@260
+			location   	(1888, 938)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"View a List of Localization Tasks")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394022510346")
+		(object UseCaseView "Use Case View::Localization Task Management::Accept a Localization Task" @261
+		    location   	(1232, 160)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@261
+			location   	(1232, 298)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Accept a Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3940229602B9")
+		(object AssociationViewNew "$UNNAMED$33" @262
+		    location   	(1614, 532)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @263
+			Parent_View 	@262
+			location   	(1614, 413)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	0.500000
+			height     	120
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"394023A103C2"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$34" @264
+			    Parent_View 	@262
+			    location   	(382, 276)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023A202A1"
+			    client     	@262
+			    supplier   	@260
+			    line_style 	0)
+			(object RoleView "$UNNAMED$35" @265
+			    Parent_View 	@262
+			    location   	(382, 276)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023A202AB"
+			    client     	@262
+			    supplier   	@261
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Localization Task Management::Reject a Localization Task" @266
+		    location   	(1232, 576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@266
+			location   	(1232, 714)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Reject a Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394023BD0097"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$39" @267
+		    location   	(1626, 708)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @268
+			Parent_View 	@267
+			location   	(1626, 589)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	0.500000
+			height     	120
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"394023D902E6"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$40" @269
+			    Parent_View 	@267
+			    location   	(394, 132)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023DA01ED"
+			    client     	@267
+			    supplier   	@260
+			    line_style 	0)
+			(object RoleView "$UNNAMED$41" @270
+			    Parent_View 	@267
+			    location   	(394, 132)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023DA01F7"
+			    client     	@267
+			    supplier   	@266
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Localization Task Management::Complete a Task" @271
+		    location   	(1216, 2208)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@271
+			location   	(1216, 2346)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Complete a Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39402636023C"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$45" @272
+		    location   	(1663, 2440)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @273
+			Parent_View 	@272
+			location   	(1663, 2321)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	0.500000
+			height     	120
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"3940268F003B"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$46" @274
+			    Parent_View 	@272
+			    location   	(495, 1256)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3940268F0226"
+			    client     	@272
+			    supplier   	@259
+			    line_style 	0)
+			(object RoleView "$UNNAMED$47" @275
+			    Parent_View 	@272
+			    location   	(495, 1256)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3940268F0230"
+			    client     	@272
+			    supplier   	@271
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Localization Task Management::Open a Localization Task" @276
+		    location   	(1296, 1088)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@276
+			location   	(1296, 1226)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Open a Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394026DC038F"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$51" @277
+		    location   	(1494, 988)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @278
+			Parent_View 	@277
+			location   	(1494, 869)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	0.500000
+			height     	120
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"39402721024E"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$52" @279
+			    Parent_View 	@277
+			    location   	(198, -100)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402722014B"
+			    client     	@277
+			    supplier   	@260
+			    line_style 	0)
+			(object RoleView "$UNNAMED$53" @280
+			    Parent_View 	@277
+			    location   	(198, -100)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394027220155"
+			    client     	@277
+			    supplier   	@276
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Localization Task Management::Open a Previous Localization Task" @281
+		    location   	(1632, 1440)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@281
+			location   	(1632, 1578)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Open a Previous Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394027560268"
+		    height     	118)
+		(object UseCaseView "Use Case View::Localization Task Management::Set a Bookmark for the Current Localization Task" @282
+		    location   	(464, 2480)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@282
+			location   	(464, 2618)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Set a Bookmark for the Current Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394027B001B3"
+		    height     	118)
+		(object UseCaseView "Use Case View::Localization Task Management::Close a Localization Task" @283
+		    location   	(1456, 1840)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@283
+			location   	(1456, 1978)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Close a Localization Task")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"394027F101A2"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Localization Participant" @284
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(315, 795)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@284
+			location   	(315, 955)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	331
+			justify    	0
+			label      	"Localization Participant")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"38BA482603AA"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "" @285
+		    location   	(1074, 795)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394022630324"
+		    roleview_list 	(list RoleViews
+			(object RoleView "" @286
+			    Parent_View 	@285
+			    location   	(-238, -629)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @287
+				Parent_View 	@286
+				location   	(513, 754)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402264015A"
+			    client     	@285
+			    supplier   	@284
+			    line_style 	0)
+			(object RoleView "" @288
+			    Parent_View 	@285
+			    location   	(-238, -629)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @289
+				Parent_View 	@288
+				location   	(1635, 838)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394022640159"
+			    client     	@285
+			    supplier   	@260
+			    line_style 	0)))
+		(object AssociationViewNew "" @290
+		    location   	(685, 536)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394022A303E5"
+		    roleview_list 	(list RoleViews
+			(object RoleView "" @291
+			    Parent_View 	@290
+			    location   	(-547, -152)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @292
+				Parent_View 	@291
+				location   	(411, 674)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394022A4029D"
+			    client     	@290
+			    supplier   	@284
+			    line_style 	0)
+			(object RoleView "" @293
+			    Parent_View 	@290
+			    location   	(-547, -152)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @294
+				Parent_View 	@293
+				location   	(913, 330)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394022A4029C"
+			    client     	@290
+			    supplier   	@261
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$36" @295
+		    location   	(641, 713)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394023D7001C"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$37" @296
+			    Parent_View 	@295
+			    location   	(321, -87)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023D702C5"
+			    client     	@295
+			    supplier   	@266
+			    line_style 	0)
+			(object RoleView "$UNNAMED$38" @297
+			    Parent_View 	@295
+			    location   	(321, -87)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394023D702C6"
+			    client     	@295
+			    supplier   	@284
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$42" @298
+		    location   	(811, 1574)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394026680157"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$43" @299
+			    Parent_View 	@298
+			    location   	(491, 774)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394026690040"
+			    client     	@298
+			    supplier   	@271
+			    line_style 	0)
+			(object RoleView "$UNNAMED$44" @300
+			    Parent_View 	@298
+			    location   	(491, 774)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394026690041"
+			    client     	@298
+			    supplier   	@284
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$48" @301
+		    location   	(778, 931)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3940270000DE"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$49" @302
+			    Parent_View 	@301
+			    location   	(458, 131)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402701002B"
+			    client     	@301
+			    supplier   	@276
+			    line_style 	0)
+			(object RoleView "$UNNAMED$50" @303
+			    Parent_View 	@301
+			    location   	(458, 131)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394027010035"
+			    client     	@301
+			    supplier   	@284
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$54" @304
+		    location   	(946, 1102)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394027910277"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$55" @305
+			    Parent_View 	@304
+			    location   	(626, 302)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3940279201B0"
+			    client     	@304
+			    supplier   	@281
+			    line_style 	0)
+			(object RoleView "$UNNAMED$56" @306
+			    Parent_View 	@304
+			    location   	(626, 302)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3940279201BA"
+			    client     	@304
+			    supplier   	@284
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$57" @307
+		    location   	(393, 1711)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394027C80226"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$58" @308
+			    Parent_View 	@307
+			    location   	(73, 911)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394027C90097"
+			    client     	@307
+			    supplier   	@282
+			    line_style 	0)
+			(object RoleView "$UNNAMED$59" @309
+			    Parent_View 	@307
+			    location   	(73, 911)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394027C900A1"
+			    client     	@307
+			    supplier   	@284
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$60" @310
+		    location   	(937, 1366)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3940280602BB"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$61" @311
+			    Parent_View 	@310
+			    location   	(617, 566)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402807019A"
+			    client     	@310
+			    supplier   	@283
+			    line_style 	0)
+			(object RoleView "$UNNAMED$62" @312
+			    Parent_View 	@310
+			    location   	(617, 566)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3940280701A4"
+			    client     	@310
+			    supplier   	@284
+			    line_style 	0)))))))

@@ -1,0 +1,593 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Project Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"39A441FB00E6"
+    documentation 	"This is the Project Management sub-domain of the Job Handler component."
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "ProjectPersistence"
+	    quid       	"39B047FD02E0"
+	    operations 	(list Operations
+		(object Operation "addL10nProfile"
+		    quid       	"39B0482203DD"
+		    documentation 	"Add the provided localization profile to the system."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "PersistentL10nProfile"
+	    quid       	"39B0486B0017"
+	    operations 	(list Operations
+		(object Operation "persist"
+		    quid       	"39B049780399"
+		    documentation 	"Save the current instance to database by either creating a new record or updating the existing one."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "client"
+		    quid       	"39B047CE0364"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39B047E1023F"
+			    supplier   	"$UNNAMED$0"
+			    quidu      	"39B047DD0352"
+			    messages   	(list Messages
+				(object Message "addL10nProfile( )"
+				    quid       	"39B047E10240"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    quidu      	"39B04675006F"))))
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$0"
+		    quid       	"39B047DD0352"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39B0481C009F"
+			    supplier   	"$UNNAMED$1"
+			    quidu      	"39B048170192"
+			    messages   	(list Messages
+				(object Message "addL10nProfile( )"
+				    quid       	"39B0481C00A0"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1"
+				    ordinal    	1
+				    quidu      	"39B0482203DD"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+		    quidu      	"3947437C00FA"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$1"
+		    quid       	"39B048170192"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39B048A703A2"
+			    supplier   	"$UNNAMED$2"
+			    quidu      	"39B0489D0023"
+			    messages   	(list Messages
+				(object Message "create"
+				    quid       	"39B048A703A3"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.1"
+				    ordinal    	2)
+				(object Message "persist( )"
+				    quid       	"39B049720246"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.2"
+				    ordinal    	3
+				    quidu      	"39B049780399"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::Project Management::ProjectPersistence"
+		    quidu      	"39B047FD02E0"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$2"
+		    quid       	"39B0489D0023"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39B048EC02F7"
+			    supplier   	"$UNNAMED$3"
+			    quidu      	"39B048E80374"
+			    messages   	(list Messages
+				(object Message "insertObject( )"
+				    quid       	"39B049DE018D"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.2.1"
+				    ordinal    	4
+				    quidu      	"39A56C840111"))))
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::Project Management::PersistentL10nProfile"
+		    quidu      	"39B0486B0017"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$3"
+		    quid       	"39B048E80374"
+		    class      	"Logical View::Utilities::Persistence::PersistenceService"
+		    quidu      	"39A56C84012C"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"39B047F7022D"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::Project Management::ProjectPersistence" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(464, 384)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(280, 306)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	369
+			justify    	0
+			label      	"ProjectPersistence")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B047FD02E0"
+		    width      	387
+		    height     	181
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Job Handler::Project Management::PersistentL10nProfile" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(1152, 400)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1035, 323)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	234
+			justify    	0
+			label      	"PersistentL10nProfile")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B0486B0017"
+		    width      	252
+		    height     	178
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object InteractionDiagram "Add Localization Profile"
+	    mechanism_ref 	@1
+	    quid       	"39B047C300D3"
+	    title      	"Add Localization Profile"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "client" @4
+		    location   	(288, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(288, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"client")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B047CE0364"
+		    width      	300
+		    height     	789
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @5
+			location   	(448, 416)
+			line_color 	3342489
+			InterObjView 	@4
+			height     	508
+			y_coord    	448
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$0" @6
+		    location   	(656, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(656, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B047DD0352"
+		    width      	300
+		    height     	789
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @7
+			location   	(784, 416)
+			line_color 	3342489
+			InterObjView 	@6
+			height     	448
+			y_coord    	388
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$1" @8
+		    location   	(1104, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@8
+			location   	(1104, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	368
+			justify    	0
+			label      	"")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B048170192"
+		    width      	386
+		    height     	789
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @9
+			location   	(1312, 448)
+			line_color 	3342489
+			InterObjView 	@8
+			height     	356
+			y_coord    	296
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$2" @10
+		    location   	(1584, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(1584, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	400
+			justify    	0
+			label      	"")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B0489D0023"
+		    width      	418
+		    height     	789
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @11
+			location   	(1872, 464)
+			line_color 	3342489
+			InterObjView 	@10
+			height     	60
+			y_coord    	0
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @12
+			location   	(1584, 592)
+			line_color 	3342489
+			InterObjView 	@10
+			height     	152
+			y_coord    	92
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$3" @13
+		    location   	(2064, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@13
+			location   	(2064, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	356
+			justify    	0
+			label      	"")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39B048E80374"
+		    width      	374
+		    height     	789
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @14
+			location   	(2064, 624)
+			line_color 	3342489
+			InterObjView 	@13
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @15
+		    location   	(16, 416)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @16
+			Parent_View 	@15
+			location   	(464, 368)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39B047E10240"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	360
+			justify    	0
+			label      	"addL10nProfile( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@4
+		    supplier   	@6
+		    Focus_Src  	@5
+		    Focus_Entry 	@7
+		    origin     	(303, 416)
+		    terminus   	(640, 416)
+		    ordinal    	0)
+		(object InterMessView "" @17
+		    location   	(16, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @18
+			Parent_View 	@17
+			location   	(880, 400)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39B0481C00A0"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	360
+			justify    	0
+			label      	"addL10nProfile( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@6
+		    supplier   	@8
+		    Focus_Src  	@7
+		    Focus_Entry 	@9
+		    origin     	(671, 448)
+		    terminus   	(1088, 448)
+		    ordinal    	1)
+		(object InterMessView "" @19
+		    location   	(16, 464)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @20
+			Parent_View 	@19
+			location   	(1344, 416)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39B048A703A3"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	159
+			justify    	0
+			label      	"create"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@8
+		    supplier   	@10
+		    Focus_Src  	@9
+		    Focus_Entry 	@11
+		    origin     	(1119, 464)
+		    terminus   	(1568, 464)
+		    ordinal    	2)
+		(object InterMessView "" @21
+		    location   	(1344, 592)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @22
+			Parent_View 	@21
+			location   	(1344, 544)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39B049720246"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"persist( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@8
+		    supplier   	@10
+		    Focus_Src  	@9
+		    Focus_Entry 	@12
+		    origin     	(1119, 592)
+		    terminus   	(1568, 592)
+		    ordinal    	3)
+		(object InterMessView "" @23
+		    location   	(16, 624)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @24
+			Parent_View 	@23
+			location   	(1824, 576)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39B049DE018D"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	313
+			justify    	0
+			label      	"insertObject( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@10
+		    supplier   	@13
+		    Focus_Src  	@12
+		    Focus_Entry 	@14
+		    origin     	(1599, 624)
+		    terminus   	(2048, 624)
+		    ordinal    	4)))))

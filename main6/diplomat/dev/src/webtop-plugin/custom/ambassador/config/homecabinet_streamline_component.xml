@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         Home Cabinet Streamline                                -->
+<!-- File           homecabinet_streamline_component.xml                   -->
+<!-- Description    Home Cabinet Streamline View Component Definition      -->
+<!-- Created on     1st August 2002                                        -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   
+   <!-- this component is the Webtop version of the Drilldown Home Cabinet Component and has unqualified scope -->
+   <scope>
+      
+      <!-- the object list component definition -->
+      <component id="homecabinet_streamline" extends="homecabinet_drilldown:custom/ambassador/config/navigation/homecabinet/homecabinet_drilldown_component.xml">
+         
+         <!-- Description (not NLS'd) -->
+         <desc>
+            WebTop Home Cabinet component: The WebTop Streamline View specific version of the homecabinet_drilldown
+            component. Extends the webcomponent to provide additional functionality to
+            update the WebTop application location bookmark.
+         </desc>
+         
+         <!-- Component Behavior -->
+         <class>com.documentum.webtop.webcomponent.homecabinet.HomeCabinetStreamlineView</class>
+         
+         <!-- Component specific Configuration -->
+         
+      </component>
+      
+   </scope>
+</config>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.JobAttribute"
+		table="JOB_ATTRIBUTE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="integerValue" column="INTEGER_VALUE" type="int"
+			not-null="false" unique="false" />
+		<property name="stringValue" column="STRING_VALUE" type="string"
+			not-null="false" unique="false" />
+		<property name="floatValue" column="FLOAT_VALUE" type="float"
+			not-null="false" unique="false" />
+		<property name="dateValue" column="DATE_VALUE" type="timestamp"
+			not-null="false" unique="false" />
+			
+		<many-to-one name="job" column="JOB_ID"
+            class="com.globalsight.everest.jobhandler.JobImpl"
+            not-null="true" />
+        <many-to-one name="attribute" column="ATTRIBUTE_ID"
+            class="com.globalsight.cxe.entity.customAttribute.AttributeClone"
+            not-null="true" />
+
+		<set name="fileValues" inverse="true" cascade="all">
+			<key column="JOB_ATTRIBUTE_ID" />
+			<one-to-many class="com.globalsight.cxe.entity.customAttribute.FileValueItem" />
+		</set>
+		
+		<set name="optionValues" table="JOB_ATTRIBUTE_SELECT_OPTION" cascade="save-update">
+			<key column="JOB_ATTRIBUTE_ID" />
+			<many-to-many class="com.globalsight.cxe.entity.customAttribute.SelectOption"
+				column="SELECT_OPTION_ID" />
+		</set>
+	</class>
+</hibernate-mapping>

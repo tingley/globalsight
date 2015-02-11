@@ -1,0 +1,77 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *       Whitespace Normalization Tool Build FILE              * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Normalization" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="normalization_src" value=".." />
+    <property name="normalization_bin" value="normalization_classes" />
+    <property name="normalization_dist" value="dist" />
+    <property name="toolsLib" value="../../../lib/common" />
+    <property name="toolsLibNt" value="../../../lib/nt" />
+    <property name="toolsBuild" value="../../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <property name="regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="weblogic" value="${toolsLib}/weblogicRmi.jar" />
+    <property name="ldap" value="${toolsLib}/ldapjdk.jar" />
+    <property name="oracle" value="${toolsLibNt}/O817NTclasses12.zip" />
+    <property name="cap"
+        value="${toolsBuild}/capclasses/globalsight/serverclasses" />
+
+    <property name="normalization_classpath"
+        value="${regexp}:${cap}:${weblogic}:${ldap}:${oracle}" />
+
+    <property name="batch_file" value="System4Normalization.bat"/>
+    <property name="sh_file" value="System4Normalization.sh"/>
+    <property name="normalization_jar" value="normalization.jar"/>
+    <property name="normalization_zip"
+        value="${normalization_dist}/normalization.zip"/>
+
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling normalization tool..." />
+    <mkdir dir="${normalization_bin}" />
+    <javac classpath="${normalization_classpath}"
+	   destdir="${normalization_bin}" >
+      <src path="${normalization_src}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="dist" depends="build">
+    <jar jarfile="${normalization_bin}/${normalization_jar}"
+         basedir="${normalization_bin}"
+	 includes="com/**" />
+
+    <copy file="${normalization_src}/${batch_file}"
+         todir="${normalization_bin}"/>
+    <copy file="${normalization_src}/${sh_file}" todir="${normalization_bin}"/>
+    <chmod file="${normalization_bin}/${sh_file}" perm="ugo+rx"/>
+    <mkdir dir="${normalization_bin}/globalsight"/>
+    <touch file="${normalization_bin}/globalsight/CAP.log"/>
+
+    <mkdir dir="${normalization_dist}" />
+    <zip zipfile="${normalization_zip}">
+        <zipfileset dir="${normalization_bin}"
+	     includes="${normalization_jar},${batch_file},${sh_file},globalsight/*"
+	      prefix="system4_normalization" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${normalization_bin}" />
+    <delete dir="${normalization_dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build">
+  </target>
+
+</project>

@@ -1,0 +1,1 @@
+alter table translation_unit change XLIFF_SCORE_100 IWS_SCORE varchar(50);

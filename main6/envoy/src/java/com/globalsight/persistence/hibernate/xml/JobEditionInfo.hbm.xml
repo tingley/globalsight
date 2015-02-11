@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.jobhandler.JobEditionInfo" table="JOB_GSEDITION_INFO">
+    
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="jobId" length="20" column="JOB_ID" type="string" not-null="true" />
+        <property name="originalTaskId" length="20" column="ORIGINAL_TASK_ID" type="string" not-null="true" />
+        <property name="url" column="URL" type="string" not-null="false" />
+        <property name="userName" column="USER_NAME" type="string" not-null="false" />
+        <property name="password" column="PASSWORD" type="string" not-null="false" />
+        <property name="sendingBackStatus" column="SENDING_BACK_STATUS" length="50" type="string"/>
+    </class>
+</hibernate-mapping>

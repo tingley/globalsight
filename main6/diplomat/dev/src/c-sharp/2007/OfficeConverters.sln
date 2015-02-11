@@ -1,0 +1,73 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordConverter", "WordConverter\WordConverter\WordConverter.csproj", "{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPointConverter", "PowerPointConverter\PowerPointConverter\PowerPointConverter.csproj", "{DCCE5900-548A-43C3-83D6-B1647FAD103C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelConverter", "ExcelConverter\ExcelConverter\ExcelConverter.csproj", "{11FBBA09-7304-4205-B672-72E292629D6A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlobalSight.Common", "GlobalSight.Common\GlobalSight.Common\GlobalSight.Common.csproj", "{086A2EB7-EAF4-4204-A312-DE5D6352D629}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ExcelConverterSetup", "ExcelConverterSetup\ExcelConverterSetup.vdproj", "{EC72D97E-9069-4613-97DF-9E663D005144}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11FBBA09-7304-4205-B672-72E292629D6A} = {11FBBA09-7304-4205-B672-72E292629D6A}
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointConverterSetup", "PowerPointConverterSetup\PowerPointConverterSetup.vdproj", "{035592ED-B93F-4080-BF66-3D8A1DE73F8C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C} = {DCCE5900-548A-43C3-83D6-B1647FAD103C}
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WordConverterSetup", "WordConverterSetup\WordConverterSetup.vdproj", "{D8FBA8C1-57BE-433C-9B52-F2F5057D2B46}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F} = {A86C34EE-2639-4343-81B8-F18B3D9FDF3F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC72D97E-9069-4613-97DF-9E663D005144}.Debug|Any CPU.ActiveCfg = Debug
+		{EC72D97E-9069-4613-97DF-9E663D005144}.Debug|Any CPU.Build.0 = Debug
+		{EC72D97E-9069-4613-97DF-9E663D005144}.Release|Any CPU.ActiveCfg = Release
+		{EC72D97E-9069-4613-97DF-9E663D005144}.Release|Any CPU.Build.0 = Release
+		{035592ED-B93F-4080-BF66-3D8A1DE73F8C}.Debug|Any CPU.ActiveCfg = Debug
+		{035592ED-B93F-4080-BF66-3D8A1DE73F8C}.Debug|Any CPU.Build.0 = Debug
+		{035592ED-B93F-4080-BF66-3D8A1DE73F8C}.Release|Any CPU.ActiveCfg = Release
+		{035592ED-B93F-4080-BF66-3D8A1DE73F8C}.Release|Any CPU.Build.0 = Release
+		{D8FBA8C1-57BE-433C-9B52-F2F5057D2B46}.Debug|Any CPU.ActiveCfg = Debug
+		{D8FBA8C1-57BE-433C-9B52-F2F5057D2B46}.Debug|Any CPU.Build.0 = Debug
+		{D8FBA8C1-57BE-433C-9B52-F2F5057D2B46}.Release|Any CPU.ActiveCfg = Release
+		{D8FBA8C1-57BE-433C-9B52-F2F5057D2B46}.Release|Any CPU.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,61 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Word2003Converter", "Word2003Converter\Word2003Converter\Word2003Converter.csproj", "{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPoint2003Converter", "PowerPoint2003Converter\PowerPoint2003Converter\PowerPoint2003Converter.csproj", "{DCCE5900-548A-43C3-83D6-B1647FAD103C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excel2003Converter", "Excel2003Converter\Excel2003Converter\Excel2003Converter.csproj", "{11FBBA09-7304-4205-B672-72E292629D6A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlobalSight.Common", "GlobalSight.Common\GlobalSight.Common\GlobalSight.Common.csproj", "{086A2EB7-EAF4-4204-A312-DE5D6352D629}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Word2003ConverterSetup", "Word2003ConverterSetup\Word2003ConverterSetup.vdproj", "{E7235E8C-0229-4FAE-9C58-39BFE6981E94}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Excel2003ConverterSetup", "Excel2003ConverterSetup\Excel2003ConverterSetup.vdproj", "{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPoint2003ConverterSetup", "PowerPoint2003ConverterSetup\PowerPoint2003ConverterSetup.vdproj", "{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Debug|Any CPU.ActiveCfg = Debug
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Debug|Any CPU.Build.0 = Debug
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Release|Any CPU.ActiveCfg = Release
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Debug|Any CPU.ActiveCfg = Debug
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Debug|Any CPU.Build.0 = Debug
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Release|Any CPU.ActiveCfg = Release
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Debug|Any CPU.ActiveCfg = Debug
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Debug|Any CPU.Build.0 = Debug
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

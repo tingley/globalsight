@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class table="IMAGE_REPLACE_FILE_MAP"
+        name="com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMap">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="state" length="20" column="STATE" type="string" />
+
+        <property name="targetPageId" length="22"
+            column="TARGET_PAGE_ID" type="long" not-null="true" />
+
+        <property name="tuvId" length="22" column="TUV_ID" type="long"
+            not-null="true" />
+
+        <property name="subId" length="22" column="SUB_ID" type="long"
+            access="field" />
+
+        <property name="tempSourceName" length="128" type="string"
+            column="TEMP_SOURCE_NAME" />
+
+        <property name="realSourceName" length="512" type="string"
+            column="REAL_SOURCE_NAME" />
+
+    </class>
+
+</hibernate-mapping>

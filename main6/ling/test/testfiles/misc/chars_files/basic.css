@@ -1,0 +1,262 @@
+@import url( unsafe.css );
+.summary {
+	BORDER-RIGHT: #699 2px solid; PADDING-RIGHT: 0.1em; BORDER-TOP: #699 2px solid; PADDING-LEFT: 0.4em; FONT-SIZE: 105%; PADDING-BOTTOM: 0.2em; MARGIN-LEFT: 10%; BORDER-LEFT: #699 2px solid; TEXT-INDENT: 1em; MARGIN-RIGHT: 10%; PADDING-TOP: 0.2em; BORDER-BOTTOM: #699 2px solid
+}
+.important {
+	BORDER-RIGHT: #f90 2px solid; PADDING-RIGHT: 0.4ex; BORDER-TOP: #f90 2px solid; PADDING-LEFT: 0.4ex; PADDING-BOTTOM: 0.4ex; MARGIN-LEFT: 5%; BORDER-LEFT: #f90 2px solid; TEXT-INDENT: 1em; MARGIN-RIGHT: 10%; PADDING-TOP: 0.4ex; BORDER-BOTTOM: #f90 2px solid
+}
+DIV.warning {
+	BORDER-RIGHT: red 3px double; PADDING-RIGHT: 0.4ex; BORDER-TOP: red 3px double; PADDING-LEFT: 0.4ex; FONT-SIZE: 105%; PADDING-BOTTOM: 0.4ex; MARGIN-LEFT: 10%; BORDER-LEFT: red 3px double; MARGIN-RIGHT: 10%; PADDING-TOP: 0.4ex; BORDER-BOTTOM: red 3px double
+}
+P.warning {
+	BORDER-RIGHT: red 3px double; PADDING-RIGHT: 0.4ex; BORDER-TOP: red 3px double; PADDING-LEFT: 0.4ex; FONT-SIZE: 105%; PADDING-BOTTOM: 0.4ex; MARGIN-LEFT: 10%; BORDER-LEFT: red 3px double; MARGIN-RIGHT: 10%; PADDING-TOP: 0.4ex; BORDER-BOTTOM: red 3px double
+}
+STRONG {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #300
+}
+STRONG.warning {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+EM.warning {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+.editorial {
+	BORDER-RIGHT: #9c9 1px inset; PADDING-RIGHT: 3px; BORDER-TOP: #9c9 1px inset; PADDING-LEFT: 3px; FONT-SIZE: 80%; PADDING-BOTTOM: 3px; MARGIN-LEFT: 20%; BORDER-LEFT: #9c9 1px inset; PADDING-TOP: 3px; BORDER-BOTTOM: #9c9 1px inset; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif
+}
+.ed {
+	FONT-SIZE: 90%
+}
+.example {
+	PADDING-LEFT: 0.7ex; FONT-SIZE: 99%; MARGIN-LEFT: 1%; BORDER-LEFT: #0c0 2px solid
+}
+HR {
+	COLOR: #9c9; HEIGHT: 0.2em
+}
+H1 {
+	TEXT-ALIGN: center
+}
+H2 {
+	MARGIN-LEFT: 1em
+}
+H1 {
+	BACKGROUND: #ffc; COLOR: #000; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif
+}
+H2 {
+	BACKGROUND: #ffc; COLOR: #000; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif
+}
+H3 {
+	BACKGROUND: #ffc; COLOR: #000; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif
+}
+H4 {
+	BACKGROUND: #ffc; COLOR: #000; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif
+}
+H1 {
+	FONT-SIZE: 180%
+}
+H2 {
+	FONT-SIZE: 140%
+}
+H3 {
+	FONT-SIZE: 117%
+}
+H4 {
+	FONT-SIZE: 105%
+}
+BLOCKQUOTE H1 {
+	FONT-SIZE: 130%
+}
+BLOCKQUOTE H2 {
+	FONT-SIZE: 120%
+}
+BLOCKQUOTE H3 {
+	FONT-SIZE: 110%
+}
+BLOCKQUOTE.newspaper {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; BORDER-LEFT: medium none; WIDTH: 20em; BORDER-BOTTOM: medium none; FONT-FAMILY: "Times New Roman", serif; TEXT-ALIGN: justify
+}
+CAPTION {
+	BACKGROUND: #ffc; COLOR: #000
+}
+.subcaption {
+	BACKGROUND: #ffc; COLOR: #000
+}
+TABLE.menu {
+	BORDER-RIGHT: blue 2px solid; PADDING-RIGHT: 3px; BORDER-TOP: blue 2px solid; PADDING-LEFT: 3px; PADDING-BOTTOM: 3px; BORDER-LEFT: blue 2px solid; PADDING-TOP: 3px; BORDER-BOTTOM: blue 2px solid; TEXT-ALIGN: center
+}
+TABLE.texttable {
+	BORDER-RIGHT: #222 0.1em solid; PADDING-RIGHT: 2em; BORDER-TOP: #222 0.1em solid; PADDING-LEFT: 2em; PADDING-BOTTOM: 2em; BORDER-LEFT: #222 0.1em solid; PADDING-TOP: 2em; BORDER-BOTTOM: #222 0.1em solid
+}
+#codetable TR TD A {
+	FONT-SIZE: large; TEXT-DECORATION: none
+}
+.numeric {
+	FONT-FAMILY: Courier, monospace; TEXT-ALIGN: right
+}
+.credit {
+	FONT-SIZE: 85%; TEXT-ALIGN: right
+}
+.wide {
+	FONT-SIZE: smaller; MARGIN: 0px
+}
+.charname {
+	FONT-VARIANT: small-caps
+}
+CAPTION {
+	FONT-WEIGHT: bold
+}
+BODY {
+	BACKGROUND: #f6f9f6; MARGIN-LEFT: 0.7em; COLOR: #000
+}
+A:link {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+STRONG A:link {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+EM A:link {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+CITE A:link {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+A:link STRONG {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+A:link EM {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+A:link CITE {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #009
+}
+A:visited {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+STRONG A:visited {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+EM A:visited {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+CITE A:visited {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+A:visited STRONG {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+A:visited EM {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+A:visited CITE {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #609
+}
+A:hover {
+	BACKGROUND: #eee; COLOR: #933
+}
+STRONG A:hover {
+	BACKGROUND: #eee; COLOR: #933
+}
+EM A:hover {
+	BACKGROUND: #eee; COLOR: #933
+}
+CITE A:hover {
+	BACKGROUND: #eee; COLOR: #933
+}
+A:hover STRONG {
+	BACKGROUND: #eee; COLOR: #933
+}
+A:hover EM {
+	BACKGROUND: #eee; COLOR: #933
+}
+A:hover CITE {
+	BACKGROUND: #eee; COLOR: #933
+}
+A:active {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+STRONG A:active {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+EM A:active {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+CITE A:active {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+A:active STRONG {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+A:active EM {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+A:active CITE {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+EM {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #000
+}
+CITE {
+	FONT-WEIGHT: 500; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #030
+}
+DFN {
+	FONT-WEIGHT: bold; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #066
+}
+DT {
+	FONT-WEIGHT: bold; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #066
+}
+VAR {
+	BACKGROUND: #fff6eb; COLOR: #010
+}
+KBD {
+	FONT-WEIGHT: bold
+}
+PRE {
+	BACKGROUND: #e0ffe0; COLOR: black; WHITE-SPACE: pre
+}
+PRE.cmd {
+	BACKGROUND: #fcf; COLOR: black
+}
+PRE.samp {
+	BACKGROUND: #fee; COLOR: black
+}
+.screen {
+	BORDER-RIGHT: #333 1px solid; PADDING-RIGHT: 3px; BORDER-TOP: #333 1px solid; PADDING-LEFT: 3px; FONT-SIZE: smaller; BACKGROUND: #fff; PADDING-BOTTOM: 3px; BORDER-LEFT: #333 1px solid; COLOR: #600; PADDING-TOP: 3px; BORDER-BOTTOM: #333 1px solid; FONT-FAMILY: "Lucida Console", Courier, monospace
+}
+.signed {
+	FONT-FAMILY: "Lucida Handwriting",  Western, cursive
+}
+ADDRESS {
+	FONT-STYLE: normal
+}
+PRE {
+	FONT-STYLE: normal; FONT-FAMILY: "Courier", monospace
+}
+CODE {
+	FONT-STYLE: normal; FONT-FAMILY: "Courier", monospace
+}
+PRE {
+	WHITE-SPACE: pre
+}
+SMALL {
+	FONT-SIZE: 77%; FONT-FAMILY: "Myriad Web",Verdana,Helvetica,Arial,sans-serif
+}
+.small {
+	FONT-SIZE: 77%; FONT-FAMILY: "Myriad Web",Verdana,Helvetica,Arial,sans-serif
+}
+.deem {
+	FONT-SIZE: 77%; FONT-FAMILY: "Myriad Web",Verdana,Helvetica,Arial,sans-serif
+}
+P.literary {
+	MARGIN-TOP: 0.5ex; MARGIN-BOTTOM: 0.5ex; TEXT-INDENT: 1em
+}
+.literary P {
+	MARGIN-TOP: 0.5ex; MARGIN-BOTTOM: 0.5ex; TEXT-INDENT: 1em
+}
+P.start {
+	MARGIN-BOTTOM: 0.5ex; TEXT-INDENT: 0px
+}
+P.start:first-letter {
+	FONT-WEIGHT: bold; FONT-SIZE: 200%; BACKGROUND: #fff; COLOR: #060
+}
+TABLE.ex TR.sample TD {
+	FONT-WEIGHT: bold; BACKGROUND: white; COLOR: black; TEXT-ALIGN: center
+}

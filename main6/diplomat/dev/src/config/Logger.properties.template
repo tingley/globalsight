@@ -1,0 +1,11 @@
+# Logger.properties
+# This file is auto generated during the GlobalSight installation
+# DO NOT MANUALLY EDIT THIS FILE
+
+# If WriteDebugFiles is set to true then "debug" files will be
+# written to the DebugFileDirectory. This will effect performance.
+WriteDebugFiles=%%cxe_debugFiles%%
+
+# Where debug files go
+DebugFileDirectory=%%system_log_directory_forwardslash%%/debug
+

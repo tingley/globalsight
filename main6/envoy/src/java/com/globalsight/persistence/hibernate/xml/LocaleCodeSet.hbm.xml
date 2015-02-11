@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+	<class
+		name="com.globalsight.persistence.hibernate.entity.LocaleCodeSet"
+		table="LOCALE_CODESET">
+		<composite-id>
+			<key-many-to-one name="local"
+				class="com.globalsight.util.GlobalSightLocale" column="LOCALE_ID" />
+			<key-many-to-one name="codeSet"
+				class="com.globalsight.everest.localemgr.CodeSetImpl"
+				column="CODE_SET" />
+		</composite-id>
+	</class>
+</hibernate-mapping>

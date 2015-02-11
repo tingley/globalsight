@@ -1,0 +1,92 @@
+<%
+	String moduleLink="/globalsight/ControlServlet?activityName=";
+%>
+				 
+<div id="menu0" style=" position: absolute; z-index: 10; top: 20px; left: 369px; width: 81px; visibility: hidden"> 
+  <table cellpadding="0" cellspacing="0" border="0">
+    <tr><td><a href="<%=moduleLink%>users" onClick="return confirmJump()" onMouseOver="aUsers.src=aUsersOn.src" onMouseOut="aUsers.src=aUsersOff.src">
+    		<img src="<%= menuBundle.getString("img_users_off") %>" width="81" height="22" name="aUsers" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>usergroups" onClick="return confirmJump()" onMouseOver="aUG.src=aUGOn.src" onMouseOut="aUG.src=aUGOff.src">
+    		<img src="/globalsight/images/menubar/admin-usergroups-off.gif" width="81" height="21" name="aUG" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>configuration" onClick="return confirmJump()" onMouseOver="aConfig.src=aConfigOn.src" onMouseOut="aConfig.src=aConfigOff.src">
+    		<img src="<%= menuBundle.getString("img_config_off") %>" width="81" height="21" name="aConfig" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>activities" onClick="return confirmJump()" onMouseOver="aActivities.src=aActivitiesOn.src" onMouseOut="aActivities.src=aActivitiesOff.src">
+    		<img src="<%= menuBundle.getString("img_activities_off") %>" width="81" height="21" name="aActivities" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>locales" onClick="return confirmJump()" onMouseOver="aLocalePairs.src=aLocalePairsOn.src" onMouseOut="aLocalePairs.src=aLocalePairsOff.src">
+    		<img src="<%= menuBundle.getString("img_localepairs_off") %>" width="81" height="20" name="aLocalePairs" border="0"></a></td></tr>
+ </table>
+</div>
+
+<div id="menu1" style=" position: absolute; z-index: 10; top: 20px; left: 449px; width: 109px; visibility: hidden"> 
+  <table cellpadding="0" cellspacing="0" border="0">
+    <tr><td><a href="<%=moduleLink%>projects" onClick="return confirmJump()" onMouseOver="pManagement.src=pManagementOn.src" onMouseOut="pManagement.src=pManagementOff.src">
+    		<img src="<%= menuBundle.getString("img_pmanagement_off") %>" width="109" height="22" name="pManagement" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>workflows" onClick="return confirmJump()" onMouseOver="pWorkflows.src=pWorkflowsOn.src" onMouseOut="pWorkflows.src=pWorkflowsOff.src">
+    		<img src="<%= menuBundle.getString("img_workflows_off") %>" width="109" height="21" name="pWorkflows" border="0"></a></td></tr>
+    <tr><td><a href="<%=moduleLink%>locprofiles" onClick="return confirmJump()" onMouseOver="pLocalProfiles.src=pLocalProfilesOn.src" onMouseOut="pLocalProfiles.src=pLocalProfilesOff.src">
+    		<img src="<%= menuBundle.getString("img_localprofiles_off") %>" width="109" height="21" name="pLocalProfiles" border="0"></a></td></tr>
+ </table>
+</div>
+
+<div id="menu2" style=" position: absolute; z-index: 10; top: 20px; left: 529px; width: 109px; visibility: hidden"> 
+  <table cellpadding="0" cellspacing="0" border="0">
+    <tr><td><a href="<%=moduleLink%>mytasks" onClick="return confirmJump()" onMouseOver="tMyTasks.src=tMyTasksOn.src" onMouseOut="tMyTasks.src=tMyTasksOff.src">
+    		<img src="<%= menuBundle.getString("img_mytasks_off") %>" width="109" height="22" name="tMyTasks" border="0"></a></td></tr>
+    <tr><td><a href="/globalsight/envoy/administration/tasks/management/index.jsp" onClick="return confirmJump()" onMouseOver="tManagement.src=tManagementOn.src" onMouseOut="tManagement.src=tManagementOff.src">
+    		<img src="<%= menuBundle.getString("img_tmanagement_off") %>" width="109" height="21" name="tManagement" border="0"></a></td></tr>
+ </table>
+</div>
+
+<div id="menu3" style=" position: absolute; z-index: 10; top: 20px; left: 609px; width: 109px; visibility: hidden"> 
+  <table cellpadding="0" cellspacing="0" border="0">
+    <tr><td><a href="/globalsight/envoy/help/systemHelp.jsp" onMouseOver="hSys4.src=hSys4On.src" onMouseOut="hSys4.src=hSys4Off.src" target="help-window">
+    		<img src="<%= menuBundle.getString("img_system4_off") %>" width="109" height="22" name="hSys4" border="0"></a></td></tr>
+    <tr><td><a href="/globalsight/envoy/help/aboutSystem4.jsp" onMouseOver="hAbout.src=hAboutOn.src" onMouseOut="hAbout.src=hAboutOff.src" target="help-window">
+    		<img src="<%= menuBundle.getString("img_about_off") %>" width="109" height="21" name="hAbout" border="0"></a></td></tr>
+ </table>
+</div>
+
+<div id="menu4" style=" position: absolute; z-index: 10; top: 20px; left: 689px; width: 75px; visibility: hidden">
+<table cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td><a href="<%=moduleLink%>login" onClick="return confirmJump()" onMouseOver="lLogout.src=lLogoutOn.src;" onMouseOut="lLogout.src=lLogoutOff.src;">
+    		<img src="<%= menuBundle.getString("img_llogout_off") %>" width="75" height="22" name="lLogout" border="0"></a>
+      </td>
+    </tr>
+ </table> 
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="769">
+	<tr height="61">
+		<td valign="top" bgcolor="white" height="61">
+			<table border="0" cellpadding="0" cellspacing="0" width="769" height="61" background="/globalsight/images/pageheader.gif">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0" width="769" height="61">
+							<tr height="20">
+								<td width="369" height="20"></td>
+								<td width="80" height="20">
+									<a href="#" onClick="showMenu(0)" onMouseOver="admin.src=adminOn.src" onMouseOut="admin.src=adminOff.src">
+									<img name="admin" src="<%= menuBundle.getString("img_admin_off") %>" width="80" height="20" border="0"></a></td>
+								<td width="80" height="20">
+									<a href="#" onClick="showMenu(1)" onMouseOver="projects.src=projectsOn.src" onMouseOut="projects.src=projectsOff.src">
+									<img name="projects" src="<%= menuBundle.getString("img_projects_off") %>" width="80" height="20" border="0"></a></td>
+								<td width="80" height="20">
+									<a href="#" onClick="showMenu(2)" onMouseOver="tasks.src=tasksOn.src" onMouseOut="tasks.src=tasksOff.src">
+									<img name="tasks" src="<%= menuBundle.getString("img_tasks_off") %>" width="80" height="20" border="0"></a></td>
+								<td width="80" height="20">
+									<a href="#" onClick="showMenu(3)" onMouseOver="help.src=helpOn.src" onMouseOut="help.src=helpOff.src">
+									<img name="help" src="<%= menuBundle.getString("img_help_off") %>" width="80" height="20" border="0"></a></td>
+								<td width="80" height="20">
+									<a href="#" onClick="showMenu(4)" onMouseOver="logout.src=logoutOn.src" onMouseOut="logout.src=logoutOff.src">
+									<img name="logout" src="<%= menuBundle.getString("img_logout_off") %>" width="80" height="20" border="0"></a></td>
+							</tr>
+							<tr height="41">
+								<td colspan="6" height="41"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>

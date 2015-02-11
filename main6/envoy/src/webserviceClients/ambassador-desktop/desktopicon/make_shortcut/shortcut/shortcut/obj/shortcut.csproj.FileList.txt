@@ -1,0 +1,10 @@
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\shortcut.Properties.Resources.resources
+obj\Debug\shortcut.csproj.GenerateResource.Cache
+bin\Debug\shortcut.exe
+bin\Debug\shortcut.pdb
+bin\Debug\Interop.IWshRuntimeLibrary.dll
+obj\Debug\Interop.IWshRuntimeLibrary.dll
+obj\Debug\shortcut.csproj.ResolveComReference.cache
+obj\Debug\shortcut.exe
+obj\Debug\shortcut.pdb

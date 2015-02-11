@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>Edit Term</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<script LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/management/FireFox.js"></script>
+<SCRIPT   LANGUAGE="JavaScript">  
+   <!--
+   //make the window in the center position  
+   function   centerWindow()   
+   {
+       var xMax = screen.width;
+       var yMax = screen.height;
+       
+       window.moveTo(xMax/2 - 200, yMax/2 - 100 - 80);
+   }
+     
+   centerWindow();  
+  //-->  
+</SCRIPT>
+<SCRIPT language="Javascript">
+var g_args;
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var term = Trim(idTerm.value);
+
+    if (term == "")
+    {
+      idTerm.focus();
+      alert("Enter a term.");
+      return;
+    }
+    
+    if(hasHtmlSpecialChars(term)) {
+        idTerm.focus();
+        alert("Invalid term. '<' or '>' can't be included.");
+        return;
+    }
+
+    g_args.setTerm(term);
+
+    window.returnValue = g_args;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_args = window.dialogArguments;
+
+  idLanguage.innerText = g_args.getLanguage();
+  idTerm.value = g_args.getTerm();
+
+  idTerm.focus();
+}
+
+function hasHtmlSpecialChars(theField) {
+	var iChars = "<>";
+    for (var i = 0; i < theField.length; i++)
+    {
+        if (iChars.indexOf(theField.charAt(i)) != -1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">Edit Term</SPAN>
+<BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <TR>
+    <TD valign="top">
+      <LABEL>Language:</LABEL>
+    </TD>
+    <TD valign="top">
+      <span id="idLanguage"></span>
+    </TD>
+  </TR>
+  <TR>
+    <TD valign="top">
+      <LABEL FOR="idTerm">Term:</LABEL>
+    </TD>
+    <TD valign="top">
+      <TEXTAREA id="idTerm" TABINDEX="1" rows="2" cols="25"></TEXTAREA>
+    </TD>
+  </TR>
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="2" onclick="doClose(true);">
+<INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="3" onclick="doClose(false);">
+</DIV>
+
+</DIV>
+</body>
+</html>

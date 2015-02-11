@@ -1,0 +1,53 @@
+.subHeading {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 10pt; font-weight:bold}
+.subHeadingBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 10pt; font-weight:bold; color:#333399}
+.subHeadingWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 10pt; font-weight:bold; color:#FFFFFF}
+
+.tableHeading {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:12pt; font-weight:bold;}
+.tableHeadingBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:12pt; font-weight:bold; color:#333399}
+.tableHeadingWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:12pt; font-weight:bold; color:#FFFFFF}
+
+.midHeading {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:14pt; font-weight:bold;}
+.midHeadingBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:14pt; font-weight:bold; color:#333399}
+.midHeadingWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:14pt; font-weight:bold; color:#FFFFFF}
+
+.mainHeading {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:18pt; font-weight:bold;}
+.mainHeadingBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:18pt; font-weight:bold; color:#333399}
+.mainHeadingWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:18pt; font-weight:bold; color:#FFFFFF}
+
+.standardText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt}
+.standardTextItalic {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; font-style:italic}
+.standardTextWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#FFFFFF}
+
+.helpText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 7pt}
+.helpTitle {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 8pt; font-weight:bold}
+
+.warningText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#FF0000}
+.greenText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#009966}
+
+.readingText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 10pt}
+.tableEntry {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 11pt}
+.tableEntryRed {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 11pt; color:#FF0000}
+
+.standardHREF {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:9pt}
+.standardHREF:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:9pt; color:#0000FF}
+.warningHREF {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:9pt; color:red}
+
+.midHREF {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt}
+.midHREFBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:#333399}
+
+.whiteHREF {color:white; font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt;}
+.sortHREFWhite {color:white; font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; font-weight: bold}
+
+.iconHREF {text-decoration:none}
+
+.editorSegment {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:blue}
+.editorSegment:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:blue}
+.editorSegmentExact {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#CCFFCC; color:blue}
+.editorSegmentExact:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#CCFFCC; color:blue}
+.editorSegmentFuzzy {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#FFFFCC; color:blue}
+.editorSegmentFuzzy:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#FFFFCC; color:blue}
+
+.formFields {font-family:Arial Unicode MS, Arial, helvetica, sans-serif; font-size: 10pt}
+
+.glossaryDateSize {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 8pt; font-style:italic}
+.smallSelectHREFBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:7pt; color:blue}

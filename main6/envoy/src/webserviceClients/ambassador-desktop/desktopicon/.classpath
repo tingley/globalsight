@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="src/lib/activation.jar"/>
+	<classpathentry kind="lib" path="src/lib/axis.jar"/>
+	<classpathentry kind="lib" path="src/lib/axis-ant.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="src/lib/dom4j.jar"/>
+	<classpathentry kind="lib" path="src/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="src/lib/log4j.jar"/>
+	<classpathentry kind="lib" path="src/lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="src/lib/mail.jar"/>
+	<classpathentry kind="lib" path="src/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="src/lib/wsdl4j.jar"/>
+	<classpathentry kind="var" path="JUNIT_HOME/junit.jar" sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip"/>
+	<classpathentry kind="lib" path="src/lib/junit.jar"/>
+	<classpathentry kind="lib" path="src/lib/mysql-connector-java-5.1.6-bin.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

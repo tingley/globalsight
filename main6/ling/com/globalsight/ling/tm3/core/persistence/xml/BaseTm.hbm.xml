@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.ling.tm3.core.BaseTm" table="TM3_TM"
+                discriminator-value="0">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <discriminator column="type" type="int" />
+        <property name="tuTableName" length="128" column="tu_table" 
+            type="string" not-null="false" />
+        <property name="tuvTableName" length="128" column="tuv_table" 
+            type="string" not-null="false" />
+        <property name="fuzzyIndexTableName" length="128" column="fuzzy_table" 
+            type="string" not-null="false" />
+        <property name="attrValTableName" length="128" column="attr_val_table" 
+            type="string" not-null="false" />
+
+        <set name="attributes" inverse="true">
+            <key column="tmId" />
+            <one-to-many class="com.globalsight.ling.tm3.core.TM3Attribute" />
+        </set>
+
+        <subclass name="com.globalsight.ling.tm3.core.MultilingualSharedTm"
+                discriminator-value="0">
+            <property name="sharedStorageId" column="sharedStorageId"
+                    type="long"/>
+        </subclass>
+
+        <subclass name="com.globalsight.ling.tm3.core.MultilingualTm" 
+                discriminator-value="1" />
+
+        <subclass name="com.globalsight.ling.tm3.core.BilingualTm" 
+                discriminator-value="2" >
+
+            <!-- Because TM3 is only loosely coupled to a locale 
+                 implementation, we can't use many-to-one here. -->
+            <property name="srcLocaleId" column="srcLocaleId"
+                type="long"/>
+            <property name="tgtLocaleId" column="tgtLocaleId"
+                type="long"/>
+
+        </subclass>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.request.WorkflowRequestImpl"
+		table="WORKFLOW_REQUEST">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		
+		<many-to-one name="job" column="JOB_ID"
+			class="com.globalsight.everest.jobhandler.JobImpl" not-null="false" />
+		
+		<property name="typeStr" length="100" column="TYPE"
+			type="string" not-null="true" unique="false" />
+		
+		<property name="exceptionXml" column="EXCEPTION_XML"
+			type="string" not-null="false" unique="false" />
+
+		<bag name="workflowTemplateList"
+			table="WORKFLOW_REQUEST_WFTEMPLATE" lazy="false">
+			<key column="WORKFLOW_REQUEST_ID" />
+			<many-to-many
+				class="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
+				column="WORKFLOW_TEMPLATE_ID"/>
+		</bag>
+	</class>
+</hibernate-mapping>

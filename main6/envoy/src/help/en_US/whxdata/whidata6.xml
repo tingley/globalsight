@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Database Read SQL" >
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+</key>
+<key name="Database Write SQL" >
+  <topic name="Database Write SQL" url="Data_Sources/Database_Profiles/DB_Write_SQL.htm" />
+</key>
+<key name="DB Preview Rules" >
+  <topic name="Database Preview Rules Main Screen" url="Data_Sources/Database_Preview_Rules/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Writing DB Preview Rules" url="Appendix/Database_Integration/Writing_DB_Preview_Rules.htm" />
+</key>
+<key name="Default Path" >
+  <topic name="Default Path" url="Glossary/Default_Path.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+</key>
+<key name="Define Termbase Column" >
+  <topic name="Define Termbase Column" url="Setup/Terminology/Define_Termbase_Column.htm" />
+</key>
+<key name="Deletable Content" >
+  <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+</key>
+<key name="Deletable Content obeys" >
+  <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+</key>
+<key name="Dependencies Exist" >
+  <topic name="Dependencies Exist" url="Appendix/Dependencies_Exist.htm" />
+</key>
+<key name="Document Check" >
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Does GlobalSight decide" >
+  <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+</key>
+<key name="Does GlobalSight Word Count work" >
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+</key>
+<key name="Does Exclude Item" >
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+</key>
+<key name="Does Exclude Item Types work" >
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+</key>
+<key name="Does TM" >
+  <topic name="How does TM highlighting work" url="Appendix/Linguistic_FAQ/How_does_TM_highlighting_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+</key>
+<key name="Does TM highlighting work" >
+  <topic name="How does TM highlighting work" url="Appendix/Linguistic_FAQ/How_does_TM_highlighting_work.htm" />
+</key>
+<key name="Does TM locking work" >
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+</key>
+<key name="Download" >
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Create Aligner Package" url="Data_Sources/Corpus_Aligner/Create_Aligner_Package.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+  <topic name="Download in Progress" url="My_Activities/Download_in_Progress.htm" />
+  <topic name="Download Progress" url="My_Jobs/Customer_Jobs/Download_Progress.htm" />
+  <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  <topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+  <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
+  <topic name="How to Save Files for Upload" url="Appendix/Working_Offline/RTF_(List_View)/How_to_Save_Files_for_Upload.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+  <topic name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+  <topic name="Support Files" url="My_Activities/Support_Files.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="Termbase Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+  <topic name="Tips For Working With Large RTF Files" url="Appendix/Working_Offline/RTF_(List_View)/Tips_For_Working_With_Large_RTF_Files.htm" />
+  <topic name="Upload" url="My_Activities/Upload.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  <topic name="Upload Error" url="My_Activities/Upload_Error.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Download Aligner Package" >
+  <topic name="Aligner Packages" url="Data_Sources/Corpus_Aligner/Aligner_Packages.htm" />
+  <topic name="Download Aligner Package" url="Data_Sources/Corpus_Aligner/Download_Aligner_Package.htm" />
+</key>
+<key name="Download files" >
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Downloaded archive" >
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+</key>
+<key name="Duplicate Localization Profile" >
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+</key>
+<key name="Duplicate Workflow" >
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+</key>
+<key name="Edit Activity" >
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Looping Workflow with Finish Options" url="Setup/Workflows/Sample_Workflows/Looping_Workflow_with_Finish_Options.htm" />
+</key>
+<key name="Edit Final Cost" >
+  <topic name="Edit Final Cost" url="My_Jobs/Edit_Final_Cost.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+</key>
+<key name="Edit Pages" >
+  <topic name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
+</key>
+<key name="Edit Planned Completion Date" >
+  <topic name="Edit Planned Completion Date" url="My_Jobs/Edit_Planned_Completion_Date.htm" />
+</key>
+<key name="Edit Role" >
+  <topic name="Edit Role (Edit Vendor)" url="Vendor_Management/Edit_Role_(Edit_Vendor).htm" />
+  <topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+</key>
+<key name="Edit Rules" >
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+</key>
+<key name="Edit Word Count" >
+  <topic name="Edit Word Count" url="My_Jobs/Edit_Word_Count.htm" />
+</key>
+<key name="Email Notification" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+</key>
+<key name="Enter Job Name" >
+  <topic name="Enter Job Name (Import p.3)" url="Data_Sources/Import/Enter_Job_Name_(Import_p.3).htm" />
+</key>
+<key name="Enter/Edit Basic Information for New Workflow" >
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+</key>
+<key name="Entry Editor" >
+  <topic name="Entry Editor" url="Setup/Terminology/Entry_Editor.htm" />
+</key>
+<key name="Exclude Item Types" >
+  <topic name="Exclude Item Types" url="Appendix/Exclude_Item_Types.htm" />
+</key>
+
+</indexdata>

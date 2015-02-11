@@ -1,0 +1,230 @@
+<%
+    String extractAsCol = bundle.getString("lb_extract_as");
+
+%>
+<script>
+function doAttrChange()
+{
+    if (hasSpecialChars(oForm.attrName.value))
+    {
+        alert("<%= bundle.getString("lb_name") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+        return false;
+    }
+    oForm.action = "<%=urlUpdate%>" + "&action=changeAttribute";
+    oForm.submit();
+}
+
+
+function doAttrAdd()
+{
+    // check if name already exists
+    if (attrExists())
+    {
+        alert("<%= bundle.getString("lb_sgml_attri_name_exists") %>");
+        return;
+    }
+    if (hasSpecialChars(oForm.attrName.value))
+    {
+        alert("<%= bundle.getString("lb_name") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+        return false;
+    }
+    oForm.action = "<%=urlUpdate%>" + "&action=addAttribute";
+    oForm.submit();
+}
+
+function attrExists()
+{
+    for (var i = 0; i < attrs.length; i++)
+    {
+        var tmp = attrs[i].split("\t");
+        for (var j = 0; j < tmp.length; j++)
+        {
+            var tmp2 = attrs[i].split(",");
+            if (tmp2[0] == oForm.attrName.value)
+                return true;
+        }
+    }
+    return false;
+}
+
+
+function doAttrRemove()
+{
+    oForm.action = "<%=urlUpdate%>" + "&action=removeAttribute";
+    oForm.submit();
+}
+
+// Update attribute table
+function updateAttrs(value, radioSelected)
+{
+    tbody = document.getElementById("attrTable");
+    for (i = tbody.rows.length; i > 0; --i)
+    {
+        tbody.deleteRow(i-1);
+    }
+    legend = document.getElementById("attrLegend");
+    elem = elems[value];
+    values = elem.split("\t");
+    legend.innerText = "Attributes for " + values[0];
+
+    // Need to get element extract value to determine the translatable value
+
+    value = attrs[value];
+    editTable = document.getElementById("editAttrFields");
+    editTable.style.display = "block";
+    if (value == undefined)
+        return;
+    if (value != "")
+    {
+        editTable.style.display = "block";
+        attrList = value.split("\t");
+        for (var i = 0; i < attrList.length; i++)
+        {
+            fieldList = attrList[i].split(",");
+            var rowColor = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
+            var row = document.createElement("tr");
+            row.style.color="black";
+            row.style.fontWeight="normal";
+            row.style.background= rowColor;
+            row.className = "standardText";
+
+            // radio button
+            var td = document.createElement("td");
+            if (radioSelected == undefined || radioSelected != i)
+            {
+                newRadio = document.createElement("<input type='radio' name='radioBtn2' value='" + attrList[i] + "," + i + "' onclick='javascript:updateAttrFieldInput(this)'>");
+            } else {
+                newRadio = document.createElement("<input type='radio' name='radioBtn2' checked value='" + attrList[i] + "," + i + "' onclick='javascript:updateAttrFieldInput(this)'>");
+            }
+            td.appendChild(newRadio);
+            row.appendChild(td);
+
+            // name
+            td = document.createElement("td");
+            text = document.createTextNode(fieldList[0]);
+            td.appendChild(text);
+            row.appendChild(td);
+
+            // extract as
+            td = document.createElement("td");
+            td.style.paddingLeft="20px";
+            if (fieldList[1] == "no")
+                text = document.createTextNode("don't extract");
+            else if (fieldList[1] == "trans")
+                text = document.createTextNode("translatable");
+            else
+                text = document.createTextNode("localizable");
+            td.appendChild(text);
+            row.appendChild(td);
+
+            // type
+            td = document.createElement("td");
+            td.style.paddingLeft="20px";
+            text = document.createTextNode(fieldList[2]);
+            td.appendChild(text);
+            row.appendChild(td);
+
+            tbody.appendChild(row);
+        }
+    }
+}
+
+var selectedAttr;
+var selectedAttrIndex;
+function updateAttrFieldInput(radio)
+{
+    selectedAttr = radio;
+    var attrValues = radio.value;
+    fieldList = attrValues.split(",");
+    oForm.origattrName.value = fieldList[0];
+    oForm.attrName.value = fieldList[0];
+    selectedAttrIndex = fieldList[3];
+    if (fieldList[1] == "no")
+        oForm.extractAs.options[0].selected = true;
+    else if (fieldList[1] == "trans")
+        oForm.extractAs.options[1].selected = true;
+    else
+        oForm.extractAs.options[2].selected = true;
+    if (fieldList[2] == "text")
+        oForm.attrType.options[0].selected = true;
+
+    oForm.changeAttrBtn.disabled=false;
+<% if (!dtd) { %>
+    oForm.removeAttrBtn.disabled=false;
+<% } %>
+
+}
+
+</script>
+<input type="hidden" name="origattrName">
+<% if (dtd) { %>
+    <input type="hidden" name="attrName">
+<% }%>
+
+<fieldset>
+  <legend id="attrLegend"><%=bundle.getString("lb_attributes")%></legend>
+    <table cellpadding=0 cellspacing=4 border=0 class="standardText">
+      <tr><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+<!-- Attributes data table -->
+          <table border="0" cellspacing="0" cellpadding="5" class="list">
+            <tr class="tableHeadingBasic" valign="bottom" style="padding-bottom: 3px;">
+              <td>&nbsp;</td>
+              <td>
+                <a class="sortHREFWhite" > <%=nameCol%>
+              </td>
+              <td style="padding-left: 20px;" nowrap >
+                <a class="sortHREFWhite" > <%=extractAsCol%>
+              </td>
+              <td style="padding-left: 20px;" width="40px">
+                <a class="sortHREFWhite" > <%=typeCol%>
+              </td>
+            </tr>
+            <tbody id=attrTable>
+            </tbody>
+            </table>
+<!-- End Attributes data table -->
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <table border=0 id="editAttrFields" style="display:block">
+        <% if (!dtd) { %>
+          <tr>
+            <td class=standardText><%=nameCol%>:</td>
+            <td><input type="text" name="attrName" ></td>
+          </tr>
+        <% } %>
+          <tr>
+            <td class=standardText><%=extractAsCol%>:</td>
+            <td>
+                <select name="extractAs">
+                    <option value="no">don't extract</option>
+                    <option value="trans">translatable</option>
+                    <option value="loc">localizable</option>
+                </select>
+            </td>
+          </tr>
+          <tr>
+            <td class=standardText><%=typeCol%>:</td>
+            <td>
+                <select name="attrType">
+                    <option value="text">text</option>
+                </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan=2>
+              <input type="button" value="<%=bundle.getString("lb_change")%>" name="changeAttrBtn" onclick="doAttrChange()"  disabled>
+<% if (!dtd) { %>
+              <input type="button" value="<%=bundle.getString("lb_remove")%>" name="removeAttrBtn" onclick="doAttrRemove()"  disabled>
+              <input type="button" value="<%=bundle.getString("lb_add")%>" name="addAttrBtn" onclick="doAttrAdd()" disabled>
+<% } %>
+            </td>
+          </tr>
+        </table>
+      </tr>
+    </table>
+</fieldset>

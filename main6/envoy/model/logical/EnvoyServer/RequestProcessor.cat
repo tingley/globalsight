@@ -1,0 +1,2195 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Request Processor"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA3D240023"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "FixErrorRequest"
+	    quid       	"39982D1A0226"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39982D6402AE"
+		    supplier   	"Logical View::com::globalsight::everest::request::AbstractRequest"
+		    quidu      	"39982CAD0048"))
+	    operations 	(list Operations
+		(object Operation "getRequestType"
+		    quid       	"39982D4A02E3"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "DiplomatXmlValidator"
+	    quid       	"39AECEDA004A"
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"39AED31100F6"
+		    label      	"create"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ValidatorHandlerBase"
+		    quidu      	"39AECF3A021F"))
+	    operations 	(list Operations
+		(object Operation "validate"
+		    quid       	"39AED3A90221"
+		    parameters 	(list Parameters
+			(object Parameter "p_diplomatXml"
+			    quid       	"3A81C099004C"
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ApacheSAXParser"
+	    quid       	"39AECF140365"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39AED006038B"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::javax.xml.parsers.SAXParer"
+		    quidu      	"39AECF990208"))
+	    operations 	(list Operations
+		(object Operation "parse"
+		    quid       	"39AED2F70275"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ApacheSAXParserFactory"
+	    quid       	"39AECF240390"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"39AED00901C3"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::javax.xml.parsers.SAXParserFactory"
+		    quidu      	"39AECFD1001E"))
+	    used_nodes 	(list uses_relationship_list
+		(object Uses_Relationship
+		    quid       	"39AED14C03BC"
+		    label      	"create"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser"
+		    quidu      	"39AECF140365"))
+	    operations 	(list Operations
+		(object Operation "newParser"
+		    quid       	"39AED47A03D0"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ValidatorHandlerBase"
+	    quid       	"39AECF3A021F")
+	(object Class "javax.xml.parsers.SAXParer"
+	    quid       	"39AECF990208")
+	(object Class "javax.xml.parsers.SAXParserFactory"
+	    quid       	"39AECFD1001E"
+	    operations 	(list Operations
+		(object Operation "newInstance"
+		    quid       	"39AED1CA018C"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Association "$UNNAMED$0"
+	    quid       	"399D77D700B3"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"399D77D703C0"
+		    supplier   	"Logical View::com::globalsight::everest::request::JMS"
+		    quidu      	"399D75E0009C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"399D77D703CA"
+		    supplier   	"Logical View::com::globalsight::everest::request::L10nRequesterServlet"
+		    quidu      	"399D77B103E3")))
+	(object Association "$UNNAMED$3"
+	    quid       	"39AED0F802B7"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"39AED0F90132"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ValidatorHandlerBase"
+		    quidu      	"39AECF3A021F"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"39AED0F90133"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser"
+		    quidu      	"39AECF140365")))
+	(object Association "$UNNAMED$6"
+	    quid       	"39AED28601DD"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"39AED287002F"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::DiplomatXmlValidator"
+		    quidu      	"39AECEDA004A"
+		    client_cardinality 	(value cardinality "1")
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"39AED287003A"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser"
+		    quidu      	"39AECF140365"
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Association "$UNNAMED$9"
+	    quid       	"39AED2A1034E"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"39AED2A201AB"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser"
+		    quidu      	"39AECF140365"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"39AED2A201B5"
+		    supplier   	"Logical View::Envoy::Envoy Server::Request Processor::DiplomatXmlValidator"
+		    quidu      	"39AECEDA004A"
+		    client_cardinality 	(value cardinality "1")
+		    is_navigable 	TRUE
+		    is_aggregate 	TRUE)))
+	(object Mechanism @1
+	    logical_models 	(list unit_reference_list
+		(object Object "$UNNAMED$12"
+		    quid       	"39AED87B0384"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEDBDA038F"
+			    supplier   	"$UNNAMED$13"
+			    quidu      	"39AED8CA039C"
+			    messages   	(list Messages
+				(object Message "send( )"
+				    quid       	"39AEDBDA0390"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    quidu      	"39AED8FA03B9"))))
+		    class      	"Logical View::com::globalsight::everest::request::L10nRequesterServlet"
+		    quidu      	"399D77B103E3"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$13"
+		    quid       	"39AED8CA039C"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEDBE702C5"
+			    supplier   	"$UNNAMED$14"
+			    quidu      	"39AEDBD1022E"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"39AEDBE702C6"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1"
+				    ordinal    	1))))
+		    class      	"Logical View::com::globalsight::everest::request::JMS"
+		    quidu      	"399D75E0009C"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$14"
+		    quid       	"39AEDBD1022E"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEDDC303E2"
+			    supplier   	"$UNNAMED$15"
+			    quidu      	"39AEDDA90132"
+			    messages   	(list Messages
+				(object Message "validate(p_diplomatXml : String)"
+				    quid       	"39AEDDC303E3"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.1"
+				    ordinal    	2
+				    Operation  	"validate(String)"
+				    quidu      	"39AED3A90221")))
+			(object Link
+			    quid       	"39AEDDDD02A9"
+			    supplier   	"$UNNAMED$14"
+			    quidu      	"39AEDBD1022E"
+			    messages   	(list Messages
+				(object Message ""
+				    quid       	"39AEDDDD02AA"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.2"
+				    ordinal    	3)))
+			(object Link
+			    quid       	"39AEDE710248"
+			    supplier   	"$UNNAMED$16"
+			    quidu      	"39AEDE690246"
+			    messages   	(list Messages
+				(object Message "createRequest(p_diplomatXml : String, p_eventFlowXml : String, p_l10nProfileId : long, p_requestType : int)"
+				    quid       	"39AEDE710249"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.3"
+				    ordinal    	4
+				    Operation  	"createRequest(String, String, long, int)"
+				    quidu      	"399D75A4010D")))
+			(object Link
+			    quid       	"39AEE13E0343"
+			    supplier   	"$UNNAMED$17"
+			    quidu      	"39AEE1310381"
+			    messages   	(list Messages
+				(object Message "addRequestToJob(L10nRequest)"
+				    quid       	"39AEE13E0344"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1.4"
+				    ordinal    	5
+				    quidu      	"38C064F0031F"))))
+		    class      	"Logical View::com::globalsight::everest::request::RequestHandlerLocal"
+		    quidu      	"3A81BDFE01FB"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$15"
+		    quid       	"39AEDDA90132"
+		    class      	"Logical View::Envoy::Envoy Server::Request Processor::DiplomatXmlValidator"
+		    quidu      	"39AECEDA004A"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$16"
+		    quid       	"39AEDE690246"
+		    class      	"Logical View::com::globalsight::everest::request::RequestFactory"
+		    quidu      	"399D755D0129"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$17"
+		    quid       	"39AEE1310381"
+		    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+		    quidu      	"38BEFAD2003B"
+		    persistence 	"Transient"
+		    multi      	FALSE)))
+	(object Mechanism @2
+	    logical_models 	(list unit_reference_list
+		(object Object "$UNNAMED$18"
+		    quid       	"39AEE26F0356"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEE2C800A1"
+			    supplier   	"$UNNAMED$19"
+			    quidu      	"39AEE2990388"
+			    messages   	(list Messages
+				(object Message "newInstance( )"
+				    quid       	"39AEE2C800A2"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"2"
+				    ordinal    	1
+				    quidu      	"39AED1CA018C")))
+			(object Link
+			    quid       	"39AEE3780144"
+			    supplier   	"$UNNAMED$20"
+			    quidu      	"39AEE28100BD"
+			    messages   	(list Messages
+				(object Message "newParser( )"
+				    quid       	"39AEE3780145"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.1"
+				    ordinal    	2
+				    quidu      	"39AED47A03D0")))
+			(object Link
+			    quid       	"39AEE38D0040"
+			    supplier   	"$UNNAMED$21"
+			    quidu      	"39AEE33801A6"
+			    messages   	(list Messages
+				(object Message "parse( )"
+				    quid       	"39AEE38D0041"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1.2"
+				    ordinal    	3
+				    quidu      	"39AED2F70275"))))
+		    class      	"Logical View::Envoy::Envoy Server::Request Processor::DiplomatXmlValidator"
+		    quidu      	"39AECEDA004A"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$20"
+		    quid       	"39AEE28100BD"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEE33E00F1"
+			    supplier   	"$UNNAMED$21"
+			    quidu      	"39AEE33801A6"))
+		    class      	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParserFactory"
+		    quidu      	"39AECF240390"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$19"
+		    quid       	"39AEE2990388"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEE302018B"
+			    supplier   	"$UNNAMED$20"
+			    quidu      	"39AEE28100BD"))
+		    class      	"Logical View::Envoy::Envoy Server::Request Processor::javax.xml.parsers.SAXParserFactory"
+		    quidu      	"39AECFD1001E"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$22"
+		    quid       	"39AEE2E40304"
+		    collaborators 	(list link_list
+			(object Link
+			    quid       	"39AEE2F002CF"
+			    supplier   	"$UNNAMED$18"
+			    quidu      	"39AEE26F0356"
+			    messages   	(list Messages
+				(object Message "validate(p_diplomatXml : String)"
+				    quid       	"39AEE2F002D0"
+				    frequency  	"Aperiodic"
+				    synchronization 	"Simple"
+				    dir        	"FromClientToSupplier"
+				    sequence   	"1"
+				    ordinal    	0
+				    Operation  	"validate(String)"
+				    quidu      	"39AED3A90221"))))
+		    class      	"Logical View::com::globalsight::everest::request::RequestHandlerLocal"
+		    quidu      	"3A81BDFE01FB"
+		    persistence 	"Transient"
+		    multi      	FALSE)
+		(object Object "$UNNAMED$21"
+		    quid       	"39AEE33801A6"
+		    class      	"Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser"
+		    quidu      	"39AECF140365"
+		    persistence 	"Transient"
+		    multi      	FALSE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Request Processor Main"
+	    quid       	"38C0137F00D2"
+	    title      	"Request Processor Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::RequestHandler" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1905, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1730, 113)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	350
+			justify    	0
+			label      	"RequestHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(1730, 63)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	350
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6EEB803C6"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(1730, 228)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	347)
+		    width      	368
+		    height     	348
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::AbstractRequest" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1620, 1725)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1414, 1491)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	412
+			justify    	0
+			label      	"AbstractRequest")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39982CAD0048"
+		    compartment 	(object Compartment
+			Parent_View 	@4
+			location   	(1414, 1606)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	6
+			max_width  	409)
+		    width      	430
+		    height     	492
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::LocalizationRequestProcesser::L10nRequest" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1335, 2220)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1001, 2111)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	668
+			justify    	0
+			label      	"L10nRequest")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39982D0E00D4"
+		    compartment 	(object Compartment
+			Parent_View 	@5
+			location   	(1001, 2226)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	369)
+		    width      	686
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::FixErrorRequest" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1965, 2220)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(1779, 2114)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	372
+			justify    	0
+			label      	"FixErrorRequest")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39982D1A0226"
+		    compartment 	(object Compartment
+			Parent_View 	@6
+			location   	(1779, 2175)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	369)
+		    width      	390
+		    height     	236
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @7
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39982D610336"
+		    client     	@5
+		    supplier   	@4
+		    line_style 	0)
+		(object InheritView "" @8
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39982D6402AE"
+		    client     	@6
+		    supplier   	@4
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::Request" @9
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1620, 1095)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@9
+			location   	(966, 633)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	1308
+			justify    	0
+			label      	"Request")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@9
+			location   	(966, 583)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1308
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6EBFD00F9"
+		    compartment 	(object Compartment
+			Parent_View 	@9
+			location   	(966, 748)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	17
+			max_width  	1306)
+		    width      	1326
+		    height     	1048
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @10
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39982D5E0075"
+		    client     	@4
+		    supplier   	@9
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::RequestFactory" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(510, 1215)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(234, 1106)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	552
+			justify    	0
+			label      	"RequestFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399D755D0129"
+		    compartment 	(object Compartment
+			Parent_View 	@11
+			location   	(234, 1221)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	550)
+		    width      	570
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object UsesView "" @12
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399D75C603E7"
+		    client     	@11
+		    supplier   	@9
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::JMS" @13
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(870, 615)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@13
+			location   	(744, 506)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	252
+			justify    	0
+			label      	"JMS")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399D75E0009C"
+		    compartment 	(object Compartment
+			Parent_View 	@13
+			location   	(744, 621)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	163)
+		    width      	270
+		    height     	242
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::L10nRequesterServlet" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(375, 210)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(200, 76)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	350
+			justify    	0
+			label      	"L10nRequesterServlet")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"399D77B103E3"
+		    compartment 	(object Compartment
+			Parent_View 	@14
+			location   	(200, 241)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	347)
+		    width      	368
+		    height     	292
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @15
+		    location   	(644, 429)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399D77D700B3"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @16
+			    Parent_View 	@15
+			    location   	(276, 221)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399D77D703C0"
+			    client     	@15
+			    supplier   	@13
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @17
+			    Parent_View 	@15
+			    location   	(276, 221)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399D77D703CA"
+			    client     	@15
+			    supplier   	@14
+			    line_style 	0)))))
+	(object ClassDiagram "External Interface"
+	    quid       	"38C6EBC600F0"
+	    title      	"External Interface"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::Request" @18
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(735, 420)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@18
+			location   	(106, 49)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	1258
+			justify    	0
+			label      	"Request")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@18
+			location   	(106, 4)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1258
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6EBFD00F9"
+		    compartment 	(object Compartment
+			Parent_View 	@18
+			location   	(106, 512)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	17
+			max_width  	1256)
+		    width      	1276
+		    height     	854
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::RequestHandler" @19
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(465, 1125)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@19
+			location   	(118, 1024)
+			fill_color 	16777215
+			nlines     	1
+			max_width  	694
+			justify    	0
+			label      	"RequestHandler")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@19
+			location   	(118, 979)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	694
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C6EEB803C6"
+		    compartment 	(object Compartment
+			Parent_View 	@19
+			location   	(118, 1217)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	690)
+		    width      	712
+		    height     	314
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::request::LocalizationRequestProcesser" @20
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(1485, 1095)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@20
+			location   	(986, 997)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	998
+			justify    	0
+			label      	"LocalizationRequestProcesser")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3A818F9D025D"
+		    width      	1016
+		    height     	218
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "Diplomat XML Validator"
+	    quid       	"39AECEB8031D"
+	    title      	"Diplomat XML Validator"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParserFactory" @21
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1856, 720)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(1578, 620)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	557
+			justify    	0
+			label      	"ApacheSAXParserFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECF240390"
+		    width      	575
+		    height     	225
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::javax.xml.parsers.SAXParer" @22
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 208)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@22
+			location   	(750, 139)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	676
+			justify    	0
+			label      	"javax.xml.parsers.SAXParer")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECF990208"
+		    width      	694
+		    height     	162
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::javax.xml.parsers.SAXParserFactory" @23
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1856, 352)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(1500, 264)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	713
+			justify    	0
+			label      	"javax.xml.parsers.SAXParserFactory")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECFD1001E"
+		    width      	731
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @24
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED00901C3"
+		    client     	@21
+		    supplier   	@23
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::ValidatorHandlerBase" @25
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1072, 1632)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(794, 1569)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	557
+			justify    	0
+			label      	"ValidatorHandlerBase")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECF3A021F"
+		    width      	575
+		    height     	150
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::ApacheSAXParser" @26
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1088, 1056)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@26
+			location   	(891, 968)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	394
+			justify    	0
+			label      	"ApacheSAXParser")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECF140365"
+		    width      	412
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritView "" @27
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED006038B"
+		    client     	@26
+		    supplier   	@22
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$3" @28
+		    location   	(1079, 1356)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED0F802B7"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @29
+			    Parent_View 	@28
+			    location   	(110, 555)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39AED0F90132"
+			    client     	@28
+			    supplier   	@25
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @30
+			    Parent_View 	@28
+			    location   	(110, 555)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39AED0F90133"
+			    client     	@28
+			    supplier   	@26
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::Envoy Server::Request Processor::DiplomatXmlValidator" @31
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(416, 384)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@31
+			location   	(172, 300)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	489
+			justify    	0
+			label      	"DiplomatXmlValidator")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AECEDA004A"
+		    width      	507
+		    height     	193
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$9" @32
+		    location   	(749, 717)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED2A1034E"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @33
+			    Parent_View 	@32
+			    location   	(397, 301)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39AED2A201AB"
+			    client     	@32
+			    supplier   	@26
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @34
+			    Parent_View 	@32
+			    location   	(397, 301)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39AED2A201B5"
+			    client     	@32
+			    supplier   	@31
+			    line_style 	0
+			    label      	(object SegLabel @35
+				Parent_View 	@34
+				location   	(996, 903)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	-0.913398
+				height     	44
+				orientation 	1))))
+		(object UsesView "create" @36
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@36
+			location   	(572, 1070)
+			anchor_loc 	1
+			nlines     	1
+			max_width  	112
+			justify    	0
+			label      	"create")
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED31100F6"
+		    client     	@31
+		    supplier   	@25
+		    vertices   	(list Points
+			(416, 480)
+			(416, 894)
+			(1005, 1556))
+		    line_style 	0)
+		(object UsesView "create" @37
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@37
+			location   	(1447, 898)
+			anchor_loc 	1
+			nlines     	1
+			max_width  	112
+			justify    	0
+			label      	"create")
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39AED14C03BC"
+		    client     	@21
+		    supplier   	@26
+		    line_style 	0)))
+	(object InteractionDiagram "Component API: submitRequest"
+	    mechanism_ref 	@1
+	    quid       	"39AED7C403C7"
+	    title      	"Component API: submitRequest"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "$UNNAMED$12" @38
+		    location   	(272, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@38
+			location   	(272, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	402
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AED87B0384"
+		    width      	420
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @39
+			location   	(272, 448)
+			line_color 	3342489
+			InterObjView 	@38
+			height     	643
+			y_coord    	583
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$13" @40
+		    location   	(672, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@40
+			location   	(672, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AED8CA039C"
+		    width      	300
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @41
+			location   	(672, 448)
+			line_color 	3342489
+			InterObjView 	@40
+			height     	583
+			y_coord    	523
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$14" @42
+		    location   	(1065, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@42
+			location   	(1065, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	416
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEDBD1022E"
+		    width      	434
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @43
+			location   	(1065, 496)
+			line_color 	3342489
+			InterObjView 	@42
+			height     	475
+			y_coord    	415
+			Nested     	FALSE)
+		    Focus_Of_Control 	(object Focus_Of_Control "" @44
+			location   	(1065, 640)
+			line_color 	3342489
+			InterObjView 	@42
+			height     	60
+			y_coord    	0
+			Nested     	TRUE))
+		(object InterObjView "$UNNAMED$15" @45
+		    location   	(1568, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@45
+			location   	(1568, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	404
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEDDA90132"
+		    width      	422
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @46
+			location   	(1568, 544)
+			line_color 	3342489
+			InterObjView 	@45
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$16" @47
+		    location   	(2000, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@47
+			location   	(2000, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	314
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEDE690246"
+		    width      	332
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @48
+			location   	(2000, 736)
+			line_color 	3342489
+			InterObjView 	@47
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$17" @49
+		    location   	(2368, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@49
+			location   	(2368, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	282
+			justify    	0
+			label      	"")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE1310381"
+		    width      	300
+		    height     	956
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @50
+			location   	(2368, 864)
+			line_color 	3342489
+			InterObjView 	@49
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @51
+		    location   	(16, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @52
+			Parent_View 	@51
+			location   	(464, 400)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEDBDA0390"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	182
+			justify    	0
+			label      	"send( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@38
+		    supplier   	@40
+		    Focus_Src  	@39
+		    Focus_Entry 	@41
+		    origin     	(287, 448)
+		    terminus   	(656, 448)
+		    ordinal    	0)
+		(object InterMessView "" @53
+		    location   	(16, 496)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @54
+			Parent_View 	@53
+			location   	(868, 452)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEDBE702C6"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	47
+			justify    	0
+			label      	""
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@40
+		    supplier   	@42
+		    Focus_Src  	@41
+		    Focus_Entry 	@43
+		    origin     	(687, 496)
+		    terminus   	(1049, 496)
+		    ordinal    	1)
+		(object InterMessView "" @55
+		    location   	(16, 544)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @56
+			Parent_View 	@55
+			location   	(1316, 500)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEDDC303E3"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"validate(p_diplomatXml : String)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@42
+		    supplier   	@45
+		    Focus_Src  	@43
+		    Focus_Entry 	@46
+		    origin     	(1080, 544)
+		    terminus   	(1552, 544)
+		    ordinal    	2)
+		(object SelfMessView "" @57
+		    location   	(16, 640)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @58
+			Parent_View 	@57
+			location   	(1156, 596)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEDDDD02AA"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	47
+			justify    	0
+			label      	""
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@42
+		    supplier   	@42
+		    Focus_Src  	@43
+		    Focus_Entry 	@44
+		    origin     	(1081, 640)
+		    terminus   	(1231, 640)
+		    ordinal    	3)
+		(object InterMessView "" @59
+		    location   	(1872, 736)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @60
+			Parent_View 	@59
+			location   	(1532, 692)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEDE710249"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"createRequest(p_diplomatXml : String, p_eventFlowXml : String, p_l10nProfileId : long, p_requestType : int)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@42
+		    supplier   	@47
+		    Focus_Src  	@43
+		    Focus_Entry 	@48
+		    origin     	(1080, 736)
+		    terminus   	(1984, 736)
+		    ordinal    	4)
+		(object Label @61
+		    location   	(880, 416)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	1
+		    max_width  	600
+		    label      	"onMessage()")
+		(object Label @62
+		    location   	(1200, 576)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    nlines     	1
+		    max_width  	600
+		    label      	"submitRequest()")
+		(object InterMessView "" @63
+		    location   	(1712, 864)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @64
+			Parent_View 	@63
+			location   	(1677, 832)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEE13E0344"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	641
+			justify    	0
+			label      	"addRequestToJob(L10nRequest)"
+			pctDist    	0.469565
+			height     	33
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@42
+		    supplier   	@49
+		    Focus_Src  	@43
+		    Focus_Entry 	@50
+		    origin     	(1080, 864)
+		    terminus   	(2352, 864)
+		    ordinal    	5)))
+	(object InteractionDiagram "DiplomatXmlValidator: validate"
+	    mechanism_ref 	@2
+	    quid       	"39AEE206030F"
+	    title      	"DiplomatXmlValidator: validate"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object InterObjView "$UNNAMED$18" @65
+		    location   	(752, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@65
+			location   	(752, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	404
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE26F0356"
+		    width      	422
+		    height     	765
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @66
+			location   	(752, 416)
+			line_color 	3342489
+			InterObjView 	@65
+			height     	424
+			y_coord    	364
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$20" @67
+		    location   	(2016, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@67
+			location   	(2016, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	482
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE28100BD"
+		    width      	500
+		    height     	765
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @68
+			location   	(2016, 608)
+			line_color 	3342489
+			InterObjView 	@67
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$21" @69
+		    location   	(2480, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@69
+			location   	(2480, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	346
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE33801A6"
+		    width      	364
+		    height     	765
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @70
+			location   	(2480, 720)
+			line_color 	3342489
+			InterObjView 	@69
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$22" @71
+		    location   	(255, 225)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@71
+			location   	(255, 225)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	416
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE2E40304"
+		    width      	434
+		    height     	765
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @72
+			location   	(255, 416)
+			line_color 	3342489
+			InterObjView 	@71
+			height     	484
+			y_coord    	424
+			Nested     	FALSE))
+		(object InterObjView "$UNNAMED$19" @73
+		    location   	(1344, 224)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	TRUE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@73
+			location   	(1344, 224)
+			fill_color 	13434879
+			anchor_loc 	1
+			nlines     	2
+			max_width  	680
+			justify    	0
+			label      	"")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39AEE2990388"
+		    width      	698
+		    height     	765
+		    icon_height 	0
+		    icon_width 	0
+		    icon_y_offset 	0
+		    annotation 	1
+		    Focus_Of_Control 	(object Focus_Of_Control "" @74
+			location   	(1344, 464)
+			line_color 	3342489
+			InterObjView 	@73
+			height     	60
+			y_coord    	0
+			Nested     	FALSE))
+		(object InterMessView "" @75
+		    location   	(1056, 464)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @76
+			Parent_View 	@75
+			location   	(1041, 417)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEE2C800A2"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	319
+			justify    	0
+			label      	"newInstance( )"
+			pctDist    	0.488414
+			height     	48
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@65
+		    supplier   	@73
+		    Focus_Src  	@66
+		    Focus_Entry 	@74
+		    origin     	(767, 464)
+		    terminus   	(1328, 464)
+		    ordinal    	1)
+		(object InterMessView "" @77
+		    location   	(16, 416)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @78
+			Parent_View 	@77
+			location   	(503, 372)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEE2F002D0"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	10
+			justify    	0
+			label      	"validate(p_diplomatXml : String)"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@71
+		    supplier   	@65
+		    Focus_Src  	@72
+		    Focus_Entry 	@66
+		    origin     	(270, 416)
+		    terminus   	(736, 416)
+		    ordinal    	0)
+		(object InterMessView "" @79
+		    location   	(1392, 608)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @80
+			Parent_View 	@79
+			location   	(1383, 564)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEE3780145"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	285
+			justify    	0
+			label      	"newParser( )"
+			pctDist    	0.500000
+			height     	45
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@65
+		    supplier   	@67
+		    Focus_Src  	@66
+		    Focus_Entry 	@68
+		    origin     	(767, 608)
+		    terminus   	(2000, 608)
+		    ordinal    	2)
+		(object InterMessView "" @81
+		    location   	(16, 720)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @82
+			Parent_View 	@81
+			location   	(1615, 673)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			quidu      	"39AEE38D0041"
+			anchor_loc 	1
+			nlines     	1
+			max_width  	194
+			justify    	0
+			label      	"parse( )"
+			pctDist    	0.499711
+			height     	48
+			orientation 	0)
+		    line_color 	3342489
+		    client     	@65
+		    supplier   	@69
+		    Focus_Src  	@66
+		    Focus_Entry 	@70
+		    origin     	(767, 720)
+		    terminus   	(2464, 720)
+		    ordinal    	3)))))

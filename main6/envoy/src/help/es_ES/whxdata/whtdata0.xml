@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<book name="Configuración" >
+  <book name="Archivos de referencia" >
+    <item name="Enviar archivos de referencia" url="Configuraci_n/Archivos_de_referencia/Upload_Support_Files.htm" />
+    <item name="Pantalla principal Archivos de referencia" url="Configuraci_n/Archivos_de_referencia/Support_Files_Main_Screen.htm" />
+  </book>
+  <book name="Archivos de registro" >
+    <item name="Archivos de registro" url="Configuraci_n/Archivos_de_registro/Log_Files.htm" />
+  </book>
+  <book name="Bases de datos terminológica" >
+    <item name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+    <item name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+    <item name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+    <item name="Examinar base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Browse_Termbase.htm" />
+    <item name="Importar" url="Configuraci_n/Bases_de_datos_terminol_gica/Import.htm" />
+    <item name="Pantalla principal Terminología" url="Configuraci_n/Bases_de_datos_terminol_gica/Terminology_Main_Screen.htm" />
+    <item name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+  </book>
+  <book name="Combinaciones de idiomas" >
+    <item name="Crear combinación de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Create_Locale_Pair.htm" />
+    <item name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+  </book>
+  <book name="Extensiones de archivo" >
+    <item name="Crear extensión de archivo" url="Configuraci_n/Extensiones_de_archivo/Create_File_Extension.htm" />
+    <item name="Pantalla principal Extensiones de archivo" url="Configuraci_n/Extensiones_de_archivo/File_Extensions_Main_Screen.htm" />
+  </book>
+  <book name="Importar fragmentos" >
+    <item name="Importar fragmentos" url="Configuraci_n/Importar_fragmentos/Import_Snippet_Files.htm" />
+  </book>
+  <book name="Memoria de traducción" >
+    <item name="Crear/modificar memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Create_Modify_Translation_Memory.htm" />
+    <item name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+  </book>
+  <book name="Moneda" >
+    <item name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+    <item name="Pantalla principal Moneda" url="Configuraci_n/Moneda/Currency_Main_Screen.htm" />
+  </book>
+  <book name="Parámetros del sistema" >
+    <item name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  </book>
+  <book name="Perfiles de traducción" >
+    <item name="Adjuntar procesos de producción a idiomas de destino" url="Configuraci_n/Perfiles_de_traducci_n/Attach_Workflows_to_Target_Locales.htm" />
+    <item name="Añadir/Modificar procesos de producción" url="Configuraci_n/Perfiles_de_traducci_n/Add_Edit_Workflows.htm" />
+    <item name="Crear/modificar actividad" url="Configuraci_n/Perfiles_de_traducci_n/Create_Modify_Activity.htm" />
+    <item name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+    <item name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+    <item name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+  </book>
+  <book name="Procesos de producción" >
+    <book name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" >
+      <item name="Proceso_de_producci_n_con_bucle_y_opci_n_de_terminar" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm#Proceso_de_producci_n_con_bucle_y_opci_n_de_terminar" />
+      <item name="Proceso_de_producci_n_de_una_etapa" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm#Proceso_de_producci_n_de_una_etapa" />
+      <item name="Proceso_de_producci_n_con_bucle" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm#Proceso_de_producci_n_con_bucle" />
+      <item name="Proceso_de_producci_n_de_dos_etapas" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm#Proceso_de_producci_n_de_dos_etapas" />
+    </book>
+    <item name="Introduzca la información básica del nuevo proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Basic_Info.htm" />
+    <item name="Procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Workflows.htm" />
+    <item name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+  </book>
+  <book name="Proyectos" >
+    <item name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+    <item name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  </book>
+  <book name="Tarifas" >
+    <item name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+    <item name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  </book>
+  <book name="Tipos de actividades" >
+    <item name="Crear/modificar tipo de actividad" url="Configuraci_n/Tipos_de_actividades/Create_Modify_Activity_Type.htm" />
+    <item name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+  </book>
+  <book name="Usuarios" >
+    <item name="Cargos" url="Configuraci_n/Usuarios/Roles.htm" />
+    <item name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+    <item name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+  </book>
+  <item name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+</book>
+<book name="Fuentes de datos" >
+  <book name="Conexiones a la base de datos" >
+    <item name="Crear/modificar conexión a la base datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/Create_Modify_DB_Connection.htm" />
+    <item name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  </book>
+  <book name="Configuración de importación de la base de datos" >
+    <item name="Crear/modificar configuraciones de importación" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/Create_Modify_Import_Settings.htm" />
+    <item name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  </book>
+  <book name="Importación" >
+    <item name="Pantalla principal de importación" url="Fuentes_de_datos/Importaci_n/Import_Main_Screen.htm" />
+    <item name="Seleccionar los archivos a importar" url="Fuentes_de_datos/Importaci_n/Select_Files_To_Import.htm" />
+  </book>
+  <book name="Perfiles de archivos" >
+    <item name="Crear/modificar perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/Create_Modify_File_Profile.htm" />
+    <item name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  </book>
+  <book name="Perfiles de bases de datos" >
+    <item name="Columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Columns.htm" />
+    <item name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+    <item name="Información básica" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Basic_Information_DB_Profiles.htm" />
+    <item name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+    <item name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+    <item name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+    <item name="Pantalla principal Perfiles de bases de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Profiles_Main_Screen.htm" />
+  </book>
+  <book name="Ramas de TeamSite" >
+    <item name="Definir una nueva rama de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/New_TeamSite_Branch_Definition.htm" />
+    <item name="Ramas de destino de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Target_Branches.htm" />
+    <item name="Ramas de origen de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Source_Branches.htm" />
+  </book>
+  <book name="Reglas de vista previa de la base de datos" >
+    <item name="Crear/modificar reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/Create_Modify_DB_Preview_Rules.htm" />
+    <item name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+  </book>
+  <book name="Reglas XML" >
+    <item name="Crear/modificar reglas XML" url="Fuentes_de_datos/Reglas_XML/Create_Modify_XML_Rules.htm" />
+    <item name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+  </book>
+  <book name="Ubicaciones de exportación" >
+    <item name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+  </book>
+  <item name="Menú Fuentes de datos" url="Fuentes_de_datos/Data_Sources_Menu.htm" />
+</book>
+<book name="Mis trabajos" >
+<chunk name="Mis trabajos" ref="whtdata1.xml" />
+</book>
+<book name="Mis actividades" >
+<chunk name="Mis actividades" ref="whtdata2.xml" />
+</book>
+<book name="Informes" >
+  <item name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+  <item name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <item name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+  <item name="Informe Detalles del trabajo" url="Informes/Job_Details_Report.htm" />
+  <item name="Pantalla principal Informes" url="Informes/Reports_Main_Screen.htm" />
+</book>
+<book name="Apéndice" >
+<chunk name="Apéndice" ref="whtdata3.xml" />
+</book>
+<book name="Glosario" >
+<chunk name="Glosario" ref="whtdata4.xml" />
+</book>
+<item name="Descripción general" url="Overview.htm" />
+<item name="Información sobre la cuenta" url="My_Account.htm" />
+
+</tocdata>

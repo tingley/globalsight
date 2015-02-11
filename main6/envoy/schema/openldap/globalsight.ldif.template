@@ -1,0 +1,107 @@
+dn: o=%%ldap_base%%
+o: %%ldap_base%%
+description: LDAP BASE.
+objectclass: top
+objectclass: organization
+
+dn: ou=People,o=%%ldap_base%%
+ou: People
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=Groups,o=%%ldap_base%%
+ou: Groups
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=Special Users,o=%%ldap_base%%
+ou: Special Users
+description: Special Administrative Accounts.
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=AccessGroups,o=%%ldap_base%%
+ou: AccessGroups
+description: All the possible access groups and permissions for GlobalSight.
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+ou: AccessGroups
+ou: Ambassador
+description: All the access groups for the Ambassador product.
+objectclass: top
+objectclass: organizationalunit
+
+dn: uid=%%system4_admin_username%%, ou=People, o=%%ldap_base%%
+ou: People
+objectclass: localizationperson
+objectclass: inetorgperson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+companyname: %%system4_super_company_name%%
+o: %%ldap_base%%
+uid: %%system4_admin_username%%
+cn: GlobalSight Admininistrator
+givenname: GlobalSight
+sn: Admininistrator
+defaultuilocale: en_US
+mail: %%admin_email%%
+status: ACTIVE
+userPassword: %%super_admin_password%%
+
+dn: cn=Administrator, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+ou: AccessGroups
+description: People with administrative capabilities for GlobalSight.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: Administrator
+o: %%ldap_base%%
+uniquemember: uid=%%system4_admin_username%%,ou=People,o=%%ldap_base%%
+
+dn: cn=ProjectManager, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+ou: AccessGroups
+description: Provides permissions for project management tasks.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: ProjectManager
+o: %%ldap_base%%
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: cn=LocalizationParticipant, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+description: Access to all localization tasks.
+objectclass: AccessGroup
+cn: LocalizationParticipant
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: cn=LocaleManager, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+description: Access to all localization tasks, plus add/delete local content.
+objectclass: AccessGroup
+cn: LocaleManager
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: cn=WorkflowManager, ou=Ambassador, ou=AccessGroups, o=%%ldap_base%%
+description: Provides permissions for workflow management tasks.
+objectclass: AccessGroup
+objectclass: groupofuniquenames
+objectclass: top
+cn: WorkflowManager
+uniquemember: ou=People,o=%%ldap_base%%
+
+dn: uid=%%ldap_username%%, ou=People, o=%%ldap_base%%
+ou: People
+description: Provides LDAP access internally for GlobalSight and iFlow.
+objectclass: inetorgperson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+o: %%ldap_base%%
+uid: %%ldap_username%%
+cn: LDAP Connection User
+givenname: LDAP Connection
+sn: User
+userPassword: %%ldap_user_password%%
+

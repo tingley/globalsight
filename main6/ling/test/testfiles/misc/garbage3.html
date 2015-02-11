@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+</HEAD>
+
+<BODY>
+<P>Taken from Microsoft's homepage Wed Aug 23 01:34:25 2000</P>
+
+<P>The problem here is that the opening font is part of the skeleton
+and not wrapped in a TMX tag, whereas the closing tag is considered
+part of the text and is output as isolated tag.  There's probably no
+way for a SAX-like HTML parser to move trailing tags from a text- to a
+skeleton context...
+</P>
+
+<FONT face="Verdana, Arial, Helvetica" size=1>
+      <FORM name=frmQuickSearch 
+      action=http://search.microsoft.com/us/default.asp 
+      method=get><B>Search</B><BR><INPUT style="FONT-SIZE: 10px" tabIndex=1 
+      name=qu MAXSIZE="40">&nbsp;<INPUT style="FONT-SIZE: 10px" tabIndex=2 type=submit value=GO name=btnSearch>&nbsp; 
+      <INPUT type=hidden value=RECCNT name=so> <INPUT type=hidden value=ALL 
+      name=boolean> <INPUT type=hidden value=0 name=intCat> <INPUT type=hidden 
+      value=1 name=intCat> <INPUT type=hidden value=2 name=intCat> <INPUT 
+      type=hidden value=3 name=intCat> <INPUT type=hidden value=4 name=intCat> 
+      <INPUT type=hidden value=5 name=intCat> <INPUT type=hidden value=6 
+      name=intCat> <INPUT type=hidden value=7 name=intCat> <INPUT type=hidden 
+      value=8 name=intCat> <INPUT type=hidden value=9 name=intCat> <INPUT 
+      type=hidden value=NEW name=nq> <INPUT type=hidden value=1 name=p> 
+      </FORM><B>Product Family Sites</B><BR><IMG height=1 alt="" 
+      src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/servers/">Servers</A><BR><IMG height=1 
+      alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://msdn.microsoft.com/vstudio/">Developer Tools</A><BR><IMG 
+      height=1 alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/office/">Office</A><BR><IMG height=1 alt="" 
+      src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/windows/">Windows</A><BR><BR><B>Web 
+      Services</B><BR><IMG height=1 alt="" src="Microsoft_files/1ptrans.gif" 
+      width=11 border=0> <A 
+      href="http://on.linkexchange.com/?ATID=15&amp;AID=1191">bCentral</A><BR><IMG 
+      height=1 alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.msn.com/">MSN</A><BR><BR><B>Customer Sites</B><BR><IMG 
+      height=1 alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/insider/">Home &amp; Personal</A><BR><IMG 
+      height=1 alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/business/">Business</A><BR><IMG height=1 
+      alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://msdn.microsoft.com/">Developer</A><BR><IMG height=1 alt="" 
+      src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/education/">Education</A><BR><IMG height=1 
+      alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/technet/">IT Professional</A><BR><IMG 
+      height=1 alt="" src="Microsoft_files/1ptrans.gif" width=11 border=0> <A 
+      href="http://www.microsoft.com/directaccess/">Partner/Reseller</A>
+      <BR><BR>
+
+</FONT>
+
+</BODY>
+</HTML>

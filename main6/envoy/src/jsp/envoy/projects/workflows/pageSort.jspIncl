@@ -1,0 +1,33 @@
+<%
+Integer pSortColumn = (Integer)session.getAttribute(JobManagementHandler.PAGE_SORT_COLUMN);
+Boolean pSortAscending = (Boolean)session.getAttribute(JobManagementHandler.PAGE_SORT_ASCENDING);
+
+// Build the reverse sort directive
+// get sort arrow image (up -or- down)
+String iSortArrow = pSortAscending.booleanValue() ? bundle.getString("img_arrowUp") : bundle.getString("img_arrowDown");
+StringBuffer tmpString = new StringBuffer();
+tmpString.append("<IMG SRC=\"");
+tmpString.append(iSortArrow);
+tmpString.append("\" WIDTH=7 HEIGHT=4 HSPACE=1 BORDER=0>");
+iSortArrow = tmpString.toString();
+
+// Set sort arrow image and the reverse sort directive
+// (doing it this way keeps the HTML cleaner below)
+String pageNameSortArrow, fileProfileNameSortArrow, wordCountSortArrow;
+
+pageNameSortArrow = fileProfileNameSortArrow = wordCountSortArrow =  "";
+switch(pSortColumn.intValue())
+{
+    case PageComparator.EXTERNAL_PAGE_ID:
+        pageNameSortArrow = iSortArrow;
+        break;
+    case PageComparator.FILE_PROFILE_NAME:
+        fileProfileNameSortArrow = iSortArrow;
+        break;
+    case PageComparator.WORD_COUNT:
+        wordCountSortArrow = iSortArrow;
+        break;
+    default:
+        break;
+}
+%>

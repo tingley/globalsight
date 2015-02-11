@@ -1,0 +1,211 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "online"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3AA6CC5F0110"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "ViewConstants"
+	    quid       	"3AA7AD3C01D3"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "STANDARD_TYPE"
+		    quid       	"3AA7AD5C00F3"
+		    type       	"int"
+		    initv      	"1"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "DETAIL_TYPE"
+		    quid       	"3AA7AD8D0049"
+		    type       	"int"
+		    initv      	"2"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "MONITOR_MODE"
+		    quid       	"3AA7ADF5003E"
+		    type       	"int"
+		    initv      	"1"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "EDIT_MODE"
+		    quid       	"3AA7AE1900A4"
+		    type       	"int"
+		    initv      	"2"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "PREVIEW_MODE"
+		    quid       	"3AA7AE3001E8"
+		    type       	"int"
+		    initv      	"3"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "PTAG_FORMAT_VERBOSE"
+		    quid       	"3AA7B2E3027E"
+		    type       	"int"
+		    initv      	"1"
+		    exportControl 	"Public"
+		    static     	TRUE)
+		(object ClassAttribute "PTAG_FORMAT_COMPACT"
+		    quid       	"3AA7B2F103E7"
+		    type       	"int"
+		    initv      	"2"
+		    exportControl 	"Public"
+		    static     	TRUE)))
+	(object Class "OnlineEditManager"
+	    quid       	"3AA7AF4A0216"
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getMainEditorView"
+		    quid       	"3AA7AF600087"
+		    parameters 	(list Parameters
+			(object Parameter "p_viewType"
+			    quid       	"3AA7AF90005E"
+			    type       	"int")
+			(object Parameter "p_viewMode"
+			    quid       	"3AA7AF9902FF"
+			    type       	"int")
+			(object Parameter "p_pageId"
+			    quid       	"3AA7AFB90247"
+			    type       	"long"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D9546039F")
+		(object Operation "getTranslationEditorView"
+		    quid       	"3AA7AFD10165"
+		    parameters 	(list Parameters
+			(object Parameter "p_viewType"
+			    quid       	"3AA7AFE30193"
+			    type       	"int")
+			(object Parameter "p_viewMode"
+			    quid       	"3AA7B01F032A"
+			    type       	"int")
+			(object Parameter "p_taskId"
+			    quid       	"3AA7B027026D"
+			    type       	"long"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"397D9546039F"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Package Overview"
+	    quid       	"3AA6CC5F0111"
+	    title      	"Package Overview"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::com::globalsight::everest::edit::online::ViewConstants" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(495, 915)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(147, 707)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	696
+			justify    	0
+			label      	"ViewConstants")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7AD3C01D3"
+		    compartment 	(object Compartment
+			Parent_View 	@1
+			location   	(147, 763)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	8
+			max_width  	700)
+		    width      	714
+		    height     	438
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::com::globalsight::everest::edit::online::OnlineEditManager" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    ShowOperationSignature 	TRUE
+		    location   	(780, 180)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(31, 104)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1498
+			justify    	0
+			label      	"OnlineEditManager")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(31, 59)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	1498
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3AA7AF4A0216"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(31, 160)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	1502)
+		    width      	1516
+		    height     	264
+		    annotation 	8
+		    autoResize 	TRUE)))))

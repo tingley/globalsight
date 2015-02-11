@@ -1,0 +1,27 @@
+<%@ page import='com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler'
+%>
+<jsp:useBean id="pageSearch" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<%
+   String pageSearchUrl = pageSearch.getPageURL() + "&action=" +
+     JobManagementHandler.PAGE_SEARCH_BEAN;
+%>
+<FORM NAME="pagesForm" METHOD="POST" action="<%=pageSearchUrl%>">
+<!-- Pages table -->
+<table border="0" class="standardText" cellpadding="2">
+  <tr>
+    <td class="standardText">
+      <%=lb_filter_text%>
+    </td>
+    <TD>
+      <input type="text" maxlength="200" size="30"
+      name="<%=JobManagementHandler.PAGE_SEARCH_PARAM%>"
+      value="<%=thisFileSearch%>">
+    </td>
+    <td>
+      <input type="submit" value="<%=bundle.getString("lb_search")%>">
+    </td>
+  </tr>
+</table> 
+</FORM>
+

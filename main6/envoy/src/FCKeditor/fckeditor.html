@@ -1,0 +1,108 @@
+<!--
+ * FCKeditor - The text editor for internet
+ * Copyright (C) 2003 Frederico Caldeira Knabben
+ *
+ * Licensed under the terms of the GNU Lesser General Public License
+ * (http://www.opensource.org/licenses/lgpl-license.php)
+ *
+ * For further information go to http://www.fredck.com/FCKeditor/ 
+ * or contact fckeditor@fredck.com.
+ *
+ * fckeditor.html: Main page that holds the editor.
+ *
+ * Authors:
+ *   Frederico Caldeira Knabben (fckeditor@fredck.com)
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<html>
+<head>
+<title>FCKeditor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="css/fck_editor.css" type="text/css" rel="stylesheet">
+  <!-- Constants -->
+  <script language="javascript" src="js/dhtmled.js"></script>
+  <!-- Includes -->
+  <script language="javascript" src="/globalsight/includes/ASCIIMathML-LGPL.js"></script>
+  <script language="javascript" src="js/fck_config.js"></script>
+  <script language="javascript" src="js/fck_init.js"></script>
+  <script language="javascript" src="js/fck_lang.js"></script>
+  <script language="javascript" src="js/fck_events.js"></script>
+  <script language="javascript" src="js/fck_toolbar.js"></script>
+  <script language="javascript" src="js/fck_toolbaritems.js"></script>
+  <script language="javascript" src="js/fck_xhtml.js"></script>
+  <script language="javascript" src="js/fck_actions.js"></script>
+  <script language="javascript" src="js/fck_displaychange.js"></script>
+  <script language="javascript" src="js/fck_contextmenu.js"></script>
+  <script language="javascript" src="js/fck_editor.js"></script>
+  <!-- DEC Events -->
+  <script language="javascript" event="DocumentComplete" for="objContent">
+  initEditor() ;
+  </script>
+  <script language="javascript" event="DisplayChanged" for="objContent">
+  events.fireEvent('onEditing') ;
+  </script>
+  <script language="javascript" event="ShowContextMenu" for="objContent">
+  showContextMenu() ;
+  </script>
+  <script language="javascript" event="ContextMenuAction(itemIndex)" for="objContent">
+  contextMenuAction(itemIndex) ;
+  </script>
+  <script language="javascript" event="onerror(msg, url, line)" for="window">
+  return true ;	 // To hide errors
+  //return false ; // To show errors
+  </script>
+  <script language="javascript" event="onload" for="window">
+  if (window == window.top)
+    alert('You should not call "fckeditor.html" directly. Please see the "_test" directory for samples on how to use the editor.' ) ;
+  </script>
+  </head>
+  <body bottommargin="0" leftmargin="0" topmargin="0" rightmargin="0">
+  <table height="100%" cellspacing="0" cellpadding="0" width="100%">
+    <tr id="trEditor">
+      <td>
+	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
+	  <tr>
+	    <td>
+	      <div id="divToolbar"></div>
+	    </td>
+	  </tr>
+	  <tr height="100%">
+	    <td>
+	      <object id="objContent" class="EditorArea" classid="clsid:2D360201-FFF5-11D1-8D03-00A0C959BC0A" viewastext>
+	      <param name="ActivateApplets" value="0">
+	      <param name="ActivateActiveXControls" value="0">
+	      <param name="ActivateDTCs" value="1">
+	      <param name="ShowDetails" value="0">
+	      <param name="ShowBorders" value="0">
+	      <param name="Appearance" value="1">
+	      <param name="Scrollbars" value="1">
+	      <param name="ScrollbarAppearance" value="1">
+	      <param name="SourceCodePreservation" value="1">
+	      <param name="AbsoluteDropMode" value="0">
+	      <param name="SnapToGrid" value="0">
+	      <param name="SnapToGridX" value="50">
+	      <param name="SnapToGridY" value="50">
+	      <param name="UseDivOnCarriageReturn" value="1">
+	      </object>
+	    </td>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+    <tr id="trSource" style="DISPLAY: none">
+      <td>
+	<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
+	  <tr>
+	    <td><div id="divToolbarSource"></div>
+	    </td>
+	  </tr>
+	  <tr height="100%">
+	    <td><textarea class="EditorArea" id="txtSource"></textarea></td>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+  </table>
+  <div id="divTemp" style="VISIBILITY: hidden; OVERFLOW: hidden; POSITION: absolute; WIDTH: 1px; HEIGHT: 1px"></div>
+</body>
+</html>

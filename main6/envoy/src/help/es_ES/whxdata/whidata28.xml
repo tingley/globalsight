@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Ficha" >
+  <topic name="Ficha de actividades Disponibles" url="Mis_actividades/Available_Activity_Tab.htm" />
+  <topic name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+  <topic name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+  <topic name="Ficha de procesos de producción Archivados" url="Mis_trabajos/Archived_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción En curso" url="Mis_trabajos/In_Progress_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="ficha apropiada" >
+  <topic name="Reasignar una actividad" url="Mis_trabajos/Procedimientos/Reassign_an_Activity_howdoI.htm" />
+</key>
+<key name="ficha Archivados" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+</key>
+<key name="ficha Disponibles" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+</key>
+<key name="ficha En curso" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="ficha Exportados" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Ficha de procesos de producción Exportados" url="Mis_trabajos/Exported_Workflow_Tab.htm" />
+  <topic name="Ficha de procesos de producción Traducidos" url="Mis_trabajos/Localized_Workflow_Tab.htm" />
+</key>
+<key name="Ficha Idiomas" >
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+</key>
+<key name="ficha Pendientes" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Error de importación" url="Mis_trabajos/Import_Error.htm" />
+</key>
+<key name="ficha Preparados" >
+  <topic name="Detalles del trabajo" url="Mis_trabajos/Job_Details.htm" />
+  <topic name="Ficha de procesos de producción Pendientes" url="Mis_trabajos/Pending_Workflow_Tab.htm" />
+  <topic name="Resumen del estado del proceso de producción" url="Glosario/Workflow_Status_Summary.htm" />
+</key>
+<key name="ficha Rechazadas" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="ficha Terminadas" >
+  <topic name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <topic name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+  <topic name="Resumen del estado de la actividad" url="Glosario/Activity_Status_Summary.htm" />
+</key>
+<key name="ficha Traducidos" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+</key>
+<key name="fichas" >
+  <topic name="Exportar páginas" url="Mis_trabajos/Procedimientos/Export_Pages.htm" />
+</key>
+<key name="figura" >
+  <topic name="Marcadores de posición (errores)" url="Ap_ndice/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="Fíjese" >
+  <topic name="Verificar columnas CSV (Importar, pág. 2)" url="Configuraci_n/Bases_de_datos_terminol_gica/Verify_CSV_Columns_(Import_p.2).htm" />
+</key>
+<key name="fila" >
+  <topic name="Columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Columns.htm" />
+  <topic name="Crear/modificar columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Create_Modify_Column.htm" />
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pantalla principal de importación" url="Fuentes_de_datos/Importaci_n/Import_Main_Screen.htm" />
+  <topic name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+  <topic name="Pantalla principal Moneda" url="Configuraci_n/Moneda/Currency_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de bases de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Pantalla principal Terminología" url="Configuraci_n/Bases_de_datos_terminol_gica/Terminology_Main_Screen.htm" />
+  <topic name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+  <topic name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+  <topic name="Ramas de origen de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Source_Branches.htm" />
+</key>
+<key name="fila correspondiente" >
+  <topic name="Columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Columns.htm" />
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+  <topic name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pantalla principal de importación" url="Fuentes_de_datos/Importaci_n/Import_Main_Screen.htm" />
+  <topic name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+  <topic name="Pantalla principal Moneda" url="Configuraci_n/Moneda/Currency_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de bases de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Pantalla principal Terminología" url="Configuraci_n/Bases_de_datos_terminol_gica/Terminology_Main_Screen.htm" />
+  <topic name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+  <topic name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+  <topic name="Ramas de origen de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Source_Branches.htm" />
+</key>
+<key name="fila traducible" >
+  <topic name="Instrucción SQL de lectura de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Read_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+</key>
+<key name="filas" >
+  <topic name="Informe de estado del proceso de producción" url="Informes/Workflow_Status_Report.htm" />
+  <topic name="Informe de memoria de traducción" url="Informes/TM_Report.htm" />
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+  <topic name="Informe Detalles del trabajo" url="Informes/Job_Details_Report.htm" />
+</key>
+<key name="Filtro" >
+  <topic name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+</key>
+<key name="fin" >
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Representación gráfica del proceso de producción" url="Configuraci_n/Procesos_de_producci_n/Graphical_Workflow.htm" />
+</key>
+<key name="finalización" >
+  <topic name="Informe de porcentaje de promedio de finalización" url="Informes/Average_Percent_Complete_Report.htm" />
+</key>
+<key name="fines" >
+  <topic name="Parámetros del sistema" url="Configuraci_n/Par_metros_del_sistema/System_Parameters.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+
+</indexdata>

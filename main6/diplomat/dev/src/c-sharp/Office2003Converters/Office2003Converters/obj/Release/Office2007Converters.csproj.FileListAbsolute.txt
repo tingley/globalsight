@@ -1,0 +1,20 @@
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.exe.config
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.exe
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.pdb
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\bin\Release\GlobalSight.Common.dll
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\ResolveAssemblyReference.cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\GlobalSight.Office2007Converters.MainForm.resources
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.Properties.Resources.resources
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.csproj.GenerateResource.Cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.exe
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.pdb
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.exe.config
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.exe
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\bin\Release\Office2007Converters.pdb
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\bin\Release\GlobalSight.Common.dll
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\ResolveAssemblyReference.cache
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\GlobalSight.Office2007Converters.MainForm.resources
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.Properties.Resources.resources
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.csproj.GenerateResource.Cache
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.exe
+D:\workspace\Build\main6\diplomat\dev\src\c-sharp\Office2007Converters\Office2007Converters\obj\Release\Office2007Converters.pdb

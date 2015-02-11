@@ -1,0 +1,46 @@
+-- 
+--  This creates the MySql schema for the GlobalSight product.
+-- 
+
+--  CAP SCHEMA -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+
+source %%canoncial_mysql_path%%create_cap_mysql.sql
+source %%canoncial_mysql_path%%create_snippet_tables_mysql.sql
+source %%canoncial_mysql_path%%vendor_management_mysql.sql
+-- source %%canoncial_mysql_path%%create_sp_types_mysql.sql
+-- source %%canoncial_mysql_path%%analyze_mysql.sql
+source %%canoncial_mysql_path%%create_new_job_table_mysql.sql
+-- source %%canoncial_mysql_path%%crt_job_analyze_mysql.sql
+
+--  CXE SCHEMA
+source %%canoncial_mysql_path%%create_cxe_mysql.sql
+
+--  ENVOY SCHEMA -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+source %%canoncial_mysql_path%%insert_locales_mysql.sql
+source %%canoncial_mysql_path%%insert_currency_codes_mysql.sql
+source %%canoncial_mysql_path%%insert_template_formats_mysql.sql
+source %%canoncial_mysql_path%%insert_known_formats_mysql.sql
+source %%canoncial_mysql_path%%insert_system_parameters_mysql.sql
+source %%canoncial_mysql_path%%insert_UImodifiable_system_parameters_mysql.sql
+source %%canoncial_mysql_path%%insert_extensions_mysql.sql
+source %%canoncial_mysql_path%%insert_exportlocation_mysql.sql
+source %%canoncial_mysql_path%%insert_default_calendar_mysql.sql
+source %%canoncial_mysql_path%%insert_leverage_group_mysql.sql
+
+--  TM SCHEMA and PROCEDURES
+source %%canoncial_mysql_path%%create_tm_mysql.sql
+-- source %%canoncial_mysql_path%%create_leverage_match_query_mysql.sql
+-- source %%canoncial_mysql_path%%create_leverage_match_mysql.sql
+-- source %%canoncial_mysql_path%%create_segment_tm_query_mysql.sql
+
+--  in-progress TM creation
+source %%canoncial_mysql_path%%create_in_progress_tm_mysql.sql
+
+--  CORPUS TM MAP
+source %%canoncial_mysql_path%%create_corpus_map_mysql.sql
+
+--  TERMBASE SCHEMA -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+
+source %%canoncial_mysql_path%%create_termbase_tables_mysql.sql
+source %%canoncial_mysql_path%%insert_termbase_data_mysql.sql
+-- source %%canoncial_mysql_path%%create_term_leverage_mysql.sql

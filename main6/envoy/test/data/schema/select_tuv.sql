@@ -1,0 +1,13 @@
+-- select * from translation_unit_variant where source_page.id = '9999' and source_page_leverage_group.sp_id = source_page.id and leverage_group.id = source_page_leverage_group.lg_id and translation_unit.leverage_group_id = leverage_group.id and translation_unit_variant.tu_id = translation_unit.id;
+--select * from source_page where source_page.id = '9999' and source_page_leverage_group.sp_id = source_page.id and leverage_group.id = source_page_leverage_group.lg_id and leverage_group.id = '9999';
+--select id from leverage_group where source_page.id = '9999' and source_page_leverage_group.sp_id = source_page.id and leverage_group.id = source_page_leverage_group.lg_id;
+--select ID from LEVERAGE_GROUP where LG1.ID = (SELECT LG_ID FROM SOURCE_PAGE_LEVERAGE_GROUP where SOURCE_PAGE_LEVERAGE_GROUP.SP_ID = '9999');
+-- works! select ID from LEVERAGE_GROUP where ID = (SELECT LG_ID FROM SOURCE_PAGE_LEVERAGE_GROUP where SOURCE_PAGE_LEVERAGE_GROUP.SP_ID = '9999');
+-- source TUV_BY_SOURCE_PAGE_SQL
+-- select id from translation_unit_variant where tu_id = (select id from translation_unit where leverage_group_id = (select lg_id from source_page_leverage_group where sp_id = '9999')); 
+-- target Tuvs EXPORT_TUVS_BY_SOURCE_PAGE_ID and localeId
+--select id from translation_unit_variant where tu_id = (select id from translation_unit where leverage_group_id = (select lg_id from target_page_leverage_group where tp_id = (select id from target_page where source_page_id = '9999' and workflow_iflow_instance_id = (select MAX(iflow_instance_id) from workflow where target_locale_id = '25'))));  
+-- TU_BY_SOURCE_PAGE_ID
+--select * from translation_unit where leverage_group_id = (select lg_id from source_page_leverage_group where sp_id = '9999');  
+-- previous tasktuvs
+select * from  (select * from task_tuv  order by version DESC)  where current_tuv_id = 9999 and rownum <= 2 order by version  DESC; 

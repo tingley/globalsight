@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE previewUrlXml SYSTEM "previewUrlXml.dtd">
+<previewUrlXml>
+	<locale name="en_US">
+		<sourceUrls encoding="UTF-8">
+			<url type="get">
+				<label>Ebay</label>
+				<href>http://cgi.ebay.com/aw-cgi/eBayISAPI.dll</href>
+				<arg>
+					<parameter>ViewItem</parameter>
+				</arg>
+				<arg>
+					<parameter>item</parameter>
+					<value substitution_source="source">$prod_id</value>
+				</arg>
+			</url>
+			<url type="post">
+				<label>CD Now</label>
+				<href>http://www.cdnow.com/cgi-bin/mserver/SID=437106387/pagename=/RP/CDN/FIND/popsearch.html</href>
+				<arg>
+					<parameter>index</parameter>
+					<value>a</value>
+				</arg>
+				<arg>
+					<parameter>string</parameter>
+					<value substitution_source="source">$group_name</value>
+				</arg>
+			</url>
+		</sourceUrls>
+	</locale>
+	<locale name="fr_FR">
+		<targetUrls encoding="ISO-8859-1">
+			<url type="post">
+				<label>CD Now</label>
+				<href>http://www.cdnow.com/cgi-bin/mserver/SID=437106387/pagename=/RP/CDN/FIND/popsearch.html</href>
+				<arg>
+					<parameter>index</parameter>
+					<value>a</value>
+				</arg>
+				<arg>
+					<parameter>string</parameter>
+					<value substitution_source="target">$group_name</value>
+				</arg>
+			</url>
+			<url type="get">
+				<label>Ebay</label>
+				<href>http://cgi.ebay.com/aw-cgi/eBayISAPI.dll</href>
+				<arg>
+					<parameter>ViewItem</parameter>
+				</arg>
+				<arg>
+					<parameter>item</parameter>
+					<value substitution_source="source">$prod_id</value>
+				</arg>
+			</url>
+		</targetUrls>
+	</locale>
+</previewUrlXml>

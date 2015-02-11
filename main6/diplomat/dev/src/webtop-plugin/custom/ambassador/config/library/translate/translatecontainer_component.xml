@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--***********************************************************************-->
+<!-- (c) Copyright 2002-2005. EMC Corporation.  All Rights Reserved.       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!-- Project        Component Library                                      -->
+<!-- Module         NewDocContainer                                        -->
+<!-- File           newdoccontainer_component.xml                          -->
+<!-- Description    New Doc Container Component Definition                 -->
+<!-- Created on     January 2 2002                                         -->
+<!-- Tab width      3                                                      -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+<!--                                                                       -->
+<!--                                                                       -->
+<!-- Log at EOF                                                            -->
+<!--                                                                       -->
+<!--***********************************************************************-->
+
+<config version='1.0'>
+   <scope>
+
+      <component id="translatecontainer" extends="combocontainer:wdk/config/combocontainer_component.xml">
+
+         <!-- Component Contract -->
+         <params>
+            <param name='component'       required='true'></param>
+            <param name='componentArgs'   required='true'></param>
+            <param name="fileProfiles"    required="false"></param>
+            <param name="editAfterCreate" required="false"></param>
+            <param name="contentType"     required="false"/>
+         </params>
+
+         <!-- Component Layout -->
+         <pages>
+            <filter clientenv='not appintg'>
+               <start>/wdk/container/combocontainer.jsp</start>
+            </filter>
+            <filter clientenv='appintg'>
+               <start>/wdk/container/combocontainer.jsp</start>
+            </filter>
+         </pages>
+
+         <!-- Contained components -->
+         <contains>
+            <component requiresVisit='true'>translate</component>
+            <!--component requiresVisit='false'>attributes</component>
+            <component requiresVisit='false'>permissions</component-->
+         </contains>
+
+         <!-- Component Behavior -->
+         <class>com.documentum.ambassador.library.translate.TranslateContainer</class>
+
+         <filter clientenv='not appintg'>
+            <nlsbundle>com.documentum.ambassador.library.translate.TranslateContainerNlsProp</nlsbundle>
+         </filter>
+         <filter clientenv='appintg'>
+            <nlsbundle>com.documentum.ambassador.library.translate.TranslateContainerNlsProp</nlsbundle>
+            <!-- Set "numberedtabs" to true to display each -->
+            <!-- tab's title with a sequential number.      -->
+            <numberedtabs>false</numberedtabs>
+         </filter>
+
+         <newcomponentname>translate</newcomponentname>
+         
+      </component>
+
+   </scope>
+
+</config>

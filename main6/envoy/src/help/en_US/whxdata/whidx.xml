@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<index>
+<chunkinfo url="whidata0.xml" first="Account Options" last="Align Menu" num="22" />
+<chunkinfo url="whidata1.xml" first="Aligner Packages" last="Alignment Parameters" num="3" />
+<chunkinfo url="whidata3.xml" first="Anonymous Termbase Access" last="Colors" num="17" />
+<chunkinfo url="whidata4.xml" first="Column" last="Create Locale Pair" num="17" />
+<chunkinfo url="whidata5.xml" first="Create/Edit" last="Database Profiles Main Screen" num="41" />
+<chunkinfo url="whidata6.xml" first="Database Read SQL" last="Exclude Item Types" num="34" />
+<chunkinfo url="whidata7.xml" first="Export" last="GS Tag Syntax" num="46" />
+<chunkinfo url="whidata8.xml" first="Handled" last="Introduction" num="18" />
+<chunkinfo url="whidata9.xml" first="Job" last="Large RTF Files" num="19" />
+<chunkinfo url="whidata10.xml" first="Level" last="Localizable segment" num="11" />
+<chunkinfo url="whidata11.xml" first="Localizables" last="Localization Participant" num="3" />
+<chunkinfo url="whidata12.xml" first="Localization Profile" last="Overview" num="26" />
+<chunkinfo url="whidata13.xml" first="Page" last="Profiles Main Screen" num="12" />
+<chunkinfo url="whidata14.xml" first="Progress" last="Project Users" num="9" />
+<chunkinfo url="whidata15.xml" first="Projects" last="Requests" num="12" />
+<chunkinfo url="whidata16.xml" first="Results" last="Search" num="9" />
+<chunkinfo url="whidata17.xml" first="Search matches" last="Select File Profile for Import" num="18" />
+<chunkinfo url="whidata18.xml" first="Select Files To Align" last="Take so long" num="34" />
+<chunkinfo url="whidata19.xml" first="Target Locales" last="Tips" num="20" />
+<chunkinfo url="whidata20.xml" first="TM" last="Translation Memory Main Screen" num="16" />
+<chunkinfo url="whidata21.xml" first="Translation Memory Profiles Main Screen" last="Unextracted File" num="10" />
+<chunkinfo url="whidata22.xml" first="Upload" last="Uploading Alignment Work" num="10" />
+<chunkinfo url="whidata23.xml" first="User" last="View Project" num="22" />
+<chunkinfo url="whidata24.xml" first="Why does" last="Workflow Status Summary" num="10" />
+<chunkinfo url="whidata25.xml" first="Workflows" last="XML Rules Main Screen" num="4" />
+
+</index>

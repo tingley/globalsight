@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.comment.IssueHistoryImpl"
+		table="ISSUE_HISTORY">
+		
+		<id name="dbId" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="dateReported" column="REPORTED_DATE"
+			type="timestamp" not-null="true" />
+		<property name="comment" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="reportedBy" length="82" column="REPORTED_BY"
+			type="string" not-null="true" unique="false" />
+
+		<many-to-one name="issue" column="ISSUE_ID"
+			class="com.globalsight.everest.comment.IssueImpl" not-null="true" />
+	</class>
+</hibernate-mapping>

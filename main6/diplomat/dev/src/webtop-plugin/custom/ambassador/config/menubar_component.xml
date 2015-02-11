@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config version='1.0'>
+   <scope>
+
+      <component id="menubar" extends="menubar:webtop/config/menubar_component.xml">
+      
+         <!-- Description (not NLS'd) -->
+         <desc>
+            Webtop menubar component: Defines the menu bar structure for Webtop.
+         </desc>
+
+         <pages>
+            <start>/custom/ambassador/classic/menubar/menubar.jsp</start>
+         </pages>
+
+         <menugrouptarget>content</menugrouptarget>
+
+         <class>com.documentum.webtop.webcomponent.menubar.MenuBar</class>
+         <nlsbundle>com.documentum.ambassador.menubar.MenuBarNlsProp</nlsbundle>
+         
+         <!-- If this component supports failover/replication, the failoverenabled needs to be set to true-->
+         <failoverenabled>true</failoverenabled>
+         
+      </component>
+      
+   </scope>
+</config>

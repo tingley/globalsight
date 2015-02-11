@@ -1,0 +1,1873 @@
+<public:component>
+    
+<!-- ---------------------------------------------------------------------------
+//
+// {{B3}} //////////////////////////////////////////////////////////////////////
+//
+//  Copyright 2000, 2001 B3 - Buckland, Buchman & Backlund.  All Rights Reserved.
+//
+//
+//
+// WARNING: DO NOT EDIT OR DELETE THIS FILE!
+// IT MAY BE UPDATED BY B3 CYBER DIALOGS AT ANY TIME
+//
+//
+//
+--------------------------------------------------------------------------- -->
+
+<!-- b3-meta{{
+<version>
+	<major>2</major>
+	<minor>8</minor>
+</version>
+}}b3-meta -->
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:property	put=FPutValue					get=FGetValue			name="value" >
+<public:property	put=FSetSelectedIndex			get=FGetSelectedIndex	name="selectedIndex" >
+<public:property	put=FSetItemTextStyle			get=FGetItemTextStyle	name="itemTextStyle" >
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:method		name="loadList"					internalname="FLoadList">
+<public:method		name="addList"					internalname="FAddList">
+<public:method		name="add"						internalname="FAddItem">
+<public:method		name="empty"					internalname="FEmpty">
+<public:method		name="loadFromRegistry"			internalname="FLoadFromRegistry">
+<public:method		name="saveToRegistry"			internalname="FSaveToRegistry">
+<public:method		name="checkItem"				internalname="FCheckItem">
+<public:method		name="decheck"					internalname="FDecheck">
+<public:method		name="debugTest"				internalname="FDebugTest">
+<public:method		name="exportList"				internalname="FExportList">
+<public:method		name="getSelectedAt"			internalname="FGetSelectedAt">
+<public:method		name="moveSelected"				internalname="FMoveSelected">
+<public:method		name="removeSelected"			internalname="FRemoveSelected">
+<public:method		name="scrollSelectedIntoView"	internalname="FScrollSelectedIntoView">
+<public:method		name="replaceSelectedAt"		internalname="FReplaceSelectedAt">
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:event		id="onChange"					name="onchange">
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:attach		event="onmousedown"				onevent="FOnMouseDown();" />
+<public:attach		event="onpropertychange"		onevent="FOnPropertyChange();" />
+<public:attach		event="onreadystatechange"		onevent="FOnReadyStateChange();" />
+<public:attach		event="onkeydown"				onevent="FOnKeyDown();" />
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:method		name="editorOnSpellChecked"		internalname="FEditorOnSpellChecked"			\>
+
+<!-- ----------------------------------------------------------------------- -->
+
+<public:b3-folder	name="Cyber/B3/Table/"	/>
+
+<public:b3-meta			inlineable="true"
+						b3ParseClass="b3Atomic"				/>
+
+<!-- ----------------------------------------------------------------------- -->
+
+
+
+
+<script language="javascript">
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Init vars
+//
+
+var gbReadOnly		= false;
+var gbHasInit		= false;
+var gInEditor		= false;
+var	gTracking		= false;
+var gCurrent		= null;
+var gBody			= null;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Create the HTML
+//
+
+FCreateHTML();
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//  Init Functions
+//
+
+function FCreateHTML()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FCreateHTML()\n" );
+
+	var html = 
+
+		'<table cellspacing=0 b3SkipOnSave style="width: 100%;">'	+
+		'</table>'				+
+		'';
+
+
+	element.insertAdjacentHTML( "afterBegin", html );
+
+	gBody = element.children[0];
+
+	//
+
+	if(element.tabIndex == 0)
+		element.tabIndex = 1;
+
+	if( element.style.backgroundColor == "" )
+		element.style.backgroundColor = "white";
+
+	if( element.style.width == "" )
+		element.style.width = "100px";
+
+	if( element.style.height == "" )
+		element.style.height = "100px";
+
+	if( element.style.overflowY == "" )
+		element.style.overflowY = "scroll";
+
+	if( element.style.overflowX == "" )
+		element.style.overflowX = "hidden";
+
+	if( element.style.cursor == "" )
+		element.style.cursor = "default";
+
+	//
+
+	if( typeof( FB3_InEditor ) == "function" && FB3_InEditor(element) ) {
+
+		gInEditor = true;
+
+		element.style.setAttribute( "b3-temp-ui-label", "Cyber Table" );
+		element.style.setAttribute( "b3-temp-ui-type", "CyberTable.cdlg" );
+	
+	}
+
+	else if( typeof( FB3_InPalette ) == "function" && FB3_InPalette(element) ) {
+
+		element.style.setAttribute( "b3-temp-ui-label", "Cyber Table" );
+		element.style.setAttribute( "b3-temp-ui-type", "CyberTable.cdlg" );
+
+		if( typeof(element.b3InitialItems) == "undefined" && FGetSourceCount() == 0 )
+			element.setAttribute( "b3InitialItems", "Cyber Table" );
+	}
+
+	if( typeof( FB3_LoadProtocols ) == "function" ) {
+
+		FB3_LoadProtocols( element, "Value;List;Registry;TabIndex;OverflowProperties;SpellCheckableItems" );
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// API
+//
+
+
+// Must be called before items created
+//
+//
+
+function FSetItemTextStyle( styledescr )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FSetItemTextStyle()\n" );
+
+	element.setAttribute( "b3ItemTextStyle", styledescr );
+
+}
+
+
+
+//
+//
+//
+
+function FGetItemTextStyle()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FGetItemTextStyle()\n" );
+
+	return element.setAttribute( "b3ItemTextStyle" );
+}
+
+
+
+
+//
+//
+//
+
+function FSetSelectedIndex( index )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FSetSelectedIndex()\n" );
+
+	var size = FGetValueCount();
+	if(index >= size) return;
+
+	FDeselect();
+	FDehighlight();
+
+	FSelectAt(index);
+	FHighlightAt(index);
+}
+
+
+//
+//
+//
+
+function FGetSelectedIndex()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FGetSelectedIndex()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if( row.selected ) return i;
+	};
+
+	return -1;
+}
+
+
+
+//
+//
+//
+
+function FLoadList(array, dontStore)
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FLoadList()\n" );
+
+	if( typeof(array) == "string" ) {
+
+		if( array.length == "" ) {
+			FEmpty();
+			return;
+		}
+
+		array = array.split("\n");
+	}
+
+	if( typeof(array) != "object" ) return;
+	if( typeof(array.length) == "undefined" ) return;
+
+	var i;
+	var size = array.length;
+
+	FEmpty();
+
+	for(i=0; i<size; i++) {
+		FAddItem( array[i] );
+	}
+
+	//
+
+	if( !dontStore && 
+		typeof( FB3_InEditor ) == "function" && 
+		FB3_InEditor(element) ) {
+	
+		element.removeAttribute( "b3InitialItems" );
+
+		FCreateSource();
+	}
+
+	return true;
+}
+
+
+
+
+
+//
+//
+//
+
+function FAddList(array)
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FAddList()\n" );
+
+	if( typeof(array) == "string" ) {
+
+		if( array.length == "" ) {
+			return;
+		}
+
+		array = array.split("\n");
+	}
+
+	if( typeof(array) != "object" ) return;
+	if( typeof(array.length) == "undefined" ) return;
+
+	var i;
+	var size = array.length;
+
+	for(i=0; i<size; i++) {
+		if(!FFindRowFor(array[i]))
+			FAddItem( array[i] );
+	}
+
+	return true;
+}
+
+
+
+
+
+
+//
+//
+//
+
+function FAddItem( itemText )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FAddItem()\n" );
+
+	var row = FGetBody().insertRow(-1);
+
+	var pstyle = "";
+
+	if( element.b3ItemTextStyle )
+		var pstyle = element.b3ItemTextStyle;
+
+
+	if( itemText.tagName ) {
+
+		var cell = row.insertCell(-1);
+
+		cell.style.cssText = pstyle;
+		cell.innerHTML = itemText.innerHTML;
+
+		if( itemText.value )
+			row.value = itemText.value;
+
+		if( itemText.items ) {
+
+			var array = itemText.items.split( "\t" );
+			var i;
+
+			for(i=0; i<array.length; i++) {
+
+				var item = array[i];
+				var cell = row.insertCell(-1);
+
+				cell.style.cssText = pstyle;
+
+				cell.innerText = item;
+			}
+		}
+
+		FSetTextStyle(row);
+
+		return;
+	}
+
+
+	//
+
+	var array = itemText.split( "\t" );
+	var i;
+
+	for(i=0; i<array.length; i++) {
+
+		var item = array[i];
+		var cell = row.insertCell(-1);
+
+		cell.style.cssText = pstyle;
+
+		cell.innerText = item;
+	}
+
+	FSetTextStyle(row);
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FSetTextStyle( row )
+{
+	var i;
+	var size = row.cells.length;
+
+	for(i=0; i<size; i++) {
+
+		var cell = row.cells[i];
+		
+		FSetTextStyle1(cell);
+	}
+}
+
+
+//
+//
+//
+
+function FSetTextStyles()
+{
+	var i;
+	var size = FGetBody().rows.length;
+
+	for(i=0; i<size; i++) {
+
+		var row = FGetRow(i);
+		
+		FSetTextStyle(row);
+	}
+}
+
+
+
+//
+//
+//
+
+function FSetTextStyle1( item )
+{
+	if( element.style.fontSize != "" )
+		item.style.fontSize = element.style.fontSize;
+
+	if( element.style.fontFamily != "" )
+		item.style.fontFamily = element.style.fontFamily;
+
+	if( element.style.fontWeight != "" )
+		item.style.fontWeight = element.style.fontWeight;
+
+	if( element.style.fontStyle != "" )
+		item.style.fontStyle = element.style.fontStyle;
+
+	if( element.style.fontStyle != "" )
+		item.style.fontStyle = element.style.fontStyle;
+
+	if( element.style.color != "" )
+		item.style.color = element.style.color;
+}
+
+
+
+
+//
+//
+//
+
+function FExportList()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FExportList()\n" );
+
+	var i;
+	var size = FGetValueCount();
+	var string = "";
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if( string.length > 0 ) {
+			string += "\n";
+		}
+
+		var j;
+		for(j=0; j<row.cells.length; j++) {
+			var cell = row.cells[j];
+
+			string += cell.innerText;
+
+			if( j<row.cells.length-1)
+				string += "\t";
+		}
+	};
+
+	return string;
+}
+
+
+
+
+//
+//
+//
+
+function FGetSelectedAt( column )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FGetSelectedAt(%s)\n", column );
+
+	var index = FGetSelectedIndex();
+	if(index == -1) return null;
+
+	var row = FGetRow(index);
+
+	if( row.cells[column] == null ) {
+		return "";
+	}
+
+	return row.cells[column].innerText;
+}
+
+
+
+//
+//
+//
+
+function FReplaceSelectedAt( column, text )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FReplaceSelectedAt(%s, %s)\n", column, text );
+
+	var index = FGetSelectedIndex();
+	if(index == -1) return false;
+
+	var row = FGetRow(index);
+
+	var pstyle = "";
+
+	if( element.b3ItemTextStyle )
+		var pstyle = element.b3ItemTextStyle;
+	
+	for(i=row.cells.length; i<=column; i++) {
+
+		var cell = row.insertCell(-1);
+
+		cell.innerText = "";
+	}
+
+	if( row.cells[column].children.length == 1 )
+		row.cells[column].children[0].innerText = text;
+	else row.cells[column].innerText = text;
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FMoveSelected( dx )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FMoveSelected()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	var body = FGetBody();
+	
+	if( dx < 0 ) {
+
+		for(i=0; i<size; i++) {
+		
+			var row = FGetRow(i);
+
+			if( row.selected ) {
+
+				var newi = i + dx;
+
+				if( newi < 0 ) newi = 0;
+
+				body.moveRow( i, newi );
+			}
+		};
+	}
+
+	else if( dx > 0 ) {
+
+		for(i=size-1; i>=0; i--) {
+		
+			var row = FGetRow(i);
+
+			if( row.selected ) {
+
+				var newi = i + dx;
+
+				if( newi >= size ) newi = size-1;
+
+				body.moveRow( i, newi );
+			}
+		};
+	}
+
+	FScrollSelectedIntoView();
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FRemoveSelected( dx )
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FRemoveSelected()\n" );
+
+	var i;
+	var size = FGetValueCount();
+	var c = 0;
+	var next = -1;
+	var body = FGetBody();
+
+	for(i=size-1; i>=0; i--) {
+	
+		var row = FGetRow(i);
+
+		if( row.selected ) {
+
+			body.deleteRow( i );
+			c++;
+			next = i;
+		}
+	};
+
+	if(next >= FGetValueCount())
+		next = FGetValueCount()-1;
+
+	if(next < 0)
+		next = 0;
+
+	FSetSelectedIndex(next);
+
+	return c;
+}
+
+
+
+//
+//
+//
+
+function FEmpty()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FEmpty()\n" );
+
+	if(!gbHasInit) {
+		return;  // return if the behavior is loading
+	}
+
+	var table = FGetBody();
+
+	while( table.rows.length > 0 ) {
+
+		table.deleteRow( table.rows.length-1 );
+	}
+
+	return true;	
+}
+
+
+
+
+
+//
+//
+//
+
+function FSelect()
+{
+}
+
+
+
+
+//
+//
+//
+
+function FDeselect()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FDeselect()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if(row.selected) {
+			row.selected = false;
+		}
+	};
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FDecheck()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FDecheck()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if(row.checked) {
+			row.checked = false;
+			row.style.fontWeight = "";
+		}
+	};
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FDehighlight()
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FDehighlight()\n" );
+
+	if(gCurrent) {
+		
+		if(gCurrent.highlighted) {
+			gCurrent.highlighted = false;
+			gCurrent.style.backgroundColor = "";
+			gCurrent.style.color = "";
+		}
+	}
+
+	gCurrent = null;
+}
+
+
+
+
+
+//
+//
+//
+
+function FCommit()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FCommit()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	FDeselect();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if(row.highlighted) {
+
+			FSelectAt(i);
+		}
+	};
+
+	FFireOnChange();
+
+}
+
+
+
+//
+//
+//
+
+function FHighlightAt( index )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FHighlightAt()\n" );
+
+	// -FIX- multiselect
+
+	if( element.disabled ) return;
+	
+	var row = FGetRow(index);
+
+	row.style.backgroundColor = "blue";
+	row.style.color = "white";
+	row.highlighted = true;
+
+	gCurrent = row;
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FSelectAt( index )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FSelectAt()\n" );
+
+	// -FIX- multiselect
+	
+	var row = FGetRow(index);
+
+	row.selected = true;
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FCheckAt( index, flag )
+{	
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FCheckAt()\n" );
+
+	var row = FGetRow(index);
+
+	if(flag) {
+		row.style.fontWeight = "bold";
+		row.checked = true;
+	} else {
+		row.style.fontWeight = "";
+		row.checked = false;
+	}
+
+	return true;
+}
+
+
+
+
+//
+//
+//
+
+function FScrollIntoViewAt( index, flag )
+{	
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FScrollIntoViewAt()\n" );
+
+	var row = FGetRow(index);
+		
+	if(row) FScrollIntoView(row, flag);
+
+	return true;
+}
+
+
+
+//
+//
+//
+
+function FScrollIntoView( item, flag )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FScrollIntoView()\n" );
+
+	if(!item) return;
+
+	//item.scrollIntoView(flag);
+
+	var miny = element.scrollTop;
+	var maxy = element.scrollTop + element.clientHeight;
+
+	var itemminy = item.offsetTop;
+	var itemmaxy = item.offsetTop + item.offsetHeight;
+	
+	if( itemmaxy >  maxy ) {
+		element.scrollTop += (itemmaxy - maxy);
+	}
+	else if( itemminy < miny ) {
+		element.scrollTop -= (miny - itemminy);
+	}
+
+}
+
+
+
+
+//
+//
+//
+
+function FScrollSelectedIntoView()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FScrollSelectedIntoView()\n" );
+
+	var index = FGetSelectedIndex();
+	if(index == -1) return false;
+
+	return FScrollIntoViewAt(index);
+}
+
+
+
+
+//
+//
+//
+
+function FCheckItem( item, flag )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FCheckItem()\n" );
+
+	if( typeof(item) == "number" ) {
+		
+		FCheckAt(item, flag);
+		return true;
+	}
+
+	var index = FGetValueIndex(item);
+
+	if(index >= 0) FCheckAt( index, flag );
+
+	return true;
+}
+
+
+
+
+
+//
+//
+//
+
+function FPutValue(value)
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FPutValue()\n" );
+
+	FDeselect();
+	FDehighlight();
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if( ( typeof(row.value) != "undefined" && row.value == value ) ||
+			( row.cells[0].innerText == value ) ) {	
+
+			FSelectAt(i);
+			FHighlightAt(i);
+			FScrollIntoViewAt(i);
+
+			return true;
+		}
+	};
+
+	return false;
+}
+
+
+
+
+//
+//
+//
+
+function FGetValue()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FGetValue()\n" );
+
+	var i;
+	var size = FGetValueCount();
+	var src = "";
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		if( row.selected ) {
+
+			//alert( i + " " + row.selected + " " + typeof(row.selected) );
+
+			if( src.length > 0 ) src += "\n";
+
+			var value = row.value;
+			if(typeof(value) == "undefined")
+				value = row.cells[0].innerText;
+
+			src += value;
+		}
+	};
+
+	return src;
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Event Handlers
+//
+
+function FOnMouseUp()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FOnMouseUp(%s)\n", window.event.srcElement.tagName );
+
+	var e = window.event.srcElement;
+
+	if(!gTracking) return;
+
+	gTracking = false;
+
+	FCommit();
+
+	element.detachEvent("onmousemove", FOnMouseMove);
+	element.detachEvent("onmouseup", FOnMouseUp);
+	element.releaseCapture();
+}
+
+
+
+//
+//
+//
+
+function FOnMouseDown()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FOnMouseDown(%s)\n", window.event.srcElement.tagName );
+
+	if( window.event.srcElement.tagName == "TABLE" ) {
+		return;
+	}
+
+	if( element.disabled ) return;
+
+	var comp = element.componentFromPoint( window.event.clientX, window.event.clientY );
+	if( comp != "" ) return;
+
+	focus();
+
+	gTracking = true;
+
+    element.setCapture();
+	element.attachEvent ("onmousemove", FOnMouseMove);
+	element.attachEvent ("onmouseup", FOnMouseUp);
+
+	FOnMouseMove();
+}
+
+
+
+//
+//
+//
+
+function FGetWindowTop( el )
+{
+	var coord = el.offsetTop;
+	var theBody = document.body;
+	var parent = el.offsetParent;
+
+	while( parent && parent != theBody ) {
+
+		coord += parent.offsetTop;
+
+		coord -= parent.scrollTop;
+
+		parent = parent.offsetParent;
+	}
+
+	return coord;
+}
+
+
+
+//
+//
+//
+
+function FOnMouseMove()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_TraceLine( "CyberTable::FOnMouseMove()" );
+
+	if(!gTracking) return;
+	
+	var item = FPickElement( event.x, event.y ); 
+
+	var dy = event.y - element.offsetTop;
+	var wtop = FGetWindowTop(element);
+	var maxy = (wtop + element.offsetHeight);
+
+	if(item) {
+
+		if( item != gCurrent ) {
+
+			var index = FGetIndex(item);
+
+			FDehighlight();
+			FHighlightAt(index);
+		}
+	}
+
+	FScrollIntoView(gCurrent, false);
+
+	if( !item ) {
+	
+		if( event.y > maxy ) {
+
+			FDehighlight();
+			FHighlightAt(FGetValueCount()-1);
+		}
+
+		else if( event.y < wtop ) {
+
+			FDehighlight();
+			FHighlightAt(0);
+		}
+	}
+}
+
+
+
+
+//
+//
+//
+
+function FOnKeyDown()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_TraceLine( "CyberTable::FOnKeyDown()" );
+
+	var cc = window.event.keyCode;
+
+	if( gInEditor ) {
+		
+		return;
+	}
+
+	if(cc == 38) {
+
+		var index = FGetSelectedIndex();
+		index--;
+
+		if( index >= 0 ) {
+			FSetSelectedIndex(index);
+			FScrollIntoViewAt(index,true);
+			FFireOnChange();
+		}
+
+		event.cancelBubble = true;
+		window.event.returnValue = false;
+		return;
+	}
+
+	if(cc == 40) {
+
+		var index = FGetSelectedIndex();
+		index++;
+
+		if( index < FGetValueCount() ) {
+			FSetSelectedIndex(index);
+			FScrollIntoViewAt(index,false);
+			FFireOnChange();
+		}
+
+		event.cancelBubble = true;
+		window.event.returnValue = false;
+		return;
+	}
+
+}
+
+
+
+
+//
+//
+//
+
+function FOnReadyStateChange()
+{
+	if( element != window.event.srcElement ) {
+		return;
+	}
+
+	if( typeof(readyState) == "unknown" ) return;
+
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FOnReadyStateChange(%s)\n", readyState );
+
+	var state = readyState;
+
+	if( state == "4" )
+		state = "complete";
+
+	var loading = (state != "complete");
+
+	if( !loading && !gbHasInit ) {
+
+		gbHasInit = true;
+
+		//
+
+		FLoadSource();
+
+		var initialItems = element.getAttribute( "b3InitialItems" );
+
+		if( initialItems ) {
+			FLoadList( initialItems, true );
+		}
+
+		//
+
+		if( typeof(FB3_SendOnReady) == "function" )
+			FB3_SendOnReady( element.id );
+	}
+
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "[exit] CyberTable::FOnReadyStateChange()\n" );
+}
+
+
+
+
+//
+//
+//
+
+function FOnPropertyChange()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FOnPropertyChange(%s)\n", window.event.propertyName );
+
+	if( element != window.event.srcElement ) {
+		return;
+	}
+
+	if(!gbHasInit) return;
+
+
+	if( window.event.propertyName == "b3TempPropertiesChanged" ) {
+
+		FSetTextStyles(); 
+
+		return true;
+	}
+}
+
+
+
+
+
+
+//
+//
+//
+
+function FEditorOnSpellChecked()
+{
+	FEmpty();
+
+	FLoadSource();
+}
+
+
+
+
+
+
+
+//
+//
+//
+
+function FGetSourceContainer()
+{
+	var i;
+	var size = element.children.length;
+
+	for(i=0; i<size; i++) {
+
+		var child = element.children[i];
+
+		if( typeof(child.b3SkipOnSave) == "undefined" ) {
+
+			return child; 
+		}
+	}
+
+	return null;
+}
+
+
+
+
+
+//
+//
+//
+
+function FGetSourceCount()
+{
+	var cont = FGetSourceContainer();
+	if(!cont) return 0;
+
+	return cont.children.length;
+}
+
+
+
+//
+//
+//
+
+function FLoadSource()
+{
+	var cont = FGetSourceContainer();
+	if(!cont) return 0;
+
+	var i;
+	var size = cont.children.length;
+	var c = 0;
+
+	for(i=0; i<size; i++) {
+
+		var child = cont.children[i];
+
+		if( !child.tagName ) continue; 
+	
+		c++;
+
+		FAddItem( child );
+	}
+
+	return c;
+}
+
+
+
+
+//
+//
+//
+
+function FRemoveSource()
+{
+	var cont = FGetSourceContainer();
+	if(!cont) return 0;
+
+	var i;
+	var size = cont.children.length;
+	var c = 0;
+
+	for(i=size-1; i>=0; i--) {
+
+		var child = cont.children[i];
+
+		if( child.b3SkipOnSave ) continue;
+			
+		c++;
+
+		cont.removeChild(child);
+	}
+
+	return c;
+}
+
+
+
+
+//
+//
+//
+
+function FCreateSource()
+{
+	FRemoveSource();
+
+	//
+
+	var cont = FGetSourceContainer();
+
+	if(!cont) {
+
+		cont = document.createElement( "DIV" );
+		cont.className = "container";
+		cont.style.display = "none";
+
+		element.insertAdjacentElement( "beforeEnd", cont );
+	}
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+	
+		var row = FGetRow(i);
+
+		var cell = row.cells[0];
+
+		//
+
+		var caption = cell.innerHTML;
+		var value = row.value;
+
+		var op = document.createElement( "DIV" );
+
+		op.className = "item";
+		op.innerHTML = caption;
+
+		if(value && value != cell.innerText)
+			op.value = value;
+
+		//
+
+		var items = "";
+		var j;
+		for(j=1; j<row.cells.length; j++) {
+
+			var cell = row.cells[j];
+
+			items += cell.innerText;
+
+			if( j<row.cells.length-1)
+				items += "\t";
+		}
+
+		if(items != "")
+			op.items = items;
+
+		//
+
+		cont.insertAdjacentElement( "beforeEnd", op );
+	};
+}
+
+
+
+
+
+//
+//
+//
+
+function FLoadFromRegistry()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FLoadFromRegistry()\n" );
+
+	var save = element.style.getAttribute( "b3-save-in-registry" );
+	
+	if( !save ) return;
+	if( save == "false" ) return;
+
+	var saved = element.getAttribute( "b3TempRegistryValue" );
+
+	if(!saved) return;
+
+	var savedArray = saved.split( "\n" );
+
+	FEmpty();
+
+	var i;
+	for(i=0; i<savedArray.length; i++) {
+
+		var x = savedArray[i];
+		FAddItem( x );
+	}
+}
+
+
+
+//
+//
+//
+
+function FSaveToRegistry()
+{
+	/*{{b3-clean}}*/ if(FDebugging()) FB3_Trace( "CyberTable::FSaveToRegistry()\n" );
+
+	var save = element.style.getAttribute( "b3-save-in-registry" );
+	var i;
+	
+	if( !save ) return;
+	if( save == "false" ) return;
+
+	var saved = element.getAttribute( "b3TempRegistryValue" );
+	var savedArray = new Array();
+	if(saved) savedArray = saved.split( "\n" );
+
+	var newItem = FGetValues();
+	if( !newItem || newItem == "" )
+		return;
+
+	///{{b3-clean}} alert( "saved=" + saved );
+	
+	var newArray = new Array();
+	var copyLen = savedArray.length;
+
+	//{{b3-clean}} alert( "copyStart=" + copyStart );
+	//{{b3-clean}} alert( "copyLen=" + copyLen );
+
+	newArray[newArray.length] = newItem;
+	copyLen--;
+
+	for(i=0; i<copyLen; i++) {
+
+		if( savedArray[i] == newItem ) {
+			copyLen++;
+			break;
+		}
+	}
+
+	for(i=0; i<copyLen; i++) {
+
+		if( savedArray[i] == newItem ) continue;
+		newArray[newArray.length] = savedArray[i];
+	}
+	
+	var newString = new String();
+	for(i=0; i<newArray.length; i++) {
+
+		newString += newArray[i];
+
+		if(i < newArray.length-1)
+			newString += "\n";
+	}
+
+	element.setAttribute( "b3TempRegistryValue", newString );
+
+	//{{b3-clean}} alert("newString=" + newString);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////                          
+// Helpers
+//
+
+//
+//
+//
+
+function FFireOnChange()
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FFireOnChange()\n" );
+
+	var evObj = createEventObject();
+	onChange.fire(evObj);
+
+	if( typeof( FB3_SendItemSelected ) == "function" ) {
+
+		FB3_SendItemSelected( element.id );
+	}
+
+	if( typeof( FB3_SendOnChange ) == "function" ) {
+
+		FB3_SendOnChange( element.id );
+	}
+}
+
+
+
+
+//
+//
+//
+
+function FGetBody( item )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetBody()\n" );
+
+	return gBody;
+}
+
+
+
+
+//
+//
+//
+
+function FGetValues()
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetValues()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	var array = new Array();
+
+	for(i=0; i<size; i++) {
+
+		var row = FGetRow(i);
+		array[length] = row.cells[0];
+	}
+
+	return array;
+}
+
+
+
+//
+//
+//
+
+function FFindRow( r )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetRow()\n" );
+
+	var row = r;
+	
+	while( row && row.tagName != "TR" ) row = row.parentElement;
+
+	return row;
+}
+
+
+
+
+//
+//
+//
+
+function FIsPointInElement( x, y, el )
+{
+	if( el.tagName == "TR" ) {
+
+		var i;
+		var size = el.children.length;
+
+		for(i=0; i<size; i++) {
+
+			var cell = el.children[i];
+
+			var r = cell.componentFromPoint( x, y );
+
+			if( r != "outside") return true;
+
+		}
+
+		return false;
+	}
+
+	var r = el.componentFromPoint( x, y );
+
+	return ( r != "outside");
+}
+
+
+
+
+//
+//
+//
+
+function FPickElement( x, y )
+{
+	var i;
+	var size = FGetValueCount();
+
+	if(size == 0) return -1;
+
+	var item = null;
+
+	for(i=0; i<size; i++) {
+
+		var test = FGetRow(i);
+
+		if( FIsPointInElement(x, y, test) ) {
+
+			item = test;
+			break;
+		}
+	}
+
+	if(!item) return null;
+
+	return item;
+}
+
+
+
+
+
+//
+//
+//
+
+function FGetIndex( r )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetIndex()\n" );
+
+	var row = FFindRow(r);
+	
+	if(!row) return -1;
+
+	return row.rowIndex;
+}
+
+
+
+
+
+//
+//
+//
+
+function FGetValueIndex( r )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetValueIndex()\n" );
+
+	var i;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+
+		var row = FGetRow(i);
+
+		if( row.cells[0].innerText == r ) return i; // -FIX- case unsens
+	}
+
+	return -1;
+}
+
+
+
+//
+//
+//
+
+function FFindRowFor( itemText )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FFindRowFor()\n" );
+
+	var array = itemText.split( "\t" );
+	var value = array[0];
+
+	var i, j;
+	var size = FGetValueCount();
+
+	for(i=0; i<size; i++) {
+
+		var row = FGetRow(i);
+
+		var cell = row.cells[0];
+
+		if( cell.innerText == value ) return row; 
+	}
+
+	return null;
+}
+
+
+
+
+//
+//
+//
+
+function FGetRow( index )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetRow()\n" );
+
+	return FGetBody().rows[index];
+}
+
+
+
+
+//
+//
+//
+
+function FGetValueCount()
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetValueCount()\n" );
+
+	return FGetBody().rows.length;
+}
+
+
+
+
+//
+//
+//
+
+function FGetLastRow( )
+{
+	/*{{b3-clean}}*/ if(FDebuggingAll()) FB3_Trace( "CyberTable::FGetLastRow()\n" );
+
+	var row = FGetBody().rows[FGetValueCount()-1];
+
+	return row;
+}
+
+
+
+//
+//
+//
+
+function FDebugTest()
+{
+	alert( element.tagName );
+}
+
+
+
+//
+//
+//
+
+function FDebugging()
+{
+	if( typeof(gB3Debugging) != "undefined" &&
+		typeof(FB3_Trace) == "function" ) {
+
+		return gB3Debugging;
+
+	}
+
+	return false;
+}
+
+
+
+//
+//
+//
+
+function FDebuggingAll()
+{
+	if( typeof(gB3DebuggingAll) != "undefined" &&
+		typeof(FB3_Trace) == "function" ) {
+
+		return gB3DebuggingAll;
+
+	}
+
+	return false;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+</script>
+
+<!-- ----------------------------------------------------------------------- -->
+
+</public:component>

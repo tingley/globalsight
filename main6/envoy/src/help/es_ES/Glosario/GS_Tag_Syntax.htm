@@ -1,0 +1,192 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=Windows-1252">
+
+<title>Sintaxis de las etiquetas GS</title>
+
+<!--(Meta)==========================================================-->
+
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=856>
+<meta name=layout-width content=729>
+<meta name=date content="07 9, 2002 10:56:12 AM">
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+p.whs1 {font-weight: bold;}
+ul.whs2 {list-style: disc;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Glosario\nSintaxis de las etiquetas GS");
+addButton("show",BTN_TEXT,"Mostrar","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../System4.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>Sintaxis de las etiquetas GS</h1>
+
+<p>Las etiquetas GS se especifican en la sintaxis XML. Por lo tanto, todos los atributos tienen valores y todos los valores están entre comillas. No obstante, el extractor de HTML puede aceptar una sintaxis simplificada similar a HTML y normalizarla internamente a la sintaxis XML. La sintaxis simplificada, que se explica más adelante, no requiere que los valores de atributos estén entre comillas. Los valores de idioma (región) siguen el formato &quot;es_ES&quot;. &nbsp;Dentro de System4, los nombres aparecen en mayúsculas, por lo que deben escribirse en mayúsculas tanto los nombres como las referencias a ellos. &nbsp;Los nombres también tienen un límite de longitud de 40 caracteres. Si epecifica un nombre más largo, quedará truncado cuando se añada a System4.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS ADD=&quot;nombre&quot; /&gt;</p>
+
+<p>Una posición donde se puede introducir un fragmento.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;yes&quot;&gt;  &lt;/GS&gt;</p>
+
+<p>Una región de contenido que se puede eliminar.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;cualquier valor&quot;&gt;  &lt;/GS&gt;</p>
+
+<p>Sintaxis simplificada; cualquier valor de DELETE se normaliza a &quot;yes&quot;, incluso si es &quot;no&quot;.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE&gt;  &lt;/GS&gt;</p>
+
+<p>Sintaxis simplificada; el valor de DELETE se establece en &quot;yes&quot;.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS DELETE=&quot;yes&quot; DELETED=&quot;idioma, idioma, &quot;&gt;  &lt;/GS&gt;</p>
+
+<p>Una región de contenido que se puede eliminar y ha sido eliminado en algunos idiomas. Si el valor de DELETED está vacío, la región se incluye en todos los idiomas.</p>
+
+<p>&nbsp;</p>
+
+<p>Estas etiquetas no se deben escribir nunca manualmente en las páginas, ya que dependen de la base de datos de System 4 y de la existencia de determinados fragmentos específicos. En su lugar, para introducir fragmentos o eliminar contenido utilice la interfaz de usuario del editor de fragmentos, que puede abrirse desde el editor principal.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS NAME=&quot;nombre&quot; ADDED=&quot;idioma&quot; /&gt;</p>
+
+<p>Inserción de un fragmento genérico.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS NAME=&quot;nombre&quot; ADDED=&quot;idioma&quot; ID=&quot;núm&quot; /&gt;</p>
+
+<p>Si ID &gt; 0, indica la inserción de un fragmento específico. Si ID = 0, se introduce el fragmento genérico.</p>
+
+<p>&nbsp;</p>
+
+<p>Para cargar los fragmentos en la Biblioteca de fragmentos, se debe crear un archivo de importación de fragmentos en el que estos deben figurar entre las siguientes etiquetas.</p>
+
+<p class="whs1">&lt;GS EXTRACT=&quot;nombre&quot; [DESC=&quot;descripción&quot;]&gt;  &lt;/GS&gt;</p>
+
+<p>Un fragmento genérico que se puede extraer.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">&lt;GS EXTRACT=&quot;nombre&quot; locale=&quot;xx_XX&quot; [DESC=&quot;descripción&quot;]&gt;  &lt;/GS&gt;</p>
+
+<p>Un fragmento específico que se puede extraer.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs1">Anidar etiquetas GS</p>
+
+<p>Las etiquetas GS se pueden anidar.</p>
+
+<ul type="disc" class="whs2">
+	
+	<li class=kadov-p><p>Los fragmentos que se incluyen mediante una etiqueta GS ADDED puede contener posiciones de inserción y regiones eliminables.</p></li>
+	
+	<li class=kadov-p><p>A su vez, las regiones eliminables pueden contener posiciones de inserción y regiones eliminables. Si se elimina una región externa, se omiten las etiquetas GS incrustadas.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+<p>Corresponde a la página de origen y al autor del fragmento asegurar que las posiciones hagan referencia a nombres de fragmentos existentes, que todos los fragmentos, incluidos los de contenido HTML, se compongan de elementos de bloque de HTML, y que al introducir fragmentos o eliminar regiones se produzca código HTML válido.</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

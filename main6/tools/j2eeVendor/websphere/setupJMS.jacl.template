@@ -1,0 +1,386 @@
+# This is a JACL (TCL) script used to create
+# AmbassadorJMS Topics and Queues in WebSphere
+# The usage is: wsadmin -f setupJMS.jacl
+# This script assumes that you are using WebSphere's embedded JMS
+# If you are using MQSeries, or another provider, you will have to
+# make some minor modifications to the $embeddedjmsp variable
+# and the $AdminConfig create calls
+
+# NOTE: The JMS topics and queues in here need to be in synch with
+# what we normally keep in weblogic\util\config.xml.template
+
+###################
+##### GLOBALS #####
+###################
+set myCell %%websphere_cell%%
+set myNode %%websphere_node%%
+set myServer %%websphere_server%%
+set category_attr [list category GlobalSight]
+
+############################
+#####  Utility Methods #####
+############################
+
+proc makeTopicConnectionFactory { jmstcfName jmstcfJNDI jmstcfDescr jmstcfXA jmstcfPort jmstcfCli authAlias } {
+  global myNode
+  global myServer
+  global AdminConfig  
+  global category_attr
+  puts "----- Creating topic connection factory $jmstcfName"
+
+  set jmsProv [$AdminConfig getid "/Node:$myNode/Server:$myServer/JMSProvider:WebSphere JMS Provider/"]
+  set name_attr       [list name $jmstcfName]
+  set jndiName_attr   [list jndiName $jmstcfJNDI]
+  set descr_attr      [list description $jmstcfDescr]
+  set xaEnabled_attr  [list XAEnabled $jmstcfXA]
+  set node_attr       [list node $myNode]
+  set port_attr       [list port $jmstcfPort]
+  set cli_attr        [list clientID $jmstcfCli]
+  # setup connectionPool Attributes                                                       
+  set conTimeout      [list connectionTimeout "30"]
+  set conMax          [list maxConnections "50"]
+  set conMin          [list minConnections "0"]
+  set conReapTime     [list reapTime "30"]
+  set conUnused       [list unusedTimeout "180"]
+  set conAged         [list agedTimeout "300"]
+  set conPurgePol     [list purgePolicy "EntirePool"]
+  set con_attrs       [list $conTimeout $conMax $conMin $conReapTime $conUnused $conAged $conPurgePol]
+  set conpool_attr    [list connectionPool $con_attrs]
+  # setup sessionPool Attributes                                                       
+  set sesTimeout      [list connectionTimeout "30"]
+  set sesMax          [list maxConnections "50"]
+  set sesMin          [list minConnections "0"]
+  set sesReapTime     [list reapTime "30"]
+  set sesUnused       [list unusedTimeout "180"]
+  set sesAged         [list agedTimeout "300"]
+  set sesPurgePol     [list purgePolicy "EntirePool"]
+  set ses_attrs       [list $sesTimeout $sesMax $sesMin $sesReapTime $sesUnused $sesAged $sesPurgePol]
+  set sespool_attr    [list sessionPool $ses_attrs]
+  # check if mapping needed
+  if { !($authAlias == "N_O_N_E") } {
+    set map_auth_attr [list authDataAlias $authAlias] 
+    set map_configalias_attr [list mappingConfigAlias "DefaultPrincipalMapping"] 
+    set map_attrs     [list $map_auth_attr $map_configalias_attr]
+    set mapping_attr  [list mapping $map_attrs]
+    set attrs         [list $name_attr $jndiName_attr $descr_attr $xaEnabled_attr $node_attr $port_attr $cli_attr $conpool_attr $mapping_attr $sespool_attr $category_attr]
+  } else {
+    set attrs         [list $name_attr $jndiName_attr $descr_attr $xaEnabled_attr $node_attr $port_attr $cli_attr $conpool_attr $sespool_attr $category_attr]
+  }
+  set newjmsTCF [$AdminConfig create WASTopicConnectionFactory $jmsProv $attrs]
+}
+
+proc makeTopic { topicName } {
+  puts "----- Creating topic $topicName"
+  global myNode
+  global myServer
+  global AdminConfig
+  global category_attr
+  set jmstName   $topicName
+  set jmstJNDI   $topicName
+  set jmstDescr  $topicName
+  set jmstTopic  $topicName
+  set jmstPer    "APPLICATION_DEFINED"
+  set jmstPri    "APPLICATION_DEFINED"
+  set jmstExp    "APPLICATION_DEFINED"
+  set jmsProv [$AdminConfig getid "/Node:$myNode/Server:$myServer/JMSProvider:WebSphere JMS Provider/"]
+  set name_attr       [list name $jmstName]
+  set jndiName_attr   [list jndiName $jmstJNDI]
+  set descr_attr      [list description $jmstDescr]
+  set topic_attr      [list topic $jmstTopic]
+  set per_attr        [list persistence $jmstPer]
+  set pri_attr        [list priority $jmstPri]
+  set exp_attr        [list expiry $jmstExp]
+  set attrs           [list $name_attr $jndiName_attr $descr_attr $topic_attr $per_attr $pri_attr $exp_attr $category_attr]
+  set newjmsT [$AdminConfig create WASTopic $jmsProv $attrs]
+}
+
+proc makeQueueConnectionFactory { jmsqcfName jmsqcfJNDI jmsqcfDescr jmsqcfXA authAlias } {
+  puts "----- Creating queue connection factory $jmsqcfName"
+  global myNode
+  global myServer 
+  global AdminConfig
+  global category_attr
+  set jmsProv [$AdminConfig getid "/Node:$myNode/Server:$myServer/JMSProvider:WebSphere JMS Provider/"]
+  if {[llength $jmsProv] == 0} {
+          puts "getting jms templates"
+          set serverID [$AdminConfig getid /Node:$myNode/Server:$myServer]
+          set template [lindex [$AdminConfig listTemplates JMSProvider "WebSphere JMS Provider"] 0]
+          if {[llength $template] == 0} {
+             puts "samplesConfig: Could not find a JMSProvider for WebSphere JMS Provider"
+             return
+          } 
+          
+          puts "creating jmsProv"
+          puts "jms template is $template"
+          set jmsProv [$AdminConfig createUsingTemplate JMSProvider $serverID {{description "Built-in WebSphere JMS Provider"} {name "WebSphere JMS Provider"}} $template]
+          puts "created jmsProv"    
+  }
+  
+  set name_attr       [list name $jmsqcfName]
+  set jndiName_attr   [list jndiName $jmsqcfJNDI]
+  set descr_attr      [list description $jmsqcfDescr]
+  set xaEnabled_attr  [list XAEnabled $jmsqcfXA]
+  set node_attr       [list node $myNode]
+  # setup connectionPool Attributes                                                       
+  set conTimeout      [list connectionTimeout "30"]
+  set conMax          [list maxConnections "50"]
+  set conMin          [list minConnections "0"]
+  set conReapTime     [list reapTime "30"]
+  set conUnused       [list unusedTimeout "180"]
+  set conAged         [list agedTimeout "300"]
+  set conPurgePol     [list purgePolicy "EntirePool"]
+  set con_attrs       [list $conTimeout $conMax $conMin $conReapTime $conUnused $conAged $conPurgePol]
+  set conpool_attr    [list connectionPool $con_attrs]
+  # setup sessionPool Attributes                                                       
+  set sesTimeout      [list connectionTimeout "30"]
+  set sesMax          [list maxConnections "50"]
+  set sesMin          [list minConnections "0"]
+  set sesReapTime     [list reapTime "30"]
+  set sesUnused       [list unusedTimeout "180"]
+  set sesAged         [list agedTimeout "300"]
+  set sesPurgePol     [list purgePolicy "EntirePool"]
+  set ses_attrs       [list $sesTimeout $sesMax $sesMin $sesReapTime $sesUnused $sesAged $sesPurgePol]
+  set sespool_attr    [list sessionPool $ses_attrs]
+  # check if mapping needed
+  if { !($authAlias == "N_O_N_E") } {
+    set map_auth_attr [list authDataAlias $authAlias] 
+    set map_configalias_attr [list mappingConfigAlias "DefaultPrincipalMapping"] 
+    set map_attrs     [list $map_auth_attr $map_configalias_attr]
+    set mapping_attr  [list mapping $map_attrs]
+    set attrs         [list $name_attr $jndiName_attr $descr_attr $xaEnabled_attr $node_attr $conpool_attr $mapping_attr $sespool_attr $category_attr]
+  } else {
+    set attrs         [list $name_attr $jndiName_attr $descr_attr $xaEnabled_attr $node_attr $conpool_attr $sespool_attr $category_attr]
+  }
+  set newjmsQCF [$AdminConfig create WASQueueConnectionFactory $jmsProv $attrs]
+}
+
+proc makeQueue { queueName } {
+  puts "----- Creating queue $queueName"
+  global myNode
+  global myServer     
+  global AdminConfig
+  global category_attr  
+  
+  set jmsqName   $queueName
+  set jmsqJNDI   $queueName
+  set jmsqDescr  $queueName
+  set jmsqPer    "APPLICATION_DEFINED"
+  set jmsqPri    "APPLICATION_DEFINED"
+  set jmsqExp    "APPLICATION_DEFINED"
+  set jmsProv [$AdminConfig getid "/Node:$myNode/Server:$myServer/JMSProvider:WebSphere JMS Provider/"]
+  set name_attr       [list name $jmsqName]
+  set jndiName_attr   [list jndiName $jmsqJNDI]
+  set descr_attr      [list description $jmsqDescr]
+  set per_attr        [list persistence $jmsqPer]
+  set pri_attr        [list priority $jmsqPri]
+  set exp_attr        [list expiry $jmsqExp]
+  set attrs           [list $name_attr $jndiName_attr $descr_attr $per_attr $pri_attr $exp_attr $category_attr]
+  set newjmsQ [$AdminConfig create WASQueue $jmsProv $attrs]
+  addQueueName $queueName
+}
+
+proc addQueueName { queueName } {
+  global myNode	
+  global AdminConfig
+  set qnAppend   "true"
+  set jmss [lindex [$AdminConfig list JMSServer] 0]
+  if {[llength $jmss] ==0} {
+    puts "ERROR: Could not find the JMS Server"
+    return
+  }
+  
+  set queueNames [$AdminConfig showAttribute $jmss queueNames]
+  # parse the semi-colon-separated string into a jacl list
+  set queueList [split $queueNames \;]
+  # make sure the specified queue is added to it
+  if { [lsearch $queueList $queueName]==-1 } {  
+     if { $qnAppend } {
+       set queueList $queueName
+     } else {
+       lappend queueList $queueName
+     }
+     # join the list back together
+     set queueNames [join $queueList \; ]
+     set attrs "{queueNames $queueNames}"
+     set newQN [$AdminConfig modify $jmss $attrs]
+  } else {
+    # do nothing because the queue is already present
+  }
+}
+
+# Proc: makeListenerPort(mdbName topicQueueName isTopic)
+# Procedure to make a listener port for an MDB
+# topicQueueName can be a topic or queue name
+# isTopic "true" for topics, "false" for queues
+proc makeListenerPort {mdbName topicQueueName isTopic} {
+	global category
+	global AdminConfig
+	set mls [lindex [$AdminConfig list MessageListenerService] 0]
+	  if {[llength $mls] ==0} {
+	    puts "samplesConfig: Could not find the Message Listener Service"
+	    return
+	  }
+	
+	set suffix "Port"
+	# set the connection factory based on queue or topic
+        if { ($isTopic == "true") } {
+		set cfName "com.globalsight.jms.GlobalSightTopicConnectionFactory" 
+	} else {
+		set cfName "com.globalsight.jms.GlobalSightQueueConnectionFactory" 
+	}
+
+	set portName $mdbName$suffix
+	set desc "GlobalSight Listener Port for $mdbName"
+	
+	#number of beans in pool??
+	set lpMaxSes   "1"
+	set lpMaxRet   "2"
+	set lpMaxMsgs  "1"
+	set smIState   "START"
+
+	# attributes in list form
+	set descr_attr      [list description $desc]
+	set name_attr       [list name $portName]
+	set cfJNDI_attr     [list connectionFactoryJNDIName $cfName]
+	set destJNDI_attr   [list destinationJNDIName $topicQueueName]
+	set maxSes_attr     [list maxSessions $lpMaxSes]
+	set maxRet_attr     [list maxRetries $lpMaxRet]
+	set maxMsgs_attr    [list maxMessages $lpMaxMsgs]
+	set InitState_attr  [list initialState $smIState]
+	set sm_attrs        [list $InitState_attr]
+	set stateMgmt_attr  [list stateManagement $sm_attrs]
+	set attrs           [list $descr_attr $name_attr $cfJNDI_attr $destJNDI_attr $maxSes_attr $maxRet_attr $maxMsgs_attr $stateMgmt_attr]
+	puts "---- Creating listenerPort $portName";
+	$AdminConfig create ListenerPort $mls $attrs
+}
+
+#################
+##### MAIN ######
+#################
+
+# Check to see if setup has been run before.
+# Assume it has if the FileSystemSourceAdapterMDBPort exists
+set adapterLP [$AdminControl queryNames "cell=dragade,node=dragade,name=FileSystemSourceAdapterMDBPort,*"]
+if {[llength $adapterLP] == 0} {
+puts "----- Creating Ambassador JMS Objects"
+# create the topic connection factory
+set tcfName "com.globalsight.jms.GlobalSightTopicConnectionFactory"
+set jmstcfName   $tcfName
+set jmstcfJNDI   $tcfName
+set jmstcfDescr  "Globalsight Topic Connection Factory"
+set jmstcfXA     "true"
+set jmstcfPort   "QUEUED"
+set jmstcfCli    $tcfName
+set authAlias    "N_O_N_E"
+makeTopicConnectionFactory $jmstcfName $jmstcfJNDI $jmstcfDescr $jmstcfXA $jmstcfPort $jmstcfCli $authAlias
+
+# create the JMS topics
+makeTopic com.globalsight.terminology.jms.TermAuditLog
+makeTopic com.globalsight.cxe.jms.ForFileSystemSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForFileSystemTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForExtractor
+makeTopic com.globalsight.cxe.jms.ForMerger
+makeTopic com.globalsight.cxe.jms.ForCapTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForCapSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForCapExportListener
+makeTopic com.globalsight.cxe.jms.ForTeamSiteSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForTeamSiteTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForVignetteSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForVignetteTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForDatabaseTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForMsOfficeSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForMsOfficeTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForPdfSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForPdfTargetAdapter
+
+makeTopic com.globalsight.cxe.jms.ForInddSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForInddTargetAdapter
+
+makeTopic com.globalsight.cxe.jms.ForQuarkFrameSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForQuarkFrameTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForCopyFlowSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForCopyFlowTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForDynamicPreview
+makeTopic com.globalsight.cxe.jms.ForMediasurfaceSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForMediasurfaceTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForCatalystSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForCatalystTargetAdapter
+makeTopic com.globalsight.cxe.jms.ForServiceWareSourceAdapter
+makeTopic com.globalsight.cxe.jms.ForServiceWareTargetAdapter
+
+# create the queue connection factory
+set qcfName "com.globalsight.jms.GlobalSightQueueConnectionFactory"
+set jmsqcfName   $qcfName
+set jmsqcfJNDI   $qcfName
+set jmsqcfDescr  "GlobalSight Queue Connection Factory"
+set jmsqcfXA     "true"
+makeQueueConnectionFactory $jmsqcfName $jmsqcfJNDI $jmsqcfDescr $jmsqcfXA $authAlias
+
+# Now make all the Queues
+makeQueue com.globalsight.everest.jms.CapExporting
+makeQueue com.globalsight.cxe.jms.CapImporting
+makeQueue com.globalsight.cxe.jms.Aligner
+makeQueue com.globalsight.everest.jms.CostCalculations
+makeQueue com.globalsight.everest.jms.WorkflowAdditions
+makeQueue com.globalsight.everest.jms.ProjectUpdate
+makeQueue com.globalsight.everest.jms.FileUpload
+makeQueue com.globalsight.jms.FluxEventScheduling
+makeQueue com.globalsight.everest.jms.TermbaseDeletion
+makeQueue com.globalsight.everest.jms.TrashCompaction
+
+# Set up the MDB Listener Ports
+# Update this section to list out all the MessageDrivenBeans and their topic/queue destination
+
+# listener ports for Topic using MDBs
+set isTopic "true"
+makeListenerPort FileSystemSourceAdapterMDB com.globalsight.cxe.jms.ForFileSystemSourceAdapter $isTopic
+makeListenerPort FileSystemTargetAdapterMDB com.globalsight.cxe.jms.ForFileSystemTargetAdapter $isTopic
+makeListenerPort ExtractorMDB com.globalsight.cxe.jms.ForExtractor $isTopic
+makeListenerPort MergerMDB com.globalsight.cxe.jms.ForMerger $isTopic
+makeListenerPort CapSourceAdapterMDB com.globalsight.cxe.jms.ForCapSourceAdapter $isTopic
+makeListenerPort CapTargetAdapterMDB com.globalsight.cxe.jms.ForCapTargetAdapter $isTopic
+makeListenerPort MsOfficeSourceAdapterMDB com.globalsight.cxe.jms.ForMsOfficeSourceAdapter $isTopic
+makeListenerPort MsOfficeTargetAdapterMDB com.globalsight.cxe.jms.ForMsOfficeTargetAdapter $isTopic
+makeListenerPort PdfSourceAdapterMDB com.globalsight.cxe.jms.ForPdfSourceAdapter $isTopic
+makeListenerPort PdfTargetAdapterMDB com.globalsight.cxe.jms.ForPdfTargetAdapter $isTopic
+
+makeListenerPort InddSourceAdapterMDB com.globalsight.cxe.jms.ForInddSourceAdapter $isTopic
+makeListenerPort InddTargetAdapterMDB com.globalsight.cxe.jms.ForInddTargetAdapter $isTopic
+
+makeListenerPort TeamSiteSourceAdapterMDB com.globalsight.cxe.jms.ForTeamSiteSourceAdapter $isTopic
+makeListenerPort TeamSiteTargetAdapterMDB com.globalsight.cxe.jms.ForTeamSiteTargetAdapter $isTopic
+makeListenerPort QuarkFrameSourceAdapterMDB com.globalsight.cxe.jms.ForQuarkFrameSourceAdapter $isTopic
+makeListenerPort QuarkFrameTargetAdapterMDB com.globalsight.cxe.jms.ForQuarkFrameTargetAdapter $isTopic
+makeListenerPort CopyFlowSourceAdapterMDB com.globalsight.cxe.jms.ForCopyFlowSourceAdapter $isTopic
+makeListenerPort CopyFlowTargetAdapterMDB com.globalsight.cxe.jms.ForCopyFlowTargetAdapter $isTopic
+makeListenerPort VignetteSourceAdapterMDB com.globalsight.cxe.jms.ForVignetteSourceAdapter $isTopic
+makeListenerPort VignetteTargetAdapterMDB com.globalsight.cxe.jms.ForVignetteTargetAdapter $isTopic
+makeListenerPort DatabaseTargetAdapterMDB com.globalsight.cxe.jms.ForDatabaseTargetAdapter $isTopic
+makeListenerPort MediasurfaceSourceAdapterMDB com.globalsight.cxe.jms.ForMediasurfaceSourceAdapter $isTopic
+makeListenerPort MediasurfaceTargetAdapterMDB com.globalsight.cxe.jms.ForMediasurfaceTargetAdapter $isTopic
+makeListenerPort CatalystSourceAdapterMDB com.globalsight.cxe.jms.ForCatalystSourceAdapter $isTopic
+makeListenerPort CatalystTargetAdapterMDB com.globalsight.cxe.jms.ForCatalystTargetAdapter $isTopic
+makeListenerPort ServiceWareSourceAdapterMDB com.globalsight.cxe.jms.ForServiceWareSourceAdapter $isTopic
+makeListenerPort ServiceWareTargetAdapterMDB com.globalsight.cxe.jms.ForServiceWareTargetAdapter $isTopic
+makeListenerPort TermAuditLogMDB com.globalsight.terminology.jms.TermAuditLog $isTopic
+
+# listener ports for Queue using MDBs
+set isTopic "false"
+makeListenerPort ExportMDB com.globalsight.everest.jms.CapExporting $isTopic
+makeListenerPort RequestHandlerActivatorMDB com.globalsight.cxe.jms.CapImporting $isTopic
+makeListenerPort AlignerMDB com.globalsight.cxe.jms.Aligner $isTopic
+makeListenerPort CalculateCostMDB com.globalsight.everest.jms.CostCalculations $isTopic
+makeListenerPort WorkflowAdditionMDB com.globalsight.everest.jms.WorkflowAdditions $isTopic
+makeListenerPort ProjectUpdateMDB com.globalsight.everest.jms.ProjectUpdate $isTopic
+makeListenerPort PageSaverMDB com.globalsight.everest.jms.FileUpload $isTopic
+makeListenerPort SchedulerMDB com.globalsight.jms.FluxEventScheduling $isTopic
+makeListenerPort TermbaseDeleterMDB com.globalsight.everest.jms.TermbaseDeletion $isTopic
+makeListenerPort TrashCompactorMDB com.globalsight.everest.jms.TrashCompaction $isTopic
+
+# Finally save and Exit
+$AdminConfig save
+puts "----- Done. Configurations saved."
+     } else {
+	puts "-----Setup has been run before. Not making any changes."
+}
+

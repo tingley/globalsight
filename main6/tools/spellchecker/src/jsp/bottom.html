@@ -1,0 +1,59 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Work Page</title>
+<script src="spellcheck.js"></script>
+<script LANGUAGE="JavaScript">
+function doLoad()
+{
+    var form = SpellForm;
+
+    var pdl = parent.document.location.toString();
+
+    var locale = scGetQueryParm(pdl, "locale");
+    var uilocale = scGetQueryParm(pdl, "uilocale");
+    var dict = scGetQueryParm(pdl, "dict");
+    var customDict = scGetQueryParm(pdl, "customDict");
+    var control = scGetQueryParm(pdl, "ctrl");
+    var controlType = scGetQueryParm(pdl, "typectrl");
+
+    var originalControl = eval('parent.opener.document.' + control) ||
+        window.parent.opener.document.getElementById(control);
+    var originalText = scGetControlText(originalControl, controlType);
+
+    if (originalText == "")
+    {
+        alert("Type some text to be spell checked");
+    }
+    else
+    {
+        var text = scStripPtags(scStripHTML(originalText));
+
+        // alert("original=" + originalText + "\nsubmitting=" + text);
+
+        form.action = g_SpellServerHref; //from js file
+        form.locale.value = locale;
+        form.uilocale.value = uilocale;
+        form.dict.value = dict;
+        form.customDict.value = escape(customDict);
+        form.texttocheck.value = escape(text);
+
+        parent.document.title = 'Checking Text...';
+        form.submit();
+    }
+}
+</script>
+</head>
+<body LEFTMARGIN="0" TOPMARGIN="0" BOTTOMMARGIN="0" RIGHTMARGIN="0"
+ onload="doLoad()">
+<FORM NAME="SpellForm" target="_self"
+ METHOD="post" ACTION="/globalsight/spellchecker/SpellCheck">
+<input type="hidden" NAME="texttocheck" VALUE="">
+<INPUT TYPE="hidden" NAME="locale" VALUE="">
+<INPUT TYPE="hidden" NAME="uilocale" VALUE="">
+<INPUT TYPE="hidden" NAME="language" VALUE="">
+<INPUT TYPE="hidden" NAME="dict" VALUE="">
+<INPUT TYPE="hidden" NAME="customDict" VALUE="">
+</FORM>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="nueva conexión" >
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+</key>
+<key name="nueva configuración" >
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+</key>
+<key name="nueva contraseña" >
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+</key>
+<key name="nueva extensión" >
+  <topic name="Pantalla principal Extensiones de archivo" url="Configuraci_n/Extensiones_de_archivo/File_Extensions_Main_Screen.htm" />
+</key>
+<key name="nueva memoria" >
+  <topic name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+</key>
+<key name="nueva regla" >
+  <topic name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+</key>
+<key name="nueva tarifa al sistema" >
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+</key>
+<key name="nueva tasa" >
+  <topic name="Pantalla principal Moneda" url="Configuraci_n/Moneda/Currency_Main_Screen.htm" />
+</key>
+<key name="nuevas traducciones" >
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+</key>
+<key name="Nuevo" >
+  <topic name="Columnas" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/Columns.htm" />
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Pantalla principal Combinaciones de idiomas" url="Configuraci_n/Combinaciones_de_idiomas/Locale_Pairs_Main_Screen.htm" />
+  <topic name="Pantalla principal Conexiones a la base de datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/DB_Connections_Main_Screen.htm" />
+  <topic name="Pantalla principal Configuración de importación de la base de datos" url="Fuentes_de_datos/Configuraci_n_de_importaci_n_de_la_base_de_datos/DB_Import_Settings_Main_Screen.htm" />
+  <topic name="Pantalla principal Extensiones de archivo" url="Configuraci_n/Extensiones_de_archivo/File_Extensions_Main_Screen.htm" />
+  <topic name="Pantalla principal Memoria de traducción" url="Configuraci_n/Memoria_de_traducci_n/Translation_Memory_Main_Screen.htm" />
+  <topic name="Pantalla principal Moneda" url="Configuraci_n/Moneda/Currency_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de bases de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+  <topic name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+  <topic name="Pantalla principal Tarifa" url="Configuraci_n/Tarifas/Rate_Main_Screen.htm" />
+  <topic name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+  <topic name="Pantalla principal Ubicaciones de exportación" url="Fuentes_de_datos/Ubicaciones_de_exportaci_n/Export_Locations_Main_Screen.htm" />
+  <topic name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+  <topic name="Procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Workflows.htm" />
+  <topic name="Ramas de origen de TeamSite" url="Fuentes_de_datos/Ramas_de_TeamSite/TeamSite_Source_Branches.htm" />
+</key>
+<key name="nuevo conjunto" >
+  <topic name="Pantalla principal Reglas XML" url="Fuentes_de_datos/Reglas_XML/XML_Rules_Main_Screen.htm" />
+</key>
+<key name="nuevo contenido" >
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+</key>
+<key name="nuevo idioma" >
+  <topic name="Crear/modificar/clonar bases de datos terminológicas" url="Configuraci_n/Bases_de_datos_terminol_gica/Create_Modify_Clone_Termbase.htm" />
+</key>
+<key name="nuevo perfil" >
+  <topic name="Pantalla principal Perfiles de archivos" url="Fuentes_de_datos/Perfiles_de_archivos/File_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de bases de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Profiles_Main_Screen.htm" />
+  <topic name="Pantalla principal Perfiles de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Localization_Profiles_Main_Screen.htm" />
+</key>
+<key name="nuevo proceso" >
+  <topic name="Procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Workflows.htm" />
+</key>
+<key name="nuevo proyecto" >
+  <topic name="Pantalla principal Proyectos" url="Configuraci_n/Proyectos/Projects_Main_Screen.htm" />
+</key>
+<key name="nuevo registro" >
+  <topic name="Instrucción SQL de grabación en la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Write_SQL.htm" />
+  <topic name="Instrucción SQL de vista previa de la base de datos" url="Fuentes_de_datos/Perfiles_de_bases_de_datos/DB_Preview_SQL.htm" />
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="nuevo texto" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+</key>
+<key name="Nuevo texto original" >
+  <topic name="Coincidencias exactas con la memoria de traducción" url="Glosario/TM_Matches.htm" />
+</key>
+<key name="nuevo tipo" >
+  <topic name="Pantalla principal Tipos de actividades" url="Configuraci_n/Tipos_de_actividades/Activity_Types_Main_Screen.htm" />
+</key>
+<key name="nuevo usuario al sistema" >
+  <topic name="Pantalla principal Usuarios" url="Configuraci_n/Usuarios/Users_Main_Screen.htm" />
+</key>
+<key name="Null" >
+  <topic name="Tabla de registros pendientes" url="Ap_ndice/Pending_Records_Table.htm" />
+</key>
+<key name="núm" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="número" >
+  <topic name="Definir columna de base de datos terminológica" url="Configuraci_n/Bases_de_datos_terminol_gica/Define_Termbase_Column.htm" />
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+  <topic name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Seleccionar fragmento" url="Mis_actividades/Select_Snippet.htm" />
+</key>
+<key name="número del" >
+  <topic name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+</key>
+<key name="número entero" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="números" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="números enteros" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="NúmPuerto" >
+  <topic name="Crear/modificar conexión a la base datos" url="Fuentes_de_datos/Conexiones_a_la_base_de_datos/Create_Modify_DB_Connection.htm" />
+</key>
+<key name="Obligatorio" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Pantalla principal Reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/DB_Preview_Rules_Main_Screen.htm" />
+</key>
+<key name="obligatorios" >
+  <topic name="Crear/modificar actividad" url="Configuraci_n/Perfiles_de_traducci_n/Create_Modify_Activity.htm" />
+  <topic name="Crear/modificar moneda" url="Configuraci_n/Moneda/Create_Modify_Currency.htm" />
+  <topic name="Crear/modificar proyectos" url="Configuraci_n/Proyectos/Create_Modify_Project.htm" />
+  <topic name="Crear/modificar tarifa" url="Configuraci_n/Tarifas/Create_Modify_Rate.htm" />
+  <topic name="Información sobre la cuenta de usuario" url="Configuraci_n/Usuarios/User_Information.htm" />
+</key>
+<key name="Observe" >
+  <topic name="Escribir reglas XML" url="Ap_ndice/Writing_XML_Rules.htm" />
+  <topic name="Marcadores de posición (información adicional)" url="Ap_ndice/Placeholder_Tags_(Additional_Information).htm" />
+</key>
+<key name="obstante" >
+  <topic name="Sintaxis de las etiquetas GS" url="Glosario/GS_Tag_Syntax.htm" />
+</key>
+<key name="obtener" >
+  <topic name="Crear/modificar reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/Create_Modify_DB_Preview_Rules.htm" />
+  <topic name="Marcadores de posición" url="Glosario/Placeholder_Tags.htm" />
+  <topic name="Pantalla principal Informes" url="Informes/Reports_Main_Screen.htm" />
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="obtener ayuda" >
+  <topic name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+</key>
+<key name="obtener más ayuda" >
+  <topic name="Pantalla principal Informes" url="Informes/Reports_Main_Screen.htm" />
+</key>
+<key name="obtener más información" >
+  <topic name="Crear/modificar reglas de vista previa de la base de datos" url="Fuentes_de_datos/Reglas_de_vista_previa_de_la_base_de_datos/Create_Modify_DB_Preview_Rules.htm" />
+</key>
+<key name="octavo bit está activado" >
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+</key>
+<key name="ohtml" >
+  <topic name="Crear extensión de archivo" url="Configuraci_n/Extensiones_de_archivo/Create_File_Extension.htm" />
+</key>
+<key name="OL" >
+  <topic name="Ejemplo de una página de origen con etiquetas GS" url="Glosario/GS-Tagged_Source_Page_Example.htm" />
+</key>
+<key name="opción" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Menús de configuración" url="Configuraci_n/Setup.htm" />
+  <topic name="Preguntas frecuentes (FAQ)" url="Ap_ndice/lingfaq.html" />
+  <topic name="Temporizadores de trabajos" url="Configuraci_n/Perfiles_de_traducci_n/Job_Timers.htm" />
+</key>
+<key name="opción correcta" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="opción Desbloquear" >
+  <topic name="Editor principal" url="Mis_actividades/Main_Editor.htm" />
+</key>
+<key name="opción predeterminada" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+</key>
+<key name="opciones" >
+  <topic name="Descargar" url="Mis_actividades/Download.htm" />
+  <topic name="Ejemplos de procesos de producción" url="Configuraci_n/Procesos_de_producci_n/Sample_Workflows.htm" />
+  <topic name="Establecer las opciones de importación (Importar, pág. 3)" url="Configuraci_n/Bases_de_datos_terminol_gica/Set_Import_Options_(Import_p.3).htm" />
+  <topic name="Información básica del perfil de traducción" url="Configuraci_n/Perfiles_de_traducci_n/Basic_Information_LP.htm" />
+  <topic name="Información sobre la cuenta" url="My_Account.htm" />
+</key>
+
+</indexdata>

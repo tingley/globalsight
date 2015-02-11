@@ -1,0 +1,25 @@
+<!--  DTD for the XML Query for jobInfo -->
+<!ELEMENT jobInfo (job*)>
+<!ELEMENT job (jobId,jobName,priority,project,projectManager,sourceLocale,workflow*)>
+<!ELEMENT jobId (#PCDATA)>
+<!ELEMENT jobName (#PCDATA)>
+<!ELEMENT priority (#PCDATA)>
+<!ELEMENT project (#PCDATA)>
+<!ELEMENT projectManager (#PCDATA)>
+<!ELEMENT sourceLocale (#PCDATA)>
+<!ELEMENT workflow (targetLocale,state,currentActivity,accepter,wcExact,wcFuzzy,wcNoMatch,wcRep,perComplete,duration,cost,actualCost,revenue,actualRevenue)>
+<!ELEMENT targetLocale (#PCDATA)>
+<!ELEMENT state (#PCDATA)>
+<!ELEMENT currentActivity (#PCDATA)>
+<!ELEMENT accepter (#PCDATA)>
+<!ELEMENT wcExact (#PCDATA)>
+<!ELEMENT wcFuzzy (#PCDATA)>
+<!ELEMENT wcNoMatch (#PCDATA)>
+<!ELEMENT wcRep (#PCDATA)>
+<!ELEMENT perComplete (#PCDATA)>
+<!ELEMENT duration (#PCDATA)>
+<!ELEMENT cost (#PCDATA)>
+<!ELEMENT actualCost (#PCDATA)>
+<!ELEMENT revenue (#PCDATA)>
+<!ELEMENT actualRevenue (#PCDATA)>
+

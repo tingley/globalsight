@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE l10nRequestXml [
+<!--  l10nRequestXml.dtd describes request to localize data to CAP. -->
+<!ELEMENT l10nRequestXml (externalPageId, originalCharacterEncoding, l10nProfileId, baseHref, batchInfo) >
+<!-- dataSourceType is like FileSystem, Database, Teamsite, Vignette, etc. -->
+<!-- dataSourceId is the ID of the file profile, database source profile, etc.  -->
+<!ATTLIST l10nRequestXml dataSourceType CDATA #REQUIRED 
+	dataSourceId CDATA #REQUIRED>
+<!-- externalPageId unique (to CXE) identifier for the page.  Should be user friendly name. -->
+<!-- For files, it is the relative path name.  For files, used by CAP to determine a  -->
+<!ELEMENT externalPageId (#PCDATA)>
+<!--  Specifies if this page can be previewed by CXE. Optional, if not specified assumes a false.-->
+<!ATTLIST externalPageId pageIsCxePreviewable (true|false) "false">
+<!-- originalCharacterEncoding from the data source. -->
+<!ELEMENT originalCharacterEncoding (#PCDATA)>
+<!--  l10nProfile identifier as a database sequence number . -->
+<!ELEMENT l10nProfileId (#PCDATA)>
+<!-- The base href to view the page properly.  Optional, only needed for CMS (ie. TeamSite) -->
+<!ELEMENT baseHref (#PCDATA)>
+<!--  This page is part of a batch that should be retained into the same job. -->
+<!ELEMENT batchInfo (batchId, pageCount, pageNumber, jobPrefixName)>
+<!--  batchId is the unique (to CXE) id for the batch. -->
+<!ELEMENT batchId (#PCDATA) >
+<!--  The number of pages in the batch. -->
+<!ELEMENT pageCount (#PCDATA) >
+<!--  The order of this page in the batch. -->
+<!ELEMENT pageNumber (#PCDATA) >
+<!--  Optional, the prefix the job name should contain that this request is added to. -->
+<!ELEMENT jobPrefixName (#PCDATA)>
+]>
+
+<l10nRequestXml dataSourceType="fs" dataSourceId="1">
+<externalPageId pageIsCxePreviewable="false">XXXReplaceMeXXX</externalPageId>
+<originalCharacterEncoding>ISO-8859-1</originalCharacterEncoding>
+<l10nProfileId>1</l10nProfileId>
+</l10nRequestXml>

@@ -1,0 +1,71 @@
+#!/bin/ksh
+# source the environment variables
+. %%SYSTEM3_ENV_FILE%%
+ 
+# Start/stop/status of system 3
+RUN_AS_USER=%%CXE_OWNER%%
+CAP_REAL_PORT=%%CAP_REAL_PORT%%
+CXE_REAL_PORT=%%CXE_REAL_PORT%%
+CURRENT_USER=$('/usr/ucb/whoami')
+
+# ports below 1024 need to be run as root
+if [ $CAP_REAL_PORT -lt 1024 ]
+then
+	CAP_START_USER="root"
+else
+	CAP_START_USER=$RUN_AS_USER
+fi
+
+if [ $CXE_REAL_PORT -lt 1024 ]
+then
+	CXE_START_USER="root"
+else
+	CXE_START_USER=$RUN_AS_USER
+fi
+
+# see if the user needs to be changed for running the command
+if [ $CAP_START_USER = $CURRENT_USER ]
+then
+	alias	SU_CAP_PREPEND='eval'
+else
+	alias	SU_CAP_PREPEND='echo "switching to user $CAP_START_USER:";su $CAP_START_USER -c'
+fi 
+
+if [ $CXE_START_USER = $CURRENT_USER ]
+then
+	alias	SU_CXE_PREPEND='eval'
+else
+	alias	SU_CXE_PREPEND='echo "switching to user $CXE_START_USER:";su $CXE_START_USER -c'
+fi 
+
+
+ 
+case "$1" in
+'start')
+	shift
+	cd ${CXE_BIN}
+	SU_CXE_PREPEND "./serv start"
+	cd ${CAP_BIN}
+	SU_CAP_PREPEND "./serv start"
+        ;;
+ 
+'stop')
+	shift
+	cd ${CXE_BIN}
+	SU_CXE_PREPEND "./serv stop"
+	cd ${CAP_BIN}
+	SU_CAP_PREPEND "./serv stop"
+        ;;
+
+'status')
+	shift
+	cd ${CXE_BIN}
+	SU_CXE_PREPEND "./serv status"
+	cd ${CAP_BIN}
+	SU_CAP_PREPEND "./serv status"
+	;;
+	
+*)
+	echo "Usage: $0 { start | stop | status }"
+	;;
+esac

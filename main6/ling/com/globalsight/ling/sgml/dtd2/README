@@ -1,0 +1,35 @@
+http://www.rpbourret.com/dtdparser/
+
+http://www.rpbourret.com/dtdparser/dtdparser.zip
+
+Problems:
+
+- no inline comments (ADDED for entities, elements, ...) (partially fixed)
+- no conditional sections (not with parsed entities as switch) (FIXED)
+
+  <!ENTITY % HTML.Reserved "IGNORE">
+  <![ %HTML.Reserved; [
+  <!ENTITY % reserved "...."> ]]>
+
+- SYSTEM ids must be URLs (must call parser with file: url) (FIXED)
+
+	<!ENTITY % HTMLlat1 PUBLIC "-//W3C//ENTITIES Latin1//EN//HTML"
+	   "HTMLlat1.ent"> <--------------- must be URL
+	%HTMLlat1;
+
+==========================================================================
+
+- no multi-element decls: <!ELEMENT (a|b) (stuff)>
+- no optionality in element decls: <!ELEMENT a - - (stuff)>
+- no allowed/disallowed specs in element decls: <!ELEMENT a (s) +(stuff) -(stuff)>
+
+- PUBLIC entities must have a system id
+	<!ENTITY % ISOnum PUBLIC "ISO..." "path or url to file required" >
+
+	-------------------------------------------------------------------
+	| Restriction: only single-element decls                          |
+	| Restriction: no optionality                                     |
+	| Restriction: no inclusion/exclusion conditions on content model |
+	| Restriction: public entities must have system id                |
+	-------------------------------------------------------------------
+

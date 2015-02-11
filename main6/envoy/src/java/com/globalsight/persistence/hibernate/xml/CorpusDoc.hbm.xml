@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.corpus.CorpusDoc"
+        table="CORPUS_UNIT_VARIANT">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="nativeFormatPath" length="4000"
+            column="NATIVE_FORMAT_PATH" type="string" not-null="false"
+            unique="false" />
+        <property name="storeDate" column="STORE_DATE" type="timestamp"
+            not-null="true" unique="false" />
+        <property name="isMapped" column="IS_MAPPED" type="yes_no"
+            not-null="true" unique="false" />
+        <many-to-one name="corpusDocGroup" column="CU_ID"
+            class="com.globalsight.everest.corpus.CorpusDocGroup"
+            not-null="true" lazy="false"/>
+        <many-to-one name="globalSightLocale" column="LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale"
+            not-null="true" lazy="false"/>
+    </class>
+</hibernate-mapping>

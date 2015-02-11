@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.xmldtd.XmlDtdImpl"
+        table="XML_DTD">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="name" length="40" column="NAME" type="string"
+            not-null="true" unique="false" />
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="companyId" column="COMPANY_ID"
+            type="string" not-null="true" unique="false" />
+        <property name="addComment"
+            column="ADD_COMMENT" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="sendEmail"
+            column="SEND_EMAIL" type="yes_no"
+            not-null="true" unique="false" />
+            
+        <set name="fileProfiles" inverse="true" cascade="none">
+            <key column="XML_DTD_ID" />
+            <one-to-many
+                class="com.globalsight.cxe.entity.fileprofile.FileProfileImpl" />
+        </set>
+    </class>
+</hibernate-mapping>

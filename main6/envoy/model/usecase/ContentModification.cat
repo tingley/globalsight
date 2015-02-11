@@ -1,0 +1,2185 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Content Modification"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"392EC0FB02F8"
+    documentation 	
+|This package contains use cases that modifies the content data outside the localization process.  This corresponds to the Business Model category "Modify Content".
+    
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Delete Local Content"
+	    quid       	"38C4085E007C"
+	    documentation 	
+|3.26.2	Actor
+|Project Manager.
+|3.26.3	Description
+|The Project Manager selects a static page and deletes some or all the local content on the page.
+|3.26.4	Normal Course of Events
+|The Project Manager selects a static page from the web data source and requests to edit the local content in the page.  The system imports the select page and uses it to create a job with an Edit Local Content task, with the Project Manager as the task participant.  When the task is active, the Project Manager invokes the Local Content Editor to delete local content from the page.  If the page already contains local content before the Project Manager started working on it, the Local Content Editor highlights the local content to distinguish it from the rest of the page. 
+|
+|The Project Manager navigates to a segment in the page (see "Use Case 82 - Navigate to Segment") and opts to delete the segment.  The Local Content Editor prompts the Project Manager to confirm.  The Project Manager confirms.  The Local Content Editor deletes the segment from the page.  The Project Manager can repeat these steps to delete any segment from the page.
+|
+|The Project Manager asks the system to save the page.  The system prompts the Project Manager to confirm her edits.  The Project Manager confirms.   The system exports the page back to the web data source where the page came from.
+|3.26.5	Alternative Courses
+|1)	When the system prompts the Project Manager to confirm the decision to save the page, the Project Manager selects to cancel rather than confirm.  The system returns to the Local Content Editor, with the Project Manager's previous edits intact, i.e. deleted segments remain deleted, for the Project Manager to make further edits before requesting to save the page again.
+|2)	Instead of saving the edits in the page, the Project Manager wants to abort all the edits and restores the page to its state before the editing session began.  The Local Content Editor prompts the Project Manager to confirm.  The Project Manager confirms.  The Local Content Editor removes all changes to the page.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @1
+		    logical_models 	(list unit_reference_list
+			(object Object "$UNNAMED$0"
+			    quid       	"399498CA0205"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"399498CA0206"
+				    supplier   	"$UNNAMED$1"
+				    quidu      	"399498CA0215"
+				    messages   	(list Messages
+					(object Message "replaceSkeleton(     )"
+					    quid       	"399498CA0209"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	2
+					    quidu      	"3994966A03E2")))
+				(object Link
+				    quid       	"399498CA020A"
+				    supplier   	"$UNNAMED$0"
+				    quidu      	"399498CA0205"))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "browser"
+			    quid       	"399498CA020E"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"399498CA020D"
+				    supplier   	"$UNNAMED$0"
+				    quidu      	"399498CA0205"
+				    messages   	(list Messages
+					(object Message "replace skeleton"
+					    quid       	"399498CA0212"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)))
+				(object Link
+				    quid       	"399498CA020F"
+				    supplier   	"browser"
+				    quidu      	"399498CA020E"
+				    messages   	(list Messages
+					(object Message "select and delete snippets"
+					    quid       	"399498CA0210"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$1"
+			    quid       	"399498CA0215"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"399498CA0214"
+				    supplier   	"$UNNAMED$2"
+				    quidu      	"399498CA021A"
+				    messages   	(list Messages
+					(object Message "replaceSkeleton(  )"
+					    quid       	"399498CA0217"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1.1"
+					    ordinal    	3
+					    quidu      	"3994975702F2"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$2"
+			    quid       	"399498CA021A"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"399498CA0219"
+				    supplier   	"$UNNAMED$3"
+				    quidu      	"399498CA021D"
+				    messages   	(list Messages
+					(object Message "replaceSkeleton(  )"
+					    quid       	"399498CA021C"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1.1.1"
+					    ordinal    	4
+					    quidu      	"399497890005"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$3"
+			    quid       	"399498CA021D"
+			    class      	"Logical View::Linguistics::LingServer"
+			    quidu      	"388BA2370262"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@1
+		    quid       	"399498C20145"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	138
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "$UNNAMED$0" @2
+			    location   	(1264, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@2
+				location   	(1264, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"399498CA0205"
+			    width      	300
+			    height     	901
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @3
+				location   	(1264, 640)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	336
+				y_coord    	276
+				Nested     	FALSE))
+			(object InterObjView "browser" @4
+			    location   	(736, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@4
+				location   	(736, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"399498CA020E"
+			    width      	300
+			    height     	901
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @5
+				location   	(736, 416)
+				line_color 	3342489
+				InterObjView 	@4
+				height     	620
+				y_coord    	560
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @6
+				location   	(736, 464)
+				line_color 	3342489
+				InterObjView 	@4
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$1" @7
+			    location   	(1664, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@7
+				location   	(1664, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	428
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"399498CA0215"
+			    width      	446
+			    height     	901
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @8
+				location   	(1664, 672)
+				line_color 	3342489
+				InterObjView 	@7
+				height     	244
+				y_coord    	184
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$2" @9
+			    location   	(2048, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@9
+				location   	(2048, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"399498CA021A"
+			    width      	300
+			    height     	901
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @10
+				location   	(2048, 704)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	152
+				y_coord    	92
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$3" @11
+			    location   	(2480, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@11
+				location   	(2480, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"399498CA021D"
+			    width      	300
+			    height     	901
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @12
+				location   	(2480, 736)
+				line_color 	3342489
+				InterObjView 	@11
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object NoteView @13
+			    location   	(352, 880)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@13
+				location   	(157, 745)
+				fill_color 	13434879
+				nlines     	5
+				max_width  	354
+				label      	"It is assumed that only the skeleton (the GSA tags) changes when local content is deleted.")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	414
+			    height     	282)
+			(object SelfMessView "" @14
+			    location   	(16, 464)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @15
+				Parent_View 	@14
+				location   	(827, 420)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399498CA0210"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	527
+				justify    	0
+				label      	"select and delete snippets"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@4
+			    supplier   	@4
+			    Focus_Src  	@5
+			    Focus_Entry 	@6
+			    origin     	(752, 464)
+			    terminus   	(902, 464)
+			    ordinal    	0)
+			(object InterMessView "" @16
+			    location   	(1008, 640)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @17
+				Parent_View 	@16
+				location   	(999, 596)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399498CA0212"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	366
+				justify    	0
+				label      	"replace skeleton"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@4
+			    supplier   	@2
+			    Focus_Src  	@5
+			    Focus_Entry 	@3
+			    origin     	(751, 640)
+			    terminus   	(1248, 640)
+			    ordinal    	1)
+			(object InterMessView "" @18
+			    location   	(16, 672)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @19
+				Parent_View 	@18
+				location   	(1463, 628)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399498CA0209"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	447
+				justify    	0
+				label      	"replaceSkeleton(     )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@2
+			    supplier   	@7
+			    Focus_Src  	@3
+			    Focus_Entry 	@8
+			    origin     	(1279, 672)
+			    terminus   	(1648, 672)
+			    ordinal    	2)
+			(object InterMessView "" @20
+			    location   	(16, 704)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @21
+				Parent_View 	@20
+				location   	(1855, 660)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399498CA0217"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	415
+				justify    	0
+				label      	"replaceSkeleton(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@7
+			    supplier   	@9
+			    Focus_Src  	@8
+			    Focus_Entry 	@10
+			    origin     	(1679, 704)
+			    terminus   	(2032, 704)
+			    ordinal    	3)
+			(object InterMessView "" @22
+			    location   	(16, 736)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @23
+				Parent_View 	@22
+				location   	(2263, 692)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399498CA021C"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	415
+				justify    	0
+				label      	"replaceSkeleton(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@11
+			    Focus_Src  	@10
+			    Focus_Entry 	@12
+			    origin     	(2063, 736)
+			    terminus   	(2464, 736)
+			    ordinal    	4)
+			(object AttachView "" @24
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@13
+			    supplier   	@16
+			    line_style 	0)))))
+	(object UseCase "Add Local Content"
+	    quid       	"39401BF0026C"
+	    documentation 	
+|3.25	Use Case 32 - Add Local Content
+|
+|3.25.1	Priority
+|
+|3
+|
+|3.25.2	Actor
+|
+|Localization Participant (most likely the Translator)
+|
+|3.25.3	Description
+|
+|The Localization Participant selects a page in a task and adds local content to the page.
+|
+|3.25.4	Preconditions
+|
+|(a)	The Localization Participant has been given the permissions to edit local content.
+|
+|(b)	The page selected has local content tags (see "Use Case 102 - Edit Local Content Tags")
+|
+|3.25.5	Normal Course of Events
+|
+|The Localization Participant logs in to the Localization Workstation (LW) and starts working on a task (see "Use Case 67 - Open a Task and Use Case 68 - Open a Previous Task").  If the page already contains local content and/or local content tags for this target locale they will appear highlighted to distinguish it from the rest of the page.  While working on a page the Localization Participant navigates to a local content tag and opts to add local content before or after the selected segment.  The Localization Participant is able to add local content because he has permissions to work with local content.  The Localization Participant is prompted with a list of HTML code snippets that can be added at this place for local content.  He chooses one and it is added to the page in the place selected (before or after the selected segment).  Within the Segment Editor the Localization Participant can enter content over the existing content.  These steps can be repeated to add more local content to the page.
+|.
+|
+|The Localization Participant asks the system to save the page.  The system prompts him to confirm his edits.  He confirms them.  The page, with its new segments, is saved.  The local content segments are not saved to the Localization Memory.  If other translation changes were made these are saved also, however these are written out to Localization Memory.
+|
+|3.25.6	Alternative Courses
+|
+|1)	When the system prompts the Localization Participant to confirm the decision to save the page, he selects to cancel rather than confirm.  The system returns to the LW editor, with the Localization Participant's previous edits intact, for him to make further edits before requesting to save the page again.
+|
+|2)	Instead of saving the edits in the page, the Localization Participant wants to abort all the edits and restores the page to its state before the editing session began.  He is prompted to confirm this and once confirmed the LW editor removes all changes to the page.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @25
+		    logical_models 	(list unit_reference_list
+			(object Object "browser"
+			    quid       	"3944CFDA0018"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3944D02601D9"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"3944D0200131"
+				    messages   	(list Messages
+					(object Message "add local content between segments"
+					    quid       	"3944D02601DA"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)
+					(object Message "UI with snippet"
+					    quid       	"398F3C300389"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"1.3"
+					    ordinal    	8)
+					(object Message "replace skeleton"
+					    quid       	"399496130206"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	9)))
+				(object Link
+				    quid       	"3994960402F5"
+				    supplier   	"browser"
+				    quidu      	"3944CFDA0018"))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$4"
+			    quid       	"3944D0200131"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397E0A7602EF"
+				    supplier   	"$UNNAMED$5"
+				    quidu      	"397E07E100C3"
+				    messages   	(list Messages
+					(object Message "getSnippet(      )"
+					    quid       	"397E0A7602F0"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.1"
+					    ordinal    	1
+					    quidu      	"3944D05B0063")
+					(object Message "snippet"
+					    quid       	"398F3C120032"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"1.1.2"
+					    ordinal    	6)
+					(object Message "replaceSkeleton(     )"
+					    quid       	"3994963E0212"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1"
+					    ordinal    	10
+					    quidu      	"3994966A03E2")))
+				(object Link
+				    quid       	"398F3C21034B"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"3944D0200131"
+				    messages   	(list Messages
+					(object Message "generate UI with inserted snippet"
+					    quid       	"398F3C21035F"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.2"
+					    ordinal    	7))))
+			    class      	"Logical View::Localization Workstation::LWServlet"
+			    quidu      	"3943CDF803C6"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$5"
+			    quid       	"397E07E100C3"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397E07E100C4"
+				    supplier   	"$UNNAMED$6"
+				    quidu      	"397E07E100C9"
+				    messages   	(list Messages
+					(object Message "getSnippet ( )"
+					    quid       	"397E07E100C5"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	2
+					    Operation  	"getSnippet(  )"
+					    quidu      	"3944D4830103")
+					(object Message "snippet"
+					    quid       	"398F3BEC0150"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.1.1.1"
+					    ordinal    	5)
+					(object Message "replaceSkeleton(  )"
+					    quid       	"3994975402DA"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1.1"
+					    ordinal    	11
+					    quidu      	"3994975702F2"))))
+			    class      	"Logical View::Envoy::EV Interface::LWServletHelper"
+			    quidu      	"38BE253F0034"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$6"
+			    quid       	"397E07E100C9"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397E0AF50247"
+				    supplier   	"$UNNAMED$7"
+				    quidu      	"397E0AEA0043"
+				    messages   	(list Messages
+					(object Message "getSnippet(  )"
+					    quid       	"397E0AF50248"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2.1"
+					    ordinal    	3
+					    quidu      	"3946396503A1")
+					(object Message "snippet"
+					    quid       	"398F3BC60318"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"ToClientFromSupplier"
+					    sequence   	"2.1.1"
+					    ordinal    	4)
+					(object Message "replaceSkeleton(  )"
+					    quid       	"39949786035E"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3.1.1.1"
+					    ordinal    	12
+					    quidu      	"399497890005"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::Workflow"
+			    quidu      	"38CEE29200B8"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$7"
+			    quid       	"397E0AEA0043"
+			    class      	"Logical View::Linguistics::LingServer"
+			    quidu      	"388BA2370262"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@25
+		    quid       	"3944CB2C019B"
+		    title      	"Component API"
+		    zoom       	95
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "browser" @26
+			    location   	(736, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@26
+				location   	(736, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"browser")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3944CFDA0018"
+			    width      	300
+			    height     	1813
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @27
+				location   	(736, 416)
+				line_color 	3342489
+				InterObjView 	@26
+				height     	1532
+				y_coord    	1472
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @28
+				location   	(736, 1296)
+				line_color 	3342489
+				InterObjView 	@26
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$4" @29
+			    location   	(1264, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@29
+				location   	(1264, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3944D0200131"
+			    width      	300
+			    height     	1813
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @30
+				location   	(1264, 416)
+				line_color 	3342489
+				InterObjView 	@29
+				height     	974
+				y_coord    	914
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @31
+				location   	(1264, 1024)
+				line_color 	3342489
+				InterObjView 	@29
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @32
+				location   	(1264, 1184)
+				line_color 	3342489
+				InterObjView 	@29
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @33
+				location   	(1264, 1552)
+				line_color 	3342489
+				InterObjView 	@29
+				height     	336
+				y_coord    	276
+				Nested     	FALSE))
+			(object InterMessView "" @34
+			    location   	(16, 416)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @35
+				Parent_View 	@34
+				location   	(999, 372)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3944D02601DA"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	842
+				justify    	0
+				label      	"add local content between segments"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@26
+			    supplier   	@29
+			    Focus_Src  	@27
+			    Focus_Entry 	@30
+			    origin     	(751, 416)
+			    terminus   	(1248, 416)
+			    ordinal    	0)
+			(object InterObjView "$UNNAMED$5" @36
+			    location   	(1664, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@36
+				location   	(1664, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	428
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397E07E100C3"
+			    width      	446
+			    height     	1813
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @37
+				location   	(1664, 592)
+				line_color 	3342489
+				InterObjView 	@36
+				height     	590
+				y_coord    	530
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @38
+				location   	(1664, 944)
+				line_color 	3342489
+				InterObjView 	@36
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @39
+				location   	(1664, 1584)
+				line_color 	3342489
+				InterObjView 	@36
+				height     	244
+				y_coord    	184
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$6" @40
+			    location   	(2048, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@40
+				location   	(2048, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397E07E100C9"
+			    width      	300
+			    height     	1813
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @41
+				location   	(2048, 688)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	274
+				y_coord    	214
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @42
+				location   	(2048, 896)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	60
+				y_coord    	0
+				Nested     	TRUE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @43
+				location   	(2048, 1616)
+				line_color 	3342489
+				InterObjView 	@40
+				height     	152
+				y_coord    	92
+				Nested     	FALSE))
+			(object InterMessView "" @44
+			    location   	(1840, 688)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @45
+				Parent_View 	@44
+				location   	(1855, 644)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E07E100C5"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	293
+				justify    	0
+				label      	"getSnippet ( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@36
+			    supplier   	@40
+			    Focus_Src  	@37
+			    Focus_Entry 	@41
+			    origin     	(1679, 688)
+			    terminus   	(2032, 688)
+			    ordinal    	2)
+			(object InterMessView "" @46
+			    location   	(944, 592)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @47
+				Parent_View 	@46
+				location   	(1463, 548)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E0A7602F0"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	332
+				justify    	0
+				label      	"getSnippet(      )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@29
+			    supplier   	@36
+			    Focus_Src  	@30
+			    Focus_Entry 	@37
+			    origin     	(1279, 592)
+			    terminus   	(1648, 592)
+			    ordinal    	1)
+			(object InterObjView "$UNNAMED$7" @48
+			    location   	(2480, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@48
+				location   	(2480, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"397E0AEA0043"
+			    width      	300
+			    height     	1813
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @49
+				location   	(2480, 784)
+				line_color 	3342489
+				InterObjView 	@48
+				height     	232
+				y_coord    	172
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @50
+				location   	(2480, 1648)
+				line_color 	3342489
+				InterObjView 	@48
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @51
+			    location   	(2960, 784)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @52
+				Parent_View 	@51
+				location   	(2263, 740)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E0AF50248"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	293
+				justify    	0
+				label      	"getSnippet(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@48
+			    Focus_Src  	@41
+			    Focus_Entry 	@49
+			    origin     	(2063, 784)
+			    terminus   	(2464, 784)
+			    ordinal    	3)
+			(object InterMessView "" @53
+			    location   	(2640, 896)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @54
+				Parent_View 	@53
+				location   	(2264, 852)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398F3BC60318"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	178
+				justify    	0
+				label      	"snippet"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@48
+			    supplier   	@40
+			    Focus_Src  	@49
+			    Focus_Entry 	@42
+			    origin     	(2464, 896)
+			    terminus   	(2064, 896)
+			    ordinal    	4)
+			(object InterMessView "" @55
+			    location   	(1328, 944)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @56
+				Parent_View 	@55
+				location   	(1856, 900)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398F3BEC0150"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	178
+				justify    	0
+				label      	"snippet"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@36
+			    Focus_Src  	@42
+			    Focus_Entry 	@38
+			    origin     	(2032, 944)
+			    terminus   	(1680, 944)
+			    ordinal    	5)
+			(object InterMessView "" @57
+			    location   	(944, 1024)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @58
+				Parent_View 	@57
+				location   	(1464, 980)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398F3C120032"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	178
+				justify    	0
+				label      	"snippet"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@36
+			    supplier   	@29
+			    Focus_Src  	@37
+			    Focus_Entry 	@31
+			    origin     	(1648, 1024)
+			    terminus   	(1280, 1024)
+			    ordinal    	6)
+			(object SelfMessView "" @59
+			    location   	(16, 1184)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @60
+				Parent_View 	@59
+				location   	(1355, 1140)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398F3C21035F"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	648
+				justify    	0
+				label      	"generate UI with inserted snippet"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@29
+			    supplier   	@29
+			    Focus_Src  	@30
+			    Focus_Entry 	@32
+			    origin     	(1280, 1184)
+			    terminus   	(1430, 1184)
+			    ordinal    	7)
+			(object InterMessView "" @61
+			    location   	(448, 1296)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @62
+				Parent_View 	@61
+				location   	(1000, 1252)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"398F3C300389"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	324
+				justify    	0
+				label      	"UI with snippet"
+				pctDist    	0.500000
+				height     	45
+				orientation 	1)
+			    line_color 	3342489
+			    client     	@29
+			    supplier   	@26
+			    Focus_Src  	@30
+			    Focus_Entry 	@28
+			    origin     	(1248, 1296)
+			    terminus   	(752, 1296)
+			    ordinal    	8)
+			(object InterMessView "" @63
+			    location   	(448, 1552)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @64
+				Parent_View 	@63
+				location   	(999, 1508)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"399496130206"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	443
+				justify    	0
+				label      	"replace skeleton"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@26
+			    supplier   	@29
+			    Focus_Src  	@27
+			    Focus_Entry 	@33
+			    origin     	(751, 1552)
+			    terminus   	(1248, 1552)
+			    ordinal    	9)
+			(object InterMessView "" @65
+			    location   	(16, 1584)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @66
+				Parent_View 	@65
+				location   	(1463, 1540)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3994963E0212"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	526
+				justify    	0
+				label      	"replaceSkeleton(     )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@29
+			    supplier   	@36
+			    Focus_Src  	@33
+			    Focus_Entry 	@39
+			    origin     	(1279, 1584)
+			    terminus   	(1648, 1584)
+			    ordinal    	10)
+			(object NoteView @67
+			    location   	(352, 1664)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@67
+				location   	(157, 1529)
+				fill_color 	13434879
+				nlines     	5
+				max_width  	354
+				label      	"It is assumed that only the skeleton (the GSA tags) changes when local content is added.")
+			    line_color 	3342489
+			    fill_color 	13434879
+			    width      	414
+			    height     	282)
+			(object AttachView "" @68
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    client     	@67
+			    supplier   	@63
+			    line_style 	0)
+			(object InterMessView "" @69
+			    location   	(16, 1616)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @70
+				Parent_View 	@69
+				location   	(1855, 1572)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3994975402DA"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	486
+				justify    	0
+				label      	"replaceSkeleton(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@36
+			    supplier   	@40
+			    Focus_Src  	@39
+			    Focus_Entry 	@43
+			    origin     	(1679, 1616)
+			    terminus   	(2032, 1616)
+			    ordinal    	11)
+			(object InterMessView "" @71
+			    location   	(16, 1648)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @72
+				Parent_View 	@71
+				location   	(2263, 1604)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39949786035E"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	486
+				justify    	0
+				label      	"replaceSkeleton(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@40
+			    supplier   	@48
+			    Focus_Src  	@43
+			    Focus_Entry 	@50
+			    origin     	(2063, 1648)
+			    terminus   	(2464, 1648)
+			    ordinal    	12)))))
+	(object UseCase "Modify Local Content"
+	    quid       	"3940214D0021"
+	    documentation 	
+|3.39.1	Actor
+|Project Manager.
+|3.39.2	Priority
+|3.39.3	Description
+|The Project Manager selects a static page and modifies the existing local content in the page.
+|3.39.4	Normal Course Of Events
+|The Project Manager selects a static page from the web data source and requests to edit the local content in the page.  The system imports the selected page and uses it to create a job with an Edit Local Content task, with the Project Manager as the task participant.  When the task is active, the Project Manager invokes the Local Content Editor to edit local content in the page.  If the page already contains local content before the Project Manager started working on it, the Local Content Editor highlights the local content to distinguish it from the rest of the page.
+|
+|The Project Manager navigates to a segment in the page (see "Use Case 82 - Navigate to Segment") and opts to modify the segment.  The Local Content Editor displays a Segment Editor window that contains the segment that the Project Manager wants to modify.  The Project Manager makes modification to the content of the segment and confirms the data entered.  The Local Content Editor saves the new content for the segment.  The Project Manager can repeat these steps to modify any segment in the page.
+|
+|The Project Manager asks the system to save the page.  The system prompts the Project Manager to confirm her edits.  The Project Manager confirms.   The system exports the page back to the web data source where the page came from.
+|
+|3.39.5	Alternative Courses
+|1)	When the system prompts the Project Manager to confirm the decision to save the page, the Project Manager selects to cancel rather than confirm.  The system returns to the Local Content Editor, with the Project Manager's previous edits intact, for the Project Manager to make further edits before requesting to save the page again.
+|2)	Instead of saving the edits in the page, the Project Manager wants to abort all the edits and restores the page to its state before the editing session began.  The Local Content Editor prompts the Project Manager to confirm.  The Project Manager confirms.  The Local Content Editor removes all changes to the page.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @73
+		    logical_models 	(list unit_reference_list)))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API - none"
+		    mechanism_ref 	@73
+		    quid       	"3994996302E2"
+		    title      	"Component API - none"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object Label @74
+			    location   	(447, 497)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	3
+			    max_width  	1294
+			    label      	"Modifying local content is identical to modifying segments during translation.  There is no special API support for this use case.")))))
+	(object UseCase "Edit Local Content Tags"
+	    quid       	"3994880D029A"
+	    documentation 	
+|3.74	Use Case 103 - Edit Local Content Tags
+|
+|3.74.1	Priority
+|
+|3.74.2	Actor
+|
+|Project Manager.
+|
+|3.74.3	Description
+|
+|The Project Manager selects one or more pages and adds/modifies/deletes local content tags in the pages.
+|
+|3.74.4	Normal Course of Events
+|
+|The Project Manager opens a web data source file in a text editor (files outside of the system) and adds tags around HTML where local content can be added and deleted.  The snippets (HTML code) that can be added must be specified and the locales that can add/delete content must also be specified.  The tag format could look like this  <GSA> add="snippetName1, snippetName2, snippetName3" addLocale=en_US,es_ES deleteLocale=de </GSA>.  The next time this file is imported into the system for translation (either automatically or manually) into other languages, local content will be able to be added.  The project manager can also add tags for snippets at the same time (see "Use Case 102 - Add HTML code snippet to local content library").  
+|
+|3.74.5	Alternative Courses
+|
+|PSO would like a smart editor to apply these tags.  With more research and clearer requirements we may be able to do this, depending on resources and the schedule.  This captures a possible solution for the smart editor.  
+|
+|The Project Manager chooses the Local Content Tag Editor from the Admin GUI.  This editor allows the Project Manager to open a file on the directory system.  The Project Manager can use this editor to specify snippets to add to the snippet library (see "Use Case 102 - Add HTML code snippet to local content library") as well as edit local content tags.  The editor will show the page in detailed mode, with skeleton and all segments.  The Project Manager selects an area (text, table, graphics, etc.) and chooses to add a Local Content tag around the area.  When adding the tag the Project Manager specifies the list of snippets that can be added (from a list of possible snippets) and the locales where local content can be added and/or deleted.  The Local Content Editor adds a Local Content tag around the selected area.  The Project Manager can repeat these steps to add more Local Contents Tags in the page.  The Project Manager can also select existing Tags and modify the snippets or locales associated with it or delete a Tag entirely. When done the Project Manager has the option to import the file(s) for translation.  If he chooses not to the next time the files are imported local content can be added.
+|
+|3.74.6	Notes and Issues
+|
+|Diplomat will not strip the Local Content Tags from the page when writing it out to the customer's web data source.  These tags need to remain in the pages in order to edit local content.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @75
+		    logical_models 	(list unit_reference_list)))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API - none"
+		    mechanism_ref 	@75
+		    quid       	"39948970010A"
+		    title      	"Component API - none"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object Label @76
+			    location   	(256, 591)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	5
+			    max_width  	1132
+			    label      	
+|For Envoy 3.0, this use case is assumed to be performed external to Envoy, in whatever content creation tool that the user uses (e.g. notepad).
+|
+|So there are no API support for this use case.
+			    )))))
+	(object UseCase "Add HTML Code Snippet to Local Content Library"
+	    quid       	"3994883E0182"
+	    documentation 	
+|3.73	Use Case 102 - Add HTML code snippet to local content library
+|
+|3.73.1	Priority
+|
+|3.73.2	Actor
+|
+|Project Manager
+|
+|3.73.3	Description
+|
+|The Project Manager modifies one or more pages and specifies HTML code snippets that should be added to the system's local content snippet library.
+|
+|3.73.4	Normal Course of Events
+|
+|The Project Manager opens a file in a text editor (files outside of the system) and adds tags around HTML code that he wants to add to the system's local content snippet library.  The format of the tag is
+|<GSA> extract="snippetName" </GSA>.  The next time this file is imported into the system for translation (either automatically or manually) the snippet will be extracted from the file and placed into the system's local content snippet library.  These snippets are used when adding Local Content (see "Use Case 32 - Add Local Content").  
+|
+|3.73.5	Alternative Courses
+|
+|PSO would like a smart editor to apply these tags.  With more research and clearer requirements we may be able to do this, depending on resources and the schedule.  This captures a possible solution for the smart editor.  
+|
+|The Project Manager chooses the Local Content Tag Editor from the Admin GUI.  This editor allows the Project Manager to open a file on the directory system.  The Project Manager can use this editor to specify snippets to add to the snippet library as well as edit local content tags (see "Use Case 103 - Edit Local Content Tags").  The editor will show the page in detailed mode, with skeleton and all segments.  The Project Manager selects an area (text, table, graphics, etc.) and chooses to extract this particular HTML code snippet and add it to the library.  The Project Manager is prompted for a name for the snippet.  He specifies a unique name and the HTML code snippet is saved to the library and can now be used for local content.  The Project Manager can repeat these steps to add more snippets to the library.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @77
+		    logical_models 	(list unit_reference_list)))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API - none"
+		    mechanism_ref 	@77
+		    quid       	"399488C00297"
+		    title      	"Component API - none"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object Label @78
+			    location   	(256, 591)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	5
+			    max_width  	1132
+			    label      	
+|The extraction of the snippets is handled by Diplomat.  The snippets are sent as part of the Diplomat XML to Linguistics. The snippet library is maintained by Linguistics.
+|
+|So there are no API support for this use case.
+			    )))))
+	(object Association "$UNNAMED$8"
+	    quid       	"39401C330060"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$9"
+		    quid       	"39401C330327"
+		    supplier   	"Use Case View::Content Modification::Add Local Content"
+		    quidu      	"39401BF0026C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$10"
+		    quid       	"39401C330331"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$11"
+	    quid       	"39401D780342"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$12"
+		    quid       	"39401D790195"
+		    supplier   	"Use Case View::Content Modification::Delete Local Content"
+		    quidu      	"38C4085E007C"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$13"
+		    quid       	"39401D79019F"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$14"
+	    quid       	"394021590123"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$15"
+		    quid       	"394021590336"
+		    supplier   	"Use Case View::Content Modification::Modify Local Content"
+		    quidu      	"3940214D0021"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$16"
+		    quid       	"394021590340"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$17"
+	    quid       	"399488280130"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$18"
+		    quid       	"399488280393"
+		    supplier   	"Use Case View::Content Modification::Edit Local Content Tags"
+		    quidu      	"3994880D029A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$19"
+		    quid       	"39948828039D"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$20"
+	    quid       	"399488430247"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$21"
+		    quid       	"399488440177"
+		    supplier   	"Use Case View::Content Modification::Add HTML Code Snippet to Local Content Library"
+		    quidu      	"3994883E0182"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$22"
+		    quid       	"399488440181"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Content Modification"
+	    quid       	"39401D660151"
+	    title      	"Content Modification"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	256
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::Content Modification::Add Local Content" @79
+		    location   	(1568, 832)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@79
+			location   	(1568, 970)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add Local Content")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39401BF0026C")
+		(object UseCaseView "Use Case View::Content Modification::Delete Local Content" @80
+		    location   	(1056, 1616)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@80
+			location   	(1056, 1754)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete Local Content")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C4085E007C")
+		(object UseCaseView "Use Case View::Content Modification::Modify Local Content" @81
+		    location   	(1520, 1296)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@81
+			location   	(1520, 1434)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify Local Content")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3940214D0021"
+		    height     	118)
+		(object UseCaseView "Use Case View::Content Modification::Edit Local Content Tags" @82
+		    location   	(1408, 480)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(1408, 618)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Edit Local Content Tags")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3994880D029A"
+		    height     	118)
+		(object UseCaseView "Use Case View::Content Modification::Add HTML Code Snippet to Local Content Library" @83
+		    location   	(912, 240)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@83
+			location   	(912, 378)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add HTML Code Snippet to Local Content Library")
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3994883E0182"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Project Manager" @84
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(656, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@84
+			location   	(656, 1037)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	325
+			justify    	0
+			label      	"Project Manager")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"38BA42D500C8"
+		    width      	180
+		    height     	60
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$8" @85
+		    location   	(1098, 878)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39401C330060"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @86
+			    Parent_View 	@85
+			    location   	(-214, 462)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @87
+				Parent_View 	@86
+				location   	(809, 867)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401C330331"
+			    client     	@85
+			    supplier   	@84
+			    line_style 	0)
+			(object RoleView "$UNNAMED$9" @88
+			    Parent_View 	@85
+			    location   	(-214, 462)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @89
+				Parent_View 	@88
+				location   	(1381, 807)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				hidden     	TRUE
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	450
+				justify    	0
+				label      	""
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401C330327"
+			    client     	@85
+			    supplier   	@79
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$11" @90
+		    location   	(907, 1362)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39401D780342"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$12" @91
+			    Parent_View 	@90
+			    location   	(475, 642)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401D790195"
+			    client     	@90
+			    supplier   	@80
+			    line_style 	0)
+			(object RoleView "$UNNAMED$13" @92
+			    Parent_View 	@90
+			    location   	(475, 642)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39401D79019F"
+			    client     	@90
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$14" @93
+		    location   	(1074, 1104)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"394021590123"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$15" @94
+			    Parent_View 	@93
+			    location   	(642, 384)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394021590336"
+			    client     	@93
+			    supplier   	@81
+			    line_style 	0)
+			(object RoleView "$UNNAMED$16" @95
+			    Parent_View 	@93
+			    location   	(642, 384)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"394021590340"
+			    client     	@93
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$17" @96
+		    location   	(962, 742)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399488280130"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$18" @97
+			    Parent_View 	@96
+			    location   	(306, -186)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399488280393"
+			    client     	@96
+			    supplier   	@82
+			    line_style 	0)
+			(object RoleView "$UNNAMED$19" @98
+			    Parent_View 	@96
+			    location   	(306, -186)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39948828039D"
+			    client     	@96
+			    supplier   	@84
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$20" @99
+		    location   	(760, 637)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"399488430247"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$21" @100
+			    Parent_View 	@99
+			    location   	(104, -291)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399488440177"
+			    client     	@99
+			    supplier   	@83
+			    line_style 	0)
+			(object RoleView "$UNNAMED$22" @101
+			    Parent_View 	@99
+			    location   	(104, -291)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"399488440181"
+			    client     	@99
+			    supplier   	@84
+			    line_style 	0)))))))

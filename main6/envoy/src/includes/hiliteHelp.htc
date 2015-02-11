@@ -1,0 +1,32 @@
+<PUBLIC:COMPONENT>
+<PUBLIC:ATTACH EVENT="ondetach" ONEVENT="cleanup()" />
+<SCRIPT LANGUAGE="JScript">
+var normalDecoration;
+
+attachEvent ('onmouseover', Hilite);
+attachEvent ('onmouseout', Restore);
+
+function cleanup()
+{
+    detachEvent ('onmouseover', Hilite);
+    detachEvent ('onmouseout', Restore);
+}
+
+function Hilite()
+{
+    if (event.srcElement == element)
+    {
+        normalDecoration = style.textDecoration;
+        runtimeStyle.textDecoration = 'underline'
+    }
+}
+
+function Restore()
+{
+    if (event.srcElement == element)
+    {
+        runtimeStyle.textDecoration = normalDecoration;
+    }
+}
+</SCRIPT>
+</PUBLIC:COMPONENT>

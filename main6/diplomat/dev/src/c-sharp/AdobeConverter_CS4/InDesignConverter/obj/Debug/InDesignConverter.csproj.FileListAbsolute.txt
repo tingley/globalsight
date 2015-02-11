@@ -1,0 +1,13 @@
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\bin\Debug\InDesignConverter.exe
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\bin\Debug\InDesignConverter.pdb
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\bin\Debug\GlobalSight.Common.dll
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\bin\Debug\GlobalSight.Common.pdb
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\bin\Debug\Interop.InDesign.dll
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\ResolveAssemblyReference.cache
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\Interop.InDesign.dll
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\InDesignConverter.csproj.ResolveComReference.cache
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\GlobalSight.InDesignConverter.ProjectInstaller.resources
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\GlobalSight.InDesignConverter.Service1.resources
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\InDesignConverter.csproj.GenerateResource.Cache
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\InDesignConverter.exe
+E:\GlobalSight\Workspace_GlobalSight\GlobalSightSource\main6\diplomat\dev\src\c-sharp\AdobeConverter_CS4\InDesignConverter\obj\Debug\InDesignConverter.pdb

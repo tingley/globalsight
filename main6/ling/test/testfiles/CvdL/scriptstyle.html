@@ -1,0 +1,39 @@
+<HTML>
+<HEAD>
+<TITLE>some title</TITLE>
+<STYLE>
+BODY		{ font-family: tahoma; }
+/* this is a </styl e> comment */
+P               { color: red; }
+</STYLE>
+<STYLE><!--
+BODY		{ font-family: tahoma; }
+/* this is a </style> comment */
+P               { color: red; }
+--></STYLE>
+<SCRIPT><!--
+alert("</script>");
+s = "This is part of a script and should be translatable";
+--></SCRIPT>
+<SCRIPT>
+alert("</scrip" + "t>");
+s = "This is part of a script and should be translatable";
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<P accesskey='r'> test in red?</P>
+<LISTING accesskey="l">
+  a
+	= b
+  || c
+</LISTING>
+<PRE>
+  a
+	= b
+  || c
+</PRE>
+</BODY>
+</BODY>
+</HTML>
+

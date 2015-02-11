@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.costing.Surcharge"
+        table="SURCHARGE">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <discriminator column="TYPE" type="string" />
+
+        <property name="name" type="string" column="NAME" length="40"
+            not-null="true" />
+
+        <many-to-one name="cost" column="COST_ID"
+            class="com.globalsight.everest.costing.Cost" />
+
+        <subclass discriminator-value="F"
+            name="com.globalsight.everest.costing.FlatSurcharge">
+
+            <property name="amount" length="126" column="AMOUNT"
+                type="float" not-null="true" access="field" />
+
+            <many-to-one name="currency" column="CURRENCY_CONV_ID"
+                access="field"
+                class="com.globalsight.everest.costing.Currency" />
+
+        </subclass>
+
+        <subclass discriminator-value="P"
+            name="com.globalsight.everest.costing.PercentageSurcharge">
+
+            <property name="percentage" length="126" column="AMOUNT"
+                type="float" not-null="true" />
+
+        </subclass>
+
+    </class>
+
+</hibernate-mapping>

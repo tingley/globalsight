@@ -1,0 +1,356 @@
+/** -*- Mode: Java -*-
+ * C++ Mark up
+ *
+ * Author: Theodore Norvell
+ * (C) 1997 Theodore Norvell and Michael Bruce Lockart
+ * except for the lexer, which is (C) sun microsystems.
+ *
+ * TODO:
+ *
+ * Lexical grammar based on:
+ *
+ * Author: Sreenivasa Viswanadha
+ * Date: 3/20/97
+ *
+ * This file contains a Java grammar and actions that implement a front-end.
+ *
+ *
+ * Derived in part from the following work:
+ *
+ * PUBLIC DOMAIN PCCTS-BASED C++ GRAMMAR (cplusplus.g, stat.g, expr.g)
+ *
+ * Authors: Sumana Srinivasan, Next Inc.;            sumana_srinivasan@next.com
+ *          Terence Parr, Parr Research Corporation; parrt@parr-research.com
+ *          Russell Quong, Purdue University;        quong@ecn.purdue.edu
+ *
+ * VERSION 1.1
+ *
+ */
+options {
+  STATIC = false ;
+  DEBUG_PARSER = true;
+  ERROR_REPORTING = true ;                // ??
+  COMMON_TOKEN_ACTION = true ;
+  BUILD_PARSER = true ;                   // Need file "Parser.java" for build
+  UNICODE_INPUT = true;                   // !!
+  JAVA_UNICODE_ESCAPE = false;            // !!
+}
+
+PARSER_BEGIN(Parser)
+package com.globalsight.ling.docproc.extractor.cpp;
+
+import java.io.* ;
+import java.util.* ;
+
+public class Parser
+{
+}
+
+PARSER_END(Parser)
+
+
+TOKEN_MGR_DECLS :
+{
+    private IParseEvents m_handler = null;
+
+    public void setHandler(IParseEvents handler)
+        {
+            m_handler = handler;
+        }
+
+    private final Integer dummy = new Integer(0);
+    private Hashtable keywords = new Hashtable();
+    private boolean hashtable_initialized = false;
+
+    private void initializeHashtable()
+        {
+        keywords.put( "auto" , dummy ) ;
+        keywords.put( "bool" , dummy ) ;
+        keywords.put( "break" , dummy ) ;
+        keywords.put( "case" , dummy ) ;
+        keywords.put( "catch" , dummy ) ;
+        keywords.put( "char" , dummy ) ;
+        keywords.put( "const" , dummy ) ;
+        keywords.put( "continue" , dummy ) ;
+        keywords.put( "default" , dummy ) ;
+        keywords.put( "delete" , dummy ) ;
+        keywords.put( "do" , dummy ) ;
+        keywords.put( "double" , dummy ) ;
+        keywords.put( "else" , dummy ) ;
+        keywords.put( "enum" , dummy ) ;
+        keywords.put( "extern" , dummy ) ;
+        keywords.put( "float" , dummy ) ;
+        keywords.put( "for" , dummy ) ;
+        keywords.put( "friend" , dummy ) ;
+        keywords.put( "goto" , dummy ) ;
+        keywords.put( "if" , dummy ) ;
+        keywords.put( "inline" , dummy ) ;
+        keywords.put( "int" , dummy ) ;
+        keywords.put( "long" , dummy ) ;
+        keywords.put( "namespace" , dummy ) ;
+        keywords.put( "new" , dummy ) ;
+        keywords.put( "private" , dummy ) ;
+        keywords.put( "protected" , dummy ) ;
+        keywords.put( "public" , dummy ) ;
+        keywords.put( "redeclared" , dummy ) ;
+        keywords.put( "register" , dummy ) ;
+        keywords.put( "return" , dummy ) ;
+        keywords.put( "short" , dummy ) ;
+        keywords.put( "signed" , dummy ) ;
+        keywords.put( "sizeof" , dummy ) ;
+        keywords.put( "static" , dummy ) ;
+        keywords.put( "struct" , dummy ) ;
+        keywords.put( "class" , dummy ) ;
+        keywords.put( "switch" , dummy ) ;
+        keywords.put( "template" , dummy ) ;
+        keywords.put( "this" , dummy ) ;
+        keywords.put( "try" , dummy ) ;
+        keywords.put( "typedef" , dummy ) ;
+        keywords.put( "union" , dummy ) ;
+        keywords.put( "unsigned" , dummy ) ;
+        keywords.put( "using" , dummy ) ;
+        keywords.put( "virtual" , dummy ) ;
+        keywords.put( "void" , dummy ) ;
+        keywords.put( "volatile" , dummy ) ;
+        keywords.put( "while" , dummy ) ;
+        keywords.put( "operator" , dummy ) ;
+        keywords.put( "true" , dummy ) ;
+        keywords.put( "false" , dummy ) ;
+        keywords.put( "throw" , dummy ) ;
+        hashtable_initialized = true ;
+        }
+
+    private StringBuffer currentLine = new StringBuffer() ;
+
+    private final int PLAIN = 0;
+    private final int KEYWORD = 1;
+    private final int LINECOMMENT = 2;
+    private final int COMMENT = 3;
+    private final int CONSTANT = 4;
+    private final int PREPROCESSOR = 5;
+    private final int STRING = 6;
+
+    // Used to communicate from lex actions
+    private int colourClass = PLAIN;
+    private int currentColour = PLAIN;
+
+    public void finish()
+        {
+            // flush the last token/stringbuffer
+            endColour();
+        }
+
+    private void startColour()
+        {
+            currentColour = colourClass;
+
+            switch (currentColour)
+            {
+            case PLAIN :
+            case KEYWORD :
+            case LINECOMMENT :
+            case COMMENT :
+            case CONSTANT :
+            case PREPROCESSOR :
+            case STRING :
+            break;
+
+            default : throw new Error("assert failed") ;
+            }
+        }
+
+    private void endColour()
+        {
+            String text = currentLine.toString();
+
+            //System.err.println("code " + currentColour + " text = `" + text + "'");
+
+            switch (currentColour)
+            {
+            case PLAIN :
+            case KEYWORD :
+            case CONSTANT :
+            {
+                m_handler.handleCode(text);
+                currentLine.setLength(0);
+                currentColour = PLAIN;
+            }
+            break;
+
+            case PREPROCESSOR :
+            {
+                m_handler.handleCode(text);
+                currentLine.setLength(0);
+                currentColour = PLAIN;
+            }
+            break;
+
+            case LINECOMMENT :
+            {
+                m_handler.handleComment(text, m_handler.SINGLE_LINE_COMMENT);
+                currentLine.setLength(0);
+                currentColour = PLAIN;
+            }
+            break;
+
+            case COMMENT :
+            {
+                m_handler.handleComment(text, m_handler.MULTI_LINE_COMMENT);
+                currentLine.setLength(0);
+                currentColour = PLAIN;
+            }
+            break;
+
+            case STRING :
+            {
+                m_handler.handleString(text);
+                currentLine.setLength(0);
+                currentColour = PLAIN;
+            }
+            break;
+
+            default : throw new Error("assert failed") ;
+            }
+        }
+
+
+    private void CommonTokenAction(Token token)
+        {
+            if (!hashtable_initialized)
+            {
+                initializeHashtable();
+            }
+
+            if (token.kind == ID_OR_KEYWORD && keywords.containsKey(token.image))
+            {
+                colourClass = KEYWORD;
+            }
+
+            if (currentColour != colourClass)
+            {
+                endColour();
+            }
+            if (currentColour != colourClass)
+            {
+                startColour();
+            }
+
+            currentLine.append(token.image);
+
+            colourClass = PLAIN;
+        }
+}
+
+SPECIAL_TOKEN :
+{
+  " "   {CommonTokenAction( matchedToken ) ;}
+|
+  "\t"  {CommonTokenAction( matchedToken ) ;}
+|
+  "\n"  {CommonTokenAction( matchedToken ) ;}
+|
+  "\r"  {CommonTokenAction( matchedToken ) ;}
+|
+  "//" {colourClass = PLAIN; CommonTokenAction( matchedToken );} : IN_LINE_COMMENT
+|
+  "/*" {colourClass = PLAIN; CommonTokenAction( matchedToken ); } : IN_COMMENT
+|
+  "#"  {colourClass = PREPROCESSOR; CommonTokenAction( matchedToken ); } : PREPROCESSOR_OUTPUT
+}
+
+<IN_LINE_COMMENT> SPECIAL_TOKEN:
+{
+    "\n"  {colourClass = LINECOMMENT; CommonTokenAction( matchedToken ); } : DEFAULT
+}
+
+<IN_LINE_COMMENT> MORE:
+{
+  < ~[] >
+}
+
+<IN_COMMENT> SPECIAL_TOKEN:
+{
+    "*/"  {colourClass = COMMENT; CommonTokenAction( matchedToken ); } : DEFAULT
+}
+
+<IN_COMMENT> MORE:
+{
+  < ~[] >
+}
+
+<PREPROCESSOR_OUTPUT> SPECIAL_TOKEN:
+{
+    "\n" { colourClass = PREPROCESSOR; CommonTokenAction( matchedToken ); } : DEFAULT
+}
+
+<PREPROCESSOR_OUTPUT> MORE:
+{
+  < ~[] >
+}
+
+
+// Number Constants are over simplified.  E.g. 123ABC is a number
+// rather than a number followied by an identifier. But since identifiers
+// never immediately follow numbers in a real C++ program, its a
+// reasonable simplification.
+
+// Note that this does not correctly deal with exponential notation
+// involving + and - signs: E.g. 12.5E+4 Will be analysed as 3 tokens.
+
+TOKEN [IGNORE_CASE] :
+{
+  <  NUMBERCONSTANT : (["0"-"9","."]) (["0"-"9","a"-"z","."])* >
+      { colourClass = CONSTANT ; }
+}
+
+// Characters and strings in all their glory.
+TOKEN :
+{
+
+  <  CHARACTER : ("L")? "'"
+   (   (~["'","\\","\n","\r"])
+   | ("\\" (
+             ["n","t","v","b","r","f","a","\\","?","'","\""]
+            |
+             "0" (["0"-"7"])? (["0"-"7"])? (["0"-"7"])?
+            |
+             ("x" | "X" | "u" | "U") (["0"-"9","a"-"f","A"-"F"])+
+           )
+     )
+   )
+   "'" > { colourClass = CONSTANT ; }
+
+| <  STRING : ("L")? "\""
+   ( ( ~["\"","\\","\n","\r"])
+   | ("\\" (
+             ["n","t","v","b","r","f","a","\\","?","'","\""]
+            |
+             ("\r")? "\n"
+            |
+             "0" (["0"-"7"])? (["0"-"7"])? (["0"-"7"])?
+            |
+             ("x" | "X" | "u" | "U") (["0"-"9","a"-"f","A"-"F"])+
+           )
+     )
+   )*
+   "\"" > { colourClass = STRING ; }
+}
+
+
+// The following production serves for both identifiers and keywords.
+// These classes of token are distinguished in the common token action
+// subroutine, according to membership in the keywords set.
+
+TOKEN :
+{
+  < ID_OR_KEYWORD : ["a"-"z","A"-"Z", "_"] (["a"-"z","A"-"Z","0"-"9","_"])* >
+}
+
+// Any other characters
+// For example == will be treated as two = tokens.
+// For parsing this would be unacceptable, but for colourizing,
+// it is fine.
+TOKEN :
+{
+  < CATCHALL : ~[] >
+}

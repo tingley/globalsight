@@ -1,0 +1,51 @@
+.segment {
+	cursor: hand;
+	color: black;
+}
+
+.segmentFuzzy {
+	cursor: hand;
+	color: #FF00FF;
+}
+
+.segmentExact {
+	cursor: hand;
+	/* before 6.3: #008000; */
+	color: #006400;
+}
+
+.segmentLocked {
+	color: #808080;
+	cursor: normal;
+}
+
+.segmentUpdated {
+	cursor: hand;
+	background-color: lightgrey;
+}
+
+.segmentUnverified {
+	cursor: hand;
+	color: #66FF00;
+}
+
+.segmentRepetition {
+	cursor: hand;
+	color: red;
+}
+
+.segmentContext {
+	cursor: normal;
+	text-decoration: underline;
+	font-style: italic;
+	font-weight: bolder;
+	color: #800040 !important;
+}
+
+.segmentContextEditable {
+    cursor: hand;
+    text-decoration: underline;
+    font-style: italic;
+    font-weight: bolder;
+    color: #800040 !important;
+}

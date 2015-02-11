@@ -1,0 +1,71 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordXPConverter", "WordXPConverter\WordXPConverter\WordXPConverter.csproj", "{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPointXPConverter", "PowerPointXPConverter\PowerPointXPConverter\PowerPointXPConverter.csproj", "{DCCE5900-548A-43C3-83D6-B1647FAD103C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F} = {A86C34EE-2639-4343-81B8-F18B3D9FDF3F}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXPConverter", "ExcelXPConverter\ExcelXPConverter\ExcelXPConverter.csproj", "{11FBBA09-7304-4205-B672-72E292629D6A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629} = {086A2EB7-EAF4-4204-A312-DE5D6352D629}
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F} = {A86C34EE-2639-4343-81B8-F18B3D9FDF3F}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlobalSight.Common", "GlobalSight.Common\GlobalSight.Common\GlobalSight.Common.csproj", "{086A2EB7-EAF4-4204-A312-DE5D6352D629}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WordXPConverterSetup", "WordXPConverterSetup\WordXPConverterSetup.vdproj", "{E7235E8C-0229-4FAE-9C58-39BFE6981E94}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ExcelXPConverterSetup", "ExcelXPConverterSetup\ExcelXPConverterSetup.vdproj", "{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointXPConverterSetup", "PowerPointXPConverterSetup\PowerPointXPConverterSetup.vdproj", "{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug.ActiveCfg = Debug|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Debug.Build.0 = Debug|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release.ActiveCfg = Release|.NET
+		{A86C34EE-2639-4343-81B8-F18B3D9FDF3F}.Release.Build.0 = Release|.NET
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug.ActiveCfg = Debug|.NET
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Debug.Build.0 = Debug|.NET
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release.ActiveCfg = Release|.NET
+		{DCCE5900-548A-43C3-83D6-B1647FAD103C}.Release.Build.0 = Release|.NET
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug.ActiveCfg = Debug|.NET
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Debug.Build.0 = Debug|.NET
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release.ActiveCfg = Release|.NET
+		{11FBBA09-7304-4205-B672-72E292629D6A}.Release.Build.0 = Release|.NET
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug.ActiveCfg = Debug|.NET
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Debug.Build.0 = Debug|.NET
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release.ActiveCfg = Release|.NET
+		{086A2EB7-EAF4-4204-A312-DE5D6352D629}.Release.Build.0 = Release|.NET
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Debug.ActiveCfg = Debug
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Debug.Build.0 = Debug
+		{E7235E8C-0229-4FAE-9C58-39BFE6981E94}.Release.ActiveCfg = Release
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Debug.ActiveCfg = Debug
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Debug.Build.0 = Debug
+		{0C1FF488-F29F-4B8A-9B95-EA0DC8A677A6}.Release.ActiveCfg = Release
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Debug.ActiveCfg = Debug
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Debug.Build.0 = Debug
+		{BD4D80A3-5B63-4DA9-85F1-7BB01573C226}.Release.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

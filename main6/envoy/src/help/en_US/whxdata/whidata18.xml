@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Select Files To Align" >
+  <topic name="Select Files To Align (Create p.2)" url="Data_Sources/Corpus_Aligner/Select_Files_To_Align_(Create_p.2).htm" />
+</key>
+<key name="Select Files To Download" >
+  <topic name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+</key>
+<key name="Select Files To Import" >
+  <topic name="Select Files To Import" url="Data_Sources/Import/Select_Files_To_Import.htm" />
+</key>
+<key name="Select Files To Upload" >
+  <topic name="Select Files to Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+</key>
+<key name="Select Snippet" >
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="Select Snippet" url="My_Activities/Select_Snippet.htm" />
+</key>
+<key name="Select TeamSite Source Branch" >
+  <topic name="New TeamSite Branch Definition" url="Data_Sources/TeamSite_Branches/New_TeamSite_Branch_Definition.htm" />
+</key>
+<key name="Select TeamSite Target Branch" >
+  <topic name="TeamSite Target Branches" url="Data_Sources/TeamSite_Branches/TeamSite_Target_Branches.htm" />
+</key>
+<key name="Set Import Options" >
+  <topic name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
+  <topic name="Set Import Options (Import p.3)" url="Setup/Terminology/Set_Import_Options_(Import_p.3).htm" />
+</key>
+<key name="Setup" >
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="TeamSite Server Configuration" url="Data_Sources/TeamSite_Server_Configuration/TeamSite_Server_Configuration.htm" />
+</key>
+<key name="Setup Guides" >
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+</key>
+<key name="Setup link" >
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+</key>
+<key name="SGML Rules" >
+  <topic name="SGML Rules" url="Data_Sources/SGML_Rules/SGML_Rules.htm" />
+</key>
+<key name="Snippet" >
+  <topic name="Deletable Content" url="Glossary/Deletable_Content.htm" />
+  <topic name="Generic Snippet" url="Glossary/Generic_Snippet.htm" />
+  <topic name="GS Tag" url="Glossary/GS_Tag.htm" />
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Select Snippet" url="My_Activities/Select_Snippet.htm" />
+  <topic name="Snippet" url="Glossary/Snippet.htm" />
+  <topic name="Snippet and Content Editor" url="My_Activities/Snippet_and_Content_Editor.htm" />
+  <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+  <topic name="Snippet Import File Example" url="Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm" />
+  <topic name="Snippet Library" url="Glossary/Snippet_Library.htm" />
+  <topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
+  <topic name="Testing Import" url="Setup/Snippet_Import/Testing_Import.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Snippet corresponds" >
+  <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+</key>
+<key name="Snippet Editor" >
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Snippet Editor" url="My_Activities/Snippet_Editor.htm" />
+</key>
+<key name="Snippet Import" >
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+  <topic name="Snippet Import File Example" url="Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm" />
+  <topic name="Testing Import" url="Setup/Snippet_Import/Testing_Import.htm" />
+</key>
+<key name="Snippet Import File" >
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+  <topic name="Snippet Import File Example" url="Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm" />
+</key>
+<key name="Snippet Import File Example" >
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File Example" url="Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm" />
+</key>
+<key name="Snippet Library" >
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Snippet Import File" url="Glossary/Snippet_Import_File.htm" />
+  <topic name="Snippet Import File Example" url="Appendix/Locale_Content_Management/Snippet_Library_File_Example.htm" />
+  <topic name="Snippet Library" url="Glossary/Snippet_Library.htm" />
+</key>
+<key name="Snippets carry a locale" >
+  <topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
+</key>
+<key name="Specific Snippet" >
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Specific Snippet" url="Glossary/Specific_Snippet.htm" />
+</key>
+<key name="Starting an Alignment Project" >
+  <topic name="Starting an Alignment Project" url="Appendix/Alignment/Starting_an_Alignment_Project.htm" />
+</key>
+<key name="Startup" >
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+</key>
+<key name="Store Selection" >
+  <topic name="TeamSite Server and Store Selection" url="Data_Sources/TeamSite_Branches/TeamSite_Server_and_Store_Selection.htm" />
+</key>
+<key name="Submit Content" >
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Support Files" >
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+  <topic name="Support Files" url="My_Activities/Support_Files.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+</key>
+<key name="Support Files Main Screen" >
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+</key>
+<key name="Supported Data Formats" >
+  <topic name="Supported Data Formats" url="Appendix/Supported_Data_Formats.htm" />
+</key>
+<key name="Surcharges" >
+  <topic name="Create/Edit Surcharges" url="My_Jobs/Create_Edit_Surcharges.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Percentage Surcharge" url="Glossary/Percentage_Surcharge.htm" />
+  <topic name="Surcharges" url="My_Jobs/Surcharges.htm" />
+</key>
+<key name="System Calendars" >
+  <topic name="Assigning Holidays" url="Setup/Calendars/Assigning_Holidays.htm" />
+  <topic name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+</key>
+<key name="System Holidays" >
+  <topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
+  <topic name="System Holidays" url="Setup/Calendars/System_Holidays.htm" />
+</key>
+<key name="System Parameters" >
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+</key>
+<key name="System Shutdown" >
+  <topic name="System Shutdown" url="Setup/System_Shutdown/System_Shutdown.htm" />
+</key>
+<key name="Take so long" >
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+</key>
+
+</indexdata>

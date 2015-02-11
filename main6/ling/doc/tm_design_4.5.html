@@ -1,0 +1,664 @@
+<html>
+<head>
+<title>TM Design for System4 4.5</title>
+    <STYLE type="text/css">
+       BODY { background-color: #ffffff }
+       .ISSUE { color: red }
+       .NOTE { color: green }
+    </STYLE>
+</head>
+<body>
+<h1>TM Design for System4 4.5</h1>
+
+<p>Working draft: February 7th, 2003</p>
+
+
+<h2>1 TM Restructuring</h2>
+
+<p>To keep the number of records in the TM manageable and improve the
+leverage performance, TM will be restructured in 4.5.</p>
+
+<p>The major change is to separate TM data and Job data. The current
+TM data as of version 4.4.x represent both TM and job data. Job data
+have a lot of duplicates from repetitive re-imports. A lot of
+duplicates in a TM table hamper the leverage performance. The
+separation of TM and job data allows TM data not having
+duplicates.</p>
+
+<p class="NOTE">In this document, "duplicate data" means two pairs of
+source and target segments where source segments are identical each
+other and target segments are also identical each other. When source
+segments are identical but target segments are different each other,
+we call it "multiple translation".</p>
+
+<h3>1.1 Job Data</h3>
+
+<p>In 4.5 release, the current translation_unit_variant and
+translation_unit continue to serve as job data without any
+modification. However, indexing on them and changing state to COMPLETE
+at the job completion won't be necessary any more.
+</p>
+
+<p class="ISSUE">[Issue: If we want to leverage segments dynamically
+from current, on-going jobs or do a concordance search these data, we
+must index current page data.]</p>
+
+<p class="ISSUE">[Issue: TIMESTAMP in translation_unit_variant must be
+changed only when the segment text is changed to use it for
+determining the latest modified segment.]</p>
+
+
+<h3>1.2 TM Data</h3>
+
+<p>There are two kinds of TM data. One is Segment TM and the other is
+Page TM. Segment TM is used to leverage files that are imported into
+the system for the first time (fresh import). Page TM is used to
+leverage files that have been imported into the system previously
+(re-import).</p>
+
+<p>Segment data in both TM are populated at the job completion. TM
+data are independent. They don't refer to job data and also they are
+not referred to by any other data including leverage_match (a table
+that stores leverage results). That way, TM data can be modified and
+deleted as needed without any side effect.</p>
+
+<h4>1.2.1 Segment TM</h4>
+
+<p>Segment TM is a collection of segment data that have been brought
+into the system. Segment TM is logically separated in one or more
+Project TMs. Each Project TM cannot have duplicate segment data in it, but
+it is allowed to store identical segments in different Project TMs.
+</p>
+
+<p>Segment TM has two different kinds of data, translatable and
+localizable. To leverage imported data, translatable data are queried
+using their indexes and localizable data are queried using their exact
+match keys. When translatables and localizables are searched through
+concordance search, their indexes are used so a partial text string
+can be used to search for segments. For this reason, both
+translatables and localizables are indexed.</p>
+
+<!--  too detailed I'm afraid
+<p>All TM data are encoded in Unicode. To ensure the same characters
+are represented as the same Unicode scalar values thus the text can be
+leveraged correctly, we normalize segment text in one of Unicode
+normalization form. We choose Normalization Form C (NFC). The
+technical details of NFC is in Unicode Standard Annex #15, <a
+href=http://www.unicode.org/reports/tr15/>"Unicode Normalization
+Forms"</a>. For the rational behind the choice of NFC, see <a
+href=http://www.w3.org/TR/charmod/#sec-ChoiceNFC>"Character Model for
+the World Wide Web 1.0"</a> from W3C.</p>
+-->
+
+<p>Segment data are not whitespace normalized in the TM. Whitespace
+differences are absorbed in indexing and leveraging. The TM preserves
+the original segment forms.</p>
+
+<p>A unit of segment data is consisted of one source segment and
+corresponding one or more target segments. There isn't any limitation
+of number of target locales that can be associated with a source
+locale segment.  If there are two different translations for a given
+source segment in a given target locale, the two target segments in
+the same target locale are associated with the source segment. There
+also isn't any limitation of number of differently translated segments
+in the same locale that can be associated with a source segment. For
+example, one en_US source segment can be associated with one fr_FR
+segment, one de_DE segment and three ja_JP segments. In this case,
+Japanese has three different translations for an en_US source
+segment.</p>
+
+<p>When a job is completed, job data are added to segment TM.  The
+data are merged into existing segment TM data in such a way as not to
+create duplicate data in a Project TM. When adding a unit of data (one
+source and some corresponding targets), a new entry is created in the
+TM if an identical source segment doesn't exist yet. If an identical
+source segment exists, corresponding target segments are examined and
+if an identical target segment exists, nothing will be
+added. Otherwise the target segments are added to the existing
+unit. That may be a new target locale entry or an addition of a
+different translation to existing target segments. The equality of
+segments are measured by exact match key and type of segments. Even
+the exact match key is the same but the type is different, they are
+considered as different segments. By doing this, we can perform
+segment type aware leveraging and filter the query with type on
+concordance search.
+</p>
+
+<p>A segment is indexed when it is added to the TM. Not only source
+but also target segments are indexed so target segments can be queried
+in concordance search and multilingual leveraging can be achieved.</p>
+
+
+<h4>1.2.2 Page TM</h4>
+
+<p>Page TM segments are the latest completed job data. They are used
+to leverage re-imported pages.</p>
+
+<p>Page TM data are logically separated by page. A page is identified
+by a combination of page external id and source locale. That is, if
+the same page is imported twice using different source languages (in
+reality it doesn't likely happen), they are considered as different
+pages. Re-imported pages are leveraged using exact match keys.</p>
+
+<p>Page TM segments are populated when a job is completed. When the
+segments are populated, the old target locale segments for the page,
+if exist, are discarded.  The segments are populated in such a way
+that the duplicate segments in a page are consolidated into one
+segment. This ensures that no any duplicates are returned from the
+database when leveraging segments.</p>
+
+<p class="NOTE">[Note: There is redundancy in segment data in Segment
+TM and Page TM. Both segment data are populated when a job is
+completed. That is, the same segments are stored in both Segment TM and
+Page TM. This redundancy makes the leveraging process simpler and
+probably faster.]</p>
+
+<p>As with the case in Segment TM, if the type of the segment is
+different, they are considered as different segments even if the texts
+are exactly the same.</p>
+
+<p>Although only exact match keys are used for leveraging Page TM
+data, Page TM segments are indexed nonetheless. Indexes are used for
+concordance search.</p>
+
+
+<h4>1.2.3 Indexing</h4>
+
+<p>When segments are added to Segment and Page TM, they are
+indexed. Before indexed, segment text will be whitespace
+normalized. In whitespace normalized text, there is no leading or
+trailing whitespace and consecutive whitespaces are shrunk into one
+SPACE (U+0020) character. Whitespace characters are all Unicode
+characters that have White_space property in <a
+href=ftp://www.unicode.org/Public/UNIDATA/PropList.txt>Extended
+Character Properties</a> list. By normalizing whitespace, whitespace
+insensitive matching can be achieved.</p>
+
+<p>The main text and subflows in a segment will be indexed separately
+so <a href=#MainTextOnlyLeveraging>Main Text Only Leveraging</a> can
+be achieved. <font color=red>--- deferred to 4.6 or beyond</font></p>
+
+<p>Both source and target segments must be indexed to enable <a
+href=#MultilingualLeveraging>Multilingual Leveraging</a> and <a
+href=#MultilingualConcordace>Multilingual Concordance Search</a>.</p>
+
+<p>Indexing probably needs to use n-gram method. For some languages
+such as Chinese or Japanese, the current word based indexing doesn't
+perform well. That's because implementing a true word breaking for
+these language is difficult and Java word breaker breaks "words" in
+these language in very coarse granularity which makes leveraging and
+concordance search nearly useless.</p>
+
+
+
+<h2>2 Leveraging</h2>
+
+<p class="NOTE">[Note: When a page is leveraged, the leverage result
+shouldn't include references to TM data. Rather, it should keep the
+copies of leveraged text. TM data can be modified or deleted at any
+moment.]</p>
+
+<h3>2.1 Performance Improvement</h3>
+
+<p>Our recent study shows that the most prominent cause of the poor
+performance of the leveraging is an excess number of candidate matches
+returned from the database. In some cases, a page with a couple
+hundreds of segments gets over one million segments of candidate
+matches. Most of them are obviously duplicates.</p>
+
+<p>By eliminating duplicate segments from both Segment and Page TM,
+the problem will go away. To improve the performance further, only
+unique segments in a page is sent to the leverager. In some pages,
+there are many identical segments. For example, a hundred of spacer
+gif images are used in some pages, which produces a hundred of
+identical segments. By leveraging only one segment out of a hundred of
+the same segments, we can reduce a great deal of time for querying
+database and post processing. Again, identical segments means that
+they have the same text and the same type.</p>
+
+
+<h3>2.2 Leverage Type</h3>
+
+<p>From user's perspective, we currently have only exact or fuzzy
+match. A user can only assume that 99% fuzzy can be multiple
+translation or whitespace difference. We need more leverage types to
+show them what the leveraging result exactly is.</p>
+
+<dl>
+<dt>100% exact match</dt>
+<dd>Byte-by-byte exactly the same. This is the match from Segment TM.</dd>
+<br/>
+
+<dt>Page TM exact match</dt>
+<dd>Byte-by-byte exactly the same. This is the match from Page TM.</dd>
+<br/>
+
+<dt>Multiple translations</dt>
+<dd>More than one translations are detected for a single source segment.</dd>
+<br/>
+
+<dt>Type difference</dt> <dd>Only types of segments are
+different. Examples of types include url-a, css-border, text, etc. A
+user option can turn this into 100% exact match. See <a
+href=#TypeDifference>Type Insensitive Leveraging</a>.</dd> <br/>
+
+<dt>Whitespace difference</dt> <dd>Only whitespaces are different. A
+user option can turn this into 100% exact match. See <a
+href=#WhiteSpace>White Space Insensitive Leveraging</a>.</dd> <br/>
+
+<dt>Code difference</dt>
+<dd>Only formatting codes such as &lt;b> in HTML are different. Code
+difference includes:
+
+  <ul>
+  <li>Missing code</li>
+  <li>Added code</li>
+  <li>Location difference</li>
+  <li>Code order difference</li>
+  <li>Code content difference</li>
+  <li>Any combination of the above</li>
+  </ul>
+<br/>
+
+Some cases such as location difference can be turned into
+100% exact match by a user option. See <a href=#CodeDifference>Code
+Insensitive Leveraging</a>.
+</dd>
+<br/>
+
+<dt>Fuzzy match</dt>
+<dd>Text are different (real fuzzy).</dd>
+</dl>
+
+<p>Leverage result should carry these leveraging categories as its
+property and users should be able to see them in the editor.</p>
+
+<p class="NOTE">[Note: Page TM leveraging has only Page TM exact match
+or Multiple translations by its nature. All other categories are the
+result of Segment TM leveraging.]</p>
+
+
+<h3>2.3 User Options</h3>
+
+<p>In this release, several user options for leveraging are
+provided. They are defined by users in TM Profile which is associated
+with L10n Profile. See <a href=#TMProfile>TM Profile</a>.</p>
+
+<h4><a name=TypeDifference>2.3.1 Type Insensitive Leveraging</a></h4>
+
+<p>If this option is selected, segments different only in their type
+become 100% exact match.</p>
+
+<p>If this option is not selected, the user can choose how many
+percentage penalty is given to this match. If the user choose 3% as
+penalty, the percentage of a match is 97%. With or without the
+option turned on, the match state is TYPE_DIFFERENCE.</p>
+
+<p>This option is applied to the leveraging from both Segment TM
+(fresh import) and Page TM (re-import).</p>
+
+
+<h4><a name=WhiteSpace>2.3.2 Whitespace Insensitive Leveraging</a></h4>
+
+<p>If this option is selected, segments different only in whitespace
+become 100% exact match. When matching segments, trailing and leading
+whitespaces are ignored and the difference of the number of
+consecutive whitespaces is ignored. But the existence of whitespaces
+is not ignored.</p>
+
+<p>For example, the following segment pairs are considered as 100%
+exact match if this option is turned on (whitespaces in the examples
+are represented as underscore '_' character).</p>
+
+<ul>
+<li>"Hello,_world."</li>
+<li>"Hello,__world."</li>
+</ul>
+
+<ul>
+<li>"Hello,_world."</li>
+<li>"_Hello,_world._"</li>
+</ul>
+
+<p>But the following is NOT 100% exact match.</p>
+
+<ul>
+<li>"Hello,_world."</li>
+<li>"Hello,world."</li>
+</ul>
+
+<p>If this option is not selected, the user can choose how many
+percentage penalty is given to this match. If the user choose 3% as
+penalty, the percentage of a match is 97%. With or without the
+option turned on, the match state is WHITE_SPACE_DIFFERENCE.</p>
+
+<p>This option is applied only to the leveraging from Segment TM
+(fresh import).</p>
+
+<h4><a name=CodeDifference>2.3.3 Code Insensitive Leveraging</a></h4>
+
+<p>If this option is selected, some cases of formatting code
+ difference can become 100% exact match. The followings are the code
+ difference that can be 100% exact match.</p>
+
+<ul>
+<li>Location difference</li>
+<li>Code order difference</li>
+<li>Code content difference (but not subflow)</li>
+<li>Any combination of the above</li>
+</ul>
+
+<p>To become 100% exact, corresponding tags in the original segment
+and the matched segment must be exactly the same or can be
+substituted. See more on <a href=TagSubstitution>Tag
+Substitution</a>. Note that the tag substitution is always performed
+regardless of this option.</p>
+
+<p>The followings are examples of segment pairs that can be 100% exact
+match if this option is turned on.</p>
+
+<ul>
+<li>All work and &lt;B>no play&lt;/B> make Jack a dull boy.</li>
+<li>All work and no play make &lt;B>Jack&lt;/B> a dull boy.</li>
+</ul>
+
+<ul>
+<li>All work and &lt;B>no play&lt;/B> make &lt;I>Jack&lt;/I> a dull boy.</li>
+<li>All work and &lt;I>no play&lt;/I> make &lt;B>Jack&lt;/B> a dull boy.</li>
+</ul>
+
+<ul>
+<li>All work and &lt;B>no play&lt;/B> make Jack a dull boy.</li>
+<li>All work and &lt;STRONG>no play&lt;/STRONG> make Jack a dull boy.</li>
+</ul>
+
+<p>But the followings are not 100% exact match even if this option is
+turned on (missing tag, tag type is different).</p>
+
+<ul>
+<li>All work and &lt;B>no play&lt;/B> make Jack a dull boy.</li>
+<li>All work and no play make Jack a dull boy.</li>
+</ul>
+
+<ul>
+<li>All work and &lt;B>no play&lt;/B> make Jack a dull boy.</li>
+<li>All work and &lt;I>no play&lt;/I> make Jack a dull boy.</li>
+</ul>
+
+
+<p>Users can choose how many percentage penalty is given to this
+match. The penalty is subtracted from 100% if matches can not become
+100% (in the case of missing tags, etc) or this option is turned
+off. If the user choose 3% as penalty, the percentage of a match is
+97%. With or without the option turned on, the match state is
+CODE_DIFFERENCE.</p>
+
+<p>This option is applied only to the leveraging from Segment TM
+(fresh import).</p>
+
+
+<h4><a name=MultipleExactMatches>2.3.4 Multiple exact matches</a></h4>
+
+<p>Multiple exact matches are more than one exact matches in which
+the source texts are the same but the translations are
+different. Users can choose the leveraging behavior from the following
+options to handle multiple exact matches.</p>
+
+<dl>
+<dt>pick the latest</dt>
+<dd>pick the most recently edited segment and make it 100% exact match. All the other matches are demoted.</dd>
+<br/>
+
+<dt>pick the oldest</dt>
+<dd>pick the least recently edited segment and make it 100% exact match. All the other matches are demoted.</dd>
+<br/>
+
+<dt>demote</dt>
+<dd>all matches are demoted.</dd>
+</dl>
+
+
+<p>Users can choose how many percentage penalty is given to demoted
+matches. If the user choose 3% as penalty, the percentage of a demoted
+match is 97%. With or without the option turned on, the match state is
+MULTIPLE_TRANSLATION.</p>
+
+<p>This option is applied only to the leveraging from Segment TM
+(fresh import).</p>
+
+<h4><a name=LatestMatch>2.3.5 Latest match for re-import</a></h4>
+
+<p>If this option is selected, Page TM is not used for leveraging
+re-import. Instead, the leverager tries to find the most recently
+edited matches in Segment TM (remember everything in Page TM are
+already in Segment TM).</p>
+
+<p>This option is applied only to the leveraging for re-import.</p>
+
+
+<h4><a name=MultilingualLeveraging>2.3.6 Multilingual leveraging</a></h4>
+
+<p>Regular leveraging leverages from a language marked as source
+to languages marked as target in the TM. Multilingual
+leveraging allows to leverage from any language to any language that
+are in the TM, even from target to source or from target to
+target. For example, when there are English source and French and
+German target TM data, Multilingual Leveraging allows to leverage from
+French source to German target. Since this leveraging is somewhat less
+reliable than the regular leveraging, this feature must be explicitly
+turned on by user.</p>
+
+<p>This option is applied only to the leveraging from Segment TM
+(fresh import).</p>
+
+
+<h3><a name=TagSubstitution>2.4 Tag Substitution</a></h3>
+
+<p>When formatting codes are different in the original and matched
+segment, tags in the matched segment are substituted for tags in the
+original segment as much as possible.  The following two TMX marked-up
+segments are considered as exactly the same (100% exact match) because
+of the tag substitution if <a href=#CodeDifference>Code Insensitive
+Leveraging</a> is turned on.
+</p>
+
+<ul>
+<li>&lt;bpt type="bold">{\b &lt;/bpt>Special&lt;ept>}&lt;/ept> text</li>
+<li>&lt;bpt type="bold">&amp;lt;B>&lt;/bpt>Special&lt;ept>&amp;lt;/B>&lt;/ept> text</li>
+</ul>
+
+<p>The first segment is RTF and the second one is HTML. Since both
+segments have the same "bold" type codes, tags in the matched segment
+can be replaced with the ones in the original segment. This example
+is taken from <a
+href=http://www.lisa.org/tmx/tmx.htm#ContentMarkup_Overview>"TMX
+specification"</a>.</p>
+
+<p>This feature is also useful when matching between the same format
+segments. If the user changed only codes in the original document and
+re-import it, he might expect all segments get 100% exact match. For
+example, the following segments can be 100% exact match if <a
+href=#CodeDifference>Code Insensitive Leveraging</a> is turned on.</p>
+
+<ul>
+<li>&lt;bpt type="span">&amp;lt;SPAN class=TEXT1>&lt;/bpt>text&lt;ept>&amp;lt;/SPAN>&lt;/ept></li>
+<li>&lt;bpt type="span">&amp;lt;SPAN class=TEXT2>&lt;/bpt>text&lt;ept>&amp;lt;/SPAN>&lt;/ept></li>
+</ul>
+
+<p>When a tag is substituted for another,</p>
+
+<ul>
+<li>their type must be the same.</li>
+<li>the number of subflows in the tags must be the same.</li>
+<li>the type of each corresponding subflow must be the same.</li>
+<li>subflow contents are not substituted.</li>
+</ul>
+
+<p>Tags that cannot be substituted are removed from the matched
+segment.</p>
+
+
+<!--  for 4.6 or above
+<h4><a name=MainTextOnlyLeveraging>3.2.3 Main text only leveraging</a></h4>
+
+<p>This is a request from PSO. <a
+href=#DifferentFormatLeveraging>Different Format Leveraging</a> can
+ignore the code difference, but not subflow text difference. When only
+a subflow text is changed or an extra subflow is added, it would be
+useful for some users to see the main text as exact and subflows as
+fuzzy or no match in the editor. Since subflows are part of a segment,
+the segment doesn't get 100% exact match, but with some special kind
+of leveraging status, we may be able to show only the main text as
+exact. From user's point of view, both main text and subflow look
+independent segments after all.</p>
+
+<p>Obviously, we need more research and careful thought on this.</p>
+-->
+
+
+<h2>3 TM Profile</h2>
+
+<p>TM Profile is newly added in the 4.5 release, in which users can
+set various options regarding TM. TM Profile is associated with L10n
+Profile. An assignment of a TM in Project screen is removed.</p>
+
+<p>Users can choose the following options</p>
+
+<h3>3.1 Project TM options</h3>
+
+<dl>
+<dt>Project TM for storage</dt>
+<dd>Users can choose a Project TM to store segments after the job completion.</dd>
+<br/>
+
+<dt>Save un-localized segments to Project TM</dt>
+<dd>A checkbox to indicate whether un-localized segments are stored in the Project TM (for fresh import).</dd>
+<br/>
+
+<dt>Save un-localized segments to Page TM</dt>
+<dd>A checkbox to indicate whether un-localized segments are stored in the Page TM (for re-import).</dd>
+</dl>
+
+<h3>3.2 Leverage options for fresh import</h3>
+
+<dl>
+<dt>Project TMs to leverage from</dt>
+<dd>Users can choose one or more Project TMs to leverage from.</dd>
+<br/>
+
+<dt>Type insensitive leveraging</dt>
+<dd>A checkbox to indicate whether type insensitive leveraging is performed. See more on <a href=#TypeDifference>Type Insensitive Leveraging</a>.</dd>
+<br/>
+
+<dt>Type difference penalty</dt>
+<dd>This option is enabled when "Type insensitive leveraging" is off. Users can enter a percentage penalty for type difference. See more on <a href=#TypeDifference>Type Insensitive Leveraging</a>.</dd>
+<br/>
+
+
+<dt>Whitespace insensitive leveraging</dt>
+<dd>A checkbox to indicate whether whitespace insensitive leveraging is performed. See more on <a href=#WhiteSpace>Whitespace Insensitive Leveraging</a>.</dd>
+<br/>
+
+<dt>Whitespace difference penalty</dt>
+<dd>This option is enabled when "Whitespace insensitive leveraging" is off. Users can enter a percentage penalty for whitespace difference. See more on <a href=#WhiteSpace>Whitespace Insensitive Leveraging</a>.</dd>
+<br/>
+
+
+<dt>Code insensitive leveraging</dt>
+<dd>A checkbox to indicate whether code insensitive leveraging is performed. See more on <a href=#CodeDifference>Code Insensitive Leveraging</a>.</dd>
+<br/>
+
+<dt>Code difference penalty</dt>
+<dd>Users can enter a percentage penalty for code difference. See more on <a href=#CodeDifference>Code Insensitive Leveraging</a>.</dd>
+<br/>
+
+<dt>Multilingual leveraging</dt>
+<dd>A checkbox to indicate whether multilingual leveraging is performed. See more on <a href=#MultilingualLeveraging>Multilingual Leveraging</a>.</dd>
+<br/>
+
+<dt>Multiple Exact Matches</dt>
+<dd>Users can choose options, "pick the latest", "pick the oldest", "demote" for handling multiple exact matches. See more on <a href=#MultipleExactMatches>Multiple exact matches</a>.</dd>
+<br/>
+
+<dt>Multiple Exact Matches penalty</dt>
+<dd>Users can enter a percentage penalty for demoted multiple exact matches. See more on <a href=#MultipleExactMatches>Multiple exact matches</a>.</dd>
+<br/>
+
+<dt>Fuzzy match threshold</dt>
+<dd>Users can enter the fuzzy match threshold.</dd>
+<br/>
+
+<dt>Number of fuzzy matches</dt>
+<dd>Users can enter the number of fuzzy matches. No more than this number of fuzzies are returned.</dd>
+</dl>
+
+
+<h3>3.3 Leverage options for re-import</h3>
+
+<dl>
+<dt>Latest match</dt>
+<dd>A checkbox to indicate whether latest match is performed. See more on <a href=#LatestMatch>Latest Match for re-import</a>.</dd>
+
+<dt>Type insensitive leveraging</dt>
+<dd>A checkbox to indicate whether type insensitive leveraging is performed. See more on <a href=#TypeDifference>Type Insensitive Leveraging</a>.</dd>
+<br/>
+
+<dt>Type difference penalty</dt>
+<dd>This option is enabled when "Type insensitive leveraging" is off. Users can enter a percentage penalty for type difference. See more on <a href=#TypeDifference>Type Insensitive Leveraging</a>.</dd>
+<br/>
+
+
+</dl>
+
+
+
+<h2>4 TM management</h2>
+
+<h3>4.1 Creation</h3>
+
+<p>Users can create a Project TM. (No change is required for the
+current implementation)</p>
+
+<h3>4.2 Deletion</h3>
+
+<p>Users can delete existing Project and Page TMs. They can choose
+either a locale to delete segments that belong to that locale or "all
+locale" that means to delete entire TM.</p>
+
+<h3>4.3 Modification</h3>
+
+<p>Users can modify a Project TM attribute such as name and
+domain. (No change is required for the current implementation)</p>
+
+
+<h3>4.4 Maintenance</h3>
+
+<p>TBD</p>
+
+<h3>4.5 Import</h3>
+
+<p>TBD</p>
+
+<h3>4.6 Export</h3>
+
+<p>TBD</p>
+
+
+<!--
+<h4><a name=MultilingualConcordace>3.3.2 Multilingual Concordance search</a></h4>
+
+<p>Search TM segments with and, or, phrase, etc options in any locale.</p>
+
+<h4>3.3.3 Edit TM data</h4>
+
+<p>Edit TM segments.</p>
+
+<ul>
+<li>Batch replace</li>
+<li>One-by-one replace</li>
+<li>Free edit</li>
+</ul>
+-->
+
+</body>
+</html>

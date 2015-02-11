@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.taskmanager.TaskImpl"
+        table="TASK_INFO">
+
+        <id name="id" column="TASK_ID" type="long">
+            <generator class="assigned" />
+        </id>
+
+        <many-to-one name="workflow" column="WORKFLOW_ID"
+            class="com.globalsight.everest.workflowmanager.WorkflowImpl"
+            not-null="true" />
+
+        <property name="name" length="64" column="NAME" type="string"
+            not-null="true" unique="false" />
+
+        <property name="stateStr" length="20" column="STATE"
+            type="string" not-null="true" unique="false" />
+
+        <property name="estimatedAcceptanceDate"
+            column="ESTIMATED_ACCEPTANCE_DATE" type="timestamp"
+            not-null="false" unique="false" />
+
+        <property name="estimatedCompletionDate"
+            column="ESTIMATED_COMPLETION_DATE" type="timestamp"
+            not-null="false" unique="false" />
+
+        <property name="acceptedDate" column="ACCEPTED_DATE" type="timestamp"
+            not-null="false" unique="false" />
+
+        <property name="completedDate" column="COMPLETED_DATE"
+            type="timestamp" not-null="false" unique="false" />
+
+        <many-to-one name="expenseRate" column="EXPENSE_RATE_ID"
+            class="com.globalsight.everest.costing.Rate"
+            not-null="false" />
+
+        <many-to-one name="revenueRate" column="REVENUE_RATE_ID"
+            class="com.globalsight.everest.costing.Rate"
+            not-null="false" />
+
+        <property name="stfCreationState" length="20"
+            column="STF_CREATION_STATE" type="string" not-null="false"
+            unique="false" />
+
+        <property name="acceptor" length="80" column="USER_ID"
+            type="string" not-null="false" unique="false" />
+
+        <property name="rateSelectionCriteria"
+            column="RATE_SELECTION_CRITERIA" type="int" not-null="true"
+            unique="false" />
+
+        <property name="typeStr" length="20" column="TYPE" type="string"
+            not-null="false" unique="false" />
+
+        <property name="taskType" length="20" column="TASK_TYPE"
+            type="string" not-null="true" unique="false" />
+
+        <property name="companyId" length="22" column="COMPANY_ID"
+            type="string" not-null="true" unique="false" />
+
+        <bag name="ratings" inverse="true" cascade="save-update">
+            <key column="TASK_ID" />
+            <one-to-many
+                class="com.globalsight.everest.vendormanagement.Rating" />
+        </bag>
+
+        <bag name="taskComments" inverse="true" cascade="save-update">
+            <key column="COMMENT_OBJECT_ID" />
+            <one-to-many
+                class="com.globalsight.everest.comment.CommentImpl" />
+        </bag>
+
+        <set name="workSet" inverse="true" cascade="all">
+            <key column="TASK_ID" />
+            <one-to-many
+                class="com.globalsight.everest.costing.AmountOfWork" />
+        </set>
+
+		<set name="taskTuvs" inverse="true" cascade="all">
+			<key column="TASK_ID" />
+			<one-to-many class="com.globalsight.everest.tuv.TaskTuv" />
+		</set>
+    </class>
+
+</hibernate-mapping>

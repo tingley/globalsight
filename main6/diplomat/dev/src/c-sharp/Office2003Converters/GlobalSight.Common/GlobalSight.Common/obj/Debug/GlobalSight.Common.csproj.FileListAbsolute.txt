@@ -1,0 +1,10 @@
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.dll
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.pdb
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\obj\Debug\ResolveAssemblyReference.cache
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.dll
+D:\workspace\b7180\diplomat\dev\src\c-sharp\2007\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.pdb
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.dll
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.pdb
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.dll
+C:\Users\admin\Documents\Visual Studio 2008\Projects\Office2007Converters\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.pdb

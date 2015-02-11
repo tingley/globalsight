@@ -1,0 +1,56 @@
+root=~/svn/main-2-23/Welocalize/main6
+
+updateSvn() {
+	cd $root
+	svn up
+	cd -
+}
+
+compile() {
+	cd $root/tools/build
+	ant clean distnojsp
+	cd -
+}
+
+copyFiles() {
+	rm -r GlobalSight_7.1
+
+	java -classpath .:lib/log4j.jar com.Main $1 $2
+}
+
+if [ $# = 0 ]
+	then
+	echo 'run version option, example: run 3007 -u'
+	echo '  options:'
+	echo '  -u:  update svn and compile'
+	echo '  -c:  compile'
+	echo '  -r:  release, will copy globalsight.jar instead of classes'
+
+else
+	if [ $# = 2 ]
+	    then
+	        case "$2" in
+	        '-u')
+			    updateSvn
+				compile
+	            ;;
+			'-ur')
+	            updateSvn
+				compile
+	            ;;
+	        '-c')
+				compile
+	            ;;
+			'-cr')
+	            compile
+	            ;;
+			'-r')
+	            ;;
+	        *)
+	            echo 'wrong parameter, please use -u|-c|-ur|-cr'
+	            ;;
+	        esac
+	fi
+
+	copyFiles $1 $2
+fi

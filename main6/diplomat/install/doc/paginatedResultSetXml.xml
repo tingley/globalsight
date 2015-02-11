@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE paginatedResultSetXml SYSTEM "paginatedResultSetXml.dtd">
+<paginatedResultSetXml version="1.0" id="PRS98450293490" locale="en_US">
+	<record recordProfileId="rpid10249" sequenceNumber="SN1">
+		<column name="PRODUCT_ID" tableName="PRODUCTS" dataType="text" ruleId="0" contentMode="contextual">
+			<label>Product Id</label>
+			<content>12345</content>
+		</column>
+		<column name="DESCRIPTION" tableName="PRODUCTS" dataType="text" ruleId="0" contentMode="translatable">
+			<label>Description</label>
+			<content>This is a product description that needs to be translated.</content>
+		</column>
+		<column name="ALT_DESCRIPTION" tableName="PROD_2" dataType="html" ruleId="0" contentMode="translatable">
+			<label>Alternate Description</label>
+			<content>&lt;b&gt;&lt;I&gt;This is some partially-escaped html stuff that needs to be translated.&lt;/I&gt;&lt;/b&gt;</content>
+		</column>
+		<context numRows="1" numCols="3">
+			<columnHeader>Customer Header1</columnHeader>
+			<columnHeader>Customer Header2</columnHeader>
+			<columnHeader>Customer Header3</columnHeader>
+			<row>
+				<column contentMode="contextual">
+					<content>Content for column 1</content>
+				</column>
+				<column contentMode="contextual">
+					<content>Content for column 2</content>
+				</column>
+				<column contentMode="contextual">
+					<content>Content for column 3</content>
+				</column>
+			</row>
+		</context>
+	</record>
+</paginatedResultSetXml>

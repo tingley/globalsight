@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Search matches" >
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Users Main Screen" url="Setup/Users/Users_Main_Screen.htm" />
+</key>
+<key name="Search Results" >
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+</key>
+<key name="Search Vendors" >
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+</key>
+<key name="Searching Termbase" >
+  <topic name="Searching Termbase (Maintenance p.2)" url="Setup/Terminology/Searching_Termbase_(Maintenance_p.2).htm" />
+</key>
+<key name="Secondary Target File" >
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="How to Save Files for Upload" url="Appendix/Working_Offline/RTF_(List_View)/How_to_Save_Files_for_Upload.htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+</key>
+<key name="Segment" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Aligning Segments" url="Appendix/Alignment/Aligning_Segments.htm" />
+  <topic name="Alignment Parameters" url="Data_Sources/Corpus_Aligner/Alignment_Parameters.htm" />
+  <topic name="Browser Settings" url="Appendix/Browser_Settings.htm" />
+  <topic name="Colors" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Colors.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
+  <topic name="Do Fuzzy Matches have formatting" url="Appendix/Linguistic_FAQ/Do_Fuzzy_Matches_have_formatting.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="Exclude Item Types" url="Appendix/Exclude_Item_Types.htm" />
+  <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  <topic name="Extracted File" url="Glossary/Extracted_File.htm" />
+  <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
+  <topic name="How are TM Fuzzy Matching scores calculated" url="Appendix/Linguistic_FAQ/How_are_TM_Fuzzy_Matching_scores_calculated.htm" />
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Localizables" url="Glossary/Localizables.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="No Match Repetitions" url="Glossary/No_Match_Repetitions.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Overview1" url="Appendix/Alignment/Overview1.htm" />
+  <topic name="Placeholder Tags (Additional Information)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Review Window" url="My_Activities/Review_Window.htm" />
+  <topic name="Segment" url="Glossary/Segment.htm" />
+  <topic name="Segment Comments" url="My_Jobs/Customer_Jobs/Segment_Comments.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+  <topic name="Segment Protection" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Editing_Text.htm" />
+  <topic name="Snippet" url="Glossary/Snippet.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Termbase Search Results (Maintenance p.3)" url="Setup/Terminology/Termbase_Search_Results_(Maintenance_p.3).htm" />
+  <topic name="TM" url="Glossary/TM.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Translation Unit Variant" url="Glossary/Translation_Unit_Variant.htm" />
+  <topic name="Type" url="Glossary/Type.htm" />
+  <topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+  <topic name="What is a Leverage Group Exact Match (LGEM)" url="Appendix/Linguistic_FAQ/What_is_a_Leverage_Group_Exact_Match_(LGEM).htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="What is a Segment" url="Appendix/Linguistic_FAQ/What_is_a_Segment.htm" />
+  <topic name="When are segments read from TM" url="Appendix/Linguistic_FAQ/When_are_segments_read_from_TM.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Segment back" >
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+</key>
+<key name="Segment Editor" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+  <topic name="Segment Protection" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Editing_Text.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+</key>
+<key name="Segment Editor Options" >
+  <topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+</key>
+<key name="Segment fails" >
+  <topic name="Email Notification" url="Email_Notification.htm" />
+</key>
+<key name="Segment formatting" >
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+</key>
+<key name="Segment Protection" >
+  <topic name="Segment Protection" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Editing_Text.htm" />
+</key>
+<key name="Segmentation customizable" >
+  <topic name="Is segmentation customizable in GlobalSight" url="Appendix/Linguistic_FAQ/Is_segmentation_customizable_in_GlobalSight.htm" />
+</key>
+<key name="Segments containing" >
+  <topic name="Customizing Segmentation Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Segmentation_Rules.htm" />
+</key>
+<key name="Segments read" >
+  <topic name="When are segments read from TM" url="Appendix/Linguistic_FAQ/When_are_segments_read_from_TM.htm" />
+</key>
+<key name="Segments saved to TM" >
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+</key>
+<key name="Select a Termbase" >
+  <topic name="Select a Termbase" url="My_Activities/Select_a_Termbase.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+</key>
+<key name="Select File Profile for Import" >
+  <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+</key>
+
+</indexdata>

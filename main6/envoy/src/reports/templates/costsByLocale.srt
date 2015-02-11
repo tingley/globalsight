@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Type="StyleSheet" Top="1.0" Left="1.0" Bottom="1.0" Right="1.0" HeaderFromEdge="0.5" FooterFromEdge="0.75" PageNumbering="1" HorizontalWrap="false" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0">
+<ReportProperty Name="report.modified">
+<![CDATA[2003-07-02 17:38:44]]>
+</ReportProperty>
+<ReportProperty Name="TextMode">
+<![CDATA[true]]>
+</ReportProperty>
+<ReportProperty Name="edit.layout">
+<![CDATA[false]]>
+</ReportProperty>
+<ReportProperty Name="report.created">
+<![CDATA[2002-03-06 17:35:12]]>
+</ReportProperty>
+<Parameters>
+</Parameters>
+<RunningTotals>
+<RunningTotal
+ name="avgJobCost" elementId="Table1" summaryColumn="Final Cost" evaluateOnChange="Job Name" formula="Average&lt;0&gt;"/>
+</RunningTotals>
+<Header Type="256">
+<ImageElement ID="imgLogo" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-4144960" PathType="3" Embedded="false" Layout="0" Wrapping="3" Rotation="0" Margin="1,1,1,1">
+<![CDATA[/images/bigGlobalSightLogo.gif]]>
+</ImageElement>
+<TextElement ID="Text8" Alignment="4" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{D}]]>
+</TextElement>
+</Header>
+<Header Type="512">
+<TextElement ID="txtPageNumber" Alignment="68" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{P}]]>
+</TextElement>
+</Header>
+<TextElement ID="txtReportTitle" Alignment="66" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Arial-BOLD-16"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[Costs by Project Locale Pair Report]]>
+</TextElement>
+<NewlineElement ID="Newline1" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TextElement ID="txtDescr" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[This report shows the average costs (estimated, actual, final, and override) grouped by project, source locale, and target locale.]]>
+</TextElement>
+<NewlineElement ID="Newline14" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TextElement ID="Text16" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[The following chart shows the average final cost for each job associated with a given project and locale pair.]]>
+</TextElement>
+<NewlineElement ID="Newline12" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<NewlineElement ID="Newline13" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<ChartElement ID="Chart1" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Embedded="true"
+ Layout="0" Wrapping="3" Rotation="0" Margin="1,1,1,1">
+<property><name><![CDATA[query]]></name><value><![CDATA[workflowLevel]]></value></property>
+<ChartDescriptor PointStyle="908,904,907,902,906,910,900,901" LineWidth="1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0" FirstDatasetOfSecondaryAxis="-1" VerticalGridStyle="0" LogarithmicYScale="false" SecondaryLogarithmicYScale="false" LegendBorder="4097" SecondaryYTitle="" PointSize="6.0" LeaderLineUsed="false" XAxisTicked="true" YAxisTicked="true" XAxisLabelBottom="false" GroupBarGap="0" Y2AxisTicked="true" XLabelRotation="0.0" YLabelRotation="0.0" YTitleRotation="0.0" SecondaryYLabelRotation="0.0" SecondaryYTitleRotation="0.0" XAxisLeftGap="2.0" XAxisRightGap="0.0" PieBorderLineStyle="0" PieBorderColor="-16777216" ValueLabelOffset="0" BarBorder="false" PlotAreaBorder="false">
+</ChartDescriptor>
+<conditionFilter>
+<dataselection frommodel="false">
+<source><![CDATA[unkown]]></source>
+<attributeref entity="" attribute="Project">
+</attributeref>
+<attributeref entity="" attribute="Source Locale">
+</attributeref>
+<attributeref entity="" attribute="Target Locale">
+</attributeref>
+<attributeref entity="" attribute="Final Cost">
+</attributeref>
+<attributeref entity="" attribute="ProjectLocalePair">
+</attributeref>
+</dataselection>
+<hiddenColumn>
+<attributeref entity="" attribute="Project Manager"/>
+<attributeref entity="" attribute="Job Name"/>
+<attributeref entity="" attribute="Start Date"/>
+<attributeref entity="" attribute="End Date"/>
+<attributeref entity="" attribute="Estimated Cost"/>
+<attributeref entity="" attribute="Actual Cost"/>
+<attributeref entity="" attribute="Override Cost"/>
+</hiddenColumn>
+</conditionFilter>
+<filter type="dataset">
+<dataset sorted="false" rowMajor="true" labelCol="ProjectLocalePair" formula="Sum&lt;0&gt;" topN="0" topNReverse="false">
+<groupCol summarize="true" order="1"><groupSort sort="1" interval="1.0" option="1" others="1">
+</groupSort>
+<column><![CDATA[ProjectLocalePair]]></column>
+</groupCol>
+<sumCol formula="Average&lt;0&gt;"><![CDATA[Final Cost]]></sumCol>
+<formulaColumn name="ProjectLocalePair">
+<![CDATA[field['Project']+"("+field['Source Locale']+"->"+field['Target Locale']+")"]]>
+</formulaColumn>
+</dataset>
+</filter>
+<Chart Datasets="1" Size="1" Style="1" Gap="2" XTitle="by Project Locale Pair" YTitle="Average Final Cost" BlackWhite="false" Styles="0,0,0,0,0,0,0,0" Colors="-16711936,-65536,-256,-16776961,-65281,-14336,-16711681,-8355712,-20561,-12566464,-6946666,-15118186" GridStyle="4113" BorderStyle="0" ShowValue="false" Precision="2" LegendPosition="32">
+<![CDATA[XXX|
+Final Cost|
+0.0
+]]></Chart>
+</ChartElement>
+<TextElement ID="Text15" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[The following table contains a detailed breakdown for each job.]]>
+</TextElement>
+<NewlineElement ID="Newline7" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<NewlineElement ID="Newline8" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TableElement ID="Table7" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" TableWidth="0.0" Layout="1" TableAdvance="1" OrphanControl="false" Padding="0,1,0,1" EmbedWidth="false" Embedded="true">
+<property><name><![CDATA[query]]></name><value><![CDATA[workflowLevel]]></value></property>
+<property><name><![CDATA[grow]]></name><value><![CDATA[true]]></value></property>
+<RowGroup>
+</RowGroup>
+<ColGroup>
+</ColGroup>
+<conditionFilter>
+<dataselection frommodel="false">
+<source><![CDATA[unkown]]></source>
+<attributeref entity="" attribute="Project">
+</attributeref>
+<attributeref entity="" attribute="Job Name">
+</attributeref>
+<attributeref entity="" attribute="Source Locale">
+</attributeref>
+<attributeref entity="" attribute="Target Locale">
+</attributeref>
+<attributeref entity="" attribute="Estimated Cost">
+</attributeref>
+<attributeref entity="" attribute="Actual Cost">
+</attributeref>
+<attributeref entity="" attribute="Final Cost">
+</attributeref>
+<attributeref entity="" attribute="Override Cost">
+</attributeref>
+</dataselection>
+<hiddenColumn>
+</hiddenColumn>
+</conditionFilter>
+<filter type="group">
+<group sorted="false" showHeader="false" showGroupCols="false" inplace="true" breakAfter="false" grandTotal="true" topN="0" topNReverse="false">
+<groupCol summarize="true" order="1"><groupSort sort="1" interval="1.0" option="1" others="1">
+</groupSort>
+<column><![CDATA[Project]]></column>
+</groupCol>
+<groupCol summarize="true" order="1"><groupSort sort="1" interval="1.0" option="1" others="1">
+</groupSort>
+<column><![CDATA[Source Locale]]></column>
+</groupCol>
+<groupCol summarize="true" order="1"><groupSort sort="1" interval="1.0" option="1" others="1">
+</groupSort>
+<column><![CDATA[Target Locale]]></column>
+</groupCol>
+<sumCol formula="Average&lt;0&gt;"><![CDATA[Final Cost]]></sumCol>
+</group>
+</filter>
+<Header>
+</Header>
+<GroupedTable GroupColCount="3" GrandSummary="true" Rows="6" Cols="11" HeaderRow="1" HeaderCol="0" TrailerRow="1" TrailerCol="0">
+<TR GroupHeaderRow="false" SummaryRow="false" BaseRow="0">
+<TD Type="String"><![CDATA[Project]]></TD><TD Type="String"><![CDATA[Source Locale]]></TD><TD Type="String"><![CDATA[Target Locale]]></TD><TD Type="String"><![CDATA[Project Manager]]></TD><TD Type="String"><![CDATA[Job Name]]></TD><TD Type="String"><![CDATA[Start Date]]></TD><TD Type="String"><![CDATA[End Date]]></TD><TD Type="String"><![CDATA[Estimated Cost]]></TD><TD Type="String"><![CDATA[Actual Cost]]></TD><TD SummaryCol="true" Type="String"><![CDATA[Final Cost]]></TD><TD Type="String"><![CDATA[Override Cost]]></TD></TR>
+<TR GroupHeaderRow="false" SummaryRow="false" GroupLevel="0" BaseRow="1">
+<TD GroupHeaderCell="true" Type="null"><![CDATA[null]]></TD><TD GroupHeaderCell="true" Type="null"><![CDATA[null]]></TD><TD GroupHeaderCell="true" Type="null"><![CDATA[null]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="Date"><![CDATA[2003-07-02 17:37:52]]></TD><TD Type="Date"><![CDATA[2003-07-02 17:37:52]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD></TR>
+<TR GroupHeaderRow="false" SummaryRow="true" SummaryLevel="2" BaseRow="-1">
+<TD Type="String"><![CDATA[XXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="Double"><![CDATA[0.0]]></TD><TD Type="null"><![CDATA[null]]></TD></TR>
+<TR GroupHeaderRow="false" SummaryRow="true" SummaryLevel="1" BaseRow="-2">
+<TD Type="String"><![CDATA[XXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="Double"><![CDATA[0.0]]></TD><TD Type="null"><![CDATA[null]]></TD></TR>
+<TR GroupHeaderRow="false" SummaryRow="true" SummaryLevel="0" BaseRow="-3">
+<TD Type="String"><![CDATA[XXXXXXX]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="Double"><![CDATA[0.0]]></TD><TD Type="null"><![CDATA[null]]></TD></TR>
+<TR GroupHeaderRow="false" SummaryRow="true" BaseRow="-4">
+<TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="Double"><![CDATA[0.0]]></TD><TD Type="null"><![CDATA[null]]></TD></TR>
+</GroupedTable>
+<highlightGroups>
+</highlightGroups>
+</TableElement>
+<NewlineElement ID="Newline9" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+</Report>

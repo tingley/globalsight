@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.calendar.ReservedTime" table="RESERVED_TIME">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="subject" length="4200" column="SUBJECT"
+            type="string" not-null="true" />
+        <property name="type" length="20" column="TYPE" type="string"
+            not-null="true" />
+        <property name="taskId" length="22" column="TASK_ID" type="long" />
+        <property name="startDate" column="START_TIME" type="timestamp"
+            not-null="true" />
+        <property name="startHour" length="2" column="START_HOUR"
+            type="integer" not-null="true" />
+        <property name="startMinute" length="2" column="START_MINUTE"
+            type="integer" not-null="true" />
+        <property name="endDate" column="END_TIME" type="timestamp" />
+        <property name="endHour" length="2" column="END_HOUR"
+            type="integer" not-null="true" />
+        <property name="endMinute" length="2" column="END_MINUTE"
+            type="integer" not-null="true" />
+        <property name="durationExpression" length="100"
+            column="DURATION_EXPRESSION" type="string" not-null="true" />
+        <property name="repeatExpression" length="10"
+            column="REPEAT_EXPRESSION" type="string" />
+
+        <many-to-one name="userFluxCalendar" column="USER_CALENDAR_ID"
+            class="com.globalsight.calendar.UserFluxCalendar" not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

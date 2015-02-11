@@ -1,0 +1,241 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "System Administration"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38C3C60F00AB"
+    documentation 	
+|This package contains use cases that administrates the system.  This corresponds to the Business Model category "Administrate the System".
+    
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Start the System"
+	    quid       	"38C3C7470258"
+	    documentation 	
+|Actor
+|====
+|
+|Systgem Administrator
+|
+|Normal Course of Events
+|=====================
+|
+|When the system starts up, it creates all the timer and server processes that are configured by the Localization Coordinator.
+|
+	    )
+	(object UseCase "Generate Report"
+	    quid       	"38C3C94201DF"
+	    documentation 	
+|Actor
+|=====
+|
+|Localization Coordinator. Coordinates the localization process.
+|
+|Normal Course of Events
+|=====================
+|
+|The Localization Coordinator invokes the system's Administration Interface and selects the "Report" option. The system displays the Report Generation Window. The Localization Coordinator selects a particular report type, and upon the click on the "Generate Report" button, the system generates the report and displays it on the report screen.   For now, the report type would be based on the "project manager" and generated report (based on the project) should include:
+|a. Completed percentage of the whole project.
+|b. Completed percentage of a project based on a target locale.
+|c. Cost per locale (for both the work done, and the work to-be-done).
+|
+	    )
+	(object Association "$UNNAMED$0"
+	    quid       	"38C3C9600160"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"38C3C9610099"
+		    supplier   	"Use Case View::System Administration::Generate Report"
+		    quidu      	"38C3C94201DF"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"38C3C961009A"
+		    supplier   	"Use Case View::Localization Coordinator"
+		    quidu      	"38C3C72702CB")))
+	(object Association "$UNNAMED$3"
+	    quid       	"393F99820080"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"393F998202A6"
+		    supplier   	"Use Case View::System Administration::Start the System"
+		    quidu      	"38C3C7470258"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"393F998202B0"
+		    supplier   	"Use Case View::System Administrator"
+		    quidu      	"393F995C03C4"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "System Administration"
+	    quid       	"38C3C709000A"
+	    title      	"System Administration"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::System Administration::Generate Report" @1
+		    location   	(1008, 1152)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(1008, 1290)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Generate Report")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C3C94201DF"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Localization Coordinator" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(368, 1152)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(368, 1312)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	327
+			justify    	0
+			label      	"Localization Coordinator")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"38C3C72702CB"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @3
+		    location   	(661, 1152)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38C3C9600160"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @4
+			    Parent_View 	@3
+			    location   	(261, 240)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C9610099"
+			    client     	@3
+			    supplier   	@1
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @5
+			    Parent_View 	@3
+			    location   	(261, 240)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38C3C961009A"
+			    client     	@3
+			    supplier   	@2
+			    line_style 	0)))
+		(object ClassView "Class" "Use Case View::System Administrator" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(384, 320)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(384, 480)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	327
+			justify    	0
+			label      	"System Administrator")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"393F995C03C4"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object UseCaseView "Use Case View::System Administration::Start the System" @7
+		    location   	(1008, 320)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(1008, 458)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Start the System")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C3C7470258"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$3" @8
+		    location   	(669, 320)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"393F99820080"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @9
+			    Parent_View 	@8
+			    location   	(317, 0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393F998202A6"
+			    client     	@8
+			    supplier   	@7
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @10
+			    Parent_View 	@8
+			    location   	(317, 0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"393F998202B0"
+			    client     	@8
+			    supplier   	@6
+			    line_style 	0)))))))

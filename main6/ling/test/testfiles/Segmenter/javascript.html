@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+<TITLE>HTML inside Javascript</TITLE>
+<SCRIPT language=JavaScript>
+<!--
+ function showAnswers(answers){
+  ansWindow = window.open('','ansWin','toolbar=no,scrollbars=yes,width=500,height=300');
+  ansWindow.document.write("<HTML><HEAD><TITLE>Answers</TITLE></HEAD><BODY BGCOLOR=#FFFFFF><H3><FONT FACE=arial>Quick Test Answers</FONT></H3><OL>");
+  ansWindow.document.write(answers);
+  ansWindow.document.write("</OL><FORM><DIV ALIGN=RIGHT>");
+  ansWindow.document.write("<INPUT TYPE=BUTTON VALUE=Close onClick='self.window.close()'></FORM></DIV>");
+  ansWindow.document.write("</BODY></HTML>");
+  ansWindow.document.close();
+ }
+// end of script -->
+</SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>
+

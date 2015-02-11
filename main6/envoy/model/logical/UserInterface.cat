@@ -1,0 +1,27 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "User Interface"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA3C9003E1"
+    visible_categories 	(list visibility_relationship_list
+	(object Visibility_Relationship
+	    quid       	"38C4CC5500B1"
+	    supplier   	"Logical View::Envoy::EV Interface"
+	    quidu      	"38BA37170148"))
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list)
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"38C4CC470183"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list))))

@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointConverterSetup", "PowerPointConverterSetup.vdproj", "{BC972409-011E-4038-9DB0-745E120DA98B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC972409-011E-4038-9DB0-745E120DA98B}.Debug|Default.ActiveCfg = Debug
+		{BC972409-011E-4038-9DB0-745E120DA98B}.Debug|Default.Build.0 = Debug
+		{BC972409-011E-4038-9DB0-745E120DA98B}.Release|Default.ActiveCfg = Release
+		{BC972409-011E-4038-9DB0-745E120DA98B}.Release|Default.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

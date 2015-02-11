@@ -1,0 +1,42 @@
+#!/bin/ksh
+# stopcxe.ksh
+# USAGE: stopcxe.ksh
+# source the environment variables
+. %%SYSTEM3_ENV_FILE%%
+
+if [ "$1" = "-?" ]
+then
+   echo "USAGE: $0";
+   echo "This script stops the adapters started by startcxe.ksh";
+   exit 1;   
+fi
+
+BROKERNAME="broker@localhost";
+PIDFILE=$GLOBALSIGHT_HOME/system3/cxe/bin/.cxe_pids;
+TOMCATPIDFILE=$GLOBALSIGHT_HOME/system3/cxe/bin/.tomcat_pid;
+
+# Check the PID file
+if [ ! -f $PIDFILE ]
+then
+    echo "CXE does not appear to be running.";
+    echo "Run startcxe.ksh to start it.";
+    exit 1;
+fi
+
+echo "Stopping CXE:";
+echo "Stopping Jakarta-Tomcat webserver.";
+$GLOBALSIGHT_HOME/system3/cxe/jakarta-tomcat/bin/tomcat.sh stop >> $GLOBALSIGHT_HOME/system3/cxe/logs/tomcat_out.log 2>&1 &
+rm -f $TOMCATPIDFILE
+
+set -A PidList $(grep -v "#" $PIDFILE | awk '{print $1}' | xargs);
+set -A AdapterList $(grep -v "#" $PIDFILE | awk '{print $2}' | xargs);
+
+cnt=0
+while ((cnt < ${#PidList[@]}))
+do
+    echo "Stopping ${AdapterList[$cnt]}";
+    kill -9 ${PidList[$cnt]};
+    ((cnt=$cnt+1))
+done
+
+rm -f $PIDFILE

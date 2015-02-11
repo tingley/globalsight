@@ -1,0 +1,209 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Spell Checker test Page</TITLE>
+<style type="text/css">
+body	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: normal;
+	background-color: #FFFFFF;
+	}
+input	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	border-style: ridge;
+	}
+</style>
+<script src="spellcheck.js"></script>
+<script language="JavaScript">
+function changeLanguage()
+{
+  var activeLanguage =
+    idLanguage.options[idLanguage.selectedIndex].value;
+
+  var text = document.getElementById("id" + activeLanguage).innerHTML;
+  var info = document.getElementById("idInfo" + activeLanguage).innerText;
+
+  idTextfield.value = text;
+  idInfoUrl.innerText = info;
+  idInfoUrl.href = info;
+  idCustomDict.value = "test" /*+ activeLanguage*/;
+}
+
+function doLoad()
+{
+  idLanguage.focus();
+}
+</script>
+</HEAD>
+
+<BODY onload="doLoad()">
+<P><a href="../index.html">Go back to index</a></P>
+
+<!--http://www.onlinenewspapers.com/-->
+<P>Newspaper: <A id="idInfoUrl" href="" target="_blank"></A></P>
+
+<TABLE BORDER="1" style="border-collapse: collapse">
+  <TR>
+    <TD>
+      Language:
+      <SELECT ID="idLanguage" SIZE="1" onchange="changeLanguage()"
+	onblur="changeLanguage()">
+	<OPTION VALUE="ar">Arabic </OPTION>
+	<OPTION VALUE="ca">Catalan </OPTION>
+	<OPTION VALUE="cs">Czech </OPTION>
+	<OPTION VALUE="da">Danish </OPTION>
+	<OPTION VALUE="de">German </OPTION>
+	<OPTION VALUE="de_ch">Swiss German </OPTION>
+	<OPTION VALUE="el">Greek </OPTION>
+	<OPTION VALUE="en_gb">British English </OPTION>
+	<OPTION VALUE="en_us" SELECTED>English </OPTION>
+	<OPTION VALUE="eo">Esperanto </OPTION>
+	<OPTION VALUE="es">Spanish </OPTION>
+	<OPTION VALUE="et">Estonian </OPTION>
+	<OPTION VALUE="fi">Finnish </OPTION>
+	<OPTION VALUE="fo">Faroese </OPTION>
+	<OPTION VALUE="fr">French </OPTION>
+	<OPTION VALUE="hu">Hungarian </OPTION>
+	<OPTION VALUE="it">Italian </OPTION>
+	<OPTION VALUE="mt">Maltese </OPTION>
+	<OPTION VALUE="nl">Dutch </OPTION>
+	<OPTION VALUE="pl">Polish </OPTION>
+	<OPTION VALUE="pt">Portuguese </OPTION>
+	<OPTION VALUE="pt_br">Brazilian Portuguese </OPTION>
+	<OPTION VALUE="ru">Russian </OPTION>
+	<OPTION VALUE="sk">Slovak </OPTION>
+	<OPTION VALUE="sl">Slovenian </OPTION>
+	<OPTION VALUE="sv">Swedish </OPTION>
+	<OPTION VALUE="uk">Ukrainian </OPTION>
+      </SELECT>
+
+      User Dictionary:
+      <input type="text" ID="idCustomDict" value="test">
+
+      UI Language:
+      <SELECT ID="idUiLocale" SIZE="1">
+	<OPTION VALUE="en" SELECTED>English </OPTION>
+	<OPTION VALUE="nl">Dutch </OPTION>
+	<OPTION VALUE="fr">French </OPTION>
+	<OPTION VALUE="es">Spanish </OPTION>
+      </SELECT>
+
+      <IMG SRC="spellcheck.gif" BORDER="0" style="cursor:hand;"
+      onclick="scSpell(this, 'idTextfield',
+      idLanguage.options[idLanguage.selectedIndex].value,
+      idUiLocale.value,
+      idLanguage.options[idLanguage.selectedIndex].value,
+      idCustomDict.value);">
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      <TEXTAREA ID="idTextfield" COLS="80" rows="5">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</TEXTAREA>
+    </TD>
+  </TR>
+</TABLE>
+
+<hr>
+
+<!-- ==================================================================== -->
+
+<div id="idar" style="display:none">الدوحة - قنا : عقد سمو الشيخ عبدالله بن خليفة آل ثاني رئيس مجلس الوزراء في الديوان الأميري مساء أمس جلسة مباحثات مع دولة السيد عمر كرامي رئيس وزراء الجمهورية اللبنانية الشقيقة. حضر الجلسة سعادة السيد احمد بن عبدالله آل محمود وزير الدولة للشؤون الخارجية وسعادة السيد يوسف حسين كمال وزير المالية
+</div>
+<div id="idInfoar" style="display:none">http://www.albayan.ae/</div>
+
+<div id="idca" style="display:none">La Conselleria de Presidència del Govern balear està perfilant un carnet que permetrà a les persones que tenguin entre 26 i 29 anys accedir a préstecs hipotecaris a baix interès per adquirir un habitatge, comprar mobiliari, obtenir crèdits per crear empreses, cursar màsters o estudis de postgrau o beneficiar-se de descomptes en viatges, activitats culturals i matrícules d'autoescola. A més, els usuaris d'allò que s'anomenarà «carnet +26» gaudiran d'alguns dels serveis ja prevists per a l'actual carnet jove, que afecta els que tenen entre 14 i 25 anys. El Govern convocarà un concurs públic perquè les empreses que vulguin gestionar el servei presentin els seus plecs de condicions.</div>
+<div id="idInfoca" style="display:none">http://www.diaridebalears.com/</div>
+
+<div id="idcs" style="display:none">News Report/Direct Info - vychází v anglické a francouzské verzi hlavně během týdnů, kdy zasedají výbory. Přináší informace o činnosti výborů, o slyšeních, atd.</div>
+<div id="idInfocs" style="display:none"></div>
+
+<div id="idda" style="display:none">News report/Direct info er en daglig pressemeddelelse på engelsk og fransk, hvori der fortælles om udvalgsmøder, høringer, osv. Den udsendes især i de uger, hvor der afholdes møde i de stående udvalg.</div>
+<div id="idInfoda" style="display:none"></div>
+
+<div id="idde" style="display:none">Dieses <b>no applet</b> <i>version ist</i> gut für Aufstellungsorte, die nicht applet benutzen möchten, einfacher HTML Preisaufschlag wird im Bannkontrolleurfenster übertragen. Ich liebe den Bannkontrolleur.</div>
+<div id="idInfode" style="display:none"></div>
+
+<div id="idde_ch" style="display:none">«Die Reformierten Kirchen Bern-Jura-Solothurn wollen ihr Mögliches dazu beitragen, dass die Demonstration ohne jede Form von Gewalt durchgeführt werden kann», schreibt der Synodalrat den Demo-Organisatoren und dem Gemeinderat der Stadt Bern. Nur so könnten die zweifelsohne vorhandenen inhaltlichen Anliegen der WEF- Kritikerinnen und Kritiker öffentlich wahrgenommen werden.</div>
+<div id="idInfode_ch" style="display:none">http://www.berner-rundschau.ch/</div>
+
+<div id="idel" style="display:none">Το News Report/Direct info είναι ένα καθημερινό ενημερωτικό δελτίο που εκδίδεται στα Αγγλικά και στα Γαλλικά, με αναφορές στις εργασίες των κοινοβουλευτικών επιτροπών, ακροάσεις κλπ. Εκδίδεται κυρίως κατά τη διάρκεια των εβδομάδων συνεδριάσεων των κοινοβουλευτικών επιτροπών.</div>
+<div id="idInfoel" style="display:none"></div>
+
+<div id="iden_gb" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+<div id="idInfoen_gb" style="display:none"></div>
+
+<div id="iden_us" style="display:none">This <b>no applet</b> <i>versaion is</i> ideale for sites that do not wish to use applets, simple HTML markup will be rendered in the spell checker window. I luv teh spell checker.</div>
+<div id="idInfoen_us" style="display:none"></div>
+
+<div id="ideo" style="display:none">La gazeto en papera formo ne plu aperas (almenaŭ "paŭzas"), sed la Esperanto-Centro "Eventoj" en Budapeŝto daŭre funkciigas diversajn servojn. - La eldonejo LINGVO-Studio / Eventoj daŭre staras je via dispono.</div>
+<div id="idInfoeo" style="display:none">http://www.eventoj.hu/</div>
+
+<div id="ides" style="display:none">Este <i>version</i> is del <b>no applet</b> ideal para los sitios que no desean utilizar applet, margen de beneficio simple del HTML ser rendido en la ventana del inspector del encanto. Amo a inspector del encanto.</div>
+<div id="idInfoes" style="display:none"></div>
+
+<div id="idet" style="display:none">News Report/Direct Info (Uudisraport/Otseinfo) on igapäevane inglise ja prantsuse keeles avaldatav uudisväljaanne, mis kajastab komisjonide tööd, kuulamisi jne. Ilmub peamiselt komsjonide toimumise nädalatel.</div>
+<div id="idInfoet" style="display:none"></div>
+
+<div id="idfi" style="display:none">News report/Direct info ilmestyy pääasiassa valiokuntaviikkojen aikana päivittäin englanniksi. Se tiedottaa mm.valiokuntien työstä ja julkisista kuulemistilaisuuksista.</div>
+<div id="idInfofi" style="display:none"></div>
+
+<div id="idfo" style="display:none">Kapping: Fyrrverandi vinnarar og luttakarar í finalum í Stjerne for en aften hittast aftur í kvøld og tey komandi sjey fríggjakvøldini at dystast um, hvør var best av øllum. Føroyingar eru áður slopnir at atkvøða, men truplari var hesaferð, tí DR hevur slept allar yvirtaksering og stuðlum, og tænastan kostar. Men DR hevur sett pening til viks, so føroyingar aftur hesaferð sleppa at atkvøða</div>
+<div id="idInfofo" style="display:none">http://www.dimma.fo/index.asp?sess=641489946</div>
+
+<div id="idfr" style="display:none">Cett version sans applet est idale pour les sites qui ne souhaitent pas utiliser des applet, un simple marquage HTML sera rendu dans la fentre de correcteur orthographique. J'aim le correcteur orthographique.</div>
+<div id="idInfofr" style="display:none"></div>
+
+<div id="idhu" style="display:none">Magyarország javasolta az Európai Unió külügyminisztereinek rendkívüli brüsszeli találkozóján, hogy az átfogó atomcsendegyezmény szervezetében működő rendszert hasznosítsák katasztrófák előrejelzésének céljára is - jelentette be a kizárólag a dél-ázsiai szökőárral foglalkozó ülés után Somogyi Ferenc külügyminiszter. A nukleáris robbantások ellenőrzése több tekintetben ugyanazokat a technikai feltételeket kívánja meg, mint a mostani katasztrófát okozó földrengések előrejelzése - mutatott rá a miniszter, hozzátéve, hogy az atomcsendegyezmény szervezetének egyik vezető tisztségviselője és a kérdés szakértője Tóth Tibor magyar nagykövet.</div>
+<div id="idInfohu" style="display:none">http://hirek.mti.hu/</div>
+
+<div id="idit" style="display:none">II Direct info/News Report è un bollettino quotidiano d'informazione, in francese ed in inglese, sulle attività delle commissioni parlamentari, le audizioni pubbliche, etc. E' pubblicato durante le settimane in cui si riuniscono le commissioni parlamentari.</div>
+<div id="idInfoit" style="display:none"></div>
+
+<div id="idmt" style="display:none">L-OPPOZIZZJONI Laburista tinsab il-hin kollu lesta biex dak li hemm bzonn isir, taghmlu biex fis-socjetà Maltija titwettaq dik id-differenza billi dak li tkun trid twettaq mhux biss tweghdu, imma tabilhaqq twettqu. Taghmel id-differenza billi tibqa’ turi l-htiega li l-prosperità ma tistax tinbena jekk mhux ukoll fuq il-harsien socjali. </div>
+<div id="idInfomt" style="display:none">http://www.kullhadd.com/</div>
+
+<div id="idnl" style="display:none">Deze Java-applet loze versie is ideaal voor websites die geen gebruik wensen te maken van Java-applets. Simpele HTML markeringen zullen weergegeven worden in het spell checker venster. Ik hou van de spell checker.</div>
+<div id="idInfonl" style="display:none"></div>
+
+<div id="idno" style="display:none">Miljøorganisasjonen WWF hevder i en ny rapport at virkningene av klimaendringer større og mer vidtgående enn tidligere antatt. Virkningene kan nå sees over det meste av verden, heter det.</div>
+<div id="idInfono" style="display:none"></div>
+
+<div id="idpl" style="display:none">News Report/Direct Info to dzienny biuletyn informacyjny na temat działalności komisji, posiedzeń, itd. Wydawany jest głównie podczas tygodni spotkań komisji, po angielsku i po francusku.</div>
+<div id="idInfopl" style="display:none"></div>
+
+<div id="idpt" style="display:none">Direct info / News Report é um boletim informativo diário, em francês e inglês, sobre a actividade das comissões parlementares, as audições públicas, etc.. É publicado durante as semanas de reunião das comissões parlamentares.</div>
+<div id="idInfopt" style="display:none"></div>
+
+<div id="idpt_br" style="display:none">Direct info / News Report é um boletim informativo diário, em francês e inglês, sobre a actividade das comissões parlementares, as audições públicas, etc.. É publicado durante as semanas de reunião das comissões parlamentares.</div>
+<div id="idInfopt_br" style="display:none"></div>
+
+<div id="idru" style="display:none">Этот вариант applet нет идеально для мест не желают использовать applets, просто повышение цены html будет представлен в окне контролера произношения по буквам. Я люблю контролера произношения по буквам.</div>
+<div id="idInforu" style="display:none"></div>
+
+<div id="idsk" style="display:none">FRANKFURT - Vlny tsunami, ktoré zdevastovali pobrežné oblasti v Indickom oceáne, možno spôsobili rozsiahle ekologické škody v už aj predtým ohrozenom ekosystéme tohto regiónu.</div>
+<div id="idInfosk" style="display:none">http://www.bleskovky.sk/</div>
+
+<div id="idsl" style="display:none">Združenje Slovenska izseljenska matica je prostovoljno in neprofitno združenje fizičnih oseb, ki se združujejo zaradi skupno določenih interesov pri razvijanju, širjenju, utrjevanju in poglabljanju stikov med Slovenci v domovini in po svetu. V skladu z Ustavo Republike Slovenije in Zakonom o uresničevanju javnega interesa na področju kulture Združenje Slovenska izseljenska matica skrbi za Slovence po svetu ter pospešuje njihove stike z domovino. Ustanovljena je bila leta 1951 z namenom, da bi tedanja Ljudska Republika Slovenija vzpostavila stike s slovenskimi izseljenci, zdomci in njihovimi potomci in da bi z njimi sodelovala, posebej pri ohranjanju slovenskega kulturnega izročila.</div>
+<div id="idInfosl" style="display:none">http://www.zdruzenje-sim.si/</div>
+
+<div id="idsv" style="display:none">News Report/Direct info är ett dagligt nyhetsbrev på engelska och franska innehållande rapporter från verksamheten i utskotten, offentliga utfrågningar och liknande. Det publiceras framförallt under utskottsveckorna.</div>
+<div id="idInfosv" style="display:none"></div>
+
+<div id="iduk" style="display:none">Верховный Суд отклонил еще две жалобы Януковича 
+В четверг, 30 декабря, Верховный суд Украины отклонил еще две жалобы кандидата в Президенты, премьер-министра Виктора Януковича, оспаривающего итоги переголосования второго тура президентских выборов...</div>
+<div id="idInfouk" style="display:none">http://www.2000.net.ua/</div>
+
+<div id="idja" style="display:none">奈良市の小１女児誘拐殺害で、女児の携帯電話から、女児の家族の携帯に、新たな犯行を予告する内容のメールがあったことがわかった。県警捜査本部は、誘拐犯が再び連絡してきた可能性が極めて高いとみている。(02:10) 全文 </div>
+<div id="idInfoja" style="display:none"></div>
+
+<div id="idzh" style="display:none">財經事務及庫務局歡迎高院裁決   2004年12月14日 HKT: 18:29
+高等法院就兩名公屋居民要求阻止領匯基金上市的司法覆核及禁制令，於下午裁定兩名公屋居民敗訴。財經事務及庫務局長馬時亨歡迎高院裁決，希望兩名原訴人尊重法庭判決，令領匯可以如期上市。 </div>
+<div id="idInfozh" style="display:none"></div>
+
+
+</BODY>
+</HTML>

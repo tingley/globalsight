@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel columns="1" weightx="1" halign="fill" weighty="1" valign="fill" gap="2">
+	<panel weightx="1" halign="fill">
+		<menubar halign="fill" weightx="1">
+			<menu text="File" mnemonic="0">
+				<menuitem text="Open Lucene index" action="actionOpen"/>
+				<separator/>
+				<menuitem text="Exit" action="actionExit"/>
+			</menu>
+			<menu text="Tools" mnemonic="0">
+				<menuitem text="Undelete All" tooltip="Undelete all deleted documents" action="actionUndelete"/>
+				<menuitem text="Optimize Index" action="actionOptimize"/>
+				<separator/>
+				<checkboxmenuitem name="cbUseCompound" text="Use Compound Files" action="actionUseCompound(this)"/>
+			</menu>
+			<menu text="Help" mnemonic="0">
+				<menuitem text="About..." action="actionAbout"/>
+			</menu>
+		</menubar>
+	</panel>
+	<tabbedpane name="maintpane" weightx="1" weighty="1" halign="fill" valign="fill">
+		<tab name="overTab" text="Overview" icon="/img/info.gif">
+			<panel name="pOver" gap="6" top="2" left="2" bottom="2" right="2" columns="1" weightx="1" weighty="1" halign="fill" valign="fill">
+				<panel columns="2" gap="2" halign="fill" valign="fill" weightx="1">
+					<label halign="right" text="Index name:"/><label font="12 bold" name="iName" text="?"/>
+					<label halign="right" text="Number of fields:"/><label font="12 bold" name="iFields" text="?"/>
+					<label halign="right" text="Number of documents:"/><label font="12 bold" name="iDocs" text="?"/>
+					<label halign="right" text="Number of terms:"/><label font="12 bold" name="iTerms" text="?"/>
+					<label halign="right" text="Has deletions?:"/><label font="12 bold" name="iDel" text="?"/>
+					<label halign="right" text="Index version:"/><label font="12 bold" name="iVer" text="?"/>
+					<label halign="right" text="Last modified:"/><label font="12 bold" name="iMod" text="?"/>
+				</panel>
+				<separator/>
+				<panel columns="3" gap="6" valign="fill" weighty="1" halign="fill" weightx="1">
+					<label colspan="3" halign="fill" text="Select fields from the list below, and press button to view top terms in these fields. No selection means all fields."/>
+					<label colspan="3" halign="fill" font="10" text="Hint: use Shift-Click to select ranges, or Ctrl-Click to select multiple fields (or unselect all)."/>
+					<panel columns="1" gap="2" valign="fill" weighty="1">
+						<label text="Available Fields:"/>
+						<list name="fList" selection="multiple" weighty="1" valign="fill" weightx="1" halign="fill"/>
+					</panel>
+					<panel columns="1" gap="4" valign="center">
+						<button text="Show top terms ->" action="actionTopTerms(nTerms)"/>
+						<label text="Number of top terms:"/>
+						<spinbox columns="5" name="nTerms" halign="center" text="50" value="50" minimum="0" maximum="999999"/>
+					</panel>
+					<panel columns="1" gap="2" valign="fill" weighty="1" halign="fill" weightx="1">
+						<label text="Top ranking terms. (Right-click for more options)"/>
+						<table name="tTable" valign="fill" weighty="1" halign="fill" weightx="1" perform="browseTermDocs(tTable)">
+							<header>
+								<column text="No" width="35"/>
+								<column text="Rank" width="60" sort="ascent"/>
+								<column text="Field"/>
+								<column text="Text"/>
+							</header>
+							<popupmenu>
+								<menuitem text="Browse term docs" action="browseTermDocs(tTable)"/>
+								<menuitem text="Show all term docs" action="showTermDocs(tTable)"/>
+							</popupmenu>
+						</table>
+					</panel>
+				</panel>
+			</panel>
+		</tab>
+		<tab name="docsTab" text="Documents" icon="/img/docs.gif">
+			<panel gap="4" weightx="1" halign="fill" weighty="1" valign="fill" columns="1" top="4" bottom="2" left="2" right="2">
+				<panel halign="fill" columns="3" weightx="1" gap="4">
+					<panel columns="1" halign="fill" weightx="1" gap="8">
+						<label font="bold" text="Browse by doc. number:"/>
+						<panel gap="2">
+							<label text="Doc. #:"/>
+							<label text="0"/>
+							<button text="&lt;-" action="showPrevDoc(docNum)"/>
+							<textfield name="docNum" columns="6" perform="showDoc(this)"/>
+							<button text="-&gt;" action="showNextDoc(docNum)"/>
+							<label name="iDocs1" text="?"/>
+						</panel>
+						<panel gap="4" halign="center">
+							<button text="Reconstruct &amp; Edit" tooltip="Reconstruct all field contents &amp; edit doc" action="actionReconstruct(docTable)"/>
+							<button text="Delete" halign="center" tooltip="Delete this document (NO WARNING)" icon="/img/delete.gif" action="deleteDoc(docNum)"/>
+						</panel>
+					</panel>
+					<separator/>
+					<panel halign="fill" columns="1" weightx="1" gap="2">
+						<label font="bold" text="Browse by term:"/>
+						<label  font="10" text="(Hint: enter a substring and press Next to start at the nearest term)."/>
+						<panel gap="3" halign="fill" weightx="1">
+							<button text="First Term" action="showFirstTerm(fCombo,fText)"/>
+							<label text="Term:"/>
+							<combobox name="fCombo" columns="12" editable="false" selected="0"/>
+							<textfield name="fText" columns="20" perform="showTerm(fCombo, fText)"/>
+							<button text="Next Term -&gt;" action="showNextTerm(fCombo,fText)"/>
+						</panel>
+						<panel gap="2" columns="2" halign="fill" weightx="1" bottom="3">
+							<label text="Doc freq of this term:"/>
+							<label name="dFreq" text="?"/>
+						</panel>
+						<separator/>
+						<panel gap="4" columns="2" top="3" halign="fill" weightx="1">
+							<panel columns="2" gap="4">
+								<button text="First Doc" action="showFirstTermDoc(fText)"/>
+								<button text="Next Doc -&gt;" action="showNextTermDoc(fText)"/>
+								<button text="Show All Docs" tooltip="Show all docs with this term" action="showAllTermDoc(fText)"/>
+								<button text="Delete All Docs" icon="/img/delete.gif" tooltip="Delete all docs with this term (NO WARNING!)" action="deleteTermDoc(fText)"/>
+							</panel>
+							<panel gap="4" columns="2" halign="fill" weightx="1">
+								<label text="Document:" halign="right"/>
+								<panel gap="2">
+									<label name="tdNum" text="?"/>
+									<label text=" of "/>
+									<label name="tdMax" text="?"/>
+								</panel>
+								<label text="Term freq in this doc:" halign="right"/>
+								<label name="tFreq" text="?"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+				<separator/>
+				<panel gap="2">
+					<label text="Doc #:" font="bold"/>
+					<label name="docNum1" text="?" font="bold"/>
+					<label halign="fill" weightx="1" text=" "/>
+					<label text="Legend: I - Indexed; T - Tokenized; S - Stored; V - Term Vector"/>
+				</panel>
+				<table name="docTable" halign="fill" selection="multiple" weightx="1" valign="fill" weighty="1">
+					<header>
+						<column text=" Field"/>
+						<column text=" I" width="15"/>
+						<column text=" T" width="15"/>
+						<column text=" S" width="15"/>
+						<column text=" V" width="15"/>
+						<column text="Boost" width="35" alignment="center"/>
+						<column text=" String Value"/>
+					</header>
+					<popupmenu>
+						<menuitem text="Field's Term Vector" action="showTV(docTable)"/>
+					</popupmenu>
+				</table>
+				<panel halign="fill" weightx="1" gap="4">
+					<button text="Field's Term Vector" tooltip="Show Term Vector of selected field" action="showTV(docTable)"/>
+					<label text=" " weightx="1" halign="fill"/>
+					<label text="Copy text to Clipboard:"/>
+					<button text="Selected fields" tooltip="Copy selected fields to Clipboard" action="clipCopyFields(docTable)"/>
+					<button text="Complete document" tooltip="Copy all fields to Clipboard" action="clipCopyDoc(docTable)"/>
+				</panel>
+			</panel>
+		</tab>
+		<tab name="srchTab" text="Search" icon="/img/search.gif">
+			<panel gap="4" weightx="1" halign="fill" weighty="1" valign="fill" columns="1" top="2" bottom="2" left="2" right="2">
+				<panel weightx="1" gap="8" halign="fill" columns="2">
+					<panel columns="1" weightx="1" halign="fill" gap="2">
+						<label font="bold" text="Enter search expression here:"/>
+						<textarea wrap="true" columns="35" rows="3" name="qField"/>
+					</panel>
+					<panel columns="1" halign="fill" weightx="1" gap="2">
+						<panel gap="4">
+							<label text="Parsed query view:  "/>
+						       	<button font="10" width="45" height="15" text="Update" tooltip="Updates the result of query parsing" action="showParsed"/>
+						</panel>
+						<textarea wrap="true" columns="45" rows="3" editable="false" border="false" name="qFieldParsed"/>
+					</panel>
+					<panel gap="4" columns="2" gap="2" halign="fill" weightx="1">
+						<label colspan="2" font="bold" text="Analyzer to use for query parsing:"/>
+						<label font="10" text="NOTE: use fully-qualified class name here." colspan="2"/>
+						<combobox colspan="2" weightx="1" halign="fill" font="11" name="cbType"
+							text="org.apache.lucene.analysis.standard.StandardAnalyzer"
+							editable="true"/>
+						<label font="bold" text="Default field is: "/>
+						<combobox editable="false" selected="0" name="defFld" text="?" weightx="1" halign="left" action="showParsed"/>
+					</panel>
+					<panel halign="fill" weightx="1" weighty="1" valign="fill">
+						<button halign="center" valign="center" weightx="1" weighty="1" font="bold 13" text="Search" halign="center" action="search(qField)"/>
+					</panel>
+				</panel>
+				<separator/>
+				<panel columns="2" gap="4" halign="fill" weightx="1" valign="fill" weighty="1">
+					<panel columns="1" gap="2">
+					</panel>
+					<panel halign="fill" valign="fill" weightx="1" weighty="1" columns="1" gap="2">
+						<panel gap="4" weightx="1" halign="fill">
+							<label font="10" text="(Hint: Double-click on results to display all document fields)" weightx="1" halign="fill"/>
+							<button text="Explain" icon="/img/info.gif" tooltip="Explain selected result" action="explainResult(sTable)"/>
+							<button text="Delete" icon="/img/delete.gif" tooltip="Delete selected docs" action="deleteDocList(sTable)"/>
+							<separator/>
+							<label name="resNum" text="0"/>
+							<label text="doc(s)"/>
+						</panel>
+						<table name="sTable" halign="fill" valign="fill" weightx="1" weighty="1" perform="gotoDoc(this)">
+							<header>
+								<column text="Rank %" width="45"/>
+								<column text="Doc. Id" width="60"/>
+							</header>
+						</table>
+					</panel>
+				</panel>
+			</panel>
+		</tab>
+		<tab name="filesTab" text="Files" icon="/img/files.gif">
+			<panel columns="1">
+				<panel columns="2" gap="3" weightx="1" bottom="3" top="3">
+					<label halign="right" text=" Total Index Size:"/><label font="13 bold" name="iFileSize" text="?"/>
+				</panel>
+				<separator/>		
+				<panel gap="4" weightx="1" weighty="1" columns="1" top="4" bottom="2" left="2" right="2">
+					<table name="filesTable" halign="fill" weightx="1" valign="fill" weighty="1">
+						<header>
+							<column text=" Filename"/>
+							<column text=" Size"/>
+							<column text=" "/>						
+						</header>
+					</table>			
+				</panel>
+			</panel>
+		</tab>		
+		<tab name="pluginsTab" text="Plugins" icon="/img/tools.gif">
+			<tabbedpane name="pluginsTabs" halign="fill" valign="fill"
+				weightx="1" weighty="1" placement="left"/>
+		</tab>
+		
+	</tabbedpane>
+	<panel name="status" weightx="1" halign="fill" left="2" right="2" gap="4">
+		<label text="Index name:"/>
+		<label font="13 bold" name="idx" text="?"/>
+		<separator/>
+		<label halign="fill" weightx="1" foreground="#aa0000" font="bold" name="statmsg"/>
+		<separator/>
+		<button type="link" valign="center" icon="/img/luke.gif" action="goUrl(this)" property="url=http://www.getopt.org/luke" tooltip="Go to Luke home page"/>
+	</panel>
+</panel>

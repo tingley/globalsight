@@ -1,0 +1,58 @@
+#!/bin/ksh
+# startcxe.ksh
+# This script starts up the adapters that are set up to run in the startcxe.cfg file
+# source the environment variables
+. %%SYSTEM3_ENV_FILE%%
+
+if [ "$1" = "-?" ]
+then
+   echo "USAGE: $0";
+   echo "This script starts CXE";
+   exit 1;   
+fi
+
+BROKERNAME="broker@localhost";
+PIDFILE=$GLOBALSIGHT_HOME/system3/cxe/bin/.cxe_pids;
+TOMCATPIDFILE=$GLOBALSIGHT_HOME/system3/cxe/bin/.tomcat_pid;
+PCRED=pcred
+
+# Check the PID file
+if [ -f $PIDFILE ]
+then
+    # First check the processes to see if they're up
+    PIDS=$(grep -v "#" $PIDFILE | awk '{print $1}' | xargs);
+    RESULT=$($PCRED $PIDS 2>/dev/null | grep "suid");
+
+    if [ -n "$RESULT" ]
+    then
+	# First tell them to stop all the adapters
+	echo "CXE already appears to be running.";
+	echo "Run stopcxe.ksh to shut it down.";
+	exit 1;
+    else
+	# CXE is not running, but the PIDFILE exists
+	echo "CXE is not running. Starting CXE."
+	echo "Removing: $PIDFILE"
+	/usr/bin/rm -f $PIDFILE
+    fi
+fi
+
+# Start Tomcat
+echo "Starting CXE:";
+echo "Starting Jakarta-Tomcat webserver.";
+mkdir -p $GLOBALSIGHT_HOME/system3/cxe/logs
+echo "# CXE Webserver(Tomcat) PID" > $TOMCATPIDFILE;
+$GLOBALSIGHT_HOME/system3/cxe/jakarta-tomcat/bin/tomcat.sh run > $GLOBALSIGHT_HOME/system3/cxe/logs/tomcat_out.log 2>&1 &
+echo "$! Tomcat" >> $TOMCATPIDFILE
+
+# Get the list of runnable adapters and run them
+echo "Reading runnable adapters from config/startcxe.cfg"
+ADAPTERS=$(cat $GLOBALSIGHT_HOME/system3/cxe/config/startcxe.cfg | grep -v '#' | xargs)
+
+echo "# CXE Adpater PIDs" > $PIDFILE;
+for a in $ADAPTERS
+do
+	echo "Starting $a on $BROKERNAME in the background.";
+	beans_adapter $a $BROKERNAME 0 debug=0 &
+        echo "$! $a" >> $GLOBALSIGHT_HOME/system3/cxe/bin/.cxe_pids
+done

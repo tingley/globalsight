@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appdeployment:Deployment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:appdeployment="http://www.ibm.com/websphere/appserver/schemas/5.0/appdeployment.xmi" xmi:id="Deployment_1107985225820">
+  <deployedObject xmi:type="appdeployment:ApplicationDeployment" xmi:id="ApplicationDeployment_1107985225820" deploymentId="0" startingWeight="1" binariesURL="$(APP_INSTALL_ROOT)/dragade/ambassador.ear" useMetadataFromBinaries="true" enableDistribution="true" warClassLoaderPolicy="SINGLE" createMBeansForResources="true" reloadInterval="0" reloadEnabled="true">
+    <targetMappings xmi:id="DeploymentTargetMapping_1107985225820" enable="true" target="ServerTarget_1107985225820"/>
+    <modules xmi:type="appdeployment:EJBModuleDeployment" xmi:id="EJBModuleDeployment_1107985225820" deploymentId="1" startingWeight="5000" uri="cxe-ejb.jar">
+      <targetMappings xmi:id="DeploymentTargetMapping_1107985225821" target="ServerTarget_1107985225820"/>
+    </modules>
+    <modules xmi:type="appdeployment:WebModuleDeployment" xmi:id="WebModuleDeployment_1107985225820" deploymentId="1" startingWeight="10000" uri="ambassador-web.war">
+      <targetMappings xmi:id="DeploymentTargetMapping_1107985225822" target="ServerTarget_1107985225820"/>
+    </modules>
+    <classloader xmi:id="Classloader_1107985225820" mode="PARENT_LAST"/>
+  </deployedObject>
+  <deploymentTargets xmi:type="appdeployment:ServerTarget" xmi:id="ServerTarget_1107985225820" name="server1" nodeName="dragade"/>
+</appdeployment:Deployment>

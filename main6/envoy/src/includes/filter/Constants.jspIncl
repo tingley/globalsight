@@ -1,0 +1,319 @@
+<script type="text/javascript">
+var maxFilterNameLength = 40;
+var invalidChars = "&,<,>,',\"";
+
+var emptyFilterName = "<%= bundle.getString("lb_filter_msg_emptyFilterName") %>";
+var emptyJsFunctionText = "<%= bundle.getString("lb_filter_msg_emptyJsFunctionText") %>";
+var existFilterName = "<%= bundle.getString("lb_filter_msg_existFilterName") %>";
+var confirmDeleteFilter = "<%= bundle.getString("lb_filter_msg_confirmDeleteFilter") %>";
+var confirmDeleteStyles = "<%= bundle.getString("lb_filter_msg_confirmDeleteStyles") %>";
+var deleteFilterSuccessful = "<%= bundle.getString("lb_filter_msg_deleteFilterSuccessful") %>";
+var deleteFiltersSuccessful = "<%= bundle.getString("lb_filter_msg_deleteFiltersSuccessful") %>";
+var deleteFilterFailure = "<%= bundle.getString("lb_filter_msg_deleteFilterFailure") %>";
+var deleteFilterExistInFileProfile = "<%= bundle.getString("lb_filter_msg_deleteFilterExistInFileProfile") %>";
+var maxPageNums = "<%= bundle.getString("lb_filter_msg_maxPageNums") %>";
+var canNotPrePage = "<%= bundle.getString("lb_filter_msg_canNotPrePage") %>";
+var canNotNextPage = "<%= bundle.getString("lb_filter_msg_canNotNextPage") %>";
+var pageValueIsNotNumber = "<%= bundle.getString("lb_filter_msg_pageValueIsNotNumber") %>";
+var invalidatePageValue = "<%= bundle.getString("lb_filter_msg_invalidatePageValue") %>";
+var shouldChooseOneFilter = "<%= bundle.getString("lb_filter_msg_shouldChooseOneFilter") %>";
+var deleteFiltersExistInFileProfile = "<%= bundle.getString("lb_filter_msg_deleteFiltersExistInFileProfile") %>";
+var existTagName = "<%= bundle.getString("lb_filter_msg_existTagName") %>";
+var existTag = "<%= bundle.getString("lb_filter_msg_existTag") %>";
+var emptyTagKey = "<%= bundle.getString("lb_filter_msg_emptyTagKey") %>";
+var emptyTagValue = "<%= bundle.getString("lb_filter_msg_emptyTagValue") %>";
+var emptyTagName = "<%= bundle.getString("lb_filter_msg_emptyTagName") %>";
+var noTagsToChoose = "<%= bundle.getString("lb_filter_msg_noTagsToChoose") %>";
+var emptyStyle = "<%= bundle.getString("lb_filter_msg_emptyStyle") %>";
+var existStyle = "<%= bundle.getString("lb_filter_msg_existStyle") %>";
+var noStylesToDelete = "<%= bundle.getString("lb_filter_msg_noStylesToDelete") %>";
+var invalidStyleChar = "<%= bundle.getString("lb_filter_msg_invalidStyleChar") %>";
+var removeExistsFiltersLableMsg = "<%= bundle.getString("lb_filter_msg_removeExistsFiltersLableMsg") %>";
+var noTagsForThisType = "<%= bundle.getString("lb_filter_msg_noTagsForThisType") %>";
+var canNotContainWhiteSpace = "<%= bundle.getString("lb_filter_msg_canNotContainWhiteSpace") %>";
+var invalidTagNameChar = "<%= bundle.getString("lb_filter_msg_invalidTagNameChar") %>";
+var invalideTagKeyChar = "<%= bundle.getString("lb_filter_msg_invalideTagKeyChar") %>";
+var invalideTagValueChar = "<%= bundle.getString("lb_filter_msg_invalideTagValueChar") %>";
+var invalidFilterNameChar = "<%= bundle.getString("lb_filter_msg_invalidFilterNameChar") %>";
+var invalidL10nChar = "<%= bundle.getString("lb_filter_msg_invalidL10nChar") %>";
+var exceedFilterName = "<%= bundle.getString("lb_filter_msg_exceedFilterName") %>";
+var contentCanNotContainsEnterKey = "<%= bundle.getString("lb_filter_msg_contentCanNotContainsEnterKey") %>";
+var existRegex = "<%= bundle.getString("lb_filter_msg_existRegex") %>";
+
+var jsFilterName = "<%= bundle.getString("lb_loc_filter_name") %>";
+var jsFilterDesc = "<%= bundle.getString("lb_description") %>";
+var jsFilterNameJavaProperties = "<%= bundle.getString("lb_filter_javapropertiesfilter") %>";
+var jsFilterNameJavaScript = "<%= bundle.getString("lb_filter_javascriptfilter") %>";
+var jsFilterNameHtmlFilter = "<%= bundle.getString("lb_filter_htmlfilter") %>";
+var jsFilterNameJspFilter = "<%= bundle.getString("lb_filter_jspfilter") %>";
+var jsFilterNameMsDocFilter = "<%= bundle.getString("lb_filter_msdocfilter") %>";
+var jsFilterNameMsExcelFilter = "<%= bundle.getString("lb_filter_msexcelfilter") %>";
+var jsFilterNameMsPPTFilter = "<%= bundle.getString("lb_filter_mspptfilter") %>";
+var jsFilterNameXmlFilter = "<%= bundle.getString("lb_filter_xmlfilter") %>";
+var jsFilterNameIndd = "<%= bundle.getString("lb_filter_inddFilter") %>";
+var jsFilterNameOO = "<%= bundle.getString("lb_filter_ooFilter") %>";
+var jsFilterNameO2010 = "<%= bundle.getString("lb_filter_o2010Filter") %>";
+var jsFilterNamePO = "<%= bundle.getString("lb_filter_pofilter") %>";
+
+var jsFilterDescJavaProperties = "<%= bundle.getString("lb_filter_javapropertiesfilter_desc") %>";
+var jsFilterDescJavaScript = "<%= bundle.getString("lb_filter_javascriptfilter_desc") %>";
+var jsFilterDescHtmlFilter = "<%= bundle.getString("lb_filter_htmlfilter_desc") %>";
+var jsFilterDescJspFilter = "<%= bundle.getString("lb_filter_jspfilter_desc") %>";
+var jsFilterDescMsDocFilter = "<%= bundle.getString("lb_filter_msdocfilter_desc") %>";
+var jsFilterDescMsExcelFilter = "<%= bundle.getString("lb_filter_msexeclfilter_desc") %>";
+var jsFilterDescMsPPTFilter = "<%= bundle.getString("lb_filter_mspptfilter_desc") %>";
+var jsFilterDescXmlFilter = "<%= bundle.getString("lb_filter_xmlfilter_desc") %>";
+var jsFilterDescIndd = "<%= bundle.getString("lb_filter_inddFilter_desc") %>";
+var jsFilterDescOO = "<%= bundle.getString("lb_filter_ooFilter_desc") %>";
+var jsFilterDescO2010 = "<%= bundle.getString("lb_filter_o2010Filter_desc") %>";
+var jsFilterDescPO = "<%= bundle.getString("lb_filter_pofilter_desc") %>";
+
+var lbEmbeddableTags = "<%= bundle.getString("lb_embeddable_tags") %>";
+var lbPairedTags = "<%= bundle.getString("lb_paired_tags") %>";
+var lbUnpairedTags = "<%= bundle.getString("lb_unpaired_tags") %>";
+var lbSwitchTagMap = "<%= bundle.getString("lb_switch_tag_map") %>";
+var lbWhitePreservingTags = "<%= bundle.getString("lb_white_preserving_tags") %>";
+var lbTranslatableAttribute = "<%= bundle.getString("lb_translatable_attribute") %>";
+var lbInternaTag = "<%= bundle.getString("lb_interna_tag") %>";
+
+var jsEnableUnicodeEscape = "<%= bundle.getString("lb_filter_enableunicodeescape") %>";
+var jsPreserveTrailingSpaces = "<%= bundle.getString("lb_filter_preservetrailingspaces") %>";
+var jsEnableSIDSupport = "<%= bundle.getString("lb_filter_enablesid") %>";
+var jsFileProfileName = "<%= bundle.getString("lb_file_profile_name") %>";
+var jsJSFunctionText = "<%= bundle.getString("lb_filter_JSFunctionText")%>";
+var jsAddAdditionalHead = "<%= bundle.getString("lb_filter_AddAdditionalHead")%>";
+var jsEnableEntityEscape = "<%= bundle.getString("lb_filter_EnableEntityEscape")%>";
+var jsUnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
+var jsUnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
+var jsTranslateHeaderInformation = "<%= bundle.getString("lb_filter_TranslateHeaderInformation")%>";
+var jsStyleType = "<%= bundle.getString("lb_filter_StyleType")%>";
+var jsStylesToDeleted = "<%= bundle.getString("lb_filter_StylesToDeleted")%>";
+var jsStylesCount = "<%= bundle.getString("lb_filter_StylesCount")%>";
+var jsRemoveStylesNote = "<%= bundle.getString("lb_filter_RemoveStylesNote") %>";
+var jsConvertHTMLEntity = "<%= bundle.getString("lb_filter_ConvertHTMLEntity") %>";
+var jsTagsToDeleted = "<%= bundle.getString("lb_filter_TagsToDeleted") %>";
+var jsTagsCount = "<%= bundle.getString("lb_filter_TagsCount") %>";
+var jsRemoveTagsNote = "<%= bundle.getString("lb_filter_RemoveTagsNote") %>";
+var jsIgnoreInvalidHTMLTags = "<%= bundle.getString("lb_filter_IgnoreInvalidHTMLTags") %>";
+var jsLocalizeFunction = "<%= bundle.getString("lb_filter_LocalizeFunction") %>";
+var jsSecondaryFilter = "<%= bundle.getString("lb_filter_SecondaryFilter") %>";
+
+var jsInternalText = "<%= bundle.getString("lb_internal_text") %>";
+var jsInternalContent = "<%= bundle.getString("lb_content") %>";
+var jsInternalIsRegex = "<%= bundle.getString("lb_is_regex") %>";
+var jsInternalExist = "<%= bundle.getString("lb_internal_exist") %>";
+var jsInternalEmpty = "<%= bundle.getString("lb_internal_empty") %>";
+
+var jsXmlRule = "<%= bundle.getString("lb_xml_rule") %>";
+var jsAdd = "<%= bundle.getString("lb_add") %>";
+var jsRemove = "<%= bundle.getString("lb_remove") %>";
+var jsDelete = "<%= bundle.getString("lb_delete") %>";
+var jsSave = "<%= bundle.getString("lb_save") %>";
+var jsValue = "<%= bundle.getString("lb_value") %>";
+var jsChoose = "<%= bundle.getString("lb_choose_1") %>";
+var jsPrevious = "<%= bundle.getString("lb_previous") %>";
+var jsNext = "<%= bundle.getString("lb_next") %>";
+var jsGo = "<%= bundle.getString("lb_go") %>";
+var jsStyle = "<%= bundle.getString("lb_style") %>";
+var jsCheckAll = "<%= bundle.getString("lb_check_all") %>";
+var jsClearAll = "<%= bundle.getString("lb_clear_all") %>";
+var jsTagName = "<%= bundle.getString("lb_tagname") %>";
+var jsInternalTag = "<%= bundle.getString("lb_internal_tag") %>";
+var jsTagKey = "<%= bundle.getString("lb_tagkey") %>";
+var jsTagValue = "<%= bundle.getString("lb_tagvalue") %>";
+var jsTagType = "<%= bundle.getString("lb_tagtype") %>";
+
+var jsExWhitespaceChars = "<%= bundle.getString("lb_filter_ExWhitespaceChars") %>";
+var jsPhConsolidation = "<%= bundle.getString("lb_filter_PhConsolidation") %>";
+var jsDonotConsolidation = "<%= bundle.getString("lb_filter_DonotConsolidation") %>";
+var jsDoPhConsolidation = "<%= bundle.getString("lb_filter_DoPhConsolidation") %>";
+var jsDoPhConsolidationIgnoreSpace = "<%= bundle.getString("lb_filter_DoPhConsolidationIgnoreSpace") %>";
+var jsPhTrimming = "<%= bundle.getString("lb_filter_PhTrimming") %>";
+var jsPhTrimDonot = "<%= bundle.getString("lb_filter_PhTrimDonot") %>";
+var jsPhTrimDo = "<%= bundle.getString("lb_filter_PhTrimDo") %>";
+var jsNonasciiAs = "<%= bundle.getString("lb_filter_NonasciiAs") %>";
+var jsNonasciiAsCharacter = "<%= bundle.getString("lb_filter_NonasciiAsCharacter") %>";
+var jsNonasciiAsEntity = "<%= bundle.getString("lb_filter_NonasciiAsEntity") %>";
+var jsWhitespaceHandling = "<%= bundle.getString("lb_filter_WhitespaceHandling") %>";
+var jsWsHandlingCollapse = "<%= bundle.getString("lb_filter_WhitespaceHandlingCollapse") %>";
+var jsWsHandlingPreserve = "<%= bundle.getString("lb_filter_WhitespaceHandlingPreserve") %>";
+var jsElementPostFilter = "<%= bundle.getString("lb_filter_elementpostfilter") %>";
+var jsCDataPostFilter = "<%= bundle.getString("lb_filter_cdatapostfilter") %>";
+var jsSidSupport = "<%= bundle.getString("lb_filter_SIDSupport") %>";
+var jsSidSupportTagName = "<%= bundle.getString("lb_filter_TagName") %>";
+var jsSidSupportAttName = "<%= bundle.getString("lb_filter_AttrName") %>";
+var jsCheckWellFormed = "<%= bundle.getString("lb_filter_CheckWellFormed") %>";
+var jsGerateLangInfo = "<%= bundle.getString("lb_filter_GenerateLangInfo") %>";
+var jsAddConfiguredEntity = "<%= bundle.getString("lb_filter_AddConfiguredEntity") %>";
+var jsEditConfiguredEntity = "<%= bundle.getString("lb_filter_EditConfiguredEntity") %>";
+var jsAddProcessIns = "<%= bundle.getString("lb_filter_AddPI") %>";
+var jsEditProcessIns = "<%= bundle.getString("lb_filter_EditPI") %>";
+var jsAnEntity = "<%= bundle.getString("lb_filter_Entity") %>";
+var jsEntityType = "<%= bundle.getString("lb_filter_Type") %>";
+var jsEntityTypeText = "<%= bundle.getString("lb_filter_Entity_Text") %>";
+var jsEntityTypePlaceHolder = "<%= bundle.getString("lb_filter_Entity_Placeholder") %>";
+var jsEntityCode = "<%= bundle.getString("lb_filter_Entity_Code") %>";
+var jsEntityChar = "<%= bundle.getString("lb_filter_Entity_Character") %>";
+var jsEntitySaveAs = "<%= bundle.getString("lb_filter_Entity_SaveAs") %>";
+var jsEntitySaveAsEntity = "<%= bundle.getString("lb_entity") %>";
+var jsEntitySaveAsChar = "<%= bundle.getString("lb_character") %>";
+var jsPIName = "<%= bundle.getString("lb_filter_PI_Name") %>";
+var jsPIHandling = "<%= bundle.getString("lb_filter_PI_HandMode") %>";
+var jsPIMarkup = "<%= bundle.getString("lb_filter_PI_ModeMarkup") %>";
+var jsPIEmbMarkUp = "<%= bundle.getString("lb_filter_PI_EmbMarkup") %>";
+var jsPIRemove = "<%= bundle.getString("lb_filter_PI_remove") %>";
+var jsInvalidEntityCode = "<%= bundle.getString("lb_filter_msg_ValidEntityCode") %>";
+
+var jsOptionEmbTags = "<%= bundle.getString("lb_filter_EmbeddableTags") %>";
+var jsOptionTransAttrTags = "<%= bundle.getString("lb_filter_TranslatableAttributeTags") %>";
+var jsOptionContentIncTags = "<%= bundle.getString("lb_filter_ContentInclusionTags") %>";
+var jsOptionEntities = "<%= bundle.getString("lb_filter_Entities") %>";
+var jsOptionProcessIns = "<%= bundle.getString("lb_filter_ProcessingInstructions") %>";
+var jsOptionPreserveWsTags = "<%= bundle.getString("lb_filter_PreserveWhitespaceTags") %>";
+
+var jsOperatorEqual = "<%= bundle.getString("lb_filter_condition_equal") %>";
+var jsOperatorNotEqual = "<%= bundle.getString("lb_filter_condition_notequal") %>";
+var jsOperatorMatch = "<%= bundle.getString("lb_filter_condition_match") %>";
+var jsConditionalAttr = "<%= bundle.getString("lb_filter_ConditionalAttributes") %>";
+var jsConfirmDeleteItems = "<%= bundle.getString("lb_filter_msg_confirmRemoveItems") %>";
+var jsEditConfiguredTag = "<%= bundle.getString("lb_filter_EditConfiguredTag") %>";
+var jsAddConfiguredTag = "<%= bundle.getString("lb_filter_AddConfiguredTag") %>";
+var jsTranslateableAttr = "<%= bundle.getString("lb_filter_TranslatableAttributes") %>";
+var jsNonTransAttr = "<%= bundle.getString("lb_filter_msg_noTransAttribute") %>";
+var jsContentInclude = "<%= bundle.getString("lb_filter_Include") %>";
+var jsContentExclude = "<%= bundle.getString("lb_filter_Exclude") %>";
+var jsContentIncludeExclude = jsContentInclude + "/" + jsContentExclude;
+var jsEmptyTagFormat = "<%= bundle.getString("lb_filter_EmptyTagFormat") %>";
+var jsEmptyTagFormatOpen = "<%= bundle.getString("lb_filter_FormatOpen") %>" + "(&lt;tag&gt;&lt;/tag&gt;)";
+var jsEmptyTagFormatClose = "<%= bundle.getString("lb_filter_FormatClose") %>" + "(&lt;tag/&gt;)";
+var jsCDataPostFilterTags = "<%= bundle.getString("lb_filter_CDataPostFilterTags") %>";
+var jsEditCdataPostFilter = "<%= bundle.getString("lb_filter_EditCdataPostFilter") %>";
+var jsAddCdataPostFilter = "<%= bundle.getString("lb_filter_AddCdataPostFilter") %>";
+var jsCdataCondition = "<%= bundle.getString("lb_filter_CdataCondition") %>";
+var jsPostFilter = "<%= bundle.getString("lb_filter_PostFilter") %>";
+var jsNNNName = "<%= bundle.getString("lb_filter_NNNName") %>";
+var jsConditionTypeCdataContent = "<%= bundle.getString("lb_filter_ConditionTypeCdataContent") %>";
+var jsPostFilterNone = "[" + "<%= bundle.getString("lb_filter_PostFilterNone") %>" + "]";
+var jsTranslatable = "<%= bundle.getString("lb_filter_Translatable") %>";
+
+var jsTransHiddenLayer = "<%= bundle.getString("lb_filter_indd_TransHiddenLayer") %>";
+var jsTransMasterLayer = "<%= bundle.getString("lb_filter_indd_TransMasterLayer") %>";
+var jsTransFileInfo = "<%= bundle.getString("lb_filter_indd_TransFileInfo") %>";
+
+var jsOOTransHeader = "<%= bundle.getString("lb_filter_ooFilter_transHeader") %>";
+var jsOOTransFileinfo = "<%= bundle.getString("lb_filter_ooFilter_transFileInfo") %>";
+var jsOOUnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
+var jsOOUnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
+var jsOOXmlFilter = "<%= bundle.getString("lb_filter_ooFilter_xmlFilter") %>";
+
+var jsO2010TransHeader = "<%= bundle.getString("lb_filter_o2010Filter_transHeader") %>";
+var jsO2010TransFileinfo = "<%= bundle.getString("lb_filter_o2010Filter_transFileInfo") %>";
+var jsO2010UnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
+var jsO2010UnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
+var jsO2010XmlFilter = "<%= bundle.getString("lb_filter_o2010Filter_xmlFilter") %>";
+var jsO2010TransMaster = "<%= bundle.getString("lb_ppt_master_translate") %>";
+
+var lbReferencedFileProfileName = "<%= bundle.getString("lb_filter_referenced_FPName") %>";
+var lbReferencedFilterName = "<%= bundle.getString("lb_filter_referenced_FilterName") %>";
+var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
+
+var lbReferencedJobName = "<%= bundle.getString("lb_filter_referenced_JobName") %>";
+var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
+
+<%
+java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
+namemap.put("java_properties_filter", "jsFilterNameJavaProperties");
+namemap.put("java_script_filter", "jsFilterNameJavaScript");
+namemap.put("ms_office_doc_filter", "jsFilterNameMsDocFilter");
+namemap.put("ms_office_excel_filter", "jsFilterNameMsExcelFilter");
+namemap.put("ms_office_ppt_filter", "jsFilterNameMsPPTFilter");
+namemap.put("xml_rule_filter", "jsFilterNameXmlFilter");
+namemap.put("html_filter", "jsFilterNameHtmlFilter");
+namemap.put("jsp_filter", "jsFilterNameJspFilter");
+namemap.put("indd_filter", "jsFilterNameIndd");
+namemap.put("openoffice_filter", "jsFilterNameOO");
+namemap.put("office2010_filter", "jsFilterNameO2010");
+namemap.put("po_filter", "jsFilterNamePO");
+
+java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
+descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
+descmap.put("java_script_filter", "jsFilterDescJavaScript");
+descmap.put("ms_office_doc_filter", "jsFilterDescMsDocFilter");
+descmap.put("ms_office_excel_filter", "jsFilterDescMsExcelFilter");
+descmap.put("ms_office_ppt_filter", "jsFilterDescMsPPTFilter");
+descmap.put("xml_rule_filter", "jsFilterDescXmlFilter");
+descmap.put("html_filter", "jsFilterDescHtmlFilter");
+descmap.put("jsp_filter", "jsFilterDescJspFilter");
+descmap.put("indd_filter", "jsFilterDescIndd");
+descmap.put("openoffice_filter", "jsFilterDescOO");
+descmap.put("office2010_filter", "jsFilterDescO2010");
+descmap.put("po_filter", "jsFilterDescPO");
+%>
+
+function getFilterNameByTableName(tablename)
+{
+	if (tablename)
+	{
+		<%
+		java.util.Set<String> namekeys = namemap.keySet();
+		for(String k : namekeys)
+		{%>
+		    if (tablename == "<%=k %>") return <%=namemap.get(k) %>;
+		<%
+		}
+		%>
+	}
+	else
+	{
+		return "";
+	}
+}
+
+function getFilterDescriptionByTableName(tablename)
+{
+	if (tablename)
+	{
+		<%
+		java.util.Set<String> desckeys = descmap.keySet();
+		for(String k : desckeys)
+		{%>
+		    if (tablename == "<%=k %>") return <%=descmap.get(k) %>;
+		<%
+		}
+		%>
+	}
+	else
+	{
+		return "";
+	}
+}
+
+function splitByFirstIndex(str, flag)
+{
+	var ret = new Array();
+	
+	if (str != undefined && flag != undefined)
+	{
+		var index = str.indexOf(flag);
+		var onev = -2;
+		var twov = "";
+		
+		if (index > 0)
+		{
+			onev = str.substring(0,index);
+			twov = str.substring(index+1);
+			
+			ret[0] = onev;
+			ret[1] = twov;
+			return ret;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	return false;
+}
+
+</script>

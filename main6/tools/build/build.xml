@@ -1,0 +1,718 @@
+<project name="GlobalSight" default="all" basedir=".">
+
+	<loadproperties srcFile="build.properties" />
+
+	<property environment="env" />
+
+	<!-- IMPORTANT PROPERTIES TO CHANGE FOR EACH BUILD -->
+	<target name="mkdirs">
+		<mkdir dir="${serverclassesDest}" />
+		<mkdir dir="${tmpclasses}" />
+	</target>
+
+	<target name="init" depends="tstamp,mkdirs,buildversion">
+		<echo message="***** Main build file ${ant.file} , java version ${ant.java.version} : init *****" />
+		<ant antfile="gsCommon_build.xml" target="init" />
+	</target>
+	<target name="buildversion" depends="mkdirs,tstamp">
+		<!-- Create a BuildVersion.java which holds the current build version -->
+		<echo file="BuildVersion.java" append="false">
+package com.globalsight;
+public class BuildVersion
+{
+    /** Product Name **/
+    public static final String PRODUCT="${product}";
+    
+    /** Product Version **/
+    public static final String VERSION="${version}";
+    
+    /** Build Date **/
+    public static final String BUILD_DATE="${DSTAMP}";
+    
+    /**the build version will get displayed in the about box **/
+    public static final String BUILD_VERSION="${version}";
+    
+    /** Prints out the Build version info **/ 
+    public static void main(String args[])
+    {
+        System.out.println(PRODUCT + " version: " + VERSION);    
+        System.out.println("Build version: " + BUILD_VERSION);
+        System.out.println("Build date: " + BUILD_DATE);        
+    }
+}
+</echo>
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" target="${javactarget}" classpath="${classpath}" srcdir="." destdir="${serverclassesDest}" includes="BuildVersion.java">
+		</javac>
+	</target>
+
+	<target name="tstamp" depends="distdir">
+		<tstamp>
+		</tstamp>
+
+	</target>
+
+	<target name="distdir">
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/langs" />
+	</target>
+
+	<target name="compileDependenciesOnce" depends="compileAllFirstForDependencies, copyLingClasses, copyCommonClasses, copyCxeClasses, AddSourceAppletJar">
+	</target>
+
+	<target name="compileAllFirstForDependencies" depends="init">
+		<echo message="***** compileAllFirstForDependencies *****" />
+		<ant antfile="../../ling/build/build.xml" target="precompile">
+			<property name="classpath" value="${classpath}" />
+		</ant>
+		<echo message="***** compileAllFirstForDependencies : javac task *****" />
+		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="../../${envoySrcJava}:../../${diplomatDevSrcJava}:../../${lingSrcJava}" destdir="${serverclassesDest}" includes="**/*.java" excludes="test/**/*.java, tools/**/*.java" fork="true" memoryMaximumSize="512m">
+		</javac>
+	</target>
+
+	<target name="copyLingClasses" depends="compileAllFirstForDependencies">
+		<echo message="***** Copying lingclasses files from ${serverclassesDest} to ${lingclasses}" />
+		<mkdir dir="${lingclasses}" />
+		<copy todir="${lingclasses}">
+			<fileset dir="${serverclassesDest}">
+				<patternset id="lingjarclasses">
+					<include name="com/globalsight/ling/**/*.class" />
+					<include name="com/globalsight/integration/**/*.class" />
+					<include name="com/globalsight/everest/foundation/User.class" />
+					<include name="com/globalsight/everest/util/server/RegistryLocator.class" />
+					<include name="com/globalsight/everest/util/server/ServerRegistryImpl.class" />
+					<include name="com/globalsight/everest/util/server/ServerRegistry.class" />
+					<include name="com/globalsight/everest/util/server/EvRemote.class" />
+					<include name="com/globalsight/everest/util/server/ServerDefaults.class" />
+					<include name="com/globalsight/everest/util/system/SystemStartupException.class" />
+					<include name="com/globalsight/everest/util/system/SystemShutdownException.class" />
+					<include name="com/globalsight/everest/util/system/SystemUtilException.class" />
+					<include name="com/globalsight/everest/util/system/SystemConfiguration.class" />
+					<include name="com/globalsight/everest/util/system/SystemConfigurationConstants.class" />
+					<include name="com/globalsight/everest/util/system/PropertiesSystemConfig.class" />
+					<include name="com/globalsight/everest/integration/ling/tm/*.class" />
+				</patternset>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copyCommonClasses" depends="compileAllFirstForDependencies">
+		<echo message="***** Copying commonclasses files from ${serverclassesDest} to ${commonclasses}" />
+		<mkdir dir="${commonclasses}" />
+		<copy todir="${commonclasses}">
+			<fileset dir="${serverclassesDest}" includes="com/globalsight/util/**/*.class, com/globalsight/log/**/*.class">
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copyCxeClasses" depends="compileAllFirstForDependencies">
+		<echo message="***** Copying cxeclasses files from ${serverclassesDest} to ${cxeclasses}" />
+		<mkdir dir="${cxeclasses}" />
+		<copy todir="${cxeclasses}">
+			<fileset dir="${serverclassesDest}" includes="com/globalsight/diplomat/**/*.class, com/globalsight/exception/WrappedException.class, com/globalsight/vignette/**/*.class">
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Build the third party JAR files. They are empty JARs except for Manifest -->
+	<target name="thirdPartyJars">
+		<jar jarfile="thirdParty1.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty1.mf" />
+		<jar jarfile="thirdParty2.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty2.mf" />
+		<jar jarfile="axisLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/axisLibs.mf" />
+		<jar jarfile="jbpmLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/jbpmLibs.mf" />
+		<jar jarfile="hibernateLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/hibernateLibs.mf" />
+		<jar jarfile="ssoLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/ssoLibs.mf" />
+	</target>
+
+	<target name="ling">
+		<ant antfile="../../ling/build/build.xml" />
+	</target>
+
+	<target name="cap" depends="ling">
+		<ant antfile="../../envoy/src/build.xml" />
+	</target>
+
+	<target name="capfoundation" depends="ling">
+		<ant antfile="../../envoy/src/build.xml" target="compile_foundation" />
+	</target>
+
+	<target name="capserver" depends="ling">
+		<ant antfile="../../envoy/src/build.xml" target="compile_server" />
+	</target>
+
+	<target name="capui" depends="ling">
+		<ant antfile="../../envoy/src/build.xml" target="compile_ui" />
+	</target>
+
+	<target name="capnojsp" depends="ling">
+		<ant antfile="../../envoy/src/build.xml" target="build_all_nojsp" />
+	</target>
+
+	<target name="captest" depends="cap">
+		<ant antfile="../../envoy/src/build.xml" target="build_test" />
+	</target>
+
+	<target name="captestnojsp" depends="capnojsp">
+		<ant antfile="../../envoy/src/build.xml" target="build_test" />
+	</target>
+
+	<target name="caprmic" depends="init">
+		<ant antfile="../../envoy/src/build.xml" target="rmic" />
+	</target>
+
+	<target name="cxe" depends="ling, cap">
+		<ant antfile="../../diplomat/build/build.xml" />
+	</target>
+
+	<target name="cxenojsp" depends="ling, capnojsp">
+		<ant antfile="../../diplomat/build/build.xml" target="buildnojsp" />
+	</target>
+
+	<target name="cxemdb">
+		<ant antfile="../../diplomat/build/build.xml" target="ejbc" />
+	</target>
+
+	<target name="capssb">
+		<ant antfile="../../envoy/src/build.xml" target="ejbc" />
+	</target>
+
+	<target name="snippets" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="snippets" />
+	</target>
+
+	<target name="tb" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="tb" />
+	</target>
+
+	<target name="tbnojsp" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="tbnojsp" />
+	</target>
+
+	<target name="tbserver" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="tbserver" />
+	</target>
+
+	<target name="tbui" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="tbui" />
+	</target>
+
+	<target name="tbrmic" depends="init">
+		<ant antfile="../../envoy/src/build.xml" target="tbrmic" />
+	</target>
+
+	<target name="tbtest" depends="">
+		<ant antfile="../../envoy/src/build.xml" target="tbtest" />
+	</target>
+
+	<target name="install">
+		<ant antfile="../install/build.xml" />
+	</target>
+
+	<target name="compileallatonce" depends="init">
+		<ant antfile="../../envoy/src/build.xml" target="init" />
+		<mkdir dir="${allatonceclassesDest}" />
+		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" target="${javactarget}" classpath="${classpath}" destdir="${allatonceclassesDest}" includes="**/*.java">
+			<src path="../../envoy/src/java">
+			</src>
+			<src path="../../ling">
+			</src>
+			<src path="../../diplomat/dev/src/java">
+			</src>
+			<src path="../../envoy/test/src/java">
+			</src>
+		</javac>
+	</target>
+	<target name="tsAutoImport" depends="capnojsp, cxenojsp">
+		<jar jarfile="${capclasses}/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
+            com/globalsight/diplomat/util/Logger.class,
+            com/globalsight/log/GlobalSightCategory.class,
+            com/globalsight/log/GlobalSightCategoryFactory.class,
+            com/globalsight/log/GlobalSightPropertyConfigurator.class,
+            com/globalsight/util/CollectionHelper.class,
+            com/globalsight/util/file/DelimitedFileReader.class,
+            com/globalsight/util/file/DirectoryMonitor.class,
+            com/globalsight/util/file/FileWaiter.class,
+            com/globalsight/util/file/FileModificationTimeSnapshot.class,
+            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportMonitor.class,
+            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImporter.class,
+            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportService.class,
+            com/globalsight/cxe/adapter/teamsite/autoimport/AutomaticImportDaemon.class,
+            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMap.class,
+            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMapEntry.class,
+            com/globalsight/cxe/adapter/filesystem/autoImport/DirectoryMapPrinter.class
+                " />
+	</target>
+
+	<target name="all" depends="withJspMsg,compileDependenciesOnce, ling, cap, cxe, tb, tsAutoImport, LingTools, SpellChecker, install" />
+
+	<target name="allnojsp" depends="withNoJspMsg,compileDependenciesOnce, ling, capnojsp, cxenojsp, tbnojsp, tsAutoImport, LingTools, SpellChecker, install" />
+
+	<target name="withJspMsg">
+		<echo message="***** Building GlobalSight (With JSPs) *****" />
+	</target>
+
+	<target name="withNoJspMsg">
+		<echo message="***** Building GlobalSight (No JSPs) *****" />
+	</target>
+
+	<target name="capjsp">
+		<ant antfile="../../envoy/src/build.xml" target="capjsp" />
+	</target>
+
+	<target name="cxejsp">
+		<ant antfile="../../diplomat/build/build.xml" target="cxejsp" />
+	</target>
+
+	<!-- Jar up all GlobalSight classes into globalsight.jar -->
+	<target name="globalsight.jar">
+		<echo message="**** Creating globalsight.jar ****" />
+		<jar destfile="./capclasses/globalsight.ear/lib/globalsight.jar" filesonly="true" duplicate="preserve">
+			<fileset dir="capclasses/globalsight.ear/lib/classes" includes="**/*.class" excludes="**/com/globalsight/vignette/*.class" />
+			<fileset dir="cxeclasses" includes="**/*.class" />
+			<fileset dir="lingclasses" includes="**/*.class,**/*.hbm.xml" />
+		</jar>
+	</target>
+
+	<target name="zip" depends="tstamp,thirdPartyJars,globalsight.jar">
+		<ant antfile="zip.xml" target="zip" />
+	</target>
+
+	<!-- Zip file for netegrity specific files -->
+	<target name="netegrity" depends="tstamp">
+		<ant antfile="zip.xml" target="netegrity" />
+	</target>
+
+	<!-- Make the zip file for Teamsite Auto Import -->
+	<target name="TeamsiteAutoImport" depends="tsAutoImport">
+		<ant antfile="zip.xml" target="TeamsiteAutoImport" />
+	</target>
+
+	<!-- Make the zip file for locale dependent property files -->
+	<!-- en_US locale  -->
+	<target name="en_US_zip" depends="tstamp">
+		<ant antfile="zip.xml" target="en_US_zip" />
+	</target>
+
+	<!-- fr_FR locale  -->
+	<target name="fr_FR_zip" depends="tstamp">
+		<ant antfile="zip.xml" target="fr_FR_zip" />
+	</target>
+
+	<!-- es_ES locale  -->
+	<target name="es_ES_zip" depends="tstamp">
+		<ant antfile="zip.xml" target="es_ES_zip" />
+	</target>
+
+	<!-- de_DE locale  -->
+	<target name="de_DE_zip" depends="tstamp">
+		<ant antfile="zip.xml" target="de_DE_zip" />
+	</target>
+
+	<!-- ja_JP locale  -->
+	<target name="ja_JP_zip" depends="tstamp">
+		<ant antfile="zip.xml" target="ja_JP_zip" />
+	</target>
+
+	<!-- Target to build the GS SpellChecker -->
+	<target name="SpellChecker">
+		<ant dir="${spellchecker}/" antfile="build.xml" target="build" inheritAll="false" />
+	</target>
+
+	<!-- Target to package all spell-checker files (not used) -->
+	<target name="XdeSpellChecker" />
+
+	<!-- Target to package all spell-checker dictionaries -->
+	<target name="XdeSpellCheckerDictionaries">
+		<echo message="**** Packaging all Spell-Checker Dictionaries ****" />
+
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="arabic" />
+			<param name="jars" value="arabic.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="chinese" />
+			<param name="jars" value="chinese.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="czech" />
+			<param name="jars" value="czech.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="danish" />
+			<param name="jars" value="danish.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="dutch" />
+			<param name="jars" value="dutch.jar,dutch2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="english_australian" />
+			<param name="jars" value="australian.jar,ukenglish.jar,ukenglish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="english_canadian" />
+			<param name="jars" value="canadian.jar,ukenglish.jar,ukenglish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="english_southafrican" />
+			<param name="jars" value="africansouth.jar,ukenglish.jar,ukenglish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="english_uk" />
+			<param name="jars" value="ukenglish.jar,ukenglish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="estonian" />
+			<param name="jars" value="estonian.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="finnish" />
+			<param name="jars" value="finnish.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="french" />
+			<param name="jars" value="french.jar,french2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="french_canada" />
+			<param name="jars" value="canadianfrench.jar,french.jar,french2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="greek" />
+			<param name="jars" value="greek.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="german" />
+			<param name="jars" value="german.jar,german2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="italian" />
+			<param name="jars" value="italian.jar,italian2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="japanese" />
+			<param name="jars" value="japaneseroman.jar,japanesesanscript.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="norwegian" />
+			<param name="jars" value="norwegian.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="polish" />
+			<param name="jars" value="polish.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="portuguese" />
+			<param name="jars" value="portuguese.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="portuguese_brazil" />
+			<param name="jars" value="brazilianportuguese.jar,portuguese.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="spanish" />
+			<param name="jars" value="spanish.jar,spanish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="spanish_argentina" />
+			<param name="jars" value="argentina.jar,spanish.jar,spanish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="spanish_bolivia" />
+			<param name="jars" value="bolivian.jar,spanish.jar,spanish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="spanish_colombo" />
+			<param name="jars" value="colombian.jar,spanish.jar,spanish2002.jar" />
+		</antcall>
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="swedish" />
+			<param name="jars" value="swedish.jar" />
+		</antcall>
+
+		<!-- Be nice to inhouse testers and pack all dicts in one zip -->
+		<antcall target="XdeSpellCheckerDictionary">
+			<param name="lang" value="ALL" />
+			<param name="jars" value="*.jar" />
+		</antcall>
+	</target>
+
+	<!-- Target to package one spell-checker dictionary -->
+	<target name="XdeSpellCheckerDictionary">
+		<echo message="**** ${lang}" />
+
+		<mkdir dir="${dist}/scdict" />
+		<zip duplicate="preserve" zipfile="${dist}/scdict/scdict_${lang}.zip">
+			<zipfileset dir="../xdespellchecker/applications/xdespellchecker/WEB-INF/lib" prefix="${product}/${deployment}/globalsight.ear/xdespellchecker.war/WEB-INF/lib" includes="${jars}" />
+		</zip>
+	</target>
+
+	<!-- Target for Desktop Icon in package-->
+	<target name="DesktopIconZip" depends="DesktopIcon">
+		<copy file="${desktopicon.dir}/build/DesktopIcon.zip" todir="${dist}" />
+	</target>
+
+	<!-- Target for webtop plug in package-->
+	<target name="WebtopZip" depends="Webtop">
+		<copy file="../../${diplomatDevSrcJava}/../webtop-plugin/dist/webtop-plug-in.zip" todir="${dist}" />
+	</target>
+
+	<target name="Webtop">
+		<echo message="../../${diplomatDevSrcJava}/../webtop-plugin" />
+		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="dist" inheritAll="false" />
+	</target>
+
+	<target name="cleanWebtop">
+		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
+	</target>
+
+	<!-- Targets for linguistics tools -->
+	<target name="LingTools" depends="Debex, GAlign" />
+	<target name="cleanLingTools" depends="cleanDebex, cleanGAlign" />
+	<target name="LingToolsZip" depends="Debex, GAlign">
+		<!--<copy file="${lingtools}/debex/dist/debex.zip" todir="${dist}" />-->
+		<copy file="${lingtools}/galign/dist/galign-installer.zip" todir="${dist}" />
+	</target>
+
+	<target name="Debex">
+		<ant dir="${lingtools}/debex" antfile="build.xml" target="dist" inheritAll="false" />
+	</target>
+
+	<target name="cleanDebex">
+		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
+	</target>
+
+	<target name="GAlign">
+		<ant dir="${lingtools}/galign" antfile="build.xml" target="dist" inheritAll="false" />
+	</target>
+
+	<target name="cleanGAlign">
+		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
+	</target>
+
+	<!-- Target to package Desktop Icon -->
+	<target name="DesktopIcon">
+		<ant dir="${desktopicon.dir}/tools" antfile="build.xml" target="make.package" />
+	</target>
+	
+	<target name="AddSourceAppletJar">
+		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="all" />
+	</target>
+
+	<!-- Target to package all converters -->
+	<target name="AllConverters" depends="tstamp,PdfConverter,WordConverter,ExcelConverter,PowerPointConverter,WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
+		<echo message="**** Packaging all Converters ****" />
+	</target>
+
+	<target name="AllXPConverters" depends="tstamp,WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
+		<echo message="**** Packaging all Office XP Converters ****" />
+	</target>
+
+	<target name="All2003Converters" depends="tstamp,Word2003Converter,Excel2003Converter,PowerPoint2003Converter">
+		<echo message="**** Packaging all Office 2003 Converters ****" />
+	</target>
+
+	<!-- GlobalSight Adobe Converter -->
+	<target name="AdobeConverter" depends="tstamp">
+		<echo message="**** Packaging Adobe Converter ****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_adobe.zip">
+			<zipfileset dir="../../diplomat\dev\src\c-sharp\AdobeConverter\AdobeConverter\AdobeConverter\bin\Release" prefix="AdobeConverter" includes="*.exe,*.dll,*.pdb" excludes="AdobeConverter.vshost.exe" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight PDF Converter Service -->
+	<target name="PdfConverter" depends="tstamp">
+		<echo message="***** GlobalSight PDF Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_pdf.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/PdfConverter/PdfConverter/bin/Debug" prefix="globalsight/pdfconverter/bin" includes="PdfConverter.exe,*.dll" />
+			<zipfileset dir="../../tools/dotnet" prefix="globalsight/pdfconverter/bin" includes="reg.exe" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Word Converter Service -->
+	<target name="WordConverter" depends="tstamp">
+		<echo message="***** GlobalSight Word Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_word.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/WordConverter/WordConverter/bin/Debug" prefix="globalsight/wordconverter/bin" includes="*.exe,*.dll" />
+			<zipfileset dir="../../tools/dotnet" prefix="globalsight/wordconverter/bin" includes="reg.exe" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Word XP Converter Service -->
+	<target name="WordXPConverter" depends="tstamp">
+		<echo message="***** GlobalSight Word XP Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_wordxp.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/WordXPConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Word 2003 Converter Service -->
+	<target name="Word2003Converter" depends="tstamp">
+		<echo message="***** GlobalSight Word 2003 Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_word2003.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/Word2003ConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+	
+	<!-- GlobalSight Office 2007 Converter -->
+	<target name="Office2007Converter" depends="tstamp">
+		<echo message="**** Packaging Office 2007 Converter ****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_office2007.zip">
+			<zipfileset dir="../../diplomat\dev\src\c-sharp\Office2007Converters\Office2007ConvertersSetup\Release" prefix="" includes="*.*" />
+		</zip>
+	</target>
+	
+	<!-- GlobalSight Office 2003 Converter -->
+	<target name="Office2003Converter" depends="tstamp">
+		<echo message="**** Packaging Office 2003 Converter ****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_office2003.zip">
+			<zipfileset dir="../../diplomat\dev\src\c-sharp\Office2003Converters\Office2003ConvertersSetup\Release" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight PPT Converter Service -->
+	<target name="PowerPointConverter" depends="tstamp">
+		<echo message="***** GlobalSight PowerPoint Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpoint.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/PowerPointConverter/PowerPointConverter/bin/Debug" prefix="globalsight/powerpointconverter/bin" includes="*.exe,*.dll" />
+			<zipfileset dir="../../tools/dotnet" prefix="globalsight/powerpointconverter/bin" includes="reg.exe" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight PPT XP Converter Service -->
+	<target name="PowerPointXPConverter" depends="tstamp">
+		<echo message="***** GlobalSight PowerPoint XP Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpointxp.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/PowerPointXPConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight PPT 2003 Converter Service -->
+	<target name="PowerPoint2003Converter" depends="tstamp">
+		<echo message="***** GlobalSight PowerPoint 2003 Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpoint2003.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/PowerPoint2003ConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Excel Converter Service -->
+	<target name="ExcelConverter" depends="tstamp">
+		<echo message="***** GlobalSight Excel Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_excel.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/ExcelConverter/ExcelConverter/bin/Debug" prefix="globalsight/excelconverter/bin" includes="*.exe,*.dll" />
+			<zipfileset dir="../../tools/dotnet" prefix="globalsight/excelconverter/bin" includes="reg.exe" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Excel XP Converter Service -->
+	<target name="ExcelXPConverter" depends="tstamp">
+		<echo message="***** GlobalSight Excel XP Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_excelxp.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/ExcelXPConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- GlobalSight Excel 2003 Converter Service -->
+	<target name="Excel2003Converter" depends="tstamp">
+		<echo message="***** GlobalSight Excel 2003 Converter *****" />
+		<zip duplicate="preserve" zipfile="${converterdist}/conv_excel2003.zip">
+			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/Excel2003ConverterSetup/Debug" prefix="" includes="*.*" />
+		</zip>
+	</target>
+
+	<!-- Web Service Clients (Java and C#) -->
+	<!-- Both the C# and Java clients serve as examples of how one could -->
+	<!-- write a web service client, so we package up everything including -->
+	<!-- code, docs, libs, etc. -->
+	<target name="WebServiceClients" depends="tstamp,DesktopIcon">
+		<echo message="***** GlobalSight Web Service Testers -- Java and C# clients *****" />
+		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="all" inheritAll="false" />
+
+		<!-- Java Web Service Clients -->
+		<zip zipfile="${dist}/${product}_${DSTAMP}_WebSvcClientJava.zip">
+			<zipfileset dir="../../envoy/src/webserviceClients/java" prefix="${product}/webservices/javaClient" excludes="GS_README.txt" />
+		</zip>
+		<!-- C# client -->
+		<zip zipfile="${dist}/${product}_${DSTAMP}_WebSvcClientC#.zip">
+			<zipfileset dir="../../envoy/src/webserviceClients/c-sharp" prefix="${product}/webservices/cSharpClient" />
+		</zip>
+	</target>
+
+	<!--     Build everything and make the zip file (no longer builds JSPs either) -->
+	<target name="dist" depends="allnojsp, zip, en_US_zip, fr_FR_zip, es_ES_zip, de_DE_zip, ja_JP_zip, TeamsiteAutoImport, WebServiceClients, SpellChecker, LingToolsZip, WebtopZip, DesktopIconZip">
+		<echo message="***** ant dist -- no longer builds JSPs *****" />
+	</target>
+
+	<!--     Build everything without JSPs and make the zip file  -->
+	<target name="distnojsp" depends="clean,allnojsp, zip, en_US_zip, fr_FR_zip, es_ES_zip, de_DE_zip, ja_JP_zip, TeamsiteAutoImport, WebServiceClients, SpellChecker, LingToolsZip, WebtopZip, DesktopIconZip" />
+
+	<target name="doc">
+		<ant antfile="javadoc.xml" target="doc" />
+	</target>
+
+	<target name="clean">
+		<!--      Delete the classes and ${dist} directory trees      -->
+		<ant antfile="gsCommon_build.xml" target="clean" />
+		<ant antfile="../../ling/build/build.xml" target="clean" />
+		<ant antfile="../../envoy/src/build.xml" target="clean" />
+		<ant antfile="../../diplomat/build/build.xml" target="clean" />
+		<ant antfile="../install/build.xml" target="clean" />
+		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
+		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
+		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
+		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
+		<ant antfile="../../envoy/src/applet/AddSourceApplet/build.xml" target="clean" />
+		<delete dir="${dist}">
+		</delete>
+		<delete dir="${allatonceclassesDest}">
+		</delete>
+		<delete dir="${docdirectory}">
+		</delete>
+		<delete file="BuildVersion.java" />
+		<delete dir="com" />
+		<delete file="graphicalWf.jar" />
+		<delete file="customer.jar" />
+		<delete file="commons-httpclient-3.0-rc2.jar" />
+		<delete file="thirdParty1.jar" />
+		<delete file="thirdParty2.jar" />
+		<delete file="axisLibs.jar" />
+		<delete file="jbpmLibs.jar" />
+		<delete file="ssoLibs.jar" />
+		<delete file="hibernateLibs.jar" />
+	</target>
+
+	<target name="cleancommon">
+		<ant antfile="gsCommon_build.xml" target="clean" />
+	</target>
+
+	<target name="cleanling">
+		<ant antfile="../../ling/build/build.xml" target="clean" />
+	</target>
+
+	<target name="cleancap">
+		<ant antfile="../../envoy/src/build.xml" target="clean" />
+	</target>
+
+	<target name="cleancxe">
+		<ant antfile="../../diplomat/build/build.xml" target="clean" />
+	</target>
+
+	<target name="cleantb">
+		<ant antfile="../../envoy/src/build.xml" target="cleantb" />
+	</target>
+
+	<target name="cleaninstall">
+		<ant antfile="../install/build.xml" target="clean" />
+	</target>
+
+	<target name="cleandoc">
+		<delete dir="${docdirectory}" />
+	</target>
+
+	<target name="cleanbuildling" depends="cleanling, ling" />
+
+	<!-- Sign the customer.jar for the applets -->
+	<target name="signCustomerJar">
+		<ant antfile="../../envoy/src/build.xml" target="sign_jars" />
+	</target>
+</project>
+

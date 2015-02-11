@@ -1,0 +1,1 @@
+alter table translation_unit add GENERATE_FROM varchar(50) DEFAULT NULL;

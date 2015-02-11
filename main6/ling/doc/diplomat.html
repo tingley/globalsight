@@ -1,0 +1,342 @@
+<HTML>
+  <HEAD>
+  <TITLE>DIPLOMAT Format Specifications (draft)</TITLE>
+
+  <STYLE TYPE="text/css">BODY { font-size: 10pt; background: #ffffff;
+font-family: Arial, Helvetica; } H1 { font-size: 24pt; } H2 { font-size: 16pt; }
+H3 { font-size: 12pt; } EM { color: #800080; } A:link, A:visited, A:active {
+color: #0000FF; } PRE, BLOCKQUOTE { font-family: Mono-space; }
+  </STYLE>
+  </HEAD>
+  
+  <BODY BGCOLOR="#FFFFFF">
+  <H1>DIPLOMAT Format Specifications (draft)</H1>
+
+  <H2>Table of Contents</H2>
+  1. <A href="#overview">Overview</A><BR>
+  2. <A href="#spec">Specification</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.1 <A href="#codesets">Encoding</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.2 <A href="#elements">Element Definitions</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.3 <A href="#attributes">Attribute Definitions</A><BR>
+
+  3. <A href="#usage">Usage</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;3.1 <A href="#tmx_elements">TMX elements</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;3.2 <A href="#example">Example</A><BR>
+
+
+
+  <H2><A NAME="overview">1. Overview</A></H2>
+  <P>The purpose of DIPLOMAT format is to provide a well defined interface when GlobalSight Diplomat and GlobalSight Ambassador interact each other. DIPLOMAT, which is a <A HREF="http://www.w3.org/TR/REC-xml">XML</A> compliant file format, defines a data structure that is being translated in Ambassador. Using DIPLOMAT format enables to extract the translatable and localizable text from the original data source without loosing the structure of the original data.</P>
+
+
+  <H2><A NAME="spec">2. Specification</A></H2>
+  <H3><A NAME="codesets">2.1. Encoding</A></H3>
+    
+    <p>DIPLOMAT files must be written in UTF-8. The encoding declaration in XML declaration will be ignored. The DIPLOMAT processor assumes that the files are always in UTF-8 and process them accordingly.</P>
+
+  <H3><A NAME="elements">2.2. Element Definitions</A></H3>
+
+  <P>The following table lists the different elements of a DIPLOMAT document:</P>
+      <TABLE BORDER="1" WIDTH="100%" CELLPADDING="5" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DIPLOMAT">&lt;diplomat&gt;</A></TD>
+        <TD>The &lt;diplomat&gt; element is the document root. It contains zero, one or more <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element, zero, one or more <A HREF="#LOCALIZABLE"> &lt;localizable&gt;</A> element, zero, one or more <A HREF="#SKELETON">&lt;skeleton&gt;</A> element and zero, one or more <A HREF="#GS">&lt;gs&gt;</A> element.
+        <BR>
+        <BR>Mandatory attribute: <A HREF="#VERSION">version</A>, <A HREF="#LOCALE">locale</A> and <A HREF="#DATATYPE">datatype</A>.
+        <BR>Optional attributes: <A HREF="#WORDCOUNT">wordcount</A> and <A HREF="#TARGETENCODING">targetEncoding</A>.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="TRANSLATABLE">&lt;translatable&gt;</A></TD>
+        <TD>The &lt;translatable&gt; element is used to identify its content as a translatable text. It
+        contains one or more <A HREF="#SEGMENT">&lt;segment&gt;</A> elements.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#BLOCKID">blockId</A>.
+        <BR>Optional attributes: <A HREF="#DATATYPE">datatype</A>, <A HREF="#TYPE">type</A> and <A HREF="#WORDCOUNT">wordcount</A>.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="SEGMENT">&lt;segment&gt;</A></TD>
+        <TD>The &lt;segment&gt; element is used to identify the boundary of the segment in the <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element. It
+        contains zero, one or more <A HREF="#BPT">&lt;bpt&gt;</A> elements; the
+        same number of corresponding <A HREF="#EPT">&lt;ept&gt;</A> elements;
+        zero, one or more <A HREF="#IT">&lt;it&gt;</A> elements; zero, one or
+        more <A HREF="#PH">&lt;ph&gt;</A> elements; zero, one or more
+        <A HREF="#UT">&lt;ut&gt;</A> elements; and zero, one or more
+        <A HREF="#LOCALIZABLE">&lt;localizable&gt;</A> elements. If no &lt;segment&gt; element is present in <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element, that means the <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element is not segmented yet so the linguistic processor has the privilege to perform the segmentation on it.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#SEGMENTID">segmentId</A>.
+        <BR>Optional attributes: <A HREF="#WORDCOUNT">wordcount</A>.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="LOCALIZABLE">&lt;localizable&gt;</A></TD>
+        <TD>The &lt;localizable&gt; element is used to identify its content as a localizable string. It contains zero, one or more <A HREF="#BPT">&lt;bpt&gt;</A> elements, the
+        same number of corresponding <A HREF="#EPT">&lt;ept&gt;</A> elements,
+        zero, one or more <A HREF="#IT">&lt;it&gt;</A> elements, zero, one or
+        more <A HREF="#PH">&lt;ph&gt;</A> elements and zero, one or more
+        <A HREF="#UT">&lt;ut&gt;</A> elements.
+        <BR>
+        <BR>Mandatory attribute: <A HREF="#BLOCKID">blockId</A>.
+        <BR>Optional attributes: <A HREF="#DATATYPE">datatype</A>, <A HREF="#TYPE">type</A> and <A HREF="#WORDCOUNT">wordcount</A>.
+        <BR></TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="SKELETON">&lt;skeleton&gt;</A></TD>
+        <TD>The &lt;skeleton&gt; element is used to identify its content as skeleton (presentational or structural codes) of the document. It contains no other elements.
+        <BR>
+        <BR>Mandatory attribute: none.
+        <BR>Optional attributes: none.
+        <BR></TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="GS">&lt;gs&gt;</A></TD>
+        <TD>The &lt;gs&gt; element is used to identify the mark-up of the add/delete functionality. It contains zero, one or more <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element, zero, one or more <A HREF="#LOCALIZABLE"> &lt;localizable&gt;</A> element, zero, one or more <A HREF="#SKELETON">&lt;skeleton&gt;</A> element and zero, one or more <A HREF="#GS">&lt;gs&gt;</A> element.
+        <BR>
+        <BR>Mandatory attribute: none.
+        <BR>Optional attributes: <A HREF="#EXTRACT">extract</A>, <A HREF="#ADD">add</A>, <A HREF="#DELETE">delete</A>, <A HREF="#added">added</A>, <A HREF="#DELETED">deleted</A>.
+	</TD>
+      </TR>
+    </TABLE>
+    
+    <P>The following table lists the different elements of a TMX document used in &lt;translatable&gt; element:</P>
+    <TABLE BORDER="1" WIDTH="100%" CELLPADDING="5" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="BPT">&lt;bpt&gt;</A></TD>
+        <TD>The &lt;bpt&gt; (Begin paired tag) element contains zero, one or
+        more <A HREF="#SUB">&lt;sub&gt;</A> elements. It is used to delimit the
+        beginning of a paired sequence of native codes. Each &lt;bpt&gt; has a
+        corresponding <A HREF="#EPT">&lt;ept&gt;</A> element within the
+        segment.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#I">i</A>.
+        <BR>Optional attributes: <A HREF="#TYPE">type</A>, <A HREF="#X">x</A>, <A HREF="#ERASABLE">erasable</A> and <A HREF="#movable">movable</A>.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="EPT">&lt;ept&gt;</A></TD>
+        <TD>The &lt;ept&gt; (End paired tag) element contains zero, one or more
+        <A HREF="#SUB">&lt;sub&gt;</A> elements. It is used to delimit the end
+        of a paired sequence of native codes. Each &lt;ept&gt; element has a
+        corresponding<A HREF="#BPT">&lt;bpt&gt;</A> element within the segment.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#I">i</A>.
+        <BR>Optional attribute: none.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="SUB">&lt;sub&gt;</A></TD>
+        <TD>The &lt;sub&gt; (Sub-flow) element contains zero, one or more
+        <A HREF="#BPT">&lt;bpt&gt;</A> elements; the same number of
+        <A HREF="#EPT">&lt;ept&gt;</A> elements; zero, one or more
+        <A HREF="#IT">&lt;it&gt;</A> elements; zero, one or more <A HREF="#UT">&lt;ut&gt;</A>
+        elements; and zero, one or more <A HREF="#PH">&lt;ph&gt;</A> elements.
+        It is used to delimit sub-flow text inside a sequence of native code,
+        for example: the definition of a footnote or the text of a title in a
+        HTML anchor element.
+        <BR>
+        <BR>Mandatory attributes: none.
+        <BR>Optional attributes: <A HREF="#LOCTYPE">locType</A>,
+        <A HREF="#DATATYPE">datatype</A> and <A HREF="#TYPE">type</A>.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="IT">&lt;it&gt;</A></TD>
+        <TD>The &lt;it&gt; (Isolated tag) element contains zero, one or more
+        <A HREF="#SUB">&lt;sub&gt;</A> elements. It is used to delimit a
+        beginning/ending sequence of native codes that does not have its
+        corresponding ending/beginning within the segment.
+        <BR>
+        <BR>Mandatory attribute: <A HREF="#POS">pos</A>.
+        <BR>Optional attributes: <A HREF="#TYPE">type</A>, <A HREF="#X">x</A>, <A HREF="#ERASABLE">erasable</A> and <A HREF="#movable">movable</A>.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="PH">&lt;ph&gt;</A></TD>
+        <TD>The &lt;ph&gt; (Place holder) element contains zero, one or more
+        <A HREF="#SUB">&lt;sub&gt;</A> elements. It is used to delimit a
+        sequence of native stand-alone codes in the segment.
+        <BR>
+        <BR>Mandatory attributes: none.
+        <BR>Optional attributes: <A HREF="#TYPE">type</A>, <A HREF="#X">x</A>,
+	 <A HREF="#ASSOC">assoc</A>, <A HREF="#ERASABLE">erasable</A> and <A HREF="#movable">movable</A>. </TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="UT">&lt;ut&gt;</A></TD>
+        <TD>The &lt;ut&gt; (Unknown tag) element contains no other elements. It
+        is used to delimit a sequence of native codes, about which the exporter
+        has no information.
+        <BR>
+        <BR>Mandatory attributes: none.
+        <BR>Optional attribute: <A HREF="#X">x</A>, <A HREF="#ERASABLE">erasable</A> and <A HREF="#movable">movable</A>.</TD>
+      </TR>
+    </TABLE>
+    
+    <H3><A NAME="attributes">2.3. Attribute Definitions</A></H3>
+    
+    <P>The following table lists the different attributes used in the elements
+      of a DIPLOMAT document. The same attribute may be used with multiple elements,
+      but will be either mandatory or optional depending on the specific
+      occurrence.</P>
+    <TABLE BORDER="1" WIDTH="100%" CELLPADDING="5" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="VERSION">version</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The version attribute is used in the  <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A> element. It indicates the
+        version of the DIPLOMAT format to which the document conforms.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="LOCALE">locale</A></TD>
+        <TD>The locale attribute is used in the <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A>
+        element to specify the language for the document. Its value is a combination of ISO Language Code and ISO Country Code with a dash between them (e.g. en-US). More information about ISO Language Code and ISO Country Code can be obtained in the java.util.locale API reference in the JAVA SDK Documentation.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DATATYPE">datatype</A></TD>
+        <TD>The datatype attribute is used in the <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A>, <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A>, <A HREF="#LACALIZABLE">&lt;localizable&gt;</A> and <A HREF="#SUB">&lt;sub&gt;</A> elements. If it is used in the <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A> element, it specifies the type of data contained in the document. If it is used in the <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A>, <A HREF="#LACALIZABLE">&lt;localizable&gt;</A> or <A HREF="#SUB">&lt;sub&gt;</A> elements, it overrides the data type used in these elements.
+Its default value is &quot;unknown&quot;.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="TARGETENCODING">targetEncoding</A></TD>
+        <TD>The targetEncoding attribute is used in the <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A> element. It specifies the character encoding to be used when the document is exported to the original format. The name of encoding must be supported in JAVA.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="ASSOC">assoc</A></TD>
+        <TD>The assoc attribute (Association) is used to define whether an
+        <A HREF="#PH">&lt;ph&gt;</A> element is associated with the previous or
+        the following text. Its value must be &quot;p&quot; (previous), &quot;f&quot;
+        (following), or &quot;b&quot; (both).</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="I">i</A></TD>
+        <TD>The i attribute (Internal matching) is used in the content markup
+        to pair the <A HREF="#BPT">&lt;bpt&gt;</A> elements with <A HREF="#EPT">&lt;ept&gt;</A>
+        elements. This mechanism provides TMX with support to markup a possibly
+        overlapping range of codes, such as: <CODE>&quot;&lt;B&gt;Bold &lt;I&gt;Bold+Italic&lt;/B&gt;
+        Italics&lt;/I&gt;&quot;</CODE>.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="POS">pos</A></TD>
+        <TD>The pos attribute (Position) specifies that an <A HREF="#IT">&lt;it&gt;</A>
+        element is actually the beginning or the end part of a paired code that
+        has no correspondence in the segment. Its value must be an empty string,
+        &quot;begin&quot; or &quot;end&quot;.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="TYPE">type</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The type attribute specifies the kind of
+        data a <A HREF="#BPT">&lt;bpt&gt;</A>,
+        <A HREF="#PH">&lt;ph&gt;</A>, <A HREF="#IT">&lt;it&gt;</A> or <A HREF="#SUB">&lt;sub&gt;</A> element
+        represents. i.e. bold, italic, underline, etc.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="X">x</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The x attribute (External matching) is
+        used in the content markup to match <A HREF="#BPT">&lt;bpt&gt;</A>,
+        <A HREF="#PH">&lt;ph&gt;</A>, <A HREF="#IT">&lt;it&gt;</A> and <A HREF="#UT">&lt;ut&gt;</A> 
+	elements between each <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A>
+        element. This mechanism
+        facilitates the pairing of allied codes in source and target text, even
+        if the order of code occurrence differs between the two.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="BLOCKID">blockId</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The blockId attribute specifies an identifier of the <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> and 
+        <A HREF="#LOCALIZABLE">&lt;localizable&gt;</A> elements.
+	Each blockId must be unique in a file.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="SEGMENTID">segmentId</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The segmentId attribute specifies an identifier of the <A HREF="#SEGMENT">&lt;segment&gt;</A> elements in a <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element.
+	Each segmentId must be unique in a <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> element.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="WORDCOUNT">wordcount</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The wordcount attribute specifies the number of words in the <A HREF="#DIPLOMAT">&lt;diplomat&gt;</A>, <A HREF="#SEGMENT">&lt;segment&gt;</A>, <A HREF="#TRANSLATABLE">&lt;translatable&gt;</A> and <A HREF="#LOCALIZABLE">&lt;localizable&gt;</A> elements.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="LOCTYPE">locType</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The locType attribute specifies the localization type in the <A HREF="#SUB">&lt;sub&gt;</A> element. It's value takes either "translatable" or "localizabel". If this attribute is omitted, it defaults to "translatable".
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="ERASABLE">erasable</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The erasable attribute specifies that the element is erasable when the segment is translated. The possible value is "yes" or "no". The default is "no". 
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="MOVABLE">movable</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The movable attribute specifies that the element is movable when the segment is traslated. The possible value is "yes" or "no". The default is "yes". 
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="EXTRACT">extract</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The value of the extract attribute is the unique name of the snippet to create from the text between the tags.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="ADD">add</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The value of the add attribute is the name of the type of snippet that can be added at that location.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DELETE">delete</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">If the delete attribute is present and set to 1, it will mean that the item can be deleted. 
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="ADDED">added</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The added attribute will be added to the tag of an item that was added in the editor and whose value will the name of the language for which it was added.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DELETED">deleted</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The deleted attribute will be added to the tag of a deleted item after a delete takes place in the editor and whose value will be a comma separated list of languages from which the item has been deleted.
+	</TD>
+      </TR>
+    </TABLE>
+
+    <H2><A NAME="usage">3. Usage</A></H2>
+
+    <H3><A NAME="tmx_elements">3.1. TMX elements</A></H3>
+    <P>A piece of a translatable text (segment) often has native codes of the original document in it. &lt;B&gt; or &lt;I&gt; tags in HTML document are the examples. <A HREF="http://www.lisa.org/tmx">TMX (Translation Memory Exchange)</A> format has been developed by OSCAR group of <A HREF="http://www.lisa.org">LISA</A> to provide a standard method to describe translation memory data. DIPLOMAT uses TMX elements to delimit the native codes of various data formats in a universal way. Abstracting the data format with TMX allows a data processor to treat any data format in the same way.</P>
+    <P>For more information of TMX, see <A HREF="http://www.lisa.org/tmx/tmx.htm#content">http://www.lisa.org/tmx/tmx.htm#content</A>.
+
+    <H3><A NAME="example">3.2 Example</A></H3>
+
+    <table cellpadding='5' border='1' bgcolor='#80ffff' width='100%'>
+    <tr><td><code>
+<pre>&lt;HTML&gt;
+&lt;HEAD&gt;&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;P&gt;Hello, &lt;A HREF=&quot;world.html&quot;&gt;world.&lt;/A&gt;&lt;/P&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</pre>
+    </code></td></tr>
+    </table>
+
+    <P>The above HTML will be transformed to a Diplomat format as follows.</P>
+    <table cellpadding='5' border='1' bgcolor='#80ffff' width='100%'>
+    <tr><td><code>
+<pre>&lt;?xml version=&quot;1.0&quot;?&gt;
+
+&lt;diplomat version=&quot;1.0&quot; locale=&quot;en-US&quot; datatype=&quot;html&quot;&gt;
+
+  &lt;skeleton&gt;&amp;lt;HTML&amp;gt;
+&amp;lt;HEAD&amp;gt;&amp;lt;/HEAD&amp;gt;
+&amp;lt;BODY&amp;gt;
+&amp;lt;P&amp;gt;&lt;/skeleton&gt;
+  &lt;translatable blockId=&quot;1&quot;&gt;
+    &lt;segment segmentId=&quot;1&quot;&gt;Hello, &lt;bpt i=&quot;1&quot; type=&quot;HREF&quot;&gt;&amp;lt;A HREF=&amp;quot;&lt;sub locType=&quot;localizable&quot;&gt;world.html&lt;/sub&gt;&amp;quot;&amp;gt;&lt;/bpt&gt;world.&lt;ept i=&quot;1&quot;&gt;&amp;lt;/A&amp;gt;&lt;/ept&gt;&lt;/segment&gt;
+  &lt;/translatable&gt;
+  &lt;skeleton&gt;&amp;lt;/P&amp;gt;
+&amp;lt;/BODY&amp;gt;
+&amp;lt;/HTML&amp;gt;&lt;/skeleton&gt;
+&lt;/diplomat&gt;</pre>
+    </code></td></tr>
+    </table>
+
+<HR>
+<SCRIPT LANGUAGE="JavaScript"><!--
+document.write("<FONT SIZE=\"2\">Last update of this copy: " + document.lastModified + "</\FONT>");
+// --></SCRIPT>
+  </BODY>
+</HTML>

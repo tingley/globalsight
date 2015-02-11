@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="GlobalSight.Common">
+</Property><Property Name="Solution File" Value="D:\Quincy_Zou\Adobe\GlobalSight.Common\GlobalSight.Common.sln">
+</Property><Property Name="Date" Value="08 November 2007">
+</Property><Property Name="Time" Value="14:14">
+</Property></Properties><Event ErrorLevel="0" Project="GlobalSight.Common" Source="GlobalSight.Common\GlobalSight.Common.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="GlobalSight.Common" Source="GlobalSight.Common\GlobalSight.Common.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="" Source="GlobalSight.Common.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="GlobalSight.Common.sln" Description="Converted">
+</Event></UpgradeLog>

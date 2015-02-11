@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.foundation.L10nProfileVersion"
+        table="L10N_PROFILE_VERSION">
+
+        <id name="id" column="VERSION_SEQ" type="long" length="20">
+            <generator class="native" />
+        </id>
+
+        <property name="modifiedProfileId" length="20"
+            column="MODIFIED_PROFILE_SEQ" type="long" not-null="true" />
+
+        <property name="originalProfileId" length="20"
+            column="ORIGINAL_PROFILE_SEQ" type="long" not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

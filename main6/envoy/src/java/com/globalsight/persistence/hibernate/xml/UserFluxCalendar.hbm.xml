@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="com.globalsight.calendar.UserFluxCalendar"
+		table="USER_CALENDAR">
+
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="activityBuffer" length="2"
+			column="ACTIVITY_BUFFER" type="integer" not-null="true" />
+
+		<property name="lastUpdatedBy" length="30"
+			column="LAST_UPDATED_BY" type="string" not-null="true" />
+
+		<property name="lastUpdatedTime" column="LAST_UPDATED_TIME"
+			type="timestamp" not-null="true" />
+
+		<property name="ownerUserId" length="30" column="OWNER_USER_ID"
+			type="string" not-null="true" />
+
+		<property name="parentCalendarId" length="22"
+			column="CALENDAR_ID" type="long" not-null="true" />
+
+		<property name="timeZoneId" length="100" column="TIME_ZONE"
+			type="string" not-null="true" />
+
+		<bag name="personalReservedTimes" inverse="true" cascade="all"
+			lazy="false">
+			<key column="USER_CALENDAR_ID" />
+			<one-to-many class="com.globalsight.calendar.ReservedTime" />
+		</bag>
+
+		<bag name="proposedActivities" inverse="true" cascade="all"
+			lazy="false">
+			<key column="USER_CALENDAR_ID" />
+			<one-to-many class="com.globalsight.calendar.ReservedTime" />
+		</bag>
+
+		<bag name="reservedTimes" inverse="true" cascade="all"
+			lazy="false">
+			<key column="USER_CALENDAR_ID" />
+			<one-to-many class="com.globalsight.calendar.ReservedTime" />
+		</bag>
+
+		<bag name="workingDays" inverse="true" cascade="all"
+			lazy="false">
+			<key column="CALENDAR_ID" />
+			<one-to-many
+				class="com.globalsight.calendar.UserCalendarWorkingDay" />
+		</bag>
+
+	</class>
+
+</hibernate-mapping>

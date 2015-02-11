@@ -1,0 +1,28 @@
+#!/bin/ksh
+# source the environment variables
+. %%SYSTEM3_ENV_FILE%%
+
+# Start/stop/status of cxe
+case "$1" in
+'start')
+	shift
+	cd $CXE_BIN
+	./startcxe.ksh
+	;;
+ 
+'stop')
+	shift
+	cd $CXE_BIN
+	./stopcxe.ksh
+	;;
+
+'status')
+	shift
+	cd $CXE_BIN
+	./cxestatus.ksh
+	;;
+	
+*)
+	echo "Usage: $0 { start | stop | status }"
+	;;
+esac

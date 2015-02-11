@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+
+<key name="Anonymous Termbase Access" >
+  <topic name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+</key>
+<key name="Archived Jobs" >
+  <topic name="Archived Jobs" url="My_Jobs/Archived_Workflow_Tab.htm" />
+</key>
+<key name="Assign User" >
+  <topic name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+  <topic name="Projects" url="Setup/Users/Projects.htm" />
+</key>
+<key name="Assigning Holidays" >
+  <topic name="Assigning Holidays" url="Setup/Calendars/Assigning_Holidays.htm" />
+</key>
+<key name="Attach" >
+  <topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
+  <topic name="Add Comments1" url="My_Activities/Add_Comments1.htm" />
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Document Check" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Document_Check.htm" />
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+</key>
+<key name="Attach Files" >
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+</key>
+<key name="Attach Workflows to Target Locales" >
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+</key>
+<key name="Auto-Import Configuration" >
+  <topic name="Auto-Import Configuration" url="Appendix/Auto-Import_Configuration.htm" />
+</key>
+<key name="Available Activities" >
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+</key>
+<key name="Available Activity Details" >
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+</key>
+<key name="Average Percent Complete Report" >
+  <topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+</key>
+<key name="Basic Information" >
+  <topic name="Basic Information" url="Vendor_Management/Basic_Information.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="User Details" url="Setup/Users/User_Details.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="Vendors" url="Vendor_Management/Vendors.htm" />
+</key>
+<key name="Browse Termbase" >
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+  <topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+  <topic name="Termbase Maintenance" url="Setup/Terminology/Termbase_Maintenance.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+</key>
+<key name="Browser Settings" >
+  <topic name="Browser Settings" url="Appendix/Browser_Settings.htm" />
+</key>
+<key name="Change Workflow Managers" >
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+</key>
+<key name="Color coding" >
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+</key>
+<key name="Colors" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Colors" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Colors.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="GlobalSight Options" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/GlobalSight_Options.htm" />
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="Localizables" url="Glossary/Localizables.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+</key>
+
+</indexdata>

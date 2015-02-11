@@ -1,0 +1,17 @@
+# db_connection.properties
+# This file is auto generated during the GlobalSight installation
+# DO NOT MANUALLY EDIT THIS FILE
+
+#Keep this value in synch with the database parameters in envoy_generated.properties
+#You have to explicitly list the host name, TCP/IP port and database name to which you want to connect 
+driver=com.mysql.jdbc.Driver
+#connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
+connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
+user_name=%%database_username%%
+password=%%database_password%%
+maxConnections=20
+minConnections=5
+#3600000=60*60*1000 means 1 hour.
+maxConnectionWaitTime=3600000
+useConnectionPool=true
+

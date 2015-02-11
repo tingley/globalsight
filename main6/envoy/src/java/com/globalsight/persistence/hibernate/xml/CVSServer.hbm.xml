@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.cvsconfig.CVSServer"
+        table="CVS_SERVER">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="name" length="200"
+            column="NAME" type="string" not-null="true" />
+
+        <property name="hostIP" length="20"
+            column="HOSTIP" type="string" not-null="true" />
+
+        <property name="hostPort" length="126"
+            column="HOSTPORT" type="int" />
+            
+        <property name="protocol" length="126"
+            column="PROTOCOL" type="int" not-null="true"/>
+            
+        <property name="sandbox" length="100"
+            column="SANDBOX" type="string" not-null="true" />
+            
+        <property name="companyId" length="22" column="COMPANYID"
+            type="long" not-null="true" />
+
+        <property name="repository" length="200"
+            column="REPOSITORY" type="string" not-null="true" />
+
+        <property name="loginUser" length="100"
+            column="LOGINUSER" type="string" not-null="true" />
+            
+        <property name="loginPwd" length="32"
+            column="LOGINPWD" type="string" not-null="true" />
+            
+        <property name="CVSRootEnv" length="1000"
+            column="CVSROOTENV" type="string" not-null="true" />
+
+        <property name="isActive" column="ISACTIVE" type="yes_no"
+            not-null="true" />
+            
+        <set name="moduleSet" inverse="true" cascade="save-update" lazy="false">
+            <key column="SERVER" />
+            <one-to-many
+                class="com.globalsight.everest.cvsconfig.CVSModule" />
+        </set>
+
+    </class>
+
+</hibernate-mapping>

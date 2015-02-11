@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="com.globalsight.everest.vendormanagement.Vendor"
+		table="VENDOR">
+
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="customVendorId" length="40"
+			column="CUSTOM_VENDOR_ID" type="string" not-null="true"
+			unique="true" />
+
+		<property name="firstName" length="40" column="FIRST_NAME"
+			type="string" not-null="true" unique="false" />
+
+		<property name="lastName" length="40" column="LAST_NAME"
+			type="string" not-null="true" unique="false" />
+
+		<property name="pseudonym" length="40" column="PSEUDONYM"
+			type="string" not-null="true" unique="true" />
+
+		<property name="title" length="40" column="TITLE" type="string"
+			not-null="false" unique="false" />
+
+		<property name="address" length="4000" column="ADDRESS"
+			type="string" not-null="false" unique="false" />
+
+		<property name="companyName" length="80" column="COMPANY"
+			type="string" not-null="false" unique="false" />
+
+		<property name="country" length="1000" column="COUNTRY"
+			type="string" not-null="false" unique="false" />
+
+		<property name="nationalities" length="2000"
+			column="NATIONALITIES" type="string" />
+
+		<property name="dob" length="20" column="DOB" type="string" />
+
+		<property name="notes" column="NOTES" type="string" />
+
+		<property name="resume" column="RESUME" type="string"
+			not-null="false" unique="false" />
+
+		<property name="resumeFilename" length="4000"
+			column="RESUME_FILENAME" type="string" />
+
+		<property name="status" length="10" column="APPLICATION_STATUS"
+			type="string" not-null="true" unique="false" />
+
+		<property name="isInternalVendor" column="IS_INTERNAL"
+			type="yes_no" not-null="false" unique="false" />
+
+		<property name="useInAmbassador" type="yes_no" not-null="true"
+			column="ALLOW_AMBASSADOR_ACCESS" />
+
+		<property name="isInAllProjects" column="IN_ALL_PROJECTS"
+			type="yes_no" not-null="true" unique="false" />
+
+		<property name="defaultUILocale" length="5"
+			column="COMMUNICATION_LOCALE" type="string" not-null="true" />
+
+		<property name="userId" length="80" column="USER_ID"
+			type="string" not-null="false" unique="false" />
+
+		<property name="timestamp" column="TIMESTAMP" type="timestamp"
+			not-null="true" unique="false" />
+
+		<set name="customFieldsAsSet" table="VENDOR_CUSTOM_FIELD"
+			inverse="true" cascade="save-update" lazy="false">
+			<key column="VENDOR_ID" />
+			<many-to-many column="CUSTOM_FIELD_ID"
+				class="com.globalsight.everest.customform.CustomField" />
+		</set>
+
+		<bag name="projects" table="PROJECT_VENDOR" inverse="true"
+			cascade="save-update" lazy="false">
+			<key column="VENDOR_ID" />
+			<many-to-many
+				class="com.globalsight.everest.projecthandler.ProjectImpl"
+				column="PROJECT_ID" />
+		</bag>
+
+		<set name="commInfo" inverse="true" cascade="all"
+			lazy="false">
+			<key column="VENDOR_ID" />
+			<one-to-many
+				class="com.globalsight.everest.vendormanagement.CommunicationInfo" />
+		</set>
+
+		<bag name="ratings" inverse="true" cascade="all" lazy="false">
+			<key column="VENDOR_ID" />
+			<one-to-many
+				class="com.globalsight.everest.vendormanagement.Rating" />
+		</bag>
+
+		<set name="roles" inverse="true" cascade="all" lazy="false">
+			<key column="VENDOR_ID" />
+			<one-to-many
+				class="com.globalsight.everest.vendormanagement.VendorRole" />
+		</set>
+
+	</class>
+
+</hibernate-mapping>

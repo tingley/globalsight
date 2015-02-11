@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.request.RequestImpl" table="REQUEST">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <component name="batchInfo" 
+            class="com.globalsight.everest.request.BatchInfo">
+            <property name="batchId" length="400" column="BATCH_ID"
+                type="string" not-null="false" unique="false" />
+            <property name="jobPrefixName" length="320"
+                column="BATCH_JOB_NAME" type="string" not-null="false"
+                unique="false" />
+            <property name="pageCount" length="5"
+                column="BATCH_PAGE_COUNT" type="long" not-null="false"
+                unique="false" />
+            <property name="pageNumber" length="5"
+                column="BATCH_PAGE_NUMBER" type="long" not-null="false"
+                unique="false" />
+            <property name="docPageCount" length="5"
+                column="BATCH_DOC_PAGE_COUNT" type="long"
+                not-null="false" unique="false" />
+            <property name="docPageNumber" length="5"
+                column="BATCH_DOC_PAGE_NUMBER" type="long"
+                not-null="false" unique="false" />
+        </component>
+
+        <property name="companyId" column="COMPANY_ID" type="string"
+            not-null="true" unique="false" />
+
+        <property name="baseHref" length="2000" column="BASE_HREF"
+            type="string" not-null="false" unique="false" />
+
+        <property name="dataSourceId" column="DATA_SOURCE_ID"
+            type="long" not-null="true" unique="false" />
+
+        <property name="eventFlowXml" column="EVENT_FLOW_XML"
+            type="string" not-null="false" unique="false" />
+
+        <property name="exceptionAsString" column="EXCEPTION_XML"
+            type="string" not-null="false" unique="false" />
+
+        <property name="isPageCxePreviewable"
+            column="IS_PAGE_CXE_PREVIEWABLE" type="yes_no"
+            not-null="true" unique="false" />
+
+        <property name="typeAsString" length="35" column="TYPE"
+            type="string" not-null="true" unique="false" />
+
+        <property name="pageId" column="PAGE_ID" type="long"
+            not-null="false" unique="false" />
+
+        <property name="timestamp" column="TIMESTAMP" type="timestamp"
+            not-null="true" unique="false" />
+
+        <many-to-one name="job" column="JOB_ID"
+            class="com.globalsight.everest.jobhandler.JobImpl"
+            not-null="false" />
+
+        <many-to-one name="l10nProfile" column="L10N_PROFILE_ID" cascade="none" 
+            class="com.globalsight.everest.foundation.BasicL10nProfile"
+            not-null="true"/>
+
+    </class>
+
+</hibernate-mapping>

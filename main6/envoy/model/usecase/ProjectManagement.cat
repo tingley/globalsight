@@ -1,0 +1,2359 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "Project Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"392EBE4E002C"
+    documentation 	
+|This package contains use cases that manage localization projects.  This corresponds to the Business Model category "Manager Localization Projects".
+    
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object UseCase "Add a Localization Project"
+	    quid       	"392F0F130255"
+	    documentation 	
+|3.32.1	Actor
+|Project Manager.
+|3.32.2	Priority
+|3.32.3	Description
+|The Project Manager adds a localization project to the system.
+|3.32.4	Normal Course Of Events
+|The Project Manager invokes the Project Management GUI through the system's Administration interface and selects the "add project" option.  The system displays the Project Detail screen with blank fields for the user to enter information of the new project to be added.  The information that can be entered include:
+|
+|a.	Project Name. Entering a value to this field is mandatory.
+|b.	Project Manager's Name.  The user's name is the default for this field. Entering a value to this field is mandatory.
+|
+|When the Project Manager confirms the data she entered, the system creates a new project in the system database with the data.
+|3.32.5	Alternative Courses
+|a.	The Project Name entered by the Project Manager already exists in the system.  The system displays this information in an error message dialog box.  The Project Manager acknowledges and dismisses the dialog box.  The system resets the fields on the screen and displays the screen for the user to enter new data.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @1
+		    logical_models 	(list unit_reference_list
+			(object Object "Project Management GUI"
+			    quid       	"394743AB022E"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"397E01920285"
+				    supplier   	"$UNNAMED$0"
+				    quidu      	"3947441002D3"
+				    messages   	(list Messages
+					(object Message "addProject( )"
+					    quid       	"397E01920286"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3947441D017D"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$0"
+			    quid       	"3947441002D3"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+			    quidu      	"3947437C00FA"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@1
+		    quid       	"394743A203CF"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "Project Management GUI" @2
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@2
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	332
+				justify    	0
+				label      	"Project Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394743AB022E"
+			    width      	350
+			    height     	369
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @3
+				location   	(448, 384)
+				line_color 	3342489
+				InterObjView 	@2
+				height     	120
+				y_coord    	60
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$0" @4
+			    location   	(976, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@4
+				location   	(976, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947441002D3"
+			    width      	300
+			    height     	369
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @5
+				location   	(976, 384)
+				line_color 	3342489
+				InterObjView 	@4
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @6
+			    location   	(16, 384)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @7
+				Parent_View 	@6
+				location   	(704, 336)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E01920286"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	288
+				justify    	0
+				label      	"addProject( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@2
+			    supplier   	@4
+			    Focus_Src  	@3
+			    Focus_Entry 	@5
+			    origin     	(463, 384)
+			    terminus   	(960, 384)
+			    ordinal    	0)))))
+	(object UseCase "Create a Localization Profile"
+	    quid       	"392F0F9E01AB"
+	    documentation 	
+|3.38.1	Actor
+|Project Manager.
+|3.38.2	Priority
+|3.38.3	Description
+|The Project Manager creates a new localization profile that specifies attributes for localization processes.
+|3.38.4	Normal Course Of Events
+|The Project Manager invokes the Localization Profile GUI through the system's Administration interface.
+|The system displays the Localization Profile Data Entry screen for the Project Manager to enter the following information:
+|
+|1)	The name of the Localization Profile (this must be unique in the system).
+|2)	The source locale of the data source.
+|3)	A list of locales (target locales) that the data in the data source shall be localized to.
+|4)	A workflow template for each target locale.  A workflow template specifies the following:
+|a)	A sequence of workflow tasks (a task is also known as a stage) in a specific order.  Each workflow task specifies the following:
+|i)	The type of the task (e.g. "Translation", "QA").
+|ii)	The role assignment.
+|iii)	The absolute due date (optional).
+|iv)	The relative due date (optional).
+|b)	An overall due date for the workflow (optional).
+|5)	A list of Localization Memories that shall be used as the default LMs during the localization process.
+|6)	A localization authority (this is a person; this parameter is optional).  If this is specified, any localization job that contains data from this data source must be authorized by the specified localization authority or the project manager before the job can become available for automatic dispatch.
+|
+|The Project Manager enters the information for the new Localization Profile and confirms the entered data.  The system saves the new Localization Profile.
+|
+|3.38.5	Alternative Courses
+|1)	Instead of confirming the entered data, the Project Manager cancels the data entry.  The system returns to the main Administration interface screen.
+|
+|2)	When the system tries to save the new Localization Profile, it finds that the name of the Localization Profile already exists in the system.  The system displays the information in a dialog box to inform the Project Manager.  The Project Manager dismisses the dialog box.  The system displays the Localization Profile Data Entry screen and place the focus in the Localization Profile name field for the Project Manager to change the name.
+|3.38.6	Notes and Issues
+|This use case can be invoked directly by the Project Manager and by other use cases (1, 2 and 44).
+|
+|A localization profile that is assigned to a data source (such as a database table or file system directory) determines its source locale, target locales and the workflow template for the localization process of each target locale.  Envoy used to have a concept called "Data Group".  A "Data Group" consists of two or more data sources; Envoy will automatically localize new or updated data in one table to the locales of all the other tables in the group.  This maintains a group of database tables (or file system directories) as "related", i.e. data in all these tables are the same, except that each table holds data in a specific locale.   The Data Group concept was dropped for Envoy 3.0.  It is up to the Project Manager to assign Localization Profiles to each table to simulate a Data Group, so as to make sure that data saved into one table will be localized and written to the other tables in the group.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @8
+		    logical_models 	(list unit_reference_list
+			(object Object "Localization Profile GUI"
+			    quid       	"394523B00283"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394627EB0362"
+				    supplier   	"$UNNAMED$1"
+				    quidu      	"394627E6029D"
+				    messages   	(list Messages
+					(object Message "create with a name"
+					    quid       	"394627EB0363"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"4"
+					    ordinal    	4)
+					(object Message "setSourceLocale( )"
+					    quid       	"394627F70373"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"5"
+					    ordinal    	5
+					    quidu      	"394567FE034E")
+					(object Message "addTargetLocale(  )"
+					    quid       	"3946280202A7"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"6"
+					    ordinal    	6
+					    quidu      	"394628300221")
+					(object Message "setMainTM( )"
+					    quid       	"39462BE10143"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"7"
+					    ordinal    	7
+					    quidu      	"39462BE80342")
+					(object Message "addLeverageTM( )"
+					    quid       	"39462C7202D2"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"8"
+					    ordinal    	8
+					    quidu      	"39462C780245")
+					(object Message "setL10nAuthority( )"
+					    quid       	"39462D090370"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"9"
+					    ordinal    	9
+					    quidu      	"39462D0F006B")))
+				(object Link
+				    quid       	"3980B8420275"
+				    supplier   	"$UNNAMED$2"
+				    quidu      	"3945824A02E0"
+				    messages   	(list Messages
+					(object Message "getListOfWorkflowTemplates( )"
+					    quid       	"3980B8420276"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"3945826902E4")))
+				(object Link
+				    quid       	"3980BA8C02DC"
+				    supplier   	"$UNNAMED$3"
+				    quidu      	"394630BB012B"
+				    messages   	(list Messages
+					(object Message "getAllTM( )"
+					    quid       	"3980BA8C02DD"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	2
+					    quidu      	"394630C80206")))
+				(object Link
+				    quid       	"3980BB530198"
+				    supplier   	"Localization Profile GUI"
+				    quidu      	"394523B00283"
+				    messages   	(list Messages
+					(object Message "display GUI with list of wf templates and TM"
+					    quid       	"3980BB530199"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"3"
+					    ordinal    	3)))
+				(object Link
+				    quid       	"39B046860055"
+				    supplier   	"$UNNAMED$4"
+				    quidu      	"39B0465703AB"
+				    messages   	(list Messages
+					(object Message "addL10nProfile( )"
+					    quid       	"39B046860056"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"10"
+					    ordinal    	10
+					    quidu      	"39B04675006F"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$2"
+			    quid       	"3945824A02E0"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3980BB2902BA"
+				    supplier   	"$UNNAMED$5"
+				    quidu      	"3980BB100250"
+				    messages   	(list Messages
+					(object Message "getAllTemplates( )"
+					    quid       	"3980BB2902BB"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1.1"
+					    ordinal    	1
+					    quidu      	"394631A403CF"))))
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::JobHandler"
+			    quidu      	"38BEFAD2003B"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$1"
+			    quid       	"394627E6029D"
+			    class      	"Logical View::Envoy::Foundation::L10nProfile"
+			    quidu      	"39456755008E"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$3"
+			    quid       	"394630BB012B"
+			    class      	"Logical View::Linguistics::TranslationServer"
+			    quidu      	"394180620117"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$5"
+			    quid       	"3980BB100250"
+			    class      	"Logical View::Envoy::Workflow::WorkflowServer"
+			    quidu      	"39435E1300DC"
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$4"
+			    quid       	"39B0465703AB"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+			    quidu      	"3947437C00FA"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@8
+		    quid       	"394523780098"
+		    title      	"Component API"
+		    documentation 	
+|EV Interface's realization of the use case "Create a Localization Profile".
+		    
+		    zoom       	89
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	70
+		    items      	(list diagram_item_list
+			(object InterObjView "Localization Profile GUI" @9
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@9
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"Localization Profile GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394523B00283"
+			    width      	300
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @10
+				location   	(448, 400)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	1656
+				y_coord    	1596
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @11
+				location   	(448, 880)
+				line_color 	3342489
+				InterObjView 	@9
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$2" @12
+			    location   	(864, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@12
+				location   	(864, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3945824A02E0"
+			    width      	300
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @13
+				location   	(864, 448)
+				line_color 	3342489
+				InterObjView 	@12
+				height     	152
+				y_coord    	92
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$3" @14
+			    location   	(1216, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@14
+				location   	(1216, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	322
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394630BB012B"
+			    width      	340
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @15
+				location   	(1216, 704)
+				line_color 	3342489
+				InterObjView 	@14
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$1" @16
+			    location   	(1984, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@16
+				location   	(1984, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394627E6029D"
+			    width      	300
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @17
+				location   	(1984, 1056)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @18
+				location   	(1984, 1200)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @19
+				location   	(1984, 1344)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @20
+				location   	(1984, 1488)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @21
+				location   	(1984, 1632)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @22
+				location   	(1984, 1776)
+				line_color 	3342489
+				InterObjView 	@16
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterObjView "$UNNAMED$4" @23
+			    location   	(2320, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@23
+				location   	(2320, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39B0465703AB"
+			    width      	300
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @24
+				location   	(2320, 1936)
+				line_color 	3342489
+				InterObjView 	@23
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @25
+			    location   	(1216, 1056)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @26
+				Parent_View 	@25
+				location   	(1216, 1008)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394627EB0363"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	497
+				justify    	0
+				label      	"create with a name"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@17
+			    origin     	(463, 1056)
+			    terminus   	(1968, 1056)
+			    ordinal    	4)
+			(object InterMessView "" @27
+			    location   	(1040, 1200)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @28
+				Parent_View 	@27
+				location   	(1216, 1152)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394627F70373"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	490
+				justify    	0
+				label      	"setSourceLocale( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@18
+			    origin     	(463, 1200)
+			    terminus   	(1968, 1200)
+			    ordinal    	5)
+			(object InterMessView "" @29
+			    location   	(1056, 1344)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @30
+				Parent_View 	@29
+				location   	(1216, 1296)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3946280202A7"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	504
+				justify    	0
+				label      	"addTargetLocale(  )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@19
+			    origin     	(463, 1344)
+			    terminus   	(1968, 1344)
+			    ordinal    	6)
+			(object Label @31
+			    location   	(96, 1104)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	4
+			    max_width  	250
+			    label      	"do this for every target locale")
+			(object InterMessView "" @32
+			    location   	(1056, 1488)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @33
+				Parent_View 	@32
+				location   	(1216, 1440)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39462BE10143"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	363
+				justify    	0
+				label      	"setMainTM( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@20
+			    origin     	(463, 1488)
+			    terminus   	(1968, 1488)
+			    ordinal    	7)
+			(object InterMessView "" @34
+			    location   	(1056, 1632)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @35
+				Parent_View 	@34
+				location   	(1216, 1584)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39462C7202D2"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	479
+				justify    	0
+				label      	"addLeverageTM( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@21
+			    origin     	(463, 1632)
+			    terminus   	(1968, 1632)
+			    ordinal    	8)
+			(object InterMessView "" @36
+			    location   	(1056, 1776)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @37
+				Parent_View 	@36
+				location   	(1216, 1728)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39462D090370"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	521
+				justify    	0
+				label      	"setL10nAuthority( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@16
+			    Focus_Src  	@10
+			    Focus_Entry 	@22
+			    origin     	(463, 1776)
+			    terminus   	(1968, 1776)
+			    ordinal    	9)
+			(object InterMessView "" @38
+			    location   	(1264, 448)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @39
+				Parent_View 	@38
+				location   	(656, 400)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980B8420276"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	764
+				justify    	0
+				label      	"getListOfWorkflowTemplates( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@12
+			    Focus_Src  	@10
+			    Focus_Entry 	@13
+			    origin     	(463, 448)
+			    terminus   	(848, 448)
+			    ordinal    	0)
+			(object InterMessView "" @40
+			    location   	(832, 704)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @41
+				Parent_View 	@40
+				location   	(832, 656)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BA8C02DD"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	307
+				justify    	0
+				label      	"getAllTM( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@14
+			    Focus_Src  	@10
+			    Focus_Entry 	@15
+			    origin     	(463, 704)
+			    terminus   	(1200, 704)
+			    ordinal    	2)
+			(object InterObjView "$UNNAMED$5" @42
+			    location   	(1600, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@42
+				location   	(1600, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	288
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3980BB100250"
+			    width      	306
+			    height     	1921
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @43
+				location   	(1600, 480)
+				line_color 	3342489
+				InterObjView 	@42
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object InterMessView "" @44
+			    location   	(16, 480)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @45
+				Parent_View 	@44
+				location   	(1232, 432)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BB2902BB"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	476
+				justify    	0
+				label      	"getAllTemplates( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@12
+			    supplier   	@42
+			    Focus_Src  	@13
+			    Focus_Entry 	@43
+			    origin     	(879, 480)
+			    terminus   	(1584, 480)
+			    ordinal    	1)
+			(object SelfMessView "" @46
+			    location   	(16, 880)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @47
+				Parent_View 	@46
+				location   	(544, 832)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3980BB530199"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	1066
+				justify    	0
+				label      	"display GUI with list of wf templates and TM"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@9
+			    Focus_Src  	@10
+			    Focus_Entry 	@11
+			    origin     	(464, 880)
+			    terminus   	(614, 880)
+			    ordinal    	3)
+			(object InterMessView "" @48
+			    location   	(1376, 1936)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @49
+				Parent_View 	@48
+				location   	(1376, 1888)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"39B046860056"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	361
+				justify    	0
+				label      	"addL10nProfile( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@9
+			    supplier   	@23
+			    Focus_Src  	@10
+			    Focus_Entry 	@24
+			    origin     	(463, 1936)
+			    terminus   	(2304, 1936)
+			    ordinal    	10)))))
+	(object UseCase "Modify a Localization Project"
+	    quid       	"392F1180028A"
+	    documentation 	
+|Normal Course Of Events
+|
+|The Project Manager bring up a list of localization projects (see Section 1.2.67, "Use Case 80 - List Localization Projects").  The Project Manager selects one of the projects in the list and selects the "modify" option.
+|
+|The system retrieves data for the selected project and displays the data in the Project Detail screen.  The information that are displayed include:
+|
+|a. Project Name.
+|b. Project Manager's Name.
+|
+|The Project Manager can modify any fields on the screen.  When the Project Manager confirms the data she entered, the system modifies the project in the system database with the data entered by the Project Manager.
+|
+|
+|---------------------------------------------------------
+|Alternative Courses
+|
+|a. The new Project Name entered by the Project Manager already exists in the system.  The system displays this information in an error message dialog box.  The Project Manager acknowledges and dismisses the dialog box.  The system resets the fields on the screen and displays the screen for the user to enter new data.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @50
+		    logical_models 	(list unit_reference_list
+			(object Object "Project Management GUI"
+			    quid       	"394747E402FA"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"3947480D003C"
+				    supplier   	"Project Management GUI"
+				    quidu      	"394747E402FA"
+				    messages   	(list Messages
+					(object Message "select and modify a project"
+					    quid       	"3947480D003D"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)))
+				(object Link
+				    quid       	"397E01D00158"
+				    supplier   	"$UNNAMED$6"
+				    quidu      	"39474854012F"
+				    messages   	(list Messages
+					(object Message "modifyProject( )"
+					    quid       	"397E01D00159"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    quidu      	"3947485C0180"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$6"
+			    quid       	"39474854012F"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+			    quidu      	"3947437C00FA"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@50
+		    quid       	"394747DC00F0"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	297
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "Project Management GUI" @51
+			    location   	(800, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@51
+				location   	(800, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	332
+				justify    	0
+				label      	"Project Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394747E402FA"
+			    width      	350
+			    height     	593
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @52
+				location   	(800, 400)
+				line_color 	3342489
+				InterObjView 	@51
+				height     	328
+				y_coord    	268
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @53
+				location   	(800, 400)
+				line_color 	3342489
+				InterObjView 	@51
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$6" @54
+			    location   	(1392, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@54
+				location   	(1392, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"39474854012F"
+			    width      	300
+			    height     	593
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @55
+				location   	(1392, 608)
+				line_color 	3342489
+				InterObjView 	@54
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @56
+			    location   	(0, 400)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @57
+				Parent_View 	@56
+				location   	(891, 356)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"3947480D003D"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	534
+				justify    	0
+				label      	"select and modify a project"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@51
+			    supplier   	@51
+			    Focus_Src  	@52
+			    Focus_Entry 	@53
+			    origin     	(816, 400)
+			    terminus   	(966, 400)
+			    ordinal    	0)
+			(object Label @58
+			    location   	(64, 336)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	16
+			    max_width  	431
+			    label      	
+|This use case continues from the use case "(View a) List (of) Localization Projects".
+			    )
+			(object InterMessView "" @59
+			    location   	(1088, 608)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @60
+				Parent_View 	@59
+				location   	(1088, 560)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E01D00159"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	341
+				justify    	0
+				label      	"modifyProject( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@51
+			    supplier   	@54
+			    Focus_Src  	@52
+			    Focus_Entry 	@55
+			    origin     	(815, 608)
+			    terminus   	(1376, 608)
+			    ordinal    	1)))))
+	(object UseCase "Delete a Localization Project"
+	    quid       	"392F16C003A5"
+	    documentation 	
+|Normal Course Of Events
+|====================
+|
+|The Project Manager bring up a list of localization projects (see Section 1.2.67, "Use Case 80 - List Localization Projects").  The Project Manager selects one of the projects in the list and selects the "delete" option.  The system verifies that there are no incomplete localization jobs in the project and prompts the Project Manager to confirm her decision.  When the Project Manager confirms, the system deletes the project from the system.
+|
+|
+|Alternative Courses
+|===============
+|
+|a. The system found that the project to be deleted contains one or more incomplete jobs.  The system reports this to the Project Manager in a dialog box that inform the Project Manager that the project cannot be deleted because it contains incomplete jobs.  The Project Manager dismisses the dialog box.  The system displays the original list of projects and wait for input from the Project Manager.
+|
+|b. When the system prompts the Project Manager to confirm her decision to delete the selected project, the Project Manager cancels the decision rather than confirming it.  The system displays the original list of projects and wait for input from the Project Manager.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @61
+		    logical_models 	(list unit_reference_list
+			(object Object "Project Management GUI"
+			    quid       	"394746DB015F"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394746F902E8"
+				    supplier   	"Project Management GUI"
+				    quidu      	"394746DB015F"
+				    messages   	(list Messages
+					(object Message "select a project"
+					    quid       	"394746F902E9"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0)))
+				(object Link
+				    quid       	"397E021E0114"
+				    supplier   	"$UNNAMED$7"
+				    quidu      	"3947473C03DF"
+				    messages   	(list Messages
+					(object Message "deleteProject( )"
+					    quid       	"397E021E0115"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1
+					    quidu      	"3947474F0346"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$7"
+			    quid       	"3947473C03DF"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+			    quidu      	"3947437C00FA"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@61
+		    quid       	"3947468B0394"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	441
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object Label @62
+			    location   	(64, 96)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    nlines     	15
+			    max_width  	443
+			    label      	
+|This use case continues from the use case "(View a) List (of) Localization Projects".
+			    )
+			(object InterObjView "Project Management GUI" @63
+			    location   	(848, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@63
+				location   	(848, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	332
+				justify    	0
+				label      	"Project Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394746DB015F"
+			    width      	350
+			    height     	561
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @64
+				location   	(848, 384)
+				line_color 	3342489
+				InterObjView 	@63
+				height     	312
+				y_coord    	252
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @65
+				location   	(848, 384)
+				line_color 	3342489
+				InterObjView 	@63
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$7" @66
+			    location   	(1536, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@66
+				location   	(1536, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947473C03DF"
+			    width      	300
+			    height     	561
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @67
+				location   	(1536, 576)
+				line_color 	3342489
+				InterObjView 	@66
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @68
+			    location   	(0, 384)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @69
+				Parent_View 	@68
+				location   	(939, 340)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394746F902E9"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	325
+				justify    	0
+				label      	"select a project"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@63
+			    supplier   	@63
+			    Focus_Src  	@64
+			    Focus_Entry 	@65
+			    origin     	(864, 384)
+			    terminus   	(1014, 384)
+			    ordinal    	0)
+			(object InterMessView "" @70
+			    location   	(1200, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @71
+				Parent_View 	@70
+				location   	(1184, 528)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E021E0115"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	332
+				justify    	0
+				label      	"deleteProject( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@63
+			    supplier   	@66
+			    Focus_Src  	@64
+			    Focus_Entry 	@67
+			    origin     	(863, 576)
+			    terminus   	(1520, 576)
+			    ordinal    	1)))))
+	(object UseCase "List Localization Projects"
+	    quid       	"39402B01011E"
+	    documentation 	
+|3.62.1	Actor
+|Project Manager.
+|3.62.2	Priority
+|3.62.3	Description
+|The Project Manager enters some search criteria to bring up a list of localization projects.
+|3.62.4	Normal Course Of Events
+|The Project Manager invokes the Project Management GUI through the system's Administration interface and selects the "show projects" option.  The system displays a screen where the Project Manager can enter some search criteria to look for projects in the system.  The search criteria that can be specified include:
+|
+|1)	Name of the project manager that owns the project.  The user's name is used as the default value for this criterion.
+|2)	Name of the project (wild card is specified as "*").  There is no default for this criterion
+|3)	Jobs in the project (a job is specified by its job id). The Project Manager can enter more than one job id.  Any project that contains one of the jobs will be included in the result of the search.  There is no default for this criterion.
+|
+|	The project manager does not have to specify a value for any of the search criteria.  When a search criterion is left blank, the system will exclude that criterion in the search.
+|
+|	When the Project Manager confirms the search criteria, the system searches for projects that match the specified criteria.  The system displays the search result in a list.  The system also displays the options to modify and delete selected projects.
+|
+	    
+	    logical_models 	(list unit_reference_list
+		(object Mechanism @72
+		    logical_models 	(list unit_reference_list
+			(object Object "Project Management GUI"
+			    quid       	"394744EA0381"
+			    collaborators 	(list link_list
+				(object Link
+				    quid       	"394745C20006"
+				    supplier   	"Project Management GUI"
+				    quidu      	"394744EA0381"
+				    messages   	(list Messages
+					(object Message "display list of projects"
+					    quid       	"394745C20007"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"2"
+					    ordinal    	1)))
+				(object Link
+				    quid       	"397E02490011"
+				    supplier   	"$UNNAMED$8"
+				    quidu      	"3947455C01FE"
+				    messages   	(list Messages
+					(object Message "getProjects( )"
+					    quid       	"397E02490012"
+					    frequency  	"Aperiodic"
+					    synchronization 	"Simple"
+					    dir        	"FromClientToSupplier"
+					    sequence   	"1"
+					    ordinal    	0
+					    quidu      	"394745790296"))))
+			    persistence 	"Transient"
+			    multi      	FALSE)
+			(object Object "$UNNAMED$8"
+			    quid       	"3947455C01FE"
+			    class      	"Logical View::Envoy::Envoy Server::Job Handler::ProjectHandler"
+			    quidu      	"3947437C00FA"
+			    persistence 	"Transient"
+			    multi      	FALSE))))
+	    logical_presentations 	(list unit_reference_list
+		(object InteractionDiagram "Component API"
+		    mechanism_ref 	@72
+		    quid       	"394744DD02B0"
+		    title      	"Component API"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	72
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object InterObjView "Project Management GUI" @73
+			    location   	(448, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@73
+				location   	(448, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	332
+				justify    	0
+				label      	"Project Management GUI")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"394744EA0381"
+			    width      	350
+			    height     	785
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @74
+				location   	(448, 416)
+				line_color 	3342489
+				InterObjView 	@73
+				height     	504
+				y_coord    	444
+				Nested     	FALSE)
+			    Focus_Of_Control 	(object Focus_Of_Control "" @75
+				location   	(448, 656)
+				line_color 	3342489
+				InterObjView 	@73
+				height     	60
+				y_coord    	0
+				Nested     	TRUE))
+			(object InterObjView "$UNNAMED$8" @76
+			    location   	(1168, 224)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	TRUE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@76
+				location   	(1168, 224)
+				fill_color 	13434879
+				anchor_loc 	1
+				nlines     	2
+				max_width  	282
+				justify    	0
+				label      	"")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3947455C01FE"
+			    width      	300
+			    height     	785
+			    icon_height 	0
+			    icon_width 	0
+			    icon_y_offset 	0
+			    annotation 	1
+			    Focus_Of_Control 	(object Focus_Of_Control "" @77
+				location   	(1168, 448)
+				line_color 	3342489
+				InterObjView 	@76
+				height     	60
+				y_coord    	0
+				Nested     	FALSE))
+			(object SelfMessView "" @78
+			    location   	(16, 656)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @79
+				Parent_View 	@78
+				location   	(544, 608)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"394745C20007"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	441
+				justify    	0
+				label      	"display list of projects"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@73
+			    supplier   	@73
+			    Focus_Src  	@74
+			    Focus_Entry 	@75
+			    origin     	(464, 656)
+			    terminus   	(614, 656)
+			    ordinal    	1)
+			(object InterMessView "" @80
+			    location   	(816, 448)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @81
+				Parent_View 	@80
+				location   	(800, 400)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				quidu      	"397E02490012"
+				anchor_loc 	1
+				nlines     	1
+				max_width  	301
+				justify    	0
+				label      	"getProjects( )"
+				pctDist    	0.500000
+				height     	45
+				orientation 	0)
+			    line_color 	3342489
+			    client     	@73
+			    supplier   	@76
+			    Focus_Src  	@74
+			    Focus_Entry 	@77
+			    origin     	(463, 448)
+			    terminus   	(1152, 448)
+			    ordinal    	0)))))
+	(object Association "$UNNAMED$9"
+	    quid       	"392F0F3B0130"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"392F0F3C0087"
+		    supplier   	"Use Case View::Project Management::Add a Localization Project"
+		    quidu      	"392F0F130255"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"392F0F3C0091"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$12"
+	    quid       	"392F0FAD02B1"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"392F0FAE028A"
+		    supplier   	"Use Case View::Project Management::Create a Localization Profile"
+		    quidu      	"392F0F9E01AB"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"392F0FAE0294"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$15"
+	    quid       	"392F11A20062"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"392F11A30031"
+		    supplier   	"Use Case View::Project Management::Modify a Localization Project"
+		    quidu      	"392F1180028A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"392F11A30032"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$18"
+	    quid       	"392F171402D3"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"392F171503BB"
+		    supplier   	"Use Case View::Project Management::Delete a Localization Project"
+		    quidu      	"392F16C003A5"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"392F171503C5"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$21"
+	    quid       	"39402B2D0095"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$22"
+		    quid       	"39402B2E0046"
+		    supplier   	"Use Case View::Project Management::List Localization Projects"
+		    quidu      	"39402B01011E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$23"
+		    quid       	"39402B2E0047"
+		    supplier   	"Use Case View::Project Manager"
+		    quidu      	"38BA42D500C8")))
+	(object Association "$UNNAMED$24"
+	    quid       	"39402B40038B"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$25"
+		    quid       	"39402B4102B0"
+		    supplier   	"Use Case View::Project Management::List Localization Projects"
+		    quidu      	"39402B01011E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$26"
+		    quid       	"39402B4102B1"
+		    supplier   	"Use Case View::Project Management::Modify a Localization Project"
+		    quidu      	"392F1180028A")))
+	(object Association "$UNNAMED$27"
+	    quid       	"39402B430213"
+	    stereotype 	"include"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$28"
+		    quid       	"39402B440016"
+		    supplier   	"Use Case View::Project Management::List Localization Projects"
+		    quidu      	"39402B01011E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$29"
+		    quid       	"39402B440020"
+		    supplier   	"Use Case View::Project Management::Delete a Localization Project"
+		    quidu      	"392F16C003A5"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Project Management"
+	    quid       	"392F0EF9013F"
+	    title      	"Project Management"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::Project Management::Add a Localization Project" @82
+		    location   	(1344, 464)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@82
+			location   	(1344, 602)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add a Localization Project")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F0F130255"
+		    height     	118)
+		(object UseCaseView "Use Case View::Project Management::Create a Localization Profile" @83
+		    location   	(800, 128)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@83
+			location   	(800, 266)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Create a Localization Profile")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F0F9E01AB"
+		    height     	118)
+		(object UseCaseView "Use Case View::Project Management::Modify a Localization Project" @84
+		    location   	(1264, 1248)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@84
+			location   	(1264, 1386)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify a Localization Project")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F1180028A"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Project Manager" @85
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(384, 1120)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@85
+			location   	(384, 1229)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	325
+			justify    	0
+			label      	"Project Manager")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"38BA42D500C8"
+		    width      	180
+		    height     	60
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$9" @86
+		    location   	(773, 851)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F0F3B0130"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @87
+			    Parent_View 	@86
+			    location   	(373, 163)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F0F3C0087"
+			    client     	@86
+			    supplier   	@82
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @88
+			    Parent_View 	@86
+			    location   	(373, 163)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F0F3C0091"
+			    client     	@86
+			    supplier   	@85
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$12" @89
+		    location   	(570, 665)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F0FAD02B1"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @90
+			    Parent_View 	@89
+			    location   	(170, -23)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F0FAE028A"
+			    client     	@89
+			    supplier   	@83
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @91
+			    Parent_View 	@89
+			    location   	(170, -23)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F0FAE0294"
+			    client     	@89
+			    supplier   	@85
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$15" @92
+		    location   	(796, 1177)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F11A20062"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$16" @93
+			    Parent_View 	@92
+			    location   	(396, 489)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F11A30031"
+			    client     	@92
+			    supplier   	@84
+			    line_style 	0)
+			(object RoleView "$UNNAMED$17" @94
+			    Parent_View 	@92
+			    location   	(396, 489)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F11A30032"
+			    client     	@92
+			    supplier   	@85
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Project Management::List Localization Projects" @95
+		    location   	(1888, 832)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@95
+			location   	(1888, 970)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"List Localization Projects")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39402B01011E"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$21" @96
+		    location   	(1109, 978)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39402B2D0095"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$22" @97
+			    Parent_View 	@96
+			    location   	(709, 290)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B2E0046"
+			    client     	@96
+			    supplier   	@95
+			    line_style 	0)
+			(object RoleView "$UNNAMED$23" @98
+			    Parent_View 	@96
+			    location   	(709, 290)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B2E0047"
+			    client     	@96
+			    supplier   	@85
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$24" @99
+		    location   	(1499, 1087)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @100
+			Parent_View 	@99
+			location   	(1467, 1047)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	-0.033333
+			height     	40
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"39402B40038B"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$25" @101
+			    Parent_View 	@99
+			    location   	(187, -177)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B4102B0"
+			    client     	@99
+			    supplier   	@95
+			    line_style 	0)
+			(object RoleView "$UNNAMED$26" @102
+			    Parent_View 	@99
+			    location   	(187, -177)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B4102B1"
+			    client     	@99
+			    supplier   	@84
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Project Management::Delete a Localization Project" @103
+		    location   	(1328, 1824)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@103
+			location   	(1328, 1962)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Delete a Localization Project")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"392F16C003A5"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$18" @104
+		    location   	(893, 1499)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"392F171402D3"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @105
+			    Parent_View 	@104
+			    location   	(493, 811)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F171503BB"
+			    client     	@104
+			    supplier   	@103
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @106
+			    Parent_View 	@104
+			    location   	(493, 811)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"392F171503C5"
+			    client     	@104
+			    supplier   	@85
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$27" @107
+		    location   	(1574, 1380)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	(object SegLabel @108
+			Parent_View 	@107
+			location   	(1574, 1262)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	10
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"<<include>>"
+			pctDist    	0.500000
+			height     	119
+			orientation 	0)
+		    line_color 	3342489
+		    quidu      	"39402B430213"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$28" @109
+			    Parent_View 	@107
+			    location   	(315, -200)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B440016"
+			    client     	@107
+			    supplier   	@95
+			    line_style 	0)
+			(object RoleView "$UNNAMED$29" @110
+			    Parent_View 	@107
+			    location   	(315, -200)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"39402B440020"
+			    client     	@107
+			    supplier   	@103
+			    line_style 	0)))))))

@@ -1,0 +1,11 @@
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=DesktopIcon
+Comment=DesktopIcon
+Exec=/usr/bin/DesktopIcon
+Icon=/usr/share/globalsight/DesktopIcon/resource/image/GlobalSight_Icon.jpg
+Terminal=false
+Type=Application
+Categories=Application;Office
+Name[zh_CN]=DesktopIcon

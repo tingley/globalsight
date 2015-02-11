@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<project name="webServiceClients" default="all" basedir=".">
+  <!-- This build requires having Apache Axis installed. -->
+  <!-- Point the axisLib value to where your Apache Axis libraries are -->
+  <!-- For example: E:\jakarta\axis-1_2RC3\lib -->
+  <property name="classpath" value=".;lib/axis.jar;lib/jaxrpc.jar" />
+
+  <target name="all" depends="build-ws"/>
+
+  <target name="clean">
+    <delete><fileset dir="." includes="**/*.class"/></delete>
+  </target>
+  
+  <target name="build-ws">
+    <javac classpath="${classpath}" srcdir="." destdir="." />
+  </target>
+</project>
+

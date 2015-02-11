@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.page.pageexport.ExportingPage"
+        table="EXPORTING_PAGE">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <any name="page" id-type="long" meta-type="string">
+            <meta-value value="SECONDARY_TARGET"
+                class="com.globalsight.everest.secondarytargetfile.SecondaryTargetFile" />
+            <meta-value value="PRIMARY_TARGET"
+                class="com.globalsight.everest.page.TargetPage" />
+            <meta-value value="SOURCE"
+                class="com.globalsight.everest.page.SourcePage" />
+            <column name="PAGE_TYPE" />
+            <column name="PAGE_ID" />
+        </any>
+
+        <property name="state" length="20" column="STATE" type="string"
+            not-null="true" />
+
+        <property name="errorMessage" length="4000" column="ERROR_MESSAGE"
+            type="string" />
+
+        <property name="endTime" length="22" column="END_TIME"
+            type="long" />
+
+        <property name="exportPath" length="4000" column="EXPORT_PATH"
+            type="string" />
+
+        <property name="isComponentPage" length="1" type="character"
+            column="IS_COMPONENT_PAGE" not-null="true" access="field" />
+
+        <many-to-one name="exportBatchEvent" column="EXPORT_BATCH_ID"
+            class="com.globalsight.everest.page.pageexport.ExportBatchEvent"
+            not-null="true" />
+
+    </class>
+
+</hibernate-mapping>

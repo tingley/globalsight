@@ -1,0 +1,39 @@
+patchRoot=~/share/installer2/source
+
+update() {
+	cd $patchRoot
+	svn up
+	sed "s/%%version%%/$2/g" build0.xml > build.xml
+	sed "s/%%version%%/$2/g" system1.xml > system2.xml
+	sed "s/%%pversion%%/$1/g" system2.xml > system.xml
+	ant buildIstaller 
+}
+
+buildInstall() {
+	cd $patchRoot
+	mkdir -p installer_root/installer/data/$root/install/data 
+	cp system.xml installer_root/installer/data/$root/install/data/ 
+	cp -r ../buildTool/GlobalSight_7.1 installer_root/installer/data/ 
+	cp run/patch/run.sh installer_root/
+	cp run/patch/run.bat installer_root/
+	cd installer_root
+	
+}
+
+if [ $# = 0 ]
+    then
+    echo 'buildPatch prevision vision option, example: buildServer 7.1.2.0 7.1.3.0 -r'
+	echo '  options:'
+	echo '  -r:  release, the name will be GlobalSight_Installer_*(patch).zip'
+else
+    update $1 $2
+	buildInstall
+	name=GlobalSight_Installer_$2.zip
+	if [ $# = 3 ]
+	    then
+			name=GlobalSight_Installer_$2\(patch\).zip
+	       
+	fi
+
+	zip -r $name installer run.bat run.sh server
+fi

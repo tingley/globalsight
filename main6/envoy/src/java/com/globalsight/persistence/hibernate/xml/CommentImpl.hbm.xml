@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.comment.CommentImpl"
+        table="COMMENTS">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="commentString" length="4000"
+            column="COMMENT_TEXT" type="string" not-null="false"
+            unique="false" />
+        <property name="createDate" column="CREATE_DATE" type="timestamp"
+            not-null="true" unique="false" />
+        <property name="creatorId" length="82" column="CREATOR_USER_ID"
+            type="string" not-null="true" unique="false" />
+        <property name="originalId" column="ORIGINAL_ID"
+            type="string" not-null="false" unique="false" />
+        <property name="originalWsdlUrl" column="WSDL_URL"
+            type="string" not-null="false" unique="false" />
+            
+        <any name="object" id-type="long" meta-type="string">
+            <meta-value value="J"
+                class="com.globalsight.everest.jobhandler.JobImpl" />
+            <meta-value value="S"
+                class="com.globalsight.everest.workflowmanager.WorkflowImpl" />
+            <meta-value value="T"
+                class="com.globalsight.everest.taskmanager.TaskImpl" />
+            <column name="COMMENT_OBJECT_TYPE" />
+            <column name="COMMENT_OBJECT_ID"/>
+        </any>
+    </class>
+</hibernate-mapping>

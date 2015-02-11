@@ -1,0 +1,60 @@
+<!-- edited with XML Spy v3.0 NT (http://www.xmlspy.com) by David McLeod (Global Sight) -->
+<!-- Every paginatedResultSetXml consists of one or more record elements -->
+<!-- PaginatedResultSetXml attributes are
+	version: the version of the DTD describing this xml
+	id: the string "PRS" followed by the creation timestamp
+	locale: source locale (e.g. "en_US") taken from l18n profile -->
+<!ELEMENT paginatedResultSetXml (record+)>
+<!ATTLIST paginatedResultSetXml
+	version CDATA "1.0"
+	id ID #REQUIRED
+	locale CDATA #REQUIRED
+>
+<!-- Every record consists of zero or one acquisition Sql parameter string, -->
+<!-- one or more columns AND zero or more contexts -->
+<!-- Record attributes are
+		recordProfileId: the record profile associated with the record
+		sequenceNumber: unique record number within this file only
+                        (always prefixed with "SN") -->
+<!ELEMENT record (acqSqlParm?, column+, context*)>
+<!ATTLIST record
+	recordProfileId CDATA #REQUIRED
+	sequenceNumber ID #REQUIRED
+>
+<!-- Every acquisition Sql parameter string contains arbitrary text -->
+<!ELEMENT acqSqlParm (#PCDATA)>
+<!-- Every column consists of zero or one label and exactly one content -->
+<!-- Column attributes are
+		name: the name of the column as defined in the result set
+		tableName: the name of the table from which the column was selected
+		dataType: the kind of text (i.e. "text", "html", "xml", etc.)
+		ruleId: the id of the rule used to parse the text (usually xml only)
+		contentMode: how the content is to be viewed by the browser
+			"translatable" -> the content will be translated
+			"contextual" -> the content will be viewed only
+			"invisible" -> must be carried so it can be saved later -->
+<!ELEMENT column (label?, content)>
+<!ATTLIST column
+	name CDATA "unknown"
+	tableName CDATA "unknown"
+	dataType CDATA "text"
+	ruleId CDATA "0"
+	contentMode (translatable | contextual | invisible) "translatable"
+>
+<!-- Every context consists of zero or more columnHeaders and one or more rows -->
+<!-- Context attributes are
+		numRows: the number of rows of context
+		numCols: the number of columns of context in each row -->
+<!ELEMENT context (columnHeader*, row+)>
+<!ATTLIST context
+	numRows CDATA #REQUIRED
+	numCols CDATA #REQUIRED
+>
+<!-- Every columnHeader contains arbitrary text -->
+<!ELEMENT columnHeader (#PCDATA)>
+<!-- Every (context) row consists of zero or one label, and one or more columns -->
+<!ELEMENT row (label?, column+)>
+<!-- Every label contains arbitrary text -->
+<!ELEMENT label (#PCDATA)>
+<!-- Every content contains arbitrary text -->
+<!ELEMENT content (#PCDATA)>

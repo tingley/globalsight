@@ -1,0 +1,130 @@
+<html>
+<head>
+<title>Add Language Constraint</title>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0">
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<style>
+/* TO BE REMOVED AND REPLACED BY SetStylesheet.js */
+BODY,
+LABEL {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 10pt;
+}
+</style>
+<SCRIPT language="Javascript">
+var g_langlocs;
+
+function initLangLocs()
+{
+  for (var i = 0; i < g_langlocs.length; ++i)
+  {
+    var langloc = g_langlocs[i];
+
+    var oOption = document.createElement('OPTION');
+    oOption.text  = langloc.getLanguage();
+    oOption.value = i;
+
+    idLanguage.add(oOption);
+  }
+}
+
+function getSelectedLangLoc()
+{
+  return g_langlocs[idLanguage.selectedIndex];
+}
+
+function doClose(ok)
+{
+  if (ok == true)
+  {
+    var langloc = getSelectedLangLoc();
+    var term;
+
+    if (idRequired.checked)
+    {
+      term = "required";
+    }
+    else
+    {
+      term = "optional";
+    }
+
+    langloc.setTerm(term);
+    window.returnValue = langloc;
+  }
+  else
+  {
+    window.returnValue = null;
+  }
+
+  window.close();
+}
+
+function doKeypress()
+{
+  var key = event.keyCode;
+
+  if (key == 27) // Escape
+  {
+    doClose(false);
+  }
+  else if (key == 13) // Return
+  {
+    doClose(true);
+  }
+}
+
+function doLoad()
+{
+  g_langlocs = window.dialogArguments;
+
+  initLangLocs();
+}
+</script>
+</head>
+
+<body onload="doLoad()" onkeypress="doKeypress()">
+
+<DIV ID="contentLayer"
+  STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">Add Language Constraints</SPAN>
+<BR>
+<TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
+  <TR>
+    <TD colspan=2>
+      <LABEL FOR="idLanguage">A term in language</LABEL>
+      <select id="idLanguage" TABINDEX="1"></select>
+    </TD>
+  </TR>
+  <TR>
+    <TD rowspan=2 valign=top>
+      is:
+    </TD>
+    <TD>
+      <INPUT TYPE="radio" name="m" id="idRequired" TABINDEX="2" checked>
+      <LABEL FOR="idRequired">required</LABEL>
+      <INPUT TYPE="radio" name="m" id="idOptional" TABINDEX="3">
+      <LABEL FOR="idOptional">optional</LABEL>
+    </TD>
+  </TR>
+<!--
+  <TR>
+    <TD>
+      <INPUT TYPE="checkbox" id="idMultiple" TABINDEX="4">
+      <LABEL FOR="idMultiple">can occur multiple times</LABEL>
+    </TD>
+  </TR>
+-->
+</TABLE>
+
+<BR>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="5" onclick="doClose(true);">
+<INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="6" onclick="doClose(false);">
+</DIV>
+
+</DIV>
+</body>
+</html>

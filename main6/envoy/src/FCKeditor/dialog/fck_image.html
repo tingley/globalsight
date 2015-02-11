@@ -1,0 +1,513 @@
+<!--
+ * FCKeditor - The text editor for internet
+ * Copyright (C) 2003 Frederico Caldeira Knabben
+ *
+ * Licensed under the terms of the GNU Lesser General Public License
+ * (http://www.opensource.org/licenses/lgpl-license.php)
+ *
+ * For further information go to http://www.fredck.com/FCKeditor/
+ * or contact fckeditor@fredck.com.
+ *
+ * fck_image.html: Image dialog box.
+ *
+ * Authors:
+ *   Frederico Caldeira Knabben (fckeditor@fredck.com)
+-->
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../css/fck_dialog.css">
+<script language="JavaScript">
+// Get browsing configuration
+var bCanBrowse = dialogArguments.config.ImageBrowser;
+var sBrowseURL = dialogArguments.config.ImageBrowserURL;
+var iBrowseWindowWidth  = dialogArguments.config.ImageBrowserWindowWidth;
+var iBrowseWindowHeight = dialogArguments.config.ImageBrowserWindowHeight;
+
+// Get upload configuration
+var bCanUpload = dialogArguments.config.ImageUpload && dialogArguments.BrowserInfo.IsIE55OrMore;
+var sUploadURL = dialogArguments.config.ImageUploadURL;
+var iUploadWindowWidth  = dialogArguments.config.ImageUploadWindowWidth;
+var iUploadWindowHeight = dialogArguments.config.ImageUploadWindowHeight;
+var sUploadAllowedExtensions = dialogArguments.config.ImageUploadAllowedExtensions;
+
+// Gets the document DOM
+var oDOM = dialogArguments.objContent.DOM;
+
+// Gets the image if there is one selected.
+var image;
+var sel = oDOM.selection.createRange();
+if (oDOM.selection.type != 'Text')
+{
+    if (sel.length == 1)
+    {
+        if (sel.item(0).tagName == "IMG") image = sel.item(0);
+    }
+}
+
+// this var is used to update the existing image
+var imageSource = image;
+
+// Gets a copy of the image (for image size purposes)
+var imageOriginal;
+if (image != null)
+{
+    imageOriginal = new Image();
+    imageOriginal.src = image.src;
+}
+else
+    imageOriginal = null;
+
+// Set the dialog title.
+if (image)
+    document.write("<TITLE>" + dialogArguments.lang["DlgImgTitleEdit"] + "</TITLE>");
+else
+    document.write("<TITLE>" + dialogArguments.lang["DlgImgTitleInsert"] + "</TITLE>");
+
+// Get the IMG tag.
+function getImageHtml()
+{
+    // CvdL: links to local images need '/ambassador' prefix,
+    // other URLs should not be modified.
+    var src = txtURL.value;
+    if (src.match(/^\/terminology\/images\//))
+    {
+        src = '/ambassador' + src;
+    }
+  
+    return '<IMG'
+        + attr("src", src)
+        + attr("alt", txtAlt.value)
+        + attr("align", cmbAlign[cmbAlign.selectedIndex].value)
+        + ((txtWidth.value)  ? attr("width" , txtWidth.value)  : "")
+        + ((txtHeight.value) ? attr("height", txtHeight.value) : "")
+        + ((txtVSpace.value) ? attr("vspace", txtVSpace.value) : "")
+        + ((txtHSpace.value) ? attr("hspace", txtHSpace.value) : "")
+        + ((txtBorder.value) ? attr("border", txtBorder.value) : attr("border",0))
+        + '/>';
+}
+
+// Returns a formatted image attribute. Used by getImageHtml().
+function attr(name, value)
+{
+    if (!value || value == "") return "";
+    return ' ' + name + '="' + value + '"';
+}
+
+// Update any image (the selected or preview one)
+function updateImage(imgTarget)
+{
+    if (txtURL.value == "")
+    {
+        imgTarget.style.display = "none";
+    }
+    else
+    {
+        imgTarget.style.removeAttribute("display");
+
+        // CvdL: add /ambassador prefix to local images
+        var src = txtURL.value;
+        if (src.match(/^\/terminology\/images\//))
+        {
+            src = '/ambassador' + src;
+        }
+
+        imgTarget.src = src;
+        setAttribute(imgTarget, "alt"   , txtAlt.value);
+        setAttribute(imgTarget, "width" , txtWidth.value);
+        setAttribute(imgTarget, "height", txtHeight.value);
+        setAttribute(imgTarget, "vspace", txtVSpace.value);
+        setAttribute(imgTarget, "hspace", txtHSpace.value);
+        setAttribute(imgTarget, "border", txtBorder.value);
+        setAttribute(imgTarget, "align" ,
+            cmbAlign.options[ cmbAlign.selectedIndex ].value);
+    }
+}
+
+function setAttribute(element, attribute, value)
+{
+    if (value == null || value == "")
+        element.removeAttribute(attribute, 0);         // 0 = case insensitive
+    else
+        element.setAttribute(attribute, value, 0);     // 0 = overwrite
+}
+
+// Fired when any field change to update the preview image.
+function updatePreview()
+{
+    updateImage(imgPreview);
+}
+
+// Fired when the user press the OK button
+function ok()
+{
+    if (txtURL.value.length == 0)
+    {
+        cancel();
+        return;
+    }
+
+    if (imageSource == null)
+    {
+        window.returnValue = getImageHtml();
+    }
+    else
+    {
+        updateImage(imageSource);
+        window.returnValue = null;
+    }
+
+    window.close();
+}
+
+// Fired when the user press the CANCEL button.
+function cancel()
+{
+    window.returnValue = null;
+    window.close();
+}
+
+// Fired when the user load the window. It sets the fields with the
+// actual values if an image is selected in the editor.
+function setDefaults()
+{
+    // First of all, translate the dialog box texts
+    dialogArguments.AvailableLangs.TranslatePage(document);
+
+    if (image == null) return;
+
+    if (image.getAttribute("src",2)    != null)
+    {
+        // CvdL: strip '/ambassador' prefix from links to local images,
+        // other URLs should not be modified.
+        var src = image.getAttribute("src", 2);
+        if (src.match(/^\/ambassador\/terminology\/images\//))
+        {
+            src = src.substring(11);
+        }
+        txtURL.value = src;
+    }
+    if (image.getAttribute("alt",2)    != null) txtAlt.value    = image.getAttribute("alt",2);
+    if (image.getAttribute("width",2)  != null) txtWidth.value  = image.getAttribute("width",2);
+    if (image.getAttribute("height",2) != null) txtHeight.value = image.getAttribute("height",2);
+    if (image.getAttribute("vspace",2) != null) txtVSpace.value = image.getAttribute("vspace",2) > 0 ? image.getAttribute("vspace",2) : "";
+    if (image.getAttribute("hspace",2) != null) txtHSpace.value = image.getAttribute("hspace",2) > 0 ? image.getAttribute("hspace",2) : "";
+    if (image.getAttribute("border",2) != null) txtBorder.value = image.getAttribute("border",2);
+
+    if (image.getAttribute("align") != null)
+    {
+        for (var i = 0; i < cmbAlign.options.length; i++)
+        {
+            if (cmbAlign.options[i].value == image.getAttribute("align"))
+            {
+                cmbAlign.options[i].selected = true;
+                break;
+            }
+        }
+    }
+
+    updatePreview();
+}
+
+// Fired when the width or height input texts change
+function sizeChanged(axe)
+{
+    // Verifies if the aspect ration has to be mantained
+    if (imageOriginal && chkLockRatio.checked)
+    {
+        if ((axe) == "Width")
+        {
+            if (txtWidth.value != "")
+            {
+                if (! isNaN(txtWidth.value))
+                {
+                    txtHeight.value = Math.round(imageOriginal.height *
+                        (txtWidth.value  / imageOriginal.width));
+                }
+            }
+            else
+            {
+                txtHeight.value = "";
+            }
+        }
+        else
+        {
+            if (txtHeight.value != "")
+            {
+                if (! isNaN(txtHeight.value))
+                {
+                    txtWidth.value = Math.round(imageOriginal.width  *
+                        (txtHeight.value / imageOriginal.height));
+                }
+            }
+            else
+            {
+                txtWidth.value = "";
+            }
+        }
+    }
+
+    updatePreview();
+}
+
+// Fired when the Lock Ratio checkbox is clicked
+function onLockRationClick()
+{
+    sizeChanged("Width");
+}
+
+// Fired when the Reset Size button is clicked
+function resetSize()
+{
+    if (! imageOriginal) return;
+
+    txtWidth.value  = imageOriginal.width;
+    txtHeight.value = imageOriginal.height;
+    updatePreview();
+}
+
+// Fired when the user click in the "Sent it to the Server" button.
+function uploadFile()
+{
+    var sFile = frmUpload.FCKeditor_File.value;
+
+    if (sFile == "")
+    {
+        alert(dialogArguments.lang["DlgImgAlertSelect"]);
+        return;
+    }
+
+    var sExt = sFile.match(/\.[^\.]*$/);
+    sExt = sExt ? sExt[0].toLowerCase() : ".";
+
+    if (sUploadAllowedExtensions.indexOf(sExt) < 0)
+    {
+        alert(dialogArguments.lang["DlgImgMsgWrongExt"]);
+        return;
+    }
+
+    var oWindow = openNewWindow("", "UploadWindow",
+        iUploadWindowWidth, iUploadWindowHeight);
+    frmUpload.submit();
+    oWindow.setImage = setImage;
+}
+
+function browserServer()
+{
+    var oWindow = openNewWindow(sBrowseURL, "BrowseWindow",
+        iBrowseWindowWidth, iBrowseWindowHeight);
+    oWindow.setImage = setImage;
+}
+
+function openNewWindow(sURL, sName, iWidth, iHeight, bResizable, bScrollbars)
+{
+    var iTop  = (screen.height - iHeight) / 2;
+    var iLeft = (screen.width  - iWidth) / 2;
+
+    var sOptions = "toolbar=no";
+    sOptions += ",width=" + iWidth;
+    sOptions += ",height=" + iHeight;
+    sOptions += ",resizable="  + (bResizable  ? "yes" : "no");
+    sOptions += ",scrollbars=" + (bScrollbars ? "yes" : "no");
+    sOptions += ",left=" + iLeft;
+    sOptions += ",top=" + iTop;
+
+    var oWindow = window.open(sURL, sName, sOptions)
+    oWindow.focus();
+
+    return oWindow;
+}
+
+function setImage(sImageURL)
+{
+    // CvdL: add /ambassador prefix to local images
+    var src = sImageURL;
+    if (src.match(/^\/terminology\/images\//))
+    {
+        src = '/ambassador' + src;
+    }
+
+    if (image != null)
+    {
+        image = new Image();
+        image.src = src;
+    }
+
+    imageOriginal = new Image();
+    imageOriginal.onload = resetSize;
+    imageOriginal.src = src;
+
+    txtURL.value = sImageURL;
+    updatePreview();
+}
+</script>
+</head>
+<body bottommargin="5" leftmargin="5" topmargin="5" rightmargin="5"
+ onload="setDefaults()">
+<table cellspacing="1" cellpadding="1" border="0" width="100%" class="dlg" height="100%">
+  <tr>
+    <td>
+      <table cellspacing="0" cellpadding="0" width="100%" border="0">
+        <tr>
+          <td valign="top">
+            <span fckLang="DlgImgURL">URL</span><br>
+            <input style="WIDTH: 100%" type="text" id="txtURL"
+             onblur="updatePreview();">
+            <table cellspacing="0" cellpadding="0" width="100%" border="0"
+              style="DISPLAY: none" id="tableUpload">
+              <tr>
+                <form id="frmUpload" enctype="multipart/form-data"
+                method="post" target="UploadWindow">
+                <td>
+                  <span fckLang="DlgImgUpload">Upload</span><br>
+                  <input style="WIDTH: 100%" type="file"
+                  name="FCKeditor_File" id="FCKeditor_File">
+                </td>
+              </tr>
+              <tr>
+                <td align="right">
+                  <input id="btnUpload" type="button" onclick="uploadFile();"
+                  fckLang="DlgImgBtnUpload" value="Send it to the Server">
+                </td>
+                </FORM>
+              </tr>
+            </table>
+          </td>
+          <td width="10">&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" width="100">
+            <input type="button" style="WIDTH: 100%" fckLang="DlgBtnOK"
+            value="OK" onclick="ok();">
+            <br>
+            <input type="button" style="WIDTH: 100%" fckLang="DlgBtnCancel"
+            value="Cancel" onclick="cancel();">
+            <br>
+            <input type="button" style="DISPLAY: none; WIDTH: 100%"
+            fckLang="DlgImgBtnBrowse" value="Browse Server"
+            onclick="browserServer();" id="btnBrowse">
+          </td>
+        </tr>
+      </table>
+      <hr width="100%" color="#000000" size="2">
+    </td>
+  </tr>
+  <tr>
+    <td><span fckLang="DlgImgAlt">Alternative Text</span><BR>
+      <input style="WIDTH: 100%" type="text" id="txtAlt"
+      onkeyup="updatePreview();">
+    </td>
+  </tr>
+  <tr height="100%">
+    <td>
+      <table cellspacing="0" cellpadding="0" width="100%" border="0" height="100%">
+        <tr>
+          <td valign="top">
+            <br>
+            <table cellspacing="0" cellpadding="0" border="0">
+              <tr>
+                <td><span fckLang="DlgImgWidth">Width</span>&nbsp;</td>
+                <td>
+                  <input type="text" size="3" id="txtWidth"
+                   onkeyup="sizeChanged('Width');"></td>
+                </tr>
+                <tr>
+                  <td><span fckLang="DlgImgHeight">Height</span>&nbsp;</td>
+                  <td>
+                    <input type="text" size="3" id="txtHeight"
+                    onkeyup="sizeChanged('Height');">
+                  </td>
+                </tr>
+              </table>
+              <input type="checkbox" class="CheckBox" checked
+              id="chkLockRatio" onclick="onLockRationClick();">
+              <span fckLang="DlgImgLockRatio">Lock Ratio</span>
+              <br>
+              <input type="button" fckLang="DlgBtnResetSize"
+              value="Reset Size" onclick="resetSize();"><br>
+              <br>
+              <table cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td><span fckLang="DlgImgBorder">Border</span>&nbsp;</td>
+                  <td>
+                    <input type="text" size="2" value="0" id="txtBorder"
+                    onkeyup="updatePreview();">
+                  </td>
+                </tr>
+                <tr>
+                  <td><span fckLang="DlgImgHSpace">HSpace</span>&nbsp;</td>
+                  <td>
+                    <input type="text" size="2" id="txtHSpace"
+                    onkeyup="updatePreview();">
+                  </td>
+                </tr>
+                <tr>
+                  <td><span fckLang="DlgImgVSpace">VSpace</span>&nbsp;</td>
+                  <td>
+                    <input type="text" size="2" id="txtVSpace"
+                    onkeyup="updatePreview();">
+                  </td>
+                </tr>
+                <tr>
+                  <td><span fckLang="DlgImgAlign">Align</span>&nbsp;</td>
+                  <td><select id="cmbAlign" onchange="updatePreview();">
+                    <option value="" selected></option>
+                    <option fckLang="DlgImgAlignLeft" value="left">Left</option>
+                    <option fckLang="DlgImgAlignAbsBottom" value="absBottom">Abs Bottom</option>
+                    <option fckLang="DlgImgAlignAbsMiddle" value="absMiddle">Abs Middle</option>
+                    <option fckLang="DlgImgAlignBaseline" value="baseline">Baseline</option>
+                    <option fckLang="DlgImgAlignBottom" value="bottom">Bottom</option>
+                    <option fckLang="DlgImgAlignMiddle" value="middle">Middle</option>
+                    <option fckLang="DlgImgAlignRight" value="right">Right</option>
+                    <option fckLang="DlgImgAlignTextTop" value="textTop">Text Top</option>
+                    <option fckLang="DlgImgAlignTop" value="top">Top</option>
+                  </select>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>&nbsp;&nbsp;&nbsp;</td>
+          <td width="100%">
+            <table cellpadding="0" cellspacing="0" height="100%">
+              <tr>
+                <td><span fckLang="DlgImgPreview">Preview</span></td>
+              </tr>
+              <tr height="100%">
+                <td>
+                  <div class="ImagePreviewArea">
+                  <img id="imgPreview" style="DISPLAY: none">Magnus es, domine, et laudabilis valde: magna virtus tua,
+                  et sapientiae tuae non est numerus. et laudare te vult homo, aliqua portio
+                  creaturae tuae, et homo circumferens mortalitem suam, circumferens testimonium
+                  peccati sui et testimonium, quia superbis resistis: et tamen laudare te vult
+                  homo, aliqua portio creaturae tuae.tu excitas, ut laudare te delectet, quia
+                  fecisti nos ad te et inquietum est cor nostrum, donec requiescat in te. da
+                  mihi, domine, scire et intellegere, utrum sit prius invocare te an laudare te,
+                  et scire te prius sit an invocare te. sed quis te invocat nesciens te? aliud
+                  enim pro alio potest invocare nesciens. an potius invocaris, ut sciaris?
+                  quomodo autem invocabunt, in quem non crediderunt? aut quomodo credent sine
+                  praedicante? et laudabunt dominum qui requirunt eum. quaerentes enim inveniunt
+                  eum et invenientes laudabunt eum. quaeram te, domine, invocans te, et invocem
+                  te credens in te: praedicatus enim es nobis. invocat te, domine, fides mea,
+                  quam dedisti mihi, quam inspirasti mihi per humanitatem filii tui, per
+                  ministerium praedicatoris tui.
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<script language="javascript">
+if (bCanUpload)
+{
+  tableUpload.style.display = "block";
+  frmUpload.action = sUploadURL;
+}
+
+if (bCanBrowse)
+{
+  btnBrowse.style.display = "block";
+}
+</script>
+</body>
+</html>

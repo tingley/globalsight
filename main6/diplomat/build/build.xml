@@ -1,0 +1,75 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                     CXE Build file                          * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="CXE" default="build" basedir="">
+    <property name="cxe.jspSrcBase" value="../../diplomat/dev/src/web-doc/jsp"></property>
+  <property name="cxe.adapterMdbDir"
+	    value="../../diplomat/dev/src/java/com/globalsight/cxe/adaptermdb"/>
+    <property name="cxe.jspFiles" value="
+${cxe.jspSrcBase}/cxe/jsp/IWImportJob.jsp
+${cxe.jspSrcBase}/cxe/jsp/IWMessage.jsp
+${cxe.jspSrcBase}/cxe/jsp/PreviewUrlFrame.jsp">
+</property>
+    <property name="cxe.jspclassesDest" value="${globalsight_home}/classfiles"></property>
+	<target name="init">
+        <echo message="***** CXE build file *****"/>
+		<tstamp/>
+		<property name="source" value="../../diplomat/dev/src/java" />
+	</target>
+
+	<target name="clean" depends="init">
+		<echo message="***** Cleaning up from previous builds."/>
+		<delete dir="${cxeclasses}" />
+	</target>
+
+	<target name="prepare" depends="init">
+		<echo message="***** Preparing: making build dir."/>
+		<mkdir dir="${cxeclasses}" />
+	</target>
+
+	<target name="build" depends="prepare, compile">
+		<echo message="***** Building CXE" />
+		</target>
+	<target name="buildnojsp" depends="prepare, compile">
+		<echo message="***** Building CXE (no JSPS)" />
+		</target>
+
+	<target name="compile" depends="prepare">
+		<javac verbose="${javacverbose}"
+		       debug="on"
+			target="${javactarget}"
+                        srcdir="${source}"
+			destdir="${cxeclasses}"
+			classpath="${classpath}"
+			includes="com/**/*.java"
+		        excludes="com/globalsight/cxe/**/*.java"/>
+	        <echo message="*** Copying CXE Resources ***"/>
+		<copy todir="${cxeclasses}/com/globalsight/resources">
+		    <fileset dir="${source}/com/globalsight/resources" includes="*/**"/>
+		 </copy>
+	</target>
+
+  <target name="init_ejb">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile
+    and copy the deployment descriptors into it-->
+    <mkdir dir="${tmpclasses}/cxe"/>
+    <mkdir dir="${tmpclasses}/cxe/META-INF"/>
+    <copy todir="${tmpclasses}/cxe/META-INF">
+      <fileset dir="${cxe.adapterMdbDir}">
+        <include name="ejb-jar.xml"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <!-- Update or create the cxe_mdb.jar ejb deployment descriptor file -->
+  <target name="jar_ejb" depends="init_ejb">
+    <jar jarfile="${tmpclasses}/cxe_mdb.jar"
+      basedir="${tmpclasses}/cxe"
+      update="yes">
+    </jar>
+  </target>
+</project>

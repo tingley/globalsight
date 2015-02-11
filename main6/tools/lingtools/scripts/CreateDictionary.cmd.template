@@ -1,0 +1,3 @@
+@echo off
+rem Utility to create GlobalSight spell checker dictionaries.
+java -classpath %%gs_ear_root%%/spellchecker.war/WEB-INF/lib/lucene-1.4.3.jar;%%gs_ear_root%%/spellchecker.war/WEB-INF/classes -Xmx768m spell.CreateDictionary %*

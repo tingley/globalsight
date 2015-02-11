@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+<TITLE>XDE HTML Edit $Revision: 1.1 $</TITLE>
+<!--
+Copyright 2003 XDE
+-------------------------------------------------------------
+$Id: htmledit.htm,v 1.1 2009/04/14 15:42:52 yorkjin Exp $
+-------------------------------------------------------------
+$RCSfile: htmledit.htm,v $
+$Author: yorkjin $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:52 $
+$Locker:  $
+$Name:  $
+------------------------------------------------------------
+-->
+<script type="text/javascript">
+var xdeeditorBasePath="/globalsight/xdespellchecker/editor/"; //Redistribution, used within xderichedit.js to change base path to all editor images, pop-ups are seperate.
+</script>
+<!-- Code Warrior Include the js files below once for each of your html pages.
+ -->
+<script type="text/javascript" src="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
+<script type="text/javascript" src="/globalsight/xdespellchecker/editor/xderichedit.js"></script>
+<script type="text/javascript" src="/globalsight/xdespellchecker/editor/coolbuttons.js"></script>
+</HEAD>
+<!-- Code warrior include the below onload and onresize into your body code -->
+<body onload="xde_resizeBody();closeLoadingDiv();"  onresize="xde_resizeBody();" topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0>
+
+
+<script type="text/javascript">
+toolbarDisplay=null;
+/*
+
+setFontNames("edit1",pcommon) use to specify valid font names.
+setFontSizes("edit1",pcommon) use to specify valid font sizes.
+Toolbar icon display and layout.  See help for full documentation, ! = new toolbar row, | = divider
+toolbarDisplay="spellandsave,|,copypaste,|,fontname,fontsize,|,bold,italic,underline,strikethrough,superscript,subscript,|,justifyleft,justifycenter,justifyright,justifyfull,|,insertunorderedlist,insertorderedlist,|,indent,outdent,|,forecolor,backcolor,|,emoticon,|,spellcheck";	
+*/
+
+	// Code warrior you may specify icons to display, by default (null) all are used 
+	displayEditBox("edit1",toolbarDisplay); //Code Warrior repeat for each RTE
+	
+	initRichEdits(); // Just do this once for the whole html page.
+
+	// Code warrior use setText to set your text initially from a database
+
+	setText("edit1","<IMG SRC=\"/Xde-Globe.gif\" BORDER=\"0\"><br>This HTML editor has been tested with MS Explorer 5.5+, Gecko Mozilla 1.4+, browsers that do not support the HTML editor will be presented with minimal options and text area instead.<br><br>While the full tool bar with all the functions is displayed, the tool bar is easily <b>customizable</b>.<br><br>The common terms drop down menu allows your users to easily insert commonly used phrases.<br><br>The preview button <IMG SRC=\"/globalsight/xdespellchecker/editor/images/edit/preview.gif\" BORDER=\"0\"> allows for printing and saving, page breaks are honored.<br><br>The save and spell check button <IMG SRC=\"/globalsight/xdespellchecker/editor/images/edit/spellsave.gif\" BORDER=\"0\"> will first perform the following steps :<br>1) Perform a spell check.<br>2) Once the user clicks finish:<br>3) Will updated editor with the corrected text.<br>4) Copy the rich text editor data to your form field.<br>5) Submit the form for server side processing. Be sure customize the action property to your environment.<br><br>I luv teh spell checker <br><b>thisa</b> is a test<sup>A</sup> of the spell checker<sup>2</sup><br><br>A) Sample footnote #1.<br>2) Sample footnote #2."); //Code Warrior repeat for each RTE
+
+function saveIt(){ //Code Warrior, will be executed after spell check, place all your form fields here.
+	document.getElementById("myFormName").textfieldforServer.value=xde_getXHTML("edit1");
+// use this for raw html:  document.getElementById("myFormName").textfieldforServer.value=xde_spellHTML(("edit1");
+	document.getElementById("myFormName").submit();  //May Remove for server side textfieldforServer text box field when control is set for runat=server
+}
+</script>
+<!-- Code warrior - End code inclusion, you will most likely be using this with a form so don't include the form tag below. -->
+
+<form name="myFormName" id="myFormName" method="post" action="displayhtml.jsp">
+
+<input TYPE="hidden" NAME="language" value="usenglish;usenglish2002">
+<!--Code warrior, just a sample form, use your existing form code and make your input field a hidden field.-->
+<input TYPE="hidden" NAME="textfieldforServer">
+</form>
+</body>
+</HTML>

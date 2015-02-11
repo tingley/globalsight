@@ -1,0 +1,72 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                   DEBEX Build File                          * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Debex" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+    <property name="src" value="src" />
+    <property name="resources" value="src/resources" />
+    <property name="bin" value="classes" />
+    <property name="lib" value="lib" />
+    <property name="dist" value="dist" />
+    <property name="toolsLib" value="../../lib/common" />
+    <property name="toolsBuild" value="../../build" />
+
+    <!-- Specify the basic list of files required for compiling -->
+    <property name="layout" value="${lib}/AbsoluteLayout.jar" />
+    <property name="cap" value="${toolsBuild}/capclasses/globalsight.ear/lib/classes" />
+
+    <property name="classpath" value="${layout}:${cap}" />
+
+    <property name="batch_file" value="debex.cmd"/>
+    <property name="sh_file"    value="debex.sh"/>
+    <property name="config_file" value="${src}/config.properties"/>
+    <property name="jar" value="${bin}/debex.jar"/>
+    <property name="zip" value="${dist}/debex.zip"/>
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling debex tool..." />
+    <mkdir dir="${bin}" />
+    <javac nowarn="${nowarn}" classpath="${classpath}"
+	   destdir="${bin}" >
+      <src path="${src}" />
+      <include name="**/*.java" />
+    </javac>
+    <copy todir="${bin}/resources"> 
+      <fileset dir="${resources}"/>
+    </copy>
+    <copy file="${batch_file}" todir="${bin}"/>
+    <copy file="${sh_file}" todir="${bin}"/>
+    <copy file="${layout}" todir="${bin}"/>
+  </target>
+
+  <target name="dist" depends="build">
+    <jar jarfile="${jar}" basedir="${bin}" includes="debex/**" />
+
+    <mkdir dir="${dist}" />
+    <zip zipfile="${zip}">
+        <zipfileset dir="${bin}" 
+	includes="*, resources/*" 
+	excludes="debex/**" 
+	prefix="debex" />
+    </zip>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${bin}" />
+    <delete dir="${dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build"></target>
+
+</project>
+
+<!-- Local Variables: -->
+<!-- compile-command: "cd d:/src/shasta/tools/lingtools/debex; ant -emacs" -->
+<!-- End: -->

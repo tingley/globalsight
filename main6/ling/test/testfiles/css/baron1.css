@@ -1,0 +1,36 @@
+P.pone {
+	color:green;
+	}
+
+P.ptwo {
+	color : blue;
+	}
+
+P.one	{
+	view: @threedee {rotation-code: '}';}
+	color: red;
+	}
+
+P.oneb	{
+	view: @threedee {rotation-code: '}';}
+	color: red;
+	color: maroon;
+	}
+
+P.two	{
+	work: { test: none; filed: no; };
+	color: green;
+	}
+
+P.three	{
+	view: @find orange { rotation: 500grad; };
+	color: green;
+	} P.four { color: green;
+margin-left: 0;} P.five {color: green} P.six {color: green;}
+
+P.seven {
+	color: blue;
+	view: color: red;
+	color: green;
+	color: red: view;
+	}

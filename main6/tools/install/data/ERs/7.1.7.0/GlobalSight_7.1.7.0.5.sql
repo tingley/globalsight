@@ -1,0 +1,2 @@
+#for GBS-931
+Alter TABLE tm_profile ADD COLUMN MS_MT_URL VARCHAR(100);

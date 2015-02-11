@@ -1,0 +1,240 @@
+<?xml version="1.0"?>
+<PortalThemes>
+<Version>5.0</Version>
+<Titles>
+<Title Name="Default" 
+Home="/inetsoft/sree/portal/portalimages/title/default/home.gif" 
+NewReport="/inetsoft/sree/portal/portalimages/title/default/newReport.gif" 
+Organize="/inetsoft/sree/portal/portalimages/title/default/organize.gif" 
+Scheduler="/inetsoft/sree/portal/portalimages/title/default/scheduler.gif" 
+Preferences="/inetsoft/sree/portal/portalimages/title/default/preferences.gif" 
+Logout="/inetsoft/sree/portal/portalimages/title/default/logout.gif">
+<![CDATA[   <html>    
+   <body leftMargin='0' rightMargin='0' topMargin='0' bottomMargin='0'>            
+    <table cellspacing=0 cellpadding=0 width="100%" bgcolor="#003366" border="0">
+      <tr>
+      <td width=266 height=60> 
+        <table width="97%" border="0" cellpadding="0" cellspacing="0">
+         <tr> 
+           <td width="11%" rowspan="2">&nbsp;</td>
+           <td width="45%" rowspan="2"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/default/logo.gif"></td>
+           <td width="44%">&nbsp;</td>
+         </tr>
+         <tr> 
+           <td><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/default/srlogo.gif"></td>
+         </tr>
+        </table>
+      </td>
+      <td bgcolor=#003366>&nbsp;</td>
+      <td width=58 bgcolor=#003366><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/default/curve.gif"></td>
+      <td width=465 align=right valign=bottom bgcolor=#6699cc> 
+        <table width="100%" border=0 align="center" cellspacing=5>
+          <tr>                 
+          <td width="65" align="center">$(home.icon)</td>                
+          <td width="65" align="center">$(newreport.icon)</td>                
+          <td width="65" align="center">$(organize.icon)</td>                
+          <td width="65" align="center">$(scheduler.icon)</td>
+          <td width="65" align="center">$(preferences.icon)</td>                
+          <td width="65" align="center">$(logout.icon)</td>
+          </tr>
+        </table>
+      </td>
+      </tr>
+    </table>
+   </body>
+   </html>               ]]>
+</Title>
+<Title Name="Desert" 
+Home="/inetsoft/sree/portal/portalimages/title/desert/home.gif" 
+NewReport="/inetsoft/sree/portal/portalimages/title/desert/newReport.gif" 
+Organize="/inetsoft/sree/portal/portalimages/title/desert/organize.gif" 
+Scheduler="/inetsoft/sree/portal/portalimages/title/desert/scheduler.gif" 
+Preferences="/inetsoft/sree/portal/portalimages/title/desert/preferences.gif" 
+Logout="/inetsoft/sree/portal/portalimages/title/desert/logout.gif">
+<![CDATA[   <html>    
+   <body leftMargin='0' rightMargin='0' topMargin='0' bottomMargin='0'>                  
+     <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFE1">
+       <tr> 
+       <td width="32%" bordercolor="0" nowrap> 
+         <table width="64%" border="0" cellspacing="0" cellpadding="0">         
+           <tr> 
+             <td width="5%" height="20">&nbsp;</td>
+             <td width="95%">&nbsp;</td>             
+           </tr>
+           <tr> 
+             <td bgcolor="#999966"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/logo.gif"></td>
+             <td><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/curve.gif"></td>
+           </tr>
+         </table>
+       </td>
+       <td width="52%" nowrap>
+         <table width="100%" border="0" cellspacing="2">
+           <tr> 
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(home.icon)</td>
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(newreport.icon)</td>
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(organize.icon)</td>
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(scheduler.icon)</td>
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(preferences.icon)</td>
+             <td width="1"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1" height="43"></td>
+             <td width="63" align="center">$(logout.icon)</td>
+             <td><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/dottedline.gif" width="1"></td>
+            </tr>
+          </table>
+        </td>
+        <td width="16%" nowrap>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr> 
+              <td><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/desert/srlogo.gif"></td>
+            </tr>
+          </table>
+        </td>
+        </tr>
+      </table> 
+   </body>
+   </html>           
+      ]]>
+</Title>
+<Title Name="Evergreen" 
+Home="/inetsoft/sree/portal/portalimages/title/evergreen/home.gif" 
+NewReport="/inetsoft/sree/portal/portalimages/title/evergreen/newReport.gif" 
+Organize="/inetsoft/sree/portal/portalimages/title/evergreen/organize.gif" 
+Scheduler="/inetsoft/sree/portal/portalimages/title/evergreen/scheduler.gif" 
+Preferences="/inetsoft/sree/portal/portalimages/title/evergreen/preferences.gif" 
+Logout="/inetsoft/sree/portal/portalimages/title/evergreen/logout.gif">
+<![CDATA[   <html>    
+   <body leftMargin='0' rightMargin='0' topMargin='0' bottomMargin='0'>      
+   <table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#99CCCC">
+     <tr> 
+     <td width="210" height="60"> 
+       <table border="0" cellpadding="0" cellspacing="0">
+         <tr> 
+         <td width="20" bgcolor="#336666">&nbsp;</td>
+         <td width="120" bgcolor="#336666"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/evergreen/srlogo.gif" align="middle"></td>
+         <td width="60"><img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/evergreen/curve.gif"></td>
+		   <td bgcolor=#99CCCC>&nbsp;</td>
+         </tr>
+        </table>      
+      </td>
+      <td width="111" valign="top" bgcolor="#99CCCC">&nbsp;</td>
+      <td width="498" valign="top" bgcolor="#99CCCC"> 
+        <table width="427" border=0 align="left" cellspacing=2>
+          <tr> 
+          <td width="70" align="center">$(home.icon)</td>
+          <td width="70" align="center">$(newreport.icon)</td>
+          <td width="70" align="center">$(organize.icon)</td>
+          <td width="70" align="center">$(scheduler.icon)</td>
+          <td width="70" align="center">$(preferences.icon)</td>
+          <td width="70" align="center">$(logout.icon)</td>
+          </tr>
+        </table>
+      </td>
+      <td width="157" valign="middle" bgcolor="#99CCCC">
+        <img src="$(SERVLET)?op=Resource&name=/inetsoft/sree/portal/portalimages/title/evergreen/logo.gif"></td>
+      </tr>
+   </table> 
+   </body> 
+   </html>          ]]>
+</Title>
+<Title Name="globalsight" 
+Home="/inetsoft/sree/portal/portalimages/title/default/home.gif" 
+NewReport="/inetsoft/sree/portal/portalimages/title/default/newReport.gif" 
+Organize="/inetsoft/sree/portal/portalimages/title/default/organize.gif" 
+Scheduler="/inetsoft/sree/portal/portalimages/title/default/scheduler.gif" 
+Preferences="/inetsoft/sree/portal/portalimages/title/default/preferences.gif" 
+Logout="/inetsoft/sree/portal/portalimages/title/default/logout.gif">
+<![CDATA[   <html>    
+   <body leftMargin='0' rightMargin='0' topMargin='0' bottomMargin='0'>            
+    <table cellspacing=0 cellpadding=0 width="100%" bgcolor="#081473" border="0">
+      <tr>
+      <td width=266 height=60> 
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+         <tr> 
+           <td width="11%" rowspan="2">&nbsp;</td>
+           <td width="45%" rowspan="2"><img src="/globalsight/reports/images/80biggerGlobalSightLogo.gif"></td>
+           <td width="44%">&nbsp;</td>
+         </tr>
+        </table>
+      </td>
+      <td bgcolor=#081473>&nbsp;</td>
+      <td width=465 align=right valign=bottom bgcolor=#081473> 
+        <table width="100%" border=0 align="center" cellspacing=5 cellpadding=0>
+          <tr>                 
+          <td width="65" align="center">$(home.icon)</td>                
+          <td width="65" align="center">$(newreport.icon)</td>                
+          <td width="65" align="center">$(scheduler.icon)</td>
+          </tr>
+        </table>
+      </td>
+      </tr>
+    </table>
+   </body>
+   </html>               ]]>
+</Title>
+</Titles>
+<TreeLists>
+<TreeList Name="Default" 
+Root="/inetsoft/sree/portal/portalimages/treelist/default/root.gif" 
+Leaf="/inetsoft/sree/portal/portalimages/treelist/default/leaf.gif" 
+FolderOpen="/inetsoft/sree/portal/portalimages/treelist/default/folderOpen.gif" 
+FolderClose="/inetsoft/sree/portal/portalimages/treelist/default/folderClose.gif"
+/>
+<TreeList Name="Desert" 
+Root="/inetsoft/sree/portal/portalimages/treelist/desert/root.gif" 
+Leaf="/inetsoft/sree/portal/portalimages/treelist/desert/leaf.gif" 
+FolderOpen="/inetsoft/sree/portal/portalimages/treelist/desert/folderOpen.gif" 
+FolderClose="/inetsoft/sree/portal/portalimages/treelist/desert/folderClose.gif"
+/>
+<TreeList Name="Evergreen" 
+Root="/inetsoft/sree/portal/portalimages/treelist/evergreen/root.gif" 
+Leaf="/inetsoft/sree/portal/portalimages/treelist/evergreen/leaf.gif" 
+FolderOpen="/inetsoft/sree/portal/portalimages/treelist/evergreen/folderOpen.gif" 
+FolderClose="/inetsoft/sree/portal/portalimages/treelist/evergreen/folderClose.gif"
+/>
+<TreeList Name="globalsight" 
+Root="/inetsoft/sree/portal/portalimages/treelist/default/root.gif" 
+Leaf="/inetsoft/sree/portal/portalimages/treelist/default/leaf.gif" 
+FolderOpen="/inetsoft/sree/portal/portalimages/treelist/default/folderOpen.gif" 
+FolderClose="/inetsoft/sree/portal/portalimages/treelist/default/folderClose.gif"
+/>
+</TreeLists>
+<WelcomePages>
+<WelcomePage Name="Default">
+<![CDATA[]]>
+</WelcomePage>
+<WelcomePage Name="Desert">
+<![CDATA[]]>
+</WelcomePage>
+<WelcomePage Name="Evergreen">
+<![CDATA[]]>
+</WelcomePage>
+<WelcomePage Name="globalsight">
+<![CDATA[<html>
+<body>
+<br>
+<br>
+<br>
+<br>
+<center>
+<h2><font color="#081473"><i> GlobalSight Reports Composer</i></font></h2>
+</center>
+<body>
+</html>]]>
+</WelcomePage>
+</WelcomePages>
+<Themes>
+<Theme Name="Default" ScreenShot="/inetsoft/sree/portal/portalimages/theme/default/screenShot.gif">
+<Title Height="60" Title="globalsight"/>
+<Layout isTree="true"/>
+<TreeList Forefround="-16777216" Background="-1" TreeList="globalsight"/>
+<WelcomePage WelcomePage="globalsight"/>
+<Footer Height="20" Foreground="-1" Background="-16247693" Font="Arial-PLAIN-10" Align="center">
+<![CDATA[Welocalize GlobalSight Reports]]>
+</Footer>
+</Theme>
+</Themes>
+</PortalThemes>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.vendormanagement.Rating"
+		table="VENDOR_RATING">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<many-to-one name="vendor" column="VENDOR_ID"
+			class="com.globalsight.everest.vendormanagement.Vendor"
+			not-null="true" />
+		<many-to-one name="task" column="TASK_ID"
+			class="com.globalsight.everest.taskmanager.TaskImpl"
+			not-null="false" />
+		<property name="rating" length="3" column="VALUE" type="int"
+			not-null="true" unique="false" />
+		<property name="modifiedDate" column="MODIFY_DATE" type="timestamp"
+			not-null="true" unique="false" />
+		<property name="raterUserId" length="20" column="MODIFY_USERID"
+			type="string" not-null="true" unique="false" />
+		<property name="comment" length="4000" column="COMMENTS"
+			type="string" not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

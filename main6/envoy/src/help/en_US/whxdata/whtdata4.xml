@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<item name="Reports Main Screen" url="Reports/Reports_Main_Screen.htm" />
+<item name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+<book name="Standard Reports By Name" >
+  <item name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+  <item name="TM Report" url="Reports/TM_Report.htm" />
+  <item name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+  <item name="Missing Terms" url="Reports/Missing_Terms.htm" />
+  <item name="Term Audit" url="Reports/Term_Audit.htm" />
+  <item name="Cost Report" url="Reports/Cost_Report.htm" />
+</book>
+<book name="Report Functionality" >
+  <item name="Find" url="Reports/Find.htm" />
+  <item name="Export Report" url="Reports/Export_Report.htm" />
+  <item name="Mail Report" url="Reports/Mail_Report.htm" />
+</book>
+<item name="Reports Admin" url="Reports/Reports_Admin.htm" />
+<item name="Reports Composer" url="Reports/Reports_Composer.htm" />
+
+</tocdata>

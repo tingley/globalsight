@@ -1,0 +1,29 @@
+<HTML>
+<HEAD>
+<TITLE>Spell Check Text</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<STYLE>
+body	{
+          font-face: verdana,arial,helvetica;
+          font-family: verdana,arial,helvetica;
+          font-size: 12pt;
+        }
+/* .e = spell error, a link that should be blue */
+.e  { color: blue; }
+/* .ce = current spell error, a link that should be blue and large */
+.ce { color: blue; font-size: 14pt; }
+.ptag   {
+          /* bright: 3366FF, dim: 808080, illegal: FF0000, unbalanced: FF9900 */
+          color: #808080;
+          font-size: 90% !important;
+        }
+</STYLE>
+</HEAD>
+
+<BODY>
+<script src="spellcheck.js"></script> 
+<DIV ID="displayID" STYLE="position: absolute; width: 100%"> 
+  <SPAN ID="foundSoFar" STYLE="position: absolute; border: 0px; width: 100%">Checking text...</SPAN> 
+</DIV>
+</BODY>
+</HTML>

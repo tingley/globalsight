@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.everest.projecthandler.TranslationMemoryProfile"
+        table="TM_PROFILE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="name" length="60" column="NAME" type="string"
+            not-null="true" unique="false" />
+        <property name="description" length="500" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="projectTmIdForSave"
+            column="PROJECT_TM_ID_FOR_SAVE" type="long" not-null="true"
+            unique="false" />
+        <property name="saveUnLocSegToProjectTM"
+            column="IS_UNLOC_SEG_SAVED_TO_PROJ_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="SaveUnLocSegToPageTM"
+            column="IS_UNLOC_SEG_SAVED_TO_PAGE_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="jobExcludeTuTypesStr" length="2000"
+            column="JOB_EXCLUDE_TU_TYPES" type="string" not-null="false"
+            unique="false" />
+        <property name="leverageLocalizable"
+            column="IS_LEVERAGE_LOCALIZABLE" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="isContextMatchLeveraging"
+            column="IS_CONTEXT_MATCH" type="yes_no" not-null="true"
+            unique="false" />
+        <property name="isExactMatchLeveraging"
+            column="IS_EXACT_MATCH_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="isTypeSensitiveLeveraging"
+            column="IS_TYPE_SENSITIVE_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="typeDifferencePenalty"
+            column="TYPE_DIFFERENCE_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="isCaseSensitiveLeveraging"
+            column="IS_CASE_SENSITIVE_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="caseDifferencePenalty"
+            column="CASE_DIFFERENCE_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="isWhiteSpaceSensitiveLeveraging"
+            column="IS_WS_SENSITIVE_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="whiteSpaceDifferencePenalty"
+            column="WHITESPACE_DIFFERENCE_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="isCodeSensitiveLeveraging"
+            column="IS_CODE_SENSITIVE_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="codeDifferencePenalty"
+            column="CODE_DIFFERENCE_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="isMultiLingualLeveraging"
+            column="IS_MULTILINGUAL_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="autoRepair" column="AUTO_REPAIR" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="multipleExactMatches" length="100"
+            column="MULTIPLE_EXACT_MATCHES" type="string"
+            not-null="false" unique="false" />
+        <property name="multipleExactMatchesPenalty"
+            column="MULTIPLE_EXACT_MATCHES_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="fuzzyMatchThreshold"
+            column="FUZZY_MATCHES_THRESHOLD" type="long"
+            not-null="false" unique="false" />
+        <property name="numberOfMatchesReturned"
+            column="NUMBER_OF_MATCHES_RETURNED" type="long"
+            not-null="false" unique="false" />
+        <property name="isLatestMatchForReimport"
+            column="IS_LATEST_MATCH_FOR_REIMPORT" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="isTypeSensitiveLeveragingForReimp"
+            column="IS_TYPE_LEV_FOR_REIMPORT" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="typeDifferencePenaltyForReimp"
+            column="TYPE_DIFF_PENALTY_REIMPORT" type="long"
+            not-null="false" unique="false" />
+        <property name="isMultipleMatchesForReimp"
+            column="IS_MULT_MATCHES_FOR_REIMP" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="multipleMatchesPenalty"
+            column="MULTIPLE_MATCHES_PENALTY" type="long"
+            not-null="false" unique="false" />
+        <property name="dynLevFromGoldTm" column="DYN_LEV_FROM_GOLD_TM"
+            type="yes_no" not-null="true" unique="false" />
+        <property name="dynLevFromInProgressTm"
+            column="DYN_LEV_FROM_IN_PROGRESS_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="dynLevFromPopulationTm"
+            column="DYN_LEV_FROM_POPULATION_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="dynLevFromReferenceTm"
+            column="DYN_LEV_FROM_REFERENCE_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="matchPercentage" column="IS_MATCH_PERCENTAGE"
+            type="yes_no" not-null="true" unique="false" />
+        <property name="tmProcendence" column="IS_TM_PROCENDENCE"
+            type="yes_no" not-null="true" unique="false" />
+        <property name="selectRefTm" column="IS_REF_TM" type="yes_no"
+            not-null="false" unique="false" />
+        <property name="refTmPenalty" column="REF_TM_PENALTY"
+            type="long" not-null="false" unique="false" />
+        <property name="refTMsToLeverageFrom" length="160"
+            column="REF_TMS" type="string" not-null="false"
+            unique="false" />
+
+        <property name="mtEngine" length="60" column="MT_ENGINE"
+            type="string" not-null="false" unique="false" />
+        <property name="autoCommitToTM" column="MT_AUTOCOMMIT_TO_TM"
+            type="yes_no" not-null="true" unique="false" />
+        <property name="overrideNonExactMatches"
+            column="MT_OVERRIDE_MATCHES" type="yes_no" not-null="true"
+            unique="false" />
+        <property name="showInEditor" column="MT_SHOW_IN_EDITOR"
+            type="yes_no" not-null="true" unique="false" />
+        <property name="isMTSensitiveLeveraging"
+            column="IS_MT_SENSITIVE_LEVERAGING" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="mtSensitivePenalty"
+            column="MT_PENALTY" type="long"
+            not-null="false" unique="false" />
+            
+        <property name="ptsurl" column="PTSURL"
+            type="string" not-null="false" unique="false" />
+        <property name="ptsUsername" column="PTS_USERNAME"
+            type="string" not-null="false" unique="false" />
+        <property name="ptsPassword" column="PTS_PASSWORD"
+            type="string" not-null="false" unique="false" />
+        <property name="ptsUrlFlag" column="PTS_URL_FLAG"
+            type="string" not-null="false" unique="false" />
+                        
+        <property name="msMTUrl" column="MS_MT_URL"
+            type="string" not-null="false" unique="false" />
+        <property name="msMTAppID" column="MS_MT_APPID"
+            type="string" not-null="false" unique="false" />
+        <property name="msMTUrlFlag" column="MS_MT_URL_FLAG"
+            type="string" not-null="false" unique="false" />
+
+        <property name="aoMtUrl" column="AO_URL"
+            type="string" not-null="false" unique="false" />
+        <property name="aoMtPort" column="AO_PORT"
+            type="long" not-null="false" unique="false" />
+        <property name="aoMtUsername" column="AO_USERNAME"
+            type="string" not-null="false" unique="false" />
+        <property name="aoMtPassword" column="AO_PASSWORD"
+            type="string" not-null="false" unique="false" />
+        <property name="aoMtAccountNumber" column="AO_ACCOUNT_NUMBER"
+            type="long" not-null="false" unique="false" />
+    
+        <set name="projectTMsToLeverageFromSet"
+            table="TM_PROFILE_PROJECT_TM_INFO" cascade="save-update"
+            inverse="true">
+            <key column="TM_PROFILE_ID" />
+            <one-to-many
+                class="com.globalsight.everest.projecthandler.LeverageProjectTM" />
+        </set>
+        
+        <set name="tmProfilePromtInfoSet"
+            table="TM_PROFILE_PROMT_INFO" cascade="all"
+            inverse="false">
+            <key column="TM_PROFILE_ID" />
+            <one-to-many
+                class="com.globalsight.everest.projecthandler.ProMTInfo" />
+        </set>
+        
+        <set name="tmProfileAoInfoSet"
+            table="TM_PROFILE_AO_INFO" cascade="all"
+            inverse="false">
+            <key column="TM_PROFILE_ID" />
+            <one-to-many
+                class="com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo" />
+        </set>
+                 
+        <one-to-one name="tdatm" class="com.globalsight.everest.foundation.TDATM" property-ref="translationMemoryProfile"/> 
+
+    </class>
+</hibernate-mapping>

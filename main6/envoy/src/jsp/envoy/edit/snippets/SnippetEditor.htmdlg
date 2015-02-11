@@ -1,0 +1,318 @@
+<!-- -*- Mode: html-helper -*- -->
+<html xmlns:b3>
+
+<title>Snippet Editor</title>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+<meta name="[B3 HTML Studio]" content="4.0.468.6">
+
+<SCRIPT LANGUAGE="JavaScript" src="/globalsight/envoy/edit/snippets/snippet.js"></SCRIPT>
+<script>
+  var arg;
+  var admin;
+  var locale;
+  var displayLocale;
+  
+  function SelectValue(elem, value)
+  {
+    if (!value)
+    {
+      return;
+    }
+  
+    var opts = elem.options;
+    for (i = 0; i < opts.length; ++i)
+    {
+      var opt = opts.item(i);
+      if (opt.value == value)
+      {
+        opt.selected = true;
+      }
+    }
+  }
+
+  function SetLocale(elem, value, displayValue)
+  {
+    if (!value)
+    {
+      return;
+    }
+  
+    var opt = document.createElement("OPTION");
+    opt.text = displayValue;
+    opt.value = value;
+    opt.selected = true;
+    elem.add(opt);
+  }
+
+function helpSwitch()
+{
+   helpWindow = window.open('/globalsight/help/en_US/My_Activities/Snippet_Editor.htm',
+      'helpWindow', 'resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
+   helpWindow.focus();
+}
+</script>
+
+<script for=ok event=oncyberdialogloaded>
+  locale = FB3_GetArgument("locale");
+
+  admin = FB3_GetArgument("userRole");
+  if (admin == "admin")
+  {
+    admin = true; 
+  }
+  else
+  {
+    admin = false;
+  }
+
+  arg = FB3_GetArgument("myarg");
+  
+  if (arg)
+  {
+    // MODIFY
+  
+    text.value = arg.name + " " +
+      ((arg.locale == null || arg.locale == "") ? "" : arg.id);
+    idDescription.value = arg.desc;
+    idContent.value = arg.value;
+
+    locale = arg.locale;
+    displayLocale = arg.displayLocale;
+
+    if (locale != null && locale != "")
+    {
+      SetLocale(idLocale, locale, displayLocale);
+    }
+
+    text.disabled = true;
+    idLocale.disabled = true;
+  
+    idContent.focus();
+  }
+  else
+  {
+    // NEW
+  
+    // create new snippet: admin creates generics, and locale
+    // managers create locale-specific copies of generic ones
+  
+    idLocale.disabled = true;
+    text.focus();
+  }
+</script>
+
+<script for=ok event=oncyberdialogvalidate>
+  var name = text.value;
+  if (name.match(/^[ \t\r\n\u00a0]*$/))
+  {
+    alert("Enter a valid snippet name!");
+    text.value = "";
+    text.focus();
+    return false;
+  }
+
+  var value = idContent.value;
+  if (value.match(/^[ \t\r\n\u00a0]*$/))
+  {
+    if (!confirm(
+       "The snippet value is empty. You should provide a meaningful value that\n" +
+       "Locale Managers can modify in their locale.\n\nDo you really want to save?"))
+    {
+      idContent.value = "";
+      idContent.focus();
+      return false;
+    }
+  }
+
+  var result = new Snippet(text.value, idDescription.value, locale, displayLocale,
+    0, idContent.value);
+
+  if (arg)
+  {
+    result.name = arg.name;
+    result.id = arg.id;
+  }
+
+  FB3_SetArgument("myarg", result);
+
+  return true;
+</script>
+
+<script>
+// Global key table
+function doKeydown() 
+{
+  if (event.keyCode == 27) // ESC
+  {
+    FB3_SetArgument("myarg", null);
+    window.close();
+  }
+}
+</script>
+</head>
+
+<!--cyber-drag-and-drop{{-------------------------------------------------------
+<button id=newpopup 
+	onclick="window.event.srcElement.runModal(window.event.srcElement)"
+	style="behavior: url('SnippetEditor.htc'); 
+		position: absolute; 
+		top: 10px;
+		left: 10px;">Snippet Editor</button>
+}}cyber-drag-and-drop---------------------------------------------------------->
+
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<link href="Cyber/B3/Dialogs/CyberDialogs.css" rel=stylesheet type="text/css"></link>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<body class=Page scroll=no b3defaultcontrolid="ok" onkeydown="doKeydown()">
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogsHead.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+<input id=ok
+	style="left: 331px ;
+		width: 65px ;
+		position: absolute ;
+		top: 251px ;
+		b3-right: 87 ;
+		b3-bottom: 4 ;
+		b3-tooltip: 'OK Button' ;
+		b3-anchored-edges: right bottom"
+	tabIndex=5
+	type=button
+	value=OK >
+
+<input id=cancel
+	style="left: 406px ;
+		width: 70px ;
+		position: absolute ;
+		top: 251px ;
+		b3-right: 7 ;
+		b3-bottom: 4 ;
+		b3-tooltip: 'Cancel Button' ;
+		b3-anchored-edges: right bottom"
+	tabIndex=6
+	type=button
+	value=Cancel >
+
+<div id=labeldiv
+	style="font-weight: bold ;
+                left: 5px ;
+		width: 80px ;
+		position: absolute ;
+		top: 12px ;
+		text-align: right ;
+		b3-right: 402 ;
+		b3-bottom: 210 ;
+		b3-tooltip: 'Label' ;
+		b3-ui-type: label" >
+
+Name:
+</div>
+
+<input id=text
+	style="left: 90px ;
+		width: 381px ;
+		position: absolute ;
+		top: 10px ;
+		height: 22px ;
+		b3-right: 12 ;
+		b3-bottom: 247 ;
+		b3-tooltip: 'Text field' ;
+		b3-anchored-edges: left right top ;
+		b3-save-in-registry: false"
+	tabIndex=1 >
+
+<div id=div_2
+	style="font-weight: bold ;
+		left: 5px ;
+		width: 80px ;
+		position: absolute ;
+		top: 45px ;
+		text-align: right ;
+		b3-right: 393 ;
+		b3-bottom: 218 ;
+		b3-tooltip: 'Label' ;
+		b3-ui-type: label" >
+Locale:
+</div>
+
+<select id=idLocale
+	style="left: 90px ;
+		width: 200px ;
+		position: absolute ;
+		top: 45px ;
+		b3-right: 193 ;
+		b3-bottom: 212 ;
+		b3-tooltip: Combo ;
+		b3-anchored-edges: top left"
+	tabIndex=2 >
+
+<option value="" selected>(generic)</option>
+</select>
+
+<div id=div_4
+	style="font-weight: bold ;
+		left: 5px ;
+		width: 80px ;
+		position: absolute ;
+		top: 80px ;
+		text-align: right ;
+		b3-right: 398 ;
+		b3-bottom: 183 ;
+		b3-tooltip: 'Label' ;
+		b3-ui-type: label" >
+Description:
+</div>
+
+<textarea id=idDescription
+	style="left: 90px ;
+		width: 385px ;
+		position: absolute ;
+		top: 80px ;
+		height: 45px ;
+		b3-right: 8 ;
+		b3-bottom: 154 ;
+		b3-tooltip: 'Multi-line text input' ;
+		b3-anchored-edges: right top left"
+	tabIndex=3 ></textarea>
+
+<div id=div_6
+	style="font-weight: bold ;
+                left: 5px ;
+		width: 80px ;
+		position: absolute ;
+		top: 140px ;
+		text-align: right ;
+		b3-right: 402 ;
+		b3-bottom: 82 ;
+		b3-tooltip: 'Label' ;
+		b3-ui-type: label" >
+Value:
+</div>
+
+<textarea id=idContent
+	style="left: 90px ;
+		width: 385px ;
+		position: absolute ;
+		top: 140px ;
+		height: 105px ;
+		b3-right: 8 ;
+		b3-bottom: 34 ;
+		b3-tooltip: 'Multi-line text input' ;
+		b3-anchored-edges: right bottom left top"
+	tabIndex=4 ></textarea>
+
+<!--cyber-dialog-support{{----------------------------------------------------->
+<script src="Cyber/B3/Dialogs/CyberDialogs.js"></script>
+<!--}}cyber-dialog-support----------------------------------------------------->
+
+
+</body>
+
+</html>
+

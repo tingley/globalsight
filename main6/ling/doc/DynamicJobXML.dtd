@@ -1,0 +1,25 @@
+<!-- DynamicJobXML.dtd created on August 2, 2000 -->
+<!--		by Shigemichi Yazawa, GlobalSight Corp. -->
+
+<!ELEMENT DynamicJob (record+)>
+<!ATTLIST DynamicJob
+	version		CDATA	#REQUIRED
+	locale		CDATA	#REQUIRED>
+
+
+<!ELEMENT record (table+)>
+<!ATTLIST record
+	dataProfileId	CDATA	#REQUIRED>
+
+
+<!ELEMENT table (column+)>
+<!ATTLIST table
+	name		CDATA	#REQUIRED>
+
+
+<!ELEMENT column (#PCDATA)>
+<!ATTLIST column
+	name		CDATA	#REQUIRED
+	format		CDATA	"TEXT"
+	ruleFile	CDATA	#IMPLIED
+	translate	(true|false)>

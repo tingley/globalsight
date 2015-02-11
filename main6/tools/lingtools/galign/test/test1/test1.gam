@@ -1,0 +1,11 @@
+<?xml version="1.0"?> 
+<gam version="1.0" 
+     source-tmx="test1-en.tmx" 
+     target-tmx="test1-fr.tmx">
+     <align source="1" target="1" approved="N" />
+     <isolate id="2" locale="T" approved="N" />
+     <align source="2" target="3" approved="N" />
+     <align source="3" target="4" approved="N" />
+     <align source="4" target="5" approved="N" />
+     <isolate id="5" locale="S" approved="N" />
+</gam>

@@ -1,0 +1,100 @@
+<!-- This DTD describes the Diplomat Event Flow Metadata.                -->
+<!-- There is a one to one correspondence between Diplomat XML files and -->
+<!-- Event Flow XML files.                                               -->
+<!ELEMENT eventFlowXml (preMergeEvent, postMergeEvent, batchInfo, source, target?, da*, gsamd?, category*, capMessageId?, cxeRequestType?)>
+<!-- The pre- and post-merge events are needed by Diplomat components    -->
+<!-- (Merger and GsaSourceAdapter) to determine what specific events to  -->
+<!-- generate.                                                           -->
+<!ELEMENT preMergeEvent (#PCDATA)>
+<!ELEMENT postMergeEvent (#PCDATA)>
+<!-- The capMessageId is the unique ID assigned by CAP to this page -->
+<!ELEMENT capMessageId (#PCDATA)>
+<!-- The cxeRequestType is the original request export,export for update, preview type assigned by CAP -->
+<!ELEMENT cxeRequestType (#PCDATA)>
+<!-- The batchInfo section describes the import batch.                   -->
+<!--     batchId is a unique identifier for the whole import batch.      -->
+<!--             Every file in the same batch has the same ID value.     -->
+<!--     pageCount is the total number of pages in this batch.           -->
+<!--     pageNumber is the number of this page in the batch              -->
+<!--             (defined as [1,pageCount])                              -->
+<!--     docPageCount is the total number of pages in this document.     -->
+<!--     docPageNumber is the number of this page in this document       -->
+<!--             (defined as [1,docPageCount])                           -->
+<!--     displayName is a meaningful human-readable label                -->
+<!--             for example, filename or acquisition sql label          -->
+<!--     l10nProfileId is the localization profile associated with the data source -->
+<!ELEMENT batchInfo (batchId, fileProfileId, pageCount, pageNumber, docPageCount, docPageNumber, displayName, baseHref?, jobName?, uuid?)>
+<!ATTLIST batchInfo
+	l10nProfileId CDATA #REQUIRED
+	processingMode (manual | automatic) "automatic"
+>
+<!ELEMENT batchId (#PCDATA)>
+<!ELEMENT fileProfileId (#PCDATA)>
+<!ELEMENT pageCount (#PCDATA)>
+<!ELEMENT pageNumber (#PCDATA)>
+<!ELEMENT docPageCount (#PCDATA)>
+<!ELEMENT docPageNumber (#PCDATA)>
+<!ELEMENT displayName (#PCDATA)>
+<!-- The base href to display the page properly.  Optional, only needed for CMS (ie. TeamSite) -->
+<!ELEMENT baseHref (#PCDATA)>
+<!-- Optionally, a job prefix name -->
+<!ELEMENT jobName (#PCDATA)>
+<!ELEMENT uuid (#PCDATA)>
+<!ELEMENT priority (#PCDATA)>
+
+<!-- A diplomat attribute has zero or more values                        -->
+<!ELEMENT da (dv*)>
+<!ATTLIST da
+	name CDATA #REQUIRED
+>
+<!-- A diplomat value is text                                            -->
+<!ELEMENT dv (#PCDATA)>
+<!-- A source has diplomat attributes relevant to the source adapter     -->
+<!--     locale is the locale of the original content                    -->
+<!--     charset is the charset of the original content                  -->
+<!--     name is the name of the data source adapter                     -->
+<!--     dataSourceType is \"fs\" for file system, \"db\" for database, or \"teamsite\" for   -->
+<!--             Interwoven TeamSite content management system, or whatever  -->
+<!--             the appropriate CMS name is -->
+<!--     dataSourceId is the id for the required file profile, db profile, etc -->
+<!--     formatType is the value for the kind of data contained -->
+<!--     pageIsCxePreviewable tells whether the page can be previewed -->
+<!--     importRequestType tells whether the page has been imported for l10n or alignment -->
+<!-- importInitiatorId is the user id of the user who initiated the import for this file. -->
+<!ELEMENT source (locale, charset, da*)>
+<!ATTLIST source
+	name CDATA #REQUIRED
+	dataSourceType CDATA #REQUIRED
+	dataSourceId CDATA #REQUIRED
+	formatType CDATA #REQUIRED
+	pageIsCxePreviewable (true | false) "false"
+	importRequestType (l10n | aligner) "l10n"
+        importInitiatorId CDATA ""
+>
+<!ELEMENT locale (#PCDATA)>
+<!ELEMENT charset (#PCDATA)>
+<!-- A target has diplomat attributes relevant to the target adapter     -->
+<!--     databaseMode distinguishes between preview and final for        -->
+<!--             put-back SQL only.                                      -->
+<!--     previewUrl specifies whether a Preview URL is needed or not.    -->
+<!--             This indicates whether the target adapter must return   -->
+<!--             a fully substituted PreviewUrlXml file                  -->
+<!ELEMENT target (locale, charset, da*)>
+<!ATTLIST target
+	name CDATA #REQUIRED
+	databaseMode (preview | final) "final"
+	previewUrl (true | false) "false"
+>
+<!-- A gsamd has attributes relevant to GlobalSight (for future use)      -->
+<!ELEMENT gsamd (da*)>
+<!-- A category specifies attributes specific to a content source        -->
+<!--     name specifies the name of the content source (e.g. Teamsite,   -->
+<!--             database, etc).                                         -->
+<!ELEMENT category (da*)>
+<!ATTLIST category
+	name CDATA #REQUIRED
+>
+<!ELEMENT alternateTargetPage (#PCDATA)>
+<!ATTLIST alternateTargetPage
+	locale CDATA #REQUIRED
+>

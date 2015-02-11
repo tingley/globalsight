@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0042)http://www.w3.org/TR/REC-CSS2/grammar.html -->
+<HTML lang=en><HEAD><TITLE>Appendix D: The grammar of CSS2</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=ISO-8859-1"><LINK 
+href="CSS2 Grammar_files/default.css" type=text/css rel=stylesheet><LINK 
+href="notes.html" rel=prev><LINK href="refs.html" rel=next><LINK 
+href="cover.html#minitoc" rel=contents><LINK title=properties 
+href="propidx.html" rel=CSS-properties><LINK title=index href="indexlist.html" 
+rel=index>
+<META content="MSHTML 5.50.4134.600" name=GENERATOR></HEAD>
+<BODY>
+<DIV class=navbar align=center>
+<P><A href="http://www.w3.org/TR/REC-CSS2/notes.html">previous</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/refs.html">next</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/cover.html#minitoc">contents</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/propidx.html">properties</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/indexlist.html">index</A> &nbsp; </P></DIV>
+<HR class=navbar>
+
+<H1 align=center>Appendix D. The grammar of CSS2</H1>
+<DIV class=subtoc>
+<P><STRONG>Contents</STRONG> 
+<UL class=toc>
+  <LI class=tocline2><A class=tocxref 
+  href="http://www.w3.org/TR/REC-CSS2/grammar.html#q1">D.1 Grammar</A> 
+  <LI class=tocline2><A class=tocxref 
+  href="http://www.w3.org/TR/REC-CSS2/grammar.html#q2">D.2 Lexical scanner</A> 
+  <LI class=tocline2><A class=tocxref 
+  href="http://www.w3.org/TR/REC-CSS2/grammar.html#tokenizer-diffs">D.3 
+  Comparison of tokenization in CSS2 and CSS1</A> </LI></UL></DIV>
+<P><EM>This appendix is normative.</EM> 
+<P>The grammar below defines the syntax of CSS2. It is in some sense, however, a 
+superset of CSS2 as this specification imposes additional semantic constraints 
+not expressed in this grammar. A conforming UA must also adhere to the <A 
+href="http://www.w3.org/TR/REC-CSS2/syndata.html#syntax">forward-compatible 
+parsing rules</A>, the <A 
+href="http://www.w3.org/TR/REC-CSS2/about.html#property-defs">property and value 
+notation</A>, and the unit notation. In addition, the document language may 
+impose restrictions, e.g. HTML imposes restrictions on the possible values of 
+the "class" attribute. 
+<H2><A name=q1>D.1 Grammar</A></H2>
+<P>The grammar below is <A name=x0><SPAN class=index-inst 
+title=LL(1)>LL(1)</SPAN></A> (but note that most UA's should not use it 
+directly, since it doesn't express the <A 
+href="http://www.w3.org/TR/REC-CSS2/syndata.html#parsing-errors">parsing 
+conventions</A>, only the CSS2 syntax). The format of the productions is 
+optimized for human consumption and some shorthand notation beyond Yacc (see <A 
+class=noxref href="http://www.w3.org/TR/REC-CSS2/refs.html#ref-YACC" 
+rel=biblioentry><SPAN class=normref>[YACC]</SPAN></A>) is used:</P>
+<UL>
+  <LI><STRONG>*</STRONG>: 0 or more 
+  <LI><STRONG>+</STRONG>: 1 or more 
+  <LI><STRONG>?</STRONG>: 0 or 1 
+  <LI><STRONG>|</STRONG>: separates alternatives 
+  <LI><STRONG>[&nbsp;]</STRONG>: grouping </LI></UL>
+<P>The productions are: <PRE>stylesheet
+  : [ CHARSET_SYM S* STRING S* ';' ]?
+    [S|CDO|CDC]* [ import [S|CDO|CDC]* ]*
+    [ [ ruleset | media | page | font_face ] [S|CDO|CDC]* ]*
+  ;
+import
+  : IMPORT_SYM S*
+    [STRING|URI] S* [ medium [ ',' S* medium]* ]? ';' S*
+  ;
+media
+  : MEDIA_SYM S* medium [ ',' S* medium ]* '{' S* ruleset* '}' S*
+  ;
+medium
+  : IDENT S*
+  ;
+page
+  : PAGE_SYM S* IDENT? pseudo_page? S*
+    '{' S* declaration [ ';' S* declaration ]* '}' S*
+  ;
+pseudo_page
+  : ':' IDENT
+  ;
+font_face
+  : FONT_FACE_SYM S*
+    '{' S* declaration [ ';' S* declaration ]* '}' S*
+  ;
+operator
+  : '/' S* | ',' S* | /* empty */
+  ;
+combinator
+  : '+' S* | '&gt;' S* | /* empty */
+  ;
+unary_operator
+  : '-' | '+'
+  ;
+property
+  : IDENT S*
+  ;
+ruleset
+  : selector [ ',' S* selector ]*
+    '{' S* declaration [ ';' S* declaration ]* '}' S*
+  ;
+<A name=x1><SPAN class=index-inst title=selector>selector</SPAN></A>
+  : simple_selector [ combinator simple_selector ]*
+  ;
+simple_selector
+  : element_name? [ HASH | class | attrib | pseudo ]* S*
+  ;
+class
+  : '.' IDENT
+  ;
+element_name
+  : IDENT | '*'
+  ;
+attrib
+  : '[' S* IDENT S* [ [ '=' | INCLUDES | DASHMATCH ] S*
+    [ IDENT | STRING ] S* ]? ']'
+  ;
+pseudo
+  : ':' [ IDENT | FUNCTION S* IDENT S* ')' ]
+  ;
+declaration
+  : property ':' S* expr prio?
+  | /* empty */
+  ;
+prio
+  : IMPORTANT_SYM S*
+  ;
+expr
+  : term [ operator term ]*
+  ;
+term
+  : unary_operator?
+    [ NUMBER S* | PERCENTAGE S* | LENGTH S* | EMS S* | EXS S* | ANGLE S* |
+      TIME S* | FREQ S* | function ]
+  | STRING S* | IDENT S* | URI S* | RGB S* | UNICODERANGE S* | hexcolor
+  ;
+function
+  : FUNCTION S* expr ')' S*
+  ;
+/*
+ * There is a constraint on the <A name=x2><SPAN class=index-inst title=color>color</SPAN></A> that it must
+ * have either 3 or 6 hex-digits (i.e., [0-9a-fA-F])
+ * after the "#"; e.g., "#000" is OK, but "#abcd" is not.
+ */
+hexcolor
+  : HASH S*
+  ;
+</PRE>
+<H2><A name=q2>D.2 Lexical scanner</A></H2>
+<P>The following is the <A name=x3><SPAN class=index-def 
+title=tokenizer>tokenizer</SPAN></A>, written in Flex (see <A class=noxref 
+href="http://www.w3.org/TR/REC-CSS2/refs.html#ref-FLEX" rel=biblioentry><SPAN 
+class=normref>[FLEX]</SPAN></A>) notation. The tokenizer is case-insensitive. 
+<P>The two occurrences of "\377" represent the highest character number that 
+current versions of Flex can deal with (decimal 255). They should be read as 
+"\4177777" (decimal 1114111), which is the highest possible code point in <A 
+name=x4><SPAN class=index-inst title=unicode>Unicode</SPAN></A>/<A name=x5><SPAN 
+class=index-inst title=iso-10646>ISO-10646</SPAN></A>. <PRE>%option case-insensitive
+
+h		[0-9a-f]
+nonascii	[\200-\377]
+unicode		\\{h}{1,6}[ \t\r\n\f]?
+escape		{unicode}|\\[ -~\200-\377]
+nmstart		[a-z]|{nonascii}|{escape}
+nmchar		[a-z0-9-]|{nonascii}|{escape}
+string1		\"([\t !#$%&amp;(-~]|\\{nl}|\'|{nonascii}|{escape})*\"
+string2		\'([\t !#$%&amp;(-~]|\\{nl}|\"|{nonascii}|{escape})*\'
+
+ident		{nmstart}{nmchar}*
+name		{nmchar}+
+num		[0-9]+|[0-9]*"."[0-9]+
+string		{string1}|{string2}
+url		([!#$%&amp;*-~]|{nonascii}|{escape})*
+w		[ \t\r\n\f]*
+nl		\n|\r\n|\r|\f
+range		\?{1,6}|{h}(\?{0,5}|{h}(\?{0,4}|{h}(\?{0,3}|{h}(\?{0,2}|{h}(\??|{h})))))
+
+%%
+
+[ \t\r\n\f]+		{return S;}
+
+\/\*[^*]*\*+([^/][^*]*\*+)*\/	/* ignore comments */
+
+"&lt;!--"			{return CDO;}
+"--&gt;"			{return CDC;}
+"~="			{return INCLUDES;}
+"|="			{return DASHMATCH;}
+
+{string}		{return STRING;}
+
+{ident}			{return IDENT;}
+
+"#"{name}		{return HASH;}
+
+"@import"		{return IMPORT_SYM;}
+"@page"			{return PAGE_SYM;}
+"@media"		{return MEDIA_SYM;}
+"@font-face"		{return FONT_FACE_SYM;}
+"@charset"		{return CHARSET_SYM;}
+"@"{ident}		{return ATKEYWORD;}
+
+"!{w}important"		{return IMPORTANT_SYM;}
+
+{num}em			{return EMS;}
+{num}ex			{return EXS;}
+{num}px			{return LENGTH;}
+{num}cm			{return LENGTH;}
+{num}mm			{return LENGTH;}
+{num}in			{return LENGTH;}
+{num}pt			{return LENGTH;}
+{num}pc			{return LENGTH;}
+{num}deg		{return ANGLE;}
+{num}rad		{return ANGLE;}
+{num}grad		{return ANGLE;}
+{num}ms			{return TIME;}
+{num}s			{return TIME;}
+{num}Hz			{return FREQ;}
+{num}kHz		{return FREQ;}
+{num}{ident}		{return DIMEN;}
+{num}%			{return PERCENTAGE;}
+{num}			{return NUMBER;}
+
+"url("{w}{string}{w}")"	{return URI;}
+"url("{w}{url}{w}")"	{return URI;}
+{ident}"("		{return FUNCTION;}
+
+U\+{range}		{return UNICODERANGE;}
+U\+{h}{1,6}-{h}{1,6}	{return UNICODERANGE;}
+
+.			{return *yytext;}
+</PRE>
+<H2>D.3 <A name=tokenizer-diffs>Comparison of tokenization in CSS2 and 
+CSS1</A></H2>
+<P>There are some differences in the syntax specified in the CSS1 recommendation 
+(<A class=noxref href="http://www.w3.org/TR/REC-CSS2/refs.html#ref-CSS1" 
+rel=biblioentry><SPAN class=informref>[CSS1]</SPAN></A>), and the one above. 
+Most of these are due to new tokens in CSS2 that didn't exist in CSS1. Others 
+are because the grammar has been rewritten to be more readable. However, there 
+are some incompatible changes, that were felt to be errors in the CSS1 syntax. 
+They are explained below. 
+<UL>
+  <LI>CSS1 style sheets could only be in 1-byte-per-character encodings, such as 
+  ASCII and ISO-8859-1. CSS2 has no such limitation. In practice, there was 
+  little difficulty in extrapolating the CSS1 tokenizer, and some UAs have 
+  accepted 2-byte encodings. 
+  <LI>CSS1 only allowed four hex-digits after the backslash (\) to refer to 
+  Unicode characters, CSS2 <A 
+  href="http://www.w3.org/TR/REC-CSS2/syndata.html#escaped-characters">allows 
+  six</A>. Furthermore, CSS2 allows a whitespace character to delimit the escape 
+  sequence. E.g., according to CSS1, the string "\abcdef" has 3 letters (\abcd, 
+  e, and f), according to CSS2 it has only one (\abcdef). 
+  <LI>The tab character (ASCII 9) was not allowed in strings. However, since 
+  strings in CSS1 were only used for font names and for URLs, the only way this 
+  can lead to incompatibility between CSS1 and CSS2 is if a style sheet contains 
+  a font family that has a tab in its name. 
+  <LI>Similarly, newlines (<A 
+  href="http://www.w3.org/TR/REC-CSS2/syndata.html#strings">escaped with a 
+  backslash</A>) were not allowed in strings in CSS1. 
+  <LI>CSS2 parses a number immediately followed by an identifier as a DIMEN 
+  token (i.e., an unknown unit), CSS1 parsed it as a number and an identifier. 
+  That means that in CSS1, the declaration 'font: 10pt/1.2serif' was correct, as 
+  was 'font: 10pt/12pt serif'; in CSS2, a space is required before "serif". 
+  (Some UAs accepted the first example, but not the second.) 
+  <LI>In CSS1, a class name could start with a digit (".55ft"), unless it was a 
+  dimension (".55in"). In CSS2, such classes are parsed as unknown dimensions 
+  (to allow for future additions of new units). To make ".55ft" a valid class, 
+  CSS2 requires the first digit to be escaped (".\55ft") </LI></UL>
+<HR class=navbar>
+
+<DIV class=navbar align=center>
+<P><A href="http://www.w3.org/TR/REC-CSS2/notes.html">previous</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/refs.html">next</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/cover.html#minitoc">contents</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/propidx.html">properties</A> &nbsp; <A 
+href="http://www.w3.org/TR/REC-CSS2/indexlist.html">index</A> &nbsp; 
+</P></DIV></BODY></HTML>

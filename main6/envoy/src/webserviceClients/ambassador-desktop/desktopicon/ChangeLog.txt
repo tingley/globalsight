@@ -1,0 +1,16 @@
+Version 2.1 (2007-10-31)  6.9.2_ER50ab
+1. Add comments issue. 
+2. Refine webservice performance.
+3. Job status issue. ER55
+
+Version 2.0 (2007-10-17) 6.9.2_ER50
+1. Enhancement in "Create Job".
+	1.1 Handle multi-files.
+	1.2 Add CommitJobDialog to show details of the progress of creating job.
+2. Refine download progress.
+
+Version 1.0 (2007-08-06)
+1. Support Firefox both for Mac OS and Windows OS.
+2. Run Desktop Icon application as a Jar.
+3. Add a menu Help under both Mac OS and Windows OS.
+4. For Mac OS, automatically check the dependence of third party software, such as Ruby, gem, SafariWatir, Firefox.

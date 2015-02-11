@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="TM" >
+  <topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Corpus Results" url="My_Activities/Corpus_Results.htm" />
+  <topic name="Create/Edit Translation Memory" url="Setup/Translation_Memory/Create_Modify_Translation_Memory.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="Exporting... (Export p.3)" url="Setup/Translation_Memory/Exporting..._(Export_p.3).htm" />
+  <topic name="How are TM Fuzzy Matching scores calculated" url="Appendix/Linguistic_FAQ/How_are_TM_Fuzzy_Matching_scores_calculated.htm" />
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="How does TM highlighting work" url="Appendix/Linguistic_FAQ/How_does_TM_highlighting_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+  <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="No Match Repetitions" url="Glossary/No_Match_Repetitions.htm" />
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+  <topic name="Output Options (Export p.2)" url="Setup/Translation_Memory/Output_Options_(Export_p.2).htm" />
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Replacement Results (Search and Replace p.3)" url="Setup/Translation_Memory/Replacement_Results_(Search_and_Replace_p.3).htm" />
+  <topic name="Results" url="Setup/Translation_Memory/Results.htm" />
+  <topic name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+  <topic name="Search and Replace" url="Setup/Translation_Memory/Search_and_Replace.htm" />
+  <topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+  <topic name="Segment Protection" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Editing_Text.htm" />
+  <topic name="Set Import Options (Import p.2)" url="Setup/Translation_Memory/Set_Import_Options_(Import_p.2).htm" />
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="TM" url="Glossary/TM.htm" />
+  <topic name="TM Matches" url="Glossary/TM_Matches.htm" />
+  <topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+  <topic name="Upload Aligner Package" url="Data_Sources/Corpus_Aligner/Upload_Aligner_Package.htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="What is Translation Memory" url="Appendix/Linguistic_FAQ/What_is_Translation_Memory.htm" />
+  <topic name="When are segments read from TM" url="Appendix/Linguistic_FAQ/When_are_segments_read_from_TM.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+  <topic name="Working Offline" url="Appendix/Working_Offline/RTF_(List_View)/Working_Offline.htm" />
+</key>
+<key name="TM during" >
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="When are segments read from TM" url="Appendix/Linguistic_FAQ/When_are_segments_read_from_TM.htm" />
+</key>
+<key name="TM Fuzzy" >
+  <topic name="How are TM Fuzzy Matching scores calculated" url="Appendix/Linguistic_FAQ/How_are_TM_Fuzzy_Matching_scores_calculated.htm" />
+</key>
+<key name="TM Fuzzy Matching scores calculated" >
+  <topic name="How are TM Fuzzy Matching scores calculated" url="Appendix/Linguistic_FAQ/How_are_TM_Fuzzy_Matching_scores_calculated.htm" />
+</key>
+<key name="TM highlighting" >
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+</key>
+<key name="TM locking" >
+  <topic name="How do TM highlighting and TM locking work for each type of TM match" url="Appendix/Linguistic_FAQ/How_do_TM_highlighting_and_TM_locking_work_for_each_type_of_TM_match.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+</key>
+<key name="TM Matches" >
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="TM Matches" url="Glossary/TM_Matches.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+</key>
+<key name="TM matching" >
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+</key>
+<key name="TM Profile" >
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+  <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+</key>
+<key name="TM Report" >
+  <topic name="TM Report" url="Reports/TM_Report.htm" />
+</key>
+<key name="TM Window" >
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+</key>
+<key name="Trados" >
+  <topic name="Download" url="My_Activities/Download.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
+  <topic name="How is GlobalSight Word Count different from that of Trados" url="Appendix/Linguistic_FAQ/How_is_GlobalSight_Word_Count_different_from_that_of_Trados.htm" />
+  <topic name="How to Save Files for Upload" url="Appendix/Working_Offline/RTF_(List_View)/How_to_Save_Files_for_Upload.htm" />
+  <topic name="Termbase Export" url="Setup/Terminology/Export.htm" />
+</key>
+<key name="Trados segment" >
+  <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
+</key>
+<key name="Translatable" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="What is a Segment" url="Appendix/Linguistic_FAQ/What_is_a_Segment.htm" />
+  <topic name="Why does importing take so long" url="Appendix/Linguistic_FAQ/Why_does_importing_take_so_long.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Translation Memory" >
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+  <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
+  <topic name="Import TM" url="Setup/Translation_Memory/Import_TM.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview1" url="Appendix/Alignment/Overview1.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Segment Editor" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Segment_Editor.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="TM" url="Glossary/TM.htm" />
+  <topic name="TM Profile" url="Glossary/TM_Profile.htm" />
+  <topic name="TM Window (Inline)" url="My_Activities/TM_Window_(Inline).htm" />
+  <topic name="Toolbar" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Toolbar.htm" />
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+  <topic name="Translation Memory Profiles Main Screen" url="Setup/Translation_Memory_Profiles/Translation_Memory_Profiles_Main.htm" />
+  <topic name="What is Translation Memory" url="Appendix/Linguistic_FAQ/What_is_Translation_Memory.htm" />
+  <topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+</key>
+<key name="Translation Memory Main Screen" >
+  <topic name="Translation Memory Main Screen" url="Setup/Translation_Memory/Translation_Memory_Main_Screen.htm" />
+</key>
+
+</indexdata>

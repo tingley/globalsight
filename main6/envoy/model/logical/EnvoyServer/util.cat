@@ -1,0 +1,6109 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object Class_Category "util"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3A81C41E005B"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "ServerProxy"
+	    quid       	"3A81C43B007B"
+	    operations 	(list Operations
+		(object Operation "getLeverager"
+		    quid       	"3A81C44A00AF"
+		    stereotype 	"static"
+		    result     	"Leverager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3A7B42760027")
+		(object Operation "getPageImporter"
+		    quid       	"3A81C45B01FE"
+		    stereotype 	"static"
+		    result     	"PageImporter"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3A7F1A330092")
+		(object Operation "getJobHandler"
+		    quid       	"3A81C49A0212"
+		    stereotype 	"static"
+		    result     	"JobHandler"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"38BEFAD2003B")
+		(object Operation "getProjectHandler"
+		    quid       	"3A81C4A900A1"
+		    stereotype 	"static"
+		    result     	"ProjectHandler"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3947437C00FA")
+		(object Operation "getLocaleManager"
+		    quid       	"3A81C4C50020"
+		    stereotype 	"static"
+		    result     	"LocaleManager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getUserManager"
+		    quid       	"3A81C4D70210"
+		    stereotype 	"static"
+		    result     	"UserManager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"39474F9F021A")
+		(object Operation "getSecurityManager"
+		    quid       	"3A81C4E500E4"
+		    stereotype 	"static"
+		    result     	"SecurityManager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3A5C955F014D")
+		(object Operation "getWorkflowServer"
+		    quid       	"3A81C4FD0070"
+		    stereotype 	"static"
+		    result     	"WorkflowServer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getStatisticsService"
+		    quid       	"3A81C61F03A2"
+		    stereotype 	"static"
+		    result     	"StatisticsService"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0
+		    quidu      	"3A7F16FC0003")))
+	(object Class_Category "system"
+	    quid       	"3ACB7E8202AF"
+	    exportControl 	"Public"
+	    logical_models 	(list unit_reference_list
+		(object Class "ServerObject"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3ACB7E9C03CF"
+		    documentation 	
+|* This interface defines the methods that a server object in Envoy
+| * must implement.  A server object in Envoy is one that needs to be
+| * started at system startup, and destroyed at system shutdown.
+| * 
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    operations 	(list Operations
+			(object Operation "init"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230230327"
+			    documentation 	
+|     * This is the initialization method for the server object.
+|     * The system calls this method immediate after instantiating
+|     * this object.
+			    
+			    result     	"void"
+			    exceptions 	"SystemStartupException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "destroy"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2302303B3"
+			    documentation 	
+|     * This is the method for the server object to clean up before
+|     * it is destroyed.  The system calls this method immediately
+|     * before system shutdown.
+			    
+			    result     	"void"
+			    exceptions 	"SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::ServerObject"
+		    quidu      	"3AAE4D5201D6"
+		    language   	"Java")
+		(object Class "Envoy"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2300000E1"
+		    documentation 	
+|* This is the main program of the Envoy system.  It can be deployed in
+| * an application server such as WebLogic, or run from the command
+| * line.
+| *
+| * @version     1.0, (8/15/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    operations 	(list Operations
+			(object Operation "Envoy"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300302DA"
+			    documentation 	
+|	 * Default constructor.
+			    
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "main"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300302DB"
+			    documentation 	
+|	 * main method that is run by the JVM
+|	 * It takes in one optional parameter that specifies if the system should be started up or
+|	 * shutdown.  If the parameter isn't specified, it assumes startup.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "args"
+				    quid       	"3AD2300302EE"
+				    type       	"String[]"))
+			    result     	"void"
+			    exceptions 	"SystemStartupException,SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "shutdown"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300302F8"
+			    documentation 	
+| * Shutdown the system.
+| *
+| * 	@throws An exception is thrown if they system can't be shutdown properly.
+			    
+			    result     	"void"
+			    exceptions 	"SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "startup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300302F9"
+			    documentation 	
+| * Start the system up.
+| *
+| * @throws An exception if they system couldn't be started successfully.
+			    
+			    result     	"void"
+			    exceptions 	"SystemStartupException,SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::Envoy"
+		    quidu      	"3AD22FFF0072"
+		    language   	"Java")
+		(object Class "EnvoySystemControl"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD23005007A"
+		    documentation 	
+|* This is the control unit of the Envoy system.  It extends the
+| * abstract base class SystemControlTemplate and implement the methods
+| * that are used by methods in the base class to provide Envoy specific
+| * information and behavior.
+| * 
+| * @version     1.0, (8/15/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD2300802E1"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemControlTemplate"
+			    quidu      	"3AD230070222"))
+		    operations 	(list Operations
+			(object Operation "EnvoySystemControl"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300802EB"
+			    documentation 	"     * Default constructor."
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "getServerClasses"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300802EC"
+			    documentation 	
+|     * Get a list of the names of the server object classes.
+|     * This method is to be implemented by the subclasses.
+			    
+			    result     	"String[]"
+			    exceptions 	"ConfigException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Protected"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::EnvoySystemControl"
+		    quidu      	"3AD2300303AD"
+		    language   	"Java")
+		(object Class "SystemControlTemplate"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD230070222"
+		    documentation 	
+|* This is an abstract implementation of the SystemControl interface.
+| * This class provides default implementations of the startup and
+| * shutdown methods.  The startup method employs the template method
+| * pattern, which uses the abstract method getServerClasses method
+| * to get a list of server object classes that needs to be started
+| * and initialized.
+| *
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    realized_interfaces 	(list realize_rel_list
+			(object Realize_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD2303B01B8"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemControl"
+			    quidu      	"3AD2301A00DF"))
+		    operations 	(list Operations
+			(object Operation "SystemControlTemplate"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303C0368"
+			    documentation 	"     * Default constructor."
+			    concurrency 	"Sequential"
+			    opExportControl 	"Protected"
+			    uid        	0)
+			(object Operation "startup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303C0372"
+			    documentation 	
+|     * This method is called to start the system that is controlled
+|     * by this object.
+			    
+			    result     	"void"
+			    exceptions 	"SystemStartupException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "shutdown"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303C037C"
+			    documentation 	
+|     * This method is called to shutdown the system that is
+|     * controlled by this object.
+			    
+			    result     	"void"
+			    exceptions 	"SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "getServerClasses"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303C0390"
+			    documentation 	
+|     * Get a list of the names of the server object classes.
+|     * This method is to be implemented by the subclasses.
+			    
+			    result     	"String[]"
+			    exceptions 	"ConfigException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Protected"
+			    uid        	0)
+			(object Operation "getServerInstances"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303C03A4"
+			    documentation 	
+|     * Get a list of the created server objects.
+|     *
+|     * @return A list of the created server objects.
+			    
+			    result     	"Enumeration"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Protected"
+			    uid        	0
+			    quidu      	"397D958D008A")
+			(object Operation "processCommand"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	TRUE))
+			    quid       	"3AD2303C03C3"
+			    documentation 	
+|     * Process system startup, shutdown and other commands from
+|     * interface methods.  All these command are processed here
+|     * so that only one command is being processed at a time.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "command"
+				    quid       	"3AD2303C03CD"
+				    type       	"int"))
+			    result     	"void"
+			    exceptions 	"SystemStartupException,SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "destroyStartedServerObjects"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	TRUE))
+			    quid       	"3AD2303D0003"
+			    documentation 	"     * Destroy all started server objects."
+			    result     	"void"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0))
+		    class_attributes 	(list class_attribute_list
+			(object ClassAttribute "SYSTEM_NOTSTARTED"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0033"
+			    type       	"int"
+			    initv      	"0"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "SYSTEM_STARTING"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0047"
+			    type       	"int"
+			    initv      	"1"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "SYSTEM_STARTED"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0051"
+			    type       	"int"
+			    initv      	"2"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "SYSTEM_STOPPING"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0065"
+			    type       	"int"
+			    initv      	"3"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "SYSTEM_STOPPED"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0083"
+			    type       	"int"
+			    initv      	"4"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "COMMAND_STARTUP"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C00A1"
+			    type       	"int"
+			    initv      	"1"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "COMMAND_SHUTDOWN"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C00B5"
+			    type       	"int"
+			    initv      	"2"
+			    exportControl 	"Implementation"
+			    static     	TRUE)
+			(object ClassAttribute "m_systemState"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0340"
+			    type       	"int"
+			    exportControl 	"Implementation"))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemControlTemplate"
+		    quidu      	"3AD23006013A"
+		    language   	"Java"
+		    abstract   	TRUE)
+		(object Class "EnvoySystemListener"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2300A0031"
+		    documentation 	
+|* This type defines a remote interface of the class that listens to
+| * messages that are to be acted upon by the Envoy system controller. 
+| * 
+| * @version     1.0, (8/16/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    operations 	(list Operations
+			(object Operation "shutdownSystem"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2300C0084"
+			    documentation 	
+|	 * Request the Envoy system to shutdown.
+			    
+			    result     	"void"
+			    exceptions 	"RemoteException,SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::EnvoySystemListener"
+		    quidu      	"3AD23008036E"
+		    language   	"Java")
+		(object Class "EnvoySystemListenerJDKRemote"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2300D0162"
+		    stereotype 	"Interface"
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD2300F00A7"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListener"
+			    quidu      	"3AD2300A0031")
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230100170"
+			    supplier   	"Logical View::java::rmi::Remote"
+			    quidu      	"397D97550230"))
+		    module     	"Component View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRemote"
+		    quidu      	"3AD2300C00AC"
+		    language   	"Java")
+		(object Class "EnvoySystemListenerJDKRMIImpl"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD23011028A"
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230140018"
+			    supplier   	"Logical View::java::rmi::server::UnicastRemoteObject"
+			    quidu      	"397D9750026F"))
+		    realized_interfaces 	(list realize_rel_list
+			(object Realize_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230140271"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRemote"
+			    quidu      	"3AD2300D0162")
+			(object Realize_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD2301500D7"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::EvRemote"
+			    quidu      	"3AD22FE201D1"))
+		    operations 	(list Operations
+			(object Operation "EnvoySystemListenerJDKRMIImpl"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230150344"
+			    parameters 	(list Parameters
+				(object Parameter "p_localReference"
+				    quid       	"3AD230150345"
+				    type       	"EnvoySystemListener"))
+			    exceptions 	"java.rmi.RemoteException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "getLocalReference"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23015034E"
+			    result     	"Object"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0
+			    quidu      	"397D954501B2")
+			(object Operation "shutdownSystem"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23015034F"
+			    result     	"void"
+			    exceptions 	"com.globalsight.everest.util.system.SystemShutdownException,java.rmi.RemoteException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRMIImpl"
+		    quidu      	"3AD2301001D5"
+		    language   	"Java")
+		(object Class "EnvoySystemListenerLocal"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2301700F8"
+		    documentation 	
+|* This type defines a remote interface of the class that listens to
+| * messages that are to be acted upon by the Envoy system controller. 
+| * 
+| * @version     1.0, (8/16/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    realized_interfaces 	(list realize_rel_list
+			(object Realize_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230190033"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListener"
+			    quidu      	"3AD2300A0031"))
+		    operations 	(list Operations
+			(object Operation "EnvoySystemListenerLocal"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2301B01C6"
+			    documentation 	
+|	 * Construct an instance that is associated with the given
+|	 * SystemControl object.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_envoyController"
+				    quid       	"3AD2301B01C7"
+				    type       	"SystemControl"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "shutdownSystem"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2301B01D0"
+			    documentation 	
+|	 * Request the Envoy system to shutdown.
+			    
+			    result     	"void"
+			    exceptions 	"RemoteException,SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::EnvoySystemListenerLocal"
+		    quidu      	"3AD23016001B"
+		    language   	"Java")
+		(object Class "SystemControl"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2301A00DF"
+		    documentation 	
+|* This interface defines the methods that a server control object in
+| * Envoy must implement.  A control object has a startup method for
+| * system startup, and a shutdown method for system shutdown.
+| * 
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    operations 	(list Operations
+			(object Operation "startup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303A0026"
+			    documentation 	
+|     * This method is called to start the system that is controlled
+|     * by this object.
+			    
+			    result     	"void"
+			    exceptions 	"SystemStartupException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "shutdown"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2303A003A"
+			    documentation 	
+|     * This method is called to shutdown the system that is
+|     * controlled by this object.
+			    
+			    result     	"void"
+			    exceptions 	"SystemShutdownException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemControl"
+		    quidu      	"3AD230190034"
+		    language   	"Java")
+		(object Class "PropertiesSystemConfig"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2301D00BB"
+		    documentation 	
+|* Concrete subclass of SystemConfiguration that uses properties file
+| * to store the configuration parameters.
+| * 
+| * @version     1.0, (7/12/00 2:05:17 PM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD2302000DD"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfiguration"
+			    quidu      	"3AD2301F0013"))
+		    exportControl 	"Implementation"
+		    operations 	(list Operations
+			(object Operation "PropertiesSystemConfig"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2302000DE"
+			    documentation 	
+| * Construct an instance of this class using the given
+| * resource name as the name of the properties file
+| * that stores the system parameters.
+| *
+| * @exception com.globalsight.util.system.ConfigException Exception
+| *            occurred while loading the resource.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_resourceName"
+				    quid       	"3AD2302000E7"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    exceptions 	"ConfigException,GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::PropertiesSystemConfig"
+		    quidu      	"3AD2301C0005"
+		    language   	"Java")
+		(object Class "SystemConfiguration"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2301F0013"
+		    documentation 	
+|* This class defines the method that client objects can use to
+| * access the system configuration parameters.  It also provides a
+| * factory method for client objects to obtain an instance of a
+| * concrete subclass.
+| * 
+| * @version     1.0, (7/11/00 5:58:09 PM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    operations 	(list Operations
+			(object Operation "SystemConfiguration"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230360003"
+			    documentation 	" * Default SystemConfiguration constructor."
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "getInstance"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23036000D"
+			    documentation 	
+| * Get a SystemConfiguration object.
+| * 
+| * @return com.globalsight.everest.util.system.SystemConfiguration
+| * @exception com.globalsight.util.GeneralException
+			    
+			    result     	"SystemConfiguration"
+			    exceptions 	"GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "getIntParameter"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23036000E"
+			    documentation 	
+| * Get the specified parameter and return it as an int.
+| *
+| * @param p_paramName Name of the parameter to get value for.
+| * @return Value of the specified parameter.
+| * @exception com.globalsight.util.system.ConfigException
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_paramName"
+				    quid       	"3AD230360017"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"int"
+			    exceptions 	"ConfigException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "getStringParameter"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230360018"
+			    documentation 	
+| * Get the specified parameter and return it as a String.
+| *
+| * @param p_paramName Name of the parameter to get value for.
+| * @return Value of the specified parameter.
+| * @exception com.globalsight.util.system.ConfigException
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_paramName"
+				    quid       	"3AD23036002B"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"String"
+			    exceptions 	"ConfigException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0
+			    quidu      	"397D9546039F"))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemConfiguration"
+		    quidu      	"3AAE4D320238"
+		    language   	"Java"
+		    abstract   	TRUE)
+		(object Class "SystemConfigParamNames"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD230240300"
+		    documentation 	
+|* This interface defines the names of the Envoy system configuration
+| * parameters.  The symbols defined here are used with the
+| * SystemConfiguration methods to read the system configuration
+| * parameter values at run time.
+| * 
+| * @version     1.0, (8/16/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    module     	"Component View::com::globalsight::everest::util::system::SystemConfigParamNames"
+		    quidu      	"3AD22D1703CF"
+		    language   	"Java")
+		(object Class "SystemConfigurationConstants"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD23037011C"
+		    documentation 	
+|* This interface defines miscellaneous constants that are used in
+| * conjunction with Envoy system configuration parameters.
+| * Some specific system configuration constants are defined in
+| * other interfaces such as SystemConfigParamNames.
+| * 
+| * @version     1.0, (8/17/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    module     	"Component View::com::globalsight::everest::util::system::SystemConfigurationConstants"
+		    quidu      	"3AD23036005D"
+		    language   	"Java")
+		(object Class "SystemShutdownException"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD2303D02AC"
+		    documentation 	
+|* This exception is thrown for exceptions that happens during system
+| * shutdown.
+| * <p>
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230410149"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemUtilException"
+			    quidu      	"3AD230400061"))
+		    operations 	(list Operations
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23041014A"
+			    documentation 	
+|     * Constructs an instance using the exception id.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD23041015D"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230410167"
+			    documentation 	
+|     * Constructs an instance using the exception id, and the message id.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_messageId Explanation of the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD230410168"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230410171"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230410172"
+			    documentation 	
+|     * Constructs an instance using the exception id, and the message.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_message Explanation of the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD23041017B"
+				    type       	"int")
+				(object Parameter "p_message"
+				    quid       	"3AD230410185"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230410199"
+			    documentation 	
+|     * Constructs an instance using the exception id, and the original exception.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_originalException Original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304101A3"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD2304101AD"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304101B7"
+			    documentation 	
+|     * Constructs an instance using the exception id, the message id, and the original exception.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_messageId Explanation of the exception.
+|     * @param p_originalException Original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304101C1"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD2304101CB"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD2304101D5"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemShutdownException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304101DF"
+			    documentation 	
+|     * Constructs an instance using the exception id, the message id, and the original exception.
+|     * NOTE: THIS CONSTRUCTOR IS USED FOR COMPOUND ERROR MESSAGES.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_messageId The id that specifies the explanation for the exception.
+|     * @param p_messageArguments The message arguments in order.
+|     * @param p_originalException The original exception that this exception edentifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304101E9"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD2304101FD"
+				    type       	"int")
+				(object Parameter "p_messageArguments"
+				    quid       	"3AD230410207"
+				    type       	"String[]")
+				(object Parameter "p_originalException"
+				    quid       	"3AD23041021B"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemShutdownException"
+		    quidu      	"3AD22D00030E"
+		    language   	"Java")
+		(object Class "SystemUtilException"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD230400061"
+		    documentation 	
+|* This exception is the root class for all exceptions in the
+| * Envoy system utility.
+| * <p>
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD230450249"
+			    supplier   	"Logical View::com::globalsight::util::GeneralException"
+			    quidu      	"3AAE4D09007E"))
+		    operations 	(list Operations
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD230450271"
+			    documentation 	
+|     * Constructs an instance using the given exception identification.
+|     *
+|     * @param p_exceptionId Reason for the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD230450285"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23045028F"
+			    documentation 	
+|     * Constructs an instance using the given exception id, and the message id.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_messageId The id that specifies the explanation for the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD230450290"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230450299"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304502A3"
+			    documentation 	
+|     * Constructs an instance using the given exception id, and the message id.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_message The explanation for the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304502AD"
+				    type       	"int")
+				(object Parameter "p_message"
+				    quid       	"3AD2304502C1"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304502CB"
+			    documentation 	
+|     * Constructs an instance using the given exception id, and the original exception.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_originalException The original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304502D5"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD2304502DF"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304502F3"
+			    documentation 	
+|     * Constructs an instance using the exception id, and the original exception.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_messageId The id that specifies the explanation for the exception.
+|     * @param p_originalException The original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304502FD"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230450307"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD23045031B"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemUtilException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23045032F"
+			    documentation 	
+|     * Constructs an instance using the given component, exception
+|     * identification, message identification, and the original exception.
+|     * NOTE: THIS CONSTRUCTOR IS USED FOR COMPOUND ERROR MESSAGES.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_messageId The id that specifies the explanation for the exception.
+|     * @param p_messageArguments The message arguments in order.
+|     * @param p_originalException The original exception that this exception edentifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD230450339"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230450343"
+				    type       	"int")
+				(object Parameter "p_messageArguments"
+				    quid       	"3AD230450357"
+				    type       	"String[]")
+				(object Parameter "p_originalException"
+				    quid       	"3AD230450375"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    class_attributes 	(list class_attribute_list
+			(object ClassAttribute "EX_SERVERCLASSNAMES"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD23045024A"
+			    documentation 	
+|     * Indicates an error in the system configuration with regard to
+|     * server object class names.
+			    
+			    type       	"int"
+			    initv      	"1001"
+			    exportControl 	"Public"
+			    static     	TRUE)
+			(object ClassAttribute "EX_FAILEDTOCREATESERVER"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD23045025D"
+			    documentation 	"     * Indicates a failure in the creation of a server object."
+			    type       	"int"
+			    initv      	"1002"
+			    exportControl 	"Public"
+			    static     	TRUE)
+			(object ClassAttribute "EX_FAILEDTOINITSERVER"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230450267"
+			    documentation 	"     * Indicates a failure in the initialization of a server object"
+			    type       	"int"
+			    initv      	"1003"
+			    exportControl 	"Public"
+			    static     	TRUE))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemUtilException"
+		    quidu      	"3AD2303E0393"
+		    language   	"Java")
+		(object Class "SystemStartupException"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD23042010E"
+		    documentation 	
+|* This exception is thrown for exceptions that happens during system
+| * startup.
+| * 
+| * @version     1.0, (8/14/00)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    superclasses 	(list inheritance_relationship_list
+			(object Inheritance_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD23044005D"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemUtilException"
+			    quidu      	"3AD230400061"))
+		    operations 	(list Operations
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23044005E"
+			    documentation 	
+|     * Constructs an instance using the given exception id.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD23044007B"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD23044007C"
+			    documentation 	
+|     * Constructs an instance using the exception and message id.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_messageId Explanation of the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD23044007D"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230440099"
+				    type       	"int"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304400A3"
+			    documentation 	
+|     * Constructs an instance using the exception id and message.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_message Explanation of the exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304400AD"
+				    type       	"int")
+				(object Parameter "p_message"
+				    quid       	"3AD2304400B7"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304400B8"
+			    documentation 	
+|     * Constructs an instance using the exception id and the original exception.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_originalException Original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304400C1"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD2304400CB"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304400D5"
+			    documentation 	
+|     * Constructs an instance using the exception id, and the original exception.
+|     * <p>
+|     * @param p_exceptionId Reason for the exception.
+|     * @param p_messageId Explanation of the exception.
+|     * @param p_originalException Original exception that this exception identifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD2304400DF"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD2304400E9"
+				    type       	"int")
+				(object Parameter "p_originalException"
+				    quid       	"3AD2304400F3"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "SystemStartupException"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD2304400FD"
+			    documentation 	
+|     * Constructs an instance using the exception id, message id, and the original exception.
+|     * NOTE: THIS CONSTRUCTOR IS USED FOR COMPOUND ERROR MESSAGES.
+|     * <p>
+|     * @param p_exceptionId The id that specifies the exception.
+|     * @param p_messageId The id that specifies the explanation for the exception.
+|     * @param p_messageArguments The message arguments in order.
+|     * @param p_originalException The original exception that this exception edentifies.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_exceptionId"
+				    quid       	"3AD230440107"
+				    type       	"int")
+				(object Parameter "p_messageId"
+				    quid       	"3AD230440125"
+				    type       	"int")
+				(object Parameter "p_messageArguments"
+				    quid       	"3AD23044012F"
+				    type       	"String[]")
+				(object Parameter "p_originalException"
+				    quid       	"3AD230440143"
+				    type       	"Exception"
+				    quidu      	"397D9550009E"))
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::system::SystemStartupException"
+		    quidu      	"3AD22D01016D"
+		    language   	"Java")
+		(object Association "$UNNAMED$0"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230020008"
+		    roles      	(list role_list
+			(object Role "CATEGORY"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"(GlobalSightCategory) GlobalSightCategory.getInstance(Envoy.class.getName())")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230020009"
+			    label      	"CATEGORY"
+			    supplier   	"Logical View::com::globalsight::log::GlobalSightCategory"
+			    quidu      	"3AD22CFD02C6"
+			    exportControl 	"Private"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$1"
+			    quid       	"3AD230020013"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::Envoy"
+			    quidu      	"3AD2300000E1")))
+		(object Association "$UNNAMED$2"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230020257"
+		    roles      	(list role_list
+			(object Role "c_startup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"startup"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230020261"
+			    label      	"c_startup"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$3"
+			    quid       	"3AD230020301"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::Envoy"
+			    quidu      	"3AD2300000E1")))
+		(object Association "$UNNAMED$4"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2300301CC"
+		    roles      	(list role_list
+			(object Role "c_shutdown"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"shutdown"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2300301CD"
+			    label      	"c_shutdown"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$5"
+			    quid       	"3AD23003026C"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::Envoy"
+			    quidu      	"3AD2300000E1")))
+		(object Association "$UNNAMED$6"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2300B0354"
+		    roles      	(list role_list
+			(object Role "SERVICE_NAME"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"Envoy System Listener"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2300B0355"
+			    documentation 	
+|	 * This listener's service name when binded to a registry.
+			    
+			    label      	"SERVICE_NAME"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$7"
+			    quid       	"3AD2300C0020"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListener"
+			    quidu      	"3AD2300A0031")))
+		(object Association "$UNNAMED$8"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD23015031C"
+		    roles      	(list role_list
+			(object Role "m_localReference"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD23015031D"
+			    label      	"m_localReference"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListener"
+			    quidu      	"3AD2300A0031"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$9"
+			    quid       	"3AD230150326"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRMIImpl"
+			    quidu      	"3AD23011028A")))
+		(object Association "$UNNAMED$10"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2301B01B2"
+		    roles      	(list role_list
+			(object Role "m_envoyController"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2301B01B3"
+			    label      	"m_envoyController"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemControl"
+			    quidu      	"3AD2301A00DF"
+			    exportControl 	"Private"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$11"
+			    quid       	"3AD2301B01B5"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::EnvoySystemListenerLocal"
+			    quidu      	"3AD2301700F8")))
+		(object Association "$UNNAMED$12"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230260230"
+		    roles      	(list role_list
+			(object Role "SERVER_CLASSES"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"server.classes"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230260231"
+			    documentation 	"     * Each component's server class name"
+			    label      	"SERVER_CLASSES"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$13"
+			    quid       	"3AD2302602EF"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$14"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302701B0"
+		    roles      	(list role_list
+			(object Role "TOPLINK_USERNAME"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.username"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302701B1"
+			    label      	"TOPLINK_USERNAME"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$15"
+			    quid       	"3AD230270250"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$16"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230280125"
+		    roles      	(list role_list
+			(object Role "TOPLINK_PASSWORD"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.password"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230280126"
+			    label      	"TOPLINK_PASSWORD"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$17"
+			    quid       	"3AD2302801BB"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$18"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230290086"
+		    roles      	(list role_list
+			(object Role "TOPLINK_CONNECTION"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.connection"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230290087"
+			    label      	"TOPLINK_CONNECTION"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$19"
+			    quid       	"3AD230290126"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$20"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302903CF"
+		    roles      	(list role_list
+			(object Role "TOPLINK_DB_DRIVER"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.driver"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302903D0"
+			    label      	"TOPLINK_DB_DRIVER"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$21"
+			    quid       	"3AD2302A0091"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$22"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302A034E"
+		    roles      	(list role_list
+			(object Role "TOPLINK_LOGGING"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.logging"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302A034F"
+			    label      	"TOPLINK_LOGGING"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$23"
+			    quid       	"3AD2302A03E5"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$24"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302B02B0"
+		    roles      	(list role_list
+			(object Role "TOPLINK_PROJECT_CLASS"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.projectClassName"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302B02B1"
+			    label      	"TOPLINK_PROJECT_CLASS"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$25"
+			    quid       	"3AD2302B0350"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$26"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302C0211"
+		    roles      	(list role_list
+			(object Role "TOPLINK_QUERY_CLASS"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"toplink.namedQueriesClassName"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302C0212"
+			    label      	"TOPLINK_QUERY_CLASS"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$27"
+			    quid       	"3AD2302C02BB"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$28"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302D0186"
+		    roles      	(list role_list
+			(object Role "DFLT_SAX_PARSER_FACTORY"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"parser.factory"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302D0187"
+			    label      	"DFLT_SAX_PARSER_FACTORY"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$29"
+			    quid       	"3AD2302D0230"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$30"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302E0105"
+		    roles      	(list role_list
+			(object Role "VALIDATE_XML"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"parser.validatexml"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302E0106"
+			    label      	"VALIDATE_XML"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$31"
+			    quid       	"3AD2302E01A6"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$32"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2302F0067"
+		    roles      	(list role_list
+			(object Role "CXE_PROTOCOL"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"cxe.protocol"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2302F0071"
+			    label      	"CXE_PROTOCOL"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$33"
+			    quid       	"3AD2302F0111"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$34"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230300018"
+		    roles      	(list role_list
+			(object Role "CXE_HOST"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"cxe.host"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230300019"
+			    label      	"CXE_HOST"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$35"
+			    quid       	"3AD2303000B8"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$36"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230300375"
+		    roles      	(list role_list
+			(object Role "CXE_PORT"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"cxe.port"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230300376"
+			    label      	"CXE_PORT"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$37"
+			    quid       	"3AD230310023"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$38"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2303102D6"
+		    roles      	(list role_list
+			(object Role "CXE_CLASS_NAME"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"cxe.servletname"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303102D7"
+			    label      	"CXE_CLASS_NAME"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$39"
+			    quid       	"3AD230310381"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigParamNames"
+			    quidu      	"3AD230240300")))
+		(object Association "$UNNAMED$40"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD23033013F"
+		    roles      	(list role_list
+			(object Role "SYSTEM_CONFIG"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"envoy.properties"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD230330140"
+			    label      	"SYSTEM_CONFIG"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$41"
+			    quid       	"3AD2303301DF"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfiguration"
+			    quidu      	"3AD2301F0013")))
+		(object Association "$UNNAMED$42"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"?_Touched_?"
+			    value      	"?_Touched_?"))
+		    quid       	"3AD2303400AA"
+		    roles      	(list role_list
+			(object Role "m_systemConfig"
+			    quid       	"3AD2303400AB"
+			    label      	"m_systemConfig"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfiguration"
+			    quidu      	"3AD2301F0013"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$43"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303400AD"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfiguration"
+			    quidu      	"3AD2301F0013"
+			    exportControl 	"Implementation"
+			    static     	TRUE)))
+		(object Association "$UNNAMED$44"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2303503E1"
+		    roles      	(list role_list
+			(object Role "m_params"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303503E2"
+			    label      	"m_params"
+			    supplier   	"Logical View::com::globalsight::util::system::ConfigParams"
+			    quidu      	"3AD230340321"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$45"
+			    quid       	"3AD2303503E4"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfiguration"
+			    quidu      	"3AD2301F0013")))
+		(object Association "$UNNAMED$46"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD230390089"
+		    roles      	(list role_list
+			(object Role "DEFAULT_DELIMITER"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|","
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD23039008A"
+			    documentation 	"     * Default delimiter in a value string"
+			    label      	"DEFAULT_DELIMITER"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$47"
+			    quid       	"3AD230390133"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemConfigurationConstants"
+			    quidu      	"3AD23037011C")))
+		(object Association "$UNNAMED$48"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2303C0029"
+		    roles      	(list role_list
+			(object Role "CATEGORY"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"(GlobalSightCategory) GlobalSightCategory.getInstance(SystemControlTemplate.class.getName())")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C002A"
+			    label      	"CATEGORY"
+			    supplier   	"Logical View::com::globalsight::log::GlobalSightCategory"
+			    quidu      	"3AD22CFD02C6"
+			    exportControl 	"Private"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$49"
+			    quid       	"3AD2303C002C"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemControlTemplate"
+			    quidu      	"3AD230070222")))
+		(object Association "$UNNAMED$50"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD2303C0318"
+		    roles      	(list role_list
+			(object Role "m_serverInstances"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD2303C0319"
+			    label      	"m_serverInstances"
+			    supplier   	"Logical View::java::util::Vector"
+			    quidu      	"397D954D02C9"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$51"
+			    quid       	"3AD2303C031B"
+			    supplier   	"Logical View::com::globalsight::everest::util::system::SystemControlTemplate"
+			    quidu      	"3AD230070222"))))
+	    logical_presentations 	(list unit_reference_list
+		(object ClassDiagram "Package Overview"
+		    quid       	"3ACB7E8202B0"
+		    title      	"Package Overview"
+		    zoom       	100
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::ServerObject" @1
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(270, 1980)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@1
+				location   	(121, 1882)
+				fill_color 	13434879
+				nlines     	2
+				max_width  	298
+				justify    	0
+				label      	"ServerObject")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@1
+				location   	(121, 1837)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	298
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3ACB7E9C03CF"
+			    compartment 	(object Compartment
+				Parent_View 	@1
+				location   	(121, 1938)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	16777215
+				anchor     	2
+				nlines     	3
+				max_width  	295)
+			    width      	316
+			    height     	308
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::Envoy" @2
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(345, 2445)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@2
+				location   	(102, 2305)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	486
+				justify    	0
+				label      	"Envoy")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2300000E1"
+			    compartment 	(object Compartment
+				Parent_View 	@2
+				location   	(102, 2361)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	5
+				max_width  	483)
+			    width      	504
+			    height     	302
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::EnvoySystemControl" @3
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(330, 1305)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@3
+				location   	(64, 1210)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	532
+				justify    	0
+				label      	"EnvoySystemControl")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD23005007A"
+			    compartment 	(object Compartment
+				Parent_View 	@3
+				location   	(64, 1266)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	3
+				max_width  	530)
+			    width      	550
+			    height     	212
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemControlTemplate" @4
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(480, 450)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	TRUE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@4
+				location   	(102, 39)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	756
+				justify    	0
+				label      	"SystemControlTemplate")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD230070222"
+			    compartment 	(object Compartment
+				Parent_View 	@4
+				location   	(102, 98)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	TRUE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	16
+				max_width  	753)
+			    width      	774
+			    height     	846
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object InheritView "" @5
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2300802E1"
+			    client     	@3
+			    supplier   	@4
+			    line_style 	0)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRemote" @6
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1095, 2955)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@6
+				location   	(780, 2929)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	630
+				justify    	0
+				label      	"EnvoySystemListenerJDKRemote")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@6
+				location   	(780, 2884)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	630
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2300D0162"
+			    width      	648
+			    height     	164
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::EnvoySystemListener" @7
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1080, 2040)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@7
+				location   	(849, 1987)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	462
+				justify    	0
+				label      	"EnvoySystemListener")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@7
+				location   	(849, 1942)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	462
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2300A0031"
+			    compartment 	(object Compartment
+				Parent_View 	@7
+				location   	(849, 2043)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	2
+				max_width  	460)
+			    width      	480
+			    height     	218
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object InheritView "" @8
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2300F00A7"
+			    client     	@6
+			    supplier   	@7
+			    line_style 	0)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::EnvoySystemListenerJDKRMIImpl" @9
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1530, 2565)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@9
+				location   	(846, 2447)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	1368
+				justify    	0
+				label      	"EnvoySystemListenerJDKRMIImpl")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD23011028A"
+			    compartment 	(object Compartment
+				Parent_View 	@9
+				location   	(846, 2503)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	4
+				max_width  	1365)
+			    width      	1386
+			    height     	258
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object RealizeView "" @10
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD230140271"
+			    client     	@9
+			    supplier   	@6
+			    line_style 	0)
+			(object AssociationViewNew "$UNNAMED$8" @11
+			    location   	(1295, 2292)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD23015031C"
+			    roleview_list 	(list RoleViews
+				(object RoleView "$UNNAMED$9" @12
+				    Parent_View 	@11
+				    location   	(1025, 1632)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @13
+					Parent_View 	@12
+					location   	(1403, 2355)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	0)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD230150326"
+				    client     	@11
+				    supplier   	@9
+				    line_style 	0)
+				(object RoleView "m_localReference" @14
+				    Parent_View 	@11
+				    location   	(1025, 1632)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @15
+					Parent_View 	@14
+					location   	(1251, 2177)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	348
+					justify    	0
+					label      	"m_localReference"
+					pctDist    	0.800000
+					height     	42
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD23015031D"
+				    client     	@11
+				    supplier   	@7
+				    line_style 	0)))
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemControl" @16
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1080, 1185)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@16
+				location   	(914, 1109)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	332
+				justify    	0
+				label      	"SystemControl")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@16
+				location   	(914, 1064)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	332
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2301A00DF"
+			    compartment 	(object Compartment
+				Parent_View 	@16
+				location   	(914, 1165)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	3
+				max_width  	330)
+			    width      	350
+			    height     	264
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::EnvoySystemListenerLocal" @17
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1080, 1650)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@17
+				location   	(512, 1555)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	1136
+				justify    	0
+				label      	"EnvoySystemListenerLocal")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2301700F8"
+			    compartment 	(object Compartment
+				Parent_View 	@17
+				location   	(512, 1611)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	3
+				max_width  	1133)
+			    width      	1154
+			    height     	212
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object RealizeView "" @18
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD230190033"
+			    client     	@17
+			    supplier   	@7
+			    line_style 	0)
+			(object AssociationViewNew "$UNNAMED$10" @19
+			    location   	(1080, 1430)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2301B01B2"
+			    roleview_list 	(list RoleViews
+				(object RoleView "$UNNAMED$11" @20
+				    Parent_View 	@19
+				    location   	(-720, 1310)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @21
+					Parent_View 	@20
+					location   	(1039, 1500)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD2301B01B5"
+				    client     	@19
+				    supplier   	@17
+				    line_style 	0)
+				(object RoleView "m_envoyController" @22
+				    Parent_View 	@19
+				    location   	(-720, 1310)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @23
+					Parent_View 	@22
+					location   	(1039, 1360)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	354
+					justify    	0
+					label      	"-m_envoyController"
+					pctDist    	0.800000
+					height     	42
+					orientation 	0)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD2301B01B3"
+				    client     	@19
+				    supplier   	@16
+				    line_style 	0)))
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::PropertiesSystemConfig" @24
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1680, 795)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@24
+				location   	(1215, 722)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	930
+				justify    	0
+				label      	"PropertiesSystemConfig")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2301D00BB"
+			    compartment 	(object Compartment
+				Parent_View 	@24
+				location   	(1215, 778)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	2
+				max_width  	928)
+			    width      	948
+			    height     	168
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemConfigParamNames" @25
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(330, 3045)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@25
+				location   	(64, 3019)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	532
+				justify    	0
+				label      	"SystemConfigParamNames")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@25
+				location   	(64, 2974)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	532
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD230240300"
+			    width      	550
+			    height     	164
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemConfiguration" @26
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1605, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	TRUE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@26
+				location   	(1127, 78)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	956
+				justify    	0
+				label      	"SystemConfiguration")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2301F0013"
+			    compartment 	(object Compartment
+				Parent_View 	@26
+				location   	(1127, 137)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	TRUE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	5
+				max_width  	953)
+			    width      	974
+			    height     	318
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object InheritView "" @27
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2302000DD"
+			    client     	@24
+			    supplier   	@26
+			    line_style 	0)
+			(object AssociationViewNew "$UNNAMED$42" @28
+			    location   	(1918, 450)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2303400AA"
+			    roleview_list 	(list RoleViews
+				(object RoleView "m_systemConfig" @29
+				    Parent_View 	@28
+				    location   	(1648, -660)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @30
+					Parent_View 	@29
+					location   	(2023, 450)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	313
+					justify    	0
+					label      	"+m_systemConfig"
+					pctDist    	0.800000
+					height     	42
+					orientation 	0)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD2303400AB"
+				    client     	@28
+				    supplier   	@26
+				    vertices   	(list Points
+					(1918, 450)
+					(2130, 450)
+					(1977, 384))
+				    line_style 	0)
+				(object RoleView "$UNNAMED$43" @31
+				    Parent_View 	@28
+				    location   	(1648, -660)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @32
+					Parent_View 	@31
+					location   	(1605, 492)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	0)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD2303400AD"
+				    client     	@28
+				    supplier   	@26
+				    vertices   	(list Points
+					(1918, 450)
+					(1605, 450)
+					(1605, 384))
+				    line_style 	0)))
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemConfigurationConstants" @33
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(345, 3285)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@33
+				location   	(53, 3259)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	584
+				justify    	0
+				label      	"SystemConfigurationConstants")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@33
+				location   	(53, 3214)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	584
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD23037011C"
+			    width      	602
+			    height     	164
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object RealizeView "" @34
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD2303B01B8"
+			    client     	@4
+			    supplier   	@16
+			    line_style 	0)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemShutdownException" @35
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1170, 4110)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@35
+				location   	(12, 3925)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	2316
+				justify    	0
+				label      	"SystemShutdownException")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD2303D02AC"
+			    compartment 	(object Compartment
+				Parent_View 	@35
+				location   	(12, 3981)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	7
+				max_width  	2313)
+			    width      	2334
+			    height     	392
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemUtilException" @36
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1890, 3375)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@36
+				location   	(790, 3122)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	2200
+				justify    	0
+				label      	"SystemUtilException")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD230400061"
+			    compartment 	(object Compartment
+				Parent_View 	@36
+				location   	(790, 3178)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	10
+				max_width  	2198)
+			    width      	2218
+			    height     	528
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object InheritView "" @37
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD230410149"
+			    client     	@35
+			    supplier   	@36
+			    line_style 	0)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::system::SystemStartupException" @38
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(3075, 4680)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@38
+				location   	(1940, 4495)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	2270
+				justify    	0
+				label      	"SystemStartupException")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD23042010E"
+			    compartment 	(object Compartment
+				Parent_View 	@38
+				location   	(1940, 4551)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	7
+				max_width  	2268)
+			    width      	2288
+			    height     	392
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object InheritView "" @39
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD23044005D"
+			    client     	@38
+			    supplier   	@36
+			    line_style 	0)))))
+	(object Class_Category "server"
+	    quid       	"3AD22FE201CE"
+	    exportControl 	"Public"
+	    logical_models 	(list unit_reference_list
+		(object Class "EvRemote"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD22FE201D1"
+		    documentation 	
+|* This interface defines a type that the Envoy Server Registry
+| * Facility accepts as Envoy servers.  Any server objects that
+| * need to be registered with the Envoy Server Registry Facility
+| * must implement this interface.
+| * 
+| * @version     1.0, (3/17/00 9:53:23 AM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    operations 	(list Operations
+			(object Operation "getLocalReference"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FE30267"
+			    documentation 	
+| * Get the reference to the local implementation of the server.
+| * 
+| * @return The reference to the local implementation of the server.
+			    
+			    result     	"Object"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0
+			    quidu      	"397D954501B2"))
+		    module     	"Component View::com::globalsight::everest::util::server::EvRemote"
+		    quidu      	"3AD22FE1019B"
+		    language   	"Java")
+		(object Class "RegistryLocator"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD22FE40181"
+		    documentation 	
+|* This class is used to locate an instance of the Envoy Registry
+| * of server objects.
+| * 
+| * @version     1.0, (3/17/00 12:06:44 PM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    operations 	(list Operations
+			(object Operation "RegistryLocator"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FE701A4"
+			    documentation 	" * RegistryLocator constructor."
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "getRegistry"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FE701AE"
+			    documentation 	
+| * Locate an instance of the Envoy server registry.  If no
+| * server registry exists, one will be created.
+| * 
+| * @return A reference to the Envoy server registry.
+			    
+			    result     	"ServerRegistry"
+			    exceptions 	"GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::server::RegistryLocator"
+		    quidu      	"3AAE4D33009E"
+		    language   	"Java")
+		(object Class "ServerRegistry"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD22FE600BC"
+		    documentation 	
+|* This interface defines the methods of a server registry that holds
+| * server objects.  Server objects can be inserted into the registry.
+| * Clients can use the registry to lookup the server objects.
+| * 
+| * @version     1.0, (3/17/00 1:36:00 AM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    stereotype 	"Interface"
+		    operations 	(list Operations
+			(object Operation "bind"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FEF0137"
+			    documentation 	
+| * Bind the specified server object under the specified name.
+| * If the specified name is already bound, the new object will
+| * be rebinded under the given name, overwriting the previous
+| * binding.
+| * 
+| * @param p_name The name to register the server under.
+| * @param p_server The server object to register.
+| * @exception weblogic.rmi.RemoteException System or network related exception.
+| * @exception java.net.MalformedURLException This exception is caused by internal errors.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FEF0141"
+				    type       	"String"
+				    quidu      	"397D9546039F")
+				(object Parameter "p_server"
+				    quid       	"3AD22FEF014B"
+				    type       	"Remote"
+				    quidu      	"397D97550230"))
+			    result     	"void"
+			    exceptions 	"GeneralException,NamingException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "lookup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FEF0155"
+			    documentation 	
+| * Lookup a server object by name.
+| * 
+| * @return The server object.
+| * @param p_name Name of the server object to lookup.
+| * @exception weblogic.rmi.RemoteException System or network related exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FEF0156"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"Object"
+			    exceptions 	"GeneralException,NamingException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0
+			    quidu      	"397D954501B2")
+			(object Operation "unbind"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FEF015F"
+			    documentation 	
+| * Unbind the specified server object under the specified name.
+| * 
+| * @param p_name The name of the server to unbind.
+| * @exception weblogic.rmi.RemoteException System or network related exception.
+| * @exception weblogic.rmi.NotBoundException The server was not bound.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FEF0173"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"void"
+			    exceptions 	"GeneralException,NamingException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0))
+		    module     	"Component View::com::globalsight::everest::util::server::ServerRegistry"
+		    quidu      	"3AAE4D3302E2"
+		    language   	"Java")
+		(object Class "ServerDefaults"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD22FE802B3"
+		    stereotype 	"Interface"
+		    module     	"Component View::com::globalsight::everest::util::server::ServerDefaults"
+		    quidu      	"3AD22FE701FE"
+		    language   	"Java")
+		(object Class "ServerRegistryImpl"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateFinalizer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateStaticInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateInstanceInitializer"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"GenerateDefaultConstructor"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Final"
+			    value      	FALSE)
+			(object Attribute
+			    tool       	"Java"
+			    name       	"Static"
+			    value      	FALSE))
+		    quid       	"3AD22FF3033B"
+		    documentation 	
+|* This is an implementation of the ServerRegistry.  It holds
+| * reference to local servers and help clients register and lookup
+| * servers.
+| * 
+| * @version     1.0, (3/17/00 12:12:34 PM)
+| * @author      Marvin Lau, mlau@globalsight.com
+		    
+		    realized_interfaces 	(list realize_rel_list
+			(object Realize_Relationship
+			    attributes 	(list Attribute_Set)
+			    quid       	"3AD22FF50280"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerRegistry"
+			    quidu      	"3AD22FE600BC"))
+		    operations 	(list Operations
+			(object Operation "ServerRegistryImpl"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF802B6"
+			    documentation 	"    * Construct a ServerRegistryImpl."
+			    exceptions 	"GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "getInstance"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF802C0"
+			    documentation 	
+|     * Get the reference to an instance of this class.  This will be
+|     * used as the Envoy server registry.
+|     * 
+|     * @return The reference to an instance of this class.
+			    
+			    result     	"ServerRegistry"
+			    exceptions 	"GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Implementation"
+			    uid        	0)
+			(object Operation "bind"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF802CA"
+			    documentation 	
+|     * Bind the specified server object under the specified name.
+|     * If the specified name is already bound, the new object will
+|     * be rebinded under the given name, overwriting the previous
+|     * binding.
+|     * 
+|     * @param p_name The name to register the server under.
+|     * @param p_server The server object to register.
+|     * @exception weblogic.rmi.RemoteException System or network related exception.
+|     * @exception java.net.MalformedURLException This exception is caused by internal errors.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FF802D4"
+				    type       	"String"
+				    quidu      	"397D9546039F")
+				(object Parameter "p_server"
+				    quid       	"3AD22FF802D5"
+				    type       	"Remote"
+				    quidu      	"397D97550230"))
+			    result     	"void"
+			    exceptions 	"GeneralException,NamingException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "lookup"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF802E8"
+			    documentation 	
+|     * Lookup a server object by name.
+|     * 
+|     * @return The server object.
+|     * @param p_name Name of the server object to lookup.
+|     * @exception weblogic.rmi.RemoteException System or network related exception.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FF802F2"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"Object"
+			    exceptions 	"NamingException,GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0
+			    quidu      	"397D954501B2")
+			(object Operation "unbind"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF802FC"
+			    documentation 	
+|     * Unbind the specified server object under the specified name.
+|     * 
+|     * @param p_name The name of the server to unbind.
+|     * @exception weblogic.rmi.RemoteException System or network related exception.
+|     * @exception weblogic.rmi.NotBoundException The server was not bound.
+|     * @exception NamingException - if a naming exception is encountered.
+|     * @exception GeneralException - General exception thrown by the system.
+			    
+			    parameters 	(list Parameters
+				(object Parameter "p_name"
+				    quid       	"3AD22FF80306"
+				    type       	"String"
+				    quidu      	"397D9546039F"))
+			    result     	"void"
+			    exceptions 	"GeneralException,NamingException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Public"
+			    uid        	0)
+			(object Operation "getInitialContext"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Abstract"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Static"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Native"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Synchronized"
+				    value      	FALSE))
+			    quid       	"3AD22FF80311"
+			    documentation 	
+|    * Get the initial context for performing naming operations.
+|    * @return The initial context.
+|    * @exception NamingException - if a naming exception is encountered.
+|    * @exception GeneralException - General exception thrown by the system.
+			    
+			    result     	"Context"
+			    exceptions 	"NamingException,GeneralException"
+			    concurrency 	"Sequential"
+			    opExportControl 	"Private"
+			    uid        	0
+			    quidu      	"39BE225C0025"))
+		    module     	"Component View::com::globalsight::everest::util::server::ServerRegistryImpl"
+		    quidu      	"3AD22FF20286"
+		    language   	"Java")
+		(object Class "WebLogicJNDIContext"
+		    quid       	"3AD22FF701BB"
+		    module     	"Component View::com::globalsight::everest::util::server::WebLogicJNDIContext"
+		    quidu      	"3AD22FF6010F"
+		    language   	"Java")
+		(object Association "$UNNAMED$52"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FE70190"
+		    roles      	(list role_list
+			(object Role "m_theRegistry"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FE70191"
+			    label      	"m_theRegistry"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerRegistry"
+			    quidu      	"3AD22FE600BC"
+			    exportControl 	"Implementation"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$53"
+			    quid       	"3AD22FE70193"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::RegistryLocator"
+			    quidu      	"3AD22FE40181")))
+		(object Association "$UNNAMED$54"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FEA01EE"
+		    roles      	(list role_list
+			(object Role "WEBLOGIC_CONTEXT"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"weblogic.jndi.WLInitialContextFactory"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FEA01EF"
+			    label      	"WEBLOGIC_CONTEXT"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$55"
+			    quid       	"3AD22FEA0298"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerDefaults"
+			    quidu      	"3AD22FE802B3")))
+		(object Association "$UNNAMED$56"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FEB0159"
+		    roles      	(list role_list
+			(object Role "PROVIDER_URL"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"http://localhost:7001"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FEB015A"
+			    label      	"PROVIDER_URL"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$57"
+			    quid       	"3AD22FEB0203"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerDefaults"
+			    quidu      	"3AD22FE802B3")))
+		(object Association "$UNNAMED$58"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FEC00CE"
+		    roles      	(list role_list
+			(object Role "PARAM_REMOTE_PROTOCOL"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"remote.protocol"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FEC00CF"
+			    label      	"PARAM_REMOTE_PROTOCOL"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$59"
+			    quid       	"3AD22FEC016F"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerDefaults"
+			    quidu      	"3AD22FE802B3")))
+		(object Association "$UNNAMED$60"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FED0030"
+		    roles      	(list role_list
+			(object Role "PARAM_REMOTE_PORT"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"remote.port"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FED003A"
+			    label      	"PARAM_REMOTE_PORT"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$61"
+			    quid       	"3AD22FED00DA"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerDefaults"
+			    quidu      	"3AD22FE802B3")))
+		(object Association "$UNNAMED$62"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FED0383"
+		    roles      	(list role_list
+			(object Role "PARAM_REMOTE_HOST"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	
+|"remote.host"
+				    )
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	TRUE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FED0384"
+			    label      	"PARAM_REMOTE_HOST"
+			    supplier   	"Logical View::java::lang::String"
+			    quidu      	"397D9546039F"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$63"
+			    quid       	"3AD22FEE0045"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerDefaults"
+			    quidu      	"3AD22FE802B3")))
+		(object Association "$UNNAMED$64"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FF600E7"
+		    roles      	(list role_list
+			(object Role "m_thisRegistry"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"null")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FF600E8"
+			    label      	"m_thisRegistry"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerRegistry"
+			    quidu      	"3AD22FE600BC"
+			    exportControl 	"Private"
+			    is_navigable 	TRUE
+			    static     	TRUE)
+			(object Role "$UNNAMED$65"
+			    quid       	"3AD22FF600EA"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerRegistryImpl"
+			    quidu      	"3AD22FF3033B")))
+		(object Association "$UNNAMED$66"
+		    attributes 	(list Attribute_Set)
+		    quid       	"3AD22FF80298"
+		    roles      	(list role_list
+			(object Role "m_jndiContext"
+			    attributes 	(list Attribute_Set
+				(object Attribute
+				    tool       	"Java"
+				    name       	"InitialValue"
+				    value      	"null")
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Final"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Transient"
+				    value      	FALSE)
+				(object Attribute
+				    tool       	"Java"
+				    name       	"Volatile"
+				    value      	FALSE))
+			    quid       	"3AD22FF80299"
+			    label      	"m_jndiContext"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::WebLogicJNDIContext"
+			    quidu      	"3AD22FF701BB"
+			    exportControl 	"Private"
+			    is_navigable 	TRUE)
+			(object Role "$UNNAMED$67"
+			    quid       	"3AD22FF8029B"
+			    supplier   	"Logical View::com::globalsight::everest::util::server::ServerRegistryImpl"
+			    quidu      	"3AD22FF3033B"))))
+	    logical_presentations 	(list unit_reference_list
+		(object ClassDiagram "Package Overview"
+		    quid       	"3AD22FE201CF"
+		    title      	"Package Overview"
+		    zoom       	90
+		    max_height 	28350
+		    max_width  	21600
+		    origin_x   	0
+		    origin_y   	0
+		    items      	(list diagram_item_list
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::EvRemote" @40
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1590, 225)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@40
+				location   	(1320, 172)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	540
+				justify    	0
+				label      	"EvRemote")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@40
+				location   	(1320, 127)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	540
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FE201D1"
+			    compartment 	(object Compartment
+				Parent_View 	@40
+				location   	(1320, 228)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	2
+				max_width  	538)
+			    width      	558
+			    height     	218
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::RegistryLocator" @41
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(660, 1545)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@41
+				location   	(384, 1450)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	552
+				justify    	0
+				label      	"RegistryLocator")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FE40181"
+			    compartment 	(object Compartment
+				Parent_View 	@41
+				location   	(384, 1506)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	3
+				max_width  	550)
+			    width      	570
+			    height     	212
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::ServerDefaults" @42
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1575, 525)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@42
+				location   	(1433, 499)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	284
+				justify    	0
+				label      	"ServerDefaults")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@42
+				location   	(1433, 454)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	284
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FE802B3"
+			    width      	302
+			    height     	164
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::ServerRegistry" @43
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(1545, 1050)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@43
+				location   	(1115, 952)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	860
+				justify    	0
+				label      	"ServerRegistry")
+			    stereotype 	(object ItemLabel
+				Parent_View 	@43
+				location   	(1115, 907)
+				fill_color 	13434879
+				anchor     	10
+				nlines     	1
+				max_width  	860
+				justify    	0
+				label      	"<<Interface>>")
+			    icon       	"Interface"
+			    icon_style 	"Label"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FE600BC"
+			    compartment 	(object Compartment
+				Parent_View 	@43
+				location   	(1115, 1008)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	4
+				max_width  	858)
+			    width      	878
+			    height     	308
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object AssociationViewNew "$UNNAMED$52" @44
+			    location   	(1057, 1321)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD22FE70190"
+			    roleview_list 	(list RoleViews
+				(object RoleView "$UNNAMED$53" @45
+				    Parent_View 	@44
+				    location   	(337, 751)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @46
+					Parent_View 	@45
+					location   	(839, 1396)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FE70193"
+				    client     	@44
+				    supplier   	@41
+				    line_style 	0)
+				(object RoleView "m_theRegistry" @47
+				    Parent_View 	@44
+				    location   	(337, 751)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @48
+					Parent_View 	@47
+					location   	(1356, 1280)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	285
+					justify    	0
+					label      	"$m_theRegistry"
+					pctDist    	1.169548
+					height     	110
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FE70191"
+				    client     	@44
+				    supplier   	@43
+				    line_style 	0)))
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::WebLogicJNDIContext" @49
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(660, 150)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@49
+				location   	(446, 104)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	428
+				justify    	0
+				label      	"WebLogicJNDIContext")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FF701BB"
+			    width      	446
+			    height     	114
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object ClassView "Class" "Logical View::com::globalsight::everest::util::server::ServerRegistryImpl" @50
+			    ShowCompartmentStereotypes 	TRUE
+			    IncludeAttribute 	TRUE
+			    IncludeOperation 	TRUE
+			    ShowOperationSignature 	TRUE
+			    location   	(660, 585)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object ItemLabel
+				Parent_View 	@50
+				location   	(230, 400)
+				fill_color 	13434879
+				nlines     	1
+				max_width  	860
+				justify    	0
+				label      	"ServerRegistryImpl")
+			    icon_style 	"Icon"
+			    line_color 	3342489
+			    fill_color 	13434879
+			    quidu      	"3AD22FF3033B"
+			    compartment 	(object Compartment
+				Parent_View 	@50
+				location   	(230, 456)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				icon_style 	"Icon"
+				fill_color 	13434879
+				anchor     	2
+				nlines     	7
+				max_width  	858)
+			    width      	878
+			    height     	392
+			    annotation 	8
+			    autoResize 	TRUE)
+			(object RealizeView "" @51
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD22FF50280"
+			    client     	@50
+			    supplier   	@43
+			    line_style 	0)
+			(object AssociationViewNew "$UNNAMED$64" @52
+			    location   	(1142, 838)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD22FF600E7"
+			    roleview_list 	(list RoleViews
+				(object RoleView "$UNNAMED$65" @53
+				    Parent_View 	@52
+				    location   	(422, 268)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @54
+					Parent_View 	@53
+					location   	(1057, 840)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	0)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FF600EA"
+				    client     	@52
+				    supplier   	@50
+				    line_style 	0)
+				(object RoleView "m_thisRegistry" @55
+				    Parent_View 	@52
+				    location   	(422, 268)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @56
+					Parent_View 	@55
+					location   	(967, 865)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	301
+					justify    	0
+					label      	"-$m_thisRegistry"
+					pctDist    	-1.153886
+					height     	105
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FF600E8"
+				    client     	@52
+				    supplier   	@43
+				    line_style 	0)))
+			(object AssociationViewNew "$UNNAMED$66" @57
+			    location   	(660, 297)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3AD22FF80298"
+			    roleview_list 	(list RoleViews
+				(object RoleView "$UNNAMED$67" @58
+				    Parent_View 	@57
+				    location   	(-1410, 177)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @59
+					Parent_View 	@58
+					location   	(619, 377)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					hidden     	TRUE
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	450
+					justify    	0
+					label      	""
+					pctDist    	0.800000
+					height     	42
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FF8029B"
+				    client     	@57
+				    supplier   	@50
+				    line_style 	0)
+				(object RoleView "m_jndiContext" @60
+				    Parent_View 	@57
+				    location   	(-1410, 177)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    label      	(object SegLabel @61
+					Parent_View 	@60
+					location   	(829, 255)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					anchor     	1
+					anchor_loc 	1
+					nlines     	1
+					max_width  	277
+					justify    	0
+					label      	"-m_jndiContext"
+					pctDist    	0.466667
+					height     	169
+					orientation 	1)
+				    stereotype 	TRUE
+				    line_color 	3342489
+				    quidu      	"3AD22FF80299"
+				    client     	@57
+				    supplier   	@49
+				    line_style 	0))))))))
+    logical_presentations 	(list unit_reference_list))

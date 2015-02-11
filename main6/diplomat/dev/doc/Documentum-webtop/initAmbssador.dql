@@ -1,0 +1,62 @@
+#create table ref_country_list
+CREATE TYPE "ref_country_list" ("locale" char(16), "country_language" char(32)) with supertype NULL
+go
+
+#create table ref_translation_preselect
+CREATE TYPE "ref_translation_preselect" ("locale_set_code" char(32), "locales" char(225) repeating) WITH SUPERTYPE NULL
+go
+
+#create table cfg_translation_attr
+CREATE TYPE "cfg_translation_attr" ("doctype" char(64), "location" char(255), "attributes" char(64) repeating) WITH SUPERTYPE NULL
+go
+
+
+#create type ambassador_document
+CREATE TYPE "ambassador_document" ("target_languages" char(64), "r_translation_job" char(16), "r_translation_ids" char(255), "r_translation_state" char(32)) WITH SUPERTYPE "dm_document"
+go
+
+
+
+#create ref_country_list objects
+CREATE "ref_country_list" OBJECT SET "locale" = 'en_US', SET "country_language" = 'American English'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'fr_FR', SET "country_language"='French'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'it_IT', SET "country_language"='Italian'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'es_ES', SET "country_language"='Spanish'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'en_AU', SET "country_language"='English(Australia)'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'fi_FI', SET "country_language"='Finnish(Finland)'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'ko_KR', SET "country_language"='Korean(South Korea)'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'ru_RU', SET "country_language"='Russian(Russia)'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'zh_CN', SET "country_language"='Chinese'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'zh_TW', SET "country_language"='Chinese(TaiWan)'
+go
+CREATE "ref_country_list" OBJECT SET "locale" = 'de_DE', SET "country_language"='Germany'
+go
+
+
+#create ref_translation_preselect objects
+CREATE "ref_translation_preselect" OBJECT SET "locale_set_code" = 'G01', SET locales[0] = 'en_US', SET locales[1] = 'zh_CN', SET locales[2] = 'fr_FR', SET locales[3] = 'it_IT',SET locales[4] = 'es_ES',SET locales[5] = 'en_AU',SET locales[6] = 'fi_FI',SET locales[7] = 'ko_KR', SET locales[8]='ru_RU', SET locales='zh_TW'
+go
+CREATE "ref_translation_preselect" OBJECT SET "locale_set_code" = 'G07', SET locales[0] = 'en_US', SET locales[1] = 'zh_CN', SET locales[2] = 'fr_FR', SET locales[3] = 'it_IT', SET locales[4]='de_DE'
+go
+CREATE "ref_translation_preselect" OBJECT SET "locale_set_code" = 'G27', SET locales[0] = 'en_US', SET locales[1] = 'zh_CN', SET locales[2] = 'fr_FR', SET locales[3] = 'it_IT'
+go
+CREATE "ref_translation_preselect" OBJECT SET "locale_set_code" = 'G02', SET locales[0] = 'en_US', SET locales[1] = 'zh_CN', SET locales[2] = 'fr_FR', SET locales[3] = 'it_IT'
+go
+
+
+#create cfg_translation_attr objects
+#CREATE "cfg_translation_attr" OBJECT SET doctype = 'ambassador_document', SET location = 'documentum1/installler/Translatable', SET attributes[0] = 'title', SET attributes[1] = 'subject', SET attributes[2]='keywords'
+#go
+#CREATE "cfg_translation_attr" OBJECT SET doctype = 'ambassador_document', SET location = 'augrepository/Brent/HTMLFolder', SET attributes[0] = 'title', SET attributes[1] = 'subject', SET attributes[2]='keywords'
+#go
+
+quit

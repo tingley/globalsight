@@ -1,0 +1,25 @@
+<project name="GlobalSight CMS Overlay" default="zip" basedir=".">
+  <!--      Make the GlobalSight CMS Overlay Zip file     -->
+  <!-- Run this build, and then check the file into toolsVOB/converters/build/dist -->
+  
+  <!-- Build Version Numbers. Change this with each release -->
+  <property name="MediasurfaceVersion" value="v5.0.0_b192"/>
+  <property name="GlobalSightVersion" value="6.2"/>
+  
+   <!-- Create a version.txt file that holds the verison number --> 
+   <target name="buildversion"> 
+<echo file="./overlay/version.txt" append="false">
+This overlay is intended for:
+Mediasurface version: ${MediasurfaceVersion}
+GlobalSight version: ${GlobalSightVersion}
+</echo>
+</target>
+
+  <target name="zip" depends="buildversion">
+    <zip zipfile="./GlobalSightCmsOverlay.zip">
+      <zipfileset dir="./overlay" />
+     </zip>
+    <delete file="./overlay/version.txt"/>
+   </target>
+</project>
+

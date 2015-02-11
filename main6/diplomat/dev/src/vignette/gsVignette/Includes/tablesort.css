@@ -1,0 +1,18 @@
+tr			{background: window;}
+td 			{color: windowtext; font: menu; padding: 1px; padding-left: 5px; padding-right: 5px;}
+table		{margin: 0px;}
+
+thead td	{background: buttonface; font: menu; border: 1px outset white;
+			 cursor: default; padding-top: 0; padding: bottom: 0;
+			 border-top: 1px solid buttonhighlight;
+			 border-left: 1px solid buttonhighlight;
+			 border-right: 1px solid buttonshadow;
+			 border-bottom: 1px solid buttonshadow;
+			 height: 16px;
+			 }
+
+
+thead .arrow	{font-family: webdings; color: black; padding: 0; font-size: 10px;
+			height: 11px; width: 10px; overflow: hidden;
+			margin-bottom: 2; margin-top: -3; padding: 0; padding-top: 0; padding-bottom: 2;}
+		

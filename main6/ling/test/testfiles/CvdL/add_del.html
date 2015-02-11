@@ -1,0 +1,153 @@
+<HTML>
+<HEAD>
+<!--- META TAG ADDED BY AMBASSADOR --->
+<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=ISO-8859-1">
+</HEAD>
+<script>
+<!---
+function ask() {
+//var MessageString = ["a string", "another string", "hello"]
+var MessageString = new Array()
+MessageString[0] = "hello"; MessageString[1] = "good-bye"; MessageString[2] = "mice, rats and capybaras"
+confirm(MessageString[0] + " " + MessageString[1])
+var a, b, c
+a = 1; b = 2; c = 3
+alert(MessageString[2] + " " +  a + " " +  b +  " " + c);
+var xyz = "have a nice day";
+alert (xyz);
+var abc = new Array()
+abc[0] = "snakes and mice"; abc[1] = "x-files"; abc[2] = "holy cow";
+confirm(abc[0] + " " + abc[2])
+alert (abc[1]);
+}
+// --->
+</script>
+<FORM NAME=TEST>
+<INPUT TYPE=SUBMIT VALUE="hello" ONCLICK=ask()>
+</FORM>
+<body>
+<ul>
+<GSA EXTRACT="list element xyz" ADD="list element xyz">
+<li>Item one.
+<a href="http://we.got.net/~kbb">Click here.</a>
+</GSA>
+<GSA DELETE=1 ADD="list element xyz">
+<li>Item two.
+<a href="http://www.altavista.com">Click here.</a>
+</GSA>
+<GSA DELETE=1>
+<li>Item three.
+</GSA>
+
+<GSA DELETE=1 ADDED="en-US"><li>This one was added by hand.</GSA>
+<GSA ADD="list element" DELETE=1><li>Item four.
+</GSA>
+<GSA ADD="list element" DELETE=1><li>Item five.
+</GSA>
+<GSA DELETE=1 ADDED="en-US"><li>Another one added by hand.</GSA>
+</ul>
+
+<table border=10>
+<GSA DELETE=1 EXTRACT="two cell table row" ADD="three cell table row">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD>Here is another sentence in another row.</TD>
+</TR>
+</GSA>
+<GSA EXTRACT="three cell table row">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD>Here is another sentence.</TD>
+<TD>
+<ul>
+<li>Item one.
+<li>Item two.
+<li>Item three.
+<li>Item four.
+<li>Item five.
+</ul>
+</TD></TR></GSA>
+<GSA DELETE=1 ADD="sample" EXTRACT="sample">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/rust.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA ADD="sample" DELETE=1>
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/buttons.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA DELETE=1 ADD="sample" EXTRACT="a fine sample">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/banana.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA DELETE=1 EXTRACT="another fine sample" ADD="sample">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/quonset.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<TR>
+<TD>
+<font size=-1 color=#0aa099 face="verdana">Here is an item not in a GSA tag. Here is an item not in a GSA tag.
+Here is an item not in a GSA tag. 
+</font>
+</TD>
+<TD><img src="/images/quonset.jpg" alt="xyz"></TD>
+</TR>
+<TR>
+<TD>
+<font size=+2 color=#2399fa>Here is an item not in a GSA tag.
+Here is an item not in a GSA tag.</font>
+</TD>
+<TD><img src="/images/quonset.jpg" alt="xyz"></TD>
+</TR>
+<GSA ADD="sample" DELETE=1 EXTRACT="one more sample">
+<TR>
+<TD>
+<font size=-1 color=#0aa099 face="verdana">
+Here is a sentence. Here is another. Here is yet another.
+</font>
+</TD>
+<TD><img src="/images/dogwd.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA ADD="sample" EXTRACT="another sample" DELETE=1>
+<TR>
+<TD><font size=+2 color=#2399fa face="Arial, Geneva, Helvetica, Sans-Serif">
+Here is a sentence. Here is another. Here is yet another.</font>
+</TD>
+<TD><img src="/images/snow.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA EXTRACT="sample two" ADD="sample" DELETE=1>
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/test6.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA EXTRACT="the final sample" DELETE=1 ADD="sample">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/yellowdot.gif" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA ADD="sample">
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/mndcno.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+<GSA DELETE=1>
+<TR>
+<TD>Here is a sentence. Here is another. Here is yet another.</TD>
+<TD><img src="/images/tree.jpg" alt="xyz"></TD>
+</TR>
+</GSA>
+</table>
+</body>
+</html>

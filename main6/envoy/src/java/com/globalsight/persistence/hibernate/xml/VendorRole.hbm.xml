@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.vendormanagement.VendorRole"
+		table="VENDOR_ROLE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		
+		<many-to-one name="vendor" column="VENDOR_ID"
+			class="com.globalsight.everest.vendormanagement.Vendor"
+			not-null="true" />
+		
+		<many-to-one name="activity" column="ACTIVITY_ID"
+			class="com.globalsight.everest.workflow.Activity" not-null="true" />
+		
+		<many-to-one name="localePair" column="LOCALE_PAIR_ID"
+			class="com.globalsight.everest.foundation.LocalePair"
+			not-null="true" />
+		
+		<many-to-one name="rate" column="RATE_ID"
+			class="com.globalsight.everest.costing.Rate" not-null="false" />
+	</class>
+</hibernate-mapping>

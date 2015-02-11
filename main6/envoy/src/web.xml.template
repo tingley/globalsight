@@ -1,0 +1,1184 @@
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app id="union" version="2.4"
+xmlns="http://java.sun.com/xml/ns/j2ee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+
+<jsp-property-group>
+  <url-pattern>*.jsp</url-pattern>
+  <el-ignored>false</el-ignored>
+</jsp-property-group>
+
+<!-- For http & https access --> 
+<!-- %%ssl_comments_end%%
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>permissionXml</web-resource-name>
+        <url-pattern>/envoy/administration/permission/permissionXml.jsp</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>customizeReportsParamXml</web-resource-name>
+        <url-pattern>/envoy/administration/reports/customizeReportsParamXml.jsp</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>CapExportServlet</web-resource-name>
+        <url-pattern>/CapExportServlet</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+	<web-resource-collection>
+        <web-resource-name>CxeExportServlet</web-resource-name>
+        <url-pattern>/CxeExportServlet</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>cxedocs</web-resource-name>
+        <url-pattern>/cxedocs/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>cxedocs2</web-resource-name>
+        <url-pattern>/cxedocs2/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>viewCorpus</web-resource-name>
+        <url-pattern>/GlobalSight/Corpus/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+	<web-resource-collection>
+        <web-resource-name>tmcorpus</web-resource-name>
+        <url-pattern>/envoy/tm/corpus/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <user-data-constraint>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>SSLApp</web-resource-name>
+        <url-pattern>/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <user-data-constraint>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+%%ssl_comments_start%% -->
+
+<!-- Begin: Filter -->
+    <!-- Note: EncodingFilter must be the first filter. -->
+    <filter>
+        <filter-name>EncodingFilter</filter-name>
+        <filter-class>com.globalsight.util.EncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>EncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>HibernateFilter</filter-name>
+        <filter-class>com.globalsight.util.HibernateFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>HibernateFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+<!-- Begin: Axis listener -->
+    <listener>
+        <listener-class>org.apache.axis.transport.http.AxisHTTPSessionListener</listener-class>
+    </listener>
+<!-- End: Axis listener -->
+<!-- Begin: Axis servlets -->          
+  <servlet>
+    <servlet-name>AxisServlet</servlet-name>
+    <display-name>Apache-Axis Servlet</display-name>
+    <servlet-class>
+        org.apache.axis.transport.http.AxisServlet
+    </servlet-class>
+  </servlet>
+
+<!-- Commented out for security reasons
+*  <servlet>
+*    <servlet-name>AdminServlet</servlet-name>
+*    <display-name>Axis Admin Servlet</display-name>
+*    <servlet-class>
+*        org.apache.axis.transport.http.AdminServlet
+*    </servlet-class>
+*    <load-on-startup>100</load-on-startup>
+*  </servlet>
+-->
+
+  <servlet>
+    <servlet-name>SOAPMonitorService</servlet-name>
+    <display-name>SOAPMonitorService</display-name>
+    <servlet-class>
+        org.apache.axis.monitor.SOAPMonitorService
+    </servlet-class>
+    <init-param>
+      <param-name>SOAPMonitorPort</param-name>
+      <param-value>5001</param-value>
+    </init-param>
+    <load-on-startup>100</load-on-startup>
+  </servlet>
+<!-- End: Axis servlets -->
+   
+  <servlet>
+    <servlet-name>AdminCaptureRootCA</servlet-name>
+    <servlet-class>admin.AdminCaptureRootCA</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminClients</servlet-name>
+    <servlet-class>admin.AdminClients</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminConnections</servlet-name>
+    <servlet-class>admin.AdminConnections</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminEvents</servlet-name>
+    <servlet-class>admin.AdminEvents</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminJDBC</servlet-name>
+    <servlet-class>admin.AdminJDBC</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminLicense</servlet-name>
+    <servlet-class>admin.AdminLicense</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminMain</servlet-name>
+    <servlet-class>admin.AdminMain</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminProps</servlet-name>
+    <servlet-class>admin.AdminProps</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminRealm</servlet-name>
+    <servlet-class>admin.AdminRealm</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminThreads</servlet-name>
+    <servlet-class>admin.AdminThreads</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminVersion</servlet-name>
+    <servlet-class>admin.AdminVersion</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>CapExportServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CapExportServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>CapImportServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.L10nRequesterServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ControlServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.ControlServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+    <load-on-startup>0</load-on-startup>    
+  </servlet>
+
+  <servlet>
+    <servlet-name>CxeExportServlet</servlet-name>
+    <servlet-class>com.globalsight.diplomat.servlet.ambassador.CxeExportServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>DynamicPreviewProxyServlet</servlet-name>
+    <servlet-class>com.globalsight.diplomat.servlet.ambassador.DynamicPreviewProxyServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>FileSystemImageReplaceHandler</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.imagereplace.FileSystemImageReplaceHandler</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ImageReplace</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.imagereplace.ImageReplace</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>L10nServiceServlet</servlet-name>
+    <servlet-class>com.globalsight.dotNet.L10nServiceServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>MsOfficeImageReplaceHandler</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.imagereplace.MsOfficeImageReplaceHandler</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+	<!-- begin Reports Configuration -->
+	  <servlet>
+	    <servlet-name>TranswareReports</servlet-name>
+	    <servlet-class>com.globalsight.reports.servlet.ReportControlServlet</servlet-class>
+	    <init-param>
+	      <param-name>wl-dispatch-policy</param-name>
+	      <param-value>ServletExecuteQueue</param-value>
+	    </init-param>
+	  </servlet>
+  <!-- end Reports Configuration -->
+
+<!-- begin Reports Configuration -->
+  <servlet-mapping>
+    <servlet-name>TranswareReports</servlet-name>
+    <url-pattern>/TranswareReports</url-pattern>
+  </servlet-mapping>
+<!-- end Reports Configuration -->
+
+
+<!-- begin InetSoft Reports Configuration -->
+  
+<!-- Style report has been changed into jsp report. 
+     Pls refer to servlet TranswareReports.
+
+  <servlet>
+    <servlet-name>ReportsAdmin</servlet-name>
+    <servlet-class>inetsoft.sree.adm.AdmServlet</servlet-class>
+    <init-param>
+      <param-name>sree.home</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/globalsight-web.war/reports</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+    <init-param>
+      <param-name>report.em.title</param-name>
+      <param-value>Welocalize GlobalSight Reports</param-value>
+    </init-param>
+  </servlet>
+  
+  
+  <servlet-mapping>
+    <servlet-name>ReportsAdmin</servlet-name>
+    <url-pattern>/ReportsAdmin</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>Reports</servlet-name>
+    <servlet-class>com.globalsight.reports.servlet.ReportsServlet</servlet-class>
+    <init-param>
+      <param-name>sree.home</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/globalsight-web.war/reports</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+    <init-param>
+      <param-name>report.em.title</param-name>
+      <param-value>Welocalize GlobalSight Reports</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Reports</servlet-name>
+    <url-pattern>/Reports</url-pattern>
+  </servlet-mapping>
+
+-->
+
+<!-- end InetSoft Reports Configuration -->
+
+<!-- start ajax service configuration-->
+<servlet>
+    <servlet-name>AjaxService</servlet-name>
+    <servlet-class>com.globalsight.everest.util.ajax.AjaxService</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>AjaxService</servlet-name>
+    <url-pattern>/AjaxService</url-pattern>
+</servlet-mapping>
+<!-- end ajax service configuration-->
+
+  <servlet>
+    <servlet-name>AppletService</servlet-name>
+    <servlet-class>com.globalsight.everest.util.applet.AppletService</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>AppletService</servlet-name>
+    <url-pattern>/AppletService</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ShowUrlFramesetServlet</servlet-name>
+    <servlet-class>com.globalsight.diplomat.servlet.ambassador.ShowUrlFramesetServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ShowUrlServlet</servlet-name>
+    <servlet-class>com.globalsight.diplomat.servlet.ambassador.ShowUrlServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>SnippetServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.webapp.servlet.SnippetLibraryServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>MtServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.MtServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>T3AdminMain</servlet-name>
+    <servlet-class>admin.AdminMain</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TSPreviewServlet</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TSPreviewServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.imagereplace.TeamSiteImageReplaceHandler</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TerminologyServlet</servlet-name>
+    <servlet-class>com.globalsight.terminology.servlet.TerminologyServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>UserdataServlet</servlet-name>
+    <servlet-class>com.globalsight.terminology.servlet.UserdataServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TranslateServlet</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TranslateServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>UrlPresentationServlet</servlet-name>
+    <servlet-class>com.globalsight.diplomat.servlet.ambassador.UrlPresentationServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>VignetteImportServlet</servlet-name>
+    <servlet-class>com.globalsight.cxe.servlet.cms.vignette.VignetteImportServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>classes</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.ClasspathServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>cxedocs</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.ImageFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%cxe_docsDir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>cxedocs2</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.ImageFileServlet2</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%cxe_docsDir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>gs</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.ControlServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>iflow_logs_dir</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.UncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%iflow_home_forwardslash%%/bin</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>system4_dir</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.UncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%system_log_directory_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>tb</servlet-name>
+    <servlet-class>com.globalsight.terminology.servlet.AnonymousTerminologyServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>viewCommentAttachments</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>viewCommentAttachments2</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.DownloadFileStorageFilesWithoutLoginServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>viewSupportFiles</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>viewStfFiles</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>viewUnextractedFiles</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>getCustomerDownload</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>viewCorpus</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>viewVendorResume</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>XmlQueryServlet</servlet-name>
+    <servlet-class>com.globalsight.reports.xmlqueries.XmlQueryServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>exports</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/globalsight-web.war/_Exports_</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>alignerPackages</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%/GlobalSight/AlignerPackages</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>downloadresource</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/globalsight-web.war/resources</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>resources</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/globalsight-web.war/resources</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>AxisServlet</servlet-name>
+    <url-pattern>/servlet/AxisServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AxisServlet</servlet-name>
+    <url-pattern>*.jws</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AxisServlet</servlet-name>
+    <url-pattern>/services/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>SOAPMonitorService</servlet-name>
+    <url-pattern>/SOAPMonitor</url-pattern>
+  </servlet-mapping>
+
+<!-- coomented out for security reasons
+  <servlet-mapping>
+    <servlet-name>AdminServlet</servlet-name>
+    <url-pattern>/servlet/AdminServlet</url-pattern>
+  </servlet-mapping>
+-->
+
+  <servlet-mapping>
+    <servlet-name>cxedocs</servlet-name>
+    <url-pattern>/cxedocs/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>cxedocs2</servlet-name>
+    <url-pattern>/cxedocs2/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>UrlPresentationServlet</servlet-name>
+    <url-pattern>/UrlPresentationServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminRealm</servlet-name>
+    <url-pattern>/AdminRealm/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>system4_dir</servlet-name>
+    <url-pattern>/system4_dir/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminMain</servlet-name>
+    <url-pattern>/AdminMain/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TeamSiteImageReplaceHandler</servlet-name>
+    <url-pattern>/TeamSiteImageReplaceHandler/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminCaptureRootCA</servlet-name>
+    <url-pattern>/AdminCaptureRootCA/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CxeExportServlet</servlet-name>
+    <url-pattern>/CxeExportServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminProps</servlet-name>
+    <url-pattern>/AdminProps/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>tb</servlet-name>
+    <url-pattern>/tb/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminJDBC</servlet-name>
+    <url-pattern>/AdminJDBC/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>iflow_logs_dir</servlet-name>
+    <url-pattern>/iflow_logs_dir/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>classes</servlet-name>
+    <url-pattern>/classes/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CapImportServlet</servlet-name>
+    <url-pattern>/CapImportServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ShowUrlFramesetServlet</servlet-name>
+    <url-pattern>/ShowUrlFramesetServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>SnippetServlet</servlet-name>
+    <url-pattern>/SnippetServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>MtServlet</servlet-name>
+    <url-pattern>/MtServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TerminologyServlet</servlet-name>
+    <url-pattern>/TerminologyServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>UserdataServlet</servlet-name>
+    <url-pattern>/UserdataServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ShowUrlServlet</servlet-name>
+    <url-pattern>/ShowUrlServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>VignetteImportServlet</servlet-name>
+    <url-pattern>/VignetteImportServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminVersion</servlet-name>
+    <url-pattern>/AdminVersion/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TSPreviewServlet</servlet-name>
+    <url-pattern>/TSPreviewServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>gs</servlet-name>
+    <url-pattern>/wl/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>AdminConnections</servlet-name>
+    <url-pattern>/AdminConnections/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TranslateServlet</servlet-name>
+    <url-pattern>/TranslateServlet/*</url-pattern>
+  </servlet-mapping>
+
+
+  <servlet-mapping>
+    <servlet-name>ImageReplace</servlet-name>
+    <url-pattern>/ImageReplace/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CapExportServlet</servlet-name>
+    <url-pattern>/CapExportServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>FileSystemImageReplaceHandler</servlet-name>
+    <url-pattern>/FileSystemImageReplaceHandler/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>L10nServiceServlet</servlet-name>
+    <url-pattern>/L10nServiceServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ControlServlet</servlet-name>
+    <url-pattern>/ControlServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminThreads</servlet-name>
+    <url-pattern>/AdminThreads/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminEvents</servlet-name>
+    <url-pattern>/AdminEvents/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminClients</servlet-name>
+    <url-pattern>/AdminClients/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>T3AdminMain</servlet-name>
+    <url-pattern>/T3AdminMain/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>DynamicPreviewProxyServlet</servlet-name>
+    <url-pattern>/DynamicPreviewProxyServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminLicense</servlet-name>
+    <url-pattern>/AdminLicense/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>viewUnextractedFiles</servlet-name>
+    <url-pattern>/GlobalSight/UnextractedFiles/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>getCustomerDownload</servlet-name>
+    <url-pattern>/GlobalSight/CustomerDownload/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>viewCommentAttachments</servlet-name>
+    <url-pattern>/GlobalSight/CommentReference/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>viewCommentAttachments2</servlet-name>
+    <url-pattern>/GlobalSight/CommentReference2/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>viewSupportFiles</servlet-name>
+    <url-pattern>/GlobalSight/SupportFiles/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>viewStfFiles</servlet-name>
+    <url-pattern>/GlobalSight/SecondaryTargetFiles/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>viewCorpus</servlet-name>
+    <url-pattern>/GlobalSight/Corpus/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>viewVendorResume</servlet-name>
+    <url-pattern>/GlobalSight/VendorResume/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>XmlQueryServlet</servlet-name>
+    <url-pattern>/XmlQueryServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>exports</servlet-name>
+    <url-pattern>/exports/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>alignerPackages</servlet-name>
+    <url-pattern>/alignerPackages/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>downloadresource</servlet-name>
+    <url-pattern>/downloadresource/*</url-pattern>
+  </servlet-mapping>
+
+  <!-- "/resources" allows URL access and servlet access to the same directory -->
+  <servlet-mapping>
+    <servlet-name>resources</servlet-name>
+    <url-pattern>/resources</url-pattern>
+  </servlet-mapping>
+
+  <mime-mapping>
+    <extension>jnlp</extension>
+    <mime-type>application/x-java-jnlp-file</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>js</extension>
+    <mime-type>text/javascript</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>css</extension>
+    <mime-type>text/css</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>dtd</extension>
+    <mime-type>text/plain</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>htmdlg</extension>
+    <mime-type>text/html</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>ico</extension>
+    <mime-type>application/octet-stream</mime-type>    
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>lng</extension>
+    <mime-type>text/plain</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>png</extension>
+    <mime-type>image/png</mime-type>    
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>xsl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>  
+  
+  <mime-mapping>
+    <extension>fm</extension>
+    <mime-type>application/vnd.framemaker</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>qxd</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>html, htm</extension>
+    <mime-type>text/html</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>htc</extension>
+    <mime-type>text/plain</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>gif</extension>
+    <mime-type>image/gif</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>jpeg, jpg</extension>
+    <mime-type>image/jpeg</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>pdf</extension>
+    <mime-type>application/pdf</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>zip</extension>
+    <mime-type>application/zip</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>doc</extension>
+    <mime-type>application/msword</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>ppt</extension>
+    <mime-type>application/vnd.ms-powerpoint</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>pps</extension>
+    <mime-type>application/vnd.ms-powerpoint</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>xls</extension>
+    <mime-type>application/vnd.ms-excel</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>class</extension>
+    <mime-type>application/x-java-vm</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>jar</extension>
+    <mime-type>application/x-java-archive</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>ser</extension>
+    <mime-type>application/x-java-serialized-object</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>exe</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wml</extension>
+    <mime-type>text/vnd.wap.wml</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wmls</extension>
+    <mime-type>text/vnd.wap.wmlscript</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wmlc</extension>
+    <mime-type>application/vnd.wap.wmlc</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wmlsc</extension>
+    <mime-type>application/vnd.wap.wmlscriptc</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wbmp</extension>
+    <mime-type>image/vnd.wap.wbmp</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>swf</extension>
+    <mime-type>application/x-shockwave-flash</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>spl</extension>
+    <mime-type>application/futuresplash</mime-type>
+  </mime-mapping>
+  
+  <mime-mapping>
+    <extension>fla</extension>
+    <mime-type>application/octet-stream</mime-type>    
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>wav</extension>
+    <mime-type>audio/wav</mime-type>    
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>ttk</extension>
+    <mime-type>application/octet-stream</mime-type>
+  </mime-mapping>
+
+<!-- Begin: Mime mappings for Axis -->  
+  <mime-mapping>
+    <extension>wsdl</extension>
+     <mime-type>text/xml</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+<!-- End: Mime mappings for Axis -->  
+  <welcome-file-list>
+    <welcome-file>wl</welcome-file>
+  </welcome-file-list>
+
+   <error-page>
+	<error-code id="error404">404</error-code>
+	<location>/envoy/common/error404.jsp</location>
+   </error-page>
+</web-app>

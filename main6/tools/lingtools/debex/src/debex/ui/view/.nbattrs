@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE attributes PUBLIC "-//NetBeans//DTD DefaultAttributes 1.0//EN" "http://www.netbeans.org/dtds/attributes-1_0.dtd">
+<attributes version="1.0">
+    <fileobject name="AboutDlg.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="AboutDlg"/>
+    </fileobject>
+    <fileobject name="Debex.java">
+        <attr name="class_dependency_javax.swing.JFrame" stringvalue="Debex"/>
+    </fileobject>
+    <fileobject name="Editor.java">
+        <attr name="class_dependency_javax.swing.JFrame" stringvalue="JFrame"/>
+    </fileobject>
+    <fileobject name="EditorPnl.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="JPanel"/>
+    </fileobject>
+    <fileobject name="SplashPnl.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="SplashPnl"/>
+    </fileobject>
+</attributes>

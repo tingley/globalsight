@@ -1,0 +1,185 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<!--(==============================================================)-->
+<!--(Document created with RoboEditor. )============================-->
+<!--(==============================================================)-->
+
+<head>
+
+<title>Placeholder Tags (Additional Information)</title>
+
+<!--(Meta)==========================================================-->
+
+<meta http-equiv=content-type content="text/html; charset=windows-1252">
+<meta name=date content="02 20, 2002 3:53:01 PM">
+<meta name="build tags" content="L10n_Participant">
+<meta name=generator content="RoboHELP by eHelp Corporation - www.ehelp.com">
+<meta name=generator-major-version content=0.1>
+<meta name=generator-minor-version content=1>
+<meta name=filetype content=kadov>
+<meta name=filetype-version content=1>
+<meta name=page-count content=1>
+<meta name=layout-height content=665>
+<meta name=layout-width content=1020>
+
+
+<!--(Links)=========================================================-->
+
+ <link rel='stylesheet' href='../../default_ns.css'>
+<script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+p.whs1 {font-family: 'Courier New', monospace; margin-left: 0px;}
+-->
+</style>
+<script type="text/javascript" language="JavaScript">
+<!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4))
+{
+  var strNSS = "<style type='text/css'>";
+  strNSS += "p.whs1 {margin-left:1; }";
+  strNSS +="</style>";
+  document.write(strNSS);
+}
+//-->
+</script>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+  div.WebHelpPopupMenu {position:absolute; left:0px; top:0px; z-index:4; visibility:hidden;}
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="../../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../../whtopic.js"></script>
+</head>
+
+<!--(Body)==========================================================-->
+
+
+<body>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("Appendix\nPlaceholder Tags\nPlaceholder Tags (Additional Information)");
+addButton("show",BTN_TEXT,"Show Table of Contents","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../../GlobalSight.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>Placeholder Tags (Additional Information)</h1>
+
+<h2>Definition</h2>
+
+<p>Placeholder tags are representations of html tags. &nbsp;These 
+ tags are only used to represent html tags which may need to be moved as 
+ part of the localization process, such as links.</p>
+
+<h2>Example</h2>
+
+<p class="whs1">I want 
+ to go to the <span style="color: #0000ff; x-text-underline: normal; /*begin!kadov{{*/ text-decoration: underline; /*}}end!kadov*/ "><font color=blue ><U>store</U></font></span>.</p>
+
+<p class="whs1">&nbsp;</p>
+
+<p>If all of the html tags were shown like this:</p>
+
+<p>&nbsp;</p>
+
+<p class=code>I want to go to the &lt;a href=&quot;www.a-store.com&quot;&gt;store&lt;/a&gt;.</p>
+
+<p class=code>&nbsp;</p>
+
+<p>The html could be accidentally corrupted by forgetting a &quot; or a 
+ &gt;. &nbsp;Placeholder 
+ tags are used to ensure code integrity: </p>
+
+<p>&nbsp;</p>
+
+<p class=code>I want to go to the [l1]store[/l1].</p>
+
+<p>&nbsp;</p>
+
+<p>Notice that the html tag has both a beginning and an end. &nbsp;In 
+ the above example, this denotes where the link should start and stop. 
+ &nbsp;Error messages 
+ are shown to localization participants to ensure that they have put both 
+ starting and stopping tags, and that they have not deleted the tags altogether.</p>
+
+<h2>Optional Placeholder Tags</h2>
+
+<p>Bold: [b][/b]</p>
+
+<p>Italic: [i][/i]</p>
+
+<p>Underline: [u][/u]</p>
+
+<p>Non-breaking space: [nbsp]</p>
+
+<p>&nbsp;</p>
+
+<p>These tags can be added or removed as necessary to assist proper localization, 
+ as some languages cannot be made italic without compromising readability 
+ and others need non-breaking spaces as part of punctuation. </p>
+
+<h2>Tags Without Closing Elements</h2>
+
+<p>Notice that the [nbsp] tag does not have a closing element. &nbsp;Likewise, 
+ if a localizable html tag covers more than one segment in the source material, 
+ it is represented as an [x] tag. &nbsp;The 
+ [x] tag cannot be deleted, even if it represents a &lt;b&gt; tag which 
+ is simply covering more than one segment.</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+
+</html>

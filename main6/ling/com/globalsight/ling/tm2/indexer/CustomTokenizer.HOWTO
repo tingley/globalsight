@@ -1,0 +1,45 @@
+This note explains how to create a custom tokenizer and configure it
+to use in GlobalSight.
+
+1. Create a custom tokenizer
+
+- a custom tokenizer must be derrived from
+  com.globalsight.ling.tm2.indexer.Tokenizer abstract class.
+
+- a custom tokenizer must implement the following method.
+
+    public List tokenize(String p_segment, long p_tuvId, long p_tuId,
+        long p_tmId, GlobalSightLocale p_locale, boolean p_sourceLocale)
+
+  p_segment is a String to be tokenized. This is usually a return
+  value of BaseTmTuv#fuzzyIndexFormat() method. p_tuvId, p_tuId, p_tmId
+  and p_sourceLocale are needed to create Token objects. p_locale is a
+  locale of the segment.
+
+- a custom tokenizer must have a default constructor. A custom
+  tokenizer object is instantiated by java.lang.Class#newInstance()
+  method.
+
+- Currently, a tokenizer is instantiated only once and the same
+  tokenizer object is returned by Tokenizer#getTokenizer() method. So a
+  custom tokenizer must not maintain a state of the object.
+
+- A care must be taken when creating a token not to exceed a limit
+  length of token string. Currently, a length of a field for tokens in
+  the database is 300 bytes in UTF-8.
+
+2. Register a custom tokenizer
+
+Register your custom tokenizer in TmTokenizer.properties file. See
+details in the file.
+
+3. Prepare external resources for a custom tokenizer
+
+If your custom tokenizer uses external resources, I suggest to put
+them in applications/DefaultWebApp/properties/tm directory.
+
+4. Setup system_parameter table
+
+Update system_parameter table to set a key of your tokenizer you
+defined in TmTokenizer.properties in value column in a row where name
+is 'tm.tokenizer'. This tells GlobalSight to use your tokenizer.

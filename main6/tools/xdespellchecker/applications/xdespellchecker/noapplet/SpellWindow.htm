@@ -1,0 +1,18 @@
+<html>
+<head>
+<title>Loading.</title>
+<script src="SpellCheckNoApplet.js"></script>
+</head> 
+<frameset framespacing="0" border="0" frameborder="0" rows="*,100,0" cols="*"
+ onunload="enableSpellCheck()">
+  <frame name="topframe" scrolling="auto" src="top.htm">
+  <frame name="mainframe" src="main.htm" scrolling="no">
+  <frame name="footerframe" scrolling="no" noresize
+   target="main" src="bottom.htm">
+</frameset>
+<noframes>
+<body onblur="self.focus()">
+<p>This page uses frames, but your browser doesn't support them.</p>
+</body>
+</noframes>
+</html>

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.costing.Cost" table="COST">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="actualCostAsFloat" length="126"
+            column="ACTUAL_COST" type="float" not-null="false"
+            unique="false" />
+        <property name="estimatedCostAsFloat" length="126"
+            column="ESTIMATED_COST" type="float" not-null="true"
+            unique="false" />
+        <property name="noUseEstimatedCostAsFloat" length="126"
+            column="NO_USE_ESTIMATED_COST" type="float" not-null="true" />
+        <property name="defaultContextEstimatedCostAsFloat" length="126"
+            column="DEFAULT_CONTEXT_ESTIMATED_COST" type="float" not-null="true" />
+             
+        <property name="finalCostAsFloat" length="126"
+            column="FINAL_COST" type="float" not-null="false"
+            unique="false" />
+        <property name="overrideCostAsFloat" length="126"
+            column="OVERRIDE_COST" type="float" not-null="false"
+            unique="false" />
+        <property name="rateTypeAsString" length="1" column="RATE_TYPE"
+            type="string" not-null="false" unique="false" />
+
+        <any name="object" id-type="long" meta-type="string">
+            <meta-value value="J"
+                class="com.globalsight.everest.jobhandler.JobImpl" />
+            <meta-value value="W"
+                class="com.globalsight.everest.workflowmanager.WorkflowImpl" />
+            <meta-value value="T"
+                class="com.globalsight.everest.taskmanager.TaskImpl" />
+            <column name="COSTABLE_OBJECT_TYPE" />
+            <column name="COSTABLE_OBJECT_ID" />
+        </any>
+
+        <many-to-one name="currency" column="CURRENCY_CONVERSION_ID"
+            class="com.globalsight.everest.costing.Currency"
+            not-null="true" lazy="false" />
+
+        <set name="surchargeSet" inverse="true" cascade="save-update"
+            lazy="false">
+            <key column="COST_ID" />
+            <one-to-many
+                class="com.globalsight.everest.costing.Surcharge" />
+        </set>
+    </class>
+</hibernate-mapping>

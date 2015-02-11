@@ -1,0 +1,54 @@
+
+project=GlobalSight_7.1_`date +%Y%m%d`
+root=~/svn/main-2-23
+patchRoot=~/share/installer2/source
+
+buildInstall() {
+	cd $patchRoot
+	svn up
+	sed "s/%%version%%/$2/g" build0.xml > build.xml
+	sed "s/%%version%%/$2/g" system1.xml > system2.xml
+	sed "s/%%pversion%%/$1/g" system2.xml > system.xml
+	ant buildIstaller
+	mkdir installer_root/server
+	cp $root/Welocalize/main6/tools/build/dist/$project.zip $patchRoot/installer_root/server/$project.zip
+	cd installer_root/server
+	unzip $patchRoot/installer_root/server/$project.zip
+	cd $patchRoot 
+	rm installer_root/server/$project.zip
+	cp system.xml installer_root/server/GlobalSight_7.1/install/data/
+	cp run/build/run.sh installer_root/
+	cp run/build/run.bat installer_root/
+	cd installer_root
+	zip -r GlobalSight_Installer_$2.zip installer run.bat run.sh server
+}
+
+update() {
+	rm $root/Welocalize/main6/tools/build/dist/$project.zip
+	cd $root/Welocalize/main6
+	svn up
+	cd tools/build
+	ant clean distnojsp
+}
+
+
+if [ $# = 0 ]
+    then
+    echo 'buildServer prevision vision option, example: buildServer 7.1.2.0 7.1.3.0 -u'
+	echo '  options:'
+	echo '  -u:  update svn and compile'
+else
+	if [ $# = 3 ]
+	    then
+	        case "$3" in
+	        '-u')
+			    update
+	            ;;
+	        *)
+	            echo 'wrong parameter, please use -u'
+	            ;;
+	        esac
+	fi
+
+	buildInstall $1 $2
+fi

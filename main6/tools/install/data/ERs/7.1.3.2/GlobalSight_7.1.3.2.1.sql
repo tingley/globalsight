@@ -1,0 +1,4 @@
+-- for GBS-497
+ALTER TABLE file_profile ADD COLUMN IS_UNICODE_ESCAPE CHAR(1);
+
+commit;

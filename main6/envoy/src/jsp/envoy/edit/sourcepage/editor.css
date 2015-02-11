@@ -1,0 +1,27 @@
+.skeleton       {
+                  color: black;
+                  /*font-style: italic;*/
+                }
+.localizable    {
+                  color: black;
+                  background-color: gold;
+                }
+.translatable   {
+                  color: black;
+                  background-color: dodgerblue;
+                  border-left: 1px solid black;
+                  border-right: 1px solid black;
+                }
+.gsadd          {
+                  color: black;
+                  background-color: palegreen;
+                }
+.gsadded        {
+                  color: black;
+                  background-color: palegreen;
+                }
+.gsdelete,
+.gs             {
+                  color: black;
+                  background-color: palegreen;
+                }

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Type="StyleSheet" ScriptLanguage="1" Top="1.0" Left="1.0" Bottom="1.0" Right="1.0" HeaderFromEdge="0.5" FooterFromEdge="0.75" PageNumbering="0" HorizontalWrap="false" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0">
+<Version>5.0</Version>
+<ReportProperty Name="report.modified">
+<![CDATA[2004-07-26 15:32:59]]>
+</ReportProperty>
+<ReportProperty Name="TextMode">
+<![CDATA[true]]>
+</ReportProperty>
+<ReportProperty Name="edit.layout">
+<![CDATA[false]]>
+</ReportProperty>
+<ReportProperty Name="report.created">
+<![CDATA[2002-03-06 17:35:12]]>
+</ReportProperty>
+<Parameters>
+</Parameters>
+<ParameterSheets>
+</ParameterSheets>
+<RunningTotals>
+</RunningTotals>
+<Header Type="256">
+<ImageElement ID="imgLogo" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-4144960" PathType="3" Embedded="false" Layout="0" Wrapping="3" Rotation="0" Margin="1,1,1,1">
+<![CDATA[/images/bigGlobalSightLogo.gif]]>
+</ImageElement>
+<TextElement ID="Text8" Alignment="4" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{D}]]>
+</TextElement>
+</Header>
+<Header Type="512">
+<TextElement ID="txtPageNumber" Alignment="68" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{P}]]>
+</TextElement>
+</Header>
+<TextElement ID="txtReportTitle" Alignment="66" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Arial-BOLD-16"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[Details Lite  Prototype Report]]>
+</TextElement>
+<NewlineElement ID="Newline1" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TextElement ID="Text5" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[You can use the Reports Composer to add grouping, conditions, hide columns, etc. and save your customized report as a new report. You can also change fonts, colors, styles, and text.
+
+The following table contains job and page information
+
+ ]]>
+</TextElement>
+<NewlineElement ID="Newline4" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+<TableElement ID="Table6" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" TableWidth="0.0" Layout="1" TableAdvance="1" OrphanControl="false" Padding="0,1,0,1" EmbedWidth="false" Embedded="true">
+<property><name><![CDATA[grow]]></name><value><![CDATA[true]]></value></property>
+<RowGroup>
+</RowGroup>
+<ColGroup>
+</ColGroup>
+<filters>
+<filter class="source" type="0" inherited="false" >
+<source source="detailLite" prefix="system4db" />
+</filter>
+<filter class="formulas">
+</filter>
+<filter class="condition">
+<conditions version="5_0">
+</conditions>
+</filter>
+<filter class="columns">
+<columnselection>
+<attributeref entity="" attribute="JOB_ID"/>
+<attributeref entity="" attribute="JOB_NAME"/>
+<attributeref entity="" attribute="JOB_STATUS"/>
+<attributeref entity="" attribute="SOURCE_LOCALE"/>
+<attributeref entity="" attribute="TARGET_LOCALE"/>
+<attributeref entity="" attribute="SOURCE_NAME"/>
+<attributeref entity="" attribute="SOURCE_FORMAT"/>
+<attributeref entity="" attribute="SOURCE_WORDS"/>
+<attributeref entity="" attribute="EXACT_MATCH_COUNT"/>
+<attributeref entity="" attribute="FUZZY_MATCH_COUNT"/>
+<attributeref entity="" attribute="NO_MATCH_COUNT"/>
+</columnselection>
+<hiddens>
+</hiddens>
+</filter>
+<filter class="summaryattr" type="table">
+<summary type="table" sorted="true">
+<topn  topN="0" topNReverse="false"/>
+<option showHeader="true" showGroupCols="false" inplace="true" breakAfter="false" grandTotal="true" summaryOnly="false" sortonly="false"/>
+</summary>
+</filter>
+</filters>
+<Table Rows="2" Cols="11" HeaderRow="1" HeaderCol="0" TrailerRow="0" TrailerCol="0">
+<TR>
+<TD Type="String"><![CDATA[JOB_ID]]></TD><TD Type="String"><![CDATA[JOB_NAME]]></TD><TD Type="String"><![CDATA[JOB_STATUS]]></TD><TD Type="String"><![CDATA[SOURCE_LOCALE]]></TD><TD Type="String"><![CDATA[TARGET_LOCALE]]></TD><TD Type="String"><![CDATA[SOURCE_NAME]]></TD><TD Type="String"><![CDATA[SOURCE_FORMAT]]></TD><TD Type="String"><![CDATA[SOURCE_WORDS]]></TD><TD Type="String"><![CDATA[EXACT_MATCH_COUNT]]></TD><TD Type="String"><![CDATA[FUZZY_MATCH_COUNT]]></TD><TD Type="String"><![CDATA[NO_MATCH_COUNT]]></TD></TR>
+<TR>
+<TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD></TR>
+</Table>
+</TableElement>
+</Report>

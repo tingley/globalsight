@@ -1,0 +1,13 @@
+<SCRIPT LANGUAGE="JavaScript">
+
+function confirmJump()
+{
+	if (needWarning)
+	{
+		return confirm("<%= bundle.getString("jsmsg_jump_warning_1") %> " + objectName + "\n\n<%= bundle.getString("jsmsg_jump_warning_2") %>");
+	}
+
+    return true;
+}
+
+</SCRIPT>

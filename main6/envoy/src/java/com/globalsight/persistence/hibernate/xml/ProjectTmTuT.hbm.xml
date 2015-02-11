@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.projecthandler.ProjectTmTuT"
+        table="PROJECT_TM_TU_T">
+        <id name="id" column="ID" type="long">
+            <generator class="assigned" />
+        </id>
+
+        <property name="format" length="20" column="FORMAT"
+            type="string" unique="false" />
+        <property name="type" length="50" column="TYPE" type="string"
+            not-null="true" unique="false" />
+        <property name="sourceTmName" length="60"
+            column="SOURCE_TM_NAME" type="string" not-null="false"
+            unique="false" />
+        <property name="fromWorldServer" column="FROM_WORLD_SERVER"
+            type="yes_no" not-null="true" unique="false" />
+
+        <many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale" not-null="false"
+            lazy="false" />
+
+        <many-to-one name="projectTm" column="TM_ID"
+            class="com.globalsight.everest.projecthandler.ProjectTM"
+            not-null="false" lazy="false" />
+
+        <set name="tuvs" inverse="true" cascade="all"
+            order-by="id asc">
+            <key column="TU_ID" />
+            <one-to-many
+                class="com.globalsight.everest.projecthandler.ProjectTmTuvT" />
+        </set>
+
+    </class>
+</hibernate-mapping>

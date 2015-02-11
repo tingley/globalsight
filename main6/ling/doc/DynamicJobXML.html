@@ -1,0 +1,164 @@
+<HTML>
+  <HEAD>
+  <TITLE>DYNAMICJOB Format Specifications (draft)</TITLE>
+
+  <STYLE TYPE="text/css">BODY { font-size: 10pt; background: #ffffff;
+font-family: Arial, Helvetica; } H1 { font-size: 24pt; } H2 { font-size: 16pt; }
+H3 { font-size: 12pt; } EM { color: #800080; } A:link, A:visited, A:active {
+color: #0000FF; } PRE, BLOCKQUOTE { font-family: Mono-space; }
+  </STYLE>
+  </HEAD>
+  
+  <BODY BGCOLOR="#FFFFFF">
+  <H1>DYNAMICJOB Format Specifications (draft)</H1>
+
+  <H2>Table of Contents</H2>
+  1. <A href="#overview">Overview</A><BR>
+  2. <A href="#spec">Specification</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.1 <A href="#codesets">Encoding</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.2 <A href="#elements">Element Definitions</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.3 <A href="#attributes">Attribute Definitions</A><BR>
+
+  3. <A href="#usage">Usage</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;3.1 <A href="#example">Example</A><BR>
+
+
+
+  <H2><A NAME="overview">1. Overview</A></H2>
+  <P>The purpose of DYNAMICJOB format is to represent the record from database in an XML file so that the data can be transported easily in the system. DYNAMICJOB format also carry the additional metadata used to process the data.</P>
+
+
+  <H2><A NAME="spec">2. Specification</A></H2>
+
+  <H3><A NAME="codesets">2.1. Encoding</A></H3>
+    
+    <p>The encoding of DYNAMICJOB file must be declared in XML declaration as stated in <A HREF="http://www.w3.org/TR/REC-xml">XML 1.0 Recommendation</A>. For example, if the encoding of the record is in latin-1, the XML declaration will be:</P>
+<P>&lt;xml version="1.0" encoding="ISO-8859-1"?&gt;</P>
+<P>If the encoding attribute is omitted, the encoding of the file is assumed to be UTF-8.</P>
+
+
+  <H3><A NAME="elements">2.2. Element Definitions</A></H3>
+
+  <P>The following table lists the different elements of a DYNAMICJOB document:</P>
+      <TABLE BORDER="1" WIDTH="100%" CELLPADDING="5" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DYNAMICJOB">&lt;DynamicJob&gt;</A></TD>
+        <TD>The &lt;DynamicJob&gt; element is the document root. It contains one or more <A HREF="#RECORD">&lt;record&gt;</A> element.
+        <BR>
+        <BR>Mandatory attribute: <A HREF="#VERSION">version</A>, <A HREF="#LOCALE">locale</A>.
+        <BR>Optional attributes: None.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="RECORD">&lt;record&gt;</A></TD>
+        <TD>The &lt;record&gt; element is a container of a record of data. It
+        contains one or more <A HREF="#TABLE">&lt;table&gt;</A> elements.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#DATAPROFILEID">dataProfileId</A>.
+        <BR>Optional attributes: None.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="TABLE">&lt;table&gt;</A></TD>
+        <TD>The &lt;table&gt; element stores the columns of the table. It
+        contains one or more <A HREF="#COLUMN">&lt;column&gt;</A> elements.
+        <BR>
+        <BR>Mandatory attributes: <A HREF="#NAME">name</A>.
+        <BR>Optional attributes: None.
+	</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="COLUMN">&lt;column&gt;</A></TD>
+        <TD>The &lt;column&gt; element stores the data of the column. 
+        <BR>
+        <BR>Mandatory attribute: <A HREF="#NAME">name</A> and <A HREF="#TRNASLATE">translate</A>.
+        <BR>Optional attributes: <A HREF="#FORMAT">format</A> and <A HREF="#RULEFILE">ruleFile</A>.
+        <BR></TD>
+      </TR>
+    </TABLE>
+    
+    
+    <H3><A NAME="attributes">2.3. Attribute Definitions</A></H3>
+    
+    <P>The following table lists the different attributes used in the elements
+      of a DYNAMICJOB document. The same attribute may be used with multiple elements,
+      but will be either mandatory or optional depending on the specific
+      occurrence.</P>
+    <TABLE BORDER="1" WIDTH="100%" CELLPADDING="5" CELLSPACING="0">
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="VERSION">version</A></TD>
+        <TD ALIGN="LEFT" VALIGN="TOP">The version attribute is used in the  <A HREF="#DYNAMICJOB">&lt;DynamicJob&gt;</A> element. It indicates the
+        version of the DYNAMICJOB format to which the document conforms.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="LOCALE">locale</A></TD>
+        <TD>The locale attribute is used in the <A HREF="#DYNAMICJOB">&lt;DynamicJob&gt;</A>
+        element to specify the language for the document. Its value is a combination of ISO Language Code and ISO Country Code with a dash between them (e.g. en-US). More information about ISO Language Code and ISO Country Code can be obtained in the java.util.locale API reference in the JAVA SDK Documentation.
+	</TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="DATAPROFILEID">dataProfileId</A></TD>
+        <TD>The dataProfileId attribute specifies the id of a Data Profile that is used to process the record.</TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="NAME">name</A></TD>
+        <TD>The name attribute is used in the <A HREF="#TABLE">&lt;table&gt;</A> and  <A HREF="#COLUMN">&lt;column&gt;</A> elements. It specifies the name of tables or columns.</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="TRANSLATE">translate</A></TD>
+        <TD>The translate attribute specifies if the column should be translated or not. The value of this attribute is either "true" or "false".</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="FORMAT">format</A></TD>
+        <TD>The format attribute specifies the format of the column. According to this value, the extractor switches to the appropriate sub-extractor. If this attribute is omitted, the format of the column is assumed to be TEXT. </TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT" VALIGN="TOP"><A NAME="RULEFILE">ruleFile</A></TD>
+        <TD>The ruleFile attribute specifies the Rule File that is used when extracting XML format columns. If this attribute exists for a column whose format is not XML, it is simply ignored. If this attribute doesn't exists for a XML column, the default XML Rule File will be used (of course, the extraction result is not optimal).</TD>
+      </TR>
+    </TABLE>
+
+    <H2><A NAME="usage">3. Usage</A></H2>
+
+    <H3><A NAME="example">3.1 Example</A></H3>
+
+    <P>The example below shows a DYNAMICJOB file that contains two records in it.</P>
+
+    <table cellpadding='5' border='1' bgcolor='#80ffff' width='100%'>
+    <tr><td><code>
+<pre>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+
+&lt;DynamicJob version="1.0" locale="en-US"&gt;
+  &lt;!-- Simple record --&gt;
+  &lt;record dataProfileId="02394039248"&gt;
+    &lt;table name="bikeshop"&gt;
+      &lt;column name="productid" translate="false"&gt;20394801923&lt;/column&gt;
+      &lt;column name="productname" translate="false"&gt;Cool MAX&lt;/column&gt;
+      &lt;column name="description" translate="true"&gt;This is a real cool bike. You always want to ride it in MAX speed!&lt;/column&gt;
+    &lt;/table&gt;
+  &lt;/record&gt;
+
+  &lt;!-- a little complicated example (two tables in a record) --&gt;
+  &lt;record dataProfileId="02394039249"&gt;
+    &lt;table name="table1"&gt;
+      &lt;column name="column1" format="XML" ruleFile="xml1.rule" translate="true"&gt;aaaaaaa&lt;/column&gt;
+      &lt;column name="column2" format="HTML" translate="true"&gt;bbbbbb&lt;/column&gt;
+      &lt;column name="column3" translate="false"&gt;ccccccc&lt;/column&gt;
+    &lt;/table&gt;
+    &lt;table name="table2"&gt;
+      &lt;column name="column1" translate="false"&gt;dddddddd&lt;/column&gt;
+      &lt;column name="column2" format="CSS" translate="true"&gt;eeeeee&lt;/column&gt;
+    &lt;/table&gt;
+  &lt;/record&gt;
+&lt;/DynamicJob&gt;</pre>
+    </code></td></tr>
+    </table>
+
+<HR>
+<SCRIPT LANGUAGE="JavaScript"><!--
+document.write("<FONT SIZE=\"2\">Last update of this copy: " + document.lastModified + "</\FONT>");
+// --></SCRIPT>
+  </BODY>
+</HTML>

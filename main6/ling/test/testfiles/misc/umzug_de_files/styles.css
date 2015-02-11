@@ -1,0 +1,18 @@
+FONT.normal {
+	FONT-WEIGHT: normal; FONT-SIZE: 15px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}
+FONT.small {
+	FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}
+FONT.big {
+	FONT-WEIGHT: normal; FONT-SIZE: 17px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}
+FONT.heading {
+	FONT-WEIGHT: bold; FONT-SIZE: 15px; COLOR: #ffffff; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}
+FONT.copyright {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}
+FONT.headline {
+	FONT-WEIGHT: bold; FONT-SIZE: 18px; COLOR: #000000; FONT-STYLE: normal; FONT-FAMILY: verdana, geneva, arial, helvetica, sans-serif; TEXT-DECORATION: none
+}

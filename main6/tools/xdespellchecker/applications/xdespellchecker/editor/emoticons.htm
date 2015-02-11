@@ -1,0 +1,141 @@
+<HTML>
+<HEAD>
+<TITLE>Emoticons</TITLE>
+<!--
+Copyright 2003 XDE
+-------------------------------------------------------------
+$Id: emoticons.htm,v 1.1 2009/04/14 15:42:51 yorkjin Exp $
+-------------------------------------------------------------
+$RCSfile: emoticons.htm,v $
+$Author: yorkjin $
+$Revision: 1.1 $
+$Date: 2009/04/14 15:42:51 $
+$Locker:  $
+$Name:  $
+------------------------------------------------------------
+-->
+
+<style>
+td {
+	background-repeat: no-repeat; 
+	background-position: center; 
+	width: 20px; height: 20px;
+	border: solid 1px black;
+}
+</style>
+<script type="text/javascript">
+function getQueryParm(pURL,ParmtoGet){
+	var StartPos=pURL.indexOf(ParmtoGet);
+	var ParmValue='';
+	if(StartPos>-1){
+		var lookfor='&';
+		var NextPos=pURL.indexOf(lookfor,StartPos);
+		if(NextPos==-1)NextPos=pURL.length;
+		ParmValue=pURL.substring(StartPos+ParmtoGet.length+1,NextPos);
+	}
+return ParmValue;
+}
+
+
+var elLastHighlight;
+
+function doOver() {
+	return;
+		
+	var event=window.event || arguments.callee.caller.arguments[0];
+	var el = event.srcElement;
+	
+	if (el.tagName == "IMG")
+		el = el.parentElement;
+
+	if (el.tagName == "TD") {
+		el.style.borderColor = "blue";
+		window.imgTitle.innerHTML = el.title;
+		if (elLastHighlight)
+			if (elLastHighlight != el)
+				elLastHighlight.style.borderColor = "black";
+
+		elLastHighlight = el;
+	}
+	else
+		window.imgTitle.innerHTML = "Click on a picture.";
+}
+
+function doOut() {
+	return;
+	var event=window.event || arguments.callee.caller.arguments[0];
+	var el = event.fromElement;
+	el.style.borderColor = "black";
+}
+
+function doClick() {
+	var event=window.event || arguments.callee.caller.arguments[0];
+	if (event.target) el = event.target;
+	else if (event.srcElement) el = event.srcElement;
+	// You clicked somewhere on the table.
+	// Get the first image element and set
+	// the source of the emoticon to the
+	// src of the image.
+	if (el.tagName != "IMG")
+		el = el.children.tags("IMG")[0];
+
+	if (el) {
+		var iFrameName=getQueryParm(parent.document.location.toString(),"iFrameName");
+
+		window.parent.opener.editSetEmoticon(iFrameName,el.src);
+		window.close();
+	}
+}
+
+window.focus();
+</script>
+<link rel="stylesheet" href="xdeStyleSheet.css" type="text/css">
+</HEAD>
+<BODY onload="window.focus();" class="xdePopUpStyle">
+<table id="imgTable" border="0" cellspacing="3" onmouseover="doOver()" onmouseout="doOut()" onclick="doClick()" class="xdeTableStyle">
+  <tr>
+<td title="Smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/regular_smile.gif"></td>
+<td title="Open-mouthed smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/teeth_smile.gif"></td>
+<td title="Smiley says O"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/omg_smile.gif"></td>
+<td title="Smiley with tongue out"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/tounge_smile.gif"></td>
+<td title="Winking smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/wink_smile.gif"></td>
+<td title="Sad smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/sad_smile.gif"></td>
+<td title="Confused smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/confused_smile.gif"></td>
+</tr>
+<tr>
+<td title="Stern smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/whatchutalkingabout_smile.gif"></td>
+<td title="Crying smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/cry_smile.gif"></td>
+<td title="Embarrassed smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/embaressed_smile.gif"></td>
+<td title="Cool smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/shades_smile.gif"></td>
+<td title="Angel smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/angel_smile.gif"></td>
+<td title="Angry smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/angry_smile.gif"></td>
+<td title="Devil smiley"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/devil_smile.gif"></td>
+</tr>
+<tr>
+<td title="Red heart"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/heart.gif"></td>
+<td title="Broken heart"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/broken_heart.gif"></td>
+<td title="Red lips"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/kiss.gif"></td>
+<td title="Gift with bow"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/present.gif"></td>
+<td title="Red rose"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/rose.gif"></td>
+<td title="Wilted rose"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/wilted_rose.gif"></td>
+<td title="Camera"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/camera.gif"></td>
+</tr>
+<tr>
+<td title="Telephone receiver"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/phone.gif"></td>
+<td title="Coffee cup"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/coffee.gif"></td>
+<td title="Light bulb"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/lightbulb.gif"></td>
+<td title="Half-moon"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/moon.gif"></td>
+<td title="Star"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/star.gif"></td>
+<td title="Musical eighth note"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/musical_note.gif"></td>
+<td title="Envelope"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/envelope.gif"></td>
+</tr>
+<tr>
+<td title="Birthday cake"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/cake.gif"></td>
+<td title="Clock"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/clock.gif"></td>
+<td title="Thumbs up"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/thumbs_up.gif"></td>
+<td title="Thumbs down"><img  height="19" width="19" src="/globalsight/xdespellchecker/editor/images/emoticons/thumbs_down.gif"></td>
+</tr>
+</table>
+<p id="imgTitle" style="font-family: verdana; font-size: 8pt;">Click on a picture.</p>
+</BODY>
+</HTML>

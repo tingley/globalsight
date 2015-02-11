@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!-- Component: inboxstreamline                                            -->
+<!-- Scope: None                                                           -->
+
+<config version='1.0'>
+   <scope>
+   
+      <component id="inboxstreamline" extends="inboxdrilldown:custom/ambassador/config/navigation/inbox/inboxdrilldown_component.xml">
+
+      <!-- Description (not NLS'd) -->
+      <desc>
+         This component allows for listing of the user?s inbox tasks. 
+         It extends inboxdrilldown adding user preference capability. 
+         It has a streamline-style layout.
+      </desc>
+
+      <pages>
+         <start>/webtop/streamline/inbox/inbox.jsp</start>
+      </pages>
+
+      <class>com.documentum.webtop.webcomponent.inbox.InboxStreamline</class>
+
+      <!-- Show attachment names -->
+      <showattachmentinfo>false</showattachmentinfo>
+
+      <!-- id of the task manager component accessible from inbox -->
+      <taskmanagerid>taskmgrstreamline</taskmanagerid>
+
+      <!-- specify action name to access workflow status page - 
+      overloaded to show workflowstatusstreamline -->
+      <workflowstatusactionname>workflowstatusstreamline</workflowstatusactionname>
+      <workflowreportactionname>reportmainstreamline</workflowreportactionname>
+
+      </component>
+      
+   </scope>
+   
+</config>

@@ -1,0 +1,60 @@
+FORM {
+	PADDING-RIGHT: 3px; PADDING-LEFT: 3px; BACKGROUND: #cc9; PADDING-BOTTOM: 3px; COLOR: black; PADDING-TOP: 3px
+}
+INPUT.radio {
+	BACKGROUND: #cc9; COLOR: #000
+}
+BLOCKQUOTE {
+	BORDER-RIGHT: #960 1px dashed; PADDING-RIGHT: 0.4em; BORDER-TOP: #960 1px dashed; PADDING-LEFT: 0.4em; BACKGROUND: #f9fcf9; PADDING-BOTTOM: 0.2em; BORDER-LEFT: #960 1px dashed; COLOR: #000; PADDING-TOP: 0.2em; BORDER-BOTTOM: #960 1px dashed
+}
+.motto {
+	MARGIN-LEFT: 30%; WIDTH: 70%
+}
+FORM.button {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; BACKGROUND: none transparent scroll repeat 0% 0%; BORDER-LEFT: medium none; BORDER-BOTTOM: medium none
+}
+UL LI {
+	MARGIN-TOP: 0.3em; MARGIN-BOTTOM: 0.3em
+}
+OL LI {
+	MARGIN-BOTTOM: 0.3em
+}
+UL {
+	MARGIN-LEFT: 2em
+}
+OL {
+	MARGIN-LEFT: 2em
+}
+LI {
+	MARGIN-LEFT: 0px
+}
+UL.toc LI {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
+}
+UL.compact LI {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px
+}
+UL.toc {
+	MARGIN-LEFT: 1em
+}
+UL.compact {
+	MARGIN-TOP: 0.1em
+}
+UL {
+	MARGIN-TOP: 0.15em
+}
+OL {
+	MARGIN-TOP: 0.15em
+}
+UL.separate {
+	MARGIN-TOP: 0.3em
+}
+OL.separate {
+	MARGIN-TOP: 0.3em
+}
+DT {
+	MARGIN-TOP: 0.4em
+}
+DD {
+	MARGIN-BOTTOM: 0.4em
+}

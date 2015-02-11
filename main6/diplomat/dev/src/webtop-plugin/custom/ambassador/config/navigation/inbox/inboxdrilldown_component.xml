@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2001.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!-- Component: inboxlist                                                  -->
+<!-- Scope: None                                                           -->
+
+<config version='1.0'>
+   <scope>
+   
+      <component id='inboxdrilldown'>
+
+         <!-- Description (not NLS'd) -->
+         <desc>
+            This component allows for listing of the user?s inbox tasks. 
+            It has a streamline-style layout.
+         </desc> 
+         
+         <pages>
+            <start>/webcomponent/navigation/inbox/inbox_drilldown.jsp</start>
+         </pages>
+
+         <class>com.documentum.webcomponent.navigation.inbox.InboxDrilldown</class>
+         <nlsbundle>com.documentum.ambassador.navigation.inbox.InboxNlsProp</nlsbundle>
+
+         <!-- If this component supports failover/replication, the failoverenabled needs to be set to true-->
+         <failoverenabled>true</failoverenabled>
+         
+         <!-- Show attachment names -->
+         <showattachmentinfo>false</showattachmentinfo>
+
+         <!-- id of the task manager component accessible from inbox -->
+         <taskmanagerid>taskmanager</taskmanagerid>
+         
+         <!-- show object type filters -->
+         <showfilters>false</showfilters>
+
+         <!-- show auto get next task for work queue processor -->
+         <showautogettask>true</showautogettask>
+         <!-- default value for auto get next task -->
+         <autogettaskdefault>false</autogettaskdefault>
+         
+         <!-- specify action name to access workflow status page -->
+         <workflowstatusactionname>workflowstatusdrilldown</workflowstatusactionname>
+         <workflowreportactionname>reportmaindrilldown</workflowreportactionname>
+
+         <!-- Column visibility for list layout -->
+         <columns>
+            <!-- NOTE: the first column, displaying 'taskName' is always visible -->
+            <column>
+               <attribute>sent_by</attribute>
+               <label><nlsid>MSG_TASK_FROM</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>date_sent</attribute>
+               <label><nlsid>MSG_TASK_RECEIVED</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>due_date</attribute>
+               <label><nlsid>MSG_TASK_DUE_DATE</nlsid></label>
+               <visible>false</visible>
+            </column>
+            <column>
+               <attribute>task_state</attribute>
+               <label><nlsid>MSG_TASK_STATUS</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>source_docbase</attribute>
+               <label><nlsid>MSG_TASK_SOURCE_DOCBASE</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>r_priority</attribute>
+               <label><nlsid>MSG_TASK_PRIORITY</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>a_wq_flag</attribute>
+               <label><nlsid>MSG_TASK_IS_PUSHED</nlsid></label>
+               <visible>true</visible>
+            </column>
+            <column>
+               <attribute>a_wq_name</attribute>
+               <label><nlsid>MSG_TASK_WQ_NAME</nlsid></label>
+               <visible>true</visible>
+            </column>
+         </columns>
+
+         <helpcontextid>inboxdrilldown</helpcontextid>
+      </component>      
+   </scope>   
+</config>

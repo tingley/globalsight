@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.cxe.entity.dbconnection.DBConnectionImpl"
+        table="CONNECTION_PROFILE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="connection" length="127" column="CONNECTION"
+            type="string" not-null="true" unique="false" />
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="driver" length="127" column="DRIVER"
+            type="string" not-null="true" unique="false" />
+        <property name="name" length="40" column="NAME" type="string"
+            not-null="true" unique="false" />
+        <property name="password" length="127" column="PASSWORD"
+            type="string" not-null="true" unique="false" />
+        <property name="username" length="80" column="USER_NAME"
+            type="string" not-null="true" unique="false" />
+    </class>
+</hibernate-mapping>

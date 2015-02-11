@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0039)http://home.worldcom.ch/~jmlugrin/fesi/ -->
+<HTML><HEAD><TITLE>FESI (pr. like fuzzy) EcmaScript interpreter</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<META content="MSHTML 5.50.4134.600" name=GENERATOR>
+<META content="Mozilla/4.72 [en] (Win98; U) [Netscape]" name=GENERATOR>
+<META content=Jean-MarcLugrin name=Author>
+<META content="Describe the FESI EcmaScript interpreter" name=Description>
+<META content="EcmaScript, JavaScript, JScript, Java" name=KeyWords></HEAD>
+<BODY vLink=#00008b link=#00008b bgColor=#add8e6>&nbsp; 
+<TABLE cellSpacing=6 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=middle><IMG height=60 src="fesi_files/fesi.gif" width=75></TD>
+    <TD align=left><FONT color=#a52a2a><FONT size=+3>FESI (pronounced like 
+      <I>fuzzy</I>)</FONT></FONT> <BR><FONT color=#a52a2a><FONT size=+3>a Free 
+      EcmaScript Interpreter.</FONT></FONT></TD></TR></TBODY></TABLE>
+<CENTER>
+<P><FONT color=#ff0000><FONT size=+3>Release 1.1.5</FONT></FONT> <BR><FONT 
+color=#ff0000><FONT size=+3>Some bug fixes</FONT></FONT></CENTER>
+<P><BR>
+<TABLE width="100%" bgColor=#a52a2a text="#FFFFFF">
+  <TBODY>
+  <TR>
+    <TD>
+      <CENTER><B><FONT color=#ffffff><FONT size=+2>The </FONT><TT><FONT 
+      size=+3>FESI</FONT></TT><FONT size=+2> (pronounced like <I>fuzzy</I>) home 
+      page</FONT></FONT></B></CENTER></TD></TR></TBODY></TABLE>
+<CENTER><B>Version 1.1.5&nbsp; (July 29, 2000)</B> <BR><B><A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/copyright.html">Download</A> (both 
+binaries and sources are available)</B> <BR><B>Mail to the author: <A 
+href="mailto:jmlugrin@worldcom.ch">Jean-Marc Lugrin</A></B></CENTER>
+<HR>
+
+<P><TT>FESI</TT> (pronounced like <I>fuzzy</I>)&nbsp; is a full implementation 
+of the EcmaScript language (defined in the standard <TT>ECMA 262</TT> available 
+at <TT><A href="http://www.ecma.ch/">http://www.ecma.ch/</A></TT> (edition of 
+june 97).&nbsp; EcmaScript is largely equivalent to the JavaScript language 
+version 1.1 or to the core part of JScript, but without the navigator specific 
+extensions. A few <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html">extensions</A> can be 
+loaded, to provide <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html#BasicIO">basic 
+input/output</A>, <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html#FileIO">file 
+input/output</A>, <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html#JavaAccess">access to Java 
+objects</A>, <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html#Database">database 
+access</A> and <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/ext.html#RegExp">regular expression 
+based search </A>from an EcmaScript program, including dynamic loading of 
+classes and beans. 
+<P><TT>FESI</TT> consists of <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/javalib.html">a set of java 
+packages</A>, allowing to use EcmaScript as a macro language for Java 
+applications, and of an <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/interp.html">interactive 
+interpreter</A> (usable from the command line to test EcmaScript programs). The 
+integration with Java is very strong, making <TT>FESI</TT> a useful tool to test 
+Java libraries. 
+<P>There is a simple editor included with the Swing version of the interpreter. 
+You can execute scripts interactively or from the editor windows. 
+<P>You will find additional useful libraries in the <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/links.html">link page</A>. 
+<P>
+<HR>
+
+<H4>A few examples of code:</H4>
+<UL>
+  <LI>Simple code to<A 
+  href="http://home.worldcom.ch/~jmlugrin/fesi/properties.txt"> list system 
+  properties</A>, an example to access Java from EcmaScript. 
+  <LI>The <A href="http://home.worldcom.ch/~jmlugrin/fesi/juggler.txt">juggler 
+  code</A> creates the juggler bean with start and stop button. An example how a 
+  bean can be tested from an EcmaScript program. 
+  <LI>An example of <A 
+  href="http://home.worldcom.ch/~jmlugrin/fesi/swingev.txt">using Swing</A> from 
+  EcmaScript, including event handling! 
+  <LI>A simple <A 
+  href="http://home.worldcom.ch/~jmlugrin/fesi/xparse.txt"><TT>XML</TT> 
+  parser</A> written entirely in EcmaScript. 
+  <LI><A 
+  href="http://home.worldcom.ch/~jmlugrin/fesi/forsite/fesiftp/fesiftp.html">FesiFTP</A>, 
+  a simple FTP access program with macros written in EcmaScript. 
+  <LI>A work in progress of interest is <A 
+  href="http://home.worldcom.ch/~jmlugrin/fesi/forsite/fesiform/index.html">FesiForm</A>, 
+  a <TT>GUI</TT> generator based on <TT>XML</TT>. </LI></UL>
+<P><BR>
+<HR>
+
+<H4>Latest changes:</H4><I>Previous history is available <A 
+href="http://home.worldcom.ch/~jmlugrin/fesi/history.html">here</A>.</I> 
+<UL><I>1.1.5 - July 29,&nbsp; 2000</I> <BR><I>&nbsp;&nbsp;&nbsp; Corrected bug 
+  when calling a function with less arguments than the number of real 
+  parameters. Now correctly returns 'undefined' for missing parameters (thanks 
+  to Rob Noble and Sergey Borisov).</I> <BR><I>&nbsp;&nbsp;&nbsp; Use 
+  'undefined' when attempting to use no value at all (for example using the 
+  returned value of an function which ends with an empty statement). Previously 
+  this created a null pointer exception.</I> <BR><I>&nbsp;&nbsp;&nbsp; Hack 
+  (adding a new line) to work around a parsing limitation which generated an 
+  error when a single line program was terminated by a // comment.</I></UL>
+<UL><I>1.1.4 - January 30,&nbsp; 2000</I> <BR><I>&nbsp;&nbsp;&nbsp; Added the 
+  GnuRegExp (Thanks to Mike Dillon), allowing LGPL support of RegExp.</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Better documentation of Windows Installation.</I></UL>
+<UL><I>1.1.3 - December 25,&nbsp; 1999</I> <BR><I>&nbsp;&nbsp;&nbsp; LICENSED 
+  UNDER THE <A href="http://www.gnu.org/copyleft/lesser.html">LGPL</A>.Thanks to 
+  the Debian and FSF people who encouraged me to use a more standard license. 
+  NOTE: To avoid any licensing ambiguity, the ORO regular expression library is 
+  not included anymore, you must download it from<B> <A 
+  href="http://www.savarese.org/">http://www.savarese.org/</A></B>.</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Use javaCC 1.1.</I> <BR><I>&nbsp;&nbsp;&nbsp; 
+  Corrected bug in getting path separator (for Linux).</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Pass call to functions to the prototype even if 
+  prototype is a native object.</I> <BR><I>&nbsp;&nbsp;&nbsp; Add extensions of 
+  initialized objects (from Christophe Marton).</I> <BR><I>&nbsp;&nbsp;&nbsp; 
+  new Date() correctly initialize to current time.</I> <BR><I>&nbsp;&nbsp;&nbsp; 
+  Corrected bug in parseInt of large numbers.</I> <BR><I>&nbsp;&nbsp;&nbsp; 
+  Corrected bug when RegExp matched but one group did not match.</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; The limitation on calling public methods of non 
+  public classe is documented (thanks to Jason Mathews).</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; The LINK.HTML page has been updated.</I> 
+  <P><I>1.1.2 - May 8,&nbsp; 1999</I> <BR><I>&nbsp;&nbsp;&nbsp; Avoid converting 
+  BigInteger to builtin numbers (thanks to Denis Bohm).</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Add support to sort function in Array.sort (thanks 
+  to Hannes Wallnoefer)</I> <BR><I>&nbsp;&nbsp;&nbsp; Corrected bug in normalize 
+  value to support arrays (thanks to Kurt Westerfeld)</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Corrected bug in array enumeration when non indexed 
+  properties were present.</I> <BR><I>&nbsp;&nbsp;&nbsp; Transformed parameters 
+  of JSFunction to JSObject when possible.</I> <BR><I>1.1.1 - March 15,&nbsp; 
+  1999</I> <BR><I>&nbsp;&nbsp;&nbsp; Cleaned up web documentation</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; Checked on Linux (the AWT GUI doubles all 
+  characters... sorry)</I> <BR><I>&nbsp;&nbsp;&nbsp; Very minor cleanup of 
+  code</I> <BR><I>1.1 - March 7,&nbsp; 1999 (not announced)</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; WARNING: Use Swing 1.1 (javax.swing) in the swinggui 
+  if used with JDK1.1.7 !</I> <BR><I>&nbsp;&nbsp;&nbsp; A new option -e allows 
+  to load extensions from the command line.</I> <BR><I>&nbsp;&nbsp;&nbsp; The 
+  Interpreter structure has well as the gui classes have been changed to</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; ease subclassing and allow compilation without the 
+  Swinf and ORO classes.</I> <BR><I>&nbsp;&nbsp;&nbsp; Validated under Java 1.2, 
+  includes Java 1.2 compatible ORO classes.</I> <BR><I>&nbsp;&nbsp;&nbsp; Added 
+  access to CORBA style properties (routines without set/get prefix)</I> 
+  <BR><I>&nbsp; From Kurt Westerfeld:</I> <BR><I>&nbsp;&nbsp;&nbsp; Fix around 
+  Console to support the MS environment</I> <BR><I>&nbsp;&nbsp;&nbsp; Bug 
+  correction in ESObject, avoiding an endless loop if an object which</I> 
+  <BR><I>&nbsp;&nbsp;&nbsp; does not have a valid default string value is 
+  converted to string.</I> <BR><I>&nbsp;&nbsp;&nbsp; Added getMetaData() to 
+  connection and rowset in the Database extension.</I></P></UL>
+<HR>
+
+<UL>
+  <UL>
+    <LI><A href="http://home.worldcom.ch/~jmlugrin/fesi/docindex.html">Online 
+    documentation</A> - Describes the interpreter, library interface and 
+    extensions. 
+    <LI><A href="http://home.worldcom.ch/~jmlugrin/fesi/pubkey.html">Public 
+    key</A> - Contains my public PGP key used to sign some redistribution 
+    licenses (under the old license agreement, prior to 1.1.3). 
+    <LI><A href="http://home.worldcom.ch/~jmlugrin/fesi/links.html">Interesting 
+    links</A> - List links useful for EcmaScript developers and <TT>FESI</TT> 
+    users. 
+    <LI><A 
+    href="http://home.worldcom.ch/~jmlugrin/fesi/install.html">Installation 
+    instructions</A> - Describes reprequisites and installation steps. 
+    <LI><A href="http://home.worldcom.ch/~jmlugrin/fesi/history.html">Change 
+    history</A> - List history of changes. 
+    <LI><A href="http://home.worldcom.ch/~jmlugrin/fesi/copyright.html">Download 
+    FESI</A> - You will first have to read and accept the conditions. 
+    <LI><A href="http://home.worldcom.ch/jmlugrin/fesi/index.html">Back to home 
+    page on Internet</A> - the FESI home page. </LI></UL></UL>
+<HR>
+
+<CENTER>
+<P>This <A href="http://members.tripod.com/~mpTOOLS/ring.html">Open Source 
+Java</A> site owned by <A href="mailto:jmlugrin@worldcom.ch">Jean-Marc 
+Lugrin</A>. <BR>[ <A 
+href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;id=46;prev5">Previous 5 
+Sites</A> | <A 
+href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;id=46;prev">Previous</A> 
+| <A 
+href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;id=46;next">Next</A> | 
+<A href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;id=46;next5">Next 5 
+Sites</A> | <A 
+href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;random">Random Site</A> 
+| <A href="http://nav.webring.org/cgi-bin/navcgi?ring=osj123;list">List 
+Sites</A> ]</CENTER>
+<P>
+<HR>
+
+<DIV align=right><FONT size=-2>Last update: 13 August 
+2000</FONT></DIV></BODY></HTML>

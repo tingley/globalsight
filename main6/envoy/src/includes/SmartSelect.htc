@@ -1,0 +1,121 @@
+<PUBLIC:COMPONENT>
+<PUBLIC:PROPERTY NAME="timeout" />
+<PUBLIC:PROPERTY NAME="showStatus" />
+<PUBLIC:ATTACH EVENT="onkeypress" ONEVENT="return KeyPress();"  />
+<PUBLIC:ATTACH EVENT="onkeydown" ONEVENT="return KeyDown();" />
+<PUBLIC:ATTACH EVENT="onfocus" ONEVENT="return OnFocus();" />
+<PUBLIC:ATTACH EVENT="onblur" ONEVENT="return OnBlur();" />
+<PUBLIC:ATTACH EVENT="onpropertychange" ONEVENT="return PropertyChange();" />
+<PUBLIC:EVENT NAME="onchange" ID="mychange"  DISPID="-2147412082" />
+<SCRIPT LANGUAGE="JScript">
+
+// Select.htc -- Add Incremental Search to a <SELECT> 
+// 
+// Last Updated: 4/28/00 by Burt Harris
+//
+var time;           // Time of last keystroke
+var searchString;       // Incremental search accumulator
+var inControl, lastIndex;   // Workaround for TAB when list down
+
+function OnFocus()
+{
+    if (timeout == null)    
+        timeout = 3000;     // Set default timeout if not supplied
+    if (showStatus == null)
+        showStatus = true;  // Set default for showStatus
+    else
+        showStatus = eval(showStatus);
+    time = new Date();      // Initalize timer
+    searchString = "";      // Start at the first character
+    inControl = false;      // Start out not in search mode
+
+    // SOMEDAY: drop down list on receiving focus
+}
+
+function KeyDown()
+{
+    // Keys we don't understand, like Up, Down etc 
+    // mark us as not in incremental search mode
+    if (event.keyCode != 9)     // Tab dosn't effect mode
+        inControl = false; 
+    return true;            
+}
+
+function KeyPress()
+{
+    var i, lasttime = time;     // Save old time
+    time = new Date();          // Note new time
+    inControl = true;           // We are in incremental search mode
+    if (!lasttime)      
+        lasttime = time;        // Only happens when debugging
+    var delta = time.valueOf() - lasttime.valueOf();
+    if (delta > timeout)
+        searchString = "";      // Reset search if too much time
+    // Add the character to the search string
+    searchString = searchString + String.fromCharCode(event.keyCode);
+    if (searchString.length == 1)
+        {
+        SearchFor(searchString, 1);    // Normal 1-character search
+        }
+    else if (!SearchFor( searchString, 0 )) // Incremental search
+        { 
+	    // Incremental search failed, try 1-character search
+        searchString = String.fromCharCode(event.keyCode);
+        SearchFor(searchString, 1); 
+        }
+    event.returnValue = false;  // Avoid default handling
+}
+
+function OnBlur()
+{
+    // If we were "in Control" and loose focus, make sure
+    // the item we last selected is still selected.
+    //if (inControl && lastIndex != this.selectedIndex)
+    //    {
+    //    this.selectedIndex = lastIndex;
+	//}
+}
+
+function PropertyChange()
+{
+    // This function generates the onchange events that were 
+    // otherwise lost by our defining it as a custom event.
+    if (event.propertyName == "selectedIndex")
+	{
+        mychange.fire(createEventObject());
+	}
+}
+
+function SearchFor( string, offset )
+{
+    var l = string.length;          // Length of search string
+    var o = this.selectedIndex;     // Original position in list
+    var i = o + offset;             // Current position in list
+    if (i >= this.options.length)
+        i = 0;                      // Wrap around if needed
+    if (showStatus)                 // Show status information
+        window.status = "Search: " + string;
+    string = string.toLowerCase();  // For case insensitive search
+    do
+    {
+        // Check if the current item matches
+        if (string == this.options[i].innerText.substr(0,l).toLowerCase())
+            return SelectItem(i);       // Success
+        if (++i >= this.options.length) // Try next position
+            i = 0;                      // Wrap around if needed
+    }   while (i != o);                 // Keep trying until all tested
+    return false;                   // No match found
+}
+
+function SelectItem(index)
+{
+    if (index >= 0 && index < this.options.length)
+    {
+        lastIndex = index;
+        this.selectedIndex = index;
+    }
+    return true;
+}
+
+</SCRIPT>  
+</PUBLIC:COMPONENT>

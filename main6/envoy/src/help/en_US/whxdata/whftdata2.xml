@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<ftstdata>
+<topic name="Select Files To Download" url="My_Jobs/Customer_Jobs/Select_Files_To_Download.htm" />
+<topic name="View Comments" url="My_Jobs/Customer_Jobs/View_Comments.htm" />
+<topic name="View File List" url="My_Jobs/Customer_Jobs/View_File_List.htm" />
+<topic name="Detailed Word Count" url="My_Jobs/Detailed_Word_Count.htm" />
+<topic name="Edit Final Cost" url="My_Jobs/Edit_Final_Cost.htm" />
+<topic name="Edit Pages" url="My_Jobs/Edit_Pages.htm" />
+<topic name="Edit Planned Completion Date" url="My_Jobs/Edit_Planned_Completion_Date.htm" />
+<topic name="Edit Word Count" url="My_Jobs/Edit_Word_Count.htm" />
+<topic name="Export" url="My_Jobs/Export.htm" />
+<topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+<topic name="Export Source" url="My_Jobs/Export_Source.htm" />
+<topic name="Exported Jobs" url="My_Jobs/Exported_Workflow_Tab.htm" />
+<topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+<topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+<topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+<topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+<topic name="Jobs - Search" url="My_Jobs/Jobs_-_Search.htm" />
+<topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+<topic name="Pending Jobs" url="My_Jobs/Pending_Workflow_Tab.htm" />
+<topic name="Rate Vendor" url="My_Jobs/Rate_Vendor.htm" />
+<topic name="Re-Assign" url="My_Jobs/Re-Assign.htm" />
+<topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+<topic name="Search (Search/Replace p.1)" url="My_Jobs/Search_(Search_Replace_p.1).htm" />
+<topic name="Search Results (Search/Replace p.2)" url="My_Jobs/Search_Results_(Search_Replace_p.2).htm" />
+<topic name="Surcharges" url="My_Jobs/Surcharges.htm" />
+<topic name="Target Word Count" url="My_Jobs/Target_Word_Count.htm" />
+<topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+<topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+<topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+<topic name="Account Information" url="My_Account.htm" />
+<topic name="Overview" url="Overview.htm" />
+<topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+<topic name="Overview_LP" url="Overview_LP.htm" />
+<topic name="Overview_PM" url="Overview_PM.htm" />
+<topic name="Overview_WM" url="Overview_WM.htm" />
+<topic name="Average Percent Complete Report" url="Reports/Average_Percent_Complete_Report.htm" />
+<topic name="Cost Report" url="Reports/Cost_Report.htm" />
+<topic name="Export Report" url="Reports/Export_Report.htm" />
+<topic name="Find" url="Reports/Find.htm" />
+<topic name="Job Details Report" url="Reports/Job_Details_Report.htm" />
+<topic name="Mail Report" url="Reports/Mail_Report.htm" />
+<topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+<topic name="Reports Admin" url="Reports/Reports_Admin.htm" />
+<topic name="Reports Composer" url="Reports/Reports_Composer.htm" />
+<topic name="Reports Main Screen" url="Reports/Reports_Main_Screen.htm" />
+<topic name="Term Audit" url="Reports/Term_Audit.htm" />
+<topic name="TM Report" url="Reports/TM_Report.htm" />
+<topic name="Workflow Status Report" url="Reports/Workflow_Status_Report.htm" />
+<topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+<topic name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+<topic name="Assigning Holidays" url="Setup/Calendars/Assigning_Holidays.htm" />
+<topic name="Create/Edit System Calendar" url="Setup/Calendars/Create_Edit_System_Calendar.htm" />
+<topic name="Create/Edit System Holiday" url="Setup/Calendars/Create_Edit_System_Holiday.htm" />
+<topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+<topic name="System Holidays" url="Setup/Calendars/System_Holidays.htm" />
+<topic name="User Calendars" url="Setup/Calendars/User_Calendars.htm" />
+<topic name="Create/Edit Currency" url="Setup/Currency/Create_Modify_Currency.htm" />
+<topic name="Currency Main Screen" url="Setup/Currency/Currency_Main_Screen.htm" />
+<topic name="Create Locale" url="Setup/Locale_Pairs/Create_Locale.htm" />
+<topic name="Create Locale Pair" url="Setup/Locale_Pairs/Create_Locale_Pair.htm" />
+<topic name="Locale Pairs Main Screen" url="Setup/Locale_Pairs/Locale_Pairs_Main_Screen.htm" />
+<topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+<topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+<topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+<topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+<topic name="Job Timers" url="Setup/Localization_Profiles/Job_Timers.htm" />
+<topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+<topic name="Log Files" url="Setup/Logs/Log_Files.htm" />
+<topic name="Edit Permission Group - Basic Information" url="Setup/Permission_Groups/Edit_Permission_Group_-_Basic_Information.htm" />
+<topic name="Edit Permission Group - Users" url="Setup/Permission_Groups/Edit_Permission_Group_-_Users.htm" />
+<topic name="Edit Permission Group - Permissions" url="Setup/Permission_Groups/Edit_Premossion_Group_-_Permissions.htm" />
+<topic name="New Permission Group - Permissions" url="Setup/Permission_Groups/New_Edit_Permission_Group_-_Permissions.htm" />
+<topic name="New Permission Group - Basic Information" url="Setup/Permission_Groups/New_Permission_Group_-_Basic_Information.htm" />
+<topic name="New Permission Group - Users" url="Setup/Permission_Groups/New_Permission_Group_-_Users.htm" />
+<topic name="Permission Group - Details" url="Setup/Permission_Groups/Permission_Group_(Details).htm" />
+<topic name="Permission Groups - Main Screen" url="Setup/Permission_Groups/Permission_Groups.htm" />
+<topic name="Column Mapping" url="Setup/Projects/Column_Mapping.htm" />
+<topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+<topic name="Export Schedules" url="Setup/Projects/Export_Schedules.htm" />
+<topic name="Exporting... (Export p.3)1" url="Setup/Projects/Exporting..._(Export_p.3)1.htm" />
+<topic name="Import Schedule Data (Import p.3)" url="Setup/Projects/Import_Schedule_Data_(Import_p.3).htm" />
+<topic name="Import Schedules" url="Setup/Projects/Import_Schedules.htm" />
+<topic name="Output Options (Export p.2)2" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+<topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+<topic name="Projects Main Screen" url="Setup/Projects/Projects_Main_Screen.htm" />
+<topic name="Verify CSV Columns (Import p.2)" url="Setup/Projects/Verify_CSV_Columns_(Import_p.2)1.htm" />
+<topic name="View Project" url="Setup/Projects/View_Project.htm" />
+<topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+<topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+<topic name="Setup Menus" url="Setup/Setup.htm" />
+<topic name="Import Snippet File" url="Setup/Snippet_Import/Import_Snippet_File.htm" />
+<topic name="Snippet Import" url="Setup/Snippet_Import/Import_Snippet_Files.htm" />
+<topic name="Testing Import" url="Setup/Snippet_Import/Testing_Import.htm" />
+<topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+<topic name="Upload Support Files" url="Setup/Support_Files/Upload_Support_Files.htm" />
+<topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+<topic name="System Shutdown" url="Setup/System_Shutdown/System_Shutdown.htm" />
+<topic name="Add Field Constraint" url="Setup/Terminology/Add_Field_Constraint.htm" />
+<topic name="Add Language Constraint" url="Setup/Terminology/Add_Language_Constraint.htm" />
+<topic name="Add Link" url="Setup/Terminology/Add_Link.htm" />
+<topic name="Add Synonym Constraint" url="Setup/Terminology/Add_Synonym_Constraint.htm" />
+<topic name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+<topic name="Browse Termbase" url="Setup/Terminology/Browse_Termbase.htm" />
+<topic name="Create/Edit Field" url="Setup/Terminology/Create_Edit_Field.htm" />
+<topic name="Create/Edit Input Model" url="Setup/Terminology/Create_Edit_Input_Model.htm" />
+<topic name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
+<topic name="Define Termbase Column" url="Setup/Terminology/Define_Termbase_Column.htm" />
+<topic name="Entry Editor" url="Setup/Terminology/Entry_Editor.htm" />
+<topic name="Termbase Export" url="Setup/Terminology/Export.htm" />
+<topic name="Termbase Exporting...(Export p.3)" url="Setup/Terminology/Exporting...(Export_p.3).htm" />
+<topic name="Import" url="Setup/Terminology/Import.htm" />
+<topic name="Import into Termbase" url="Setup/Terminology/Import_into_Termbase.htm" />
+<topic name="Indexing Termbase" url="Setup/Terminology/Indexing_Termbase.htm" />
+<topic name="Insert Image" url="Setup/Terminology/Insert_Image.htm" />
+<topic name="Manage Input Models" url="Setup/Terminology/Manage_Input_Models.htm" />
+<topic name="New Field" url="Setup/Terminology/New_Field.htm" />
+<topic name="Output Options (Export p.2)" url="Setup/Terminology/Output_Options_(Export_p.2)1.htm" />
+<topic name="Replacing in Termbase" url="Setup/Terminology/Replacing_in_Termbase.htm" />
+<topic name="Schedule Re-Indexing" url="Setup/Terminology/Schedule_Re-Indexing.htm" />
+
+</ftstdata>  

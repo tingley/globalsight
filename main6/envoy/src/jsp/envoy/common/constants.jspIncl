@@ -1,0 +1,3 @@
+<script type="text/javascript">
+var msg_select_row = "<%=bundle.getString("jsmsg_please_select_a_row")%>";
+</script>

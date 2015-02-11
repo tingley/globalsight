@@ -1,0 +1,150 @@
+
+<!-- Segment Comments data table -->
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+        <tr>
+            <td><b><%=bundle.getString("lb_segment")%> <%=bundle.getString("lb_comments")%>
+            </b></td>
+        </tr>
+        <tr>
+            <td><%=bundle.getString("lb_show")%>:
+            <select name=segmentShowSelect onchange=updateSegmentTable()>
+            <%
+                out.println("<option value=s_allSegmentLocales>" + bundle.getString("lb_all") + "</option>");
+                for (int i=0 ; i < segmentTargLocales.size(); i++)
+                {
+                    Locale loc = (Locale)segmentTargLocales.get(i);
+                    out.print("<option value=\"s_" + loc.getDisplayName() + "\"");
+                    if (loc.getDisplayName().equals(segmentSelectedLocale))
+                        out.print(" selected ");
+                    out.println(">" + loc.getDisplayName() + "</option>");
+                }
+            %>
+            </select>
+        </tr>
+        <tr>
+        <% if (segmentSelectedLocale == null) { %>
+        <td id="s_allSegmentLocales" style="display:block">
+        <% } else { %>
+        <td id="s_allSegmentLocales" style="display:none">
+        <% } %>
+          <amb:table bean="segmentCommentList" id="segcomment" key="<%=CommentConstants.SEGMENT_COMMENT_KEY%>"
+             dataClass="com.globalsight.everest.webapp.pagehandler.administration.comment.LocaleCommentsSummary" 
+             pageUrl="jobComments"
+             emptyTableMsg="msg_comments_none_for_job" >
+            <amb:column label="lb_target_locale" width="10%" sortBy="<%=LocaleCommentsComparator.LOCALE%>">
+                <%=segcomment.getTargetLocale().getDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_page" width="80%" style="word-wrap:break-word;word-break:break-all">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int i = 0; i < pages.size(); i++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(i);
+                        TargetPage tPage = spage.getTargetPage();
+                        String pageUrl = segcommentsUrl + 
+                          "&" + WebAppConstants.TARGET_PAGE_ID + "=" + tPage.getId() +
+                          "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + tPage.getSourcePage().getId() +
+                          "&" + WebAppConstants.JOB_ID + "=" + 
+                               sessionMgr.getAttribute(JobManagementHandler.JOB_ID) +
+                          "&" + WebAppConstants.TARGET_PAGE_NAME + "=" + tPage.getExternalPageId() +
+                          "&targLocale=" + segcomment.getTargetLocale().getDisplayName();
+						out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:80%\'>\");}</SCRIPT>");
+                        out.println("<a href=\"" + pageUrl + "\">");
+                        out.println(tPage.getExternalPageId() + "<br>");
+                        out.println("</a>");
+                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+                    }
+                %>
+            </amb:column>
+            <amb:column label="lb_open_segment_comments" width="5%">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int i = 0; i < pages.size(); i++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(i);
+                        out.println(spage.getOpenCommentsCount() + "<br>");
+                    }
+                %>
+            </amb:column>
+            <amb:column label="lb_closed_segment_comments" width="5%">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int j = 0; j < pages.size(); j++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(j);
+                        out.println(spage.getClosedCommentsCount() + "<br>");
+                    }
+                %>
+            </amb:column>
+         </amb:table>
+        </td>
+
+<%
+    for (int i=0 ; i < segmentCommentList.size(); i++)
+    {
+        LocaleCommentsSummary locsum = (LocaleCommentsSummary)segmentCommentList.get(i);
+        Locale loc = locsum.getTargetLocale().getLocale();
+        String filterSelection = loc.getLanguage() + "," + loc.getCountry();
+        if (loc.getDisplayName().equals(segmentSelectedLocale)) 
+            out.println("<td id=\"s_" + loc.getDisplayName() + "\" style=\"display:block\">");
+        else
+            out.println("<td id=\"s_" + loc.getDisplayName() + "\" style=\"display:none\">");
+%>
+
+          <amb:table bean="segmentCommentList" id="segcomment" key="<%=CommentConstants.SEGMENT_COMMENT_KEY%>"
+             dataClass="com.globalsight.everest.webapp.pagehandler.administration.comment.LocaleCommentsSummary" 
+             pageUrl="jobComments"
+             filterMethod="getTargetLocaleName" filterData="<%=loc%>"
+             filterSelection="<%=filterSelection%>"
+             emptyTableMsg="msg_comments_none_for_job" >
+            <amb:column label="lb_target_locale" width="10%" sortBy="<%=LocaleCommentsComparator.LOCALE%>">
+                <%=segcomment.getTargetLocale().getDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_page" width="80%" style="word-wrap:break-word;word-break:break-all">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int j = 0; j < pages.size(); j++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(j);
+                        TargetPage tPage = spage.getTargetPage();
+                        String pageUrl = segcommentsUrl + 
+                          "&" + WebAppConstants.TARGET_PAGE_ID + "=" + tPage.getId() +
+                          "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + tPage.getSourcePage().getId() +
+                          "&" + WebAppConstants.JOB_ID + "="  +
+                               sessionMgr.getAttribute(JobManagementHandler.JOB_ID) +
+                          "&" + WebAppConstants.TARGET_PAGE_NAME + "=" + tPage.getExternalPageId() +
+                          "&targLocale=" + segcomment.getTargetLocale().getDisplayName();
+                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:80%\'>\");}</SCRIPT>");
+                        out.println("<a href=\"" + pageUrl + "\">");
+                        out.println(tPage.getExternalPageId() + "<br>");
+                        out.println("</a>");
+                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+                    }
+                %>
+            </amb:column>
+            <amb:column label="lb_open_segment_comments" width="5%">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int j = 0; j < pages.size(); j++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(j);
+                        out.println(spage.getOpenCommentsCount() + "<br>");
+                    }
+                %>
+            </amb:column>
+            <amb:column label="lb_closed_segment_comments" width="5%">
+                <%
+                    List pages = segcomment.getPageCommentsSummary();
+                    for (int j = 0; j < pages.size(); j++)
+                    {
+                        PageCommentsSummary spage = (PageCommentsSummary)pages.get(j);
+                        out.println(spage.getClosedCommentsCount() + "<br>");
+                    }
+                %>
+            </amb:column>
+         </amb:table>
+        </td>
+<% } %>
+      </tr>
+      </td>
+      </table>

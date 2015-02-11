@@ -1,0 +1,141 @@
+2008-11-06 15:11:22,380 INFO  [com.globalsight.action.Main] Running on "Windows XP" with default encoding "GBK"
+2008-11-06 15:11:22,380 INFO  [com.globalsight.action.Main] GlobalSight Desktop Icon is installed in C:/D/Project/code/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/bin/
+2008-11-06 15:11:22,380 INFO  [com.globalsight.action.Main] Resource directory is in C:/D/Project/code/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/bin/resource/
+2008-11-06 15:40:59,810 INFO  [com.globalsight.action.Main] Running on "Windows XP" with default encoding "GBK"
+2008-11-06 15:40:59,810 INFO  [com.globalsight.action.Main] GlobalSight Desktop Icon is installed in C:/D/Project/code/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/bin/
+2008-11-06 15:40:59,826 INFO  [com.globalsight.action.Main] Resource directory is in C:/D/Project/code/main6/envoy/src/webserviceClients/ambassador-desktop/desktopicon/bin/resource/
+2008-11-06 15:41:27,154 ERROR [com.globalsight.ui.MainFrame] Unknown exception - Illegal web service access attempt from IP address 127.0.0.1
+AxisFault
+ faultCode: {http://schemas.xmlsoap.org/soap/envelope/}Server.generalException
+ faultSubcode: 
+ faultString: Illegal web service access attempt from IP address 127.0.0.1
+ faultActor: 
+ faultNode: 
+ faultDetail: 
+	{http://xml.apache.org/axis/}stackTrace:Illegal web service access attempt from IP address 127.0.0.1
+	at org.apache.axis.message.SOAPFaultBuilder.createFault(SOAPFaultBuilder.java:221)
+	at org.apache.axis.message.SOAPFaultBuilder.endElement(SOAPFaultBuilder.java:128)
+	at org.apache.axis.encoding.DeserializationContext.endElement(DeserializationContext.java:1087)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.endElement(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanEndElement(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(Unknown Source)
+	at javax.xml.parsers.SAXParser.parse(Unknown Source)
+	at org.apache.axis.encoding.DeserializationContext.parse(DeserializationContext.java:227)
+	at org.apache.axis.SOAPPart.getAsSOAPEnvelope(SOAPPart.java:696)
+	at org.apache.axis.Message.getSOAPEnvelope(Message.java:424)
+	at org.apache.axis.handlers.soap.MustUnderstandChecker.invoke(MustUnderstandChecker.java:62)
+	at org.apache.axis.client.AxisClient.invoke(AxisClient.java:206)
+	at org.apache.axis.client.Call.invokeEngine(Call.java:2754)
+	at org.apache.axis.client.Call.invoke(Call.java:2737)
+	at org.apache.axis.client.Call.invoke(Call.java:2413)
+	at org.apache.axis.client.Call.invoke(Call.java:2336)
+	at org.apache.axis.client.Call.invoke(Call.java:1793)
+	at com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub.login(AmbassadorWebServiceSoapBindingStub.java:1281)
+	at com.globalsight.bo.LoginBO.login(LoginBO.java:12)
+	at com.globalsight.action.LoginAction.execute(LoginAction.java:27)
+	at com.globalsight.ui.MainFrame.logon(MainFrame.java:233)
+	at com.globalsight.ui.UserOptionsPanel$11.actionPerformed(UserOptionsPanel.java:455)
+	at javax.swing.AbstractButton.fireActionPerformed(Unknown Source)
+	at javax.swing.AbstractButton$Handler.actionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.setPressed(Unknown Source)
+	at javax.swing.plaf.basic.BasicButtonListener.mouseReleased(Unknown Source)
+	at java.awt.Component.processMouseEvent(Unknown Source)
+	at javax.swing.JComponent.processMouseEvent(Unknown Source)
+	at java.awt.Component.processEvent(Unknown Source)
+	at java.awt.Container.processEvent(Unknown Source)
+	at java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.processMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.dispatchEvent(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Window.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.run(Unknown Source)
+
+	{http://xml.apache.org/axis/}hostname:T01539-29
+
+Illegal web service access attempt from IP address 127.0.0.1
+	at org.apache.axis.message.SOAPFaultBuilder.createFault(SOAPFaultBuilder.java:221)
+	at org.apache.axis.message.SOAPFaultBuilder.endElement(SOAPFaultBuilder.java:128)
+	at org.apache.axis.encoding.DeserializationContext.endElement(DeserializationContext.java:1087)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.endElement(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanEndElement(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(Unknown Source)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(Unknown Source)
+	at com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(Unknown Source)
+	at javax.xml.parsers.SAXParser.parse(Unknown Source)
+	at org.apache.axis.encoding.DeserializationContext.parse(DeserializationContext.java:227)
+	at org.apache.axis.SOAPPart.getAsSOAPEnvelope(SOAPPart.java:696)
+	at org.apache.axis.Message.getSOAPEnvelope(Message.java:424)
+	at org.apache.axis.handlers.soap.MustUnderstandChecker.invoke(MustUnderstandChecker.java:62)
+	at org.apache.axis.client.AxisClient.invoke(AxisClient.java:206)
+	at org.apache.axis.client.Call.invokeEngine(Call.java:2754)
+	at org.apache.axis.client.Call.invoke(Call.java:2737)
+	at org.apache.axis.client.Call.invoke(Call.java:2413)
+	at org.apache.axis.client.Call.invoke(Call.java:2336)
+	at org.apache.axis.client.Call.invoke(Call.java:1793)
+	at com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub.login(AmbassadorWebServiceSoapBindingStub.java:1281)
+	at com.globalsight.bo.LoginBO.login(LoginBO.java:12)
+	at com.globalsight.action.LoginAction.execute(LoginAction.java:27)
+	at com.globalsight.ui.MainFrame.logon(MainFrame.java:233)
+	at com.globalsight.ui.UserOptionsPanel$11.actionPerformed(UserOptionsPanel.java:455)
+	at javax.swing.AbstractButton.fireActionPerformed(Unknown Source)
+	at javax.swing.AbstractButton$Handler.actionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.setPressed(Unknown Source)
+	at javax.swing.plaf.basic.BasicButtonListener.mouseReleased(Unknown Source)
+	at java.awt.Component.processMouseEvent(Unknown Source)
+	at javax.swing.JComponent.processMouseEvent(Unknown Source)
+	at java.awt.Component.processEvent(Unknown Source)
+	at java.awt.Container.processEvent(Unknown Source)
+	at java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.processMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.dispatchEvent(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Window.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.run(Unknown Source)
+2008-11-06 15:42:29,481 INFO  [com.globalsight.ui.UserOptionsPanel] Connect to server successfully. 192.168.29.82:8080
+2008-11-06 15:42:30,700 INFO  [com.globalsight.ui.MainFrame] companyaadmin (192.168.29.82:8080) login.
+2008-11-06 15:42:30,731 INFO  [com.globalsight.action.DownloadAction] Started to download all available jobs in every 10 minute(s) by user companyaadmin (192.168.29.82:8080)
+2008-11-06 15:43:21,918 INFO  [com.globalsight.ui.MainFrame] companyaadmin (192.168.29.82:8080) login.
+2008-11-06 15:43:21,965 INFO  [com.globalsight.action.DownloadAction] Started to download all available jobs in every 10 minute(s) by user companyaadmin (192.168.29.82:8080)
+2008-11-06 15:43:22,465 INFO  [com.globalsight.ui.UploadFilesDialog] Job "www_583497681" information: 
+    File 1: C:\Program Files\Welocalize\note.xml (xmlprofile it_IT)
+
+2008-11-06 15:43:22,496 INFO  [com.globalsight.ui.UploadFilesDialog] Job www_583497681 has been backuped.
+2008-11-06 15:43:22,512 INFO  [com.globalsight.action.AddCommentAction] Start to add comments for job www_583497681.
+2008-11-06 15:43:52,792 INFO  [com.globalsight.ui.UploadFilesDialog] Success to add comments for job www_583497681.
+2008-11-06 15:52:30,739 INFO  [com.globalsight.action.DownloadAction] Download thread stopped  - companyaadmin (192.168.29.82:8080)

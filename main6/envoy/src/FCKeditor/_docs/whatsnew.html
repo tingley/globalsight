@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
+<HTML xmlns:o>
+	<HEAD>
+		<TITLE>FCKeditor - What's New</TITLE></HEAD>
+	<BODY>
+		<H3>Version 1.4</H3>
+		<UL>
+			<LI>
+				<STRONG>ATTENTION: For PHP users</STRONG>: The editor was changed and now uses <STRONG>
+					htmlspecialchars</STRONG> instead of <STRONG>htmlentities</STRONG>
+			when handling the initial value. It should works well, but please make some 
+			tests before upgrading definitively. If there is any problem just uncomment the 
+			line in the fckeditor.php file (and send me a message!).
+			<LI>
+				The editor is now integrated with <STRONG>ieSpell</STRONG> (<A href="http://www.iespell.com">http://www.iespell.com</A>) 
+				for <STRONG>Spell Checking</STRONG>. You can configure the download URL in 
+			then fck_config.js file. Thanks to Sanjay Sharma. (ieSpell is free for personal 
+			use but must be paid for commercial use)
+			<LI>
+				<STRONG>Table</STRONG> and <STRONG>table cell</STRONG> dialogs has been 
+				changed. Now you can <STRONG>select the class</STRONG>
+			you want to be applied. Thanks to Alexander Lezos.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=865378&amp;group_id=75348&amp;atid=543656">SF 
+					Feature-865378</A>]A new <STRONG>upload support is available for ASP</STRONG>. 
+			It uses the /UserImages/ folder in the root of the web site as the files 
+			container and a counter controlled by the upload.cnt file. Both must have write 
+			permissions set to the IUSR_xxx user. Thanks to Trax and Juanjo.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=798128&amp;group_id=75348&amp;atid=543655">SF 
+					Patch-798128</A>] The user (programmer) can now define a <STRONG>custom 
+					separator</STRONG>
+			for the list items of a combo in the toolbar. Thanks to Wulff D. Heiss.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=741963&amp;group_id=75348&amp;atid=543656">SF 
+					Feature-741963</A>][<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=878941&amp;group_id=75348&amp;atid=543656">SF 
+					Feature-878941</A>][<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=869389&amp;group_id=75348&amp;atid=543655">SF 
+					Patch-869389</A>] A minimal support for a “fake” <STRONG>TAB is now available</STRONG>, 
+			even if HTML has no support for TAB. Now when the user presses the TAB key a 
+			configurable number of spaces (&amp;nbsp;) is added. Take a look at 
+			config.TabSpaces on the fck_config.js file. No action is performed if it is set 
+			to zero. The default value is 4. Thanks to Phil Hassey.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=782779&amp;group_id=75348&amp;atid=543653">SF 
+					BUG-782779</A>][<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=790939&amp;group_id=75348&amp;atid=543653">SF 
+					BUG-790939</A>] The problem with big images has been corrected. Thanks 
+			to Raver.
+			<LI>
+				[<A href="https://sourceforge.net/tracker/?func=detail&amp;atid=543653&amp;aid=853374&amp;group_id=75348">SF 
+					BUG-862975</A>] Now the editor does nothing if no image is selected in 
+			the image dialog box and the OK button is hit.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=851609&amp;group_id=75348&amp;atid=543653">SF 
+					BUG-851609</A>] The problem with ASP and null values has been solved.
+			<LI>
+				<STRONG>Norwegean</STRONG>
+			language pack. Thanks to Martin Kronstad.
+			<LI>
+				<STRONG>Hungarian</STRONG>
+			language pack. Thanks to Balázs Szabó.
+			<LI>
+				<STRONG>Bosnian</STRONG>&nbsp;language pack. Thanks to Trax.
+			<LI>
+				<STRONG>Japanese</STRONG>
+			language pack. Thanks to Kato Yuichiro.
+			<LI>
+				Updates on the <STRONG>Polish</STRONG>
+			language pack. Thanks to Norbert Neubauer.
+			<LI>
+				The <STRONG>Chinese (Taiwan)</STRONG> (zh-tw) has been removed from the package 
+				because it's corrupt. I'm sorry. I hope someone could send me a good version 
+				soon.
+			</LI>
+		</UL>
+		<H3>Version 1.3.1</H3>
+		<UL>
+			<LI>
+				It's now possible to configure the editor the insert a <STRONG>&lt;BR&gt; tag 
+					instead of &lt;P&gt;</STRONG> when the user presses the <STRONG>&lt;Enter&gt;</STRONG>
+				key. Take a look at the fck_config.js configuration file for the "<STRONG>UseBROnCarriageReturn</STRONG>" 
+			key. This option is disabled by default.
+			<LI>
+				<STRONG>Icelandic</STRONG>
+			language pack. Thanks to Andri Óskarsson.
+			<LI>
+				[<A href="https://sourceforge.net/tracker/?func=detail&amp;atid=543653&amp;aid=853374&amp;group_id=75348">SF 
+					BUG-853374</A>] On IE 5.0 there was a little error introduced with 
+			version 1.3 on initialization. It was corrected.
+			<LI>
+				[<A href="https://sourceforge.net/tracker/?func=detail&amp;atid=543653&amp;aid=853372&amp;group_id=75348">SF 
+					BUG-853372</A>] On IE 5.0 there was a little error introduced with 
+			version 1.3 when setting the focus in the editor. It was corrected.
+			<LI>
+				Minor errors on the language file for <STRONG>english</STRONG>
+			has been corrected. Thanks to Anders Madsen.
+			<LI>
+				Minor errors on the language file for <STRONG>danish</STRONG> has been 
+				corrected. Thanks to Martin Johansen.
+			</LI>
+		</UL>
+		<H3>Version 1.3</H3>
+		<UL>
+			<LI>
+				Language support for <STRONG>Danish, Polish, Simple Chinese, Slovak, Swedish and 
+					Turkish</STRONG>.
+			<LI>
+				Language updates for <STRONG>Romanian</STRONG>.
+			<LI>
+				It's now possible to <STRONG>override</STRONG> any of the <STRONG>editor's 
+					configurations</STRONG>
+			(for now it's implemented just for JavaScript, ASPX and HTC modules). See 
+			_test/test.html for a sample. I'm now waiting for the Community for the ASP, 
+			CFM and PHP versions.
+			<LI>
+				A new method is available for <STRONG>PHP</STRONG> users. It's called <STRONG>ReturnFCKeditor</STRONG>. 
+				It works exactly like CreateFCKeditor, but it <STRONG>returns a string with the 
+					HTML</STRONG>
+			for the editor instead of output it (echo). This feature is useful for people 
+			who are working with Smarty Templates or something like that. Thanks to Timothy 
+			J. Finucane.
+			<LI>
+				Many people have had problems with <STRONG>international characters</STRONG> over
+				<STRONG>PHP</STRONG>. I had also the same problem. PHP have strange problems 
+				with character encoding. The code hasn't been changed but just saved again with 
+				Western European encoding. <STRONG>Now it works well</STRONG> in my system.<BR>
+			Take a look also at the "default_charset" configuration option at the php.ini 
+			file. It doesn't seem to be an editor's problem but a PHP issue.
+			<LI>
+				The "<STRONG>testsubmit.php</STRONG>" file now strips the "<STRONG>Magic Quotes</STRONG>
+			" that are automatically added by PHP on form posts.
+			<LI>
+				A <STRONG>new language</STRONG> integration module is available for <STRONG>ASP/Jscript</STRONG>. 
+			Thanks to Dimiter Naydenov.
+			<LI>
+				<STRONG>New configuration</STRONG> options are available to <STRONG>customize the 
+					Target</STRONG> combo box in the <STRONG>Insert/Modify Link</STRONG>
+			dialog box. Now you can hide it, or set which options are available in the 
+			combo box. Take a look at the fck_config.js file.
+			<LI>
+				The <STRONG>Text as Plain Text</STRONG> toolbar <STRONG>icon</STRONG> has been 
+				changed <STRONG>to avoid confusion</STRONG>
+			with the Normal Paste or. Thanks to Kaupo Kalda.
+			<LI>
+				The file <STRONG>dhtmled.cab has been removed</STRONG>
+			from the package. It's not needed to the editor to work and caused some 
+			confusion for a few users.
+			<LI>
+				The <STRONG>editor's content</STRONG> now <STRONG>doesn't loose the focus</STRONG>
+			when the user clicks with the mouse in a toolbar button.
+			<LI>
+				On <STRONG>drag-and-drop</STRONG> operations the data to be inserted in the 
+				editor is now <STRONG>converted to plain text</STRONG> when the "<STRONG>ForcePasteAsPlainText</STRONG>" 
+				configuration is set to <STRONG>true</STRONG>.
+			<LI>
+				The <STRONG>image browser</STRONG> sample in PHP now <STRONG>sorts the files</STRONG>
+			by name. Thanks to Sergey Lupashko.
+			<LI>
+				Two <STRONG>new configuration</STRONG> options are available to <STRONG>turn on/off 
+					by default</STRONG> the "<STRONG>Show Borders</STRONG>" and "<STRONG>Show 
+					Details</STRONG>" commands.
+			<LI>
+				Some <STRONG>characters have been removed</STRONG> from the "<STRONG>Insert Special 
+					Chars</STRONG>" dialog box because they were causing encoding problems 
+			in some languages. Thanks to Abomb Hua.
+			<LI>
+				<STRONG>JSP</STRONG> versions of the <STRONG>image and file upload and browsing</STRONG>
+				features. Thanks to Simone Chiaretta.</LI></UL>
+		<H3>Version 1.2.4</H3>
+		<UL>
+			<LI>
+				Language support for <STRONG>Spanish, Finnish, Romanian and Korean</STRONG>.
+			<LI>
+				Language updates for <STRONG>German</STRONG>.
+			<LI>
+				New <STRONG>Zoom</STRONG> toolbar option. (<A href="https://sourceforge.net/forum/forum.php?thread_id=904116&amp;forum_id=257180">Thanks 
+					to "mtn_roadie"</A>)</LI></UL>
+		<H3>Version 1.2.2</H3>
+		<UL>
+			<LI>
+				Language support for <STRONG>French</STRONG>.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=782779&amp;group_id=75348&amp;atid=543653"
+					target="_blank">SF BUG-782779</A>] Version 1.2 introduced a bug on the 
+				image dialog window: when changing the image, no update was done. This bug is 
+				now fixed.
+			</LI>
+		</UL>
+		<H3>Version 1.2</H3>
+		<UL>
+			<LI>
+				Enhancements to the <STRONG>Word cleaning</STRONG>
+			feature (Thanks to Karl von Randow).
+			<LI>
+				The <STRONG>Table dialog box</STRONG>
+			now handles the Style width and height set in the table (Thanks to Roberto 
+			Arruda). There where many problems on prior version when people changed 
+			manually the table's size, dragging the size handles, and then it was not 
+			possible to set a new size using the table dialog box.
+			<LI>
+				For the <STRONG>Image dialog box:</STRONG>
+				<UL>
+					<LI>
+					No image is shown in the preview pane if no image has been set.
+					<LI>
+						If no HSpace is set in the image a "-1" value was shown in the dialog box. Now, 
+						nothing is shown if the value is negative.
+					</LI>
+				</UL>
+			<LI>
+				[<A href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=739630&amp;group_id=75348&amp;atid=543653"
+					target="_blank">SF BUG-739630</A>] Image with link lost the link when 
+			changing its properties. The problem is solved.
+			<LI>
+				Due to some problems in the XHTML cleaning (content duplication when the source 
+				HTML is dirty and malformed), the <STRONG>XHTML support is turned off by default</STRONG>
+			from this version. You can still change this behavior and turn it on&nbsp;in 
+			the configuration file.
+			<LI>
+				Some little updates on the <STRONG>English </STRONG>
+			language file.
+			<LI>
+			A few addition of missing entries on all languages files (translations for 
+			these changes are pending).
+			<LI>
+				Language files has been added for the following languages:
+				<UL>
+					<LI>
+						<STRONG>Brazilian Portuguese</STRONG>
+					(pt-br)
+					<LI>
+						<STRONG>Czech</STRONG>
+					(cz)
+					<LI>
+						<STRONG>Dutch</STRONG>
+					(nl)
+					<LI>
+						<STRONG>Russian</STRONG>
+					(ru)
+					<LI>
+						<STRONG>Chinese (Taiwan)</STRONG>
+					(zh-tw)
+					<LI>
+						<STRONG>Greek</STRONG>
+					(gr)
+					<LI>
+						<STRONG>German</STRONG> (de)</LI></UL>
+			</LI>
+		</UL>
+		<H3>Version 1.1</H3>
+		<UL>
+			<LI>
+				The "<STRONG>Multi Language</STRONG>" system is now available. This version 
+				ships with English and Italian versions completed. Other languages will be 
+				available soon. The editor automatically detects the client language and sets 
+				all labels, tooltips and dialog boxes to it, if available. The auto detection 
+				and the default language can be set in the <STRONG>fck_config.file</STRONG>.
+			<LI>
+				Two files can now be created to isolate customizations code from the original 
+				source code of the editor: <STRONG>fckeditor.config.js</STRONG> and <STRONG>fckeditor.custom.js</STRONG>. 
+			Create these files in the root folder of your web site, if needed. The first 
+			one can be used to add or override configurations set on fck_config.js. The 
+			second one is used for custom actions and behaviors.
+			<LI>
+			A problem with relative links and images like "/test/test.doc" has been solved. 
+			In prior versions, only with XHTML support enabled, the URL was changed to 
+			something like "http://www.mysite.xxx/test/test.doc" (The domain was 
+			automatically added). Now the XHTML cleaning procedure gets the URLs exactly 
+			how they are defined in the editor’s HTML.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=742168&amp;group_id=75348&amp;atid=543653"
+					target="_blank">SF BUG-742168</A>] Mouse drag and drop from toolbar 
+			buttons has been disabled.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=768210&amp;group_id=75348&amp;atid=543653"
+					target="_blank">SF BUG-768210</A>] HTML entities, like <STRONG>&amp;lt;</STRONG>, 
+			were not load correctly. The problem is solved.
+			<LI>
+				[<A href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=748812&amp;group_id=75348&amp;atid=543653"
+					target="_blank">SF BUG-748812</A>] The link dialog window doesn't open when 
+				the link button is grayed.
+			</LI>
+		</UL>
+		<H3>Version 1.0</H3>
+		<UL>
+			<LI>
+			Three new options are available in the configuration file to set what file 
+			types are allowed / denied to be uploaded from the "Insert Link" and "Insert 
+			Image" dialog boxes.
+			<LI>
+			Upload options, for links and images, are automatically hidden on IE 5.0 
+			browsers (it's not compatible).
+			<LI>
+			[SF BUG-734894] Fixed a problem on XHTML cleaning: the value on INPUT fields 
+			were lost.
+			<LI>
+			[SF BUG-713797] Fixed some image dialog errors when trying to set image 
+			properties when no image is available.
+			<LI>
+			[SF BUG-736414] Developed a workaround for a DHTML control bug when loading in 
+			the editor some HTML started with &lt;p&gt;&lt;hr&gt;&lt;/p&gt;.
+			<LI>
+			[SF BUG-737143] Paste from Word cleaning changed to solve some IE 5.0 errors. 
+			This feature is still not available over IE 5.0.
+			<LI>
+			[SF BUG-737233] CSS mappings are now OK on the PHP image browser module.
+			<LI>
+			[SF BUG-737495] The image preview in the image dialog box is now working 
+			correctly.
+			<LI>
+			[SF BUG-737532] The editor automatically switches to WYSIWYG mode when the form 
+			is posted.
+			<LI>
+				[SF BUG-739571] The editor is now working well over Opera (as for Netscape, a 
+				TEXTAREA is shown).
+			</LI>
+		</UL>
+		<H3>Version 1.0 Final Candidate</H3>
+		<UL>
+			<LI>
+			A new dialog box for the "Link" command is available. Now you can upload and 
+			browse the server exactly like the image dialog box. It's also possible to 
+			define the link title and target window (_blank, _self, _parent and _top). As 
+			with the image dialog box, a sample (and simple) file server browser is 
+			available.
+			<LI>
+			A new configuration option is available to force every paste action to be 
+			handled as plain text. See "config.ForcePasteAsPlainText" in fck_config.js.
+			<LI>
+			A new Toolbar button is available: "Paste from Word". It automatically cleans 
+			the clipboard content before pasting (removesWord styles, classes, xml stuff, 
+			etc...). This command is available for IE 5.5 and more. For IE 5.0 users, a 
+			message is displayed advising that the text will not be cleaned before pasting.
+			<LI>
+			The editor automatically detects Word clipboard data on pasting operations and 
+			asks the user to clean it before pasting. This option is turned on by default 
+			but it can be configured. See "config.AutoDetectPasteFromWord" in 
+			fck_config.js.
+			<LI>
+			Table properties are now available in cells' right click context menu.
+			<LI>
+				It's now possible to edit cells advanced properties from it's right click 
+				context menu.
+			</LI>
+		</UL>
+		<H3>Version 1.0 Release Candidate 1 (RC1)</H3>
+		<UL>
+			<LI>
+			Some performance improvements.
+			<LI>
+			The file dhtmled.cab has been added to the package for clients ho needs to 
+			install the Microsoft DHTML Editor component.
+			<LI>
+			[SF BUG-713952] The format command options are localized, so it depends on the 
+			IE language to work. Until version 0.9.5 it was working only over English IE 
+			browsers. Now the options are load dynamically on the client using the client's 
+			language.
+			<LI>
+			[SF BUG-712103] The style command is localized, so it depends on the IE 
+			language to work. Until version 0.9.5 it was working only over English IE 
+			browsers. Now it configures itself using the client's language.
+			<LI>
+				[SF BUG-726137] On version 0.9.5, some commands (special chars, image, 
+				emoticons, ...) remove the next available character before inserting the 
+				required content even if no selection was made in the editor. Now the editor 
+				replaces only the selected content (if available).
+			</LI>
+		</UL>
+		<H3>Version 0.9.5 beta</H3>
+		<UL>
+			<LI>
+			XHTML support is now available! It can be enabled/disabled in the fck_config.js 
+			file.
+			<LI>
+			"Show Table Borders" option: show borders for tables with borders size set to 
+			zero.
+			<LI>
+			"Show Details" option: show hidden elements (comments, scripts, paragraphs, 
+			line breaks)
+			<LI>
+			IE behavior integration module. Thanks to Daniel Shryock.
+			<LI>
+			"Find" option: to find text in the document.
+			<LI>
+			More performance enhancements.
+			<LI>
+			New testsubmit.php file. Thansk to Jim Michaels.
+			<LI>
+			Two initial PHP upload manager implementations (not working yet). Thanks to 
+			Frederic Tyndiuk and Christian Liljedahl.
+			<LI>
+			Initial PHP image browser implementation (not working yet). Thanks to Frederic 
+			Tyndiuk.
+			<LI>
+				Initial CFM upload manager implementation. Thanks to John Watson.
+			</LI>
+		</UL>
+		<H3>Version 0.9.4 beta</H3>
+		<UL>
+			<LI>
+			ColdFusion module integration is now available! Thanks to John Watson.
+			<LI>
+			"Insert Smiley" toolbar option! Thanks to Fredox. Take a look at fck_config.js 
+			for configuration options.
+			<LI>
+			"Paste as plain text" toolbar option!
+			<LI>
+			Right click support for links (edit / remove).
+			<LI>
+			Buttons now are shown in gray when disabled.
+			<LI>
+			Buttons are shown just when the image is downloaded (no more "red x" while 
+			waiting for it).
+			<LI>
+			The toolbar background color can be set with a CSS style (see fck_editor.css).
+			<LI>
+				Toolbar images have been reviewed:
+				<UL>
+					<LI>
+					Now they are transparent.
+					<LI>
+					No more over...gif for every button (so the editor loads quicker).
+					<LI>
+						Buttons states are controlled with CSS styles. (see fck_editor.css).</LI></UL>
+			<LI>
+			Internet Explorer 5.0 compatibility, except for the image uploading popup.
+			<LI>
+			Optimizations when loading the editor.
+			<LI>
+			[SF BUG-709544] - Toolbar buttons wait for the images to be downloaded to start 
+			watching and responding the user actions (turn buttons on/off when the user 
+			changes position inside the editor).
+			<LI>
+			Javascript integration is now Object Oriented. CreateFCKeditor function is not 
+			available anymore. Take a look in test.html.
+			<LI>
+				Two new configuration options, ImageBrowser and ImageUpload, are available to 
+				turn on and off the image upload and image browsing options in the Image dialog 
+				box. This options can be hidden for a specific editor instance throw specific 
+				URL parameter in the editor’s IFRAME (upload=true/false&amp;browse=true/false). 
+				All specific language integration modules handle this option. For sample see 
+				the _test directory.
+			</LI>
+		</UL>
+	</BODY>
+</HTML>

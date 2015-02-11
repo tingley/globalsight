@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Account Options" >
+  <topic name="Account Options" url="Account_Options.htm" />
+</key>
+<key name="Activities matching" >
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+</key>
+<key name="Activity" >
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Activity Type" url="Glossary/Activity_Type.htm" />
+  <topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+  <topic name="Add Comments1" url="My_Activities/Add_Comments1.htm" />
+  <topic name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+  <topic name="Assign User" url="My_Jobs/Customer_Jobs/Assign_User.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="Concordance Search" url="My_Activities/Concordance_Search.htm" />
+  <topic name="Cost Report" url="Reports/Cost_Report.htm" />
+  <topic name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Default Path" url="Glossary/Default_Path.htm" />
+  <topic name="Download in Progress" url="My_Activities/Download_in_Progress.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="Edit Calendar" url="Setup/Users/Edit_Calendar.htm" />
+  <topic name="Email Notification" url="Email_Notification.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="Filter User List" url="Setup/Users/Filter_User_List.htm" />
+  <topic name="Finished Activities" url="My_Activities/Finished_Activity_Tab.htm" />
+  <topic name="Fixed Rates" url="Glossary/Fixed_Rates.htm" />
+  <topic name="Graphical Workflow" url="Setup/Workflows/Graphical_Workflow.htm" />
+  <topic name="Hourly Rates" url="Glossary/Hourly_Rates.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Job Information" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Job_Information.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="One Activity Workflow" url="Setup/Workflows/Sample_Workflows/One_Activity_Workflow.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_LP" url="Overview_LP.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Project Users" url="Setup/Projects/Project_Users.htm" />
+  <topic name="Rate Vendor" url="My_Jobs/Rate_Vendor.htm" />
+  <topic name="Rates Main Screen" url="Setup/Rates/Rate_Main_Screen.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Review Window" url="My_Activities/Review_Window.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Roles List" url="Setup/Users/Roles_List.htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Secondary Target File" url="Glossary/Secondary_Target_File.htm" />
+  <topic name="Segment Editor (Image)" url="My_Activities/Segment_Editor_(Image).htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Startup" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Startup.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Calendars" url="Setup/Calendars/System_Calendars.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Two Activity Workflow" url="Setup/Workflows/Sample_Workflows/Two_Activity_Workflow.htm" />
+  <topic name="Upload" url="My_Activities/Upload.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="Vendor Details" url="Vendor_Management/Vendor_Details.htm" />
+  <topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+  <topic name="View User Events" url="Setup/Users/View_User_Events.htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+  <topic name="Workflow Details" url="My_Jobs/Workflow_Details.htm" />
+  <topic name="Workflow Editor" url="My_Jobs/Workflow_Editor.htm" />
+</key>
+<key name="Activity name" >
+  <topic name="Available Activities" url="My_Activities/Available_Activity_Tab.htm" />
+  <topic name="In Progress Activities" url="My_Activities/In_Progress_Activity_Tab.htm" />
+  <topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+</key>
+<key name="Activity needs" >
+  <topic name="Available Activity Details" url="My_Activities/Available_Activity_Details.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+</key>
+<key name="Activity Status Summary" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+</key>
+<key name="Activity Type" >
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Activity Type" url="Glossary/Activity_Type.htm" />
+  <topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+  <topic name="Create/Edit Activity Type" url="Setup/Activity_Types/Create_Modify_Activity_Type.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Edit Activity in Workflow" url="Setup/Workflows/Edit_Activity_in_Workflow.htm" />
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+  <topic name="Roles" url="Vendor_Management/Roles.htm" />
+  <topic name="Search Vendors" url="Vendor_Management/Search_Vendors.htm" />
+  <topic name="Workflow" url="Glossary/Workflow.htm" />
+</key>
+<key name="Activity Types Main Screen" >
+  <topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+</key>
+<key name="Activity Workflow" >
+  <topic name="One Activity Workflow" url="Setup/Workflows/Sample_Workflows/One_Activity_Workflow.htm" />
+  <topic name="Two Activity Workflow" url="Setup/Workflows/Sample_Workflows/Two_Activity_Workflow.htm" />
+</key>
+<key name="Activity/Vendor Ratings" >
+  <topic name="Vendor Ratings" url="My_Jobs/Vendor_Ratings.htm" />
+</key>
+<key name="Add Comments" >
+  <topic name="Add Comments" url="My_Jobs/Add_Comments.htm" />
+  <topic name="Job Comments" url="My_Jobs/Job_Comments.htm" />
+</key>
+<key name="Add Content Store" >
+  <topic name="Add Content Store" url="Data_Sources/TeamSite_Server_Configuration/Add_Content_Store.htm" />
+</key>
+<key name="Add Field Constrain" >
+  <topic name="Add Field Constraint" url="Setup/Terminology/Add_Field_Constraint.htm" />
+</key>
+<key name="Add Language Constraint" >
+  <topic name="Add Language Constraint" url="Setup/Terminology/Add_Language_Constraint.htm" />
+</key>
+<key name="Add Link" >
+  <topic name="Add Link" url="Setup/Terminology/Add_Link.htm" />
+</key>
+<key name="Add Synonym Constraint" >
+  <topic name="Add Synonym Constraint" url="Setup/Terminology/Add_Synonym_Constraint.htm" />
+</key>
+<key name="Add Workflow" >
+  <topic name="Add Workflow" url="My_Jobs/Add_Workflow.htm" />
+</key>
+<key name="Add/Edit Comments" >
+  <topic name="Add Comments1" url="My_Activities/Add_Comments1.htm" />
+</key>
+<key name="Add/Edit Event" >
+  <topic name="Add/Edit Event" url="Setup/Users/Add_Edit_Event.htm" />
+</key>
+<key name="Add/Edit Workflows" >
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+</key>
+<key name="Administrator" >
+  <topic name="Attach Files" url="My_Jobs/Attach_Files.htm" />
+  <topic name="Attach Files1" url="My_Activities/Attach_Files1.htm" />
+  <topic name="Create/Edit Database Connection" url="Data_Sources/Database_Connections/Create_Modify_DB_Connection.htm" />
+  <topic name="Create/Edit Database Preview Rules" url="Data_Sources/Database_Preview_Rules/Create_Modify_DB_Preview_Rules.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit XML Rules" url="Data_Sources/XML_Rules/Create_Modify_XML_Rules.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Enter Basic Information for New Workflow" url="Setup/Workflows/Basic_Information_Workflows.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Activity Details" url="My_Activities/In_Progress_Activity_Details.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Projects" url="Setup/Users/Projects.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="Align Menu" >
+  <topic name="Align Menu" url="Appendix/Alignment/Align_Menu.htm" />
+  <topic name="Aligning Segments" url="Appendix/Alignment/Aligning_Segments.htm" />
+  <topic name="Starting an Alignment Project" url="Appendix/Alignment/Starting_an_Alignment_Project.htm" />
+</key>
+
+</indexdata>

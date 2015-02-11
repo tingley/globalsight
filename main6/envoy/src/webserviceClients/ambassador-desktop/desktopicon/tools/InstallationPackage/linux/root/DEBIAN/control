@@ -1,0 +1,9 @@
+Package: DesktopIcon
+Priority: extra
+Section: Office
+Installed-Size: 7764
+Maintainer: GlobalSight
+Architecture: i386
+Version: 7.1.8.0
+Depends: 
+Description: Desktop tool that simplify does tasks such as submitting and retrieving projects from GlobalSight

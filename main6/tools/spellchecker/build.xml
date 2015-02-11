@@ -1,0 +1,196 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                SPELL CHECKER Build File                     * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+
+<project name="SpellCheck" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+
+    <!-- Basic directories -->
+    <property name="dist" value="spellchecker" />
+    <property name="dist.war" value="spellchecker.war" />
+    <property name="src" value="src" />
+    <property name="srcdict" value="srcdict" />
+    <property name="trgdict" value="${dist}/dicts" />
+    <property name="javasrc" value="${dist}/WEB-INF/classes" />
+    <property name="lib" value="${dist}/WEB-INF/lib" />
+    <property name="bin" value="bin" />
+    <property name="resources" value="${dist}/resources" />
+    <property name="target" value="1.4" />
+
+    <property name="lucene" value="${lib}/lucene-1.4.3.jar" />
+    <property name="servlet" value="servlet-2.3.jar" />
+
+    <property name="classpath" value="${javasrc}:${lucene}:${servlet}" />
+
+    <property name="batch_file"  value="${bin}/loaddict.cmd"/>
+    <property name="sh_file"     value="${bin}/loaddict.sh"/>
+  </target>
+
+  <target name="build" depends="initialize">
+    <echo message="***** Compiling GlobalSight Spell Checker..." />
+
+    <!-- We compile this into the source directory. Zipping up
+    ${dist} (excluding *.java) produces a spellchecker.war. -->
+    <mkdir dir="${dist}" />
+
+    <!-- Copy all source files. -->
+    <copy todir="${dist}">
+      <fileset dir="${src}" />
+    </copy>
+
+    <javac nowarn="${nowarn}" classpath="${classpath}">
+      <src path="${javasrc}" />
+      <include name="**/*.java" />
+    </javac>
+
+  </target>
+
+  <target name="CreateDictionaries" depends="initialize">
+    <antcall target="CreateDictionary">
+      <param name="lang" value="en_us"/>
+      <param name="file" value="american.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="en_gb"/>
+      <param name="file" value="british.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="pt_br"/>
+      <param name="file" value="brazilian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="ca"/>
+      <param name="file" value="catalan.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="cz"/>
+      <param name="file" value="czech.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="da"/>
+      <param name="file" value="danish.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="nl"/>
+      <param name="file" value="dutch.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="eo"/>
+      <param name="file" value="esperanto.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="fo"/>
+      <param name="file" value="faroese.txt"/>
+    </antcall> 
+    <antcall target="CreateDictionary">
+      <param name="lang" value="fr"/>
+      <param name="file" value="french.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="de"/>
+      <param name="file" value="german.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="el"/>
+      <param name="file" value="greek.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="hu"/>
+      <param name="file" value="hungarian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="it"/>
+      <param name="file" value="italian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="mt"/>
+      <param name="file" value="maltese.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="po"/>
+      <param name="file" value="polish.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="pt"/>
+      <param name="file" value="portuguese.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="ro"/>
+      <param name="file" value="romanian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="ru"/>
+      <param name="file" value="russian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="sk"/>
+      <param name="file" value="slovak.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="sl"/>
+      <param name="file" value="slovenian.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="es"/>
+      <param name="file" value="spanish.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="sv"/>
+      <param name="file" value="swedish.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="de_ch"/>
+      <param name="file" value="swiss.txt"/>
+    </antcall>
+    <antcall target="CreateDictionary">
+      <param name="lang" value="uk"/>
+      <param name="file" value="ukrainian.txt"/>
+    </antcall>
+  </target>
+
+  <!-- Target to build one spell-checker dictionary -->
+  <target name="CreateDictionary" depends="initialize">
+    <echo message="**** Building dictionary ${lang}" />
+
+    <java classname="spell.CreateDictionary" fork="yes">
+      <jvmarg value="-Xmx768m" />
+      <classpath>
+        <pathelement path="${javasrc}" />
+	<pathelement location="${lucene}" />
+      </classpath>
+      <arg value="-t"/><arg value="${trgdict}"/>
+      <arg value="-l"/><arg value="${lang}"/>
+      <arg value="-f"/><arg value="${srcdict}/${file}"/>
+    </java>
+  </target>
+
+  <!-- Building a WAR file does not make sense because there is no web.xml 
+  (only a template) -->
+  <target name="dist" depends="build, CreateDictionaries">
+
+    <!-- Build application war. -->
+    <jar jarfile="${dist.war}" basedir="${dist}" 
+    includes="**/*"
+    excludes="**/*.java">
+    </jar>
+
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${dist}" />
+    <delete file="${dist.war}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build"></target>
+
+</project>
+
+<!-- Local Variables: -->
+<!-- compile-command: "ant -emacs " -->
+<!-- End: -->

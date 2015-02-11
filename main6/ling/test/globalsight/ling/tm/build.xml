@@ -1,0 +1,39 @@
+<project name="TuvLingTest" default="compile" basedir=".">
+
+  <target name="initialize">
+    <property name="testBase" value="." />
+    <property name="testRoot" value="../../../.." />
+    <property name="toolsLib" value="../../../../../toolsVOB/lib" />
+    <property name="toolsBuild" value="../../../../../toolsVOB/build" />
+
+    <property name="test_regexp" value="${toolsLib}/jakarta-regexp-1.2.jar" />
+    <property name="test_junit" value="${toolsLib}/junit.jar" />
+    <property name="test_log4j" value="${toolsLib}/log4j.jar" />
+    <property name="test_xerces" value="${toolsLib}/xerces1.4.0.jar" />
+    <property name="lingClasses" value="${toolsBuild}/lingclasses" />
+    <property name="commonClasses" value="${toolsBuild}/commonclasses" />
+    <property name="capClasses" value="${toolsBuild}/capclasses/myserver/serverclasses" />
+
+    <property name="local_classpath" 
+              value="${test_junit};${test_log4j};${test_xerces};${test_regexp};${lingClasses};${commonClasses};${testRoot};${capClasses}" />
+  </target>
+
+  <target name="compile" depends="initialize">
+    <javac classpath="${local_classpath}"
+           srcdir="${testBase}"
+	   includes="TuvLingTest.java" />
+
+  </target>
+
+	
+  <target name="clean" depends="initialize">
+    <delete>
+      <fileset dir="${testBase}" includes="TuvLingTest.class" />
+    </delete>
+  </target>
+
+  <target name="run" depends="initialize">
+    <java classname="test.globalsight.ling.tm.TuvLingTest"
+          classpath="${local_classpath}" />
+  </target>
+</project>

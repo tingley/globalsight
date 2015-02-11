@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Confidential Property of Documentum, Inc.                             -->
+<!-- (c) Copyright Documentum, Inc. 2002.                                  -->
+<!-- All Rights reserved.                                                  -->
+<!-- May not be used without prior written agreement                       -->
+<!-- signed by a Documentum corporate officer.                             -->
+<!--                                                                       -->
+<!-- Component: Webtop Category Streamline View                               -->
+<!-- Scope: None                                                           -->
+
+
+<config version='1.0'>
+
+   <!-- this component is the generic version so has unqualified scope -->
+   <scope>
+
+      <!-- the drilldown component definition -->
+      <component id="categorystreamline"
+                 extends="categorydrilldown:custom/ambassador/config/navigation/category/categorydrilldown_component.xml">
+
+         <!-- Component Contract -->
+         <params>
+            <param name="nodeIds" required="false"></param>
+            <param name='folderId' required='false'/>
+            <param name='folderPath' required='false'/>
+         </params>
+
+         <!-- Component Behavior -->
+         <class>com.documentum.webtop.webcomponent.category.CategoryStreamlineView</class>
+
+         <!-- Component specific Configuration -->
+         <helpcontextid>categorystreamline</helpcontextid>
+
+      </component>
+
+   </scope>
+</config>
+

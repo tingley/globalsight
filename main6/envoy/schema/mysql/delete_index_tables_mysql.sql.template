@@ -1,0 +1,107 @@
+DELIMITER //
+
+CREATE PROCEDURE DROP_TABLES()
+BEGIN
+   DECLARE NAME VARCHAR(64);
+   DECLARE NUM BIGINT DEFAULT 0;
+
+-- Declare cursors
+   DECLARE SEGMENT_INDEX_CURSOR CURSOR FOR 
+           SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'SEGMENT_TM_INDEX%';
+		   
+   DECLARE SEGMENT_TOKEN_CURSOR CURSOR FOR 
+           SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'SEGMENT_TM_TOKEN%';
+
+   DECLARE PAGE_INDEX_CURSOR CURSOR FOR 
+           SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'PAGE_TM_INDEX%';
+
+   DECLARE PAGE_TOKEN_CURSOR CURSOR FOR 
+           SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'PAGE_TM_TOKEN%';
+
+-- Drop tables like 'SEGMENT_TM_INDEX%'		   
+   OPEN SEGMENT_INDEX_CURSOR;
+   SELECT COUNT(*) INTO NUM FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'SEGMENT_TM_INDEX%';
+   
+   WHILE NUM > 0 DO
+         FETCH SEGMENT_INDEX_CURSOR INTO NAME;
+         DROP TABLE NAME;
+         SET NUM = NUM -1;		 
+   END WHILE;
+   CLOSE SEGMENT_INDEX_CURSOR;  
+
+-- Drop tables like 'SEGMENT_TM_TOKEN%'
+   OPEN SEGMENT_TOKEN_CURSOR;
+   SELECT COUNT(*) INTO NUM FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'SEGMENT_TM_TOKEN%';
+   
+   WHILE NUM > 0 DO
+         FETCH SEGMENT_INDEX_CURSOR INTO NAME;
+         DROP TABLE NAME;
+         SET NUM = NUM -1;		 
+   END WHILE;
+   CLOSE SEGMENT_TOKEN_CURSOR;      
+
+-- Drop tables like 'PAGE_TM_INDEX%'.
+   OPEN PAGE_INDEX_CURSOR;
+   SELECT COUNT(*) INTO NUM FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'PAGE_TM_INDEX%';
+   
+   WHILE NUM > 0 DO
+         FETCH SEGMENT_INDEX_CURSOR INTO NAME;
+         DROP TABLE NAME;
+         SET NUM = NUM -1;		 
+   END WHILE;
+   CLOSE PAGE_INDEX_CURSOR; 
+   
+-- Drop tables like 
+   OPEN PAGE_TOKEN_CURSOR;
+   SELECT COUNT(*) INTO NUM FROM INFORMATION_SCHEMA.TABLES
+		   WHERE TABLE_SCHEMA = '%%database_instance_name%%' AND TABLE_NAME LIKE 'PAGE_TM_TOKEN%';
+   
+   WHILE NUM > 0 DO
+         FETCH SEGMENT_INDEX_CURSOR INTO NAME;
+         DROP TABLE NAME;
+         SET NUM = NUM -1;		 
+   END WHILE; 
+   CLOSE PAGE_TOKEN_CURSOR; 
+
+END;
+//
+DELIMITER ;
+
+CALL DROP_TABLES();
+
+DROP PROCEDURE DROP_TABLES;   
+   /*
+   FOR tableName IN (select table_name from user_tables where
+                            table_name like 'SEGMENT_TM_INDEX%') LOOP
+       DBMS_OUTPUT.PUT_LINE('Deleting ' || tableName.table_name);
+       EXECUTE IMMEDIATE 'DROP table ' ||  tableName.table_name;
+   END LOOP;
+
+   FOR tableName IN (select table_name from user_tables where
+                            table_name like 'SEGMENT_TM_TOKEN%') LOOP
+       DBMS_OUTPUT.PUT_LINE('Deleting ' || tableName.table_name);
+       EXECUTE IMMEDIATE 'DROP table ' ||  tableName.table_name;
+   END LOOP;
+
+   FOR tableName IN (select table_name from user_tables where
+                            table_name like 'PAGE_TM_INDEX%') LOOP
+       DBMS_OUTPUT.PUT_LINE('Deleting ' || tableName.table_name);
+       EXECUTE IMMEDIATE 'DROP table ' ||  tableName.table_name;
+   END LOOP;
+
+   FOR tableName IN (select table_name from user_tables where
+                            table_name like 'PAGE_TM_TOKEN%') LOOP
+       DBMS_OUTPUT.PUT_LINE('Deleting ' || tableName.table_name);
+       EXECUTE IMMEDIATE 'DROP table ' ||  tableName.table_name;
+   END LOOP;
+
+END;
+/
+*/

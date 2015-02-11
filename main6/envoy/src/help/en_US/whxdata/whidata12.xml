@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Localization Profile" >
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Exclude Item Types" url="Appendix/Exclude_Item_Types.htm" />
+  <topic name="Export Error" url="My_Jobs/Export_Error.htm" />
+  <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Job Details" url="My_Jobs/Job_Details.htm" />
+  <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+</key>
+<key name="Localization Profile Basic Information" >
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+</key>
+<key name="Localization Profiles Main Screen" >
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+</key>
+<key name="Localized Jobs" >
+  <topic name="Localized Jobs" url="My_Jobs/Localized_Workflow_Tab.htm" />
+</key>
+<key name="Log" >
+  <topic name="Browser Settings" url="Appendix/Browser_Settings.htm" />
+  <topic name="Create/Edit Segment Comment" url="My_Activities/Create_Edit_Segment_Comment.htm" />
+  <topic name="Log Files" url="Setup/Logs/Log_Files.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Reports Admin" url="Reports/Reports_Admin.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+</key>
+<key name="Logs Main Screen" >
+  <topic name="Log Files" url="Setup/Logs/Log_Files.htm" />
+</key>
+<key name="Looping Workflow" >
+  <topic name="Looping Workflow" url="Setup/Workflows/Sample_Workflows/Looping_Workflow.htm" />
+  <topic name="Looping Workflow with Finish Options" url="Setup/Workflows/Sample_Workflows/Looping_Workflow_with_Finish_Options.htm" />
+</key>
+<key name="Mail Report" >
+  <topic name="Export Report" url="Reports/Export_Report.htm" />
+  <topic name="Mail Report" url="Reports/Mail_Report.htm" />
+</key>
+<key name="Main Editor" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Extracted File" url="Glossary/Extracted_File.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="GS Tag Syntax" url="Appendix/Locale_Content_Management/GS_Tag_Syntax.htm" />
+  <topic name="Local Content Management (Snippets)" url="Appendix/Locale_Content_Management/Local_Content_Management_(Snippets).htm" />
+  <topic name="Main Editor (Inline)" url="My_Activities/Main_Editor_Para.htm" />
+  <topic name="Main Editor (Popup)" url="My_Activities/Main_Editor.htm" />
+  <topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+  <topic name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
+</key>
+<key name="Main Editor Options" >
+  <topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  <topic name="Main Editor Options (Popup)" url="My_Activities/Main_Editor_Options.htm" />
+</key>
+<key name="Manage Input Models" >
+  <topic name="Manage Input Models" url="Setup/Terminology/Manage_Input_Models.htm" />
+</key>
+<key name="Many Fuzzy Matches to display" >
+  <topic name="How does GlobalSight decide how many Fuzzy Matches to display to the user" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_how_many_Fuzzy_Matches_to_display_to_the_user.htm" />
+</key>
+<key name="Match Repetitions" >
+  <topic name="No Match Repetitions" url="Glossary/No_Match_Repetitions.htm" />
+</key>
+<key name="Missing Terms" >
+  <topic name="Missing Terms" url="Reports/Missing_Terms.htm" />
+</key>
+<key name="My" >
+  <topic name="Account Information" url="My_Account.htm" />
+  <topic name="Auto-Import Configuration" url="Appendix/Auto-Import_Configuration.htm" />
+  <topic name="Change Workflow Managers" url="My_Jobs/Change_Workflow_Managers.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Export" url="My_Jobs/Export.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Placeholder Tags (Errors)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Errors).htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+</key>
+<key name="My Account Information" >
+  <topic name="Account Information" url="My_Account.htm" />
+</key>
+<key name="My Activities" >
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Activities - Search" url="My_Activities/My_Activities_-_Search.htm" />
+</key>
+<key name="My Jobs" >
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+</key>
+<key name="New Field" >
+  <topic name="Create/Edit/Duplicate Termbase" url="Setup/Terminology/Create_Modify_Clone_Termbase.htm" />
+  <topic name="Custom Form Designer" url="Vendor_Management/Custom_Form_Designer.htm" />
+  <topic name="New Field" url="Setup/Terminology/New_Field.htm" />
+</key>
+<key name="New Role" >
+  <topic name="New Role (Edit Vendor)" url="Vendor_Management/New_Role_(Edit_Vendor).htm" />
+  <topic name="Roles List (Edit Vendor)" url="Vendor_Management/Roles_List_(Edit_Vendor).htm" />
+</key>
+<key name="New/Edit Roles" >
+  <topic name="New Roles" url="Setup/Users/Edit_Roles.htm" />
+</key>
+<key name="Office Adapters" >
+  <topic name="Office Adapters" url="Appendix/Office_Adapter.htm" />
+</key>
+<key name="Offline Help" >
+  <topic name="Offline Help" url="Appendix/Working_Offline/RTF_(List_View)/OL_Index.htm" />
+</key>
+<key name="Optional Features" >
+  <topic name="Optional Features" url="Glossary/Optional_Features.htm" />
+</key>
+<key name="Output Options" >
+  <topic name="Output Options (Export p.2)" url="Setup/Translation_Memory/Output_Options_(Export_p.2).htm" />
+  <topic name="Output Options (Export p.2)2" url="Setup/Projects/Output_Options_(Export_p.2)2.htm" />
+</key>
+<key name="Overview" >
+  <topic name="Overview" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview1" url="Appendix/Alignment/Overview1.htm" />
+  <topic name="Overview_LP" url="Overview_LP.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Overview_WM" url="Overview_WM.htm" />
+  <topic name="Upload Summary" url="Customer_Upload/Upload_Summary.htm" />
+</key>
+
+</indexdata>

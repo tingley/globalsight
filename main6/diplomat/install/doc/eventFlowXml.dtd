@@ -1,0 +1,59 @@
+<!-- eventFlowXml.dtd describes the Diplomat Event Flow Metadata. -->
+<!-- There is a one to one correspondence between Diplomat XML files and Event Flow XML files.-->
+<!ELEMENT eventFlowXml (preMergeEvent, postMergeEvent, batchInfo, source, target?, da*, gsamd?, category?)>
+<!-- The pre and post merge events are needed by Diplomat components (Merger and GsaSourceAdapter
+	to determine what specific events to generate -->
+<!ELEMENT preMergeEvent (#PCDATA)>
+<!ELEMENT postMergeEvent (#PCDATA)>
+<!-- The batchInfo section deals with information related to the import batch.
+	batchId is a unique identifier for the whole import batch. Every file in the same batch has the same ID value.
+	pageCount is the total number of pages in this batch.
+	pageNumber is the number of this page in the batch defined as [1,pageCount]
+	displayName is a meaningful human-readable name that can be used to display the page.
+	(for example, filename or acquisition sql label) -->
+<!ELEMENT batchInfo (batchId, pageCount, pageNumber, displayName)>
+<!ELEMENT batchId (#PCDATA)>
+<!ELEMENT pageCount (#PCDATA)>
+<!ELEMENT pageNumber (#PCDATA)>
+<!ELEMENT displayName (#PCDATA)>
+<!-- A diplomat attribute has zero or more values -->
+<!ELEMENT da (dv*)>
+<!ATTLIST da
+	name CDATA #REQUIRED
+>
+<!-- A diplomat value is text -->
+<!ELEMENT dv (#PCDATA)>
+<!-- A source has diplomat attributes relevant to the data source adapter
+	locale is the locale of the original content
+	charset is the charset of the original content
+	name is the name of the data source adapter
+	type is "fs" for file system, "db" for database", "cms" for third party content management system
+	profile is the FILE_PROFILE_ID field in the FILE_PROFILE table (This is "NA" if the content is PrsXml). 
+	format_type is the value of the FORMAT_TYPE column for the known_format used by the profile
+	-->
+<!ELEMENT source (locale, charset, da*)>
+<!ATTLIST source
+	name CDATA #REQUIRED
+	type (fs | db | cms) #REQUIRED
+	profile CDATA "NA"
+	formatType CDATA "html"
+>
+<!ELEMENT locale (#PCDATA)>
+<!ELEMENT charset (#PCDATA)>
+<!-- A target has diplomat attributes relevant to the data target adapter -->
+<!-- The databaseMode attribute is used to distinguish between preview and final for put-back SQL only. -->
+<!-- The previewUrl attribute is used to decided whether a Preview URL is needed or not. This is whether the target adapter must send back a fully
+substituted PreviewUrlXml file -->
+<!ELEMENT target (locale, charset, da*)>
+<!ATTLIST target
+	name CDATA #REQUIRED
+	databaseMode (preview | final) "final"
+	previewUrl (true | false) "false"
+>
+<!-- A gsamd has diplomat attributes relevant to GlobalSight for future use -->
+<!ELEMENT gsamd (da*)>
+<!--A category Element specifies attributes  that are specific to a content source the name attribute specifies the name of the content source (e.g. Teamsite, database, etc). -->
+<!ELEMENT category (da*)>
+<!ATTLIST category
+	name CDATA #REQUIRED
+>

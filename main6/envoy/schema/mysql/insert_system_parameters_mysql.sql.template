@@ -1,0 +1,88 @@
+-- 
+--  This populates the SYSTEM_PARAMETER table with values the user sets
+--  during in the Install.
+-- 
+--  This only contains the values that are NOT modifiable through the UI.
+
+--  Reserve the space of IDs 0-100 for non UI Modifiable system parameters
+
+delete from SYSTEM_PARAMETER where id < 100;
+
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (1, 'hibernate.logging', '%%database_logging%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (2, 'system.logging.priority', '%%system_logging_priority%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (3, 'mailserver', '%%mailserver%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (4, 'systemNotification.enabled', '%%system_notification_enabled%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (5, 'server.host', '%%server_host%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (6, 'nonSSLPort', '%%server_port%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (7, 'cxe.docsDir', '%%cxe_docsDir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (8, 'cap.servlet.url', '/globalsight/CapExportServlet', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (9, 'cxe.servlet.url', '/globalsight/CxeExportServlet', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (10, 'teamsite.installKey', '%%teamsite%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (11, 'quark.installKey', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (12, 'frame.installKey', '%%frame_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (13, 'word.installKey', '%%word_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (14, 'excel.installKey', '%%excel_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (15, 'powerpoint.installKey', '%%powerpoint_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (16, 'addLanguageMetaTag', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (17, 'leverager.excludeTuTypes', 'n/a', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (18, 'pm.accessGroup', 'ProjectManager', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (19, 'cap.login.url', '%%cap_login_url%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (20, 'useProxy', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (21, 'proxy.server.name', '', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (22, 'proxy.server.port', '', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (23, 'database.installKey', '%%database_adapters%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (24, 'priority.max', '5', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (25, 'priority.default', '3', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (26, 'documentum.installKey', '%%documentum_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (27, 'enable.proxy.ssl', '%%server_ssl_enable%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (28, 'cxe.ntcsDir', '%%desktop_ntcs_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (29, 'serviceware.installKey', '%%serviceware_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (30, 'jobCosting.enabled','%%costing%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (31, 'warningThresholds.enabled','%%system4_timer_useWarningThresholds%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (32, 'timer.threshold','%%system4_timer_threshold%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (33, 'reports.enabled','%%reports_enabled%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (34, 'vignette.installKey', '%%vignette_adapters%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (35, 'addDelete.enabled','%%addDelete%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (36, 'export.overrideCjkFontFace', 'true', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (37, 'cms.ui.host', '%%cms_ui_host%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (38, 'cms.ui.port', '%%cms_ui_port%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (39, 'cms.installKey', '%%cms_adapters%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (40, 'login.concurrentDuplicate.allowed', '%%current_dup_login%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (41, 'pdf.installKey', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (42, 'pdf.dir', '', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (43, 'msoffice.dir', '%%msoffice_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (44, 'fileStorage.dir', '%%file_storage_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (45, 'calendar.installKey', '%%calendar_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (46, 'corpus.installKey', '%%corpus_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (47, 'websvc.installKey', '%%websvc_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (48, 'editor.installKey', '%%editor_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (49, 'terminology.features.installKey', '0', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (50, 'cms.contentServerUrl', '%%cms_content_server_url%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (51, 'cms.contentServerName', '%%cms_content_server_name%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (52, 'cms.contentServerPort', '%%cms_content_server_port%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (53, 'vendorManagement.installKey', '%%vm_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (54, 'catalyst.installKey', '%%catalyst_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (55, 'quarkmac.installKey', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (56, 'corpusAligner.installKey', '%%corpus_aligner_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (57, 'editor.gxml.installKey', 'false', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (58, 'msoffice2003.dir', '%%msoffice2003_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (59, 'adobe.cs3.dir', '%%adobe_cs3_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (60, 'revenue.enabled', '%%revenue%%', 1);
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (61, 'comments.sorting', '%%comments_sorting%%', 1);
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (62, 'admin.email', '%%admin_email%%', 1);
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (63, 'indd.installKey', '%%indd_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (64, 'illustrator.installKey', '%%illustrator_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (65, 'adobe.dir', '%%adobe_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (66, 'download.delay.time.after.exporting', '0', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (67, 'task.complete.delay.time.after.upload', '0', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (68, 'adobe.cs4.dir', '%%adobe_cs4_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (69, 'mailserver.account.password', '%%account_password%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (70, 'cap.public.url.enable', '%%cap_public_url_enable%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (71, 'cap.public.url', '%%cap_public_url%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (72, 'openoffice.install.key', '%%openoffice_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (73, 'openoffice.install.dir', '%%openoffice_install_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (74, 'cap.login.url.ssl', '%%cap_login_url_ssl%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (75, 'server.ssl.port', '%%server_ssl_port%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (76, 'server.ssl.enable', '%%server_ssl_enable%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (77, 'adobe.cs5.dir', '%%adobe_cs5_dir%%', '1');
+commit;

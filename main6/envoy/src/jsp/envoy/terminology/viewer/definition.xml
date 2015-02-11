@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<definition>
+  <languages>
+    <language>
+      <name>English</name>
+      <locale>en_US</locale>
+      <hasterms>true</hasterms>
+    </language>
+    <language>
+      <name>French</name>
+      <locale>fr_FR</locale>
+      <hasterms>true</hasterms>
+    </language>
+    <language>
+      <name>Spanish</name>
+      <locale>es_ES</locale>
+      <hasterms>true</hasterms>
+    </language>
+    <language>
+      <name>German</name>
+      <locale>de_DE</locale>
+      <hasterms>true</hasterms>
+    </language>
+  </languages>
+  <fields>
+  </fields>
+</definition>

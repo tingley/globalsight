@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class
+        name="com.globalsight.cxe.entity.databaseprofile.DatabaseProfileImpl"
+        table="CUSTOMER_DB_ACCESS_PROFILE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="checkInConnectProfileId"
+            column="CHECKIN_CONNECT_ID" type="long" not-null="false"
+            unique="false" />
+        <property name="checkInInsertSql" column="CHECKIN_INSERT_SQL"
+            type="string" not-null="false" unique="false" />
+        <property name="checkInUpdateSql" column="CHECKIN_UPDATE_SQL"
+            type="string" not-null="false" unique="false" />
+        <property name="checkOutConnectProfileId"
+            column="CHECKOUT_CONNECT_ID" type="long" not-null="false"
+            unique="false" />
+        <property name="checkOutSql" column="CHECKOUT_SQL" type="string"
+            not-null="false" unique="false" />
+        <property name="codeSet" length="30" column="CODE_SET"
+            type="string" not-null="false" unique="false" />
+        <property name="description" length="4000" column="DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="l10nProfileId" column="L10N_PROFILE_ID"
+            type="long" not-null="false" unique="false" />
+        <property name="name" length="40" column="NAME" type="string"
+            not-null="true" unique="false" />
+        <property name="previewConnectProfileId"
+            column="PREVIEW_CONNECT_ID" type="long" not-null="false"
+            unique="false" />
+        <property name="previewInsertSql" column="PREVIEW_INSERT_SQL"
+            type="string" not-null="false" unique="false" />
+        <property name="previewUpdateSql" column="PREVIEW_UPDATE_SQL"
+            type="string" not-null="false" unique="false" />
+        <property name="previewUrlId" column="PREVIEW_URL_ID"
+            type="long" not-null="false" unique="false" />
+        <property name="timestamp" column="TIMESTAMP" type="timestamp"
+            not-null="true" />
+    </class>
+</hibernate-mapping>

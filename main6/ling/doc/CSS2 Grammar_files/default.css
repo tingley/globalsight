@@ -1,0 +1,228 @@
+BODY {
+	BACKGROUND: white; MARGIN: 2em; COLOR: black; FONT-FAMILY: helvetica, sans-serif
+}
+H1 {
+	TEXT-ALIGN: left
+}
+H2 {
+	TEXT-ALIGN: left
+}
+H3 {
+	TEXT-ALIGN: left
+}
+H4 {
+	TEXT-ALIGN: left
+}
+H5 {
+	TEXT-ALIGN: left
+}
+H6 {
+	TEXT-ALIGN: left
+}
+H1 {
+	CLEAR: left; MARGIN-TOP: 2em; TEXT-ALIGN: center
+}
+PRE {
+	FONT-SIZE: 90%; MARGIN-LEFT: 1em; FONT-FAMILY: monospace
+}
+ADDRESS {
+	FONT-STYLE: italic; TEXT-ALIGN: right
+}
+VAR {
+	FONT-STYLE: normal
+}
+IMG {
+	BORDER-RIGHT: 0px; BORDER-TOP: 0px; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px
+}
+.toc {
+	TEXT-INDENT: 0px
+}
+P.toc-line {
+	MARGIN-TOP: 1em; MARGIN-BOTTOM: 1em; TEXT-INDENT: 0px
+}
+A.noxref:link {
+	COLOR: black
+}
+A.noxref:visited {
+	COLOR: black
+}
+DIV.example A:link {
+	COLOR: maroon
+}
+DIV.example A:visited {
+	COLOR: maroon
+}
+DIV.deprecated-html-example A:link {
+	COLOR: red
+}
+DIV.deprecated-html-example A:visited {
+	COLOR: red
+}
+.note A:link {
+	COLOR: green
+}
+.note A:visited {
+	COLOR: green
+}
+A.propdef-title {
+	BACKGROUND: yellow
+}
+A.descdef-title {
+	BACKGROUND: green; COLOR: yellow
+}
+DIV.propdef {
+	MARGIN: 1.2em 0px
+}
+DIV.example {
+	COLOR: maroon
+}
+PRE.example {
+	COLOR: maroon
+}
+PRE.illegal-example {
+	COLOR: red
+}
+DIV.illegal-example {
+	COLOR: red
+}
+DIV.illegal-example P {
+	COLOR: black
+}
+DIV.html-example {
+	COLOR: maroon
+}
+PRE.html-example {
+	COLOR: maroon
+}
+PRE.illegal-html-example {
+	COLOR: red
+}
+DIV.illegal-html-example {
+	COLOR: red
+}
+DIV.illegal-html-example P {
+	COLOR: black
+}
+PRE.deprecated-html-example {
+	COLOR: red
+}
+DIV.deprecated-html-example {
+	COLOR: red
+}
+DIV.deprecated-html-example P {
+	COLOR: black
+}
+DIV.xml-example {
+	COLOR: maroon
+}
+PRE.xml-example {
+	COLOR: maroon
+}
+PRE.illegal-xml-example {
+	COLOR: red
+}
+DIV.illegal-xml-example {
+	COLOR: red
+}
+DIV.illegal-xml-example P {
+	COLOR: black
+}
+DIV.dtd-example {
+	COLOR: maroon
+}
+PRE.dtd-example {
+	COLOR: maroon
+}
+PRE.illegal-dtd-example {
+	COLOR: red
+}
+DIV.illegal-dtd-example {
+	COLOR: red
+}
+DIV.illegal-dtd-example P {
+	COLOR: black
+}
+.note {
+	FONT-WEIGHT: bold; MARGIN: 1em; COLOR: green
+}
+.normref {
+	COLOR: red
+}
+.informref {
+	COLOR: green
+}
+DIV.propdef TH {
+	TEXT-ALIGN: right
+}
+DIV.descdef TH {
+	TEXT-ALIGN: right
+}
+UL.toc {
+	LIST-STYLE-TYPE: none
+}
+OL.toc {
+	LIST-STYLE-TYPE: none
+}
+DIV.toc UL UL {
+	MARGIN-LEFT: 0px
+}
+DIV.toc OL OL {
+	MARGIN-LEFT: 0px
+}
+DIV.toc UL UL UL {
+	MARGIN-LEFT: 1em
+}
+DIV.toc OL OL OL {
+	MARGIN-LEFT: 1em
+}
+DIV.toc UL UL UL UL {
+	MARGIN-LEFT: 0px
+}
+DIV.toc OL OL OL OL {
+	MARGIN-LEFT: 0px
+}
+LI.tocline1 {
+	FONT-WEIGHT: bold
+}
+LI.tocline2 {
+	FONT-WEIGHT: normal
+}
+LI.tocline4 {
+	FONT-STYLE: italic
+}
+UL.index {
+	LIST-STYLE-TYPE: none
+}
+S {
+	COLOR: red; TEXT-DECORATION: line-through
+}
+DEL {
+	COLOR: red; TEXT-DECORATION: line-through
+}
+U {
+	BACKGROUND: #bfa; TEXT-DECORATION: underline
+}
+INS {
+	BACKGROUND: #bfa; TEXT-DECORATION: underline
+}
+DIV.figure {
+	MARGIN: 2.5em 0px; TEXT-ALIGN: center
+}
+P.caption {
+	FONT-WEIGHT: bold; FONT-SIZE: 90%; MARGIN: 1.5em 25% 0px; COLOR: #088; FONT-STYLE: italic; TEXT-ALIGN: center
+}
+CAPTION {
+	FONT-WEIGHT: bold; FONT-SIZE: 90%; MARGIN: 1.5em 25% 0px; COLOR: #088; FONT-STYLE: italic; TEXT-ALIGN: center
+}
+DIV.toc {
+	TEXT-ALIGN: left
+}
+UL.index {
+	TEXT-ALIGN: left
+}
+DT {
+	TEXT-ALIGN: left
+}
+SUP {
+	FONT-SIZE: 80%; VERTICAL-ALIGN: super
+}

@@ -1,0 +1,2 @@
+#for GBS-519
+Alter TABLE xliff_alt ADD COLUMN QUALITY text DEFAULT NULL;

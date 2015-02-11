@@ -1,0 +1,152 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                   GALIGN Build File                          * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+<project name="Galign" default="build" basedir=".">
+
+  <target name="initialize">
+    <tstamp/>
+
+    <!-- Basic directories -->
+    <property name="src" value="src" />
+    <property name="bin" value="bin" />
+    <property name="lib" value="lib" />
+    <property name="installer" value="installer" />
+    <property name="resources" value="src/resources" />
+    <property name="help" value="src/resources/help" />
+    <property name="classes" value="classes" />
+    <property name="dist" value="dist" />
+    <property name="target" value="1.4" />
+
+    <property name="izpack"   value="../../izpack/izpack-installer" />
+    <property name="izlaunch" value="../../izpack/izpack-launcher"  />
+
+    <property name="layout" value="${lib}/AbsoluteLayout.jar" />
+    <property name="dom4j"  value="${lib}/dom4j-1.5-rc1.jar" />
+    <property name="jaxen"  value="${lib}/jaxen-1.1-beta-4.jar" />
+
+    <property name="classpath" value="${layout}:${dom4j}:${jaxen}" />
+
+    <property name="batch_file"  value="${bin}/galign.cmd"/>
+    <property name="sh_file"     value="${bin}/galign.sh"/>
+
+    <property name="jar" value="${classes}/galign.jar"/>
+    <property name="zip" value="${dist}/galign.zip"/>
+    <property name="installer-jar" value="galign-installer.jar"/>
+    <property name="installer-zip" value="galign-installer.zip"/>
+
+    <property name="product" value="GAlign"/>
+    <property name="version" value="1.0"/>
+
+    <!-- Define IzPack installer ant task -->
+    <taskdef name="izpack" classpath="${izpack}/standalone-compiler.jar"
+    classname="com.izforge.izpack.ant.IzPackTask" />
+
+  </target>
+
+  <target name="build" depends="initialize, buildversion">
+    <echo message="***** Compiling galign tool..." />
+    <javac nowarn="${nowarn}" classpath="${classpath}" destdir="${classes}" >
+      <src path="${src}" />
+      <include name="**/*.java" />
+    </javac>
+    <copy todir="${classes}/resources"> 
+      <fileset dir="${resources}"/>
+    </copy>
+    <copy todir="${classes}/resources/help"> 
+      <fileset dir="${resources}/help"/>
+    </copy>
+    <copy tofile="${classes}/resources/labels_en_US.properties" 
+     file="${src}/resources/labels.properties" />
+    <copy tofile="${classes}/resources/errors_en_US.properties" 
+     file="${src}/resources/errors.properties" />
+    <copy todir="${classes}/lib"> 
+      <fileset dir="${lib}"/>
+    </copy>
+    <copy file="${batch_file}" todir="${classes}"/>
+    <copy file="${sh_file}"    todir="${classes}"/>
+  </target>
+
+  <target name="dist" depends="build">
+
+    <mkdir dir="${dist}" />
+
+    <!-- 1: Build application jar. -->
+    <jar jarfile="${jar}" basedir="${classes}" includes="galign/**">
+      <manifest>
+        <attribute name="Main-Class" value="galign.ui.control.Start"/>
+        <attribute name="Class-Path" value=". ${layout} ${dom4j} ${jaxen}"/>
+      </manifest>
+    </jar>
+
+    <!-- 2: Zip up application just for fun. This is all we need to run. -->
+    <zip zipfile="${zip}" update="no" filesonly="yes">
+        <zipfileset dir="${classes}" 
+	includes="*, resources/*, resources/help/*" 
+	excludes="galign/**" 
+	prefix="galign" />
+    </zip>
+
+    <!-- 3: Create installer package. -->
+    <java classname="com.izforge.izpack.compiler.Compiler" fork="true">
+      <arg line="${installer}/install.xml -b . -o ${dist}/${installer-jar} -k standard" />
+      <classpath>
+        <pathelement location="${izpack}/standalone-compiler.jar"/>
+      </classpath>
+    </java>
+
+    <!-- 4: Create installer zip containing setup.exe for Windows -->
+    <zip zipfile="${dist}/${installer-zip}" update="no" filesonly="yes">
+      <zipfileset dir="${dist}"      includes="${installer-jar}" />
+      <zipfileset dir="${installer}" includes="launcher.ini" />
+      <zipfileset dir="${izlaunch}"  includes="**/*" />
+    </zip>
+
+  </target>
+
+  <target name="buildversion">
+    <!-- Create a BuildVersion.java which holds the current build version -->
+    <mkdir dir="${classes}" />
+<echo file="BuildVersion.java" append="false">
+package galign;
+public class BuildVersion
+{
+    /** Product Name **/
+    public static final String PRODUCT="${product}";
+
+    /** Product Version **/
+    public static final String VERSION="${version}";
+
+    /** Build Date **/
+    public static final String BUILD_DATE="${DSTAMP}";
+
+    /**the build version will get displayed in the about box **/
+    public static final String BUILD_VERSION="${version}_${DSTAMP}";
+
+    /** Prints out the Build version info **/
+    public static void main(String args[])
+    {
+    System.out.println(PRODUCT + " version: " + VERSION);
+    System.out.println("Build version: " + BUILD_VERSION);
+    System.out.println("Build date: " + BUILD_DATE);
+    }
+}
+</echo>
+    <javac nowarn="${nowarn}" target="${target}" classpath="${classpath}" srcdir="."  destdir="${classes}"  includes="BuildVersion.java"></javac>
+  </target>
+
+  <!-- Delete all the generated target files -->
+  <target name="clean" depends="initialize">
+    <delete dir="${classes}" />
+    <delete dir="${dist}" />
+  </target>
+
+  <!-- Build the component from scratch -->
+  <target name="cleanbuild" depends="clean, build"></target>
+
+</project>
+
+<!-- Local Variables: -->
+<!-- compile-command: "ant -emacs " -->
+<!-- End: -->

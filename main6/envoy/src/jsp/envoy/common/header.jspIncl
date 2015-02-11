@@ -1,0 +1,110 @@
+<%@ page import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
+                 com.globalsight.everest.webapp.webnavigation.LinkHelper,
+                 com.globalsight.everest.servlet.util.SessionManager,
+		 com.globalsight.everest.foundation.User,
+		 com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler,
+		 com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+                 com.globalsight.everest.webapp.WebAppConstants,
+		 java.util.ResourceBundle,com.globalsight.everest.company.*"
+%>
+
+<style> body { background: url(images/page_bg.png) no-repeat; }</style>
+
+<jsp:useBean id="skin" scope="application"
+ class="com.globalsight.everest.webapp.javabean.SkinBean" />
+<%
+   ResourceBundle bundleHeader = PageHandler.getBundle(session);
+   String homeUrl = LinkHelper.getSystemHomeURL(request);
+   String logoutUrl = LinkHelper.getWebActivityURL(request, "login");
+   String accountUrl = LinkHelper.getWebActivityURL(request, "myaccount");
+
+   SessionManager sessionMgrHeader = (SessionManager)session.getAttribute(
+     WebAppConstants.SESSION_MANAGER);
+
+   User userHeader = (User)sessionMgrHeader.getAttribute(WebAppConstants.USER);
+   boolean isAnonymous = userHeader.getType() == User.UserType.ANONYMOUS ? true : false;
+   String logoImage = skin.getProperty("skin.banner.logoImage");
+   String logoBackgroundImage = skin.getProperty("skin.banner.logoBackgroundImage");
+   boolean useOneLogoImage = false;
+   if (logoImage.equals(logoBackgroundImage))
+   {
+     useOneLogoImage = true;
+   }
+   boolean isSuperPM = UserUtil.isSuperPM(userHeader.getUserId());
+%>
+<SCRIPT LANGUAGE="JavaScript">
+function helpSwitch() 
+{  
+  // The variable helpFile must be defined in each JSP.
+  helpWindow = window.open(helpFile, 'helpWindow',
+    'resizable=yes,scrollbars=yes,WIDTH=730,HEIGHT=400');
+  helpWindow.focus();
+}
+
+</SCRIPT>
+
+<DIV ID="header" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 0px; width:100%;">
+<TABLE NAME="logoTable" WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
+  <TR CLASS="header1">
+    	<% if (useOneLogoImage == true){ %>
+    		<TD WIDTH="960"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="960"></TD>
+    	<%} else {%>
+    		<TD WIDTH="285"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="285"></TD>
+    		<TD WIDTH="675"><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
+    	<%}%>            
+    		<TD ALIGN="RIGHT" VALIGN="TOP">
+      			<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
+					<TR>
+	  					<TD NOWRAP><IMG SRC="/globalsight/images/bullet_header.gif" HEIGHT="41" WIDTH="9">
+	    					<A CLASS="header1" onClick="return confirmJump();" HREF="<%=homeUrl%>" TARGET="_top"><%=bundleHeader.getString("lb_home")%></A>&nbsp;&nbsp;
+	  					</TD>
+						<%
+				        if (!isAnonymous)
+				        {
+						%>
+					  		<TD NOWRAP><IMG SRC="/globalsight/images/bullet_header.gif" HEIGHT="41" WIDTH="9">
+					   		<A CLASS="header1" onClick="return confirmJump();" HREF="<%=accountUrl%>" TARGET="_top"><%=bundleHeader.getString("lb_my_account")%></A>&nbsp;&nbsp;
+					  		</TD>
+						<%
+				        }
+						%>
+						  <TD NOWRAP><IMG SRC="/globalsight/images/bullet_header.gif" HEIGHT="41" WIDTH="9">
+						    <A CLASS="header1" onClick="return confirmJump();" HREF="<%=logoutUrl%>" TARGET="_top"><%=bundleHeader.getString("lb_logout")%></A>&nbsp;&nbsp;
+						  </TD>
+						  <TD NOWRAP><IMG SRC="/globalsight/images/bullet_header.gif" HEIGHT="41" WIDTH="9">
+						    <A CLASS="header1" HREF="javascript:helpSwitch();"><%=bundleHeader.getString("lb_help")%></A>&nbsp;&nbsp;
+						  </TD>
+					</TR>
+					<%
+					      if (!isAnonymous)
+					      {
+					%>
+					<TR>
+					  <TD NOWRAP ALIGN="RIGHT" CLASS="smallSilverItalicBold" COLSPAN=4 STYLE="padding-top:3px;">
+					    <%=bundleHeader.getString("lb_welcome")%> 
+					    <%out.print(userHeader.getUserId());%>&nbsp;&nbsp; 
+				        <%
+				              if(!isSuperPM)
+				              {
+				                out.print(userHeader.getCompanyName());
+				              }
+				              else
+				              {
+				                out.print(CompanyWrapper.getCompanyNameById(CompanyThreadLocal.getInstance().getValue()));
+				              }
+					   %>&nbsp;&nbsp;&nbsp;
+					  </TD>
+					</TR>
+					<%
+					      }
+					%>
+      		</TABLE>
+    	</TD>
+  	</TR>
+</TABLE>
+</DIV>
+
+<DIV ID="shutdownBanner" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px;">
+<%@ include file="/envoy/common/shutdownBanner.jspIncl" %>
+</DIV>
+<link rel="shortcut icon" href="/globalsight/images/GlobalSight_Icon.ico" >

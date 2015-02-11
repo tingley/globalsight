@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Type="StyleSheet" Top="1.0" Left="0.75" Bottom="1.0" Right="0.75" HeaderFromEdge="0.5" FooterFromEdge="0.75" PageNumbering="0" HorizontalWrap="false" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0">
+<ReportProperty Name="report.modified">
+<![CDATA[2002-12-17 05:06:33]]>
+</ReportProperty>
+<ReportProperty Name="PageSize">
+<![CDATA[Letter [8.5x11 in]]]>
+</ReportProperty>
+<ReportProperty Name="TextMode">
+<![CDATA[false]]>
+</ReportProperty>
+<ReportProperty Name="Orientation">
+<![CDATA[Landscape]]>
+</ReportProperty>
+<ReportProperty Name="edit.layout">
+<![CDATA[false]]>
+</ReportProperty>
+<ReportProperty Name="report.created">
+<![CDATA[2002-12-17 03:28:32]]>
+</ReportProperty>
+<Parameters>
+</Parameters>
+<RunningTotals>
+</RunningTotals>
+<Header Type="256">
+<TextElement ID="Text2" Alignment="2" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-BOLD-16"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[Translation and Interpretation Division Bill Report]]>
+</TextElement>
+<NewlineElement ID="Newline1" Alignment="1" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Count="1">
+</NewlineElement>
+</Header>
+<Header Type="512">
+<TextElement ID="Text5" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[Page {P} of {N}]]>
+</TextElement>
+<TextElement ID="Text7" Alignment="2" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[{D} - {T}]]>
+</TextElement>
+</Header>
+<TextElement ID="Text4" Alignment="2" Indent="0.0" Hindent="0" Spacing="0" Block="false" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-BOLD-32"
+ Foreground="-16777216" FillStyle="0" TabStops="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0" Justify="false" Orphan="false" TextAdvance="3">
+<![CDATA[TRIAL BILL]]>
+</TextElement>
+<SeparatorElement ID="Separator1" Alignment="2" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" Style="4097" SeparatorAdvance="4">
+</SeparatorElement>
+<TableElement ID="Table3" Alignment="65" Indent="0.0" Hindent="0" Spacing="0" Block="true" Continuation="false" Visible="true" KeepWithNext="false" Font="Serif-PLAIN-10"
+ Foreground="-16777216" TableWidth="0.0" FixedWidths="52,33,55,38,46,124,36,37,50,18,17,18,16,16,64,63"  Layout="0" TableAdvance="1" OrphanControl="false" Padding="0,1,0,1" Style="WBCustom" EmbedWidth="true" Embedded="true">
+<property><name><![CDATA[query]]></name><value><![CDATA[TrialBill]]></value></property>
+<property><name><![CDATA[grow]]></name><value><![CDATA[true]]></value></property>
+<Style RowBorderC="true" ColBorderC="true" RowBorder="true" ColBorder="true" Insets="false" Alignment="false" Font="true" LineWrap="false" Foreground="true" Background="true" FirstRow="true" FirstCol="true" LastRow="true" LastCol="true"/>
+<RowGroup>
+<Row name="__ALL CELLS__" alignment="18" linewrap="false" suppressIfZero="false" suppressIfDuplicate="false"/>
+<Row name="__HEADER_ROW__" alignment="18" linewrap="true" suppressIfZero="false" suppressIfDuplicate="false"/>
+</RowGroup>
+<ColGroup>
+<Col name="ESERVICES_JOB_NO" alignment="18" linewrap="false" suppressIfZero="false" suppressIfDuplicate="false"/>
+<Col name="REQUESTOR_NAME" linewrap="false" suppressIfZero="false" suppressIfDuplicate="false"/>
+<Col name="SERVICE_COST" alignment="144" format="CurrencyFormat" linewrap="false" suppressIfZero="false" suppressIfDuplicate="false"/>
+<Col name="ESERVICES_LINE_NO" linewrap="false" suppressIfZero="false" suppressIfDuplicate="false"/>
+</ColGroup>
+<conditionFilter>
+<dataselection frommodel="false">
+<source><![CDATA[TrialBill]]></source>
+<attributeref entity="" attribute="ESERVICES_JOB_NO">
+</attributeref>
+<attributeref entity="" attribute="ESERVICES_LINE_NO">
+</attributeref>
+<attributeref entity="" attribute="REQUESTOR_NAME">
+</attributeref>
+<attributeref entity="" attribute="CHARGE_SEQUENCE_NO">
+</attributeref>
+<attributeref entity="" attribute="COST_CENTER">
+</attributeref>
+<attributeref entity="" attribute="DOCUMENT_TITLE">
+</attributeref>
+<attributeref entity="" attribute="SOURCE_LOCALE">
+</attributeref>
+<attributeref entity="" attribute="TARGET_LOCALE">
+</attributeref>
+<attributeref entity="" attribute="SERVICE_LEVEL">
+</attributeref>
+<attributeref entity="" attribute="TRANSLATE_FLG">
+</attributeref>
+<attributeref entity="" attribute="TRANSLATION_UPDATE_FLG">
+</attributeref>
+<attributeref entity="" attribute="DESKTOP_PUBLISHING_FLG">
+</attributeref>
+<attributeref entity="" attribute="REVIEW_FLG">
+</attributeref>
+<attributeref entity="" attribute="GALLEY_PROOFING_FLG">
+</attributeref>
+<attributeref entity="" attribute="WORD_COUNT">
+</attributeref>
+<attributeref entity="" attribute="SERVICE_COST">
+</attributeref>
+</dataselection>
+<hiddenColumn>
+</hiddenColumn>
+</conditionFilter>
+<filter type="group">
+<group sorted="true" showHeader="true" showGroupCols="false" inplace="true" breakAfter="false" grandTotal="true" topN="0" topNReverse="false">
+<sumCol formula="Sum"><![CDATA[WORD_COUNT]]></sumCol>
+<sumCol formula="Sum"><![CDATA[SERVICE_COST]]></sumCol>
+</group>
+</filter>
+<Header>
+<ColumnHeader header="ESERVICES_JOB_NO">
+<![CDATA[Job No.]]>
+</ColumnHeader>
+<ColumnHeader header="ESERVICES_LINE_NO">
+<![CDATA[Line No.]]>
+</ColumnHeader>
+<ColumnHeader header="REQUESTOR_NAME">
+<![CDATA[Requester]]>
+</ColumnHeader>
+<ColumnHeader header="CHARGE_SEQUENCE_NO">
+<![CDATA[Charge No.]]>
+</ColumnHeader>
+<ColumnHeader header="COST_CENTER">
+<![CDATA[Cost Center]]>
+</ColumnHeader>
+<ColumnHeader header="DOCUMENT_TITLE">
+<![CDATA[Title]]>
+</ColumnHeader>
+<ColumnHeader header="SOURCE_LOCALE">
+<![CDATA[Src. Loc.]]>
+</ColumnHeader>
+<ColumnHeader header="TARGET_LOCALE">
+<![CDATA[Trg. Loc]]>
+</ColumnHeader>
+<ColumnHeader header="SERVICE_LEVEL">
+<![CDATA[Service
+Level]]>
+</ColumnHeader>
+<ColumnHeader header="TRANSLATE_FLG">
+<![CDATA[T]]>
+</ColumnHeader>
+<ColumnHeader header="TRANSLATION_UPDATE_FLG">
+<![CDATA[U]]>
+</ColumnHeader>
+<ColumnHeader header="DESKTOP_PUBLISHING_FLG">
+<![CDATA[O]]>
+</ColumnHeader>
+<ColumnHeader header="REVIEW_FLG">
+<![CDATA[R]]>
+</ColumnHeader>
+<ColumnHeader header="GALLEY_PROOFING_FLG">
+<![CDATA[G]]>
+</ColumnHeader>
+<ColumnHeader header="WORD_COUNT">
+<![CDATA[Word
+Count]]>
+</ColumnHeader>
+<ColumnHeader header="SERVICE_COST">
+<![CDATA[Bill
+Amount]]>
+</ColumnHeader>
+</Header>
+<Table Rows="3" Cols="16" HeaderRow="1" HeaderCol="0" TrailerRow="1" TrailerCol="0">
+<TR>
+<TD Type="String"><![CDATA[ESERVICES_JOB_NO]]></TD><TD Type="String"><![CDATA[ESERVICES_LINE_NO]]></TD><TD Type="String"><![CDATA[REQUESTOR_NAME]]></TD><TD Type="String"><![CDATA[CHARGE_SEQUENCE_NO]]></TD><TD Type="String"><![CDATA[COST_CENTER]]></TD><TD Type="String"><![CDATA[DOCUMENT_TITLE]]></TD><TD Type="String"><![CDATA[SOURCE_LOCALE]]></TD><TD Type="String"><![CDATA[TARGET_LOCALE]]></TD><TD Type="String"><![CDATA[SERVICE_LEVEL]]></TD><TD Type="String"><![CDATA[TRANSLATE_FLG]]></TD><TD Type="String"><![CDATA[TRANSLATION_UPDATE_FLG]]></TD><TD Type="String"><![CDATA[DESKTOP_PUBLISHING_FLG]]></TD><TD Type="String"><![CDATA[REVIEW_FLG]]></TD><TD Type="String"><![CDATA[GALLEY_PROOFING_FLG]]></TD><TD Type="String"><![CDATA[WORD_COUNT]]></TD><TD Type="String"><![CDATA[SERVICE_COST]]></TD></TR>
+<TR>
+<TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="String"><![CDATA[XXXXXXXX]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="String"><![CDATA[$99,999.99]]></TD></TR>
+<TR>
+<TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="null"><![CDATA[null]]></TD><TD Type="Double"><![CDATA[99999.99]]></TD><TD Type="String"><![CDATA[$99,999.99]]></TD></TR>
+</Table>
+<highlightGroups>
+</highlightGroups>
+</TableElement>
+</Report>

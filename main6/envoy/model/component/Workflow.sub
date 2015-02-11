@@ -1,0 +1,33 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.1.9642.27"
+    charSet    	0)
+
+(object SubSystem "Workflow"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA54570221"
+    visible_modules 	(list dependency_list
+	(object Module_Visibility_Relationship
+	    quid       	"38BD50B600C4"
+	    supplier   	"Component View::User Management"
+	    quidu      	"38BA54500109"
+	    supplier_is_subsystem 	TRUE))
+    physical_models 	(list unit_reference_list
+	(object module "Workflow" "NotAModuleType" "NotAModulePart"
+	    quid       	"388BA169027A"
+	    stereotype 	""
+	    visible_modules 	(list dependency_list
+		(object Module_Visibility_Relationship
+		    quid       	"388BA17302ED"
+		    supplier   	"Component View::Linguistics::Ling Server"
+		    quidu      	"388B9FEC03C7"
+		    supplier_is_spec 	TRUE)
+		(object Module_Visibility_Relationship
+		    quid       	"38A4A2D80146"
+		    supplier   	"Component View::Linguistics::Localization Data Server"
+		    quidu      	"38A4A29B0134"
+		    supplier_is_spec 	TRUE))
+	    language   	""))
+    physical_presentations 	(list unit_reference_list))

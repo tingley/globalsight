@@ -1,0 +1,2 @@
+# For gbs-974
+ALTER TABLE activity ADD COLUMN GSEDITION_ACTION_ID bigint(20);

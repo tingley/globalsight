@@ -1,0 +1,41 @@
+<?xml version="1.0"?> <!-- -*- mode: SGML -*- -->
+<tmx version="1.4">
+<header
+  creationtool="Globalsight Ambassador"
+  creationtoolversion="6.2"
+  datatype="html"
+  segtype="sentence"
+  adminlang="en-us"
+  srclang="EN"
+  o-tmf="unknown"
+>
+  <note>This is test 1 in English.</note>
+</header>
+<body>
+  <tu tuid="1">
+    <tuv xml:lang="EN">
+      <seg>test1 en</seg>
+    </tuv>
+  </tu>
+  <tu tuid="2">
+    <tuv xml:lang="EN">
+      <seg>Segment 2 en</seg>
+    </tuv>
+  </tu>
+  <tu tuid="3">
+    <tuv xml:lang="EN">
+      <seg>Segment 3 en</seg>
+    </tuv>
+  </tu>
+  <tu tuid="4">
+    <tuv xml:lang="EN">
+      <seg>Segment 4 en</seg>
+    </tuv>
+  </tu>
+  <tu tuid="5">
+    <tuv xml:lang="EN">
+      <seg>Special Segment 5 en</seg>
+    </tuv>
+  </tu>
+</body>
+</tmx>

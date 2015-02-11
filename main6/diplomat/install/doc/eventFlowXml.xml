@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE eventFlowXml SYSTEM "eventFlowXml.dtd">
+<eventFlowXml>
+	<preMergeEvent> Diplomat::HtmlTranslatedEvent </preMergeEvent>
+	<postMergeEvent> Diplomat::FileSystemMergedEvent </postMergeEvent>
+	<batchInfo>
+		<batchId>batch1</batchId>
+		<pageCount> 10 </pageCount>
+		<pageNumber>4 </pageNumber>
+		<displayName> foo.html </displayName>
+	</batchInfo>
+	<source name="FileSystemSourceAdapter" type="fs" profile="1" formatType="html">
+		<locale> en_US </locale>
+		<charset> ISO-8859-1 </charset>
+		<da name="Filename">
+			<dv>Foo.html</dv>
+		</da>
+		<da name="Path">
+			<dv>/tmp/</dv>
+		</da>
+	</source>
+	<target name="FileSystemTargetAdapter" databaseMode="final" previewUrl="false">
+		<locale> fr_FR </locale>
+		<charset> ISO-8859-1 </charset>
+		<da name="FileName">
+			<dv> /tmp/foo.html </dv>
+		</da>
+	</target>
+	<category name="Interwoven">
+		<da name="attribute1">
+			<dv>value1</dv>
+		</da>
+	</category>
+</eventFlowXml>

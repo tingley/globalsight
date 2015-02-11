@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<indexdata>
+<key name="Localizables" >
+  <topic name="Account Options" url="Account_Options.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Preview SQL" url="Data_Sources/Database_Profiles/DB_Preview_SQL.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Database Profiles Main Screen" url="Data_Sources/Database_Profiles/DB_Profiles_Main_Screen.htm" />
+  <topic name="Database Read SQL" url="Data_Sources/Database_Profiles/DB_Read_SQL.htm" />
+  <topic name="Edit Rules" url="Data_Sources/SGML_Rules/Edit_Rules.htm" />
+  <topic name="Extracted File" url="Glossary/Extracted_File.htm" />
+  <topic name="How does GlobalSight decide what is translatable in a page" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_decide_what_is_translatable_in_a_page.htm" />
+  <topic name="How does GlobalSight Word Count work" url="Appendix/Linguistic_FAQ/How_does_GlobalSight_Word_Count_work.htm" />
+  <topic name="Localizables" url="Glossary/Localizables.htm" />
+  <topic name="Main Editor Options (Inline)" url="My_Activities/Main_Editor_Options_(Inline).htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+  <topic name="Placeholder Tags (Additional Information)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Segment" url="Glossary/Segment.htm" />
+  <topic name="Segment Editor Options" url="My_Activities/Segment_Editor_Options.htm" />
+  <topic name="Unextracted File" url="Glossary/Unextracted_File.htm" />
+  <topic name="What is a Localizable segment and how is it handled in TM" url="Appendix/Linguistic_FAQ/What_is_a_Localizable_segment_and_how_is_it_handled_in_TM.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Localization" >
+  <topic name="Activity" url="Glossary/Activity.htm" />
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Activity Type" url="Glossary/Activity_Type.htm" />
+  <topic name="Activity Types Main Screen" url="Setup/Activity_Types/Activity_Types_Main_Screen.htm" />
+  <topic name="Add/Edit Workflows" url="Setup/Localization_Profiles/Add_Edit_Workflows.htm" />
+  <topic name="Anonymous Termbase Access" url="Setup/Terminology/Anonymous_Termbase_Access.htm" />
+  <topic name="Attach Workflows to Target Locales" url="Setup/Localization_Profiles/Attach_Workflows_to_Target_Locales.htm" />
+  <topic name="Columns" url="Data_Sources/Database_Profiles/Columns.htm" />
+  <topic name="Content Management Overview" url="Content_Management/Content_Management_Overview.htm" />
+  <topic name="Create/Edit Column" url="Data_Sources/Database_Profiles/Create_Modify_Column.htm" />
+  <topic name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+  <topic name="Create/Edit Import Settings" url="Data_Sources/Database_Import_Settings/Create_Modify_Import_Settings.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Create/Edit TeamSite Server" url="Data_Sources/TeamSite_Server_Configuration/Create_Edit_TeamSite_Server.htm" />
+  <topic name="Create/Modify TM Profile" url="Setup/Translation_Memory_Profiles/Create_Modify_TM_Profile.htm" />
+  <topic name="Customizing Extraction Settings" url="Appendix/GlobalSight_Configuration_Files/Customizing_Extraction_Rules.htm" />
+  <topic name="Data Sources Menu" url="Data_Sources/Data_Sources_Menu.htm" />
+  <topic name="Database Profiles Basic Information" url="Data_Sources/Database_Profiles/Basic_Information_DB_Profiles.htm" />
+  <topic name="Do Fuzzy Matches have formatting" url="Appendix/Linguistic_FAQ/Do_Fuzzy_Matches_have_formatting.htm" />
+  <topic name="Duplicate Localization Profile" url="Setup/Localization_Profiles/Duplicate_Localization_Profile.htm" />
+  <topic name="Duplicate Workflow" url="Setup/Workflows/Duplicate_Workflow.htm" />
+  <topic name="Exclude Item Types" url="Appendix/Exclude_Item_Types.htm" />
+  <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="Fixed Rates" url="Glossary/Fixed_Rates.htm" />
+  <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
+  <topic name="Hourly Rates" url="Glossary/Hourly_Rates.htm" />
+  <topic name="How does Exclude Item Types work" url="Appendix/Linguistic_FAQ/How_does_Exclude_Item_Types_work.htm" />
+  <topic name="How does TM locking work" url="Appendix/Linguistic_FAQ/How_does_TM_locking_work.htm" />
+  <topic name="Import Error" url="My_Jobs/Import_Error.htm" />
+  <topic name="Import Main Screen" url="Data_Sources/Import/Import_Main_Screen.htm" />
+  <topic name="Import TeamSite File into GlobalSight" url="Appendix/TeamSite/Import_TeamSite_File_into_GlobalSight.htm" />
+  <topic name="In Progress Jobs" url="My_Jobs/In_Progress_Workflow_Tab.htm" />
+  <topic name="Introduction" url="Appendix/TeamSite/Introduction.htm" />
+  <topic name="Job" url="Glossary/Job.htm" />
+  <topic name="Job Costing" url="Appendix/Job_Costing.htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="Localizables" url="Glossary/Localizables.htm" />
+  <topic name="Localization Profile" url="Glossary/Localization_Profile.htm" />
+  <topic name="Localization Profile Basic Information" url="Setup/Localization_Profiles/Basic_Information_LP.htm" />
+  <topic name="Localization Profiles Main Screen" url="Setup/Localization_Profiles/Localization_Profiles_Main_Screen.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="My Jobs" url="My_Jobs/Customer_Jobs/My_Jobs.htm" />
+  <topic name="Overview" url="Overview.htm" />
+  <topic name="Overview - Customer" url="Overview_-_Customer.htm" />
+  <topic name="Overview_PM" url="Overview_PM.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Pending Records Table" url="Appendix/Database_Integration/Pending_Records_Table.htm" />
+  <topic name="Placeholder Tags" url="Glossary/Placeholder_Tags.htm" />
+  <topic name="Placeholder Tags (Additional Information)" url="Appendix/Placeholder_Tags/Placeholder_Tags_(Additional_Information).htm" />
+  <topic name="Ready Jobs" url="My_Jobs/Ready_Workflow_Tab.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="Segment Editor (Text)" url="My_Activities/Segment_Editor_(Text).htm" />
+  <topic name="Select Files to Upload" url="Customer_Upload/Select_Files_to_Upload.htm" />
+  <topic name="Setup Menus" url="Setup/Setup.htm" />
+  <topic name="Support Files Main Screen" url="Setup/Support_Files/Support_Files_Main_Screen.htm" />
+  <topic name="System Parameters" url="Setup/System_Parameters/System_Parameters.htm" />
+  <topic name="Terminology Main Screen" url="Setup/Terminology/Terminology_Main_Screen.htm" />
+  <topic name="Unextracted File" url="Glossary/Unextracted_File.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+  <topic name="Word Count Rates" url="Glossary/Word_Count_Rates.htm" />
+  <topic name="Workflow Status Summary" url="Glossary/Workflow_Status_Summary.htm" />
+  <topic name="Working with Placeholder Tags" url="Appendix/Working_Offline/RTF_(Paragraph_Mode)/Working_with_Placeholder_Tags.htm" />
+  <topic name="Writing XML Rules" url="Appendix/Writing_XML_Rules.htm" />
+</key>
+<key name="Localization Participant" >
+  <topic name="Activity Status Summary" url="Glossary/Activity_Status_Summary.htm" />
+  <topic name="Create/Edit Project" url="Setup/Projects/Create_Modify_Project.htm" />
+  <topic name="Create/Edit Rates" url="Setup/Rates/Create_Modify_Rate.htm" />
+  <topic name="Do Fuzzy Matches have formatting" url="Appendix/Linguistic_FAQ/Do_Fuzzy_Matches_have_formatting.htm" />
+  <topic name="Hourly Rates" url="Glossary/Hourly_Rates.htm" />
+  <topic name="Locale Manager" url="Glossary/Locale_Manager.htm" />
+  <topic name="My Activities" url="My_Activities/My_Activities.htm" />
+  <topic name="Overview_LP" url="Overview_LP.htm" />
+  <topic name="Page Rates" url="Glossary/Page_Rates.htm" />
+  <topic name="Rejected Activities" url="My_Activities/Rejected_Activity_Tab.htm" />
+  <topic name="User Account Information" url="Setup/Users/User_Information.htm" />
+  <topic name="When are segments saved to TM" url="Appendix/Linguistic_FAQ/When_are_segments_saved_to_TM.htm" />
+</key>
+
+</indexdata>

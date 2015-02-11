@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.projecthandler.ProjectTmTuvT"
+		table="PROJECT_TM_TUV_T">
+		<id name="id" column="ID" type="long">
+			<generator class="assigned" />
+		</id>
+
+		<property name="segmentString" column="SEGMENT_STRING"
+			type="string" unique="false" />
+		<property name="segmentClob" column="SEGMENT_CLOB" type="string"
+			unique="false" />
+		<property name="exactMatchKey" length="20"
+			column="EXACT_MATCH_KEY" type="string" not-null="false"
+			unique="false" />
+		<property name="creationDate" column="CREATION_DATE"
+			type="timestamp" not-null="true" unique="false" />
+		<property name="modifyDate" column="MODIFY_DATE"
+			type="timestamp" not-null="true" unique="false" />
+		<property name="creationUser" length="80" column="CREATION_USER"
+			type="string" not-null="false" unique="false" />
+		<property name="modifyUser" length="80" column="MODIFY_USER"
+			type="string" not-null="false" unique="false" />
+		<property name="sid" length="255" column="SID"
+            type="string" not-null="false" unique="false" />
+		<property name="updatedByProject" length="40"
+			column="UPDATED_BY_PROJECT" type="string" not-null="false"
+			unique="false" />
+
+		<many-to-one name="locale" column="LOCALE_ID"
+			class="com.globalsight.util.GlobalSightLocale" not-null="false"
+			lazy="false" />
+
+		<many-to-one name="tu" column="TU_ID"
+			class="com.globalsight.everest.projecthandler.ProjectTmTuT" 
+			not-null="false" lazy="false" />
+	</class>
+</hibernate-mapping>

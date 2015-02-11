@@ -1,0 +1,36 @@
+Tm Reindexer for GlobalSight 5.2.1
+
+Tm Reindexer indexes all Tm segments in the system. First tiem this
+tool runs on an GlobalSight instance (or -i option is specified), it
+creates a table called REINDEXER_PROGRESS. This table records which
+segments have already been indexed. If the execution of the tool is
+terminated for any reason in the middle of the reindexing process, the
+subsequent invocation of the tool starts indexing from where it's
+stopped before.
+
+Prerequisites:
+ER2 and ER3 for GlobalSight 5.2.1 must be installed.
+
+How to Use:
+1. Shutdown GlobalSight if it's running.
+2. unzip the archive in your selected directory. ambassador_reindexer
+   directory is created.
+3. go to <Ambassador home> and type "setenv.cmd".
+4. go to ambassador_reindexer directory, and type Reindexer.bat with
+   optional parameters. The commandline syntax is as follows.
+
+Usage: Reindexer [OPTOIN]
+  -q,    Suppress the confirmation message.
+  -i,    Initialize the progress record table and start over
+         the reindexing process.
+  -v,    Verbose output.
+  -t,    Number of indexes to be saved at a time. Default is 600,000.
+
+For example, 
+
+	Reindexer.bat -i
+
+will discard all index data and rebuild it. If you want to resume the
+reindexing process from where you've left previously, do not use -i
+option.
+

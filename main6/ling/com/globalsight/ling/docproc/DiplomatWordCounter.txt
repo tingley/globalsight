@@ -1,0 +1,14 @@
+NOTE:
+
+* The behaviour of the word counter on Japanese text is strange.  
+Need to confirm with a native speaker.
+
+* Chinese and possibly Korean word counting are broken in the JDK 1.3.
+
+* Suggest we use the iCU4J Rule based breakiterator.
+
+* In general I trust the word counter on latin based languages only!
+
+
+Jim Hargrave 
+September 12, 2000

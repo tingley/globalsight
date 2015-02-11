@@ -1,0 +1,163 @@
+/* Entry formatting */
+BODY      {
+            background-color: white;
+            color: black;
+            font-family: Arial Unicode MS, Arial, Helvetica, sans-serif;
+            font-size: 14;
+            margin-left: 6px;
+          }
+#idHeader { width: 100%; margin-top: 4px; }
+#idHeaderSeparator { width: 100%; }
+
+#idViewerEntry {
+                 background-color: white;
+                 font-size: 14;
+               }
+
+#idViewerEntry P,
+#idViewerEntry OL,
+#idViewerEntry UL {
+                   margin-top: 0px;
+                   margin-bottom: 0px;
+                 }
+
+#idViewerEntry A {
+                   color: blue;
+                   cursor: default;
+                 }
+
+#idViewerEntry .xref {
+                       behavior: url(/globalsight/envoy/terminology/viewer/bhvrNoXref.htc)
+                     }
+
+.vconceptGrp
+              {
+                border: 1px solid white;
+              }
+
+.vlanguageGrp,
+.vsourceLanguageGrp,
+.vtargetLanguageGrp
+              {
+                margin-left: 10px;
+                margin-top: 0.1em;
+                border: 1px solid white;
+              }
+.vtermGrp
+              {
+                margin-left: 10px;
+                margin-top: 0.1em;
+                border: 1px solid white;
+              }
+.vtransacGrp
+              {
+                margin-left: 10px;
+                display: block;
+              }
+
+.vconceptlabel
+              {
+                font-weight: bold;
+                margin-right: 0.5ex;
+              }
+
+.vconcept
+              {
+                font-weight: bold;
+              }
+
+.vlanguagelabel
+              {
+                display: none;
+                margin-right: 0.5ex;
+              }
+
+.vlanguage
+              {
+                font-weight: bold;
+                font-style: italic;
+                color: black;
+              }
+
+.vtermlabel
+              {
+                display: none;
+                margin-right: 0.5ex;
+              }
+
+.vsourceLanguageGrp .vsearchterm
+              {
+                font-size: small;
+                font-weight: bold;
+                color: black;
+              }
+
+.vtargetLanguageGrp .vsearchterm
+              {
+                font-size: medium;
+                font-weight: bold;
+                color: black;
+              }
+
+.vlanguageGrp .vsearchterm
+              {
+                font-size: small;
+                font-weight: bold;
+                color: black;
+              }
+
+.vsourceLanguageGrp .vterm
+              {
+                font-size: small;
+                font-weight: bold;
+                color: black;
+              }
+
+.vtargetLanguageGrp .vterm
+              {
+                font-size: medium;
+                font-weight: bold;
+                color: black;
+              }
+
+.vlanguageGrp .vterm
+              {
+                font-size: small;
+                font-weight: bold;
+                color: black;
+              }
+
+.vfakeConceptGrp
+              {
+                display: block;
+              }
+.vfakeTermGrp {
+                border: 1px solid white;
+              }
+
+.vfieldGrp
+              {
+                margin-left: 10px;
+                border: 1px solid white;
+              }
+.vfieldlabel
+              {
+                font-weight: bold;
+                margin-right: 0.5ex;
+              }
+.vfieldvalue
+              {
+                font-weight: normal;
+              }
+.vtransaclabel
+              {
+                font-size:11;
+                font-weight: bold;
+                margin-right: 0.5ex;
+              }
+.vtransacvalue
+              {
+                font-size: 11;
+                font-style: italic;
+                color: gray;
+              }

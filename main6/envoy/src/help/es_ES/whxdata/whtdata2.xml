@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<tocdata>
+<book name="Procedimientos" >
+  <item name="Administrar actividades" url="Mis_actividades/Procedimientos/Manage_Activities.htm" />
+  <item name="Pasos iniciales" url="Mis_actividades/Procedimientos/Get_Started.htm" />
+</book>
+<item name="Descargar" url="Mis_actividades/Download.htm" />
+<item name="Detalles de la actividad disponible" url="Mis_actividades/Available_Activity_Details.htm" />
+<item name="Detalles de la actividad en curso" url="Mis_actividades/In_Progress_Activity_Details.htm" />
+<item name="Editor de fragmentos" url="Mis_actividades/Snippet_Editor.htm" />
+<item name="Editor de fragmentos y contenido" url="Mis_actividades/Snippet_and_Content_Editor.htm" />
+<item name="Editor de segmentos (imágenes)" url="Mis_actividades/Segment_Editor_(Image).htm" />
+<item name="Editor de segmentos (texto)" url="Mis_actividades/Segment_Editor_(Text).htm" />
+<book name="Editor principal" url="Mis_actividades/Main_Editor.htm" >
+  <item name="Unlock" url="Mis_actividades/Main_Editor.htm#Unlock" />
+</book>
+<item name="Enviar" url="Mis_actividades/Upload.htm" />
+<item name="Ficha de actividades Disponibles" url="Mis_actividades/Available_Activity_Tab.htm" />
+<item name="Ficha de actividades En curso" url="Mis_actividades/In_Progress_Activity_Tab.htm" />
+<item name="Ficha de actividades Rechazadas" url="Mis_actividades/Rejected_Activity_Tab.htm" />
+<item name="Ficha de actividades Terminadas" url="Mis_actividades/Finished_Activity_Tab.htm" />
+<item name="Mis actividades" url="Mis_actividades/My_Activities.htm" />
+<item name="Seleccionar fragmento" url="Mis_actividades/Select_Snippet.htm" />
+<item name="Trabajar con archivos descargados" url="Mis_actividades/Working_With_Downloaded_Files.htm" />
+
+</tocdata>

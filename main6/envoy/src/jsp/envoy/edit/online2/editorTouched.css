@@ -1,0 +1,29 @@
+.segment        {
+                  cursor: hand;
+                  color: black;
+                }
+.segmentFuzzy   {
+                  cursor: hand;
+                  color: black;
+                }
+.segmentExact   {
+                  cursor: hand;
+                  color: black;
+                }
+.segmentLocked  {
+                  cursor: normal !important;
+                  color: black;
+                }
+.segmentUpdated {
+                  cursor: hand;
+                  color: black;
+                  background-color: yellow;
+                }
+.segmentUnverified {
+                     cursor: hand;
+                     color: black;
+                   }
+.segmentRepetition {
+                     cursor: hand;
+                     color: black;
+                   }

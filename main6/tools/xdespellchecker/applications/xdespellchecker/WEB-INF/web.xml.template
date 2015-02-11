@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+   <display-name>XDE Spelling Server</display-name>
+   <description>XDE Java Spelling Server</description>
+   <servlet>
+      <servlet-name>xdeSpellNoApplet</servlet-name>
+      <servlet-class>xdeSpellNoApplet</servlet-class>
+
+    <init-param>
+      <param-name>proxyURL</param-name>
+      <param-value></param-value>
+      <description>
+        Specifies the url to a remote spell server.
+
+        servlet.xdeSpellNoApplet.initArgs=proxyURL=http://yourserver1/servlet/xdeSpellNoApplet;http://yourserver2/servlet/xdeSpellNoApplet
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>redirectionServer</param-name>
+      <param-value></param-value>
+      <description>
+        Specifies the name of the redirection server e.g. Apache
+        mod_URL calling a Tomcat Server.
+
+        servlet.xdeSpellNoApplet.initArgs=proxyURL=http://yourApacheRedirectionServer.somedomain.com
+      </description>
+    </init-param>
+    
+    <init-param>
+      <param-name>basePath</param-name>
+      <param-value>/globalsight/xdespellchecker/noapplet/</param-value>
+      <description>
+        Specifies the path to static files. Specify this if 
+	/xdespellchecker/noapplet/ is changed to /yourapplication/noapplet 
+	e.g. Change management environments.
+        servlet.xdeSpellNoApplet.initArgs=basePath=/xdespellchecker/noapplet/
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>userDir</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/xdespellchecker.war/customdicts</param-value>
+      <description>
+        Specifies the directory to store the custom dictionary file.
+        If blank will use Java's user.dir setting.
+        
+        # Domino Spell Checker Servlet 'domino.properties' startup parameters
+        servlet.xdeSpellNoApplet.initArgs=userDir=C:\\Lotus\\Domino\\Data\\domino\\servlet
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>globalDictionaryHref</param-name>
+      <param-value></param-value>
+      <description>
+        Specifies the URL to a master page which get requests will be
+        performed, for capturing all user dictionary adds for
+        inclusion into a master dictionary.
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>maxSecondsDictionaryIdle</param-name>
+      <param-value>144000</param-value>
+      <description>
+        Specifies maximum time to allow dictionary to go idle before
+        unloading from memory. Defaults to 3600 seconds/60 minutes.
+
+        If set to 0 dictionary pool checking will be disabled and
+        unused dictionaries will not be unloaded.
+
+        # Domino Spell Checker Servlet 'domino.properties' startup parameters
+        servlet.xdeSpellNoApplet.initArgs=maxSecondsDictionaryIdle=144000
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>dictionaryIdleCheckTime</param-name>
+      <param-value>60</param-value>
+      <description>
+        Specifies amount of seconds between checks to look for an idle
+        dictionary. Defaults to 60 seconds/1 minute.
+
+        If set to 0 dictionary pool checking will be disabled and
+        unused dictionaries will not be unloaded.
+
+        # Domino Spell Checker Servlet 'domino.properties' startup parameters
+        servlet.xdeSpellNoApplet.initArgs=dictionaryIdleCheckTime=60
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>dictionaryAutoSaveTime</param-name>
+      <param-value>15</param-value>
+      <description>
+        Specifies amount of seconds between checks to see if the
+        dictionary should be saved.Defaults to 60 seconds/1 minute.
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>maxSuggestionCache</param-name>
+      <param-value>3500</param-value>
+      <description>
+        Specifies # of mispelled word suggestions to hold in the cache.
+        # Domino Spell Checker Servlet 'domino.properties' startup parameters
+        servlet.xdeSpellNoApplet.initArgs=maxSuggestionCache=3500
+      </description>
+    </init-param>
+    
+    <init-param>
+      <param-name>ignoreUpperCaseWords</param-name>
+      <param-value>true</param-value>
+      <description>
+        By default spell checker will ignore words in all upper case,
+        set to false to spell check upper case words.
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>doPeriodicGC</param-name>
+      <param-value>false</param-value>
+      <description>
+        If true the spell checker dictionary pool will perform perodic
+        garbage collection every 'dictionaryIdleCheckTime'.
+
+        This setting is for Domino 5.0 servers which use an older JVM.
+        # Domino Spell Checker Servlet 'domino.properties' startup parameters
+        servlet.xdeSpellNoApplet.initArgs=doPeriodicGC=true
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>false</param-value>
+      <description>
+        Show Debugging output, automatically sets debugLevel to 5
+      </description>
+    </init-param>
+
+    <init-param>
+      <param-name>debugLevel</param-name>
+      <param-value></param-value>
+      <description>
+        Set Debugging level, higher the number, the more logging that
+        is made available, automatically sets debug to true.
+      </description>
+    </init-param>
+    
+    <init-param>
+      <param-name>noMisspellingMessage</param-name>
+      <param-value>No mis-spellings found</param-value>
+      <description>
+        Specifies the html only alert message to display for no
+        misspellings found.
+      </description>
+    </init-param>
+   </servlet>
+
+   <servlet>
+      <servlet-name>xdeSpellApplet</servlet-name>
+      <servlet-class>xdeSpellApplet</servlet-class>
+   </servlet>
+
+   <servlet>
+      <servlet-name>xdeGlobalDictionary</servlet-name>
+      <servlet-class>xdeGlobalDictionary</servlet-class>
+   </servlet>
+
+   <servlet-mapping>
+      <servlet-name>xdeGlobalDictionary</servlet-name>
+      <url-pattern>/xdeGlobalDictionary</url-pattern>
+   </servlet-mapping>
+
+   <servlet-mapping>
+      <servlet-name>xdeSpellApplet</servlet-name>
+      <url-pattern>/xdeSpellApplet</url-pattern>
+   </servlet-mapping>
+
+   <servlet-mapping>
+      <servlet-name>xdeSpellNoApplet</servlet-name>
+      <url-pattern>/xdeSpellNoApplet</url-pattern>
+   </servlet-mapping>
+
+      <welcome-file-list>
+      <welcome-file>index.htm</welcome-file>
+
+   </welcome-file-list>
+
+</web-app>

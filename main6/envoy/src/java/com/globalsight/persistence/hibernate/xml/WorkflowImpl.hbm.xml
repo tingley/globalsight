@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.workflowmanager.WorkflowImpl"
+        table="WORKFLOW">
+
+        <id name="id" column="IFLOW_INSTANCE_ID" type="long">
+            <generator class="assigned" />
+        </id>
+
+        <property name="state" length="40" column="STATE" type="string"
+            not-null="false" />
+        <property name="workflowType" length="20" column="TYPE"
+            type="string" not-null="true" />
+        <property name="dispatchedDate" column="DISPATCH_DATE"
+            type="timestamp" not-null="false" />
+        <property name="estimatedCompletionDate"
+            column="ESTIMATED_COMPLETION_DATE" type="timestamp"
+            not-null="false" />
+        <property name="completedDate" column="COMPLETED_DATE"
+            type="timestamp" not-null="false" />
+        <property name="exportDate" column="EXPORT_DATE"
+            type="timestamp" not-null="false" />    
+        <property name="fraction" length="25" column="FRACTION"
+            type="string" not-null="true" />
+        <property name="durationAsLong" length="25" column="DURATION"
+            type="long" not-null="false" />
+        <property name="timestamp" column="TIMESTAMP" type="timestamp"
+            not-null="true" />
+        <property name="plannedCompletionDate"
+            column="PLANNED_COMPLETION_DATE" type="timestamp"
+            not-null="false" />
+        <property name="subLevMatchWordCountAsInteger" length="10"
+            column="SUB_LEV_MATCH_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="subLevRepetitionWordCountAsInteger" length="10"
+            column="SUB_LEV_REPETITION_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="inContextMatchWordCountAsInteger" length="10"
+            column="IN_CONTEXT_MATCH_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="contextMatchWordCountAsInteger" length="10"
+            column="EXACT_CONTEXT_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="noUseInContextMatchWordCountAsInteger" length="10"
+            column="NO_USE_IC_MATCH_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="noUseExactMatchWordCountAsInteger" length="10"
+            column="NO_USE_EXACT_MATCH_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="segmentTmWordCountAsInteger" length="10"
+            column="EXACT_SEGMENT_TM_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="lowFuzzyMatchWordCountAsInteger" length="10"
+            column="FUZZY_LOW_WORD_COUNT" type="int" not-null="false" />
+        <property name="medFuzzyMatchWordCountAsInteger" length="10"
+            column="FUZZY_MED_WORD_COUNT" type="int" not-null="false" />
+        <property name="medHiFuzzyMatchWordCountAsInteger" length="10"
+            column="FUZZY_MED_HI_WORD_COUNT" type="int"
+            not-null="false" />
+        <property name="hiFuzzyMatchWordCountAsInteger" length="10"
+            column="FUZZY_HI_WORD_COUNT" type="int" not-null="false" />
+        <property name="noMatchWordCountAsInteger" length="10"
+            column="NO_MATCH_WORD_COUNT" type="int" not-null="false" />
+        <property name="repetitionWordCountAsInteger" length="10"
+            column="REPETITION_WORD_COUNT" type="int" not-null="false" />
+        <property name="totalWordCountAsInteger" length="10"
+            column="TOTAL_WORD_COUNT" type="int" not-null="false" />
+        <property name="isEstimatedCompletionDateOverrided"
+            column="IS_ESTI_CMPLTN_DATE_OVERRIDED" type="yes_no"
+            not-null="false" />
+        <property name="estimatedTranslateCompletionDate"
+            column="ESTI_TRANSLATE_CMPLTN_DATE" type="timestamp"
+            not-null="false" />
+        <property name="isEstimatedTranslateCompletionDateOverrided"
+            column="IS_ESTI_TRANS_DATE_OVERRIDED" type="yes_no"
+            not-null="false" />
+        <property name="translationCompletedDate"
+            column="TRANSLATION_COMPLETED_DATE" type="timestamp"
+            not-null="false" />
+        <property name="companyId" column="COMPANY_ID" type="string"
+            not-null="true" />
+        <property name="priority" column="PRIORITY" type="int"
+            not-null="true" />
+
+        <many-to-one name="targetLocale" column="TARGET_LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale"
+            not-null="true" />
+        <many-to-one name="job" column="JOB_ID"
+            class="com.globalsight.everest.jobhandler.JobImpl"
+            not-null="true" lazy="false"/>
+
+        <set name="secondaryTargets" inverse="true" cascade="save-update">
+            <key column="WORKFLOW_ID" />
+            <one-to-many
+                class="com.globalsight.everest.secondarytargetfile.SecondaryTargetFile" />
+        </set>
+
+        <set name="targetPagesSet" inverse="true" cascade="save-update">
+            <key column="WORKFLOW_IFLOW_INSTANCE_ID" />
+            <one-to-many
+                class="com.globalsight.everest.page.TargetPage" />
+        </set>
+        <set name="taskSet" inverse="true" cascade="save-update">
+            <key column="WORKFLOW_ID" />
+            <one-to-many
+                class="com.globalsight.everest.taskmanager.TaskImpl" />
+        </set>
+        <set name="workflowCommentSet" inverse="true" cascade="save-update">
+            <key column="COMMENT_OBJECT_ID" />
+            <one-to-many
+                class="com.globalsight.everest.comment.CommentImpl" />
+        </set>
+        <set name="workflowOwnerSet" inverse="true" cascade="save-update">
+            <key column="WORKFLOW_ID" />
+            <one-to-many
+                class="com.globalsight.everest.workflowmanager.WorkflowOwner" />
+        </set>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.page.pageexport.ExportBatchEvent"
+           table="EXPORT_BATCH_EVENT">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="startTime" length="22" column="START_TIME"
+            type="long" not-null="true" />
+
+        <property name="endTime" length="22" column="END_TIME" type="long" />
+
+        <property name="exportType" length="20" column="EXPORT_TYPE"
+            type="string" not-null="true" />
+
+        <property name="responsibleUserId" length="20"
+            column="RESPONSIBLE_USER_ID" type="string" not-null="true" />
+
+        <property name="taskId" length="22" column="TASK_ID" type="long" />
+
+        <many-to-one name="job" column="JOB_ID" not-null="true"
+            class="com.globalsight.everest.jobhandler.JobImpl" />
+            
+        <bag name="workflowIds" table="EXPORTBATCH_WORKFLOW">
+            <key column="EXPORT_BATCH_ID" />
+            <element column="WORKFLOW_ID" type="long" />
+        </bag>
+        
+        <bag name="exportingPages" inverse="true" cascade="all">
+			<key column="EXPORT_BATCH_ID" />
+			<one-to-many
+				class="com.globalsight.everest.page.pageexport.ExportingPage" />
+		</bag>
+    </class>
+
+</hibernate-mapping>

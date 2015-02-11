@@ -1,0 +1,1 @@
+alter table FILE_PROFILE add NEW_ID BIGINT;

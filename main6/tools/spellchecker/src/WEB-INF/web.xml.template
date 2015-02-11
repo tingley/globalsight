@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+   <display-name>GlobalSight Spelling Server</display-name>
+   <description>GlobalSight Spelling Server</description>
+
+   <servlet>
+      <servlet-name>SpellCheck</servlet-name>
+      <servlet-class>SpellCheck</servlet-class>
+
+      <init-param>
+      <param-name>basePath</param-name>
+      <param-value>/globalsight/spellchecker/jsp/</param-value>
+      <description>
+        Specifies the path to include files (HTML and Javascript).
+      </description>
+      </init-param>
+
+      <init-param>
+      <param-name>dictionaryDirectory</param-name>
+      <param-value>%%gs_ear_root_forwardslash%%/spellchecker.war/dicts</param-value>
+      <description>
+        Specifies the directory of dictionaries.
+      </description>
+      </init-param>
+   </servlet>
+    
+   <servlet-mapping>
+      <servlet-name>SpellCheck</servlet-name>
+      <url-pattern>/SpellCheck</url-pattern>
+   </servlet-mapping>
+
+   <welcome-file-list>
+      <welcome-file>index.html</welcome-file>
+   </welcome-file-list>
+
+</web-app>

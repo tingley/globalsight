@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.config.UserParameterImpl"
+        table="USER_PARAMETER">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <properties name="user" unique="true">
+            <property name="userId" length="80" column="USER_ID"
+                type="string" not-null="true" />
+            <property name="name" length="127" column="NAME"
+                type="string" not-null="true" />
+        </properties>
+
+        <property name="value" length="2000" column="VALUE"
+            type="string" not-null="false" unique="false" />
+    </class>
+</hibernate-mapping>

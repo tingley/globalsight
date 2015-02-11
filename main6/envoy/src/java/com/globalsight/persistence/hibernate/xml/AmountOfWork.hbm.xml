@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.costing.AmountOfWork"
+        table="AMOUNT_OF_WORK">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="actualAmount" length="126"
+            column="ACTUAL_AMOUNT" type="double" not-null="false"
+            unique="false" />
+        <property name="estimatedAmount" length="126"
+            column="ESTIMATED_AMOUNT" type="double" not-null="true"
+            unique="false" />
+        <property name="stringUnitOfWork" length="1" column="UOW" type="string"
+            not-null="true" unique="false" />
+        <many-to-one name="task" column="TASK_ID"
+            class="com.globalsight.everest.taskmanager.TaskImpl"
+            not-null="false" />
+    </class>
+</hibernate-mapping>

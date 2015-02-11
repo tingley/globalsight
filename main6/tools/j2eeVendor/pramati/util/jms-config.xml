@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE jms-service PUBLIC '-//Pramati Technologies //DTD Pramati JMS Service 3.5//EN' 'http://www.pramati.com/dtd/pramati-jms-service.dtd'>
+
+<jms-service>
+  <!--
+		Performance tuning tags: By default the all the parameters are set to give higher reliability
+			consider reviewing the following tags to get better performance
+
+            <auto-ack-server>             : false for higher performance
+            <max-unacknowledged-messages> : number of messages maintained in the server per connections. Higher
+                                            number for higher concurrency
+		    <transport-type>              : rmi-transport is default
+			                                pramati-transport for higher performance
+            <accept-backlog>              : higher value will improve scalability, can support higher number
+                                            concurrent connections
+            <max-concurrent-threads>      : -1 will support max concurrency, 200 (default) will support pooling
+            <enable-compression>          : if network is choked
+            <max-file-size-mb>            : if there is accumulation of messages on serverside.
+  -->
+  <!--
+        strict-compliance
+            if enabled="true" then all the sub child nodes are treated as true.
+            if enabled="false" the strict-compliance attribute decides the compliance of that extension.
+  -->
+  <strict-compliance enabled="false">
+    <!--
+            enable-multiple-receivers : will allow queues to have multiple receivers,
+            and the messages will be delivered to each receiver in a round-robin way
+    -->
+    <enable-multiple-receivers strict-compliance="false" />
+    <!--
+            This will allow or disallow overriding of message attributes for each destination
+            strict-compliance true : will not allow administrator to override the message attributes
+            strict-compliance false : will be overridden by the value of the override tags under each destination.
+                if it is not specified for a particular destination, the default-over-ride value will be take.
+                the default is not to override.
+        -->
+    <override-message-priority strict-compliance="false" />
+    <override-message-timetolive-millis strict-compliance="false" />
+    <override-message-delivery-mode strict-compliance="false" />
+    <!--
+            This will allow or disallow defining default message attributes for the connection factories
+            When a new message is created, and the user does not set these message attributes,
+            what should be the default values.
+            strict-compliance true : default values will be as specified in the jms specification
+            strict-compliance false : administrator will be allowed to specify the default values for these attributes
+         -->
+    <default-message-priority strict-compliance="false" />
+    <default-message-timetolive strict-compliance="false" />
+    <default-message-delivery-mode strict-compliance="false" />
+    <!--
+            timed-messages
+                If a longProperty "com.pramati.jms.message.deliverytime" that can be set on the message,
+                do not make the message visible on the destination until that time specified in the property
+            strict-compliance true  : ignore this property even if it is set on the message
+            strict-compliance false : honor this property
+        -->
+    <timed-messages strict-compliance="false" />
+    <!--
+            message-size-overflow-policy
+                The spec does not say any thing about the size of a particular message. Implying that all messages
+                must be treated alike irrespective of their size. In Pramati JMS Administrator can specify the max
+                message size that can be sent to the server.
+            strict-compliance true  : accept messages of all sizes
+            strict-compliance true  : if message exceed the configured size, take corrective action
+                according to the policy
+        -->
+    <message-size-overflow-policy strict-compliance="false" />
+    <!--
+            persistence-disabled-policy
+                Pamati JMS allows administrators to disable persistence. When persistence is disabled, and the
+                delivery mode on the message is persistent, it is treated as a non-persistent message.
+            strict-compliance true  : throw an exception to the sender
+            strict-compliance false : action depends on the configured policy
+        -->
+    <persistence-disabled-policy strict-compliance="false" />
+    <!--
+            redelivery-limit
+                Pramati JMS allows administrator to configure the number of retries and the delay between two retries
+                for redelivering a message when the client does not accept a message
+            strict-compliance true  : unlimited number of retries
+            strict-compliance false : number of attempts depended on configuration.
+        -->
+    <redelivery-limit strict-compliance="false" />
+    <!--
+            max-messages-in-cache
+
+        -->
+    <max-messages-in-cache strict-compliance="false" />
+  </strict-compliance>
+  <!--
+        pramati-transport
+            Allows multiple communication protocols between client and sever.
+            default-transport-protocol="tcp" : uses TCP Sockets for communication
+            default-transport-protocol="rmi" : uses RMI for communication
+    -->
+  <pramati-transport default-transport-protocol="tcp">
+    <!--
+            max-concurrent-threads :
+                no. of threads that are created in the transport layer to dispatch the messages arriving in the
+                transport layer, to the parent layer. A value of -1 means that a new thread would be created for
+                each message dispatch to the upper layer.
+                This in itself could be costly as thread are important resources to the system and should be re-used.
+                This should be configured according to the requirements. An ideal thread count would be double the
+                value of (Number of receiver JMS connection + Number of sender JMS Connection).
+
+                NOTE: If high number of clients(>60) are expected, the value needs to be increased appropriately.
+
+            method-timeout-seconds :
+                This gives a time-out value to the method call on the transport layer. The method call is deemed as
+                not executed on the server side if there is no response from the server until the timeout.
+                The value must not be changed (Especially for the receiver VM's ) as it might lead to some problems
+                as in the method getting executed multiple times on the server.
+        -->
+    <transport-layer-properties max-concurrent-threads="200" method-timeout-seconds="-1" />
+    <!-- there could be multiple wire protocol implementations available -->
+    <wire-protocol name="tcp" enabled="true">
+      <!--
+            socket-pool-size : Defines the size of the socket pool that is used to send the data across the network.
+                If the CPU  consumption is not a bottleneck then increasing the size might result in better results.
+            -->
+      <tcp-properties export-port="0" ssl-export-port="0" socket-pool-size="2" />
+      <!--
+            socket-timeout-seconds :
+                Enable/disable SO_TIMEOUT with the specified timeout, in milliseconds.  With this
+                option set to a non-zero timeout, a read() call on the InputStream associated with this Socket will
+                block for only this amount of time. A timeout of zero is interpreted as an infinite timeout.
+
+            send-buffer-bytes/receive-buffer-bytes :
+                Sets the SO_SNDBUF/SO_RCVBUF option to the specified value for this Socket. The SO_SNDBUF/SO_RCVBUF
+                option is used by the platform's networking code as a hint for the size to set the underlying network
+                I/O buffers. Increasing buffer size can increase the performance of network I/O for high-volume
+                connection, while decreasing it can help reduce the backlog of incoming data.
+
+            socket-connect-retrials :
+                Number of retries that should be made to establish a connection to the destination before assuming
+                the unavailability of the destination.
+
+            data-send-retrials :
+                Number of retries that should be made to send data to the destination before assuming the
+                unavailability of the destination.
+            -->
+      <client-socket-properties socket-timeout-seconds="0" send-buffer-bytes="0" receive-buffer-bytes="0" socket-connect-retrials="0" data-send-retrials="2" />
+      <!--
+            accept-backlog : It specifies the TCP layer to buffer these many connection request between subsequent requests
+            from the user process to accept the connection.
+            -->
+      <server-socket-properties accept-backlog="200" />
+    </wire-protocol>
+    <!--
+            default packet transformations to be available shortly to enable compression and aggregation
+            These will be useful transformation based on network bandwidth. The sample tags could look like :
+
+                   <compression enabled="false" algo="huffman" />
+                   <packet-aggregation enabled="false" />
+
+        -->
+    <!--
+            custom interceptors
+                To extend the behavior and transform the communication packets.
+        -->
+    <custom-interceptors>
+      <interceptor name="priority.aggregator" type="aggregation" class-name="com.example.MyAggregator">
+	<interceptor-property name="destination" value="JMSQueue" />
+      </interceptor>
+    </custom-interceptors>
+  </pramati-transport>
+  <admin-params>
+    <!--
+            expiration-scan-millis :
+                Scan interval to clean up all expired messages.
+        -->
+    <expiration-scan-millis>60000</expiration-scan-millis>
+    <!--
+            expiration-policy:
+                messages can have a timetolive set on them. If there are no clients for the messages and the message
+                exceeds the time to live. The action taken will depend on this policy
+            add-to-dead-message-queue : redirects the message to the dead message queue
+            discard-message : (default) the message is dropped and not delivered to the client
+        -->
+    <expiration-handling-policy>discard-message</expiration-handling-policy>
+    <!--
+            connection-timeout-millis
+                On the server side the clientProxies are discarded if there is no ping/heartbeat from the client until
+                this time. This is needed to guard against improper close from JMS client
+        -->
+    <connection-timeout-millis>150000</connection-timeout-millis>
+    <!--
+    	    delivery-topic-message-to-all-j2ee-nodes
+    	       If true, it delivers a message for a topic to all j2ee nodes on which the mdb for the topic is deployed.
+    	       This tag is optional and the value is false.
+    	-->
+    <!-- deliver-topic-message-to-all-j2ee-nodes>true</deliver-topic-message-to-all-j2ee-nodes -->
+    <!--
+            default-destination-properties
+                When a new destination is created, it will have theses properties unless overridden.
+                All the attributes are optional, and only those attribute that needs to be overridden can be specified for
+                each destination
+        -->
+    <default-destination-properties>
+      <!--
+                max-messages-in-cache
+                    The runtime/in-memory size of the queues in terms of the number of messages. (in future versions
+                    this can also be based on the memory size)
+                    Value of -1 implies there is no limit set. The server could go out of memory in this case.
+            -->
+      <max-messages-in-cache>5000</max-messages-in-cache>
+      <!--
+                cache-overflow-policy:
+                    This determines, what action to take when there are more messages sent than configured in max-messages-in-cache
+                    handle-with-persistence(default) :  messages are not kept in memory but persisted in persistence store
+                    throw-exception, : send call throws exception
+                    block-sender    : send call will block
+            -->
+      <cache-overflow-policy>throw-exception</cache-overflow-policy>
+      <!--
+                max-message-size-kb
+                    max size of each message that will be kept in memory.
+            -->
+      <max-message-size-kb>50</max-message-size-kb>
+      <!--
+                message-size-overflow-policy : action that will be taken based when the message size exceeds max-message-size-kb
+                    message-size-overflow-policy:
+                    handle-with-persistence(default),
+                    throw-exception
+            -->
+      <message-size-overflow-policy>handle-with-persistence</message-size-overflow-policy>
+      <!--
+                enable-multiple-receivers : For Queues,
+                    false : All receivers will receive messages according to round robin fashion
+                    true : exception while registering the second receiver
+            -->
+      <enable-multiple-receivers>true</enable-multiple-receivers>
+      <redelivery-delay-millis>0</redelivery-delay-millis>
+      <redelivery-limit>20</redelivery-limit>
+      <!-- redelivery-count-overflow-policy: add-to-dead-message-queue(default), discard-message -->
+      <redelivery-limit-overflow-policy>add-to-dead-message-queue</redelivery-limit-overflow-policy>
+      <!-- over-ride-message-priority -1 implied do not over ride-->
+      <override-message-priority>-1</override-message-priority>
+      <!-- over-ride-message-timetolive -1 implied do not override-->
+      <override-message-timetolive-millis>-1</override-message-timetolive-millis>
+      <!-- over-ride-message-delivery-mode -1 implied do not override. 1 - Non persistent 2 - Persistent -->
+      <override-message-delivery-mode>-1</override-message-delivery-mode>
+    </default-destination-properties>
+    <!--
+            default-connection-factory-properties :
+                These values will be taken by new connection factories unless overridden.
+                Each property can be separately overridden
+        -->
+    <default-connection-factory-properties>
+      <!--
+                transport-type:
+                    Each connection factory can create connection with certain type of transfer for client-server communication
+                pramati-transport(default) : Uses TCP Sockets. The transport configuration will is specified under
+                    pramati-transport tag
+                rmi-transport : Use RMI for client-server communication
+            -->
+      <transport-type>rmi-transport</transport-type>
+      <!--
+                naming-provider-url :
+                    This property not required for stand alone JMS. In case of clusters,
+                    it can be configured to specify the order of fail overs. It is a comma separated list of urls
+            -->
+      <!--naming-provider-url>rmi://localhost:9191</naming-provider-url-->
+      <!--
+                is-secure: determines whether or not to use secure sockets.
+                    false(default)
+            -->
+      <is-secure>false</is-secure>
+      <!--
+                enable-compression:
+                    compress the message at the client side before sending it to the server
+                    this is CPU intensive and network friendly.
+            -->
+      <enable-compression>false</enable-compression>
+      <!--
+                compression-trigger-size-kb:
+                    compress is effective only after a certain min size
+            -->
+      <compression-trigger-size-kb>10</compression-trigger-size-kb>
+      <!--
+                max-unacknowledged-messages
+                    Number of messages that can accumulate at the client side without acknowledgments.
+                    increasing this number increases the throughput, but will require higher memory at runtime.
+                    These many unack messages will be kept for each client. It is a memory Vs perf trade off.
+            -->
+      <max-unacknowledged-messages>300</max-unacknowledged-messages>
+      <!--
+                auto-ack-server
+                    In cases the acknowledgment mode is AUTO_ACKNOWLEDGEMENT, assume that the client has received
+                    the message if the checkForNewMessage does not throw any exception. (It is equivalent of NO_ACK
+                    in WebLogic).
+                    false : higher performance
+                    true  : higher reliability (client sends the ack)
+            -->
+      <auto-ack-server>true</auto-ack-server>
+      <!--
+                bulk-send-enabled
+                    Accumulate the messages at the client end until the bulk-send-rate number of messages.
+                    Then send all the messages in one shot.
+                    Enable this when network traffic is heavy.
+            -->
+      <bulk-send-enabled>false</bulk-send-enabled>
+      <bulk-send-rate>10</bulk-send-rate>
+      <default-message-priority>-1</default-message-priority>
+      <default-message-timetolive>-1</default-message-timetolive>
+      <default-message-delivery-mode>-1</default-message-delivery-mode>
+    </default-connection-factory-properties>
+  </admin-params>
+  <persistent-store>
+    <!--
+            persistence-enabled : If this is disabled, the server will not access any persistence store.
+                If messages are sent with PERSISTENT delivery mode, the handling is decided by the
+                persistence-disabled-policy:
+            persistence-disabled-policy :
+                throw-exception : send message throws an exception
+                override-message-delivery-mode(default) : messages are treated as non-persistent messages
+        -->
+    <persistence-enabled>true</persistence-enabled>
+    <persistence-disabled-policy>override-message-delivery-mode</persistence-disabled-policy>
+    <!--
+            persistence-type: There are two implementations of persistence store. More options will be available in future releases
+            file-store(default) : Faster and does not have external dependencies
+            db-store : more reliable and needs to be configured in the resource-service
+        -->
+    <persistence-type>file-store</persistence-type>
+    <file-store>
+      <!--
+                messages-dir :
+                    should specify is absolute path or
+                    use prefix $NODES_DIR/ to make the store relative to nodes dir or
+                    use prefix $INSTALL_DIR/ to make the store relative to install dir
+            -->
+      <messages-dir>$NODES_DIR/jmsmessages</messages-dir>
+      <!--
+                max-file-size-mb :
+                    New file is created after the max file size is reached.
+                    If one file is too big, it reduces performance
+            -->
+      <max-file-size-mb>10</max-file-size-mb>
+      <!--
+                purge-interval-sec :
+                    The interval for purging deleted messages from the file store
+            -->
+      <purge-interval-sec>600</purge-interval-sec>
+    </file-store>
+    <db-store>
+      <!--
+                data-source-name : as defined in the resource-config.xml
+            -->
+      <data-source-name>jmsdb</data-source-name>
+      <!--
+                jms-table-name-prefix : All tables created by jms will have this as prefix.
+            -->
+      <jms-table-name-prefix>pmt_</jms-table-name-prefix>
+    </db-store>
+  </persistent-store>
+  <administered-objects>
+    <!--
+                destinations
+                    For each of the destinations, any/all of the default-destination-properties can be mentioned.
+                    That value will override the default-property
+    -->
+    <destinations>
+      <dead-message-queue>
+	<name>pramati_dmq</name>
+      </dead-message-queue>
+      <queue>
+	<name>JMSQueue</name>
+	<!--
+                        All the properties under default-destination-properties can used here.
+                        For this destination, the properties specified here, take precedence over
+                        default-destination-properties
+    -->
+	<!--
+                        <max-messages-in-cache>-1</max-messages-in-cache>
+                        <cache-overflow-policy>handle-with-persistence</cache-overflow-policy>
+                        <max-message-size-kb>50</max-message-size-kb>
+                        <message-size-overflow-policy>handle-with-persistence</message-size-overflow-policy>
+                        <enable-multiple-receivers>true</enable-multiple-receivers>
+                        <redelivery-delay-millis>0</redelivery-delay-millis>
+                        <redelivery-limit>20</redelivery-limit>
+                        <redelivery-limit-overflow-policy>add-to-dead-message-queue</redelivery-limit-overflow-policy>
+                        <override-message-priority>-1</override-message-priority>
+                        <override-message-timetolive-millis>-1</override-message-timetolive-millis>
+                        <override-message-delivery-mode>-1</override-message-delivery-mode>
+    -->
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.CapExporting</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.cxe.jms.CapImporting</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.CostCalculations</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.WorkflowAdditions</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.ProjectUpdate</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.FileUpload</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.jms.FluxEventScheduling</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.TermbaseDeletion</name>
+      </queue>
+      <queue>
+	<name>com.globalsight.everest.jms.TrashCompaction</name>
+      </queue>
+      <queue>
+	<name>SellQueue</name>
+      </queue>
+      <queue>
+	<name>BuyQueue</name>
+      </queue>
+      <topic>
+	<name>JMSTopic</name>
+	<!--
+                        All the properties under default-destination-properties can used here.
+                        For this destination, the properties specified here, take precedence over
+                        default-destination-properties
+                    -->
+	<!--
+                        <max-message-size-kb>50</max-message-size-kb>
+                        <message-size-overflow-policy>handle-with-persistence</message-size-overflow-policy>
+                        <override-message-priority>-1</override-message-priority>
+                        <override-message-timetolive-millis>-1</override-message-timetolive-millis>
+                        <override-message-delivery-mode>-1</override-message-delivery-mode>
+                    -->
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForCapSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForCapTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForDatabaseTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForDynamicPreview</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForExtractor</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForFileSystemSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForFileSystemTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForMerger</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForMsOfficeSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForMsOfficeTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForPdfSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForPdfTargetAdapter</name>
+      </topic>
+      
+      <topic>
+	<name>com.globalsight.cxe.jms.ForAdobeSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForAdobeTargetAdapter</name>
+      </topic>
+      
+      <topic>
+	<name>com.globalsight.cxe.jms.ForOpenOfficeSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForOpenOfficeTargetAdapter</name>
+      </topic>
+      
+      <topic>
+	<name>com.globalsight.cxe.jms.ForQuarkFrameSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForQuarkFrameTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForTeamSiteSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForTeamSiteTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForVignetteSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForVignetteTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForMediasurfaceSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForMediasurfaceTargetAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForCatalystSourceAdapter</name>
+      </topic>
+      <topic>
+	<name>com.globalsight.cxe.jms.ForCatalystTargetAdapter</name>
+      </topic>
+
+      <topic>
+	<name>StockMarket</name>
+      </topic>
+    </destinations>
+    <connection-factories>
+      <queue-connection-factory>
+	<name>JMSQueueConnectionFactory</name>
+      </queue-connection-factory>
+      <queue-connection-factory>
+	<name>weblogic.jms.GlobalSightQueueConnectionFactory</name>
+      </queue-connection-factory>
+      <topic-connection-factory>
+	<name>JMSTopicConnectionFactory</name>
+      </topic-connection-factory>
+      <topic-connection-factory>
+	<name>weblogic.jms.GlobalSightTopicConnectionFactory</name>
+      </topic-connection-factory>
+      <xa-queue-connection-factory>
+	<name>JMSXAQueueConnectionFactory</name>
+      </xa-queue-connection-factory>
+      <xa-topic-connection-factory>
+	<name>JMSXATopicConnectionFactory</name>
+      </xa-topic-connection-factory>
+      <!-- commented example of all the properties connection factory tag can have-->
+      <!--xa-topic-connection-factory>
+                    <name>XATopicConnectionFactory</name>
+                <transport-type>rmi-transport</transport-type>
+                <naming-provider-url>rmi://192.168.1.29:2001,rmi://192.168.1.29:2002</naming-provider-url>
+                <is-secure>false</is-secure>
+                <enable-compression>false</enable-compression>
+                <compression-trigger-size-kb>10</compression-trigger-size-kb>
+                <max-unacknowledged-messages>50</max-unacknowledged-messages>
+                <auto-ack-server>true</auto-ack-server>
+                <bulk-send-enabled>false</bulk-send-enabled>
+                <bulk-send-rate>10</bulk-send-rate>
+                <default-message-priority>-1</default-message-priority>
+                <default-message-timetolive>-1</default-message-timetolive>
+                <default-message-delivery-mode>-1</default-message-delivery-mode>
+                </xa-topic-connection-factory-->
+    </connection-factories>
+  </administered-objects>
+</jms-service>

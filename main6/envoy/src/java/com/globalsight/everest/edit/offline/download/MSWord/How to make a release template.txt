@@ -1,0 +1,159 @@
+
+DEVELOPMENT TEMPLATE:
+
+The template called "gs4win.dot" which is located at the root of
+com\globalsight\everest\edit\offline\download\MSWord is the development template.
+This template should never be released "as-is" since it contains testing code and
+all the macros are unprotected. Instead, this template should be copied, renamed,
+and otherwise prepped for release as described below.
+
+HOW TO SHRINK TEMPLATE:
+
+I have noticed (since moving to Word 2003) that the template gets bloated 
+over time while coding.
+I discovered that I can shrink the template by doing the following.
+1) Make a copy of the template
+2) Open it in Word 2000
+3) Open VBA (ALT+F11)
+4) Dirty the template VBA code (add/delete a space anywhere)
+5) Save the template
+The size will often be greatly reduced.
+You should do this as part of each major release. This is included in the steps below.
+
+HOW TO MAKE A RELEASE:
+
+Note: See "how to Shrink" first
+1) Copy gs4win.dot to a temporary location.
+2) Rename gs4win.dot to AOR-Template.dot (case sensitive)
+3) open the new template (AOR-Template.dot) in word as a document 
+   (enable macros if asked)
+4) Press ALT+F11 to open the VBA editor
+5) Right click on the project called AOR-Template (left window)
+6) Select TemplateProjectProperties->Protection
+7) Click "lock project for viewing"
+8) Enter and confirm the password "global2000"
+9) Select and expand "Modules" in the left panel
+10) run "untiTestAll" from the "test" module
+11) Delete the "test" and "dev" modules
+12) Sign the code "Tools->Digital Sig" (see details below)
+13) Check Tools References and remove any unsused/unnecessary references
+
+	Current references used:
+	[x] Visual Basic For Applications
+	[x] Microsoft Word 11.0 Object library 
+	    (version varies when opened on other office versions)
+	[x] Microsoft Office 11.0 Object library 
+	    (version varies when opened other on office versions)
+	[x] Microsoft Forms 2.0 Object library
+
+	NOTE: If you get a runtime startup error immediately when
+	      using the template, check Tools->References while
+	      running on the problematic machine. 
+
+	      If a required reference is missing, the word "MISSING"
+	      will appear in front of it. 
+
+	      The missing library will have to be installed >>if<< it
+	      is required by our code. 
+
+	      If it is not required, remove the reference and rebuild
+	      the release template.
+
+14) Save the template
+15) Close the VBA editor
+16) Close the document (and save if asked)
+17) Test the template with a previously downloaded job by copying 
+    this template over the job's template.
+18) Test all functions
+19) Check out the current release template (AOR-Template.dot) from 
+    com\globalsight\everest\edit\offline\download\MSWord\TemplateRelease
+20) Copy the new template over the old
+21) DEFLATE the template :-)
+
+	During coding using Word 2003, the template can get very large
+	for unknown reasons.
+
+	The size can be greatly reduced by doing the following:
+	- open the template in Word 2000
+	- make a dummy change to the VBA code
+	- then save
+	The above often has reduced the template from 1.2K to 500k
+	This will help download.
+
+22) check it in.
+
+Note: the build process will copy the releaseTemplate to the correct
+production directory during build.
+
+
+HOW TO SIGN THE CODE:
+
+Please note, a major part of the security is how you manage and protect your key.
+
+It is not advisable to install the key (as an “exportable”
+private key) on too many machines or to let the password for the
+installer be commonly known (they suggest a safety deposit box for
+both).
+
+If the key is needed on other machines, you might consider importing
+it as a "non-exportable" key. That way it cannot be exported and/or
+moved to other machines. Right now it is checked-in as described below
+and there is *this* readme which includes the password.
+
+I’m leaving it like this unless someone wants to go farther and move
+the certificate offsite.
+
+It is also worth noting that the signature was purchased and
+originally downloaded by Clove on his machine.
+
+It was then moved using the process described below to BillB's
+machine. So as of this writing it is only usable to sign code from
+these two machines and it is exportable on those two machines.
+[Mon Sep 26 22:41:10 2005 CvdL: I installed it as exportable, too.]
+
+1) Read this URL to get an overview.
+http://www.verisign.com/developer/rsc/gd/mo2000/index.html
+
+2) Read this URL if you need to move our digital certificate to another machine.
+
+   https://digitalid.verisign.com/client/help/transporting.htm#5
+
+   As of this writing it is only installed on Clove's, BillB’s and
+   CvdL's machines.
+
+	Our digital signature is checked-in at :
+	\envoy\src\java\com\globalsight\everest\edit\offline\download\MSWord
+
+	This file is called:  gs_digital_sig_ms_auth.pfx
+
+	The password to import this private key (see URL in step two)
+	is = "password".
+
+	Once this private registry key is installed on your machine,
+	it (meaning the signature) can be used to sign any MS-Office
+	code from your machine.
+
+	Note: I do not know if we need the other file that Clove set
+	along inside "gsofflinecert.zip" but I checked it in anyway.
+	All I used was the pfx file to import the key to my machine.
+	The signature was originally purchased and downloaded on
+	Cloves machine.
+
+3) Don’t forget to make this registry entry on your machine:
+
+   HKEY_Current_User\Software\Microsoft\VBA\Security\TimeStampURL
+
+   to: http://timestamp.verisign.com/scripts/timstamp.dll
+
+4) Once you have installed the certificate, open the offline template
+   in Word. Then press ALT+F11 to open the VBA editor.
+
+   Select the project you want to sign in the left hand window. Select
+   Tools->digital certificate from the main VBA menu.
+
+   Press "Choose" if the certificate does not appear. If you have
+   imported the certificate correctly as described in step #2, it
+   should appear in the chooser window. Choose the cert and then press OK.
+
+   The project that you have selected in the left-hand window will now
+   be signed. Save the project.

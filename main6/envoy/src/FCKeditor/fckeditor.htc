@@ -1,0 +1,110 @@
+<SCRIPT language="javascript">
+/*
+ * FCKeditor - The text editor for internet
+ * Copyright (C) 2003 Frederico Caldeira Knabben
+ *
+ * Licensed under the terms of the GNU Lesser General Public License
+ * (http://www.opensource.org/licenses/lgpl-license.php)
+ *
+ * For further information go to http://www.fredck.com/FCKeditor/
+ * or contact fckeditor@fredck.com.
+ *
+ * fckeditor.htc: Handles FCKeditor as a IE behavior.
+ *
+ * Authors:
+ *   Daniel Shryock (dan@justsnooping.com)
+ */
+
+var FCKeditorBasePath = '/globalsight/FCKeditor/' ;
+
+var isOpera = (navigator.userAgent.indexOf("Opera") > 0) ;
+
+// Check if the browser is compatible with the Editor:
+//      - Internet Explorer 5 or above
+var isCompatible = (!isOpera && navigator.appName == 'Microsoft Internet Explorer') ;
+if (isCompatible)
+{
+    var browserVersion = navigator.appVersion.match(/MSIE (.)/)[1] ;
+    isCompatible = (browserVersion >= 5) ;
+}
+
+// FCKeditor class
+function FCKeditor(instanceName, width, height, toolbarSet, value)
+{
+    this.InstanceName   = instanceName ;
+    this.Width          = width         || '100%' ;
+    this.Height         = height        || '200' ;
+    this.ToolbarSet     = toolbarSet ;
+    this.Value          = value         || '' ;
+
+    this.Config         = new Object() ;
+    this.CanUpload      = null ;    // true / false
+    this.CanBrowse      = null ;    // true / false
+}
+
+FCKeditor.prototype.Create = function(bNoForm)
+{
+    var sHTML = "";
+    if (isCompatible)
+    {
+        var sLink = FCKeditorBasePath + 'fckeditor.html?FieldName=' + this.InstanceName ;
+        if (this.ToolbarSet) sLink += '&Toolbar=' + this.ToolbarSet ;
+        if (this.CanUpload != null) sLink += '&Upload=' + (this.CanUpload ? "true" : "false") ;
+        if (this.CanBrowse != null) sLink += '&Browse=' + (this.CanBrowse ? "true" : "false") ;
+
+        for ( o in this.Config )
+            sLink += '&' + o + '=' + this.Config[o] ;
+
+        sHTML += ('<IFRAME src="' + sLink + '" width="' + this.Width + '" height="' + this.Height + '" frameborder="no" scrolling="no"></IFRAME>') ;
+        if(!bNoForm)    sHTML += ('<INPUT type="hidden" name="' + this.InstanceName + '" value="' +  HTMLEncode( this.Value ) + '">') ;
+
+        element.innerHTML = sHTML;
+    }
+}
+
+function HTMLEncode(text)
+{
+    text = text.replace(/&/g, "&amp;") ;
+    text = text.replace(/"/g, "&quot;") ; //"
+    text = text.replace(/</g, "&lt;") ;
+    text = text.replace(/>/g, "&gt;") ;
+    text = text.replace(/'/g, "&#146;") ; //'
+
+    return text ;
+}
+
+
+var bNoForm                     = false;
+var sInstanceName               = "";
+var sValue                      = "";
+
+if (element.inputform)
+{
+    //Grab form object
+    var oInputForm              = eval("window.document.all."+element.inputform);
+    //Hide form object
+    oInputForm.style.display    = "none";
+
+    bNoForm                     = true;
+    sInstanceName               = oInputForm.name;
+    sValue                      = oInputForm.value;
+}
+else
+{
+    sInstanceName               = element.name;
+    sValue                      = element.innerHTML;
+}
+
+
+var oFCKeditor  = new FCKeditor(sInstanceName);
+
+if (element.canupload)  oFCKeditor.CanUpload    = element.canupload ;
+if (element.canbrowse)  oFCKeditor.CanBrowse    = element.canbrowse ;
+if (element.width)      oFCKeditor.Width        = element.width ;
+if (element.height)     oFCKeditor.Height       = element.height ;
+if (element.toolbarset) oFCKeditor.ToolbarSet   = element.toolbarset ;
+if (element.innerHTML)  oFCKeditor.Value        = sValue ;
+oFCKeditor.Create(bNoForm);
+
+
+</SCRIPT>

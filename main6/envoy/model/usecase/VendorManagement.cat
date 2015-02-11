@@ -1,0 +1,855 @@
+
+(object Petal
+    version    	46
+    _written   	"Rose 7.7.0204.3001"
+    charSet    	0)
+
+(object Class_Category "Vendor Management"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3FBBD8AB006A"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "VendorManager"
+	    quid       	"3FBE6790033E"
+	    stereotype 	"Actor")
+	(object Class "VendorAdmin"
+	    quid       	"3FBE688A0171"
+	    stereotype 	"Actor")
+	(object Class "VendorViewer"
+	    quid       	"3FCB9E9C016D"
+	    stereotype 	"Actor")
+	(object UseCase "Create a user"
+	    quid       	"3FBBD91901AC")
+	(object UseCase "Add a Vendor"
+	    quid       	"3FBBD91D014E"
+	    visible_modules 	(list dependency_list
+		(object Dependency_Relationship
+		    quid       	"3FBE676200B1"
+		    label      	"may use"
+		    supplier   	"Use Case View::Vendor Management::Approve a Vendor"
+		    quidu      	"3FBBDA6B00C2")))
+	(object UseCase "VendorReports"
+	    quid       	"3FBBD91F016F")
+	(object UseCase "Modify a user"
+	    quid       	"3FBBDA12029A")
+	(object UseCase "Remove a user"
+	    quid       	"3FBBDA1C02DC")
+	(object UseCase "Edit a vendor"
+	    quid       	"3FBBDA660223"
+	    visible_modules 	(list dependency_list
+		(object Dependency_Relationship
+		    quid       	"3FBE67690094"
+		    label      	"may use"
+		    supplier   	"Use Case View::Vendor Management::Approve a Vendor"
+		    quidu      	"3FBBDA6B00C2")
+		(object Dependency_Relationship
+		    quid       	"3FBE676F02D9"
+		    label      	"may use"
+		    supplier   	"Use Case View::Vendor Management::Disapprove a vendor"
+		    quidu      	"3FBBDA710099")))
+	(object UseCase "Approve a Vendor"
+	    quid       	"3FBBDA6B00C2")
+	(object UseCase "Disapprove a vendor"
+	    quid       	"3FBBDA710099")
+	(object UseCase "Remove a vendor"
+	    quid       	"3FBE683E010E"
+	    visible_modules 	(list dependency_list
+		(object Dependency_Relationship
+		    quid       	"3FCB9F1C03C5"
+		    supplier   	"Use Case View::Vendor Management::Disapprove a vendor"
+		    quidu      	"3FBBDA710099")))
+	(object Association "$UNNAMED$0"
+	    quid       	"3FBE67D40023"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"3FBE67D501C9"
+		    supplier   	"Use Case View::Vendor Management::VendorReports"
+		    quidu      	"3FBBD91F016F"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"3FBE67D501CB"
+		    supplier   	"Use Case View::Vendor Management::VendorManager"
+		    quidu      	"3FBE6790033E")))
+	(object Association "$UNNAMED$3"
+	    quid       	"3FBE68A4001D"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"3FBE68A90223"
+		    supplier   	"Use Case View::Vendor Management::Edit a vendor"
+		    quidu      	"3FBBDA660223"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"3FBE68A90225"
+		    supplier   	"Use Case View::Vendor Management::VendorAdmin"
+		    quidu      	"3FBE688A0171")))
+	(object Association "$UNNAMED$6"
+	    quid       	"3FBE68F602F6"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"3FBE68F70153"
+		    supplier   	"Use Case View::Vendor Management::Create a user"
+		    quidu      	"3FBBD91901AC"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"3FBE68F70155"
+		    supplier   	"Use Case View::Vendor Management::VendorAdmin"
+		    quidu      	"3FBE688A0171")))
+	(object Association "$UNNAMED$9"
+	    quid       	"3FBE68FA02C0"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$10"
+		    quid       	"3FBE68FB034E"
+		    supplier   	"Use Case View::Vendor Management::Modify a user"
+		    quidu      	"3FBBDA12029A"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$11"
+		    quid       	"3FBE68FB0350"
+		    supplier   	"Use Case View::Vendor Management::VendorAdmin"
+		    quidu      	"3FBE688A0171")))
+	(object Association "$UNNAMED$12"
+	    quid       	"3FBE690301C9"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$13"
+		    quid       	"3FBE69040103"
+		    supplier   	"Use Case View::Vendor Management::Remove a user"
+		    quidu      	"3FBBDA1C02DC"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$14"
+		    quid       	"3FBE69040105"
+		    supplier   	"Use Case View::Vendor Management::VendorAdmin"
+		    quidu      	"3FBE688A0171")))
+	(object Association "$UNNAMED$15"
+	    quid       	"3FCB9EB30259"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$16"
+		    quid       	"3FCB9EB4026E"
+		    supplier   	"Use Case View::Vendor Management::VendorReports"
+		    quidu      	"3FBBD91F016F"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$17"
+		    quid       	"3FCB9EB40270"
+		    supplier   	"Use Case View::Vendor Management::VendorViewer"
+		    quidu      	"3FCB9E9C016D")))
+	(object Association "$UNNAMED$18"
+	    quid       	"3FCB9ED402A0"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$19"
+		    quid       	"3FCB9ED60195"
+		    supplier   	"Use Case View::Vendor Management::Add a Vendor"
+		    quidu      	"3FBBD91D014E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$20"
+		    quid       	"3FCB9ED60197"
+		    supplier   	"Use Case View::Vendor Management::VendorManager"
+		    quidu      	"3FBE6790033E")))
+	(object Association "$UNNAMED$21"
+	    quid       	"3FCB9EDB0305"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$22"
+		    quid       	"3FCB9EDC0235"
+		    supplier   	"Use Case View::Vendor Management::Edit a vendor"
+		    quidu      	"3FBBDA660223"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$23"
+		    quid       	"3FCB9EDC0237"
+		    supplier   	"Use Case View::Vendor Management::VendorManager"
+		    quidu      	"3FBE6790033E")))
+	(object Association "$UNNAMED$24"
+	    quid       	"3FCB9EDF03D4"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$25"
+		    quid       	"3FCB9EE10323"
+		    supplier   	"Use Case View::Vendor Management::Remove a vendor"
+		    quidu      	"3FBE683E010E"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$26"
+		    quid       	"3FCB9EE10325"
+		    supplier   	"Use Case View::Vendor Management::VendorManager"
+		    quidu      	"3FBE6790033E"))))
+    logical_presentations 	(list unit_reference_list
+	(object UseCaseDiagram "Main"
+	    quid       	"3FBBD8B5016A"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object UseCaseView "Use Case View::Vendor Management::Approve a Vendor" @1
+		    location   	(1815, 150)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(1815, 288)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Approve a Vendor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBDA6B00C2"
+		    height     	118)
+		(object UseCaseView "Use Case View::Vendor Management::Disapprove a vendor" @2
+		    location   	(1890, 465)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1890, 603)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Disapprove a vendor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBDA710099"
+		    height     	118)
+		(object UseCaseView "Use Case View::Vendor Management::Create a user" @3
+		    location   	(825, 1005)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(825, 1143)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Create a user")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBD91901AC"
+		    height     	118)
+		(object UseCaseView "Use Case View::Vendor Management::Modify a user" @4
+		    location   	(840, 1275)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(840, 1413)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Modify a user")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBDA12029A"
+		    height     	118)
+		(object UseCaseView "Use Case View::Vendor Management::Remove a user" @5
+		    location   	(855, 1530)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(855, 1668)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Remove a user")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBDA1C02DC"
+		    height     	118)
+		(object ClassView "Class" "Use Case View::Vendor Management::VendorAdmin" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(135, 1215)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(135, 1375)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	362
+			justify    	0
+			label      	"VendorAdmin")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"3FBE688A0171"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$6" @7
+		    location   	(452, 1114)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE68F602F6"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @8
+			    Parent_View 	@7
+			    location   	(317, -101)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68F70153"
+			    client     	@7
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @9
+			    Parent_View 	@7
+			    location   	(317, -101)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68F70155"
+			    client     	@7
+			    supplier   	@6
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$9" @10
+		    location   	(461, 1240)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE68FA02C0"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$10" @11
+			    Parent_View 	@10
+			    location   	(326, 25)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68FB034E"
+			    client     	@10
+			    supplier   	@4
+			    line_style 	0)
+			(object RoleView "$UNNAMED$11" @12
+			    Parent_View 	@10
+			    location   	(326, 25)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68FB0350"
+			    client     	@10
+			    supplier   	@6
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$12" @13
+		    location   	(468, 1360)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE690301C9"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$13" @14
+			    Parent_View 	@13
+			    location   	(333, 145)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE69040103"
+			    client     	@13
+			    supplier   	@5
+			    line_style 	0)
+			(object RoleView "$UNNAMED$14" @15
+			    Parent_View 	@13
+			    location   	(333, 145)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE69040105"
+			    client     	@13
+			    supplier   	@6
+			    line_style 	0)))
+		(object ClassView "Class" "Use Case View::Vendor Management::VendorViewer" @16
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(240, 1785)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@16
+			location   	(240, 1945)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	373
+			justify    	0
+			label      	"VendorViewer")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"3FCB9E9C016D"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object UseCaseView "Use Case View::Vendor Management::VendorReports" @17
+		    location   	(870, 1785)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@17
+			location   	(870, 1923)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"VendorReports")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBD91F016F"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$15" @18
+		    location   	(528, 1785)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FCB9EB30259"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$16" @19
+			    Parent_View 	@18
+			    location   	(363, -360)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EB4026E"
+			    client     	@18
+			    supplier   	@17
+			    line_style 	0)
+			(object RoleView "$UNNAMED$17" @20
+			    Parent_View 	@18
+			    location   	(363, -360)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EB40270"
+			    client     	@18
+			    supplier   	@16
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Vendor Management::Add a Vendor" @21
+		    location   	(780, 105)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@21
+			location   	(780, 243)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Add a Vendor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBD91D014E"
+		    height     	118)
+		(object DependencyView "may use" @22
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@22
+			location   	(1297, 124)
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"may use")
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE676200B1"
+		    client     	@21
+		    supplier   	@1
+		    line_style 	0)
+		(object UseCaseView "Use Case View::Vendor Management::Edit a vendor" @23
+		    location   	(795, 405)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(795, 543)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Edit a vendor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBBDA660223"
+		    height     	118)
+		(object DependencyView "may use" @24
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@24
+			location   	(1303, 274)
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"may use")
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE67690094"
+		    client     	@23
+		    supplier   	@1
+		    line_style 	0)
+		(object DependencyView "may use" @25
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(1340, 431)
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"may use")
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE676F02D9"
+		    client     	@23
+		    supplier   	@2
+		    line_style 	0)
+		(object AssociationViewNew "$UNNAMED$3" @26
+		    location   	(432, 846)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE68A4001D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @27
+			    Parent_View 	@26
+			    location   	(252, -144)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68A90223"
+			    client     	@26
+			    supplier   	@23
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @28
+			    Parent_View 	@26
+			    location   	(252, -144)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE68A90225"
+			    client     	@26
+			    supplier   	@6
+			    line_style 	0)))
+		(object ClassView "Class" "Use Case View::Vendor Management::VendorManager" @29
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(195, 360)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@29
+			location   	(195, 520)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	362
+			justify    	0
+			label      	"VendorManager")
+		    icon       	"Actor"
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    quidu      	"3FBE6790033E"
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @30
+		    location   	(560, 1135)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FBE67D40023"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @31
+			    Parent_View 	@30
+			    location   	(365, 40)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE67D501C9"
+			    client     	@30
+			    supplier   	@17
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @32
+			    Parent_View 	@30
+			    location   	(365, 40)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FBE67D501CB"
+			    client     	@30
+			    supplier   	@29
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$18" @33
+		    location   	(451, 246)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FCB9ED402A0"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$19" @34
+			    Parent_View 	@33
+			    location   	(301, -324)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9ED60195"
+			    client     	@33
+			    supplier   	@21
+			    line_style 	0)
+			(object RoleView "$UNNAMED$20" @35
+			    Parent_View 	@33
+			    location   	(301, -324)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9ED60197"
+			    client     	@33
+			    supplier   	@29
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$21" @36
+		    location   	(468, 377)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FCB9EDB0305"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$22" @37
+			    Parent_View 	@36
+			    location   	(288, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EDC0235"
+			    client     	@36
+			    supplier   	@23
+			    line_style 	0)
+			(object RoleView "$UNNAMED$23" @38
+			    Parent_View 	@36
+			    location   	(288, 32)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EDC0237"
+			    client     	@36
+			    supplier   	@29
+			    line_style 	0)))
+		(object UseCaseView "Use Case View::Vendor Management::Remove a vendor" @39
+		    location   	(810, 720)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@39
+			location   	(810, 858)
+			anchor_loc 	1
+			nlines     	2
+			max_width  	630
+			justify    	0
+			label      	"Remove a vendor")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FBE683E010E"
+		    height     	118)
+		(object AssociationViewNew "$UNNAMED$24" @40
+		    location   	(527, 554)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FCB9EDF03D4"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$25" @41
+			    Parent_View 	@40
+			    location   	(332, 194)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EE10323"
+			    client     	@40
+			    supplier   	@39
+			    line_style 	0)
+			(object RoleView "$UNNAMED$26" @42
+			    Parent_View 	@40
+			    location   	(332, 194)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3FCB9EE10325"
+			    client     	@40
+			    supplier   	@29
+			    line_style 	0)))
+		(object DependencyView "" @43
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3FCB9F1C03C5"
+		    client     	@39
+		    supplier   	@2
+		    line_style 	0)))))

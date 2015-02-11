@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0024)http://www.irt.org/ecma/ -->
+<HTML lang=en><HEAD><TITLE>ECMAScript</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252"><LINK 
+href="ECMAScript_files/main.css" type=text/css rel=stylesheet>
+<STYLE type=text/css>H1 {
+	COLOR: maroon
+}
+H2 {
+	COLOR: maroon
+}
+H3 {
+	COLOR: maroon
+}
+H4 {
+	COLOR: maroon
+}
+H5 {
+	COLOR: maroon
+}
+H6 {
+	COLOR: maroon
+}
+EM {
+	COLOR: maroon
+}
+.highlight {
+	BACKGROUND: #aaaaff
+}
+.hl100 {
+	BACKGROUND: #aaaaff
+}
+.highlightsmall {
+	BACKGROUND: #aaaaff
+}
+.bluebackground {
+	BACKGROUND: #aaaaff
+}
+.itemTitle {
+	BACKGROUND: #ffffcc
+}
+.itemSynopsis {
+	BACKGROUND: #ffffcc
+}
+TABLE.code {
+	BACKGROUND: #ffffcc
+}
+</STYLE>
+
+<META lang=en content=ECMAScript name=Keywords>
+<META lang=en content=ECMAScript name=Description><!--htdig_noindex-->
+<META lang=en content="Martin Webb" name=Author>
+<META http-equiv=PICS-Label 
+content='(PICS-1.1 "http://www.rsac.org/ratingsv01.html" l gen true comment "RSACi North America Server" for "http://www.irt.org/" on "1998.08.13T14:43-0800" r (n 0 s 0 v 0 l 0))'>
+<META http-equiv=PICS-Label 
+content='(PICS-1.1 "http://www.classify.org/safesurf/" l gen true for "http://www.irt.org/" by "martin@irt.org" r (SS~~000 1))'>
+<SCRIPT type=text/javascript><!--
+function isEmail(string) { if (!string) return false; var iChars = "*|,\"<:>[]{}`\';()&$#%"; for (var i = 0; i < string.length; i++) { if (iChars.indexOf(string.charAt(i)) != -1) return false; };  return true; }
+function isReady(form) { var error = ''; if (isEmail(form.email.value) == false) { error += "Please enter a valid email address.\n\n"; form.email.focus(); }; if (error != '') { alert(error); return false; }; return true; }
+
+function show(object) {
+    if (document.getElementById && document.getElementById(object) != null) {
+         document.getElementById(object).style.visibility='visible';
+         document.getElementById(object).style.display='block';
+    }
+    else if (document.layers && document.layers[object] != null)
+        document.layers[object].visibility = 'visible';
+    else if (document.all) {
+        document.all[object].style.zIndex = 100;
+        document.all[object].style.visibility = 'visible';
+    }
+}
+
+function hide(object) {
+    if (document.getElementById && document.getElementById(object) != null) {
+         document.getElementById(object).style.visibility='hidden';
+         document.getElementById(object).style.display='none';
+    }
+    else if (document.layers && document.layers[object] != null)
+        document.layers[object].visibility = 'hidden';
+    else if (document.all)
+         document.all[object].style.visibility = 'hidden';
+}
+
+if (document.getElementById) { document.write('<style>.article {position:absolute;visibility:hidden;display:none}</style>'); }
+//--></SCRIPT>
+
+<META content="MSHTML 5.50.4134.600" name=GENERATOR></HEAD>
+<BODY>
+<TABLE cellSpacing=0 cellPadding=0 width="100%" border=0>
+  <TBODY>
+  <TR>
+    <TD vAlign=top><A href="http://www.irt.org/index.htm"><IMG height=60 
+      alt="irt.org logo" src="ECMAScript_files/irt-sm.gif" width=135 
+      border=0></A> </TD>
+    <TD>
+      <DIV class=center><A 
+      href="http://216.147.49.86/cgi-bin/banner/ads.pl?advert=NonSSI&amp;page=01"><IMG 
+      height=60 src="ECMAScript_files/cedant_468x60.gif" width=468 
+      border=0></A></DIV></TD></TR></TBODY></TABLE>
+<DIV class=center><A href="http://www.irt.org/index.htm"><SPAN 
+class=h-home>Home</SPAN></A> <A href="http://www.irt.org/articles.htm"><SPAN 
+class=h-article>Articles</SPAN></A> <A 
+href="http://developer.irt.org/faq.htm"><SPAN class=h-faq>FAQs</SPAN></A> <A 
+href="http://www.irt.org/games/index.htm"><SPAN class=h-game>Games</SPAN></A> <A 
+href="http://www.irt.org/discus/messages/board-topics.html"><SPAN 
+class=h-bbs>BBS</SPAN></A> <A href="http://www.irt.org/links/index.html"><SPAN 
+class=h-resource>Resources</SPAN></A> <A 
+href="http://www.irt.org/software/index.htm"><SPAN 
+class=h-software>Software</SPAN></A> <A 
+href="http://www.irt.org/cgi-bin/news"><SPAN class=h-news>News</SPAN></A> <A 
+href="http://www.irt.org/books/index.htm"><SPAN class=h-book>Books</SPAN></A> <A 
+href="http://www.irt.org/download/index.htm"><SPAN 
+class=h-download>Downloads</SPAN></A> <A 
+href="http://www.irt.org/about/index.htm"><SPAN class=h-about>About</SPAN></A> 
+<A href="http://www.irt.org/beta/index.htm"><SPAN class=h-beta>Beta</SPAN></A> 
+<A href="http://www.irt.org/search.htm"><SPAN class=h-search>Find</SPAN></A> 
+</DIV><!--/htdig_noindex-->
+<TABLE width="100%">
+  <TBODY>
+  <TR>
+    <TH class=highlight>ECMAScript</TH></TR></TBODY></TABLE>
+<P>2nd edition (August 1998) </P>
+<P>This ECMA Standard defines the ECMAScript scripting language, a general 
+purpose, cross-platform programming language. </P>
+<P>This ECMA Standard is based on several originating technologies, the most 
+well-known being JavaScript (Netscape Communications) and JScript (Microsoft 
+Corporation). </P>
+<UL>
+  <LI><A href="ftp://ftp.ecma.ch/ecma-st/e262-doc.exe">MS Word file, self 
+  expanding</A> 
+  <LI><A href="ftp://ftp.ecma.ch/ecma-st/e262-pdf.pdf">Corresponding Acrobat PDF 
+  file</A> </LI></UL><!--htdig_noindex-->
+<TABLE width="100%">
+  <TBODY>
+  <TR>
+    <TD vAlign=top>
+      <TABLE class=bluebackground width=170>
+        <TBODY>
+        <TR>
+          <TD align=middle><STRONG>Inside Microsoft SQL Server 
+            6.5</STRONG><BR><A 
+            href="http://www.amazon.com/exec/obidos/ISBN=1572313315//"><IMG 
+            height=140 alt="Available to buy at amazon.com!" 
+            src="ECMAScript_files/1572313315.gif" width=107></A><BR><STRONG>Buy 
+            from<BR><A title="Buy from the US based Amazon.com" 
+            href="http://www.amazon.com/exec/obidos/ISBN=1572313315//">Amazon.com</A><BR><A 
+            title="Buy from the UK based Amazon.co.uk" 
+            href="http://www.amazon.co.uk/exec/obidos/ISBN=1572313315//">Amazon.co.uk</A><BR><A 
+            title="Buy from the German based Amazon.de" 
+            href="http://www.amazon.de/exec/obidos/ISBN=1572313315//">Amazon.de</A><BR>or<BR><A 
+            href="http://www.irt.org/books/1572313315.htm">Read the Review at 
+            irt.org</A></STRONG></TD></TR></TBODY></TABLE></TD>
+    <TD vAlign=top>
+      <TABLE width="100%">
+        <TBODY>
+        <TR>
+          <TH class=highlight>ECMAScript</TH></TR></TBODY></TABLE>
+      <P><A 
+      href="http://www.irt.org/cgi-bin/feedback.pl?subject=ECMAScript&amp;author=martin"><STRONG>Provide 
+      Feedback</STRONG></A> on the ECMAScript </P>
+      <P><A href="http://www.irt.org/articles.htm"><STRONG>Articles and 
+      Tutorials</STRONG></A> - <A 
+      href="http://www.irt.org/articles/index.htm">All</A> | <A 
+      href="http://www.irt.org/articles/cgi.htm">CGI &amp; Perl</A> | <A 
+      href="http://www.irt.org/articles/css.htm">CSS</A> | <A 
+      href="http://www.irt.org/articles/database.htm">Database</A> | <A 
+      href="http://www.irt.org/articles/dhtml.htm">DHTML</A> | <A 
+      href="http://www.irt.org/articles/commerce.htm">E-Commerce</A> | <A 
+      href="http://www.irt.org/articles/emacs.htm">Emacs</A> | <A 
+      href="http://www.irt.org/articles/design.htm">Design</A> | <A 
+      href="http://www.irt.org/articles/graphics.htm">Graphics</A> | <A 
+      href="http://www.irt.org/articles/html.htm">HTML</A> | <A 
+      href="http://www.irt.org/articles/java.htm">Java</A> | <A 
+      href="http://www.irt.org/articles/script.htm">JavaScript</A> | <A 
+      href="http://www.irt.org/articles/linux.htm">Linux</A> | <A 
+      href="http://www.irt.org/articles/markup.htm">Markup Languages</A> | <A 
+      href="http://www.irt.org/articles/opera.htm">Opera</A> | <A 
+      href="http://www.irt.org/articles/topten.htm">Top Ten</A> | <A 
+      href="http://www.irt.org/articles/vbscript.htm">VBScript</A> | <A 
+      href="http://www.irt.org/articles/www.htm">WWW</A> | <A 
+      href="http://www.irt.org/articles/xml.htm">XML</A> </P>
+      <P><A href="http://developer.irt.org/faq.htm"><STRONG>FAQ Knowledge 
+      Base</STRONG></A> - <A 
+      href="http://developer.irt.org/script/asp.htm">ASP</A> | <A 
+      href="http://developer.irt.org/script/cgi.htm">CGI/Perl</A> | <A 
+      href="http://developer.irt.org/script/css.htm">CSS</A> | <A 
+      href="http://developer.irt.org/script/fusion.htm">ColdFusion</A> | <A 
+      href="http://developer.irt.org/script/dhtml.htm">DHTML</A> | <A 
+      href="http://developer.irt.org/script/html.htm">HTML</A> | <A 
+      href="http://developer.irt.org/script/java.htm">Java</A> | <A 
+      href="http://developer.irt.org/script/script.htm">JavaScript</A> | <A 
+      href="http://developer.irt.org/script/linux.htm">Linux</A> | <A 
+      href="http://developer.irt.org/script/vbscript.htm">VBScript</A> | <A 
+      href="http://developer.irt.org/script/vrml.htm">VRML</A> | <A 
+      href="http://developer.irt.org/script/xml.htm">XML</A> </P>
+      <P><A href="http://www.irt.org/software/index.htm"><STRONG>Software 
+      Reviews</STRONG></A> - <A 
+      href="http://www.irt.org/software/all.htm">All</A> | <A 
+      href="http://www.irt.org/software/e-comm.htm">E-Commerce</A> | <A 
+      href="http://www.irt.org/software/free.htm">Freeware/Shareware</A> | <A 
+      href="http://www.irt.org/software/graphics.htm">Graphics</A> | <A 
+      href="http://www.irt.org/software/multim.htm">Multimedia</A> | <A 
+      href="http://www.irt.org/software/prog.htm">Programming</A> | <A 
+      href="http://www.irt.org/software/webed.htm">Web Editors</A> | <A 
+      href="http://www.irt.org/software/download.htm">Software downloads</A> 
+    </P></TD>
+    <TD vAlign=top>
+      <TABLE class=bluebackground width=170>
+        <TBODY>
+        <TR>
+          <TD align=middle>
+            <FORM action=http://www.irt.org/cgi-bin/htsearch method=post>
+            <P><INPUT type=hidden value=and name=method><INPUT type=hidden 
+            value=builtin-long name=format><INPUT type=hidden value=score 
+            name=sort><INPUT type=hidden value=htdig name=config><INPUT 
+            type=hidden name=restrict><INPUT type=hidden 
+            name=exclude><STRONG>Search irt.org</STRONG><BR><SMALL>e.g. "<SPAN 
+            style="COLOR: #ff0000">frame form window</SPAN>"</SMALL><BR><INPUT 
+            size=12 name=words><BR><A 
+            href="http://www.irt.org/search.htm"><STRONG>Advanced 
+            Search</STRONG></A></P></FORM></TD></TR></TBODY></TABLE><BR>
+      <TABLE class=bluebackground width=170>
+        <TBODY>
+        <TR>
+          <TD align=middle>
+            <FORM onsubmit="return isReady(this)" action=/cgi-bin/formmail.cgi 
+            method=post>
+            <P><STRONG>FREE Newsletter</STRONG><BR><INPUT size=12 
+            value=email_address name=email><INPUT type=hidden 
+            value=register@irt.org name=recipient><INPUT type=hidden 
+            value=Register name=subject><INPUT type=hidden 
+            value=REMOTE_HOST,REMOTE_ADDR,HTTP_USER_AGENT 
+            name=env_report></P></FORM></TD></TR></TBODY></TABLE><BR>
+      <TABLE class=bluebackground width=170>
+        <TBODY>
+        <TR>
+          <TD align=middle>
+            <FORM 
+            action=http://cedant.com/cgi-bin/register/domain.pl?show_wizard=1 
+            method=post><B>Get your own Domain Name for $20/year!</B><INPUT 
+            maxLength=67 size=16 name=domain><INPUT type=hidden value=1 
+            name=root_allowed><INPUT type=hidden value=OK name=lookup><INPUT type=submit value="Domain Search"></FORM></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE>
+<DIV class=center><SMALL>Last Updated: 13th August 2000 - Maintained by: <A 
+href="mailto:martin@irt.org">Martin Webb</A> <BR>Copyright © 1996-1999 irt.org, 
+All Rights Reserved. <BR>irt.org <A 
+href="http://www.irt.org/utility/smprint.htm#liability">liability</A>, 
+trademark, <A href="http://www.irt.org/utility/smprint.htm#copyright">document 
+use</A> and <A href="http://www.irt.org/utility/smprint.htm#software">software 
+licensing rules</A> apply. <BR>Your interactions with this site are in 
+accordance with our public <A 
+href="http://www.irt.org/utility/smprint.htm#privacy">privacy</A> statements. 
+</SMALL></DIV>
+<DIV class=center><A href="http://www.irt.org/index.htm"><SPAN 
+class=h-home>Home</SPAN></A> <A href="http://www.irt.org/articles.htm"><SPAN 
+class=h-article>Articles</SPAN></A> <A 
+href="http://developer.irt.org/faq.htm"><SPAN class=h-faq>FAQs</SPAN></A> <A 
+href="http://www.irt.org/games/index.htm"><SPAN class=h-game>Games</SPAN></A> <A 
+href="http://www.irt.org/discus/messages/board-topics.html"><SPAN 
+class=h-bbs>BBS</SPAN></A> <A href="http://www.irt.org/links/index.html"><SPAN 
+class=h-resource>Resources</SPAN></A> <A 
+href="http://www.irt.org/software/index.htm"><SPAN 
+class=h-software>Software</SPAN></A> <A 
+href="http://www.irt.org/cgi-bin/news"><SPAN class=h-news>News</SPAN></A> <A 
+href="http://www.irt.org/books/index.htm"><SPAN class=h-book>Books</SPAN></A> <A 
+href="http://www.irt.org/download/index.htm"><SPAN 
+class=h-download>Downloads</SPAN></A> <A 
+href="http://www.irt.org/about/index.htm"><SPAN class=h-about>About</SPAN></A> 
+<A href="http://www.irt.org/beta/index.htm"><SPAN class=h-beta>Beta</SPAN></A> 
+<A href="http://www.irt.org/search.htm"><SPAN class=h-search>Find</SPAN></A> 
+</DIV><!--/htdig_noindex--></BODY></HTML>

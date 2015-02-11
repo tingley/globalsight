@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.filterconfiguration.JSPFilter"
+        table="jsp_filter">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="companyId" column="COMPANY_ID" type="long"
+            not-null="true" unique="false" />
+        <property name="filterName" length="255" column="FILTER_NAME"
+            type="string" not-null="true" unique="false" />
+        <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
+            type="string" not-null="false" unique="false" />
+        <property name="addAdditionalHead" column="IS_ADDITIONAL_HEAD_ADDED" type="yes_no"
+            not-null="false" />
+        <property name="enableEscapeEntity" column="IS_ESCAPE_ENTITY" type="yes_no"
+            not-null="false" />
+    </class>
+</hibernate-mapping>

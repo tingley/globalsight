@@ -1,0 +1,249 @@
+
+<!-- Task Comments data table -->
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+        <tr>
+            <td><b><%=bundle.getString("lb_activity")%> <%=bundle.getString("lb_comments")%>
+            </b></td>
+        </tr>
+        <tr>
+            <td><%=bundle.getString("lb_show")%>:
+            <select id="showLocaleSelect" name=showSelect onchange=updateTaskTable()>
+            <%
+                out.println("<option value=allLocales>" + bundle.getString("lb_all") + "</option>");
+                for (int i=0 ; i < targLocales.size(); i++)
+                {
+                    Locale loc = (Locale)targLocales.get(i);
+                    out.print("<option value=\"" + loc.getDisplayName() + "\"");
+                    if (loc.getDisplayName().equals(selectedLocale))
+                        out.print(" selected ");
+                    out.println(">" + loc.getDisplayName() + "</option>");
+                }
+            %>
+            </select>
+        </tr>
+        <tr>
+        <% if (selectedLocale == null) { %>
+        <td id="allLocales" style="display:block">
+        <% } else { %>
+        <td id="allLocales" style="display:none">
+        <% } %>
+          <amb:table bean="taskCommentList" id="taskcomment" key="<%=CommentConstants.TASK_COMMENT_KEY%>"
+             dataClass="com.globalsight.everest.comment.TaskCommentInfo" pageUrl="jobComments"
+             emptyTableMsg="msg_comments_none_for_job" >
+            <amb:column label="" width="15px">
+          <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
+                <input type="radio" name="radioBtn" value="<%=taskcomment.getCommentId()%>"
+                    onclick="enableButtons('editActBtn')">
+            </amb:permission>
+            </amb:column>
+            <amb:column label="lb_target_locale" width="100px" sortBy="<%=TaskCommentInfoComparator.LOCALE%>">
+                <%=taskcomment.getTargetLocale().getDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_comment_creator" width="100px" sortBy="<%=TaskCommentInfoComparator.USER%>">
+                <%=taskcomment.getCreatorId()%>
+            </amb:column>
+            <amb:column label="lb_date_created" width="100px" sortBy="<%=TaskCommentInfoComparator.DATE%>">
+                <%=taskcomment.getCreatedDate()%>
+            </amb:column>
+            <amb:column label="lb_activity" width="100px" sortBy="<%=TaskCommentInfoComparator.TASK%>">
+                <%=taskcomment.getTaskDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_comments" width="350px" style="word-wrap:break-word;word-break:break-all">
+<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:350px\'>\");}</SCRIPT>"); %>
+                <%
+                    String com = taskcomment.getComment();
+                    if (com.length() > 200)
+                    {
+                        int idx = com.indexOf(' ', 200);
+                        if (idx > 0)
+                            com = com.substring(0, idx);
+                        out.println(com);
+                        out.println("<div onclick=\"javascript:showComment('allt" + taskcomment.getCommentId() + "');\" style=\"cursor:hand\">[more...]</div>");
+                        out.println("<div id=allt" + taskcomment.getCommentId() + " class=\"comment\">" + taskcomment.getComment() + "<div onclick=closeComment('allt" + taskcomment.getCommentId() + "');><span style=\"cursor: hand; color:blue\">[Close]</span></div></div>");
+                    }
+                    else
+                        out.println(taskcomment.getComment());
+                %>
+<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+            </amb:column>
+            <amb:column label="lb_attached_files" width="100px" style="word-wrap:break-word;word-break:break-all">
+            <%
+                 List commentReferences = taskcomment.getAttachments();
+                 String commentId = (new Long(taskcomment.getCommentId())).toString();
+                 if (commentReferences != null)
+                 {
+                    for (Iterator it = commentReferences.iterator(); it.hasNext();)
+                    {
+                        CommentFile file = (CommentFile)it.next();
+                        // round size to nearest 1024bytes (1k) - like win-explorer.
+                        // adjust for empty file
+                        long filesize = file.getFileSize() < 3 ? 0 : file.getFileSize();
+                        if(filesize != 0)
+                        {
+                            filesize = (filesize%1024!=0) ?
+                                 ((filesize/1024)+1)/*round up*/ : filesize/1024;
+                        }
+
+%>
+						<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+                        	<input type="checkbox" id="<%=commentId%>" name="ActivityCheckboxBtn" value="<%=commentId + ":" + file.getFileAccess() + ":" + file.getFilename()%>">
+                        </amb:permission>
+
+                        <IMG SRC="/globalsight/images/file_paperclip.gif" ALT="<%=bundle.getString("lb_reference_file")%>" HEIGHT=15 WIDTH=13>
+<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:100px\'>\");}</SCRIPT>"); %>
+<%
+path = "/globalsight/".concat(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR).concat(File.separator).concat(commentId);
+path += File.separator.concat(file.getFileAccess()).concat(File.separator).concat(file.getFilename());
+path = URLEncoder.encodeUrlStr(path);
+%>
+                        <A class="standardHREF" target="_blank" href="<%=path %>">
+                        <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
+                        </A>
+<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+                        <SPAN CLASS=smallText>
+                        <%=numberFormat.format(filesize)%>k
+<%
+                        if (file.getFileAccess().equals("Restricted"))
+                        {
+%>
+                            <SPAN STYLE="color: red">
+                                (<%=bundle.getString("lb_restricted")%>)&nbsp;
+                            </SPAN>
+<%
+                        }
+%>
+                        </SPAN>
+                        <br>
+<%
+                    }
+                  }
+%>
+           </amb:column>
+         </amb:table>
+        </td>
+
+<% for (int i=0; i<targLocales.size(); i++) { 
+        Locale loc = (Locale)targLocales.get(i);
+        String filterSelection = loc.getLanguage() + "," + loc.getCountry();
+        if (loc.getDisplayName().equals(selectedLocale)) 
+            out.println("<td id=\"" + loc.getDisplayName() + "\" style=\"display:block\">");
+        else
+            out.println("<td id=\"" + loc.getDisplayName() + "\" style=\"display:none\">");
+%>
+
+          <amb:table bean="taskCommentList" id="taskcomment" key="<%=CommentConstants.TASK_COMMENT_KEY%>"
+             dataClass="com.globalsight.everest.comment.TaskCommentInfo" pageUrl="jobComments"
+             filterMethod="getTargetLocale" filterData="<%=loc%>"
+             filterSelection="<%=filterSelection%>"
+             emptyTableMsg="msg_comments_none_for_job" >
+            <amb:column label="" width="15px">
+          <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
+                <input type="radio" name="radioBtn" value="<%=taskcomment.getCommentId()%>"
+                    onclick="enableButtons()">
+           </amb:permission> 
+            </amb:column>
+               <amb:column label="lb_target_locale" width="100px" sortBy="<%=TaskCommentInfoComparator.LOCALE%>">
+                <%=taskcomment.getTargetLocale().getDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_comment_creator" width="100px" sortBy="<%=TaskCommentInfoComparator.USER%>">
+                <%=taskcomment.getCreatorId()%>
+            </amb:column>
+            <amb:column label="lb_date_created" width="100px" sortBy="<%=TaskCommentInfoComparator.DATE%>">
+                <%=taskcomment.getCreatedDate()%>
+            </amb:column>
+            <amb:column label="lb_activity" width="100px" sortBy="<%=TaskCommentInfoComparator.TASK%>">
+                <%=taskcomment.getTaskDisplayName()%>
+            </amb:column>
+            <amb:column label="lb_comments" width="350px">
+                <%
+                    String com = taskcomment.getComment();
+                    if (com.length() > 200)
+                    {
+                        int idx = com.indexOf(' ', 200);
+                        if (idx > 0)
+                            com = com.substring(0, idx);
+                        out.println(com);
+                        out.println("<div onclick=\"javascript:showComment('" + i + "t" + taskcomment.getCommentId() + "');\" style=\"cursor:hand\">[more...]</div>");
+                        out.println("<div id=" + i + "t" + taskcomment.getCommentId() + " class=\"comment\">" + taskcomment.getComment() + "<div onclick=closeComment('" + i + "t" + taskcomment.getCommentId() + "');><span style=\"cursor: hand; color:blue\">[Close]</span></div></div>");
+                    }
+                    else
+                        out.println(taskcomment.getComment());
+                %>
+            </amb:column>
+            <amb:column label="lb_attached_files" width="100px">
+            <%
+                 List commentReferences = taskcomment.getAttachments();
+                 String commentId = (new Long(taskcomment.getCommentId())).toString();
+
+                 if (commentReferences != null)
+                 {
+                    for (Iterator it = commentReferences.iterator(); it.hasNext();)
+                    {
+                        CommentFile file = (CommentFile)it.next();
+                        // round size to nearest 1024bytes (1k) - like win-explorer.
+                        // adjust for empty file
+                        long filesize = file.getFileSize() < 3 ? 0 : file.getFileSize();
+                        if(filesize != 0)
+                        {
+                            filesize = (filesize%1024!=0) ?
+                                 ((filesize/1024)+1)/*round up*/ : filesize/1024;
+                        }
+
+%>
+						<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+                        	<input type="checkbox" id="<%=commentId%>" name="ActivityCheckboxBtn" value="<%=commentId + ":" + file.getFileAccess() + ":" + file.getFilename() + ":" + loc.getDisplayName()%>">
+                        </amb:permission>
+
+                        <IMG SRC="/globalsight/images/file_paperclip.gif" ALT="<%=bundle.getString("lb_reference_file")%>" HEIGHT=15 WIDTH=13>
+
+<%
+path = "/globalsight/".concat(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR).concat(File.separator).concat(commentId);
+path += File.separator.concat(file.getFileAccess()).concat(File.separator).concat(file.getFilename());
+path = URLEncoder.encodeUrlStr(path);
+%>
+                        <A class="standardHREF" target="_blank" href="<%=path %>">
+                        <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
+                        </A>
+                        <SPAN CLASS=smallText>
+                        <%=numberFormat.format(filesize)%>k
+<%
+                        if (file.getFileAccess().equals("Restricted"))
+                        {
+%>
+                            <SPAN STYLE="color: red">
+                                (<%=bundle.getString("lb_restricted")%>)&nbsp;
+                            </SPAN>
+<%
+                        }
+%>
+                        </SPAN>
+                        <br>
+<%
+                    }
+                  }
+%>
+           </amb:column>
+         </amb:table>
+        </td>
+<% } %>
+      </tr>
+      </td>
+      <tr>
+      <td style="text-align:right">
+     	<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+				<A CLASS="standardHREF" HREF="#"
+                     onClick="doCheckAll('ActivityCheckboxBtn'); return false;"
+                     onFocus="this.blur();"><%=bundle.getString("lb_check_all")%></A> |
+				<A CLASS="standardHREF" HREF="#"
+                     onClick="doClearAll('ActivityCheckboxBtn'); return false;"
+                     onFocus="this.blur();"><%=bundle.getString("lb_clear_all")%></A>
+
+      		<input type="BUTTON" value="<%=bundle.getString("lb_download_files_in_job_detail")%>" onclick="submitForm('DownloadFiles')"/>
+      	</amb:permission>
+    <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
+    <INPUT TYPE="BUTTON" NAME=editActBtn VALUE="<%=editButton%>" disabled onClick="submitForm('Edit');">
+    </amb:permission>
+      
+      </td>
+      </tr>
+      </table>

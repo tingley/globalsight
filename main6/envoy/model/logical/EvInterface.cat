@@ -1,0 +1,1438 @@
+
+(object Petal
+    version    	44
+    _written   	"Rose 7.0.9420.17"
+    charSet    	0)
+
+(object Class_Category "EV Interface"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"38BA37170148"
+    visible_categories 	(list visibility_relationship_list
+	(object Visibility_Relationship
+	    quid       	"38C4CC7002A5"
+	    supplier   	"Logical View::Envoy::Envoy Server"
+	    quidu      	"3890C2BE02C5"))
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "ServerProxy"
+	    quid       	"38BDB46D0297"
+	    documentation 	"This interface defines the operations to request for services to work with."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getProjectHandler"
+		    quid       	"38BDBCC200B3"
+		    documentation 	"Get an instance of the ProjectHandler type."
+		    result     	"ProjectHandler"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getLocalizationRequestHandler"
+		    quid       	"38BDC3B5022E"
+		    documentation 	"Get an instance of the LocalizationRequestHandler type."
+		    result     	"LocalizationRequestHandler"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getJobHandler"
+		    quid       	"38BDC40B021E"
+		    documentation 	"Get an instance of the JobHandler type."
+		    result     	"JobHandler"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getUserManager"
+		    quid       	"38BDC42A010A"
+		    documentation 	"Get an instance of the UserManager type."
+		    result     	"UserManager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getDataSourceProxy"
+		    quid       	"394A196001D1"
+		    documentation 	"Return an instance of DataSourceProxy."
+		    result     	"DataSourceProxy"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSecurityManager"
+		    quid       	"3A6346AE005D"
+		    result     	"SecurityManager"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "LWServletHelper"
+	    quid       	"38BE253F0034"
+	    documentation 	"This is an interface that responds to requests from clients that communicates through the HTTP protocol.  Each method specified in this interface corresponds to a HTTP POST method that provides the specified parameters."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "login"
+		    quid       	"38BE262101CA"
+		    documentation 	"Login to the system using the given username and password.  This method returns a session ID that can be used in future calls to other methods to identify the established session.  The session will time out after [TBD] minutes."
+		    parameters 	(list Parameters
+			(object Parameter "username"
+			    quid       	"39403DDD02D3"
+			    documentation 	"Name of the user."
+			    type       	"String")
+			(object Parameter "password"
+			    quid       	"39403DDD02D4"
+			    documentation 	"Password of the user's account."
+			    type       	"String"))
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowssForUser"
+		    quid       	"38BE26AE00AA"
+		    documentation 	"Get a list of workflows whose current task is assigned to the specified user.  Each element in the returned list contains: a project ID (integer) and a job ID (integer)."
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02D6"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "userID"
+			    quid       	"39403DDD02D7"
+			    documentation 	"Identification of the user to get jobs for."
+			    type       	"Integer"))
+		    result     	"List"
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"The user is already logged into the Envoy system.")
+		    post_condition 	(object Semantic_Info
+			PDL        	"A list of jobs is returned.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getPagesForTask"
+		    quid       	"38BE334300F2"
+		    documentation 	"Get a list of page IDs and names (as a Map) for the specified task.  The return value is a list of integers."
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02D9"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39403DDD02DA"
+			    documentation 	"Identifies the project that the specified job belongs to."
+			    type       	"Integer")
+			(object Parameter "workflowID"
+			    quid       	"39403DDD02DB"
+			    documentation 	"Identification of the job to get page information for."
+			    type       	"Integer"))
+		    result     	"Map"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOnlineTranslationPackage"
+		    quid       	"38BE342B01AA"
+		    documentation 	
+|Get the localization "package" for the specified page.  The package contains all the data that the translation workstation requres to work on (i.e. translate) the page locally without further contact with the server, unless the translation workstation need more up to date information, such as the latest TM matches for the segments in the page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02DD"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39403DDD02DE"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "jobID"
+			    quid       	"39403DDD02DF"
+			    documentation 	"Identifies the job that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"39403DDD02E0"
+			    documentation 	"Identifies the page to get package information for."
+			    type       	"Integer"))
+		    result     	"PageGenerationOutput"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rebuildPage"
+		    quid       	"38BE34EB0264"
+		    documentation 	
+|Rebuild the localization "package" for the specified page.  The package contains all the data that the translation workstation requres to work on (i.e. translate) the page locally without further contact with the server, unless the translation workstation need more up to date information, such as the latest TM matches for the segments in the page.
+		    
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02E2"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39403DDD02E3"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "jobID"
+			    quid       	"39403DDD02E4"
+			    documentation 	"Identifies the job that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"39403DDD02E5"
+			    documentation 	"Identifies the page to get package information for."
+			    type       	"Integer"))
+		    result     	"PageGenerationOutput"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "saveTranslatedChunk"
+		    quid       	"38BE352003C9"
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02E7"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39403DDD02E8"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "workflowID"
+			    quid       	"39403DDD02E9"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"39403DDD02EA"
+			    documentation 	"Identifies the page to save translated chunk into."
+			    type       	"Integer")
+			(object Parameter "segmentID"
+			    quid       	"39403DDD02EB"
+			    documentation 	"Identifies the segment that the translated chunk is for."
+			    type       	"Integer")
+			(object Parameter "chunk"
+			    quid       	"39403DDD02EC"
+			    documentation 	"The translated chunk to be saved."
+			    type       	"String")
+			(object Parameter "note"
+			    quid       	"39403DDD02ED"
+			    documentation 	"A note about the translated chunk; saved together with the translated chunk for future reference."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTM"
+		    quid       	"38BE362D0217"
+		    documentation 	"Get the latest TM matches for the specified segment.  The locale for the TM matches is implicitly specified by the job id because a job has only one target locale."
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"39403DDD02EF"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"39403DDD02F0"
+			    documentation 	"Identifies the project that the specified segment belongs to."
+			    type       	"Integer")
+			(object Parameter "jobID"
+			    quid       	"39403DDD02F1"
+			    documentation 	"Identifies the job that the specified segment belongs to."
+			    type       	"Integer")
+			(object Parameter "pageID"
+			    quid       	"39403DDD02F2"
+			    documentation 	"Identifies the page that the specified segment belongs to."
+			    type       	"Integer")
+			(object Parameter "segmentID"
+			    quid       	"39403DDD02F3"
+			    documentation 	"Identifies the segment to get TM matches for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTerm"
+		    quid       	"38BE3733003D"
+		    documentation 	"Get terminology matches for (words and phrases in the?) specified segment.  [This operation is not defined and is not planned for Ambassador 3.0]"
+		    parameters 	(list Parameters
+			(object Parameter "sessionId"
+			    quid       	"39403DDD02F5"
+			    type       	"Integer")
+			(object Parameter "projectId"
+			    quid       	"39403DDD02F6"
+			    type       	"Integer")
+			(object Parameter "jobId"
+			    quid       	"39403DDD02F7"
+			    type       	"Integer")
+			(object Parameter "pageId"
+			    quid       	"39403DDD02F8"
+			    type       	"Integer")
+			(object Parameter "segmentId"
+			    quid       	"39403DDD02F9"
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "concordanceSearch"
+		    quid       	"38BE3750028E"
+		    documentation 	"Perform concordance search on the specified segment.  The target locale of the search is implicitly specified by the job id because a job has only one target locale.  [This operation is not defined and is not planned for Ambassador 3.0]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setTMSearchParams"
+		    quid       	"38BE375600AC"
+		    documentation 	"[This operation is not defined and is not planned for Ambassador 3.0]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchAndReplace"
+		    quid       	"38BE37DD007E"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "requestToAddTerm"
+		    quid       	"38BE37E102C8"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getUserId"
+		    quid       	"38DA70600372"
+		    parameters 	(list Parameters
+			(object Parameter "sessionId"
+			    quid       	"39403DDD02FF"
+			    type       	"Long"))
+		    result     	"Long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getAccessLevel"
+		    quid       	"38DA70780286"
+		    parameters 	(list Parameters
+			(object Parameter "sessionId"
+			    quid       	"39403DDD0301"
+			    type       	"Long"))
+		    result     	"Long"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getUserName"
+		    quid       	"38DA9B800150"
+		    parameters 	(list Parameters
+			(object Parameter "sessionId"
+			    quid       	"39403DDD0303"
+			    type       	"Long"))
+		    result     	"String"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "acceptTask"
+		    quid       	"3943DC140012"
+		    documentation 	"Accept the specified task."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "finishTask"
+		    quid       	"39448F040328"
+		    documentation 	"Set the specified task as finished."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B4AC10083"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B4AC100C9"
+			    documentation 	"Identifies the project that the specified workflow belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B4AC1010F"
+			    documentation 	"Identifies the workflow that to finish the current task for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getSnippet"
+		    quid       	"3944D05B0063"
+		    documentation 	"Get the specified snippet."
+		    parameters 	(list Parameters
+			(object Parameter "sessionId"
+			    quid       	"39949252039F"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "projectId"
+			    quid       	"399492530039"
+			    documentation 	"Identifies the project."
+			    type       	"Integer")
+			(object Parameter "pageId"
+			    quid       	"3944D1C600DD"
+			    documentation 	"Identification of the page to be edited."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"399492D40337"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"399492D403CE"
+			    documentation 	"Identifies the page within the current workflow in which the specified segments are to be joined."
+			    type       	"long")
+			(object Parameter "p_localContentName"
+			    quid       	"399492E90247"
+			    documentation 	"Name that identifies the local content snippet that can be inserted."
+			    type       	"String"))
+		    result     	"String Array"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectTask"
+		    quid       	"3948E09E0398"
+		    documentation 	"Reject the specified localization task."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addNewSegment"
+		    quid       	"3957A6B5014D"
+		    documentation 	"Add a new text segment before or after the specified text segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3957AD88016D"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"3957ADA40023"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"3957AD8F0308"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"3957AD7A02E0"
+			    documentation 	"Identifies the page within the current workflow to which the new segment is to be added."
+			    type       	"long")
+			(object Parameter "p_currentSegmentId"
+			    quid       	"3957AD7A02FE"
+			    documentation 	"Identifies the segment before or after which the new segment is to be added."
+			    type       	"Integer")
+			(object Parameter "p_before"
+			    quid       	"3957AD7A0312"
+			    documentation 	"Specifies whether the new segment is to be added before or after the current segment.  Before if true, after if false."
+			    type       	"Boolean")
+			(object Parameter "p_newSegment"
+			    quid       	"3957AD7A0326"
+			    documentation 	"The content of the new segment to be added."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "addCommentToWorkflow"
+		    quid       	"3957D6EE0197"
+		    documentation 	"Add the specified comment to the specified workflow."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3957FB23033A"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"3957FB23036C"
+			    documentation 	"Identifies the project that the specified workflow belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"3957FB2303A8"
+			    documentation 	"Identifies the workflow that the comment is to be added to."
+			    type       	"Integer")
+			(object Parameter "p_comment"
+			    quid       	"3957FB5E0190"
+			    documentation 	"The comment to be added."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "deleteSegment"
+		    quid       	"398B070C0210"
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B07540191"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B07540200"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B0754026E"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"398B075402DC"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is to be deleted."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B07540354"
+			    documentation 	"Identifies the segment to be deleted."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "findTermMatch"
+		    quid       	"398B099F000F"
+		    documentation 	"Find all terminology matches for the specified text in the specified project."
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"398EAEBC02FB"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B0A0102FF"
+			    documentation 	"Identifies the project that specifies the terminology database to search for matches."
+			    type       	"Integer")
+			(object Parameter "p_text"
+			    quid       	"398B0A1201AF"
+			    documentation 	"The text to search for terminology matches."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "joinSegments"
+		    quid       	"398B0BA203E5"
+		    documentation 	"Join the specified segments together to become one segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B0BA203E6"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B0BA203E7"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B0BA203E8"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"398B0BA203E9"
+			    documentation 	"Identifies the page within the current workflow in which the specified segments are to be joined."
+			    type       	"long")
+			(object Parameter "p_segmentIds"
+			    quid       	"398B0BA203EA"
+			    documentation 	"Identificaitons of the list of segments to be joined."
+			    type       	"Integer Array"))
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"The specified segements must be adjacent to each other.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getOfflineTranslationPackages"
+		    quid       	"398B14B7022F"
+		    documentation 	"Get a list of offline translation packages for the specified task."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B158001C0"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B158001F2"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B1580022E"
+			    documentation 	"Identifies the workflow to get packages for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getPreviousTranslations"
+		    quid       	"398B2E380043"
+		    documentation 	"Get a list of previous translation, each element in the list is a pair of activity (e.g. QA) and translated segment."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B2EEC02D7"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B2EEC034F"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B2EEC03BD"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"398B2EED002F"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B2EED0093"
+			    documentation 	"Identifies the segment to get previous translations for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "revertToPreviousTranslation"
+		    quid       	"398B328A0346"
+		    documentation 	"Revert a segment's translation to one that was done in a previous stage/task."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B32C2006C"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B32C200DA"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B32C2013E"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"398B32C201AC"
+			    documentation 	"Identifies the page within the current workflow in which the specified segment is."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398B32C2022E"
+			    documentation 	"Identifies the segment to revert translations for."
+			    type       	"Integer")
+			(object Parameter "p_taskId"
+			    quid       	"398B32E70105"
+			    documentation 	"The ID of the previous task that this segment's translation should revert to."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectTranslationResult"
+		    quid       	"398B4A4C0161"
+		    documentation 	"Reject the result of the previous translation."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398B4B0802FC"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398B4B080388"
+			    documentation 	"Identifies the project that the specified workflow belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398B4B09002C"
+			    documentation 	"Identifies the workflow that to finish the current task for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "searchTm"
+		    quid       	"398EAE1C01BA"
+		    documentation 	"Search localization memory for segment matches."
+		    parameters 	(list Parameters
+			(object Parameter "sessionID"
+			    quid       	"398EAE8B0001"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "projectID"
+			    quid       	"398EAE8B0051"
+			    documentation 	"Identifies the project that specifies the list of LM to search."
+			    type       	"Integer")
+			(object Parameter "p_searchCriteria"
+			    quid       	"398EAF2E0254"
+			    documentation 	"Specifies the criteria of the LM search: exact or fuzzy, degree of fuzziness, concordance.")
+			(object Parameter "p_text"
+			    quid       	"398EAE9D011F"
+			    documentation 	"The text to search for LM matches."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "splitSourceSegment"
+		    quid       	"398EB2600020"
+		    documentation 	"Split a source segment into two and return a new version of the translation package."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398EB2BF018F"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398EB2BF01D5"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398EB2BF0207"
+			    documentation 	"Identifies the workflow that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"398EB2BF0243"
+			    documentation 	"Identifies the page within the current workflow in which the specified segments are to be splitted."
+			    type       	"long")
+			(object Parameter "p_segmentId"
+			    quid       	"398EB2BF029D"
+			    documentation 	"Identificaiton of the segment to be splitted."
+			    type       	"Integer")
+			(object Parameter "p_position"
+			    quid       	"398EB2EE0006"
+			    documentation 	"The position at which the segment is to be splitted.  This is specified as the offset from the beginning of the source segment."
+			    type       	"Integer"))
+		    result     	"OnlineTranslationPackage"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "saveUploadedPages"
+		    quid       	"398EB7270322"
+		    documentation 	"Save all the specified uploaded pages."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398EB76101BC"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398EB76101E4"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398EB7610203"
+			    documentation 	"Identifies the workflow to save pages for."
+			    type       	"Integer")
+			(object Parameter "p_pages"
+			    quid       	"398EB779029D"
+			    documentation 	"The uploaded pages to be saved."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "setBookmark"
+		    quid       	"398EC76F0271"
+		    documentation 	"Set a bookmark at the current position of the task."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"398EC7AD0049"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"398EC7AD0085"
+			    documentation 	"Identifies the project that the specified page belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"398EC7AD00D5"
+			    documentation 	"Identifies the workflow to set bookmark for."
+			    type       	"Integer")
+			(object Parameter "p_bookmark"
+			    quid       	"398EC7C40287"
+			    documentation 	"The bookmark to set.  A bookmark specifies page and segment."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceSkeleton"
+		    quid       	"3994966A03E2"
+		    documentation 	"Replace the skeleton of the specified page with the provided skeleton."
+		    parameters 	(list Parameters
+			(object Parameter "p_sessionId"
+			    quid       	"3994969C03B2"
+			    documentation 	"Identifies the session of the client.  The client obtained this session id when it logs in by calling the login() method."
+			    type       	"Integer")
+			(object Parameter "p_projectId"
+			    quid       	"3994969D0042"
+			    documentation 	"Identifies the project that the specified job belongs to."
+			    type       	"Integer")
+			(object Parameter "p_workflowId"
+			    quid       	"3994969D00B0"
+			    documentation 	"Identification of the current job."
+			    type       	"Integer")
+			(object Parameter "p_pageId"
+			    quid       	"399496DD0198"
+			    documentation 	"Identifies the page to replace skeleton for."
+			    type       	"Integer")
+			(object Parameter "p_newSkeleton"
+			    quid       	"399496F1009D"
+			    documentation 	"The new skeleton to replace the existing one."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "LocalizationRequester"
+	    quid       	"38C697670251"
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "submitRequest"
+		    quid       	"38C6977C00DF"
+		    documentation 	"Submits a localization request to the Envoy server.  If the submit is successful, an integer is returned to identify the localization request in the Envoy server."
+		    parameters 	(list Parameters
+			(object Parameter "request"
+			    quid       	"3941739702D1"
+			    documentation 	"This is the localization request.  It is a String of text in XML format that specifies: job profile for workflow, skeleton and segments for translation.  The DTD for the XML format is [TBD]."
+			    type       	"String"))
+		    result     	"Integer"
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"A valid session with the Envoy server exisits.")
+		    post_condition 	(object Semantic_Info
+			PDL        	"A localizatin request is queued inside the Envoy server.  The request has a request ID.")
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getInstance"
+		    quid       	"3942700403C4"
+		    documentation 	"Create an instance of the implementation class and establish a session with the Envoy server."
+		    parameters 	(list Parameters
+			(object Parameter "username"
+			    quid       	"3942704302FC"
+			    documentation 	"The user name of an account that is used to login to the Envoy system.  It is necessary to login before doing any other operations."
+			    type       	"String")
+			(object Parameter "password"
+			    quid       	"39427049011A"
+			    documentation 	"The password of an account that is used to login to the Envoy system.  It is necessary to login before doing any other operations."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    pre_condition 	(object Semantic_Info
+			PDL        	"None")
+		    post_condition 	(object Semantic_Info
+			PDL        	"A session to the Envoy server is established.  Other public operations requires this session to work.")
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "AdminServletHelper"
+	    quid       	"397F18B202EB"
+	    documentation 	"This is an interface that provides all the methods that the Admin servlet needs to perform its functions.  It handles looking up the server objects, if necessary, and figures out the appropriate methods to call."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "getAllTM"
+		    quid       	"397F192402F9"
+		    documentation 	"Get a list of all the TMs in the system."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "replaceSegmentInTM"
+		    quid       	"397F197A019E"
+		    documentation 	"Replace a segment for the specified locale in the specified TM."
+		    parameters 	(list Parameters
+			(object Parameter "p_TMId"
+			    quid       	"397F19EA023F"
+			    documentation 	"The identification of the TM where the target segment is."
+			    type       	"Integer")
+			(object Parameter "p_segmentId"
+			    quid       	"397F19B801B1"
+			    documentation 	"The identification of the segment to be replaced."
+			    type       	"Integer")
+			(object Parameter "p_locale"
+			    quid       	"397F19DC0389"
+			    documentation 	"The locale that the new text apply to."
+			    type       	"Locale")
+			(object Parameter "p_newText"
+			    quid       	"397F19D30142"
+			    documentation 	"The new text for the target segment."
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getListOfWorkflows"
+		    quid       	"397F1CE4012C"
+		    documentation 	"Get a list of Workflow instances that satisfies the specified search criteria."
+		    parameters 	(list Parameters
+			(object Parameter "searchCriteria"
+			    quid       	"397F1CE4012D"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "dispatchWorkflow"
+		    quid       	"397F1DE20019"
+		    documentation 	"Dispatch the specified workflow without waiting for any more user input or dispatch criteria evaluation."
+		    parameters 	(list Parameters
+			(object Parameter "p_userId"
+			    quid       	"397F1DE2001A"
+			    documentation 	"the id of the user who has dispatched the job"
+			    type       	"long"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getWorkflowDetail"
+		    quid       	"397F3043008D"
+		    documentation 	"Get detail information about a workflow, such as routing information."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowId"
+			    quid       	"397F305E03A3"
+			    documentation 	"The identificaiton of the workflow to get detail information for."
+			    type       	"Integer"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rerouteWorkflow"
+		    quid       	"397F325402D2"
+		    documentation 	"Reroute the specified workflow."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowId"
+			    quid       	"397F32670316"
+			    documentation 	"The identification of the workflow to reroute."
+			    type       	"Integer")
+			(object Parameter "p_newRoute"
+			    quid       	"397F326F03B8"
+			    documentation 	"The new routing information/template.  [The type of this parameter is TBD]"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "rejectWorkflow"
+		    quid       	"397F4FD8024B"
+		    documentation 	"Reject a workflow from being dispatched."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowId"
+			    quid       	"397F4FFC0026"
+			    documentation 	"Identification of the workflow to be rejected."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "authorize"
+		    quid       	"397F514A02B1"
+		    parameters 	(list Parameters
+			(object Parameter "p_userId"
+			    quid       	"397F514A02B2"
+			    documentation 	"the id of the user who's authorizing the job"
+			    type       	"long")
+			(object Parameter "p_comment"
+			    quid       	"397F514A02B3"
+			    documentation 	"the comments put for the job authorization"
+			    type       	"String"))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getTasksForWorkflow"
+		    quid       	"397F52D90265"
+		    documentation 	"Get a list of localization tasks in the specified workflow."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowId"
+			    quid       	"397F52F001B4"
+			    documentation 	"Identification of the workflow to get tasks for."
+			    type       	"Integer"))
+		    result     	"JobStage[]"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "reassignTask"
+		    quid       	"397F53590024"
+		    documentation 	"Reassign the specified task in the specified workflow to the specified role."
+		    parameters 	(list Parameters
+			(object Parameter "p_workflowId"
+			    quid       	"397F538A00F7"
+			    documentation 	"Identification of the workflow which the task is in.")
+			(object Parameter "p_task"
+			    quid       	"397F53590025"
+			    documentation 	"Task to reassign to the specified role.")
+			(object Parameter "p_role"
+			    quid       	"397F53590026"
+			    documentation 	"Role to reassign the specified task to."))
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "getRootDirForExport"
+		    quid       	"397F59E50024"
+		    documentation 	"Get root directory for export."
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "login"
+		    quid       	"39D12B8D01CE"
+		    documentation 	"Login."
+		    parameters 	(list Parameters
+			(object Parameter "p_userName"
+			    quid       	"39D12BB103A6"
+			    documentation 	"The user name."
+			    type       	"String")
+			(object Parameter "p_passWord"
+			    quid       	"39D12BB7003E"
+			    documentation 	"The password."
+			    type       	"String")
+			(object Parameter "p_sessionID"
+			    quid       	"39D12BB80298"
+			    documentation 	"The session id."
+			    type       	"String"))
+		    result     	"ServerProxy"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "logout"
+		    quid       	"39D12B93012C"
+		    documentation 	"Logout."
+		    parameters 	(list Parameters
+			(object Parameter "p_session"
+			    quid       	"39D12C760151"
+			    documentation 	"The Http Session."
+			    type       	"HttpSession")
+			(object Parameter "p_name"
+			    quid       	"39D12C790105"
+			    documentation 	"The name of the Http session event."
+			    type       	"String"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "javax.servlet.http.HttpBindingListener"
+	    quid       	"39D12D240089"
+	    documentation 	"Causes an object to be notified when it is bound to or unbound from a session. The object is notified by an HttpSessionBindingEvent object."
+	    stereotype 	"Interface"
+	    operations 	(list Operations
+		(object Operation "valueBound"
+		    quid       	"39D12DE6015A"
+		    documentation 	"Notifies the object that it is being bound to a session and identifies the session."
+		    parameters 	(list Parameters
+			(object Parameter "p_event"
+			    quid       	"39D12E080195"
+			    documentation 	"HttpSesionBindingEvent that identifies the session."
+			    type       	"HttpSessionBindingEvent"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)
+		(object Operation "valueUnbound"
+		    quid       	"39D12E5F0122"
+		    documentation 	"Notifies the object that it is being unbound from a session and identifies the session."
+		    parameters 	(list Parameters
+			(object Parameter "p_event"
+			    quid       	"39D12E8B01A7"
+			    documentation 	"HttpSessionBindingEvent that identifies the session."
+			    type       	"HttpSessionBindingEvent"))
+		    result     	"void"
+		    concurrency 	"Sequential"
+		    opExportControl 	"Public"
+		    uid        	0)))
+	(object Class "ServerProxyImpl"
+	    quid       	"39D5283E02C1"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39D528700327"
+		    supplier   	"Logical View::Envoy::EV Interface::ServerProxy"
+		    quidu      	"38BDB46D0297")))
+	(object Class "AdminServletHelperImpl"
+	    quid       	"39F8D93D02B7"
+	    realized_interfaces 	(list realize_rel_list
+		(object Realize_Relationship
+		    quid       	"39F8D94D0147"
+		    supplier   	"Logical View::Envoy::EV Interface::AdminServletHelper"
+		    quidu      	"397F18B202EB")
+		(object Realize_Relationship
+		    quid       	"39F8D9590221"
+		    supplier   	"Logical View::Envoy::EV Interface::javax.servlet.http.HttpBindingListener"
+		    quidu      	"39D12D240089")))
+	(object Association "$UNNAMED$0"
+	    quid       	"38BE255B0021"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$1"
+		    quid       	"38BE255B03CE"
+		    supplier   	"Logical View::Envoy::EV Interface::ServerProxy"
+		    quidu      	"38BDB46D0297"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$2"
+		    quid       	"38BE255B03E2"
+		    supplier   	"Logical View::Envoy::EV Interface::LWServletHelper"
+		    quidu      	"38BE253F0034")))
+	(object Association "$UNNAMED$3"
+	    quid       	"397F1B58026D"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$4"
+		    quid       	"397F1B5901C5"
+		    supplier   	"Logical View::Envoy::EV Interface::ServerProxy"
+		    quidu      	"38BDB46D0297"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$5"
+		    quid       	"397F1B5901D9"
+		    supplier   	"Logical View::Envoy::EV Interface::AdminServletHelper"
+		    quidu      	"397F18B202EB")))
+	(object Association "$UNNAMED$6"
+	    quid       	"397F6CF80288"
+	    roles      	(list role_list
+		(object Role "$UNNAMED$7"
+		    quid       	"397F6CF900EF"
+		    supplier   	"Logical View::Envoy::EV Interface::ServerProxy"
+		    quidu      	"38BDB46D0297"
+		    is_navigable 	TRUE)
+		(object Role "$UNNAMED$8"
+		    quid       	"397F6CF900F9"
+		    supplier   	"Logical View::Envoy::EV Interface::LocalizationRequester"
+		    quidu      	"38C697670251"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "External Interface"
+	    quid       	"38BD5E880108"
+	    title      	"External Interface"
+	    documentation 	"This class diagrams shows the external interface that other components can use to communicate with this component."
+	    zoom       	77
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::LWServletHelper" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(384, 2128)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(57, 1258)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	654
+			justify    	0
+			label      	"LWServletHelper")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(57, 1209)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	654
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BE253F0034"
+		    width      	672
+		    height     	1862
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::AdminServletHelper" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1184, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(953, 97)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	462
+			justify    	0
+			label      	"AdminServletHelper")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(953, 48)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	462
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"397F18B202EB"
+		    width      	480
+		    height     	824
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::ServerProxy" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1184, 1344)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(878, 1090)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	612
+			justify    	0
+			label      	"ServerProxy")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(878, 1041)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	612
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38BDB46D0297"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(878, 1146)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	7
+			max_width  	643)
+		    width      	630
+		    height     	630
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$0" @4
+		    location   	(794, 1724)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"38BE255B0021"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$1" @5
+			    Parent_View 	@4
+			    location   	(410, -388)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38BE255B03CE"
+			    client     	@4
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$2" @6
+			    Parent_View 	@4
+			    location   	(410, -388)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"38BE255B03E2"
+			    client     	@4
+			    supplier   	@1
+			    line_style 	0)))
+		(object AssociationViewNew "$UNNAMED$3" @7
+		    location   	(1184, 944)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"397F1B58026D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$4" @8
+			    Parent_View 	@7
+			    location   	(0, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"397F1B5901C5"
+			    client     	@7
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$5" @9
+			    Parent_View 	@7
+			    location   	(0, 576)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"397F1B5901D9"
+			    client     	@7
+			    supplier   	@2
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::LocalizationRequester" @10
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2288, 1552)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(2070, 1469)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"LocalizationRequester")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@10
+			location   	(2070, 1420)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	436
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"38C697670251"
+		    width      	454
+		    height     	288
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "$UNNAMED$6" @11
+		    location   	(1779, 1455)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"397F6CF80288"
+		    roleview_list 	(list RoleViews
+			(object RoleView "$UNNAMED$7" @12
+			    Parent_View 	@11
+			    location   	(-109, 1167)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"397F6CF900EF"
+			    client     	@11
+			    supplier   	@3
+			    line_style 	0)
+			(object RoleView "$UNNAMED$8" @13
+			    Parent_View 	@11
+			    location   	(-109, 1167)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"397F6CF900F9"
+			    client     	@11
+			    supplier   	@10
+			    line_style 	0)))
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::javax.servlet.http.HttpBindingListener" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2656, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(2307, 366)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	698
+			justify    	0
+			label      	"javax.servlet.http.HttpBindingListener")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@14
+			location   	(2307, 317)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	698
+			justify    	0
+			label      	"<<Interface>>")
+		    icon       	"Interface"
+		    icon_style 	"Label"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39D12D240089"
+		    width      	716
+		    height     	286
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::ServerProxyImpl" @15
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2128, 928)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@15
+			location   	(2031, 854)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	194
+			justify    	0
+			label      	"ServerProxyImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39D5283E02C1"
+		    width      	212
+		    height     	172
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @16
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39D528700327"
+		    client     	@15
+		    supplier   	@3
+		    line_style 	0)
+		(object ClassView "Class" "Logical View::Envoy::EV Interface::AdminServletHelperImpl" @17
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1840, 448)
+		    font       	(object Font
+			size       	10
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@17
+			location   	(1712, 374)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	256
+			justify    	0
+			label      	"AdminServletHelperImpl")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"39F8D93D02B7"
+		    width      	274
+		    height     	172
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object RealizeView "" @18
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39F8D94D0147"
+		    client     	@17
+		    supplier   	@2
+		    line_style 	0)
+		(object RealizeView "" @19
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"39F8D9590221"
+		    client     	@17
+		    supplier   	@14
+		    line_style 	0)))))

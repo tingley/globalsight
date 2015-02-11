@@ -131,7 +131,8 @@ public class LuceneIndexReader
         
         QueryParser parser = new QueryParser(LuceneUtil.VERSION,
                 TuvDocument.TEXT_FIELD, m_analyzer);
-        Query q = parser.parse(p_term);
+        String qqq = QueryParser.escape(p_term);
+        Query q = parser.parse(qqq);
         TopDocs results = m_searcher.search(q, 100);
         
         // fix a issue for lucene which cannot find : enterpris

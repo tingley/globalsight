@@ -111,5 +111,10 @@ public interface OfflineEditManager
      */
     public void detachListener();
 
-	public void runProcessDownloadRequest(DownloadParams downloadParams) throws OfflineEditorManagerException, RemoteException;
+    public void runProcessDownloadRequest(DownloadParams downloadParams)
+            throws OfflineEditorManagerException, RemoteException;
+
+    public String runProcessUploadReportPage(File p_tmpFile, User p_user,
+            Task p_task, String p_fileName, String p_reportName)
+            throws AmbassadorDwUpException;
 }

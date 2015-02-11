@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.webnavigation.WebSiteDescription;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.LoginUtil;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
@@ -340,13 +341,14 @@ public class ControlServlet extends HttpServlet
             else if (p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD) == null
                     && p_request.getParameter("ssoResponseData") == null)
             {
+            	LoginUtil.addSubmitToken(p_request);
                 // the entry page does not receive login parameters
                 // retrieve the page descriptor for entry page (this is
                 // a default)
                 targetPageDescriptor = WebSiteDescription.instance()
                         .getPageDescriptor(ENTRY_PAGE);
             }
-            else
+            else if (LoginUtil.isFromLoginPage(p_request))
             {
                 // if so, proceed to login the user
                 sourcePageDescriptor = WebSiteDescription.instance()
@@ -402,12 +404,23 @@ public class ControlServlet extends HttpServlet
                                 userSession, sourcePageHandler);
                     }
                 }
+                
+                LoginUtil.addSubmitToken(p_request);
 
                 // determine the target page
                 targetPageDescriptor = WebSiteDescription.instance()
                         .getPageDescriptor(
                                 sourcePageDescriptor
                                         .getDestinationPageName(linkName));
+            }
+            else
+            {
+            	LoginUtil.addSubmitToken(p_request);
+                // the entry page does not receive login parameters
+                // retrieve the page descriptor for entry page (this is
+                // a default)
+                targetPageDescriptor = WebSiteDescription.instance()
+                        .getPageDescriptor(ENTRY_PAGE);
             }
         }
         else
@@ -529,6 +542,11 @@ public class ControlServlet extends HttpServlet
                 // defined
                 String activityName = p_request
                         .getParameter(LinkHelper.ACTIVITY_NAME);
+                
+                if ("login".equals(activityName))
+                {
+                	LoginUtil.addSubmitToken(p_request);
+                }
 
                 if (CATEGORY.isDebugEnabled())
                 {

@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -42,6 +41,8 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.globalsight.everest.page.pageexport.style.pptx.AtBrStyle;
+import com.globalsight.everest.page.pageexport.style.pptx.AtStyleStyle;
 import com.globalsight.everest.page.pageexport.style.pptx.BoldStyle;
 import com.globalsight.everest.page.pageexport.style.pptx.ItalicStyle;
 import com.globalsight.everest.page.pageexport.style.pptx.Style;
@@ -200,6 +201,8 @@ public class PptxStyleUtil extends StyleUtil
         styles.add(new UnderlineStyle());
         styles.add(new SuperscriptStyle());
         styles.add(new SubscriptStyle());
+        styles.add(new AtStyleStyle());
+        styles.add(new AtBrStyle());
         return styles;
     }
 

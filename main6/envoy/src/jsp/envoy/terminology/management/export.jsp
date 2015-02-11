@@ -71,6 +71,7 @@ TABLE, TD, INPUT, SELECT { font: Tahoma Verdana Arial 10pt; }
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/import.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/includes/report/calendar2.js"></SCRIPT>
@@ -136,40 +137,40 @@ function parseExportOptions()
   var level, field, operator, value, matchcase;
 
   
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
-  selectMode = node.selectSingleNode("selectMode").text;
-  selectLanguage = node.selectSingleNode("selectLanguage").text;
-  duplicateHandling = node.selectSingleNode("duplicateHandling").text;
+  node = $(dom).find("exportOptions selectOptions");
+  selectMode = $(node).find("selectMode").text();
+  selectLanguage = $(node).find("selectLanguage").text();
+  duplicateHandling = $(node).find("duplicateHandling").text();
 
-  node = dom.selectSingleNode("/exportOptions/filterOptions");
-  createdBy = node.selectSingleNode("createdby").text;
-  modifiedBy = node.selectSingleNode("modifiedby").text;
-  createdAfter = node.selectSingleNode("createdafter").text;
-  createdBefore = node.selectSingleNode("createdbefore").text;
-  modifiedAfter = node.selectSingleNode("modifiedafter").text;
-  modifiedBefore = node.selectSingleNode("modifiedbefore").text;
-  status = node.selectSingleNode("status").text;
-  domain = node.selectSingleNode("domain").text;
-  project = node.selectSingleNode("project").text;
+  node = $(dom).find("exportOptions filterOptions");
+  createdBy = $(node).find("createdby").text();
+  modifiedBy = $(node).find("modifiedby").text();
+  createdAfter = $(node).find("createdafter").text();
+  createdBefore = $(node).find("createdbefore").text();
+  modifiedAfter = $(node).find("modifiedafter").text();
+  modifiedBefore = $(node).find("modifiedbefore").text();
+  status = $(node).find("status").text();
+  domain = $(node).find("domain").text();
+  project = $(node).find("project").text();
 
-  nodes = dom.selectNodes("/exportOptions/filterOptions/conditions/condition");
+  nodes = $(dom).find("exportOptions filterOptions conditions condition");
   for (var i = 0; i < nodes.length; i++)
   {
     node = nodes[i];//node = nodes.item(i);
 
-    level = node.selectSingleNode("level").text;
-    field = node.selectSingleNode("field").text;
-    operator = node.selectSingleNode("operator").text;
-    value = node.selectSingleNode("value").text;
-    matchcase = node.selectSingleNode("matchcase").text;
+    level = $(node).find("level").text();
+    field = $(node).find("field").text();
+    operator = $(node).find("operator").text();
+    value = $(node).find("value").text();
+    matchcase = $(node).find("matchcase").text();
 
     g_advancedFilter.push(new FilterCondition(level, field,
       operator, value, matchcase));
   }
 
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
-  fileType = node.selectSingleNode("fileType").text;
-  fileEncoding = node.selectSingleNode("fileEncoding").text;
+  node = $(dom).find("exportOptions fileOptions");
+  fileType = $(node).find("fileType").text();
+  fileEncoding = $(node).find("fileEncoding").text();
 
   if (selectMode == "<%=ExportOptions.SELECT_LANGUAGE%>")
   {
@@ -202,19 +203,7 @@ function parseExportOptions()
 
 function fnGetDOM(xmlId,xmlStr)
 {
-  var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-	//dom = xmlId.XMLDocument;
-	  dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlStr);
-  }
-  else if(window.DOMParser)
-  { 
-	var parser = new DOMParser();
-	dom = parser.parseFromString(xmlStr,"text/xml");
-  }
+  var dom = $.parseXML(xmlStr);
   return dom;
 }
 
@@ -223,28 +212,25 @@ function buildExportOptions()
   var result = new Result("", "", null);
   var form = document.oDummyForm;
   var dom;
-  //var dom = oExportOptions.XMLDocument;
   dom = fnGetDOM(oExportOptions,xmlExportOptions);
-  var node;
-  var sel;
+  var node,sel;
 
   // SELECT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
+  node = $(dom).find("exportOptions selectOptions");
 
   if (form.oEntries[0].checked)
   {
-     node.selectSingleNode("selectMode").text =
-       "<%=ExportOptions.SELECT_ALL%>";
+     //node.selectSingleNode("selectMode").text = "<%=ExportOptions.SELECT_ALL%>";
+	  $(node).find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
   }
   else
   {
-     node.selectSingleNode("selectMode").text =
-       "<%=ExportOptions.SELECT_LANGUAGE%>";
+     //node.selectSingleNode("selectMode").text = "<%=ExportOptions.SELECT_LANGUAGE%>";
+	  $(node).find("selectMode").text("<%=ExportOptions.SELECT_LANGUAGE%>");
   }
 
   sel = form.oEntryLang;
-  node.selectSingleNode("selectLanguage").text =
-    sel.options[sel.selectedIndex].value;
+  $(node).find("selectLanguage").text(sel.options[sel.selectedIndex].value);
 
 <%--
   if (form.oSynonyms[0].checked)
@@ -266,25 +252,24 @@ function buildExportOptions()
   if (datecheck = validateDate(form.fltModifiedBefore)) return datecheck;
 
   // FILTER OPTIONS
-  node = dom.selectSingleNode("/exportOptions/filterOptions");
-  node.selectSingleNode("createdby").text  = form.fltCreatedBy.value;
-  node.selectSingleNode("modifiedby").text = form.fltModifiedBy.value;
-  node.selectSingleNode("createdafter").text = form.fltCreatedAfter.value;
-  node.selectSingleNode("createdbefore").text = form.fltCreatedBefore.value;
-  node.selectSingleNode("modifiedafter").text = form.fltModifiedAfter.value;
-  node.selectSingleNode("modifiedbefore").text = form.fltModifiedBefore.value;
+  node = $(dom).find("exportOptions filterOptions");
+  $(node).find("createdby").text(form.fltCreatedBy.value);
+  $(node).find("modifiedby").text(form.fltModifiedBy.value);
+  $(node).find("createdafter").text(form.fltCreatedAfter.value);
+  $(node).find("createdbefore").text(form.fltCreatedBefore.value);
+  $(node).find("modifiedafter").text(form.fltModifiedAfter.value);
+  $(node).find("modifiedbefore").text(form.fltModifiedBefore.value);
 
   sel = form.fltStatus;
-  node.selectSingleNode("status").text = getSelectedValues(sel);
-
-  //node.selectSingleNode("domain").text = form.fltDomain.value;
-  //node.selectSingleNode("project").text = form.fltProject.value;
+  $(node).find("status").text(getSelectedValues(sel));
 
   // ADVANCED FILTER OPTONS
-  node = dom.selectSingleNode("/exportOptions/filterOptions/conditions");
-  while (node.hasChildNodes())
-  {
-    node.removeChild(node.firstChild);
+  node = $(dom).find("exportOptions filterOptions conditions");
+  
+  var len = node.children().length;
+  while(len){
+  		node.children().eq(0).remove();
+  		len = node.children().length;
   }
 
   for (var i = 0; i < g_advancedFilter.length; ++i)
@@ -292,39 +277,36 @@ function buildExportOptions()
     var condition = g_advancedFilter[i];
 
     var elem  = dom.createElement("condition");
+    node.append(elem);
+    var len = $(node).find("condition").length;
+    elem = $(node).find("condition").eq(len-1);
+    
     var level = dom.createElement("level");
     var field = dom.createElement("field");
     var operator = dom.createElement("operator");
     var value = dom.createElement("value");
     var matchcase = dom.createElement("matchcase");
-
-    level.text = condition.getLevel();
-    field.text = condition.getField();
-    operator.text = condition.getOperator();
-    value.text = condition.getValue();
-    matchcase.text = (condition.getMatchCase() ? "true" : "false");
-
-    elem.appendChild(level);
-    elem.appendChild(field);
-    elem.appendChild(operator);
-    elem.appendChild(value);
-    elem.appendChild(matchcase);
-
-    node.appendChild(elem);
+    elem.append(level);
+    elem.append(field);
+    elem.append(operator);
+    elem.append(value);
+    elem.append(matchcase);
+    
+    $(elem).find("level").text(condition.getLevel());
+    $(elem).find("field").text(condition.getField());
+    $(elem).find("operator").text(condition.getOperator());
+    $(elem).find("value").text(condition.getValue());
+    $(elem).find("matchcase").text((condition.getMatchCase() ? "true" : "false"));
   }
 
   // FILE OPTIONS
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
+  node = $(dom).find("exportOptions fileOptions");
 
   sel = form.oType;
-  node.selectSingleNode("fileType").text =
-    sel.options[sel.selectedIndex].value;
+  $(node).find("fileType").text(sel.options[sel.selectedIndex].value);
 
   sel = form.oEncoding;
-  node.selectSingleNode("fileEncoding").text =
-    sel.options[sel.selectedIndex].value;
-
-  //alert("options = " + oExportOptions.xml);
+  $(node).find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
   result.dom = dom;
   return result;
@@ -391,8 +373,6 @@ function SetFilterConditions(filters)
       filter.getLevel(), filter.getField(), filter.getOperator(),
       filter.getValue(), filter.getMatchCase());
 
-    //alert(clone);
-
     g_advancedFilter.push(clone);
   }
 }
@@ -429,15 +409,15 @@ function doNext()
         var url;
         var dom = result.dom;
         
-        var node = dom.selectSingleNode("/exportOptions/fileOptions/fileType");
-        if (node.text == "<%=ExportOptions.TYPE_XML%>" ||
-            node.text == "<%=ExportOptions.TYPE_MTF%>" ||
-            node.text == "<%=ExportOptions.TYPE_HTM%>" ||
-            node.text == "<%=ExportOptions.TYPE_TBX%>")
+        var node = $(dom).find("exportOptions fileOptions fileType");
+        if (node.text() == "<%=ExportOptions.TYPE_XML%>" ||
+            node.text() == "<%=ExportOptions.TYPE_MTF%>" ||
+            node.text() == "<%=ExportOptions.TYPE_HTM%>" ||
+            node.text() == "<%=ExportOptions.TYPE_TBX%>")
         {
             url = "<%=urlNextXML%>";
         }
-        else if (node.text == "<%=ExportOptions.TYPE_CSV%>")
+        else if (node.text() == "<%=ExportOptions.TYPE_CSV%>")
         {
             url = "<%=urlNextCSV%>";
         }
@@ -448,15 +428,7 @@ function doNext()
 
         oForm.action = url;
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.exportoptions.value = oExportOptions.xml;
-        	oForm.exportoptions.value = result.dom.xml; 
-        }
-        else
-        {
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.exportoptions.value = getDomString(result.dom);
         
         oForm.submit();
     }
@@ -556,11 +528,11 @@ function selectValue(select, value)
 function fillLanguages()
 {
   var domDefinition = fnGetDOM(oDefinition,xmlDefinition);//var dom = oDefinition.XMLDocument;
-  var names = domDefinition.selectNodes("/definition/languages/language/name");
+  var names = $(domDefinition).find("definition languages language name");
 
   for (i = 0; i < names.length; ++i)
   {
-    var name = names[i].text;//var name = names.item(i).text;
+    var name = $(names[i]).text();//var name = names.item(i).text;
 
     oOption = document.createElement("OPTION");
     oOption.text = name;
@@ -604,14 +576,14 @@ function setTermbaseLanguages(p_definition)
 {
     var nodes, node;
 
-    nodes = p_definition.selectNodes("/definition/languages/language");
+    nodes = $(p_definition).find("definition languages language"); 
     for (var i = 0; i < nodes.length; i++)
     {
         node = nodes[i];//node = nodes.item(i);
 
-        var name = node.selectSingleNode("name").text;
-        var locale = node.selectSingleNode("locale").text;
-        var hasterms = node.selectSingleNode("hasterms").text;
+        var name = $(node).find("name").text();
+        var locale = $(node).find("locale").text();
+        var hasterms = $(node).find("hasterms").text();
         hasterms = (hasterms == "true" ? true : false);
         var exists = true;
 
@@ -626,16 +598,15 @@ function setTermbaseLanguages(p_definition)
 function setTermbaseFields(p_definition)
 {
     // compute cached array of known fields
-    var nodes = p_definition.selectNodes("/definition/fields/field");
+    var nodes = $(p_definition).find("definition fields field");
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];//var node = nodes.item(i);
 
-        var name = node.selectSingleNode("name").text;
-        var type = node.selectSingleNode("type").text;
-        var system =
-          (node.selectSingleNode("system").text == "true" ? true : false);
-        var values = node.selectSingleNode("values").text;
+        var name = $(node).find("name").text();
+        var type = $(node).find("type").text();
+        var system = ($(node).find("system").text() == "true" ? true : false);
+        var values = $(node).find("values").text();
         var format = getFieldFormatByType(type);
 
         var field = new Field(name, type, format, system, values);
@@ -643,7 +614,6 @@ function setTermbaseFields(p_definition)
         g_termbaseFields.push(field);
     }
 
-    // alert(g_termbaseFields);
 }
 
 // Overwrite field names if customer uses custom names for e.g. Domain.

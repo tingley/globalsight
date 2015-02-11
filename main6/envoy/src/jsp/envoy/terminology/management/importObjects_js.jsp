@@ -286,16 +286,17 @@ function addCustomFields(p_definition)
     // "concept" or "term" that guides the importer backend where to
     // put the field. The importer strips the prefix so that data in
     // the termbase uses clean type names.
-    var nodes = p_definition.selectNodes("/definition/fields/field");
+    var nodes = $(p_definition).find("definition fields field");
+    
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
-        var name = node.selectSingleNode("name").text;
-        var type = node.selectSingleNode("type").text;
+        var name = $(node).find("name").text();
+        var type = $(node).find("type").text();
         var system =
-          (node.selectSingleNode("system").text == "true" ? true : false);
-        var values = node.selectSingleNode("values").text;
+          ($(node).find("system").text() == "true" ? true : false);
+        var values = $(node).find("values").text();
         var format = getCustomFieldFormatByType(type);
 
         var importfield1 = new ImportFieldType(
@@ -304,7 +305,7 @@ function addCustomFields(p_definition)
         var importfield2 = new ImportFieldType(
             "term" + type, name + " (on term)", format, values,
             "user-defined field", false, true, true);
-
+            
         aImportFieldTypes.push(importfield1);
         aImportFieldTypes.push(importfield2);
     }

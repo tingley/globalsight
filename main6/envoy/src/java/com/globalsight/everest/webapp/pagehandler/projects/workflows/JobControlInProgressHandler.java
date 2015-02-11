@@ -36,7 +36,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -160,17 +159,10 @@ public class JobControlInProgressHandler extends JobManagementHandler
                 jobId = tokenizer.nextToken();
                 String userId = ((User) sessionMgr
                         .getAttribute(WebAppConstants.USER)).getUserId();
-                // pass in null as the state - it should discard the job and
-                // all its workflows regardless of the state
                 Job job = WorkflowHandlerHelper
                         .getJobById(Long.parseLong(jobId));
-                //WorkflowHandlerHelper
-                //        .cancelJob(userId, job, null);
-                
-                // Remove job data
-                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
-                        .getCompanyId()));
-                removal.removeJob(job);
+
+                WorkflowHandlerHelper.cancelJob(userId, job, null);
             }
         }
         else if (action != null && action.equals("save"))

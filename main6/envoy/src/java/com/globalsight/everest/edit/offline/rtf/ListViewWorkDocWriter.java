@@ -851,7 +851,7 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         m_outputStream.write("{" + m_strExternalStyle
                 + AmbassadorDwUpConstants.HEADER_HELP_KEY + " ");
         m_outputStream.write(makeMsWordHyperLink(
-                AmbassadorDwUpConstants.FILE_MAIN_HELP, "Anchor",
+                AmbassadorDwUpConstants.FILE_MAIN_HELP, null,
                 AmbassadorDwUpConstants.LINK_TIP_MAIN_HELP,
                 AmbassadorDwUpConstants.LINK_NAME_MAIN_HELP,
                 m_strExternalStyle, COLOR_BLUE));
@@ -869,24 +869,24 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         // m_outputStream.write(m_strEOL);
 
         // Add note: Amb comment template instructions
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE1));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE2));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE3));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE4));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE5));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE6));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE7));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE8));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE9));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE10));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE11));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE12));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE13));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE14));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE15));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE16));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE17));
-        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE18));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE1));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE2));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE3));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE4));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE5));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE6));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE7));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE8));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE9));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE10));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE11));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE12));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE13));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE14));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE15));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE16));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE17));
+//        m_outputStream.write(makeRTF_listViewHeaderNote(HEADER_CMT_TEMPLATE18));
 
         // add note - pound sign instructions
         m_outputStream.write(makeRTF_listViewHeaderNote(LINK_NAME_NOTES));
@@ -956,7 +956,7 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
     {
         StringBuffer sb = new StringBuffer();
 
-        if (p_url != null && p_anchorName != null && p_linkText != null
+        if (p_url != null && p_linkText != null
                 && p_style != null && p_color != null)
         {
             sb.append("{");
@@ -964,9 +964,12 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
             sb.append("\"");
             sb.append(p_url);
             sb.append("\" ");
-            sb.append("\\\\l \"");
-            sb.append(p_anchorName);
-            sb.append("\" ");
+            if (p_anchorName != null && p_anchorName.trim().length() > 0)
+            {
+                sb.append("\\\\l \"");
+                sb.append(p_anchorName);
+                sb.append("\" ");
+            }
             sb.append("\\\\o \"");
             sb.append((p_screenTip == null ? p_linkText : p_screenTip));
             sb.append("\" ");

@@ -467,7 +467,7 @@ public class DbUtil
         }
         catch (Exception e)
         {
-            c_logger.error("Error when check table exists.", e);
+            c_logger.warn("Error when check table exists.", e);
         }
         finally
         {

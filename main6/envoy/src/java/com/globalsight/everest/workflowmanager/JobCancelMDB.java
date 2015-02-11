@@ -113,11 +113,6 @@ public class JobCancelMDB extends GenericQueueMDB
             long companyId = job.getCompanyId();
             CompanyThreadLocal.getInstance().setIdValue(companyId);
 
-            if (!reimport)
-            {
-                WorkflowManagerLocal.resetTuvStatus(job);
-            }
-
             Iterator it = job.getWorkflows().iterator();
             Object[] tasks = null;
             List<Object[]> taskList = new ArrayList<Object[]>();
@@ -137,7 +132,6 @@ public class JobCancelMDB extends GenericQueueMDB
                         || Workflow.DISPATCHED.equals(state)
                         || Workflow.BATCHRESERVED.equals(state))
                 {
-
                     updatePageState(wfClone.getTargetPages(),
                             PageState.NOT_LOCALIZED);
                     // also update the secondary target files (if any)
@@ -146,42 +140,35 @@ public class JobCancelMDB extends GenericQueueMDB
                             SecondaryTargetFileState.CANCELLED);
                 }
 
-                if (Workflow.DISPATCHED.equals(state)
-                        || Workflow.READY_TO_BE_DISPATCHED.equals(state))
+                Map activeTasks = ServerProxy.getWorkflowServer()
+                        .getActiveTasksForWorkflow(wf.getId());
+                if (activeTasks != null && activeTasks.size() != 0)
                 {
-                    Map activeTasks = ServerProxy.getWorkflowServer()
-                            .getActiveTasksForWorkflow(wf.getId());
-                    if (activeTasks != null && activeTasks.size() != 0)
-                    {
-                        tasks = activeTasks.values().toArray();
-                        taskList.add(tasks);
-                        updateTaskState(tasks, wfClone.getTasks(),
-                                Task.STATE_DEACTIVE);
+                    tasks = activeTasks.values().toArray();
+                    taskList.add(tasks);
+                    updateTaskState(tasks, wfClone.getTasks(),
+                            Task.STATE_DEACTIVE);
 
-                        WorkflowManagerLocal.removeReservedTimes(tasks);
-                    }
-
-                    WorkflowTemplateInfo wfti = job.getL10nProfile()
-                            .getWorkflowTemplateInfo(wfClone.getTargetLocale());
-
-                    TaskEmailInfo emailInfo = new TaskEmailInfo(
-                            job.getL10nProfile().getProject()
-                                    .getProjectManagerId(),
-                            wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
-                            wfti.notifyProjectManager(), job.getPriority());
-
-                    emailInfo.setJobName(job.getJobName());
-                    emailInfo.setProjectIdAsLong(new Long(job.getL10nProfile()
-                            .getProjectId()));
-                    emailInfo.setSourceLocale(wfClone.getJob()
-                            .getSourceLocale().toString());
-                    emailInfo.setTargetLocale(wfClone.getTargetLocale()
-                            .toString());
-                    emailInfo.setCompanyId(String.valueOf(companyId));
-
-                    ServerProxy.getWorkflowServer().suspendWorkflow(
-                            wfClone.getId(), emailInfo);
+                    WorkflowManagerLocal.removeReservedTimes(tasks);
                 }
+
+                WorkflowTemplateInfo wfti = job.getL10nProfile()
+                        .getWorkflowTemplateInfo(wfClone.getTargetLocale());
+
+                TaskEmailInfo emailInfo = new TaskEmailInfo(
+                        job.getL10nProfile().getProject().getProjectManagerId(),
+                        wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                        wfti.notifyProjectManager(), job.getPriority());
+
+                emailInfo.setJobName(job.getJobName());
+                emailInfo.setProjectIdAsLong(new Long(job.getL10nProfile().getProjectId()));
+                emailInfo.setSourceLocale(wfClone.getJob().getSourceLocale().toString());
+                emailInfo.setTargetLocale(wfClone.getTargetLocale().toString());
+                emailInfo.setCompanyId(String.valueOf(companyId));
+
+                ServerProxy.getWorkflowServer().suspendWorkflow(
+                        wfClone.getId(), emailInfo);
+
                 HibernateUtil.saveOrUpdate(wfClone);
             }
 

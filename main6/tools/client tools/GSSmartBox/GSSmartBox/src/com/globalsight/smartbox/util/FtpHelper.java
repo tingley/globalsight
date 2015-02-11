@@ -28,6 +28,8 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+import com.globalsight.smartbox.bo.FTPConfiguration;
+
 /**
  * FTP Utility, such as Upload and Download file from FTP.
  * 
@@ -35,17 +37,14 @@ import org.apache.commons.net.ftp.FTPFile;
  */
 public class FtpHelper
 {
-    protected FTPClient ftpClient = null;
     protected String host;
     protected String username;
     protected String password;
     protected int port = 21;
 
-    public FtpHelper(String host, String username, String password)
-    {
-        this(host, 21, username, password);
-    }
-    
+    private static int MAX_FTP_CONNECTION_NUM = 3;
+    private static int busyFtpClientNumber = 0;
+
     public FtpHelper(String host, int port, String username, String password)
     {
         this.host = host;
@@ -53,53 +52,44 @@ public class FtpHelper
         this.password = password;
         setPort(port);
     }
-    
+
+    public FtpHelper(FTPConfiguration ftpConfig)
+    {
+        this.host = ftpConfig.getFtpHost();
+        this.username = ftpConfig.getFtpUsername();
+        this.password = ftpConfig.getFtpPassword();
+        setPort(ftpConfig.getFtpPort());
+    }
+
     public boolean testConnect()
     {
-        boolean connect = ftpConnect();
-        ftpClose();
-        return connect;
-    }
-
-    protected boolean ftpConnect()
-    {
+        FTPClient ftpClient = null;
         try
         {
-            boolean result ;
-            if (ftpClient == null || !ftpClient.isConnected())
+            ftpClient = getFtpClient();
+            if (ftpClient != null && ftpClient.isConnected())
             {
-                ftpClient = new FTPClient();
-                ftpClient.connect(host, port);
-                result = ftpClient.login(username, password);
-                // Sets Binary File Type for ZIP File.  
-                ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-                // Set Buffer Size to speed up download/upload file.
-                ftpClient.setBufferSize(102400);
+                return true;
             }
-            else
-            {
-                result = ftpClient.isConnected();
-            }
-            
-            return result;
         }
         catch (Exception e)
-        {
-            String message = "Failed to connect to FTP Server: " + host
-                    + ", FTPUsername:" + username + ", FTPPassword:" + password
-                    + ", FTPServerPort:" + port + ".";
-            LogUtil.fail(message, e);
-            return false;
+        {            
         }
+        finally
+        {
+            closeFtpClient(ftpClient);
+        }
+        return false;
     }
 
-    public void ftpCreateDir(String p_path)
+    public boolean ftpCreateDir(String p_path)
     {
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
-                ftpClient.makeDirectory(p_path);
+                return ftpClient.makeDirectory(p_path);
             }
             catch (IOException e)
             {
@@ -107,14 +97,17 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
+
+        return false;
     }
-    
+
     public boolean ftpDirExists(String p_path)
     {
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -126,28 +119,13 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
 
         return true;
     }
 
-    public boolean ftpClose()
-    {
-        try
-        {
-            ftpClient.disconnect();
-        }
-        catch (Exception e)
-        {
-            String message = "Ftp close exception";
-            LogUtil.fail(message, e);
-            return false;
-        }
-        return true;
-    }
-    
     /**
      * Gets File Array in FTP Server by FTP Directory.
      * 
@@ -157,7 +135,8 @@ public class FtpHelper
     public FTPFile[] ftpFileList(String p_directory)
     {
         FTPFile[] result = {};
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -170,7 +149,7 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
 
@@ -179,7 +158,8 @@ public class FtpHelper
 
     public boolean ftpRename(String p_target, String p_file)
     {
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -191,18 +171,18 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
 
         return true;
     }
-
    
     public InputStream ftpDownloadFile(String p_remoteFileName)
     {
         InputStream is = null;
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -216,13 +196,13 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
 
         return is;
     }
-    
+
     /**
      * Downloads file from FTP to Locale.
      * 
@@ -233,7 +213,8 @@ public class FtpHelper
      */
     public void ftpDownloadFile(String p_remoteFileName, String p_localFileName)
     {
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -250,7 +231,7 @@ public class FtpHelper
             }
             finally
             {
-                ftpClose();
+                closeFtpClient(ftpClient);
             }
         }
     }
@@ -293,35 +274,36 @@ public class FtpHelper
      */
     public boolean ftpUpload(String p_remoteFileName, File p_file)
     {
-        if (ftpConnect())
+        try
         {
-            try
+            String remoteFile = p_remoteFileName.replace("\\", "/").replace("//", "/");
+            int index = remoteFile.lastIndexOf("/");
+            if (index > -1)
             {
-                String remoteFileName = p_remoteFileName.replace("\\", "/").replace("//", "/");
-                ftpCreateDirectoryTree(remoteFileName.substring(0, remoteFileName.lastIndexOf("/")));
-                FileInputStream localFIS = new FileInputStream(p_file);
-                boolean result = ftpClient.storeFile(remoteFileName, localFIS);
-                localFIS.close();
-                LogUtil.info("Upload file successfully, FTP File:[" + remoteFileName + "]");
-                return result;
+                String remoteDirectory = remoteFile.substring(0, index);
+                ftpCreateDirectoryTree(remoteDirectory);
             }
-            catch (IOException e)
+
+            boolean isSucceed = ftpStoreFile(remoteFile, p_file);
+            if (isSucceed)
             {
-                String message = "Failed to upload file, FTP File:["
-                        + p_remoteFileName + "], locale File:["
-                        + p_file.getPath() + "].";
-                LogUtil.FAILEDLOG.error(message);
-                return false;
+                LogUtil.info("Upload file successfully, FTP File:["
+                        + remoteFile + "]");
             }
-            finally
-            {
-                ftpClose();
-            }
+            return isSucceed;
         }
-        
-        return false;
+        catch (IOException e)
+        {
+            String message = "Failed to upload file, FTP File:["
+                    + p_remoteFileName + "], locale File:[" + p_file.getPath()
+                    + "].";
+            LogUtil.FAILEDLOG.error(message);
+            LogUtil.fail(message, e);
+
+            return false;
+        }
     }
-        
+
     /**
      * Creates an arbitrary directory hierarchy on the remote ftp server.
      * 
@@ -337,10 +319,13 @@ public class FtpHelper
         List<String> directories = new ArrayList<String>();
         String[] temp = p_dirTree.split("/"); 
         StringBuffer path = new StringBuffer();
-        for (int i = 1; i < temp.length; i++)
+        for (int i = 0; i < temp.length; i++)
         {
-            path.append("/").append(temp[i]);
-            directories.add(path.toString());
+            if (temp[i].trim().length() > 0)
+            {
+                path.append("/").append(temp[i]);
+                directories.add(path.toString());
+            }
         }
         
         for (String dir : directories)
@@ -349,23 +334,21 @@ public class FtpHelper
             {
                 if (dirExists)
                 {
-                    dirExists = ftpClient.changeWorkingDirectory(dir);
+                    dirExists = ftpDirExists(dir);
                 }
                 if (!dirExists)
                 {
-                    if (!ftpClient.makeDirectory(dir))
+                    if (!ftpCreateDir(dir))
                     {
                         throw new IOException(
                                 "Unable to create remote directory '" + dir
-                                        + "'.  error='"
-                                        + ftpClient.getReplyString() + "'");
+                                        + "'.");
                     }
-                    if (!ftpClient.changeWorkingDirectory(dir))
+                    if (!ftpDirExists(dir))
                     {
                         throw new IOException(
                                 "Unable to change into newly created remote directory '"
-                                        + dir + "'.  error='"
-                                        + ftpClient.getReplyString() + "'");
+                                        + dir + "'.");
                     }
                 }
             }
@@ -375,7 +358,8 @@ public class FtpHelper
     // Deletes a file on FTP Server.
     public boolean ftpDeleteFile(String p_fileName)
     {
-        if (ftpConnect())
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
         {
             try
             {
@@ -385,13 +369,116 @@ public class FtpHelper
             {
                 LogUtil.fail("Delete File Error: " + p_fileName, e);
             }
-            
-            ftpClose();
+            finally
+            {
+                closeFtpClient(ftpClient);
+            }
         }
-        
+
         return false;
     }
-    
+
+    public boolean ftpStoreFile(String remoteFileName, File localFile)
+    {
+        FTPClient ftpClient = getFtpClient();
+        if (ftpClient != null && ftpClient.isConnected())
+        {
+            FileInputStream localFIS = null;
+            try
+            {
+                localFIS = new FileInputStream(localFile);
+                return ftpClient.storeFile(remoteFileName, localFIS);
+            }
+            catch (IOException e)
+            {
+                LogUtil.fail("Store File Error: " + remoteFileName, e);
+            }
+            finally
+            {
+                try
+                {
+                    localFIS.close();
+                }
+                catch (IOException e)
+                {
+                    LogUtil.fail(
+                            "Fail to close FileInputStream: "
+                                    + localFile.getAbsolutePath(), e);
+                }
+                closeFtpClient(ftpClient);
+            }
+        }
+
+        return false;
+    }
+
+    public synchronized FTPClient getFtpClient()
+    {
+        FTPClient client = null;
+        try
+        {
+            boolean loopFlag = true;
+            while (loopFlag)
+            {
+                if (busyFtpClientNumber < MAX_FTP_CONNECTION_NUM)
+                {
+                    client = initFtpClient();
+                    busyFtpClientNumber++;
+                    break;
+                }
+                else
+                {
+                    LogUtil.GSSMARTBOXLOG.warn("ATTENTION:: Busy FTPClients exceed 3 !!!");
+                    Thread.sleep(1000);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String message = "Failed to connect to FTP Server: " + host
+                    + ", FTPUsername:" + username + ", FTPPassword:" + password
+                    + ", FTPServerPort:" + port + ".";
+            LogUtil.fail(message, e);
+            return null;
+        }
+
+        return client;
+    }
+
+    private FTPClient initFtpClient() throws IOException
+    {
+        FTPClient ftpClient = new FTPClient();
+        ftpClient.connect(host, port);
+        ftpClient.login(username, password);
+
+        // Sets Binary File Type for ZIP File.
+        ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+        // Set Buffer Size to speed up download/upload file.
+        ftpClient.setBufferSize(102400);
+
+        return ftpClient;
+    }
+
+    public synchronized boolean closeFtpClient(FTPClient ftpClient)
+    {
+        if (ftpClient == null)
+            return true;
+
+        try
+        {
+            ftpClient.disconnect();
+            if (busyFtpClientNumber > 0)
+                busyFtpClientNumber--;
+        }
+        catch (Exception e)
+        {
+            String message = "Ftp close exception";
+            LogUtil.fail(message, e);
+            return false;
+        }
+        return true;
+    }
+
     public int getPort()
     {
         return port;

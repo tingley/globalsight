@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,7 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -52,6 +54,8 @@ public class MTHelper
     public static final String ENGINE_NAME = "ENGINE_NAME";
     public static final String MT_TRANSLATION_DIV = "translatedString_replaced_div";
     public static final String ACTION_GET_MT_TRANSLATION = "getMtTranslation";
+
+    public static final String MT_EXTRA_CONFIGS = "/properties/mt.config.properties";
 
     /**
      * If "show_in_editor" is checked on TM profile >> MT Options UI, get MT
@@ -413,5 +417,39 @@ public class MTHelper
         }
 
         return segmentsFromGxml;
+    }
+
+    public static String getMTConfig(String paramName)
+    {
+        Properties mtProperties = getMTExtraConfigs();
+        String param = mtProperties.getProperty(paramName);
+        if (param != null)
+        {
+            return param;
+        }
+
+        return null;
+    }
+
+    private static Properties getMTExtraConfigs()
+    {
+        PropertiesFactory factory = new PropertiesFactory();
+        return factory.getProperties(MT_EXTRA_CONFIGS);
+    }
+
+    /**
+     * User may want more detailed information in "GlobalSight.log" when use MT,
+     * flag "mt.log.detailed.info" is for this purpose, default false.
+     * 
+     * @return boolean
+     */
+    public static boolean isLogDetailedInfo()
+    {
+        String logDetailedInfo = getMTConfig("mt.log.detailed.info");
+        if ("true".equalsIgnoreCase(logDetailedInfo))
+        {
+            return true;
+        }
+        return false;
     }
 }

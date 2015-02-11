@@ -44,6 +44,10 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="download" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="estimatedCompletionDate" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="estimatedTranslateCompletionDate" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     String DEFAULT_PARAM = "&jobListStart=0";
     Object param = request.getAttribute(JobManagementHandler.JOB_LIST_START_PARAM);
@@ -480,7 +484,7 @@ is defined in header.jspIncl which must be included in the body.
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.WORD_COUNT%>"><%=bundle.getString("lb_word_count")%></A><%=jobWordCountSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.DATE_CREATED%>"><%=bundle.getString("lb_date_created")%></A><%=jobDateSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.EST_TRANSLATE_COMPLETION_DATE%>"><%=bundle.getString("lb_estimated_translate_completion_date")%></A><%=jobEstTranslateCompletionDateSortArrow%></TD>
-    <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.EST_COMPLETION_DATE%>"><%=bundle.getString("lb_estimated_job_completion_date")%></A><%=jobEstCompletionDateSortArrow%></TD>
+    <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.EST_COMPLETION_DATE%>"><%=bundle.getString("lb_estimated_workflow_completion_date")%></A><%=jobEstCompletionDateSortArrow%></TD>
 </TR>
 <c:forEach items="${jobVos}" var="jobVo" varStatus="i">
     <TR VALIGN=TOP STYLE="padding-top: 5px; padding-bottom: 5px;" BGCOLOR="#FFFFFF" CLASS=standardText>
@@ -503,8 +507,24 @@ is defined in header.jspIncl which must be included in the body.
 	<TD CLASS=${jobVo.textType} >${jobVo.sourceLocale}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.wordcount}</TD>
 	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.createDate}</TD>
-	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.estimatedTranslateCompletionDate}</TD>
-	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.plannedCompletionDate}</TD>
+	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >
+		<amb:permission name="<%=Permission.JOBS_ESTIMATEDTRANSLATECOMPDATE%>">
+			 <a class="standardHREF" style="word-wrap:break-word;word-break:break-all;" href="${estimatedTranslateCompletionDate.pageURL}&jobId=${jobVo.id}&from=jobInProgress">
+		</amb:permission>
+	    ${jobVo.estimatedTranslateCompletionDate}
+		<amb:permission name="<%=Permission.JOBS_ESTIMATEDTRANSLATECOMPDATE%>">
+			 </a>
+		</amb:permission>
+    </TD>
+	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >
+	    <amb:permission name="<%=Permission.JOBS_ESTIMATEDCOMPDATE%>">
+			 <a class="standardHREF" style="word-wrap:break-word;word-break:break-all;" href="${estimatedCompletionDate.pageURL}&jobId=${jobVo.id}&from=jobInProgress">
+		</amb:permission>
+	    ${jobVo.plannedCompletionDate}
+		<amb:permission name="<%=Permission.JOBS_ESTIMATEDCOMPDATE%>">
+			 </a>
+		</amb:permission>
+	</TD>
     </TR>
 </c:forEach>
 <tr><td><div id='restofjobs' style="display:none">

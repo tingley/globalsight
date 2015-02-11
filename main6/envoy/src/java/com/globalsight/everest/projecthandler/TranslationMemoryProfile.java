@@ -140,6 +140,8 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_dynLevFromGoldTm = false;
 
     private boolean m_dynLevFromInProgressTm = true;
+    
+    private boolean m_dynLevStopSearch = false;
 
     private boolean m_dynLevFromPopulationTm = false;
 
@@ -546,6 +548,16 @@ public class TranslationMemoryProfile extends PersistentObject
     public void setDynLevFromInProgressTm(boolean levFromInProgressTm)
     {
         m_dynLevFromInProgressTm = levFromInProgressTm;
+    }
+    
+    public boolean getDynLevStopSearch()
+    {
+        return m_dynLevStopSearch;
+    }
+
+    public void setDynLevStopSearch(boolean dynLevStopSearch)
+    {
+        m_dynLevStopSearch = dynLevStopSearch;
     }
 
     /**

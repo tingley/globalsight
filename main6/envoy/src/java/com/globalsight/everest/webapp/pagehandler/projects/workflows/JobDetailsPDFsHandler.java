@@ -86,9 +86,11 @@ public class JobDetailsPDFsHandler extends PageActionHandler implements JobDetai
     public void cancel(HttpServletRequest p_request, 
             HttpServletResponse p_response, Object p_form) throws Exception
     {
+        HttpSession session = p_request.getSession();
+        String userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         String wfids = p_request.getParameter("wfids"); 
         Set<Long> workflowIdSet = getLongSet(wfids);
-        new PreviewPDFHelper().cancelPDF(workflowIdSet);
+        new PreviewPDFHelper().cancelPDF(workflowIdSet, userId);
         pageReturn();
     }
     
@@ -145,7 +147,7 @@ public class JobDetailsPDFsHandler extends PageActionHandler implements JobDetai
         {
             Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(workflowId);
             JobDetailsPDFsBO data = new JobDetailsPDFsBO(wf);
-            PreviewPDFHelper.setJobDetailsPDFsBO(wf, data, user.getUserId());
+            new PreviewPDFHelper().setJobDetailsPDFsBO(wf, data, user.getUserId());
             dataSet.add(data);
         }
         
@@ -212,7 +214,7 @@ public class JobDetailsPDFsHandler extends PageActionHandler implements JobDetai
             data.setTargetLocaleDisplayName(workflow
                     .getTargetLocale().getDisplayName(uiLocale));
             data.setTotalWordCount(wordCount);
-            PreviewPDFHelper.setJobDetailsPDFsBO(workflow, data, user.getUserId());
+            new PreviewPDFHelper().setJobDetailsPDFsBO(workflow, data, user.getUserId());
             setStatusDisplayName(data, bundle);
             
             result.add(data);

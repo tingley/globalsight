@@ -1298,7 +1298,7 @@ public class IdmlHelper
             {
                 // check if there is \n\t before this tag
                 char cc = s.charAt(m.start() - 1);
-                if (cc == '\n' || cc == '\t')
+                if (cc == '\n')// || cc == '\t')
                 {
                     // append content before \n\t
                     output.append(s.substring(start, m.start() - 1));
@@ -1342,7 +1342,7 @@ public class IdmlHelper
             {
                 // check if there is \n\t before this tag
                 char cc = s.charAt(m.end());
-                if (cc == '\n' || cc == '\t')
+                if (cc == '\n')// || cc == '\t')
                 {
                     start = m.end() + 1;
                 }

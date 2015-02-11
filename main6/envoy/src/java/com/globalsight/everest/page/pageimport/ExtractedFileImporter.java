@@ -1102,14 +1102,23 @@ public class ExtractedFileImporter extends FileImporter
                     srcComment = m_xmlDecoder.decodeStringBasic(srcComment);
                 }
 
-				if (fileName != null
-						&& fileName.toLowerCase().endsWith("docx")
-						&& WordExtractor.useNewExtractor(""
-								+ p_request.getDataSourceId()))
+                boolean setGxml = false;
+                
+                if (fileName != null)
                 {
-                	tuv.setGxml(oriGxml);
+                	String lName = fileName.toLowerCase();
+                	if (lName.endsWith("docx") || lName.endsWith("pptx"))
+                	{
+                		if (WordExtractor.useNewExtractor(""
+								+ p_request.getDataSourceId()))
+                		{
+                			tuv.setGxml(oriGxml);
+                			setGxml = true;
+                		}
+                	}
                 }
-                else
+                
+				if (!setGxml)
                 {
                 	 OptimizeUtil op = new OptimizeUtil();
                      op.setGxml((TuvImpl) tuv, oriGxml, companyId, tuDataType,

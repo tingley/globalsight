@@ -340,7 +340,8 @@ public class UpdateLeverageHelper
             leverageDataCenter = LingServerProxy.getTmCoreManager()
                     .leverageSegments(p_sourceTuvs, sourceLocale, trgLocales,
                             leverageOptions,
-                            String.valueOf(p_workflow.getCompanyId()));
+                            String.valueOf(p_workflow.getCompanyId()),
+                            p_workflow.getJob());
         }
         catch (Exception e)
         {

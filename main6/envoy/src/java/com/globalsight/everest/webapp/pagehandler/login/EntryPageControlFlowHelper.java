@@ -448,6 +448,7 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         pass = URLEncoder.encode(pass);
         Cookie cookie = new Cookie(cookieName, userName + "|" + pass);
         cookie.setMaxAge(expires);
+        cookie.setHttpOnly(true);
         m_response.addCookie(cookie);
     }
 

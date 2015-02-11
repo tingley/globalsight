@@ -73,7 +73,7 @@ public class Usecase02PreProcess implements PreProcess {
 		// temp directory used for saving converted file
 		String tempDirPath = originFilePath.substring(0, originFilePath.lastIndexOf("."));
 		File tempDir = new File(tempDirPath);
-		tempDir.mkdir();
+		tempDir.mkdirs();
 		jobInfo.setTempFile(tempDirPath);
 
 		// Validate original file

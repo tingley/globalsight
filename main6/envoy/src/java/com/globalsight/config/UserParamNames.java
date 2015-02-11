@@ -127,6 +127,10 @@ public interface UserParamNames
     public static final String EDITOR_AUTO_ADJUST_WHITESPACE = "editor_autowhite";
     public static final String EDITOR_AUTO_ADJUST_WHITESPACE_DEFAULT = "1";
 
+    //Report Options -- Abbreviate Report Name
+    public static final String EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT = "abbreviate_report_name";
+    public static final String EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT_DEFAULT = "yes";
+
     // Allowed values for Main Editor layout: "source_target_horizontal",
     // "source_target_vertical" "source", or "target".
     public static final String EDITOR_LAYOUT = "editor_layout";

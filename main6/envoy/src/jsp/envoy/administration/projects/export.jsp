@@ -69,6 +69,7 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <!-- To get Encodings of output files -->
 <SCRIPT language="Javascript" src="/globalsight/envoy/terminology/management/import.js"></SCRIPT>
@@ -95,27 +96,17 @@ function Result(message, description, element)
 function parseExportOptions()
 {
   var form = document.oDummyForm;
-  var dom;
+  var dom = $.parseXML(xmlExportOptions);
   var nodes, node;
   var selectMode, selectFilter, fileType, fileEncoding;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  node = $(dom).find("exportOptions selectOptions");
+  selectMode = $(node).find("selectMode").text();
+  selectFilter = $(node).find("selectFilter").text();
 
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
-  selectMode = node.selectSingleNode("selectMode").text;
-  selectFilter = node.selectSingleNode("selectFilter").text;
-
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
-  fileType = node.selectSingleNode("fileType").text;
-  fileEncoding = node.selectSingleNode("fileEncoding").text;
+  node = $(dom).find("/exportOptions/fileOptions");
+  fileType = $(node).find("fileType").text();
+  fileEncoding = $(node).find("fileEncoding").text();
 
   if (selectMode == "<%=ExportOptions.SELECT_FILTERED%>")
   {
@@ -140,41 +131,27 @@ function buildExportOptions()
 {
   var result = new Result("", "", null);
   var form = document.oDummyForm;
-  var dom;
-  var node;
-  var sel;
+  var dom = $.parseXML(xmlExportOptions);
+  var node,sel;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
-  
   // SELECT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
+  node = $(dom).find("exportOptions selectOptions");
 
   if (form.oEntries[0].checked)
   {
-     node.selectSingleNode("selectMode").text =
-       "<%=ExportOptions.SELECT_ALL%>";
+     $(node).find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
   }
   else
   {
-     node.selectSingleNode("selectMode").text =
-       "<%=ExportOptions.SELECT_FILTERED%>";
+	  $(node).find("selectMode").text("<%=ExportOptions.SELECT_FILTERED%>");
      var val = form.oUser;
-     node.selectSingleNode("selectFilter").text =
-        val.options[val.selectedIndex].value;
+     $(node).find("selectFilter").text(val.options[val.selectedIndex].value);
   }
 
   // FILE OPTIONS
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
+  node = $(dom).find("exportOptions fileOptions");
 
-  node.selectSingleNode("fileType").text = "<%=ExportOptions.TYPE_CSV%>";
+  $(node).find("fileType").text("<%=ExportOptions.TYPE_CSV%>");
 
 <%--
   if (form.oType[0].checked)
@@ -190,10 +167,7 @@ function buildExportOptions()
 --%>
 
   var sel = form.oEncoding;
-  node.selectSingleNode("fileEncoding").text =
-    sel.options[sel.selectedIndex].value;
-
-  //alert("options = " + oExportOptions.xml);
+  $(node).find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
   result.dom=dom;
   return result;
@@ -220,14 +194,8 @@ function doNext()
             "=" + WebAppConstants.TM_ACTION_ANALYZE_TM%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	oForm.exportoptions.value = oExportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.exportoptions.value = getDomString(result.dom);
+        
         oForm.submit();
     }
 }

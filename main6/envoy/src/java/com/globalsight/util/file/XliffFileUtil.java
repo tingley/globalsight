@@ -28,6 +28,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -1030,6 +1031,103 @@ public class XliffFileUtil
             logger.error(e.getMessage(), e);
         }
 
+        return result;
+    }
+
+    /**
+     * For xlz/xlf job, get its original real source file instead of the
+     * extracted file.
+     * 
+     * @param srcFile
+     * @return File
+     */
+    public static File getOriginalRealSoureFile(File srcFile)
+    {
+        if (!srcFile.exists() || !srcFile.isFile())
+            return null;
+
+        if (!isXliffFile(srcFile.getName()))
+            return srcFile;
+
+        File result = srcFile;
+        // Check if it is a sub xlf file from a xlf file that has multiple
+        // <file> elements.
+        HashMap<String, Object> map = getPossibleOriginalXlfSourceFile(result);
+        Boolean isSubFile = (Boolean) map.get("isSubFile");
+        if (isSubFile)
+        {
+            result = (File) map.get("sourceFile");
+        }
+
+        // Check if it is from a xlz file
+        HashMap<String, Object> map2 = getPossibleOriginalXlzSourceFile(result);
+        Boolean isFromXlzFile = (Boolean) map2.get("isFromXlzFile");
+        if (isFromXlzFile)
+        {
+            result = (File) map2.get("sourceFile");
+        }
+
+        return result;
+    }
+
+    private static HashMap<String, Object> getPossibleOriginalXlfSourceFile(
+            File xlfFile)
+    {
+        HashMap<String, Object> result = new HashMap<String, Object>();
+        File wantedFile = xlfFile;
+        Boolean isSubFile = false;
+        try
+        {
+            String parentFolderName = xlfFile.getParentFile().getName();
+            if (parentFolderName.endsWith(".sub"))
+            {
+                File grandFile = xlfFile.getParentFile().getParentFile();
+                String fileName = parentFolderName.substring(0,
+                        parentFolderName.length() - 4);
+                File file = new File(grandFile, fileName);
+                if (file.exists() && file.isFile()
+                        && isXliffFile(file.getName()))
+                {
+                    wantedFile = file;
+                    isSubFile = true;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        result.put("sourceFile", wantedFile);
+        result.put("isSubFile", isSubFile);
+        return result;
+    }
+
+    private static HashMap<String, Object> getPossibleOriginalXlzSourceFile(
+            File file)
+    {
+        HashMap<String, Object> result = new HashMap<String, Object>();
+        File wantedFile = file;
+        Boolean isFromXlzFile = false;
+
+        try
+        {
+            File parentFile = file.getParentFile();
+            File grandFile = parentFile.getParentFile();
+            File f = new File(grandFile, parentFile.getName() + ".xlz");
+            if (f.exists() && f.isFile())
+            {
+                wantedFile = f;
+                isFromXlzFile = true;
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        result.put("sourceFile", wantedFile);
+        result.put("isFromXlzFile", isFromXlzFile);
         return result;
     }
 }

@@ -96,7 +96,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
     public static final Set<String> extensionSet = new HashSet<String>();
     // The Map for storing PDF future, the key is TargetPageID, the value is PDF Future.
-    private static final Map<Long, Future<File>> createPDFMap = new ConcurrentHashMap<Long, Future<File>>();
+    private static final Map<String, Future<File>> createPDFMap = new ConcurrentHashMap<String, Future<File>>();
     private static final ExecutorService serviceForINDD = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForFM = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForIDML = Executors.newSingleThreadExecutor();
@@ -147,18 +147,19 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     }
     
     // Cancel Creating PDF Threads.
-    public void cancelPDF(Set<Long> p_workflowIdSet) throws WorkflowManagerException, RemoteException
+    public void cancelPDF(Set<Long> p_workflowIdSet, String p_userId) throws WorkflowManagerException, RemoteException
     {
         for (long workflowId : p_workflowIdSet)
         {
             Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(workflowId);
             for (TargetPage tp : workflow.getTargetPages())
             {
-                Future<File> future = createPDFMap.get(tp.getId());
+                String key = getKey(tp, p_userId);
+                Future<File> future = createPDFMap.get(key);
                 if (future != null)
                 {
                     future.cancel(true);
-                    createPDFMap.remove(tp.getId());
+                    createPDFMap.remove(key);
                 }
             }
         }
@@ -187,20 +188,22 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         try
         {
             TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(p_targetPageId);
-            Future<File> future = createPDFMap.get(targetPage.getId());
+            String key = getKey(targetPage, p_userId);
+            Future<File> future = createPDFMap.get(key);
             if(future == null)
             {
                 createPDF(targetPage, p_userId);
-                future = createPDFMap.get(targetPage.getId());
+                future = createPDFMap.get(key);
             }      
             
             // Create PDF again, if no result.
-            if(future.get() == null)
+            File pdfFile = future.get();
+            if(pdfFile == null || !pdfFile.exists())
             {
                 future.cancel(true);
-                createPDFMap.remove(targetPage.getId());
+                createPDFMap.remove(key);
                 createPDF(targetPage, p_userId);
-                future = createPDFMap.get(targetPage.getId());
+                future = createPDFMap.get(key);
             }
                 
             return future.get();
@@ -216,11 +219,12 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     }
     
     // Create PDF file for Target Page
-    public void createPDF(TargetPage p_targetPage, String p_userId)
+    private void createPDF(TargetPage p_targetPage, String p_userId)
             throws WorkflowManagerException, RemoteException
     {
         // Cancel Duplicate Request
-        if(createPDFMap.get(p_targetPage.getId()) != null)
+        String key = getKey(p_targetPage, p_userId);
+        if(createPDFMap.get(key) != null)
             return;
         
         Callable<File> task;
@@ -230,7 +234,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             task = new CreatePDFTask(p_targetPage, p_userId, ADOBE_CS5_5);
             future = serviceForINDD.submit(task);
-            createPDFMap.put(p_targetPage.getId(), future);
+            createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(FM_SUFFIX))
         {
@@ -241,13 +245,13 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             editState.setExcludedItems(items);
             ((CreatePDFTask)task).setEditState(editState);
             future = serviceForFM.submit(task);
-            createPDFMap.put(p_targetPage.getId(), future);
+            createPDFMap.put(key, future);
         }
         else if (externalPageId.endsWith(IDML_SUFFIX))
         {
             task = new CreatePDFTask(p_targetPage, p_userId, ADOBE_TYPE_IDML);
             future = serviceForIDML.submit(task);
-            createPDFMap.put(p_targetPage.getId(), future);
+            createPDFMap.put(key, future);
         }
     }
     
@@ -261,14 +265,15 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_userId
      *            User ID
      */
-    public static void setJobDetailsPDFsBO(Workflow p_wf, JobDetailsPDFsBO p_pdfBO, String p_userId)
+    public void setJobDetailsPDFsBO(Workflow p_wf, JobDetailsPDFsBO p_pdfBO, String p_userId)
     {
         long totalPDFFileNumber = 0, existPDFFileNumber = 0;
         long companyId = p_wf.getCompanyId();
         for(TargetPage tp : p_wf.getTargetPages())
         {
             // Set Status
-            Future<File> future = createPDFMap.get(tp.getId());
+            String key = this.getKey(tp, p_userId);
+            Future<File> future = createPDFMap.get(key);
             if (future != null)
             {
                 if(future.isDone())
@@ -520,7 +525,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             backupInddFile(newFileNameMap, getConvertDir(p_params), trgLocale, oriXmlFileName, p_fileSuffix, p_job);
             // Upload XML file to converter
             String xmlFilePath = converterDir + File.separator + (String) newFileNameMap.get(XML_SUFFIX);
-            writeXMLFileToConvertDir(xmlFilePath, trgLocale, p_trgPageId, p_params);
+            writeXMLFileToConvertDir(xmlFilePath, trgLocale, p_trgPageId, p_params, p_userId);
             // Upload command file to converter
             writeCommandFile(xmlFilePath, p_params);
             
@@ -571,7 +576,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             String xmlFilePath = converterDir + File.separator + params.getRelSafeName();
             File zipDir = getZipDir(new File(xmlFilePath), params.getSafeBaseFileName());
             // write xml file
-            writeXMLFileToConvertDir(xmlFilePath, trgLocale, trgPageId, params);
+            writeXMLFileToConvertDir(xmlFilePath, trgLocale, trgPageId, params, p_userId);
             IdmlHelper.split(zipDir.getAbsolutePath());
             IDMLFontMappingHelper idmlFontMappinghelper = new IDMLFontMappingHelper();
             idmlFontMappinghelper.processIDMLFont(zipDir.getAbsolutePath(), trgLocale);
@@ -1048,9 +1053,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
      * @param p_request
      */
     private void writeXMLFileToConvertDir(String p_xmlFilePath, String p_trgLocale, 
-            long p_trgPageId, PreviewPDFBO p_params) throws Exception
+            long p_trgPageId, PreviewPDFBO p_params, String uid) throws Exception
     {
         ExportHelper ex = new ExportHelper();
+        ex.setUserId(uid);
         try
         {
             if (p_trgPageId == 0)
@@ -1063,9 +1069,20 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 xml = AdobeHelper.recoverLineBreak(xml);
             }
-            FontMappingHelper fontMappinghelper = new FontMappingHelper();
-            String processed = (p_params.getVersionType() == ADOBE_TYPE_IDML) ? xml 
-                    : fontMappinghelper.processInddXml(p_trgLocale, xml);
+            
+            String processed = xml;
+            // idml
+            if (p_params.getVersionType() == ADOBE_TYPE_IDML)
+            {
+                processed = xml;
+            }
+            // indd inx
+            else 
+            {
+                FontMappingHelper fontMappinghelper = new FontMappingHelper();
+                processed = fontMappinghelper.processInddXml(p_trgLocale, processed);
+            }
+            
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                     p_xmlFilePath.toString()), ExportConstants.UTF8), processed.length());
             writer.write(processed);
@@ -1459,4 +1476,16 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return srcFile;
 
     }
+    
+    private String getKey(TargetPage p_tp, String p_userId)
+    {
+        return p_tp.getId() + "_" + p_userId;
+    }
+    
+    /*
+    public void removeMapValue(TargetPage p_tp, String p_userId)
+    {
+        String key = getKey(p_tp, p_userId);
+        createPDFMap.remove(key);
+    }       */
 }

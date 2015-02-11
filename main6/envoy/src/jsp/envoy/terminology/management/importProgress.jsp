@@ -8,7 +8,10 @@
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.WebAppConstants,
         com.globalsight.everest.servlet.util.SessionManager,
-        java.io.IOException"
+        java.io.IOException,
+        org.dom4j.Document,
+        org.dom4j.DocumentHelper,
+        org.dom4j.Element"
     session="true"
 %>
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -38,6 +41,20 @@ String str_termbaseId =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_TB_ID);
 String xmlImportOptions =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_IMPORT_OPTIONS);
+
+Document doc = null;
+doc = DocumentHelper.parseText(xmlImportOptions);
+Element rootElt = doc.getRootElement();
+String warning = "false";
+Iterator iter = rootElt.elementIterator("fileOptions");
+while (iter.hasNext()) {
+    Element recordEle = (Element) iter.next();
+    String errorMessage = recordEle.elementTextTrim("errorMessage");
+    if(!errorMessage.equalsIgnoreCase(null) && !errorMessage.equals("")){
+    	warning = "ture";
+    }
+}
+urlRefresh = urlRefresh + "&warning="+warning;
 
 Object[] args = { str_termbaseName };
 MessageFormat format = new MessageFormat(
@@ -105,6 +122,7 @@ sessionMgr.setAttribute(WebAppConstants.TERMBASE_TB_NAME , str_termbaseName);
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <SCRIPT>
@@ -263,23 +281,15 @@ function showTermbase()
 function checkAnalysisError()
 {
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
-    var errorMessage = node.text;
+    
+    dom = $.parseXML(xmlImportOptions);
+    
+    var node = $(dom).find("importOptions fileOptions errorMessage");
+    var errorMessage = node.text();
     if (errorMessage != "")
     {
-        node.text = "";
+        //node.text = "";
+        node.text("");
 
         showWarning("<%=EditUtil.toJavascript(lb_failed_analysis)%>" +
           errorMessage);
@@ -288,16 +298,9 @@ function checkAnalysisError()
           "&" + WebAppConstants.TERMBASE_ACTION +
           "=" + WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
           
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-      		//oForm.importoptions.value = oImportOptions.xml;
-        	oForm.importoptions.value = result.domImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-        }
-        oForm.submit();
+         oForm.importoptions.value = getDomString(dom);
+
+         oForm.submit();
         return true;
     }
 

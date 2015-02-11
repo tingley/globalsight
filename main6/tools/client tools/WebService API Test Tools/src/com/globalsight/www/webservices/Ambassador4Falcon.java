@@ -16,6 +16,9 @@ public interface Ambassador4Falcon extends java.rmi.Remote {
     public java.lang.String getDetailedWordcounts(java.lang.String p_accessToken, java.lang.String[] p_jobIds, java.lang.Boolean p_includeMTData) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
     public java.lang.String getWorkflowTemplateNames(java.lang.String p_accessToken) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
     public java.lang.String modifyWorkflowTemplateAssignees(java.lang.String p_accessToken, java.lang.String p_workflowTemplateName, java.lang.String p_companyName, java.lang.String p_activityAssigneesInJson) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
+    public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
+    public java.lang.String uploadWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, java.lang.String p_fileName, byte[] bytes) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
+    public java.lang.String importWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, java.lang.String p_identifyKey, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
     public boolean isInstalled() throws java.rmi.RemoteException;
     public java.lang.String login(java.lang.String p_username, java.lang.String p_password) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;
     public java.lang.String helloWorld() throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException;

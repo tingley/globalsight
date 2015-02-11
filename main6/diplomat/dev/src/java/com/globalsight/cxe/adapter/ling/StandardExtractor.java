@@ -87,11 +87,12 @@ import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
+import com.globalsight.ling.docproc.extractor.msoffice2010.PptxExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
-import com.globalsight.util.edit.SegmentUtil;
+import com.globalsight.util.edit.SegmentUtil; 
 
 /**
  * StandardExtractor is a helper class for the LingAdapter.
@@ -321,15 +322,23 @@ public class StandardExtractor
     
     private WordExtractor createWordExtractor()
     {
-    	WordExtractor e = new WordExtractor();
-    	e.addOptions("isToolTipsTranslate", m_isToolTipsTranslate);
-    	e.addOptions("unCharStyles", m_office_unChar);
-    	e.addOptions("unParaStyles", m_office_unPara);
-    	e.addOptions("internalCharStyles", m_office_internalChar);
-    	e.addOptions("isHiddenTextTranslate", m_isHiddenTextTranslate);
-    	e.addOptions("isTableOfContentTranslate", m_isTableOfContentTranslate);
-    	
-    	return e;
+        WordExtractor e = new WordExtractor();
+        e.addOptions("isToolTipsTranslate", m_isToolTipsTranslate);
+        e.addOptions("unCharStyles", m_office_unChar);
+        e.addOptions("unParaStyles", m_office_unPara);
+        e.addOptions("internalCharStyles", m_office_internalChar);
+        e.addOptions("isHiddenTextTranslate", m_isHiddenTextTranslate);
+        e.addOptions("isTableOfContentTranslate", m_isTableOfContentTranslate);
+        
+        return e;
+    }
+    
+    private PptxExtractor createPptxExtractor()
+    {
+        PptxExtractor e = new PptxExtractor();
+        e.addOptions("isToolTipsTranslate", m_isToolTipsTranslate);
+        
+        return e;
     }
     
     /**
@@ -397,7 +406,7 @@ public class StandardExtractor
         }
         else
         {
-            // Use segmentaion rule configed.
+            // Use segmentation rule configured.
             if (val.validate(ruleText, srf.getType()))
             {
                 diplomat.setSegmentationRuleText(ruleText);
@@ -413,14 +422,19 @@ public class StandardExtractor
         diplomat.setLocale(m_locale);
         diplomat.setInputFormat(m_formatType);
         
-		 if (WordExtractor.useNewExtractor(m_fileProfile))
-		 {
-			 if (m_displayName.toLowerCase().endsWith(".docx"))
-			 {
-				 WordExtractor extractor = createWordExtractor();
-				 diplomat.setExtractor(extractor);
-			 }
-		 }
+         if (WordExtractor.useNewExtractor(m_fileProfile))
+         {
+             if (m_displayName.toLowerCase().endsWith(".docx"))
+             {
+                 WordExtractor extractor = createWordExtractor();
+                 diplomat.setExtractor(extractor);
+             }
+             else if (m_displayName.toLowerCase().endsWith(".pptx"))
+             {
+                 PptxExtractor extractor = createPptxExtractor();
+                 diplomat.setExtractor(extractor);
+             }
+         }
 
         if (m_ruleFile != null)
         {
@@ -458,16 +472,10 @@ public class StandardExtractor
 
         if (fp != null && fp.isExtractWithSecondFilter())
         {
-            String secondFilterTableName = "";
-            long secondFilterId = -1;
-
-            // Not from aligner.
-            secondFilterTableName = fp.getSecondFilterTableName();
-            secondFilterId = fp.getSecondFilterId();
-
+            String secondFilterTableName = fp.getSecondFilterTableName();
+            long secondFilterId = fp.getSecondFilterId();
             boolean isFilterExist = false;
-            if (secondFilterTableName != null
-                    && !"".equals(secondFilterTableName.trim())
+            if (StringUtil.isNotEmpty(secondFilterTableName)
                     && secondFilterId > 0)
             {
                 isFilterExist = FilterHelper.isFilterExist(
@@ -711,26 +719,28 @@ public class StandardExtractor
      * Secondary Extractor (HTML/XML Extractor), the data will be parsed by
      * SegmentUtil.replaceHtmltagWithPH.
      */
+    @SuppressWarnings("rawtypes")
     private void doSecondFilterForPO(Output p_extractedOutPut, Iterator p_it,
             DiplomatAPI p_diplomat, FileProfileImpl p_fp, String p_fpId,
             long p_secondFilterId, String p_secondFilterTableName)
             throws ExtractorException, DiplomatWordCounterException,
             DiplomatSegmenterException, ExtractorRegistryException, Exception
     {
+        String inputFormatName = getInputFormatName(p_secondFilterTableName);
+        boolean isXML = FilterConstants.XMLRULE_TABLENAME
+                .equals(p_secondFilterTableName);
+        boolean isHTML = FilterConstants.HTML_TABLENAME
+                .equals(p_secondFilterTableName);
+
         ArrayList segSource = new ArrayList();
         ArrayList segTarget = new ArrayList();
         TranslatableElement elemSource = new TranslatableElement();
         TranslatableElement elemTarget = new TranslatableElement();
         String xliffpart;
-        boolean isXML = FilterConstants.XMLRULE_TABLENAME
-                .equals(p_secondFilterTableName);
-        boolean isHTML = FilterConstants.HTML_TABLENAME
-                .equals(p_secondFilterTableName);
         DiplomatWordCounter wc = new DiplomatWordCounter();
         while (p_it.hasNext())
         {
             DocumentElement element = (DocumentElement) p_it.next();
-
             if (element instanceof TranslatableElement)
             {
                 ArrayList segments = ((TranslatableElement) element)
@@ -751,21 +761,24 @@ public class StandardExtractor
 
                 // If need do a secondary filter.
                 boolean needSecondaryFilter = true;
-                if (segSource != null && segTarget != null
-                        && segSource.size() == segTarget.size())
-                {
-                    String source, target;
-                    for (int i = 0, max = segSource.size(); i < max; i++)
-                    {
-                        source = ((SegmentNode) segSource.get(i)).getSegment();
-                        target = ((SegmentNode) segTarget.get(i)).getSegment();
-                        if (!StringUtil.equalsIgnoreSpace(source, target))
-                        {
-                            needSecondaryFilter = false;
-                            break;
-                        }
-                    }
-                }
+                // Because of GBS-2785, we can not know target language of text
+                // in "msgstr", all "msgstr" will be ignored for now. So here
+                // all segments from PO file can go through secondary filter.
+//                if (segSource != null && segTarget != null
+//                        && segSource.size() == segTarget.size())
+//                {
+//                    String source, target;
+//                    for (int i = 0, max = segSource.size(); i < max; i++)
+//                    {
+//                        source = ((SegmentNode) segSource.get(i)).getSegment();
+//                        target = ((SegmentNode) segTarget.get(i)).getSegment();
+//                        if (!StringUtil.equalsIgnoreSpace(source, target))
+//                        {
+//                            needSecondaryFilter = false;
+//                            break;
+//                        }
+//                    }
+//                }
 
                 SegmentNode sn;
                 String seg;
@@ -776,9 +789,9 @@ public class StandardExtractor
                     {
                         sn = (SegmentNode) segSource.get(i);
                         seg = sn.getSegment();
-                        seg = seg.replace("&amp;", m_tag_amp);
                         if (isXML && !checkIfXMLIsWellFormed(seg))
                         {
+                            seg = seg.replace("&amp;", m_tag_amp);
                             seg = m_tag_start + seg + m_tag_end;
                             if (checkIfXMLIsWellFormed(seg))
                             {
@@ -794,40 +807,32 @@ public class StandardExtractor
                     for (int i = 0, max = segSource.size(); i < max; i++)
                     {
                         p_diplomat.resetForChainFilter();
-
-                        // Not from aligner.
                         if (p_fp != null)
                         {
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);
-                            p_diplomat
-                                    .setFilterTableName(p_secondFilterTableName);
+                            p_diplomat.setFilterTableName(p_secondFilterTableName);
                         }
-
-                        String inputFormatName = getInputFormatName(p_secondFilterTableName);
                         p_diplomat.setInputFormat(inputFormatName);
 
                         SegmentNode node = (SegmentNode) segSource.get(i);
                         XmlEntities xe = new XmlEntities();
-                        String segmentValue = xe.decodeStringBasic(node
-                                .getSegment());
+                        String segmentValue = xe.decodeStringBasic(node.getSegment());
                         // decode TWICE to make sure secondary parser can work
-                        // as expected,
-                        // but it will result in an entity issue,seems it can't
-                        // be resolved
-                        // in current framework of GS.
+                        // as expected, but it will result in an entity
+                        // issue,seems it can't be resolved in current framework
+                        // of GS.
                         if (segmentValue.indexOf("&") > -1)
                         {
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 
-                        if (inputFormatName != null
-                                && inputFormatName.equals("html"))
+                        if ("html".equalsIgnoreCase(inputFormatName))
                         {
                             segmentValue = checkHtmlTags(segmentValue);
                         }
                         p_diplomat.setSourceString(segmentValue);
-
+                        p_diplomat.setExtractor(null);
                         // extract this segment
                         try
                         {
@@ -866,6 +871,9 @@ public class StandardExtractor
                                 {
                                     String text = ((SkeletonElement) element2)
                                             .getSkeleton();
+                                    if (m_tag_start.equals(text)
+                                            || m_tag_end.equals(text))
+                                        continue;
                                     if (isXML && text.startsWith(m_tag_start))
                                     {
                                         text = text.substring(m_tag_start

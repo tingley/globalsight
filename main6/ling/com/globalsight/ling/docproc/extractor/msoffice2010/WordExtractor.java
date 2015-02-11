@@ -354,44 +354,6 @@ public class WordExtractor extends AbstractExtractor
     	handleChild(node);
     }
     
-    private void getXmlString(Node node, StringBuilder sb)
-    {
-    	if (node.getNodeType() == Node.TEXT_NODE)
-    	{
-    		sb.append(escapeString(node.getTextContent()));
-    		return;
-    	}
-    	
-    	// start
-    	String name = node.getNodeName();
-    	sb.append("&lt;");
-    	sb.append(name);
-    	NamedNodeMap attrs = node.getAttributes();
-        for (int j = 0; j < attrs.getLength(); ++j)
-        {
-            Node att = attrs.item(j);
-            String attname = att.getNodeName();
-            String value = att.getNodeValue();
-            
-            sb.append(" ").append(attname).append("=\"");
-            sb.append(escapeString(value));
-            sb.append("\"");
-        }
-    	sb.append("&gt;");
-    	
-    	// child
-    	List<Node> cs = util.getChildNodes(node);
-		for (Node c : cs)
-		{
-			getXmlString(c, sb);
-		}
-    	
-		// end
-    	sb.append("&lt;/");
-    	sb.append(node.getNodeName());
-    	sb.append("&gt;");
-    }
-    
     private String getType(Node node)
     {
     	String nodeName = node.getNodeName();
@@ -805,7 +767,7 @@ public class WordExtractor extends AbstractExtractor
     		
     		if (commentContent != null)
     		{
-    			getXmlString(commentContent, sb);
+    			util.getXmlString(commentContent, sb);
     		}
     		
     		addFldEnd(node, sb);
@@ -830,7 +792,7 @@ public class WordExtractor extends AbstractExtractor
     		sb.append("<ept i=\"").append(index2).append("\">");
     	}
     	
-	    getXmlString(node, sb);
+	    util.getXmlString(node, sb);
 	    
 		if (flag)
 		{
@@ -853,7 +815,7 @@ public class WordExtractor extends AbstractExtractor
     	}
     	
     	StringBuilder s = new StringBuilder();
-		getXmlString(node, s);
+		util.getXmlString(node, s);
 		
 		String content = s.toString();
 		
@@ -939,7 +901,7 @@ public class WordExtractor extends AbstractExtractor
     	{
     		StringBuilder sb = new StringBuilder();
 			sb.append("<ph type=\"tag\" i=\"").append(++index).append("\">");
-			getXmlString(node, sb);
+			util.getXmlString(node, sb);
 			sb.append("</ph>");
 			outputTranslatableTmx(sb.toString());
 			

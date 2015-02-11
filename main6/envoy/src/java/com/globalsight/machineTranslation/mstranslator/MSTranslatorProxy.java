@@ -28,6 +28,7 @@ import org.tempuri.SoapService;
 import org.tempuri.SoapServiceLocator;
 
 import com.globalsight.machineTranslation.AbstractTranslator;
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.microsofttranslator.api.V2.LanguageService;
@@ -107,10 +108,10 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 }
                 catch (Exception e)
                 {
-                    CATEGORY.error(e.getMessage(), e);
+                    CATEGORY.error(e.getMessage());
                 }
             }
-            CATEGORY.error(ex.getMessage(), ex);
+            CATEGORY.error(ex.getMessage());
         }
 
         return false;
@@ -189,7 +190,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 }
                 catch (Exception e)
                 {
-                    CATEGORY.error(e.getMessage(), e);
+                    CATEGORY.error(e.getMessage());
                 }
    		    }
 
@@ -211,6 +212,13 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             Locale p_targetLocale, String[] segments)
             throws MachineTranslationException
     {
+        if (MTHelper.isLogDetailedInfo())
+        {
+            for (int i = 0; i < segments.length; i++)
+            {
+                CATEGORY.info("Source segment[" + i + "]:" + segments[i]);
+            }
+        }
     	String[] results = null;
 
         String sourceLang = p_sourceLocale.getLanguage();
@@ -292,6 +300,13 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             for (int i = 0; i < result.length; i++)
             {
                 results[i] = result[i].getTranslatedText();
+            }
+            if (MTHelper.isLogDetailedInfo())
+            {
+                for (int i = 0; i < results.length; i++)
+                {
+                    CATEGORY.info("Translated segment[" + i + "]:" + results[i]);
+                }
             }
         }
         else

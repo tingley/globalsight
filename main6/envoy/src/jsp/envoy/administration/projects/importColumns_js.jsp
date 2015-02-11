@@ -67,14 +67,21 @@ function Associate(event)
       		//dom = parser.parseFromString(xmlImportOptions,"text/xml");
       		dom = oProperties.importOptions;
     	}
+		var node;
+ 		var nodes = $(dom).find("importOptions columnOptions column");
+        for(i=0;i < nodes.length;i++)
+        {
+        	var attrVlue = $(nodes[i]).attr("id");
+        	if(attrVlue == id)
+        	{
+        		node = nodes[i]
+        	}
+        }
 
-        node = dom.selectSingleNode(
-            "/importOptions/columnOptions/column[@id='" + id + "']");
-
-        name = node.selectSingleNode("name").text;
-        example = node.selectSingleNode("example").text;
-        type = node.selectSingleNode("type").text;
-        subtype = node.selectSingleNode("subtype").text;
+        name = $(node).find("name").text();
+        example = $(node).find("example").text();
+        type = $(node).find("type").text();
+        subtype = $(node).find("subtype").text();
 
         aColumns[id] = new Column(id, name, example, type, subtype);
 

@@ -17,9 +17,12 @@
 package com.globalsight.ling.tm2.leverage;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -31,6 +34,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.request.Request;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
@@ -129,20 +133,7 @@ public class Leverager
                 // if a page tm for the page exists, latest re-import is true
                 leverageOptions.setLatestReimport(tmId != 0);
             }
-
-            // Leverage from Segment Tms.
-            levMatchResult = new LeverageMatchResults();
-            if (tm2Tms.size() > 0)
-            {
-                levMatchResult = new Tm2SegmentTmInfo().leverage(tm2Tms,
-                        p_leverageDataCenter, companyId);
-            }
-            if (tm3Tms.size() > 0)
-            {
-                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(tm3Tms,
-                        p_leverageDataCenter, companyId));
-            }
-
+            
             // get job infor
             Request req = p_sourcePage.getRequest();
             Job job = null;
@@ -154,7 +145,7 @@ public class Leverager
                     EventFlowXmlParser p = new EventFlowXmlParser();
                     p.parse(eventFlowXml);
 
-                    job = (new JobHandlerLocal()).getJobById(Long.parseLong(p
+                    job = ServerProxy.getJobHandler().getJobById(Long.parseLong(p
                             .getJobId()));
                 }
                 catch (Exception e)
@@ -163,12 +154,33 @@ public class Leverager
                 }
             }
 
-            p_leverageDataCenter.setJob(job);
-            p_leverageDataCenter
-                    .addLeverageResultsOfSegmentTmMatching(levMatchResult);
-
-            // apply Segment Tm leverage options
-            p_leverageDataCenter.applySegmentTmOptions();
+            if (!leverageOptions.dynamicLeveragesStopSearch())
+            {
+                levMatchResult = new LeverageMatchResults();
+                // Leverage from Segment Tms.
+                if (tm2Tms.size() > 0)
+                {
+                    levMatchResult = new Tm2SegmentTmInfo().leverage(tm2Tms,
+                            p_leverageDataCenter, companyId);
+                }
+                if (tm3Tms.size() > 0)
+                {
+                    levMatchResult.merge(new Tm3SegmentTmInfo().leverage(tm3Tms,
+                            p_leverageDataCenter, companyId));
+                }
+    
+                p_leverageDataCenter.setJob(job);
+                p_leverageDataCenter
+                        .addLeverageResultsOfSegmentTmMatching(levMatchResult);
+    
+                // apply Segment Tm leverage options
+                p_leverageDataCenter.applySegmentTmOptions();
+            }
+            else
+            {
+                leverageDataCenterWithStopSearch(job, p_leverageDataCenter,
+                        tm2Tms, tm3Tms, companyId);
+            }
         }
         catch (LingManagerException le)
         {
@@ -183,6 +195,149 @@ public class Leverager
         {
             DbUtil.silentReturnConnection(conn);
         }
+    }
+
+    // GBS-3282 hierarchical TMs stop search after hitting 100% match
+    public void leverageDataCenterWithStopSearch(Job job,
+            LeverageDataCenter p_leverageDataCenter, List<Tm> tm2Tms,
+            List<Tm> tm3Tms, String companyId) throws Exception
+    {
+        LeverageMatchResults levMatchResultHere = new LeverageMatchResults();
+        Collection targetLocales = p_leverageDataCenter.getTargetLocales();
+        Collection<BaseTmTuv> oriTuvs = p_leverageDataCenter
+                .getOriginalSourceTuvs();
+        List<BaseTmTuv> oriAllTuvs = new ArrayList<BaseTmTuv>();
+
+        for (BaseTmTuv baseTmTuv : oriTuvs)
+        {
+            oriAllTuvs.add(baseTmTuv);
+        }
+
+        for (Object object : targetLocales)
+        {
+            GlobalSightLocale l = (GlobalSightLocale) object;
+            Collection cl = new ArrayList();
+            cl.add(l);
+            p_leverageDataCenter.resetForStopSearch(cl, oriAllTuvs);
+            List<Tm> temp = new ArrayList<Tm>(1);
+            List<BaseTmTuv> exactMatchTuvs = new ArrayList<BaseTmTuv>();
+            List<BaseTmTuv> tempExactMatchTuvs = new ArrayList<BaseTmTuv>();
+            boolean isAllExactMatch = false;
+
+            for (Tm tm2 : tm2Tms)
+            {
+                temp.clear();
+                tempExactMatchTuvs.clear();
+                temp.add(tm2);
+                LeverageMatchResults tmLevMatchResults = new LeverageMatchResults();
+                LeverageMatchResults rightResults = new LeverageMatchResults();
+                tmLevMatchResults = new Tm2SegmentTmInfo().leverage(temp,
+                        p_leverageDataCenter, companyId);
+
+                isAllExactMatch = checkMatchResult(p_leverageDataCenter,
+                        companyId, job, exactMatchTuvs, tempExactMatchTuvs,
+                        tmLevMatchResults, rightResults, l);
+
+                levMatchResultHere.merge(rightResults);
+
+                if (isAllExactMatch)
+                {
+                    break;
+                }
+
+                p_leverageDataCenter
+                        .removeOriginalSourceTuv(tempExactMatchTuvs);
+            }
+
+            if (!isAllExactMatch)
+            {
+                for (Tm tm3 : tm3Tms)
+                {
+                    temp.clear();
+                    tempExactMatchTuvs.clear();
+                    temp.add(tm3);
+                    LeverageMatchResults tmLevMatchResults = new LeverageMatchResults();
+                    LeverageMatchResults rightResults = new LeverageMatchResults();
+                    tmLevMatchResults.merge(new Tm3SegmentTmInfo().leverage(
+                            temp, p_leverageDataCenter, companyId));
+
+                    isAllExactMatch = checkMatchResult(p_leverageDataCenter,
+                            companyId, job, exactMatchTuvs, tempExactMatchTuvs,
+                            tmLevMatchResults, rightResults, l);
+                    levMatchResultHere.merge(rightResults);
+
+                    if (isAllExactMatch)
+                    {
+                        break;
+                    }
+
+                    p_leverageDataCenter
+                            .removeOriginalSourceTuv(tempExactMatchTuvs);
+                }
+            }
+        }
+
+        p_leverageDataCenter.resetForStopSearch(targetLocales, oriAllTuvs);
+        p_leverageDataCenter.setJob(job);
+        p_leverageDataCenter
+                .addLeverageResultsOfSegmentTmMatching(levMatchResultHere);
+    }
+
+    private boolean checkMatchResult(LeverageDataCenter p_leverageDataCenter,
+            String companyId, Job job, List<BaseTmTuv> exactMatchTuvs,
+            List<BaseTmTuv> tempExactMatchTuvs,
+            LeverageMatchResults tmLevMatchResults,
+            LeverageMatchResults rightResults, GlobalSightLocale targetLocale)
+            throws Exception
+    {
+        boolean isAllMatched = false;
+        Iterator<LeverageMatches> itLeverageMatches = tmLevMatchResults
+                .iterator();
+        while (itLeverageMatches.hasNext())
+        {
+            LeverageMatches levMatches = itLeverageMatches.next();
+
+            // value of m_uniqueSeparatedSegments can be null
+            if (levMatches != null)
+            {
+                levMatches.setJob(job);
+                levMatches.applySegmentTmOptions();
+            }
+
+            LeveragedTuv levTuv = levMatches.getExactLeverageMatch(
+                    targetLocale, companyId);
+            // find exact match, then stop search other tms
+            BaseTmTuv srctuv = levMatches.getOriginalTuv();
+            if (levTuv != null)
+            {
+                exactMatchTuvs.add(srctuv);
+                tempExactMatchTuvs.add(srctuv);
+                LeverageMatches newLevMatches = new LeverageMatches(srctuv,
+                        p_leverageDataCenter.getLeverageOptions());
+                newLevMatches.merge(levMatches, targetLocale);
+                rightResults.add(newLevMatches);
+                
+                Set<BaseTmTuv> tuvKeys = p_leverageDataCenter
+                        .getOriginalSourceTuvKeys();
+
+                if (tuvKeys != null
+                        && tempExactMatchTuvs.size() == tuvKeys.size())
+                {
+                    isAllMatched = true;
+                    break;
+                }
+            }
+            // not exact match, but we should save them too
+            else
+            {
+                LeverageMatches newLevMatches = new LeverageMatches(srctuv,
+                        p_leverageDataCenter.getLeverageOptions());
+                newLevMatches.merge(levMatches, targetLocale);
+                rightResults.add(newLevMatches);
+            }
+        }
+
+        return isAllMatched;
     }
 
     /**
@@ -200,15 +355,6 @@ public class Leverager
             LeverageOptions p_leverageOptions, List<Tm> tm2Tms, List<Tm> tm3Tms)
             throws Exception
     {
-        LeverageMatches levMatches = new Tm2SegmentTmInfo().leverageSegment(
-                p_sourceTuv, p_leverageOptions, tm2Tms);
-        LeverageMatches tm3Matches = new Tm3SegmentTmInfo().leverageSegment(
-                p_sourceTuv, p_leverageOptions, tm3Tms);
-        if (tm3Matches != null)
-        {
-            levMatches.merge(tm3Matches);
-        }
-
         Job j = null;
         try
         {
@@ -225,17 +371,100 @@ public class Leverager
 
         String companyId = j != null ? String.valueOf(j.getCompanyId())
                 : CompanyWrapper.getCurrentCompanyId();
-        levMatches.setJob(j);
+        
+        if (!p_leverageOptions.dynamicLeveragesStopSearch())
+        {
+            LeverageMatches levMatches = new Tm2SegmentTmInfo()
+                    .leverageSegment(p_sourceTuv, p_leverageOptions, tm2Tms);
+            LeverageMatches tm3Matches = new Tm3SegmentTmInfo()
+                    .leverageSegment(p_sourceTuv, p_leverageOptions, tm3Tms);
+            if (tm3Matches != null)
+            {
+                levMatches.merge(tm3Matches);
+            }
+            
+            levMatches.setJob(j);
 
-        // apply leverage option.
-        levMatches.applySegmentTmOptions();
-        // remove STATISTICS_MATCH and NOT_A_MATCH
-        levMatches.removeNoMatches();
+            // apply leverage option.
+            levMatches.applySegmentTmOptions();
+            // remove STATISTICS_MATCH and NOT_A_MATCH
+            levMatches.removeNoMatches();
 
-        // create DynamicLeverageResults from LeverageMatches
-        GlobalSightLocale targetLocale = getFirstTargetLocale(p_leverageOptions);
-        return createDynamicLeverageResults(levMatches, p_sourceTuv,
-                targetLocale, companyId);
+            // create DynamicLeverageResults from LeverageMatches
+            GlobalSightLocale targetLocale = getFirstTargetLocale(p_leverageOptions);
+            return createDynamicLeverageResults(levMatches, p_sourceTuv,
+                    targetLocale, companyId);
+        }
+        else
+        {
+            List<Tm> temp = new ArrayList<Tm>(1);
+            boolean isExactMatch = false;
+            LeverageMatches alllevMatches = new LeverageMatches(p_sourceTuv, p_leverageOptions);
+            
+            for (Tm tm2 : tm2Tms)
+            {
+                temp.clear();
+                temp.add(tm2);
+
+                LeverageMatches levMatches = new Tm2SegmentTmInfo()
+                        .leverageSegment(p_sourceTuv, p_leverageOptions, temp);
+
+                if (levMatches != null)
+                {
+                    levMatches.setJob(j);
+                    // apply leverage option.
+                    levMatches.applySegmentTmOptions();
+                    // remove STATISTICS_MATCH and NOT_A_MATCH
+                    levMatches.removeNoMatches();
+                    
+                    alllevMatches.merge(levMatches);
+                    
+                    ExactLeverageMatch elm = levMatches.getExactLeverageMatch(companyId);
+                    // find exact match, then stop search other tms
+                    if (elm != null && elm.targetLocaleIterator().hasNext())
+                    {
+                        isExactMatch = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!isExactMatch)
+            {
+                for (Tm tm3 : tm3Tms)
+                {
+                    temp.clear();
+                    temp.add(tm3);
+
+                    LeverageMatches tm3Matches = new Tm3SegmentTmInfo()
+                            .leverageSegment(p_sourceTuv, p_leverageOptions, temp);
+
+                    if (tm3Matches != null)
+                    {
+                        tm3Matches.setJob(j);
+                        // apply leverage option.
+                        tm3Matches.applySegmentTmOptions();
+                        // remove STATISTICS_MATCH and NOT_A_MATCH
+                        tm3Matches.removeNoMatches();
+                        
+                        alllevMatches.merge(tm3Matches);
+                        
+                        ExactLeverageMatch elm = tm3Matches.getExactLeverageMatch(companyId);
+                        // find exact match, then stop search other tms
+                        if (elm != null && elm.targetLocaleIterator().hasNext())
+                        {
+                            isExactMatch = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // create DynamicLeverageResults from LeverageMatches
+            GlobalSightLocale targetLocale = getFirstTargetLocale(p_leverageOptions);
+            return createDynamicLeverageResults(alllevMatches, p_sourceTuv,
+                    targetLocale, companyId);
+        }
     }
 
     private DynamicLeverageResults createDynamicLeverageResults(

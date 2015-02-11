@@ -65,41 +65,48 @@ public class PptxRepairer extends OfficeRepairer
         
         for (File f : fs)
         {
-    		StyleUtil util = StyleFactory.getStyleUtil(StyleFactory.PPTX);
-    		util.updateBeforeExport(f.getAbsolutePath());
-        	
-            String content = FileUtil.readFile(f, "utf-8");
-            
-            XmlParser parser = new XmlParser();
-            org.dom4j.Document document = parser.parseXml(content);
-            Element element = document.getRootElement();
-            
-            @SuppressWarnings("unchecked")
-            List<Element> ats = element.selectNodes("//a:t");
-            
-            for (Element at : ats)
+            try
             {
-            	if (at == null)
-            		continue;
-            	
-            	@SuppressWarnings("unchecked")
-                List<Element> es = at.elements();
-                if (!at.isTextOnly())
+                StyleUtil util = StyleFactory.getStyleUtil(StyleFactory.PPTX);
+                util.updateBeforeExport(f.getAbsolutePath());
+                
+                String content = FileUtil.readFile(f, "utf-8");
+                
+                XmlParser parser = new XmlParser();
+                org.dom4j.Document document = parser.parseXml(content);
+                Element element = document.getRootElement();
+                
+                @SuppressWarnings("unchecked")
+                List<Element> ats = element.selectNodes("//a:t");
+                
+                for (Element at : ats)
                 {
-                    String text = at.getStringValue();
-                    for (Element e : es)
-                    {
-                        at.remove(e);
-                    }
+                    if (at == null)
+                        continue;
                     
-                    at.setText(text);
+                    @SuppressWarnings("unchecked")
+                    List<Element> es = at.elements();
+                    if (!at.isTextOnly())
+                    {
+                        String text = at.getStringValue();
+                        for (Element e : es)
+                        {
+                            at.remove(e);
+                        }
+                        
+                        at.setText(text);
+                    }
                 }
+                
+                Writer fileWriter = new OutputStreamWriter(new FileOutputStream(f), "UTF-8") ;
+                XMLWriter xmlWriter = new XMLWriter(fileWriter);
+                xmlWriter.write(document);
+                xmlWriter.close();
             }
-            
-            Writer fileWriter = new OutputStreamWriter(new FileOutputStream(f), "UTF-8") ;
-            XMLWriter xmlWriter = new XMLWriter(fileWriter);
-            xmlWriter.write(document);
-            xmlWriter.close();
+            catch(Exception e)
+            {
+                //do nothing.
+            }
         }
     }
 }

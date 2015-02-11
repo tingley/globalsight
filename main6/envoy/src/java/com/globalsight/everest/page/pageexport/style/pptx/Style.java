@@ -1,16 +1,21 @@
 package com.globalsight.everest.page.pageexport.style.pptx;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
 
 /**
  * A abstract class that to handle the style node. For example <b> node in DOCX
  * document.xml file.
  * 
  */
-public abstract class Style
+public abstract class Style extends XmlUtil
 {
     /**
      * Adds style to the DOCX document. Should not be null.
@@ -23,10 +28,19 @@ public abstract class Style
     {
         NodeList bNodes = document.getElementsByTagName(getNodeName());
         int found = bNodes.getLength();
+        List<Node> nodes = new ArrayList<Node>();
 
         for (int i = 0; i < found; i++)
         {
-            handleStyleNode(bNodes.item(i));
+        	nodes.add(bNodes.item(i));
+        }
+        
+        for (Node n : nodes)
+        {
+        	if (n != null)
+        	{
+               handleStyleNode(n);
+        	}
         }
 
         return found;
@@ -93,11 +107,16 @@ public abstract class Style
      * 
      * @param bNode
      */
-    private void handleStyleNode(Node bNode)
+    protected void handleStyleNode(Node bNode)
     {
         Node atNode = bNode.getParentNode();
         Node arNode = atNode.getParentNode();
         Node root = arNode.getParentNode();
+        
+        if (atNode == null || arNode == null || root == null)
+        {
+            return;
+        }
 
         if (arNode.getNodeName().equals("a:r"))
         {
@@ -105,17 +124,7 @@ public abstract class Style
             while (cNode != null)
             {
                 Node cloneNode = arNode.cloneNode(true);
-
-                if (cNode.getNodeName().equals(getNodeName()))
-                {
-                    addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(),
-                            atNode.getNodeName());
-                    // Style node can be nested.
-                }
-
-                changeText(cloneNode, atNode.getNodeName(), cNode);
-
-                root.insertBefore(cloneNode, arNode);
+                updateStyle(cNode, cloneNode, atNode, arNode, root);
 
                 // The br style should be removed.
                 if (cNode.getNextSibling() != null)
@@ -128,6 +137,21 @@ public abstract class Style
 
             root.removeChild(arNode);
         }
+    }
+    
+    protected void updateStyle(Node cNode, Node cloneNode, Node atNode,
+			Node arNode, Node root)
+    {
+        if (cNode.getNodeName().equals(getNodeName()))
+        {
+            addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(),
+                    atNode.getNodeName());
+            // Style node can be nested.
+        }
+
+        changeText(cloneNode, atNode.getNodeName(), cNode);
+
+        root.insertBefore(cloneNode, arNode);
     }
 
     /**
@@ -179,11 +203,6 @@ public abstract class Style
         {
             if (styleNode.getNodeType() == Node.TEXT_NODE)
             {
-                if ("w:t".equals(t.getNodeName()) && t instanceof Element)
-                {
-                    Element e = (Element) t;
-                    e.setAttribute("xml:space", "preserve");
-                }
                 t.setTextContent(styleNode.getTextContent());
             }
             else if (styleNode.getNodeName().equals(getNodeName()))
@@ -205,7 +224,7 @@ public abstract class Style
         }
     }
 
-    private Node getChild(Node node, String name)
+    protected Node getChild(Node node, String name)
     {
         Node n = node.getFirstChild();
         while (n != null && !name.equals(n.getNodeName()))

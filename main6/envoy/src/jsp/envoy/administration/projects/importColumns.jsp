@@ -56,6 +56,7 @@ TEXTAREA     { overflow: auto; }
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/envoy/terminology/management/import.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/envoy/administration/projects/importObjects_js.jsp"></SCRIPT>
@@ -97,14 +98,7 @@ function doNext()
         "&" + WebAppConstants.TM_ACTION +
         "=" + WebAppConstants.TM_ACTION_SET_IMPORT_OPTIONS%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-      	oForm.importoptions.value = oImportOptions.xml;
-      }
-      else
-      {
-      	oForm.importoptions.value = XML.getDomString(result.dom);
-      }
+      oForm.importoptions.value = getDomString(result.dom);
       
       oForm.submit();
     }
@@ -154,14 +148,7 @@ function doReAnalyze()
         "&" + WebAppConstants.TM_ACTION +
         "=" + WebAppConstants.TM_ACTION_ANALYZE_FILE%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-      	oForm.importoptions.value = oImportOptions.xml;
-      }
-      else
-      {
-      	oForm.importoptions.value = XML.getDomString(result.dom);
-      }
+      oForm.importoptions.value = getDomString(result.dom);
       oForm.submit();
     }
 }
@@ -196,14 +183,7 @@ function doTestrun()
         "&" + WebAppConstants.TM_ACTION +
         "=" + WebAppConstants.TM_ACTION_TEST_IMPORT%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-      	oForm.importoptions.value = oImportOptions.xml;
-      }
-      else
-      {
-      	oForm.importoptions.value = XML.getDomString(result.dom);
-      }
+      oForm.importoptions.value = getDomString(result.dom);
       
       oForm.submit();
     }
@@ -212,49 +192,42 @@ function doTestrun()
 function buildOptions()
 {
     var result = new Result("", null);
-	var dom;
+	var dom = $.parseXML(xmlImportOptions);
     var node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
+    node = $(dom).find("importOptions columnOptions");
+    var len = node.children().length;
+    while(len > 0)
     {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
+   		node.children().eq(0).remove();
+   		len = node.children().length;
     }
     
-    node = dom.selectSingleNode("/importOptions/columnOptions");
-    while (node.hasChildNodes())
-    {
-        node.removeChild(node.firstChild);
-    }
-
     for (i = 0; i < aColumns.length; ++i)
     {
         var oCol = aColumns[i];
 
         var id = dom.createAttribute("id");
         var elem = dom.createElement("column");
+        node.append(elem);
+        var len = $(node).find("column").length;
+        elem = $(node).find("column").eq(len-1);
+        
         var name = dom.createElement("name");
         var example = dom.createElement("example");
         var type = dom.createElement("type");
         var subtype = dom.createElement("subtype");
 
-        id.value = oCol.id;
-        name.text = oCol.name;
-        example.text = oCol.example;
-        type.text = oCol.type;
-        subtype.text = oCol.subtype;
-
-        elem.attributes.setNamedItem(id);
-        elem.appendChild(name);
-        elem.appendChild(example);
-        elem.appendChild(type);
-        elem.appendChild(subtype);
-
-        node.appendChild(elem);
+        elem.append(name);
+        elem.append(example);
+        elem.append(type);
+        elem.append(subtype);
+        
+        $(elem).attr("id",oCol.id);
+        $(elem).find("name").text(oCol.name);
+        $(elem).find("example").text(oCol.example);
+        $(elem).find("type").text(oCol.type);
+        $(elem).find("subtype").text(oCol.subtype);
     }
 
     result.dom = dom;
@@ -264,21 +237,11 @@ function buildOptions()
 function buildFileOptions()
 {
     var result = new Result("", null);
-	var dom;
+	var dom = $.parseXML(xmlImportOptions);
     var node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-    var separator = node.selectSingleNode("separator");
+    node = $(dom).find("importOptions fileOptions");
+    var separator = $(node).find("separator");
     for (var key in Delimitor)
     {
        // IE 5.0 adds prototype functions as keys
@@ -291,12 +254,12 @@ function buildFileOptions()
        var index = Delimitor[key];
        if (document.oDummyForm.oDelimit[index].checked)
        {
-          separator.text = key;
+          separator.text(key);
           break;
        }
     }
 
-    if (separator.text == "other")
+    if (separator.text() == "other")
     {
         var value = document.oDummyForm.oDelimitText.value;
         if (value == "")
@@ -306,15 +269,15 @@ function buildFileOptions()
             document.oDummyForm.oDelimitText);
         }
 
-        separator.text = value;
+        separator.text(value);
     }
     if (document.oDummyForm.oIgnoreHeader.checked)
     {
-       node.selectSingleNode("ignoreHeader").text = "true";
+       $(node).find("ignoreHeader").text("true");
     }
     else
     {
-       node.selectSingleNode("ignoreHeader").text = "false";
+       $(node).find("ignoreHeader").text("false");
     }
 
     result.dom = dom;
@@ -323,42 +286,32 @@ function buildFileOptions()
 
 function parseColumns()
 {
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
     var nodes, node, id, name, example, type, subtype;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-
-    nodes = dom.selectNodes("/importOptions/columnOptions/column");
+    nodes = $(dom).find("importOptions columnOptions column");
 
     for (i = 0; i < nodes.length; ++i)
     {
         node = nodes[i];//node = nodes.item(i);
 
-        id = node.getAttribute("id");
+        id = $(node).attr("id");
 
-        if(node.selectSingleNode("name"))
+        if($(node).find("name"))
         {
-            name = node.selectSingleNode("name").text;
+            name = $(node).find("name").text();
         }
-        if(node.selectSingleNode("example"))
+        if($(node).find("example"))
         {
-            example = node.selectSingleNode("example").text;
+            example = $(node).find("example").text();
         }
-        if(node.selectSingleNode("type"))
+        if($(node).find("type"))
         {
-            type = node.selectSingleNode("type").text;
+            type = $(node).find("type").text();
         }
-        if(node.selectSingleNode("subtype"))
+        if($(node).find("subtype"))
         {
-            subtype = node.selectSingleNode("subtype").text;
+            subtype = $(node).find("subtype").text();
         }
 
         aColumns.push(new Column(id, name, example, type, subtype));
@@ -369,22 +322,13 @@ function parseColumns()
 
 function checkAnalysisError()
 {
-    var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    var dom = $.parseXML(xmlImportOptions);
     
-    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
-    var errorMessage = node.text;
+    var node = $(dom).find("importOptions fileOptions errorMessage");
+    var errorMessage = node.text();
     if (errorMessage != "")
     {
-        node.text = "";
+        node.text("");
 
         showWarning("<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_import_failed_analyze"))%>" + errorMessage);
 
@@ -392,15 +336,7 @@ function checkAnalysisError()
           "&" + WebAppConstants.TM_ACTION +
           "=" + WebAppConstants.TM_ACTION_SET_IMPORT_OPTIONS%>";
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	oForm.importoptions.value = oImportOptions.xml;
-        }
-        else
-        {
-        	oForm.importoptions.value = XML.getDomString(dom);
-        }
-        
+        oForm.importoptions.value = getDomString(dom);
         oForm.submit();
         return true;
     }
@@ -411,24 +347,15 @@ function checkAnalysisError()
 function parseFileOptions()
 {
     var form = document.oDummyForm;
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
+    
     var nodes, node, fileName, fileType, fileEncoding;
     var separator, ignoreHeader;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    node = $(dom).find("importOptions fileOptions");
 
-    separator = node.selectSingleNode("separator").text;
-    ignoreHeader = node.selectSingleNode("ignoreHeader").text;
+    separator = $(node).find("separator").text();
+    ignoreHeader = $(node).find("ignoreHeader").text();
 
     idDelimiterSpan.innerText = separator;
 

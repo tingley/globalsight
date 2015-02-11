@@ -42,10 +42,9 @@ public class PageImportQuery
             + " AND LP.SOURCE_LOCALE_ID = ?"
             + " AND SP.COMPANY_ID = ?"
             + " AND R.L10N_PROFILE_ID=LP.ID AND R.PAGE_ID=SP.ID "
-            + " AND SP.STATE != '"
-            + PageState.IMPORT_FAIL
-            + "' "
+            + " AND SP.STATE != '" + PageState.IMPORT_FAIL + "' "
             + " AND R.TYPE != 'REQUEST_WITH_IMPORT_ERROR' "
+            + " AND R.JOB_ID IS NOT NULL "
             + " ORDER BY SP.ID DESC limit 1";
     private static final String SOURCE_PAGE_BY_ID = "select * from source_page where id = ? ";
     private static final String LEVERAGE_GROUP_IDS = "select * from source_page_leverage_group where SP_ID = ?";

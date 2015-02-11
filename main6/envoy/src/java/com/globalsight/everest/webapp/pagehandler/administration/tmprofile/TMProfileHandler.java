@@ -673,6 +673,18 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             tmProfile.setDynLevFromGoldTm(false);
         }
+        
+        // dynamic leverage stop search
+        dynLevValue = p_request
+                .getParameter(TMProfileConstants.DYN_LEV_STOP_SEARCH);
+        if (dynLevValue != null && dynLevValue.equals("true"))
+        {
+            tmProfile.setDynLevStopSearch(true);
+        }
+        else
+        {
+            tmProfile.setDynLevStopSearch(false);
+        }
 
         // dynamic leverage from in-progress TM
         dynLevValue = p_request

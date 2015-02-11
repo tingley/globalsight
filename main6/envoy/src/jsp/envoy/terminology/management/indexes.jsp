@@ -75,6 +75,7 @@ TD           { font: 9pt arial;}
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT src="/globalsight/includes/xmlextras.js"></SCRIPT>
 <SCRIPT src="/globalsight/includes/utilityScripts.js"></SCRIPT>
@@ -158,22 +159,11 @@ function doSave()
 
     var result = buildDefinition();
 
-    // alert(oDefinition.XMLDocument.xml); //return;
-
     try
     {
-       if(window.navigator.userAgent.indexOf("MSIE")>0)
-       {
-	        sendTermbaseManagementRequest(
-	          "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-	          result.dom.xml);
-       }
-       else
-       {
-             sendTermbaseManagementRequest(
-	          "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-	          XML.getDomString(result.dom));
-       }
+       sendTermbaseManagementRequest(
+       "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
+       getDomString(result.dom));
 
       indexform.action = "<%=urlRefresh%>";
       indexform.submit();
@@ -216,72 +206,21 @@ function Result(message, errorFlag, element, dom)
 function buildDefinition()
 {    
     var xmlStr = "<%=xmlDefinition%>";
-    var dom;
+    var dom = $.parseXML(xmlStr);
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-     // dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    
     var result = new Result("", 0, null, null);
 
     var node;
 
-    node = dom.selectSingleNode("/definition/indexes");
-    while (node.hasChildNodes())
-    {
-      node.removeChild(node.firstChild);
+    node = $(dom).find("definition indexes");
+    
+    var len = node.children().length;
+    while(len){
+    		node.children().eq(0).remove();
+    		len = node.children().length;
     }
     
     var form = document.indexform;    
-    /*for (var i = 0; i < form.elements.length; i++)
-    {
-	  if (form.elements[i].type == "checkbox" &&
-        form.elements[i].name == "checkbox" &&
-	    !form.elements[i].disabled &&
-	    form.elements[i].checked == true)
-      {
-         var box = form.elements[i];
-		 var key = box.value;
-		 var arr = key.split(",");
-		 var type = arr[0];
-		 var name = arr[1];
-         
-        var elem = dom.createElement("index");
-        var langname = dom.createElement("languagename");
-        var locale = dom.createElement("locale");
-        var langtype = dom.createElement("type");
-
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        langname.text = name;
-        locale.text = getLocale(name);
-        langtype.text = type;
-        }
-        else
-        {
-        langname.textContent = name;
-        locale.textContent = getLocale(name);
-        langtype.textContent = type;        
-        }
-
-        elem.appendChild(langname);
-        elem.appendChild(locale);
-        elem.appendChild(langtype);
-
-        node.appendChild(elem);
-         
-      }
-    }*/
 
     var eles = document.getElementsByTagName("*");
     for (var i = 0; i < eles.length; i++)
@@ -298,29 +237,21 @@ function buildDefinition()
 		 var name = arr[1];
          
         var elem = dom.createElement("index");
+        node.append(elem);
+        var len = $(node).find("index").length;
+        elem = $(node).find("index").eq(len-1);
+        
         var langname = dom.createElement("languagename");
         var locale = dom.createElement("locale");
         var langtype = dom.createElement("type");
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        langname.text = name;
-        locale.text = getLocale(name);
-        langtype.text = type;
-        }
-        else
-        {
-        langname.textContent = name;
-        locale.textContent = getLocale(name);
-        langtype.textContent = type;        
-        }
-
-        elem.appendChild(langname);
-        elem.appendChild(locale);
-        elem.appendChild(langtype);
-
-        node.appendChild(elem);
-         
+        elem.append(langname);
+        elem.append(locale);
+        elem.append(langtype);
+        
+        $(elem).find("languagename").text(name);
+        $(elem).find("locale").text(getLocale(name));
+        $(elem).find("type").text(type);
       }
     }
     
@@ -421,45 +352,15 @@ function parseDefinition()
   var defStr = "<%=xmlDefinition%>";
   var statStr = "<%String cleanStr = xmlStatistics.replaceAll("\\n","");out.print(cleanStr);%>";
   
-  var def;
-  var stat;
+  var def = $.parseXML(defStr);
+  var stat = $.parseXML(statStr);
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-      //def = oDefinition.XMLDocument;
-      //stat = oStatistics.XMLDocument;
-	  def=new ActiveXObject("Microsoft.XMLDOM");
-      def.async="false";
-      def.loadXML(defStr);
-      stat = new ActiveXObject("Microsoft.XMLDOM");
-      stat.async="false";
-      stat.loadXML(statStr);
-  }
-  else if(window.DOMParser)
-  { 
-      var parser = new DOMParser();
-      def = parser.parseFromString(defStr,"text/xml");
-      parser = new DOMParser();
-      stat = parser.parseFromString(statStr,"text/xml");   
-  }
-  
-   
   var nodes, node;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-	  var termbaseName = def.selectSingleNode("/definition/name").text;
-	  var indexingStatus = stat.selectSingleNode("/statistics/indexstatus").text;
-	  var concepts = stat.selectSingleNode("/statistics/concepts").text;
-	  var ftconcepts = stat.selectSingleNode("/statistics/fulltextcount").text;
-  }
-  else
-  {
-	  var termbaseName = def.selectSingleNode("/definition/name").textContent;
-	  var indexingStatus = stat.selectSingleNode("/statistics/indexstatus").textContent;
-	  var concepts = stat.selectSingleNode("/statistics/concepts").textContent;
-	  var ftconcepts = stat.selectSingleNode("/statistics/fulltextcount").textContent;  
-  }
+  var termbaseName = $(def).find("definition name").text();
+  var indexingStatus = $(stat).find("statistics indexstatus").text();
+  var concepts = $(stat).find("statistics concepts").text();
+  var ftconcepts = $(stat).find("statistics fulltextcount").text();
 
   if (indexingStatus == "ok")
   {
@@ -477,23 +378,13 @@ function parseDefinition()
   idIndexingStatus.innerHTML = isIndexing ? "<%=bundle.getString("lb_building")%>" : "<%=bundle.getString("lb_built")%>";
   
   // Read languages from the database definition
-  nodes = def.selectNodes("/definition/languages/language");
+  nodes = $(def).find("definition languages language");
   for (var i = 0; i < nodes.length; i++)
   {
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {      
-        node = nodes.item(i);
-	    var name = node.selectSingleNode("name").text;
-	    var locale = node.selectSingleNode("locale").text;
-	    var hasterms = node.selectSingleNode("hasterms").text;
-    }
-    else
-    {     
-        node = nodes[i];
-	    var name = node.selectSingleNode("name").textContent;
-	    var locale = node.selectSingleNode("locale").textContent;
-	    var hasterms = node.selectSingleNode("hasterms").textContent;    
-    }
+	node = nodes[i];
+    var name = $(node).find("name").text();
+    var locale = $(node).find("locale").text();
+    var hasterms = $(node).find("hasterms").text();    
     
     hasterms = (hasterms == "true" ? true : false);
 
@@ -503,24 +394,14 @@ function parseDefinition()
   aLanguages.sort(compareLanguages);
 
   // Read indexes defined on these languages
-  nodes = def.selectNodes("/definition/indexes/index");
+  nodes = $(def).find("definition indexes index");
   for (var i = 0; i < nodes.length; i++)
   {
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-        node = nodes.item(i);
-	    var name = node.selectSingleNode("languagename").text;
-	    var locale = node.selectSingleNode("locale").text;
-	    var type = node.selectSingleNode("type").text;
-    }
-    else
-    {
-        node = nodes[i];
-	    var name = node.selectSingleNode("languagename").textContent;
-	    var locale = node.selectSingleNode("locale").textContent;
-	    var type = node.selectSingleNode("type").textContent;    
-    }
+	  node = nodes[i];
+      var name = $(node).find("languagename").text();
+      var locale = $(node).find("locale").text();
+      var type = $(node).find("type").text();
 
     aIndexes[type + "," + name] = new Index(name, locale, type);
   }
@@ -529,27 +410,15 @@ function parseDefinition()
   aIndexStats[""] = new IndexStat("", concepts, ftconcepts, "-1");
 
   // Collect index statistics (term-level)
-  nodes = stat.selectNodes("/statistics/indexes/index");
+  nodes = $(stat).find("statistics indexes index");
   for (var i = 0; i < nodes.length; i++)
   {
+    node = nodes[i];
+    var name = $(node).find("language").text();
+    var termCount = $(node).find("terms").text();
+    var fulltextCount = $(node).find("fulltextcount").text();
+    var fuzzyCount = $(node).find("fuzzycount").text();  
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-        node = nodes.item(i);
-	    var name = node.selectSingleNode("language").text;
-	    var termCount = node.selectSingleNode("terms").text;
-	    var fulltextCount = node.selectSingleNode("fulltextcount").text;
-	    var fuzzyCount = node.selectSingleNode("fuzzycount").text;
-    }
-    else
-    {
-        node = nodes[i];
-	    var name = node.selectSingleNode("language").textContent;
-	    var termCount = node.selectSingleNode("terms").textContent;
-	    var fulltextCount = node.selectSingleNode("fulltextcount").textContent;
-	    var fuzzyCount = node.selectSingleNode("fuzzycount").textContent;    
-    }
-
     aIndexStats[name.toLowerCase()] = new IndexStat(name.toLowerCase(), termCount, fulltextCount, fuzzyCount);
   }
 

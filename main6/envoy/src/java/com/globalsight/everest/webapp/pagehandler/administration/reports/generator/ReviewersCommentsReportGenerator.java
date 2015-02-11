@@ -260,25 +260,30 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
             if (cancel)
                 return null;
 
-            // Sets Reports Percent.
-            setPercent(++finishedJobNum);
+			// Sets Reports Percent.
+			setPercent(++finishedJobNum);
 
-            Job job = ServerProxy.getJobHandler().getJobById(jobID);
-            if (job == null)
-                continue;
+			Job job = ServerProxy.getJobHandler().getJobById(jobID);
 
-            setAllCellStyleNull();
+			if (job == null)
+				continue;
 
-            Workbook workBook = new SXSSFWorkbook();
-            createReport(workBook, job, p_targetLocales, m_dateFormat);
-            File file = getFile(getReportType(), job, workBook);
-            FileOutputStream out = new FileOutputStream(file);
-            workBook.write(out);
-            out.close();
-            ((SXSSFWorkbook)workBook).dispose();
+			if (m_userId == null) {
+				m_userId = job.getCreateUserId();
+			}
 
-            workBooks.add(file);
-        }
+			setAllCellStyleNull();
+
+			Workbook workBook = new SXSSFWorkbook();
+			createReport(workBook, job, p_targetLocales, m_dateFormat);
+			File file = getFile(getReportType(), job, workBook);
+			FileOutputStream out = new FileOutputStream(file);
+			workBook.write(out);
+			out.close();
+			((SXSSFWorkbook) workBook).dispose();
+
+			workBooks.add(file);
+		}
 
         return ReportHelper.moveReports(workBooks, m_userId);
     }
@@ -1285,5 +1290,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     public void setIncludeCompactTags(boolean isWithCompactTags)
     {
         this.isIncludeCompactTags = isWithCompactTags;
+    }
+
+    public void setUserId(String p_userId)
+    {
+        this.m_userId = p_userId;
     }
 }

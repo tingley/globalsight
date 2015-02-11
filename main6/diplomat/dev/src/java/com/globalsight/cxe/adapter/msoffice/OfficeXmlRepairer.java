@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
+import com.globalsight.util.StringUtil;
 
 /**
  * This is a util class that used to repair exporting office 2010 files.
@@ -378,9 +379,15 @@ public class OfficeXmlRepairer
             result.append(before);
 
             StringBuffer vsb = new StringBuffer();
+            
             // add rtl="1" for a:p in p:sld XML
             if (v.contains(s_apPrRtl))
             {
+                vsb.append(v);
+            }
+            else if (v.contains("rtl=\"0\""))
+            {
+                v = StringUtil.replace(v, "rtl=\"0\"", s_apPrRtl);
                 vsb.append(v);
             }
             else

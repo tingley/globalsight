@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.tm.StatisticsInfo;
@@ -310,6 +311,11 @@ public interface TmCoreManager
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
             String companyId) throws RemoteException, LingManagerException;
+    
+    public LeverageDataCenter leverageSegments(
+            List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
+            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
+            String companyId, Job job) throws RemoteException, LingManagerException;
 
     /**
      * Return the given segments.

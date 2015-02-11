@@ -62,28 +62,10 @@
     String refreshUrl = pendingURL;
     
     String helperText = bundle.getString("helper_text_job_pending");
-    
-    /*
-    int myJobsDaysRetrieved = 0;
-    try
-    {
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        myJobsDaysRetrieved =
-               sc.getIntParameter(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
-       
-        if ("stateOnly".equals(thisSearch) && myJobsDaysRetrieved > 0)
-        {
-            String[] messageArgs = {String.valueOf(myJobsDaysRetrieved)};
-            helperText = helperText + MessageFormat.format(
-               bundle.getString("helper_text_recent_jobs"), messageArgs);
-        }
-
-    }
-    catch (Exception ge)
-    {
-        // assume 0
-    }
-    */
+   
+    String recreateMessage = (String) request.getAttribute("recreateMessage");
+    if (recreateMessage == null)
+        recreateMessage = "";
 %>                       
 <HTML>
 <HEAD>
@@ -111,8 +93,13 @@ function loadPage()
    }
    // Load the Guide
    loadGuides();
-   
+
    ContextMenu.intializeContextMenu();
+
+   if ('<%=recreateMessage%>' != "")
+   {
+	   alert('<%=recreateMessage%>');
+   }
 }
 
 function dtpSelectedIndex()
@@ -316,6 +303,11 @@ function submitForm(buttonClicked)
          jobActionParam = "<%=request.getAttribute(JobManagementHandler.MAKE_READY_JOB_PARAM)%>";
       }
    }
+   else if (buttonClicked == "Recreate")
+   {
+       JobForm.action = "<%=refreshUrl%>";
+       jobActionParam = "<%=request.getAttribute(JobManagementHandler.RECREATE_JOB_PARAM)%>";
+   }
 
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    JobForm.submit();
@@ -462,13 +454,16 @@ is defined in header.jspIncl which must be included in the body.
 <TR><TD COLSPAN=0>        
 <DIV ID="ButtonLayer" ALIGN="RIGHT" STYLE="visibility: hidden">
     <amb:permission name="<%=Permission.JOBS_VIEW_ERROR%>" >
-        <INPUT TYPE="BUTTON" NAME=Error VALUE="<%=bundle.getString("action_view_error")%>" onClick="submitForm('Error');">
+        <INPUT TYPE="BUTTON" NAME="Error" VALUE="<%=bundle.getString("action_view_error")%>" onClick="submitForm('Error');">
     </amb:permission>
     <amb:permission name="<%=Permission.JOBS_DISCARD%>" >
-        <INPUT TYPE="BUTTON" NAME=Discard VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
+        <INPUT TYPE="BUTTON" NAME="Discard" VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
     </amb:permission>
     <amb:permission name="<%=Permission.JOBS_MAKE_READY%>" >
-        <INPUT TYPE="BUTTON" NAME=MakeReady VALUE="<%=bundle.getString("action_make_ready")%>" onClick="submitForm('MakeReady');">
+        <INPUT TYPE="BUTTON" NAME="MakeReady" VALUE="<%=bundle.getString("action_make_ready")%>" onClick="submitForm('MakeReady');">
+    </amb:permission>
+    <amb:permission name="<%=Permission.JOBS_RECREATE%>" >
+        <INPUT TYPE="BUTTON" NAME="Recreate" VALUE="<%=bundle.getString("action_recreate")%>" onClick="submitForm('Recreate');">
     </amb:permission>
 </DIV>
 </TD></TR>

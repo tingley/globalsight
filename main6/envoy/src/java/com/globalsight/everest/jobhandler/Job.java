@@ -397,4 +397,8 @@ public interface Job extends WorkObject
     public void setIsMigrated(boolean p_isMigrated);
 
     public boolean isMigrated();
+
+    public boolean getIsAllRequestGenerated();
+
+    public void setIsAllRequestGenerated(boolean isAllRequestGenerated);
 }

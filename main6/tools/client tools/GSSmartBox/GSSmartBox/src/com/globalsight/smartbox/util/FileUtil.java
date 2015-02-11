@@ -90,7 +90,7 @@ public class FileUtil
         File targetFile = new File(targetDir);
         if (!targetFile.exists())
         {
-            targetFile.mkdir();
+            targetFile.mkdirs();
         }
         else
         {

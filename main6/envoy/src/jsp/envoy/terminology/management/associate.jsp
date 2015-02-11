@@ -39,6 +39,7 @@ String lb_ok = bundle.getString("lb_ok");
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/importObjects_js.jsp"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT>
@@ -79,34 +80,38 @@ function doClose(ok)
       return;
     }
 
-    var node = args.importOptions.selectSingleNode(
-      "/importOptions/columnOptions/column[@id='" + args.id + "']");
+    var node;
+    var nodes = $(args.importOptions).find("importOptions columnOptions column");
+    for (i = 0; i < nodes.length; ++i)
+    {
+    	var attrValue = $(nodes[i]).attr("id");
+    	if(attrValue == args.id){
+    		node = nodes[i];
+    	}
+    }
 
-    node.selectSingleNode("name").text = idName.value;
-    node.selectSingleNode("type").text = type;
-    node.selectSingleNode("termLanguage").text =
-      idLanguage.options[idLanguage.selectedIndex].value;
-
+    $(node).find("name").text(idName.value);
+    $(node).find("type").text(type);
+    $(node).find("termLanguage").text(idLanguage.options[idLanguage.selectedIndex].value);
+	
     args.name				= idName.value;
     args.type 			  	= type;
-    args.termLanguage		= idLanguage.options[idLanguage.selectedIndex].value;
+    args.termLanguage   = idLanguage.options[idLanguage.selectedIndex].value;
 
     if (idColumn.options.length > 0)
     {
         if (type == "term" || type == "skip" || type.startsWith("concept"))
         {
-            node.selectSingleNode("associatedColumn").text = "-1";
+            $(node).find("associatedColumn").text("-1");
 			args.associatedColumn 	= "-1";
         }
         else
         {
-            node.selectSingleNode("associatedColumn").text =
-                idColumn.options[idColumn.selectedIndex].value;
+            $(node).find("associatedColumn").text(idColumn.options[idColumn.selectedIndex].value);
             args.associatedColumn 	= 
             	idColumn.options[idColumn.selectedIndex].value;
         }
     }
-
     window.returnValue = args;
   }
   else
@@ -201,11 +206,12 @@ function selectType()
 function initLanguages(dom)
 {
   var oOption, oLang;
-  var nodes = dom.selectNodes("/definition/languages/language/name");
+  var nodes = $(dom).find("definition languages language name");
+
   for (i = 0; i < nodes.length; ++i)
   {
-    oLang = nodes[i].text;//oLang = nodes.item(i).text;
-
+	var node = nodes[i];
+    oLang = $(node).text();//oLang = nodes.item(i).text;
     oOption = document.createElement("OPTION");
     oOption.text = oLang;
     oOption.value = oLang;
@@ -231,20 +237,20 @@ function initTypes()
 
 function initColumns(dom)
 {
-  var oOption, oColumn;
-  var nodes = dom.selectNodes(
-    "/importOptions/columnOptions/column[@id != '" + args.id + "']/name");
-
-  for (i = 0; i < nodes.length; ++i)
-  {
-    oColumn = nodes[i].text;//oColumn = nodes.item(i).text;
-
-    oOption = document.createElement("OPTION");
-    oOption.text = oColumn;
-    oOption.value = nodes[i].parentNode.getAttribute("id");//oOption.value = nodes.item(i).parentNode.getAttribute("id");
-
-    idColumn.add(oOption);
-  }
+ 	var oOption, oColumn;
+ 	var nodes = $(dom).find("importOptions columnOptions column name");
+	for (i = 0; i < nodes.length; ++i)
+    {
+		var node = nodes[i];
+		var attrValue = $(node).parent().attr("id");
+		if(attrValue != args.id){
+    		oColumn = $(node).text();//oColumn = nodes.item(i).text;
+    		oOption = document.createElement("OPTION");
+    		oOption.text = oColumn;
+    		oOption.value = attrValue;
+    		idColumn.add(oOption);
+		}
+    }
 }
 
 function doLoad()
@@ -257,13 +263,20 @@ function doLoad()
   initLanguages(args.definition);
   initColumns(args.importOptions);
 
-  var node = args.importOptions.selectSingleNode(
-      "/importOptions/columnOptions/column[@id='" + args.id + "']");
-
-  idName.value = node.selectSingleNode("name").text;
-  setType(node.selectSingleNode("type").text);
-  setLanguage(node.selectSingleNode("termLanguage").text);
-  setColumn(node.selectSingleNode("associatedColumn").text);
+  var attrValue,nodes,node;
+  var dom = args.importOptions;
+  nodes = $(dom).find("importOptions columnOptions column");
+  for (i = 0; i < nodes.length; ++i)
+  {
+	  node = nodes[i];
+	  attrValue = $(node).attr("id");
+	  if(attrValue == args.id){
+		  idName.value = $(node).find("name").text();
+		  setType($(node).find("type").text());
+		  setLanguage($(node).find("termLanguage").text());
+		  setColumn($(node).find("associatedColumn").text());
+	  }
+  }
 
   selectType();
 

@@ -24,16 +24,12 @@ public class SmartValidator {
 		return file.exists();
 	}
 
-	public boolean validateFTP(FTPConfiguration ftpConfiguration) {
-		String ftpHost = ftpConfiguration.getFtpHost();
-		int ftpPort = ftpConfiguration.getFtpPort();
-		String ftpUsername = ftpConfiguration.getFtpUsername();
-		String ftpPassword = ftpConfiguration.getFtpPassword();
-		String ftpInbox = ftpConfiguration.getFtpInbox();
-		String ftpOutbox = ftpConfiguration.getFtpOutbox();
-		String ftpFailedbox = ftpConfiguration.getFtpFailedbox();
+	public boolean validateFTP(FTPConfiguration ftpConfig) {
+		String ftpInbox = ftpConfig.getFtpInbox();
+		String ftpOutbox = ftpConfig.getFtpOutbox();
+		String ftpFailedbox = ftpConfig.getFtpFailedbox();
 		// Validate FTP server
-		FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
+		FtpHelper ftpHelper = new FtpHelper(ftpConfig);
 		boolean serverAvaliable = ftpHelper.testConnect();
 		if (!serverAvaliable) {
 			return false;
@@ -41,35 +37,34 @@ public class SmartValidator {
 		boolean dirExists = true;
 
 		dirExists = ftpHelper.ftpDirExists(ftpInbox);
-		if (!dirExists) {
-			String message = "Configuration error for \"FTPInbox\" in GSSmartBox.cfg.xml.";
-			LogUtil.FAILEDLOG.error(message);
-			return false;
+		if (!dirExists)
+		{
+		    ftpHelper.ftpCreateDir(ftpInbox);
 		}
 
 		dirExists = ftpHelper.ftpDirExists(ftpOutbox);
-		if (!dirExists) {
-			String message = "Configuration error for \"FTPOutbox\" in GSSmartBox.cfg.xml.";
-			LogUtil.FAILEDLOG.error(message);
-			return false;
+		if (!dirExists)
+		{
+		    ftpHelper.ftpCreateDir(ftpOutbox);
 		}
 
 		dirExists = ftpHelper.ftpDirExists(ftpFailedbox);
-		if (!dirExists) {
-			String message = "Configuration error for \"FTPFailedbox\" in GSSmartBox.cfg.xml.";
-			LogUtil.FAILEDLOG.error(message);
-			return false;
+		if (!dirExists)
+		{
+		    ftpHelper.ftpCreateDir(ftpFailedbox);
 		}
+
 		// Create Import and Export folder unbder failedbox in FTP
-		if (!ftpHelper.ftpDirExists(ftpFailedbox + "/Import")) {
+		if (!ftpHelper.ftpDirExists(ftpFailedbox + "/Import"))
+		{
 			ftpHelper.ftpCreateDir(ftpFailedbox + "/Import");
 		}
-		if (!ftpHelper.ftpDirExists(ftpFailedbox + "/Export")) {
+		if (!ftpHelper.ftpDirExists(ftpFailedbox + "/Export"))
+		{
 			ftpHelper.ftpCreateDir(ftpFailedbox + "/Export");
 		}
 
 		return true;
-
 	}
 
 	public boolean validateSMB(SMBConfiguration smbConfiguration) {
@@ -102,11 +97,11 @@ public class SmartValidator {
 			// Create Import and Export folder unbder failedbox in SMB
 			SmbFile sfFailedboxImport = new SmbFile(smbFailedbox + "/Import");
 			if (!sfFailedboxImport.exists()) {
-				sfFailedboxImport.mkdir();
+				sfFailedboxImport.mkdirs();
 			}
 			SmbFile sfFailedboxExport = new SmbFile(smbFailedbox + "/Export");
 			if (!sfFailedboxExport.exists()) {
-				sfFailedboxExport.mkdir();
+				sfFailedboxExport.mkdirs();
 			}
 		} catch (Exception e) {
 			String message = "SMB Config error.";

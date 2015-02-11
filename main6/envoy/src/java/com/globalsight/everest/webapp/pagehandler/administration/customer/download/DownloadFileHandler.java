@@ -23,15 +23,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -41,35 +39,28 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.hibernate.mapping.Collection;
 
-import com.globalsight.cxe.adapter.passolo.PassoloUtil;
-import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.page.pageexport.ExportConstants;
-import com.globalsight.everest.request.Request;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.util.comparator.FileComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
-import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.zip.ZipIt;
 
 /**
@@ -77,6 +68,8 @@ import com.globalsight.util.zip.ZipIt;
  */
 public class DownloadFileHandler extends PageHandler
 {
+	private static final Logger logger = Logger
+			.getLogger(DownloadFileHandler.class);
     // http request params / session attributes
     public static final String PARAM_UPLOAD_NAME = "customerDownload.uploadName";
     public static final String PARAM_LOCALE = "customerDownload.locale";
@@ -87,6 +80,7 @@ public class DownloadFileHandler extends PageHandler
     public static final String PARAM_WORKFLOW_ID = "customerDownload.wfId";
     public static final String PARAM_DOWNLOAD_NAME = "customerDownload.originalFloderName";
     public static final String PARAM_DOWNLOAD_FILE_NAME = "customerDownload.FileName";
+    public static final String PARAM_COMPANY_FOLDER_PATH = "companyFolderPath";
     public static final String DOWNLOAD_FROM_JOB = "downloadFlag";
     public static final String DOWNLOAD_JOB_LOCALES = "locales";
     public static final String FILE_LIST = "dl_fileList";
@@ -158,425 +152,64 @@ public class DownloadFileHandler extends PageHandler
         HttpSession session = p_request.getSession(true);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-
-        // clear out the file list if this is the first entry into the screen
-        if (p_request.getParameter(PARAM_FIRST_ENTRY) != null)
+        
+        // permission check
+        PermissionSet userPerms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        boolean canDownloadJob = userPerms.getPermissionFor(Permission.JOBS_DOWNLOAD);
+        if (!canDownloadJob && !userPerms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD))
         {
-            sessionMgr.setAttribute(FILE_LIST, new HashSet());
+            logger.error("User doesn't have the permission to download files via this page.");
+            p_response.sendRedirect("/globalsight/ControlServlet?");
+            return;
         }
-        String downloadFlag = p_request.getParameter(DOWNLOAD_FROM_JOB);
-        // the upload name
-        String uploadName = p_request.getParameter(PARAM_UPLOAD_NAME);
-        String locale = p_request.getParameter(PARAM_LOCALE);
+        
+        String action = p_request.getParameter("action");
+        String jobIds = p_request.getParameter(PARAM_JOB_ID);
+        String wfIds = p_request.getParameter(PARAM_WORKFLOW_ID);
         String taskId = p_request.getParameter(TASK_ID);
         String tasksTate = p_request.getParameter(TASK_STATE);
+        p_request.setAttribute(PARAM_JOB_ID, jobIds);
+        p_request.setAttribute(PARAM_WORKFLOW_ID, wfIds);
+        p_request.setAttribute(PARAM_COMPANY_FOLDER_PATH, 
+        		getCompanyFolderPath(sessionMgr, jobIds));
         p_request.setAttribute(TASK_ID, taskId);
         p_request.setAttribute(TASK_STATE, tasksTate);
-        StringBuffer jobNameOri = new StringBuffer();
-        String jobIds = null;
-        boolean hasPassolo = false;
-        String jobCompanyName = "";
+        
+        if("getDownloadFileList".equals(action))
+        {
+        	User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+        	boolean isTaskAssignees = false;
+        	if(StringUtil.isNotEmpty(taskId) && !taskId.equals("null"))
+        	{       	
+        		TaskImpl taskImpl = HibernateUtil.get(TaskImpl.class, new Long(taskId));
+        		TaskSearchUtil.setAllAssignees(taskImpl);
+        		Long jobId = taskImpl.getJobId();
+        		if(taskImpl.getAllAssignees().contains(user.getUserId())
+        				&& jobId.equals(new Long(jobIds)))
+        			isTaskAssignees = true;
+        	}
+        	
+        	Set<Long> jobIdSet = new HashSet<Long>();
+        	for(String jobIdStr: StringUtil.split(jobIds, ","))
+        	{
+        		jobIdSet.add(Long.parseLong(jobIdStr));
+        	}
+        	Set<Long> wfIdSet = new HashSet<Long>();
+        	if(!wfIds.equals("null"))
+        	{
+        		for(String wfIdStr: StringUtil.split(wfIds, ","))
+            	{
+        			wfIdSet.add(Long.parseLong(wfIdStr));
+            	}
+        	}
+        	List<DownloadFile> downloadFiles = getDownloadFiles(jobIdSet, wfIdSet, 
+        			sessionMgr, isTaskAssignees, canDownloadJob, user);
+        	p_response.setContentType("text/html;charset=UTF-8");
+        	p_response.getWriter().write(getJSON(downloadFiles));
+        	return;
+        }
         isDownloaded = false;
-
-        if (uploadName != null)
-            sessionMgr.setAttribute(PARAM_UPLOAD_NAME, uploadName);
-        else
-        {
-            // upload name is null, but maybe job id was passed in, in which
-            // case the upload name is just the job name
-        	HashSet<String> downloadNames = new HashSet<String>();
-            jobIds = p_request.getParameter(PARAM_JOB_ID);
-            uploadName = "";
-            if (jobIds != null)
-            {
-                try
-                {
-                	Set<String> jobIdS = StringUtil.split(jobIds, " ");
-                	long job_id;
-                	List<String> pageList = new ArrayList<String>();
-                	List<String> localesList = new ArrayList<String>();
-                	HashSet<String> webServiceJobs = new HashSet<String>();
-                	for(String jobId: jobIdS)
-                	{
-                		job_id = Long.parseLong(jobId);
-	                    Job j = ServerProxy.getJobHandler().getJobById(job_id);
-	                    uploadName = uploadName + " " +j.getJobName();
-	                    // retrieve company name for current job
-	                    sessionMgr.setAttribute(PARAM_JOB_COMPANY_ID,
-	                            j.getCompanyId());
-	                    jobCompanyName = ServerProxy.getJobHandler()
-                        	.getCompanyById(j.getCompanyId()).getCompanyName();
-
-	                    List sps = new ArrayList(j.getSourcePages());
-	                    SourcePage sp = (SourcePage) sps.get(0);
-	                    String pageId = sp.getExternalPageId();
-	                    String[] pageIdToken = (pageId.replace('\\', '/'))
-	                            .split("/");
-	                    Iterator pageIterator = sps.iterator();
-	                    Set<String> fullPageList = new HashSet<String>();
-	
-	                    // Clear the delayTimeTable date for this job export
-	                    Hashtable delayTimeTable = (Hashtable) sessionMgr
-	                            .getAttribute(WebAppConstants.DOWLOAD_DELAY_TIME_TABLE);
-	                    String wfId = p_request.getParameter(PARAM_WORKFLOW_ID);
-	                    if (delayTimeTable != null)
-	                    {
-	                        User user = (User) sessionMgr.getAttribute(USER);
-	                        String userId = user.getUserId();
-	                        String delayTimeKey = userId + job_id + wfId;
-	
-	                        Object startTimeObj = delayTimeTable.get(delayTimeKey);
-	                        if (startTimeObj != null)
-	                        {
-	                            delayTimeTable.remove(delayTimeKey);
-	                        }
-	                    }
-	
-	                    if (downloadFlag != null && downloadFlag.equals("true"))
-	                    {
-	                        // Get target locales from workflows of selected job                        
-	                        for (Workflow wf : j.getWorkflows())
-	                        {
-	                        	if(!localesList.contains(wf.getTargetLocale().toString()))
-	                        	{                        		
-	                        		localesList.add(wf.getTargetLocale().toString());
-	                        	}
-	                        }
-	                        
-	                    }
-
-	                    String wfIdParam = p_request
-	                            .getParameter(PARAM_WORKFLOW_ID);
-	                    HashSet<String> wfIds = new HashSet<String>();
-	                    if(wfIdParam != null)
-	                    {
-	                    	String[] ids= wfIdParam.split(" ");
-	                    	for(String id: ids)
-	                    	{
-	                    		wfIds.add(id);
-	                    	}
-	                    	
-	                    	for (Workflow wf : j.getWorkflows())
-	                        {
-	                    		Long tempId = wf.getId();
-	                        	if(wfIds.contains(tempId.toString()))
-	                        	{                        		
-	                        		localesList.add(wf.getTargetLocale().toString());
-	                        	}
-	                        }
-	                    }
-	
-	                    while (pageIterator.hasNext())
-	                    {
-	                        SourcePage sourcePage = (SourcePage) pageIterator
-	                                .next();
-	                        boolean isPassoloFile = PassoloUtil
-	                                .isPassoloFile(sourcePage);
-	
-	                        if (wfIds.size() > 0 && isPassoloFile)
-	                        {
-	                            boolean found = false;
-	                            for (TargetPage tp : sourcePage.getTargetPages())
-	                            {
-	                                if (wfIds.contains(String.valueOf(tp.getWorkflowInstance().getId())))
-	                                {
-	                                    found = true;
-	                                    break;
-	                                }
-	                            }
-	
-	                            if (!found)
-	                            {
-	                                continue;
-	                            }
-	                        }
-	
-	                        // For Import&Export script issue.
-	                        // Download the reverted file instead of the scripted
-	                        // file when importing.
-	                        Request req = sourcePage.getRequest();
-	                        FileProfile fp = HibernateUtil.get(
-	                                FileProfileImpl.class, req.getDataSourceId(),
-	                                false);
-	
-	                        String externalPageId = sourcePage.getExternalPageId();
-	
-	                        String scriptOnImport = fp.getScriptOnImport();
-	                        if (scriptOnImport != null
-	                                && scriptOnImport.length() > 0)
-	                        {
-	                            String tempPath = externalPageId.substring(0,
-	                                    externalPageId.lastIndexOf(File.separator));
-	                            String targetFolder = tempPath.substring(0,
-	                                    tempPath.lastIndexOf(File.separator));
-	                            String scriptedFolderName = tempPath
-	                                    .substring(tempPath
-	                                            .lastIndexOf(File.separator) + 1);
-	                            File srcFolder = new File(
-	                                    AmbFileStoragePathUtils
-	                                            .getCxeDocDirPath(String
-	                                                    .valueOf(sourcePage
-	                                                            .getCompanyId()))
-	                                            + File.separator + targetFolder);
-	                            File sourceFiles[] = srcFolder.listFiles();
-	                            for (int i = 0; sourceFiles != null
-	                                    && i < sourceFiles.length; i++)
-	                            {
-	                                File file = sourceFiles[i];
-	                                if (file.isFile())
-	                                {
-	                                    String fileName = file.getName();
-	                                    String scriptedFolderNamePrefix = FileSystemUtil
-	                                			.getScriptedFolderNamePrefixByJob(job_id);
-	                                    String folderName = scriptedFolderNamePrefix + "_" 
-	                                    		+ fileName.substring(0, fileName.lastIndexOf(".")) + "_"
-	                                    		+ fileName.substring(fileName.lastIndexOf(".") + 1);
-	                                    if (scriptedFolderName.equals(folderName) ||
-	                                    		scriptedFolderName.equals(fileName
-	                                    			.substring(0,
-	                                                    fileName.lastIndexOf("."))))
-	                                    {
-	                                        // re-set the externalPageId to the
-	                                        // reverted file name.
-	                                        externalPageId = targetFolder
-	                                                + File.separator + fileName;
-	                                        
-	                                        externalPageId = externalPageId.replace('\\', '/');
-	                                        if (fullPageList.contains(externalPageId))
-	                                            continue;
-	                                        
-	                                        break;
-	                                    }
-	                                }
-	                            }
-	                        }
-	
-	                        // Process XLZ file
-	                        String tmp = externalPageId.toLowerCase();
-	                        if (XliffFileUtil.isXliffFile(tmp))
-	                        {
-	                            tmp = StringUtil.replace(tmp, "/", File.separator);
-	                            tmp = StringUtil.replace(tmp, "\\", File.separator);
-	                            int tmpIndex = tmp.lastIndexOf(".sub"
-	                                    + File.separator);
-	                            if (tmpIndex != -1)
-	                            {
-	                                tmp = tmp.substring(0, tmpIndex);
-	                                if (XliffFileUtil.isXliffFile(tmp))
-	                                    externalPageId = externalPageId.substring(
-	                                            0, tmpIndex);
-	                            }
-	
-	                            String tmpFullname = "";
-	                            tmp = externalPageId.substring(0,
-	                                    externalPageId.lastIndexOf(File.separator))
-	                                    + ".xlz";
-	
-	                            String companyName = CompanyWrapper
-	                                    .getCompanyNameById(j.getCompanyId());
-	                            if ("1".equals(CompanyWrapper.getCurrentCompanyId())
-	                                    && !"1".equals(j.getCompanyId()))
-	                            {
-	                                String baseDir = AmbFileStoragePathUtils
-	                                        .getCxeDocDir().getPath();
-	                                tmpFullname = baseDir + File.separator
-	                                        + companyName + File.separator + tmp;
-	                            }
-	                            else
-	                            {
-	                                tmpFullname = getAbsolutePath(tmp);
-	                            }
-	                            File tmpFullFile = new File(tmpFullname);
-	                            if (tmpFullFile.exists() && tmpFullFile.isFile())
-	                            {
-	                                externalPageId = tmp;
-	                            }
-	                        }
-	
-	                        externalPageId = externalPageId.replace('\\', '/');
-	
-	                        if (fullPageList.contains(externalPageId))
-	                            continue;
-	
-	                        fullPageList.add(externalPageId);
-	
-	                        if (isPassoloFile)
-	                        {
-	                            File f = new File(sourcePage.getPassoloFileName());
-	                            String name = f.getName();
-	                            if (!pageList.contains(name))
-	                            {
-	                                pageList.add(name);
-	                            }
-	
-	                            List<String> tempLocalesList = (List<String>) sessionMgr
-	                                    .getAttribute(DOWNLOAD_JOB_LOCALES);
-	
-	                            if (tempLocalesList == null)
-	                            {
-	                            	tempLocalesList = new ArrayList<String>();
-	                            }
-	
-	                            if (tempLocalesList != null
-	                                    && !tempLocalesList.contains("passolo"))
-	                            {
-	                            	if(!localesList.contains("passolo"))
-                        			{	                            		
-	                            		localesList.add("passolo");
-                        			}
-	                            }
-	                            hasPassolo = true;
-	                        }
-	                        else
-	                        {
-	                            pageList.add(externalPageId.substring(
-	                                    externalPageId.lastIndexOf("/") + 1,
-	                                    externalPageId.length()));
-	                        }
-	                    }
-	
-	                    if (pageIdToken.length > 2)
-	                    {
-	                        if (pageIdToken[1].equals(DESKTOP_FOLDER))
-	                        {
-	                            jobNameOri.append(pageIdToken[1]);
-	                            downloadNames.add(pageIdToken[2]);
-	                            sessionMgr.setAttribute(DESKTOP_FOLDER,
-	                                    pageIdToken[1]);
-	                            webServiceJobs.add(jobId);
-	                        }
-	                        else
-	                        {
-	                        	jobNameOri.append(pageIdToken[1]);
-	                        	downloadNames.add(pageIdToken[1]);
-	                        }
-	                    }
-	                    else
-	                    {
-	                    	downloadNames.add(null);
-	                    }
-                	}
-                	sessionMgr.setAttribute(PARAM_UPLOAD_NAME, uploadName);
-                	sessionMgr.setAttribute("jobName", jobIds);
-                	sessionMgr.setAttribute(DOWNLOAD_JOB_LOCALES,
-                            localesList);
-                	sessionMgr.setAttribute(PARAM_DOWNLOAD_FILE_NAME, pageList);
-                	sessionMgr.setAttribute(PARAM_DOWNLOAD_NAME,
-                			downloadNames);
-                	sessionMgr.setAttribute("webServiceJobs", webServiceJobs);
-                }
-                catch (Exception e)
-                {
-                    CATEGORY.error("Failed to get job " + jobIds, e);
-                }
-            }
-        }
-
-        if (locale != null)
-            sessionMgr.setAttribute(PARAM_LOCALE, locale);
-        else
-        {
-            String wfIdParam = p_request.getParameter(PARAM_WORKFLOW_ID);
-            String[] wfIds = new String[]{};
-            if(wfIdParam != null)
-            {
-            	wfIds = wfIdParam.split(" ");
-            }
-            if (wfIds.length > 0)
-            {
-                try
-                {
-                	for(String id: wfIds)
-                	{               		
-                		long wfId = Long.parseLong(id);
-                		Workflow w = ServerProxy.getWorkflowManager()
-                		.getWorkflowByIdRefresh(wfId);
-                		String wfLocale = w.getTargetLocale().toString();
-                		sessionMgr.setAttribute(PARAM_LOCALE, wfLocale);
-                        List<String> localesList = (List<String>) sessionMgr
-                                .getAttribute(DOWNLOAD_JOB_LOCALES);
-                		if (localesList != null && !localesList.contains(wfLocale))
-                		{
-                			localesList.add(wfLocale);
-                		}
-                	}
-                }
-                catch (Exception e)
-                {
-                    CATEGORY.error("Failed to get workflow " + wfIdParam, e);
-                }
-            }
-
-            // the locale may have been previously stored in the session or just
-            // read in now from the workflow
-            if(wfIds.length == 1)
-            {            	
-            	locale = (String) sessionMgr.getAttribute(PARAM_LOCALE);
-            }
-        }
-
-        // Clicking on the folder sends the parameter via the request
-        // object. Get it and put on the session.
-        String currentFolder = p_request.getParameter(PARAM_CURRENT_FOLDER);
-
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        String ruleType = sc
-                .getStringParameter(SystemConfiguration.DIRECTORY_RULE_TYPE);
-
-        if (currentFolder == null)
-        {
-        	if (locale == null || hasPassolo)
-            {
-                currentFolder = "/";
-            }
-            else
-            {
-                if (ruleType.toUpperCase().equals(
-                        ExportConstants.LANGUAGE_DIRECTORY))
-                {
-                    int index = locale.indexOf("_");
-                    currentFolder = "/" + locale.substring(0, index);
-                }
-                else if (ruleType.toUpperCase().equals(
-                        ExportConstants.EXPORT_DIRECTORY))
-                {
-                    currentFolder = "/export";
-                }
-                else
-                {
-                    currentFolder = "/" + locale;
-                    if (jobNameOri != null && jobNameOri.length() != 0)
-                    {
-                        currentFolder = currentFolder + "/"
-                                + jobNameOri.toString();
-                    }
-                    // for super user works for sub company
-                    if (jobCompanyName != null
-                            && !CompanyWrapper
-                                    .isSuperCompanyName(jobCompanyName)
-                            && CompanyThreadLocal.getInstance()
-                                    .fromSuperCompany()
-                            && !currentFolder.startsWith("/" + jobCompanyName))
-                    {
-                        currentFolder = "/" + jobCompanyName + currentFolder;
-                    }
-                }
-            }
-        }
-        // for download from list page
-        if (downloadFlag != null && downloadFlag.equals("true"))
-        {
-            currentFolder = "/";
-        }
-
-        session.setAttribute(PARAM_CURRENT_FOLDER, currentFolder);
-
-        // the selected file listing.
-        String tokenized = currentFolder.replace('\\', '/');
-        StringTokenizer tok = new StringTokenizer(tokenized, "/");
-        List pageList = (List) sessionMgr
-                .getAttribute(DownloadFileHandler.PARAM_DOWNLOAD_FILE_NAME);
-        int depth = tok.countTokens(); // depth relative to cxe docs dir
         // fix for GBS-1449
         if (CompanyThreadLocal.getInstance().fromSuperCompany())
         {
@@ -587,16 +220,11 @@ public class DownloadFileHandler extends PageHandler
             sessionMgr.setAttribute(CompanyType, "commonCompany");
         }
 
-        prepareFileList(p_request, p_response, sessionMgr, depth, pageList);
-
-        // turn off cache. do both. "pragma" for the older browsers.
-        // p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        // p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-        // p_response.addHeader("Cache-Control", "no-store"); // tell proxy not
-        // to
-        // cache
-        // p_response.addHeader("Cache-Control", "max-age=0"); // stale right
-        // away
+        String fileAction = p_request.getParameter("fileAction");
+        if (fileAction != null && fileAction.equals("download"))
+        {     	
+        	prepareFileList(p_request, p_response, sessionMgr);
+        }
 
         if (!isDownloaded)
         {
@@ -606,79 +234,16 @@ public class DownloadFileHandler extends PageHandler
             requestDispatcher.forward(p_request, p_response);
         }
     }
-
-    private void recurseFileStructures(File p_baseFile, HashSet p_fileList,
-            int p_depth, String p_uploadName, List p_pageList)
-            throws EnvoyServletException
-    {
-        File[] directoryContent = p_baseFile.listFiles();
-        File cxeBaseDir = AmbFileStoragePathUtils.getCxeDocDir();
-        File doc = null;
-        File xlzFile = null;
-
-        if (directoryContent != null)
-        {
-            for (int i = 0; i < directoryContent.length; i++)
-            {
-                doc = directoryContent[i];
-
-                if (doc.isDirectory())
-                {
-                    xlzFile = new File(doc.getAbsoluteFile() + ".xlz");
-                    if (xlzFile.exists() && xlzFile.isFile())
-                        continue;
-
-                    if (p_depth == 1)
-                    {
-                        // only recurse if the dir has upload in the name
-                        if (doc.getName().equals(p_uploadName) == true)
-                        {
-                            recurseFileStructures(doc, p_fileList, p_depth + 1,
-                                    p_uploadName, p_pageList);
-                        }
-                    }
-                    else
-                    {
-                        recurseFileStructures(doc, p_fileList, p_depth + 1,
-                                p_uploadName, p_pageList);
-                    }
-                }
-                else
-                {
-                    if (p_depth >= 1 && p_pageList != null
-                            && p_pageList.size() > 0)
-                    {
-                        Iterator pages = p_pageList.iterator();
-                        while (pages.hasNext())
-                        {
-                            String fileName = (String) pages.next();
-                            if (doc.getName().equals(fileName))
-                            {
-                                p_fileList
-                                        .add(getRelativePath(cxeBaseDir, doc));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // obtain the file list and add or remove the
-    // files selected from the selected list.
+    
     private void prepareFileList(HttpServletRequest p_request,
-            HttpServletResponse p_response, SessionManager p_sessionMgr,
-            int p_depth, List p_pageList)
+            HttpServletResponse p_response, SessionManager p_sessionMgr)
             throws EnvoyServletException, UnsupportedEncodingException
     {
         String uploadName = (String) p_sessionMgr
                 .getAttribute(PARAM_UPLOAD_NAME);
-        HashSet<String> downloadNames = (HashSet<String>) p_sessionMgr
+        HashSet<Long> downloadJobIds = (HashSet<Long>) p_sessionMgr
                 .getAttribute(PARAM_DOWNLOAD_NAME);
-        HashSet<String> webServiceJobs = (HashSet<String>) p_sessionMgr
-        		.getAttribute("webServiceJobs");
-        String localName = (String) p_sessionMgr.getAttribute(PARAM_LOCALE);
-        File cxeBaseDir = AmbFileStoragePathUtils.getCxeDocDir();
+        p_request.getParameter("selectedFileList");
 
         if (uploadName == null)
         {
@@ -687,133 +252,41 @@ public class DownloadFileHandler extends PageHandler
             uploadName = "Upload";
         }
 
-        HashSet fileList = getFileList(p_sessionMgr);
-        String fileAction = p_request.getParameter("fileAction");
-        if (fileAction != null)
+        HashSet<String> fileList = new HashSet<String>();
+        // Fix for GBS-1570, get the selected files list string
+        String selectedFilesListStr = p_request
+                .getParameter("selectedFileList");
+        if (selectedFilesListStr != null
+                && !selectedFilesListStr.equals(""))
         {
-            // All the checkboxes are named "file" so the "file" parameter value
-            // comes back as an array.
-        	for(String downloadName:downloadNames)
-        	{
-	            String files[] = p_request.getParameterValues("file");
-	            String file = null;
-	            if (fileAction.equals("add"))
-	            {
-	                // Add the selected files to the import list.
-	                String webservice = (String) p_sessionMgr
-	                        .getAttribute(DESKTOP_FOLDER);
-	                for (int i = 0; i < files.length; i++)
-	                {
-	                    try
-	                    {
-	                        file = URLDecoder.decode(files[i].toString(), "UTF-8");
-	                    }
-	                    catch (Exception e)
-	                    {
-	                        file = files[i].toString();
-	                    }
-	
-	                    File addFile = new File(getAbsolutePath(file));
-	                    if (addFile.isDirectory())
-	                    {
-	                        if (p_depth == 1)
-	                        {
-	                            // only recurse if the dir has upload in the name
-	                            if (addFile.getName().equals(downloadName) == true)
-	                            {
-	                                recurseFileStructures(addFile, fileList,
-	                                        p_depth + 1, downloadName, p_pageList);
-	                            }
-	                            if (webservice != null
-	                                    && webservice.equals(DESKTOP_FOLDER)
-	                                    && webServiceJobs.contains(downloadName))
-	                            {
-	                                recurseFileStructures(addFile, fileList,
-	                                        p_depth, downloadName, p_pageList);
-	                            }
-	                        }
-	                        else
-	                        {
-	                            if (p_depth == 0 && webservice != null
-	                                    && webservice.equals(DESKTOP_FOLDER)
-	                                    && webServiceJobs.contains(downloadName))
-	                            {
-	                                addFile = new File(addFile, webservice);
-	                            }
-	                            recurseFileStructures(addFile, fileList,
-	                                    p_depth + 1, downloadName, p_pageList);
-	                        }
-	                    }
-	                    else
-	                    {
-	                        if (p_pageList != null && p_pageList.size() > 0)
-	                        {
-	                            Iterator pages = p_pageList.iterator();
-	                            while (pages.hasNext())
-	                            {
-	                                String fileName = (String) pages.next();
-	                                if (addFile.getName().equals(fileName))
-	                                {
-	                                    fileList.add(getRelativePath(cxeBaseDir,
-	                                            addFile));
-	                                }
-	                            }
-	                        }
-	                    }
-	                }
-	            }
-	            else if (fileAction.equals("remove"))
-	            {
-	                // Remove files from the import list.
-	                for (int i = 0; i < files.length; i++)
-	                {
-	                    file = files[i].toString();
-	                    fileList.remove(file);
-	                }
-	            }
-	            else if (fileAction.equals("download"))
-	            {
-	                // Fix for GBS-1570, get the selected files list string
-	                String selectedFilesListStr = p_request
-	                        .getParameter("selectedFileList");
-	                if (selectedFilesListStr != null
-	                        && !selectedFilesListStr.equals(""))
-	                {
-	                    String[] selectedFiles = selectedFilesListStr.split(",");
-	                    for (int i = 0; i < selectedFiles.length; i++)
-	                    {
-	                        try
-	                        {
-	                            selectedFiles[i] = URLDecoder.decode(
-	                                    selectedFiles[i], "UTF-8");
-	                        }
-	                        catch (Exception e)
-	                        {
-	                            CATEGORY.error("Failed to decode fileNames: "
-	                                    + selectedFilesListStr, e);
-	                        }
-	                    }
-	                    HashSet selectedFilesList = new HashSet();
-	                    for (int i = 0; i < selectedFiles.length; i++)
-	                    {
-	
-	                        file = selectedFiles[i].toString();
-	                        selectedFilesList.add(file);
-	                    }
-	                    fileList = selectedFilesList;
-	                }
-	                
-	                try
-	                {
-	                    doDownload(p_request, p_response, fileList, downloadNames, localName);
-	                }
-	                catch (Exception e)
-	                {
-	                    CATEGORY.error("Failed to do customer download with exception:", e);
-	                    throw new EnvoyServletException(e);
-	                }
-	            }
-        	}
+            String[] selectedFiles = selectedFilesListStr.split(",");
+            for (int i = 0; i < selectedFiles.length; i++)
+            {
+                try
+                {
+                    selectedFiles[i] = URLDecoder.decode(
+                            selectedFiles[i], "UTF-8");
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error("Failed to decode fileNames: "
+                            + selectedFilesListStr, e);
+                }
+            }
+            for (int i = 0; i < selectedFiles.length; i++)
+            {
+                fileList.add(selectedFiles[i].toString());
+            }
+        }
+        
+        try
+        {
+            doDownload(p_request, p_response, fileList, downloadJobIds);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to do customer download with exception:", e);
+            throw new EnvoyServletException(e);
         }
     }
 
@@ -826,11 +299,9 @@ public class DownloadFileHandler extends PageHandler
      * @exception Exception
      */
     private void doDownload(HttpServletRequest p_request,
-            HttpServletResponse p_response, HashSet p_fileList,
-            HashSet<String> jobNames, String locale) throws Exception
+            HttpServletResponse p_response, HashSet<String> p_fileList,
+            HashSet<Long> downloadJobIds) throws Exception
     {
-        // make a dir under filestorage for the .zip to live temporarily
-        // File tmpDir = AmbFileStoragePathUtils.getCustomerDownloadDir();
         HttpSession session = p_request.getSession(true);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
@@ -838,12 +309,10 @@ public class DownloadFileHandler extends PageHandler
                 .getAttribute(PARAM_JOB_COMPANY_ID);
         String fileStorageDirPathForJobCompany = AmbFileStoragePathUtils
                 .getFileStorageDirPath(jobCompanyId);
-        String jobCompanyName = ServerProxy.getJobHandler()
-        		.getCompanyById(jobCompanyId).getCompanyName();
         StringBuffer names = new StringBuffer();
-        for(String jobName:jobNames)
+        for(Long jobId:downloadJobIds)
         {
-        	names.append(jobName).append(",");
+        	names.append(jobId).append(",");
         }
 	        
         File tmpDir = new File(fileStorageDirPathForJobCompany,
@@ -854,61 +323,54 @@ public class DownloadFileHandler extends PageHandler
 
         Set<File> entryFiles = new HashSet<File>();
         Set<String> locales = new HashSet<String>();
-        Set<String> jobNameSet = new HashSet<String>();
-        String[] lastModifiedTimes = new String[p_fileList.size()];
-        Iterator iter = p_fileList.iterator();
-        int i = 0;
+        Set<Long> jobIdSet = new HashSet<Long>();
+        Iterator<String> iter = p_fileList.iterator();
         File cxeDocsDir = AmbFileStoragePathUtils.getCxeDocDir(jobCompanyId);
         while (iter.hasNext())
         {
-            String fileName = (String) iter.next();
+            String fileName = iter.next();
             String fileName2 = fileName;
             if (fileName.contains("/"))
             {
-                fileName2 = fileName.replace("/0", "\\");
+                fileName2 = fileName.replace("/", "\\");
             }
             
             String temps = fileName2.length() > 30 ? fileName2.substring(0, 30) : fileName2;
-            for(String jobName : jobNames)
+            for(Long jobId : downloadJobIds)
             {
-                if (temps.contains("\\" + jobName + "\\"))
+                if (temps.contains("\\" + jobId + "\\"))
                 {
-                    jobNameSet.add(jobName);
+                	jobIdSet.add(jobId);
                 }
             }
 
-            if(fileName2.startsWith(jobCompanyName))
-            {
-            	fileName2 = fileName2.substring(jobCompanyName.length() + 1);
-            }
             String fileLocale = fileName2.substring(0, fileName2.indexOf("\\"));
             locales.add(fileLocale);
 
-            File realFile = new File(cxeDocsDir, fileName2);
-            lastModifiedTimes[i] = String.valueOf(realFile.lastModified());
+            File realFile = new File(cxeDocsDir, fileName);
             entryFiles.add(realFile);
         }
         
         Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles, 
-        		jobNameSet, locales, cxeDocsDir.getPath());
+        		jobIdSet, locales, cxeDocsDir.getPath());
         ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
         
         String downloadFileName = zipFile.getName();
-        if (jobNameSet!= null && jobNameSet.size() == 1)
+        if (jobIdSet!= null && jobIdSet.size() == 1)
         {
-            String jn = jobNameSet.iterator().next();
+            Long ji = jobIdSet.iterator().next();
             long jobId = -1;
-            String jobname = jn;
+            String jobname = ji.toString();
 
             try
             {
-                jobId = Long.parseLong(jn);
+                jobId = ji;
                 Job j = ServerProxy.getJobHandler().getJobById(jobId);
                 jobname = j.getJobName();
             }
             catch (Exception e)
             {
-                jobname = jn;
+                jobname = ji.toString();
             }
 
             String tempS = locales.toString();
@@ -916,9 +378,9 @@ public class DownloadFileHandler extends PageHandler
             localestr = locales.size() == 1 ? localestr : "Languages(" + localestr + ")";
             downloadFileName = (jobId > -1 ? jobId + "_" : "") + jobname + "_" + localestr + ".zip";
         }
-        else if (jobNameSet!= null && jobNameSet.size() > 1)
+        else if (jobIdSet!= null && jobIdSet.size() > 1)
         {
-            String tempS = jobNameSet.toString();
+            String tempS = jobIdSet.toString();
             String jobNamesstr =  tempS.substring(1, tempS.length() - 1);
             downloadFileName = "GlobalSight_Download_jobs(" + jobNamesstr + ").zip";
         }
@@ -951,9 +413,18 @@ public class DownloadFileHandler extends PageHandler
         }
 
         fis.close();
-        
+
         isDownloaded = true;
-        
+
+        try {
+            FileUtil.deleteFile(zipFile);            
+        } catch (Exception ignore) {
+            
+        } finally {
+            if (zipFile.exists())
+                zipFile.deleteOnExit();
+        }
+
         /*
         Long zipFileSize = Long.valueOf(zipFile.length());
         StringBuffer zipUrl = new StringBuffer();
@@ -991,45 +462,261 @@ public class DownloadFileHandler extends PageHandler
         p_request.setAttribute("zipFileName", zipFile.getName());
         */
     }
-
-    private HashSet getFileList(SessionManager p_sessionMgr)
+    
+    private String getJSON(List<DownloadFile> p_list)
     {
-        HashSet fileList = (HashSet) p_sessionMgr.getAttribute(FILE_LIST);
-        if (fileList == null)
+        if (p_list == null || p_list.size() == 0)
         {
-            fileList = new HashSet();
-            p_sessionMgr.setAttribute(FILE_LIST, fileList);
+            return "[]";
         }
-        return fileList;
-    }
 
-    private static String getRelativePath(File p_parent, File p_absolute)
-    {
-        String parent;
-
-        if (p_parent.getPath().endsWith(File.separator))
-            parent = p_parent.getPath();
-        else
-            parent = p_parent.getPath() + File.separator;
-
-        String absolute = p_absolute.getPath();
-
-        return absolute.substring(parent.length());
-    }
-
-    private static String getAbsolutePath(String p_absolute)
-    {
-        return AmbFileStoragePathUtils.getCxeDocDir().getPath()
-                + File.separator + p_absolute;
+        StringBuilder result = new StringBuilder();
+        result.append("[");
+        for (DownloadFile DownloadFile : p_list)
+        {
+            result.append(DownloadFile.toJSON()).append(", ");
+        }
+        result.delete(result.length() - 2, result.length());
+        result.append("]");
+        return result.toString();
     }
     
-    private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, 
-			Set<String> jobIdSet, Set<String> locales, String cxeDocsDirPath)
+    private List<DownloadFile> getDownloadFiles(Set<Long> jobIdSet, Set<Long> wfIdSet, 
+    		SessionManager p_sessionMgr, boolean isTaskAssignees ,boolean canDownloadJob, User user)
+    {
+        List<DownloadFile> DownloadFiles = new ArrayList<DownloadFile>();
+        Long companyId = (Long) p_sessionMgr.getAttribute(PARAM_JOB_COMPANY_ID);
+        String companyFolderPath = AmbFileStoragePathUtils.getCxeDocDirPath(companyId);
+        File companyFolder = new File(companyFolderPath);
+        File[] localeFloders = companyFolder.listFiles();
+        List<String> localesList = getDownloadLocaleList(jobIdSet, wfIdSet);
+        Arrays.sort(localeFloders);
+        for (File localeFolder : localeFloders)
+        {
+        	boolean isPassoloFolder = false;
+        	if(localeFolder.getPath().endsWith(File.separator + "passolo"))
+        	{
+        		isPassoloFolder = true;
+        	}
+        	String filePath = localeFolder.getPath();
+        	boolean isContainLocale = false;
+        	String presentLocale = "";
+        	for(String locale: localesList)
+        	{
+        		if(filePath.endsWith(locale))
+        		{      			
+        			isContainLocale = true;
+        			presentLocale = locale;
+        			break;
+        		}
+        	}
+        	if(isPassoloFolder)
+        		isContainLocale = true;
+            if (localeFolder.isFile() || FileUtil.isEmpty(localeFolder) || !isContainLocale)
+                continue;
+            DownloadFile localeFile = new DownloadFile(localeFolder);
+            String localePath = localeFolder.getPath();
+            Long[] jobIds = jobIdSet.toArray(new Long[jobIdSet.size()]);
+            Arrays.sort(jobIds);
+        	for(Long jobId: jobIds)
+        	{
+				try
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(jobId);
+					if(!job.getProject().getUserIds().contains(user.getUserId()) ||
+							!(isTaskAssignees || canDownloadJob))
+					{
+						continue;
+					}
+					isContainLocale = false;
+					for (Workflow wf : job.getWorkflows())
+					{
+						if(presentLocale.equals(wf.getTargetLocale().toString()))
+						{                        		
+							isContainLocale = true;
+						}
+					}
+					if(isPassoloFolder)
+						isContainLocale = true;
+					
+					if(isContainLocale)
+					{
+						File tempFile = new File(localePath + File.separator + jobId);
+						File tempWebserviceFile = new File(localePath + File.separator + "webservice" 
+								+ File.separator + jobId);
+						if(tempFile.exists() && !tempFile.isFile() && !FileUtil.isEmpty(tempFile))
+						{
+							DownloadFile downloadFile = new DownloadFile(tempFile);
+							setChildren(downloadFile, tempFile);
+			                if (downloadFile.getChildren() != null)
+			                {
+			                	localeFile.addChildren(downloadFile);
+			                }
+						}
+						else if(tempWebserviceFile.exists() && !tempWebserviceFile.isFile() 
+								&& !FileUtil.isEmpty(tempWebserviceFile))
+						{
+							DownloadFile downloadFile = new DownloadFile(tempWebserviceFile);
+							setChildren(downloadFile, tempWebserviceFile);
+			                if (downloadFile.getChildren() != null)
+			                {
+			                	localeFile.addChildren(downloadFile);
+			                }
+						}
+					}
+				} 
+				catch (Exception e)
+        		{
+        			CATEGORY.error("Failed to get job " + jobId, e);
+        		}
+        	}       
+
+            if (localeFile.getChildren() != null)
+            {
+                DownloadFiles.add(localeFile);
+            }
+        }
+
+        return DownloadFiles;
+    }
+    
+    private List<String> getDownloadLocaleList(Set<Long> jobIdSet,
+			Set<Long> wfIdSet) 
+	{
+    	List<String> localesList = new ArrayList<String>();
+    	
+    	if(wfIdSet.size() > 0)
+        {
+        	for(Long wfId: wfIdSet)
+        	{      		
+        		try 
+        		{
+					Workflow wf = ServerProxy.getWorkflowManager()
+							.getWorkflowById(wfId);
+					if(!localesList.contains(wf.getTargetLocale().toString()))
+    				{                        		
+    					localesList.add(wf.getTargetLocale().toString());
+    				}
+				}
+        		catch (Exception e)
+        		{
+        			CATEGORY.error("Failed to get wf " + wfId, e);
+        		}
+        	}
+        }
+        else 
+        {		
+        	for(Long jobId: jobIdSet)
+        	{
+        		try 
+        		{
+        			Job job = ServerProxy.getJobHandler()
+        					.getJobById(jobId);
+        			for (Workflow wf : job.getWorkflows())
+        			{
+        				if(!localesList.contains(wf.getTargetLocale().toString()))
+        				{                        		
+        					localesList.add(wf.getTargetLocale().toString());
+        				}
+        			}
+        		}
+        		catch (Exception e)
+        		{
+        			CATEGORY.error("Failed to get job " + jobId, e);
+        		}
+        	}
+		}
+    	return localesList;
+	}
+
+	private void setChildren(DownloadFile p_downloadFolder, File p_folder)
+    {
+        if (p_folder.isFile() || FileUtil.isEmpty(p_folder))
+            return;
+
+        List<DownloadFile> children = new ArrayList<DownloadFile>();
+        File[] files = p_folder.listFiles();
+        Arrays.sort(files, new FileComparator(0, null, true));
+        Set<String> xlzFolders = new HashSet<String>();
+        for (File file : files)
+        {
+            DownloadFile downloadFolder = new DownloadFile(file);
+            if (file.isDirectory() && !FileUtil.isEmpty(file))
+            {
+                setChildren(downloadFolder, file);
+            }
+            children.add(downloadFolder);
+            
+            if(file.isFile() && file.getName().endsWith(".xlz"))
+            {
+            	xlzFolders.add(file.getName().substring(0, file.getName().length() - 4));
+            }
+        }
+        
+        List<DownloadFile> xlzFolderList = new ArrayList<DownloadFile>();
+        for(DownloadFile downloadFile: children)
+        {
+        	if(xlzFolders.contains(downloadFile.getTitle()))
+        	{
+        		xlzFolderList.add(downloadFile);
+        	}
+        }
+        children.removeAll(xlzFolderList);
+        
+        p_downloadFolder.setChildren(children);
+    }
+	
+	private String getCompanyFolderPath(SessionManager p_sessionMgr, String p_jobIds)
+	{
+		if(p_jobIds == null)
+		{
+			return AmbFileStoragePathUtils.getCxeDocDirPath();
+		}
+		else 
+		{		
+			Set<String> jobIdSet = new HashSet<String>();
+			if(p_jobIds.indexOf(",") > 0)
+			{		
+				jobIdSet = StringUtil.split(p_jobIds, ",");
+			}
+			else 
+			{
+				jobIdSet = StringUtil.split(p_jobIds, " ");
+			}
+			
+			long companyId = new Long("0");
+			String uploadName = "";
+			Set<Long> downloadJobIds = new HashSet<Long>();
+			for(String jobId: jobIdSet)
+			{
+				try 
+				{
+					Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
+					companyId = job.getCompanyId();
+					uploadName = job.getJobName() + " ";
+					downloadJobIds.add(job.getId());
+				}
+				catch (Exception e)
+				{
+					CATEGORY.error("Failed to get job " + jobId, e);
+				}
+			}
+			p_sessionMgr.setAttribute(PARAM_UPLOAD_NAME, uploadName.substring(0,
+					uploadName.length() - 1));
+			p_sessionMgr.setAttribute(PARAM_DOWNLOAD_NAME,
+					downloadJobIds);
+			p_sessionMgr.setAttribute(PARAM_JOB_COMPANY_ID, companyId);
+			return AmbFileStoragePathUtils.getCxeDocDirPath(companyId);
+		}
+	}
+	
+	private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, 
+			Set<Long> jobIdSet, Set<String> locales, String cxeDocsDirPath)
 	{
 		Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
 		File tempFile;
 		
-		for(String jobId: jobIdSet)
+		for(Long jobId: jobIdSet)
 		{
 			ArrayList<String> entryNames = new ArrayList<String>();
 			String prefixPassolo = cxeDocsDirPath + File.separator + "passolo" + File.separator 
@@ -1083,4 +770,5 @@ public class DownloadFileHandler extends PageHandler
 		}
 		return entryFileToFileNameMap;
 	}
+	
 }

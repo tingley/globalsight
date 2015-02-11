@@ -2321,7 +2321,7 @@ function doInit()
   // Check for shutdown every 5 minutes
   checkShutdown(1000 * 60 * 5);
 
-  window.setTimeout("idLoading.style.display = 'none';", 250, "JavaScript");
+  window.setTimeout("idLoading.style.display = 'none';", 250);
   window.defaultStatus = '';
 
   if (g_syncMessage)
@@ -3048,13 +3048,13 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 <input type="hidden" name="segment" value="">
 </form>
 
-<div class="header" style="width:expression(idBody.clientWidth);padding:0px 5px">
+<div class="header" style="width:expression(idBody.clientWidth);padding:8px 5px 0px">
 <!-- Right Links Start -->
-    <span id="idHelpViewer" onclick="showHelp()" class="help" style="margin-right: 10px;"><%=bundle.getString("lb_help") %></span>
-    <span class="help">&nbsp;|&nbsp;</span>
-    <span id="idCloseEditor" class="help" onclick="closeEditor()"><%=bundle.getString("lb_close") %></span>
+    <span id="idHelpViewer" onclick="showHelp()" class="help" style="margin-right: 10px;padding-top:8px;"><%=bundle.getString("lb_help") %></span>
+    <span class="help" style="padding-top:8px;" >&nbsp;|&nbsp;</span>
+    <span id="idCloseEditor" class="help" style="padding-top:8px;" onclick="closeEditor()"><%=bundle.getString("lb_close") %></span>
     
-    <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
+    <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none;padding-top:8px;" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
 	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">
 	        <li><a href="javascript:showTermbases();"><%=bundle.getString("lb_termbases")%>...</a></li>
 	        <% if (b_updateLeverage) { %>

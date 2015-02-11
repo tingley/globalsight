@@ -1,5 +1,15 @@
 package com.globalsight.client;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLDecoder;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,7 +19,7 @@ public class ClientTester
 {
     private static String HOST_NAME = "localhost";
     private static String HOST_PORT = "8080";
-    private static String userName = "qaadmin";
+    private static String userName = "york";
     private static String password = "password";
 
     public static Ambassador4Falcon getAmbassador() throws Exception
@@ -51,11 +61,17 @@ public class ClientTester
 //           testModifyWorkflowTemplateAssignees(ambassador, fullAccessToken);
 //
             // GBS-3132 #1 (8.5.2)
-            testCreateUser(ambassador, fullAccessToken);
+//            testCreateUser(ambassador, fullAccessToken);
 //            // GBS-3132 #2 (8.5.2)
 //            testModifyUser(ambassador, fullAccessToken);
 //            // GBS-3132 #3 (8.5.2)
 //            testTaskReassign(ambassador, fullAccessToken);
+
+            // GBS-3421 (8.5.3)
+            File file = testGetWorkOfflineFiles(ambassador, fullAccessToken);
+            String identifyKey = testUploadWorkOfflineFiles(ambassador,
+                    fullAccessToken, file);
+            testImportWorkOfflineFiles(ambassador, fullAccessToken, identifyKey);
         }
         catch (Exception ex)
         {
@@ -218,6 +234,105 @@ public class ClientTester
         
         System.out.println("Task reassign ...");
         String result = ambassador.taskReassign(p_accessToken, taskId, user);
+        System.out.println(result);
+    }
+
+    // GBS-3421 (8.5.3)
+    private static File testGetWorkOfflineFiles(Ambassador4Falcon ambassador,
+            String p_accessToken) throws Exception
+    {
+        long taskId = 3717;
+        int workOfflineFileType = 1;
+        String result = ambassador.getWorkOfflineFiles(p_accessToken, taskId,
+                workOfflineFileType);
+        System.out.println(result);
+
+        // Get the file back via the url in "path" key.
+        try
+        {
+            JSONObject object = new JSONObject(result);
+            String path = (String) object.get("path");
+            path = path.replace("\\\\", "/");
+            String fileName = path.substring(path.lastIndexOf("/") + 1);
+            String urlDecode = URLDecoder.decode(path, "UTF-8").replace(" ", "%20");
+
+            URL url = new URL(urlDecode);
+            HttpURLConnection hurl = (HttpURLConnection) url.openConnection();
+            hurl.connect();
+            InputStream is = hurl.getInputStream();
+            File localFile = new File("C:\\local", fileName);
+            saveFile(is, localFile);
+            System.out.println("Report is save to local :: "
+                    + localFile.getAbsolutePath());
+            return localFile;
+        }
+        catch (Exception e)
+        {
+//            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static void saveFile(InputStream is, File file) throws IOException,
+            FileNotFoundException
+    {
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        FileOutputStream outstream = new FileOutputStream(file);
+        int c;
+        while ((c = is.read()) != -1)
+        {
+            outstream.write(c);
+        }
+        outstream.close();
+        is.close();
+        if (file.length() == 0)
+        {
+            file.delete();
+        }
+    }
+
+    private static String testUploadWorkOfflineFiles(
+            Ambassador4Falcon ambassador, String p_accessToken, File file)
+            throws Exception
+    {
+        long taskId = 3717;
+        int workOfflineFileType = 1;
+        String fileName = file.getName();
+
+        byte[] bytes = null;
+//        File file = new File("C:\\local\\TranslationsEditReport-(333_369430748)(333)-en_US_zh_CN-20140218 182353.xlsx");
+        bytes = new byte[(int) file.length()];
+        FileInputStream fin = new FileInputStream(file);
+        fin.read(bytes, 0, (int) file.length());
+
+        String result = ambassador.uploadWorkOfflineFiles(p_accessToken,
+                taskId, workOfflineFileType, fileName, bytes);
+        System.out.println(result);
+
+        String identifyKey = null;
+        try
+        {
+            JSONObject object = new JSONObject(result);
+            identifyKey = (String) object.get("identifyKey");
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return identifyKey;
+    }
+
+    private static void testImportWorkOfflineFiles(
+            Ambassador4Falcon ambassador, String p_accessToken, String p_identifyKey)
+            throws Exception
+    {
+        long taskId = 3717;
+        int workOfflineFileType = 1;
+
+        String result = ambassador.importWorkOfflineFiles(p_accessToken,
+                taskId, p_identifyKey, workOfflineFileType);
         System.out.println(result);
     }
 }

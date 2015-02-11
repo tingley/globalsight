@@ -20,6 +20,10 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobDetails" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobInProgress" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobReady" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -31,6 +35,7 @@
 
     String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
     saveUrl += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
+    Object from = request.getAttribute("from");
 
     String title= bundle.getString("lb_edit") + " " + bundle.getString("lb_estimated_translate_completion_date");
 
@@ -100,6 +105,7 @@
 <meta http-equiv="content-type" content="text/html;charset=UTF-8">
 <title><%= title %></title>
 <script language="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script language="JavaScript">
@@ -115,8 +121,35 @@ function cancel()
 
 function save()
 {
-    WFForm.action = "<%=saveUrl%>" + "&action=" + "<%=JobManagementHandler.ESTIMATED_TRANSLATE_COMP_DATE%>";
-    WFForm.submit();
+	var ws = $(".workflow");
+    var ts = "";
+    for (var i = 0; i < ws.length; i++) 
+    {
+        var w = ws[i];
+        var selects = $(w).find("select");
+        var t = $(selects[0]).val() + "/" + $(selects[1]).val() + "/" + $(selects[2]).val() +" " + $(selects[3]).val() + ":" + $(selects[4]).val() + ": 00";
+        ts += "|";
+        ts += t;
+         
+    }
+
+    var obj = {time: ts};
+    $.ajax({
+        dataType : "json",
+        url : "AjaxService?action=validateTime",
+        data : obj,
+        contentType : 'application/json;charset=UTF-8',
+        success : function(msg) {
+            var ob = eval(msg);
+            if (ob){
+                WFForm.action = "<%=saveUrl%>" + "&action=" + "<%=JobManagementHandler.ESTIMATED_TRANSLATE_COMP_DATE%>";
+                WFForm.submit();
+            }
+            else {
+                alert("Can't set date less than today.");
+            }
+        }
+    });
 }
 
 function updateEditable(workflowId)
@@ -276,6 +309,9 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
     <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
+    <div class="mainHeading" style="margin-bottom:8px">
+    <%=bundle.getString("lb_job")%>: ${Job.name}
+    </div>
     <span class="mainHeading">
     <%=title%>
     </span>
@@ -496,7 +532,7 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
                 minuteField = "minuteField" + "_" + wf.getId();
 %>
                 <tr style="padding-bottom:5px; padding-top:5px;"
-                  valign=top bgcolor="<%=color%>">
+                  valign=top bgcolor="<%=color%>" class="workflow">
 
                   <td class="standardText">
                     <input type='checkbox' name='<%=checkField%>' onclick='updateEditable("<%=wf.getId()%>");' <%=checkboxDisabled%> <%=checkboxchecked%> >
@@ -601,6 +637,9 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 </TD>
 </TR>
 </TABLE>
+<% if (from != null) { %>
+    <input type="hidden" name="from" value="<%=from%>" />
+<% } %>
 </FORM>
 </BODY>
 </html>

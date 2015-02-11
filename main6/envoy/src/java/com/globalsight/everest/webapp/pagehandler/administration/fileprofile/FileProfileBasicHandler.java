@@ -45,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
@@ -179,7 +180,7 @@ public class FileProfileBasicHandler extends PageHandler
         
         for (KnownFormatTypeImpl type : allFormatTypes)
         {
-        	if ("(Beta) New Office 2010 Filter (DOCX only)".equals(type.getName()))
+        	if (type.getName() != null && type.getName().indexOf("New Office 2010") > 0)
         	{
         		allFormatTypes.remove(type);
         		allFormatTypes.add(type);

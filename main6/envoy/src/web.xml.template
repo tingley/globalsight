@@ -548,7 +548,20 @@
       <param-value>ServletExecuteQueue</param-value>
     </init-param>
   </servlet>
-  
+
+  <servlet>
+    <servlet-name>downloadReports</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
   <servlet>
     <servlet-name>viewCorpus</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
@@ -767,7 +780,12 @@
     <servlet-name>getCustomerDownload</servlet-name>
     <url-pattern>/GlobalSight/CustomerDownload/*</url-pattern>
   </servlet-mapping>
-  
+
+  <servlet-mapping>
+    <servlet-name>downloadReports</servlet-name>
+    <url-pattern>/DownloadReports/*</url-pattern>
+  </servlet-mapping>
+
   <servlet-mapping>
     <servlet-name>viewCommentAttachments</servlet-name>
     <url-pattern>/GlobalSight/CommentReference/*</url-pattern>

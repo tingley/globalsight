@@ -48,8 +48,13 @@ public class IpAddressFilterHandler extends BasicHandler
     private static Set<String> notCareIpFilterMethods = new HashSet<String>();
     static
     {
+        // Create job uses below methods("Ambassador2.java"), IP filter should
+        // ignore them.
         notCareIpFilterMethods.add("dummyLogin");
         notCareIpFilterMethods.add("uploadFiles");
+        // GBS-3389: recreate job uses "createJobOnInitial" API, IP filter
+        // should ignore it.
+        notCareIpFilterMethods.add("createJobOnInitial");
     }
 
     /**

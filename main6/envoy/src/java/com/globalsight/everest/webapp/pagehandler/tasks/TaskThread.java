@@ -62,7 +62,8 @@ public class TaskThread extends MultiCompanySupportedThread
 
     private TaskImpl task;
     private Map<String, ?> dataMap;
-
+    public static String roleName;
+    
     public TaskThread(TaskImpl p_task, Map<String, ?> p_dataMap)
     {
         super();
@@ -219,6 +220,7 @@ public class TaskThread extends MultiCompanySupportedThread
         File[] files = null;
         if (p_project.getReviewOnlyAutoSend())
         {
+        	roleName = p_acceptor;
             List<Long> jobIDS = new ArrayList<Long>();
             jobIDS.add(p_task.getJobId());
             List<GlobalSightLocale> targetLocales = new ArrayList<GlobalSightLocale>();
@@ -235,6 +237,7 @@ public class TaskThread extends MultiCompanySupportedThread
                 generator = new TranslationsEditReportGenerator(p_companyName);
             }
             files = generator.generateReports(jobIDS, targetLocales);
+            roleName = null;
         }
 
         String[] messageArguments =

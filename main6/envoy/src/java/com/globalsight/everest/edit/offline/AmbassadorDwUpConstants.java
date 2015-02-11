@@ -42,7 +42,7 @@ public interface AmbassadorDwUpConstants
     static public final String FILE_NAME_BREAK = "_";
 
     /** Relative paths to help file (paths are escaped for rtf). */
-    static public final String FILE_MAIN_HELP = "../help/A/B/C/ol_index.htm";
+    static public final String FILE_MAIN_HELP = "http://www.globalsight.com/wiki/index.php/Main_Page";
 
     // Grammar For Plain text format javacc parser. Note: the grammar
     // cannot accept translated values.
@@ -97,7 +97,7 @@ public interface AmbassadorDwUpConstants
     static public final String HEADER_TM_EDIT_TYPE_100 = "Exact Match";
     static public final String HEADER_TM_EDIT_TYPE_DENY = "Deny Edit";
     
-    static public final String LINK_NAME_MAIN_HELP = "Click here to access Offline Help and Placeholder Map.";
+    static public final String LINK_NAME_MAIN_HELP = "For more information, see the Offline Help, Placeholder Map and GlobalSight Wiki.";
     static public final String LINK_NAME_UPLOAD_HELP = "Click here to learn how to save files for upload.";
 
     static public final String HEADER_CMT_TEMPLATE1 = "{ ";
@@ -118,7 +118,7 @@ public interface AmbassadorDwUpConstants
     static public final String HEADER_CMT_TEMPLATE16 = "\\tab Upload errors may result from not following these directions.";
     static public final String HEADER_CMT_TEMPLATE17 = "\\tab Click on the Offline Help link above for more information.";
     static public final String HEADER_CMT_TEMPLATE18 = "} ";
-    static public final String LINK_NAME_NOTES = "Do not modify any lines that start with a pound sign.";
+    static public final String LINK_NAME_NOTES = "Do not modify any lines that start with #.";
 
     /** Standard internal delimiter - see also word client delimiters below. */
     static public final char SEGMENT_ID_DELIMITER = ':';
@@ -144,7 +144,7 @@ public interface AmbassadorDwUpConstants
     static public final String LABEL_LINK_DETAILS = "Details";
     static public final String LABEL_LINK_TM = "TM";
     static public final String LABEL_LINK_MT = "MT";
-    static public final String LINK_TIP_MAIN_HELP = "Click here to access Offline Help and Placeholder Map";
+    static public final String LINK_TIP_MAIN_HELP = "For more information, see the Offline Help, Placeholder Map and GlobalSight Wiki.";
     static public final String LINK_TIP_UPLOAD_HELP = "Click here to learn how to save files for upload";
     static public final String LINK_TIP_NOTES = "Do not modify any lines that start with a pound sign";
     static public final String LINK_TIP_RESPAGE = "Click here to view segment resources";

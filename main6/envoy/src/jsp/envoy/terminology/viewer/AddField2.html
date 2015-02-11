@@ -230,7 +230,7 @@ function submitDummyForm()
 {
   // Need to let attached onsubmit handler update the fake form field.
   //window.event.returnValue = false;
-  window.setTimeout('doClose(true)', 100, 'JavaScript');
+  window.setTimeout(doClose(true), 100);
   
   return false;
 }

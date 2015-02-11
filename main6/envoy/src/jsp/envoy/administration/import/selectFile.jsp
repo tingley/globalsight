@@ -111,31 +111,34 @@
         // Place the directory content under the folder
         // list or the file list for proper sequencing.
         Vector<String> cvsSandBoxs = cvsServerManager.getAllServerSandbox();
-        for (int i=0; i<directoryContent.length; i++)
-        {
-            File curDoc = directoryContent[i];
-            if (curDoc.isFile())
-            {
-               if (atTopLevelDocsDir)
-               {
-                 //do not add files at the top level
-                 category.info("Ignoring file " + curDoc +
-                 " since it is not under a locale specific subdirectory.");
-               }
-               else
-               {
-                 fileList.add(curDoc);
-               }
-            }
-            else
-            {
-            	//To ignore CVS folders
-            	tmp = curDoc.getAbsolutePath();
-            	tmp = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
-            	if (!cvsSandBoxs.contains(tmp) && !tmp.endsWith(".sub"))
-            	    folderList.add(curDoc);
-            }
-        }
+		if (directoryContent != null && directoryContent.length > 0)
+		{
+	        for (int i=0; i<directoryContent.length; i++)
+	        {
+	            File curDoc = directoryContent[i];
+	            if (curDoc.isFile())
+	            {
+	               if (atTopLevelDocsDir)
+	               {
+	                 //do not add files at the top level
+	                 category.info("Ignoring file " + curDoc +
+	                 " since it is not under a locale specific subdirectory.");
+	               }
+	               else
+	               {
+	                 fileList.add(curDoc);
+	               }
+	            }
+	            else
+	            {
+	            	//To ignore CVS folders
+	            	tmp = curDoc.getAbsolutePath();
+	            	tmp = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
+	            	if (!cvsSandBoxs.contains(tmp) && !tmp.endsWith(".sub"))
+	            	    folderList.add(curDoc);
+	            }
+	        }
+		}
 
         int rowCount = 0;
         // Print out the folders first.
@@ -172,7 +175,7 @@
         }
         }
         catch (Exception e) {
-            category.error("Unable to read files for the manual import UI. The docs directory setting may be incorrect\nor the permissions on that directory may be incorrect.");
+            category.warn("Unable to read files for the manual import UI. The docs directory setting may be incorrect\nor the permissions on that directory may be incorrect.");
         }
     }
 

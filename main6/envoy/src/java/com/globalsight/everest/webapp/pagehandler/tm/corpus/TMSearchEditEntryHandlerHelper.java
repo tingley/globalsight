@@ -40,6 +40,7 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
 import com.globalsight.util.UTC;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 
 public class TMSearchEditEntryHandlerHelper
@@ -251,15 +252,17 @@ public class TMSearchEditEntryHandlerHelper
         String modifyDate = UTC.valueOf(trgTuv.getModifyDate());
 
         entryInfo.put("sid", sid);
-        entryInfo.put("createdBy",
-                createdBy == null ? na : UserUtil.getUserNameById(createdBy));
+        String createdByName = UserUtil.getUserNameById(createdBy);
+        entryInfo.put("createdBy", createdBy == null ? 
+                na : EditUtil.encodeXmlEntities(createdByName));
         entryInfo.put("createdOn", createdOn == null ? na : createdOn);
-        entryInfo.put("modifiedBy",
-                modifyUser == null ? na : UserUtil.getUserNameById(modifyUser));
+        String modifyUserName = UserUtil.getUserNameById(modifyUser);
+        entryInfo.put("modifiedBy", modifyUser == null ?
+                na : EditUtil.encodeXmlEntities(modifyUserName));
         entryInfo.put("modifiedOn", modifyDate == null ? na : modifyDate);
         entryInfo.put("sourceLocale", srcTuv.getLocale().getDisplayName());
         entryInfo.put("targetLocale", targetLocale.getDisplayName());
-        entryInfo.put("tmName", tm.getName());
+        entryInfo.put("tmName", EditUtil.encodeXmlEntities(tm.getName()));
 
         String srcSegment = GxmlUtil.stripRootTag(srcTuv.getSegment());
         SegmentManager segmentManagerSource = new SegmentManager();

@@ -157,21 +157,24 @@ public class SmartConfiguration {
 		// Create Import and Export folder under failed box in local
 		String failedBoxImport = failedBox + File.separator + "Import";
 		File failedBoxImportDir = new File(failedBoxImport);
-		failedBoxImportDir.mkdir();
+		failedBoxImportDir.mkdirs();
 		String failedBoxExport = failedBox + File.separator + "Export";
 		File failedBoxExportDir = new File(failedBoxExport);
-		failedBoxExportDir.mkdir();
+		failedBoxExportDir.mkdirs();
 	}
 
 	private void createDir4Romte(CompanyConfiguration cc, String remote) {
-		String failedBox = cc.getFailedBox(), outbox = cc.getOutbox();
+        String failedBox = cc.getFailedBox().replace("\\", "/")
+                .replace("/", File.separator);
+        String outbox = cc.getOutbox().replace("\\", "/")
+                .replace("/", File.separator);
 		// Create FTP directory for failedBox and outBox
 		failedBox = failedBox + File.separator + remote;
 		File failedBoxDir = new File(failedBox);
-		failedBoxDir.mkdir();
+		failedBoxDir.mkdirs();
 		outbox = outbox + File.separator + remote;
 		File outboxDir = new File(outbox);
-		outboxDir.mkdir();
+		outboxDir.mkdirs();
 		cc.setFailedBox(failedBox);
 		cc.setOutbox(outbox);
 	}
@@ -195,7 +198,7 @@ public class SmartConfiguration {
 			newPath = basePath + File.separator + path;
 			File file = new File(newPath);
 			if (!file.exists()) {
-				if (!file.mkdir()) {
+				if (!file.mkdirs()) {
 					String message = "Configuration error for \"" + paramName + "\" in GSSmartBox.conf.";
 					LogUtil.FAILEDLOG.error(message);
 					newPath = null;

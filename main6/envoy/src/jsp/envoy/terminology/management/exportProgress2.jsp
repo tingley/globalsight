@@ -61,7 +61,7 @@ function doLoad()
   // refresh frame
   if ("<%=done%>" == "false")
   {
-    window.setTimeout("doRefresh()", 5000, "JavaScript");
+    window.setTimeout(document.location.reload(), 5000);
   }
   else
   {

@@ -52,6 +52,7 @@ public class GeneralPreProcess implements PreProcess {
 		String originFileName = originFile.getName();
 		String sourceLocale = cpConfig.getSourceLocale();
 		String targetLocale = cpConfig.getTargetLocale();
+
 		File xlzDir = new File(cpConfig.getJobCreatingBox4XLZ());
 		if (originFilePath.contains(xlzDir.getPath())) {
 			String xlfFile = originFilePath;
@@ -88,9 +89,9 @@ public class GeneralPreProcess implements PreProcess {
 
 		if (originFilePath.endsWith(".zip")) {
 			// temp directory used for saving converted file
-			String tempDirPath = originFilePath.substring(0, originFilePath.indexOf(".zip"));
+			String tempDirPath = originFilePath.substring(0, originFilePath.lastIndexOf(".zip"));
 			File tempDir = new File(tempDirPath);
-			tempDir.mkdir();
+			tempDir.mkdirs();
 			jobInfo.setTempFile(tempDirPath);
 			jobInfo.setOriginFile(tempDirPath);
 		}

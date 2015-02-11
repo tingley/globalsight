@@ -387,6 +387,10 @@ namespace GlobalSight.InDesignConverter
                 RestoreLayers();
                 m_log.Debug("finish RestoreLayers, start ExportToPDFFile");
 
+                //update color
+                InDesignColorHelper h = new InDesignColorHelper(m_inDesignDoc);
+                h.UpdateColors();
+
                 //convert to pdf
                 ExportToPDFFile(pdfFileName);
                 m_log.Debug("finish ExportToPDFFile");

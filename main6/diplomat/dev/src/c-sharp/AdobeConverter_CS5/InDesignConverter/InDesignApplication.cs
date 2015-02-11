@@ -287,7 +287,7 @@ namespace GlobalSight.InDesignConverter
             {
                 fontTable = new Hashtable();
             }
-
+            
             for (int i = 0; i < m_inDesignApp.Fonts.Count; i++)
             {
                 if (i == 0)
@@ -354,13 +354,18 @@ namespace GlobalSight.InDesignConverter
             }
         }
 
-        public void ConvertIdmlToPDF(string p_idmlFileName, string pdfFileName)
+        public void ConvertIdmlToPDF(string p_idmlFileName, string pdfFileName, bool p_masterTranslated, bool p_translateHiddenLayer)
         {           
             try
             {
                 isExceptionOccur = false;
                 m_log.Debug("Start conversion to PDF");
                 OpenInDesignDoc(p_idmlFileName);
+                // markup for color preview
+                MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                //update color
+                InDesignColorHelper h = new InDesignColorHelper(m_inDesignDoc);
+                h.UpdateColors();
                 //convert to pdf
                 ExportToPDFFile(pdfFileName);
                 m_log.Debug("finish ExportToPDFFile");
@@ -413,6 +418,10 @@ namespace GlobalSight.InDesignConverter
                 m_log.Debug("finish ImportXMP, start RestoreLayers");
                 RestoreLayers();
                 m_log.Debug("finish RestoreLayers, start ExportToPDFFile");
+
+                //update color
+                InDesignColorHelper h = new InDesignColorHelper(m_inDesignDoc);
+                h.UpdateColors();
 
                 //convert to pdf
                 ExportToPDFFile(pdfFileName);

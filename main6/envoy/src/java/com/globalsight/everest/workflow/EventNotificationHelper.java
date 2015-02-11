@@ -114,7 +114,7 @@ public class EventNotificationHelper
      * @param p_threshold
      * @param p_emailInfo
      */
-    static void performSchedulingProcess(Integer p_actionType,
+    public static void performSchedulingProcess(Integer p_actionType,
             long p_unsheduleTaskId, Integer p_unScheduleEventType, Node p_node,
             TaskInfo p_taskInfo, Long p_creationTime,
             Integer p_scheduleEventType, Float p_threshold,

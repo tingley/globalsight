@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -89,33 +90,9 @@ public class JobCreationMonitor
             long l10nProfileId, String priority, String state)
             throws JobCreationException
     {
-        JobImpl job = null;
-        try
-        {
-            job = new JobImpl();
-            job.setJobName(EditUtil.removeCRLF(jobName));
-            job.setCreateUserId(userId);
-            job.setL10nProfileId(l10nProfileId);
-            job.setPriority(Integer.parseInt(priority));
-            job.setState(state);
-            job.setUuid(jobName);
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
-            job.setCreateDate(ts);
-            job.setTimestamp(ts);
-            job.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
-                    .getValue()));
-
-            HibernateUtil.save(job);
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Error initializing new job: " + jobName, e);
-            throw new JobCreationException(
-                    JobCreationException.MSG_FAILED_TO_INITIALIZE_NEW_JOB,
-                    null, e);
-        }
-
-        return job;
+        String uuid = jobName;
+        return initializeJob(jobName, uuid, userId, l10nProfileId, priority,
+                state);
     }
 
     /**
@@ -132,6 +109,8 @@ public class JobCreationMonitor
             job.setJobName(EditUtil.removeCRLF(jobName));
             job.setCreateUserId(userId);
             job.setL10nProfileId(l10nProfileId);
+            job.setSourceLocale(ServerProxy.getProjectHandler()
+                    .getL10nProfile(l10nProfileId).getSourceLocale());
             job.setPriority(Integer.parseInt(priority));
             job.setState(state);
             if (uuid == null)

@@ -67,6 +67,7 @@ public interface TMProfileConstants
     public static final String MULTIPLE_EXACT_MATCHES_REIMPORT = "multLGEM";
     public static final String MULTIPLE_EXACT_MATCHES_PENALTY_REIMPORT = "multMatchesPenaltyReimport";
     public static final String DYN_LEV_GOLD = "dynLevGold";
+    public static final String DYN_LEV_STOP_SEARCH = "dynLevStopSearch";
     public static final String DYN_LEV_IN_PROGRESS = "dynLevInProgress";
     public static final String DYN_LEV_POPULATION = "dynLevPopulation";
     public static final String DYN_LEV_REFERENCE = "dynLevReference";

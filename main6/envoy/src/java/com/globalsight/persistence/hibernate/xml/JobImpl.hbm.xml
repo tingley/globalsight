@@ -53,6 +53,11 @@
 
         <property name="isMigrated" column="IS_MIGRATED"
             type="yes_no" not-null="false" />
+        <property name="isAllRequestGenerated" column="IS_ALL_REQUEST_GENERATED"
+            type="yes_no" not-null="false" />
+
+        <many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID"
+            class="com.globalsight.util.GlobalSightLocale" not-null="true" />
 
         <many-to-one name="l10nProfile" not-null="false" insert="false" update="false"
 	        class="com.globalsight.everest.foundation.BasicL10nProfile" column="L10N_PROFILE_ID" />

@@ -16,45 +16,68 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import java.io.File;
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
+import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
+import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.foundation.Timestamp;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.workflow.JbpmVariable;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.file.XliffFileUtil;
+import com.globalsight.webservices.client2.Ambassador2;
+import com.globalsight.webservices.client2.WebService2ClientHelper;
 
 /**
  * A helper class for all workflow related page handlers.
  */
 public class WorkflowHandlerHelper
 {
-    static private final long DAY_IN_MILLISEC = 86400000;
+    private static final Logger logger = Logger
+            .getLogger(WorkflowHandlerHelper.class.getName());
 
     /**
      * Archives the specified job.
@@ -907,5 +930,271 @@ public class WorkflowHandlerHelper
         }
 
         return taskInstances;
+    }
+
+    /**
+     * Recreate job with same job id, job name, source files, target locales
+     * etc.
+     * 
+     * @param jobId
+     */
+    public static void recreateJob(Long jobId) throws EnvoyServletException
+    {
+        HashMap<String, Object> args = new HashMap<String, Object>();
+        Vector<String> filePaths = new Vector<String>();
+        Vector<String> fileProfileIds = new Vector<String>();
+        Vector<String> targetLocales = new Vector<String>();
+
+        Vector<File> sourceFiles = new Vector<File>();
+        Vector<File> backupFiles = new Vector<File>();
+        try
+        {
+            Job job = JobCreationMonitor.loadJobFromDB(jobId);
+            String jobName = job.getJobName();
+            String priority = String.valueOf(job.getPriority());
+            String createUserId = job.getCreateUserId();
+            String docDir = AmbFileStoragePathUtils.getCxeDocDirPath(job.getCompanyId());
+
+            Set<String> realFiles = new HashSet<String>();
+            Collection<Request> requests = job.getRequestList();
+            for (Request request : requests)
+            {
+                long fpId = request.getFileProfileId();
+                fpId = fixFileProfileId(fpId);
+
+                EventFlowXmlParser parser = new EventFlowXmlParser();
+                parser.parse(request.getEventFlowXml());
+                String trgLocales = parser.getTargetLocale();
+                String srcFilePathName = parser.getDataValue("source", "Filename");
+
+                File srcFile = new File(docDir, srcFilePathName);
+                if (XliffFileUtil.isXliffFile(srcFile.getName()))
+                {
+                    srcFile = XliffFileUtil
+                            .getOriginalRealSoureFile(srcFile);
+                    if (srcFile.exists() && srcFile.isFile())
+                    {
+                        String path = srcFile.getAbsolutePath().replace("\\", "/");
+                        String docDirTmp = docDir.replace("\\", "/");
+                        srcFilePathName = path.substring(docDirTmp.length() + 1);
+                    }
+                }
+
+                // For office 2010 formats, multiple requests may be from the
+                // same real file
+                if (realFiles.contains(srcFilePathName))
+                {
+                    continue;
+                }
+                realFiles.add(srcFilePathName);
+
+                // back up source files
+                File backupFile = new File(docDir + File.separator
+                        + "recreateJob_tmp", srcFilePathName);
+                if (srcFile.exists() && srcFile.isFile())
+                {
+                    FileUtil.copyFile(srcFile, backupFile);
+                    sourceFiles.add(srcFile);
+                    backupFiles.add(backupFile);
+                }
+                else
+                {
+                    // ignore this request as its source file does not exist.
+                    logger.warn("Can not find the source file for recreate: "
+                            + srcFile.getAbsolutePath());
+                    continue;
+                }
+
+                filePaths.add(getSourceFileLocalPathName(srcFilePathName));
+                fileProfileIds.add(String.valueOf(fpId));
+                targetLocales.add(trgLocales);
+            }
+
+            // try to re-create job only when it has at least one valid source file.
+            if (sourceFiles.size() > 0)
+            {
+                // Remove job, but do not remove data in "job" table.
+                CompanyRemoval removal = new CompanyRemoval(job.getCompanyId());
+                boolean isRecreateJob = true;
+                removal.removeJob(job, isRecreateJob);
+
+                // Move backup source files back to working path after original
+                // job is discarded.
+                for (int i = 0; i < sourceFiles.size(); i++)
+                {
+                    File srcFile = sourceFiles.get(i);
+                    File bakFile = backupFiles.get(i);
+                    FileUtil.copyFile(bakFile, srcFile);
+                }
+                // Clean back up files
+                cleanBackupFile(backupFiles.get(0));
+
+                // update job state
+                job.setState(Job.IN_QUEUE);
+                HibernateUtil.saveOrUpdate(job);
+
+                // Reuse the implementation in web service.
+                args.put("jobId", String.valueOf(job.getJobId()));
+                args.put("jobName", jobName);
+                args.put("priority", priority);
+                args.put("filePaths", filePaths);
+                args.put("fileProfileIds", fileProfileIds);
+                args.put("targetLocales", targetLocales);
+                // args.put("attributes", attributeXml);
+
+                //   use job's original creator
+                User user = UserUtil.getUserById(createUserId);
+                SystemConfiguration config = SystemConfiguration.getInstance();
+                String hostName = config.getStringParameter("server.host");
+                String port = config.getStringParameter("nonSSLPort");
+                String isHttps = config.getStringParameter("server.ssl.enable");
+                boolean httsEnabled = "true".equalsIgnoreCase(isHttps) ? true : false;
+                String sslPort = config.getStringParameter("server.ssl.port");
+                String userName = user.getUserName();
+                String password = user.getPassword();
+                Ambassador2 amb2 = WebService2ClientHelper
+                        .getClientAmbassador2(hostName, (httsEnabled ? sslPort
+                                : port), userName, password,
+                                (httsEnabled ? true : false));
+                String accessToken = amb2.dummyLogin(userName, password);
+                args.put("accessToken", accessToken);
+                args.put("recreate", "true");
+                boolean isViaWS = isJobCreatedOriginallyViaWS(
+                        realFiles.iterator().next(), job.getId()); 
+                args.put("isJobCreatedOriginallyViaWS", isViaWS ? "true"
+                        : "false");
+                amb2.createJobOnInitial(args);
+            }
+            else
+            {
+                logger.warn("Do not find any source files on hard disk, so can not re-create this job");
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when try to re-create job " + jobId, e);
+            throw new EnvoyServletException(e);
+        }
+        finally
+        {
+            filePaths = null;
+            fileProfileIds = null;
+            targetLocales = null;
+            args = null;
+
+            sourceFiles = null;
+            backupFiles = null;
+        }
+    }
+
+    /**
+     * Get the local file pathname of source file.
+     * @param displayName
+     * @return
+     */
+    private static String getSourceFileLocalPathName(String displayName)
+    {
+        String localPath = displayName.replace("\\", "/");
+
+        // remove source locale section
+        localPath = localPath.substring(localPath.indexOf("/") + 1);
+        // remove "webservice"
+        if (localPath.startsWith("webservice"))
+        {
+            localPath = localPath.substring(localPath.indexOf("/") + 1);
+        }
+        // remove "jobid" or "jobname"(old jobs)
+        localPath = localPath.substring(localPath.indexOf("/") + 1);
+
+        localPath = localPath.replace("/", File.separator);
+
+        return localPath;
+    }
+
+    /**
+     * Clean backup files in "recreateJob_tmp" folder for current job.
+     */
+    private static void cleanBackupFile(File bakFile)
+    {
+        StringBuffer fileBuf = new StringBuffer();
+
+        String path = bakFile.getAbsolutePath().replace("\\", "/");
+        // recreateJob_tmp
+        int index = path.indexOf("/recreateJob_tmp/");
+        fileBuf.append(path.substring(0, index + "/recreateJob_tmp/".length()));
+        path = path.substring(index + "/recreateJob_tmp/".length());
+        // source locale
+        index = path.indexOf("/");
+        fileBuf.append(path.substring(0, index));
+        path = path.substring(index + 1);
+        // webservice
+        if (path.startsWith("webservice"))
+        {
+            fileBuf.append("/webservice");
+            path = path.substring("webservice".length() + 1);
+        }
+        // job id
+        index = path.indexOf("/");
+        fileBuf.append("/").append(path.substring(0, index));
+
+        String filePath = fileBuf.toString().replace("/", File.separator);
+        // this is the job id folder
+        File file = new File(filePath);
+        FileUtil.deleteFile(file);
+    }
+
+    /**
+     * For some file formats, the "displayName" in DB starts with some special
+     * characters like "footer1", "header1", "diagram data1", "comments" etc.
+     * Display name in DB:
+     * "(Hyperlinks) en_US\4\GS\test\Files\testfile\FromBugs\Docx\test3_1415.docx"
+     * Expected: 
+     * "en_US\4\GS\test\Files\testfile\FromBugs\Docx\test3_1415.docx"
+     */
+//    private static String fixDisplayNameForOffice(String displayName,
+//            GlobalSightLocale sourceLocale)
+//    {
+//        String fixedDisplayName = displayName.replace("\\", "/");
+//        int index = fixedDisplayName.indexOf("/");
+//        fixedDisplayName = fixedDisplayName.substring(index + 1);
+//        fixedDisplayName = sourceLocale.toString() + "/" + fixedDisplayName;
+//        fixedDisplayName = fixedDisplayName.replace("/", File.separator);
+//        return fixedDisplayName;
+//    }
+
+    private static long fixFileProfileId(long fpId) throws GeneralException,
+            RemoteException, NamingException
+    {
+        long result = fpId;
+
+        FileProfilePersistenceManager fpManager = ServerProxy
+                .getFileProfilePersistenceManager();
+        FileProfile fp = fpManager.getFileProfileById(fpId, false);
+        String fpName = fp.getName();
+        boolean isXlzRef = fpManager.isXlzReferenceXlfFileProfile(fpName);
+        if (isXlzRef)
+        {
+            String tmpFPName = fpName.substring(0, fpName.length() - 4);
+            FileProfile xlzFP = fpManager.getFileProfileByName(tmpFPName);
+            result = xlzFP.getId();
+        }
+
+        return result;
+    }
+
+    private static boolean isJobCreatedOriginallyViaWS(
+            String modifiedDisplayName, long jobId)
+    {
+        String fakeDisplayName = modifiedDisplayName.replace("\\", "/");
+        if (fakeDisplayName.indexOf("/webservice/") > -1)
+        {
+            int index = fakeDisplayName.indexOf("/");
+            String rest = fakeDisplayName.substring(index);
+            if (rest.startsWith("/webservice/" + jobId + "/"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

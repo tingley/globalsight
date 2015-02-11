@@ -228,4 +228,47 @@ public class XmlUtil
 			s_logger.error(e);
 		}
     }
+    
+    public void getXmlString(Node node, StringBuilder sb)
+    {
+    	if (node.getNodeType() == Node.TEXT_NODE)
+    	{
+    		sb.append(escapeString(node.getTextContent()));
+    		return;
+    	}
+    	
+    	// start
+    	String name = node.getNodeName();
+    	sb.append("&lt;");
+    	sb.append(name);
+    	NamedNodeMap attrs = node.getAttributes();
+        for (int j = 0; j < attrs.getLength(); ++j)
+        {
+            Node att = attrs.item(j);
+            String attname = att.getNodeName();
+            String value = att.getNodeValue();
+            
+            sb.append(" ").append(attname).append("=\"");
+            sb.append(escapeString(escapeString(value)));
+            sb.append("\"");
+        }
+    	sb.append("&gt;");
+    	
+    	// child
+    	List<Node> cs = getChildNodes(node);
+		for (Node c : cs)
+		{
+			getXmlString(c, sb);
+		}
+    	
+		// end
+    	sb.append("&lt;/");
+    	sb.append(node.getNodeName());
+    	sb.append("&gt;");
+    }
+    
+    public String escapeString(String s)
+    {
+    	return com.globalsight.diplomat.util.XmlUtil.escapeString(s);
+    }
 }

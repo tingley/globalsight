@@ -41,6 +41,7 @@ String lb_selectImportFile = bundle.getString("lb_select_import_file");
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
@@ -86,15 +87,7 @@ function doNext()
 
         oForm.action = url;
        
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	 //oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = oOptions.xml;
-        	oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = result.dom.xml;
-        }
-        else if(window.DOMParser)
-        { 
-        	oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = XML.getDomString(result.dom);
-        }
+        oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -102,29 +95,15 @@ function doNext()
 function buildOptions()
 {
     var result = new Result("", "", null);
-    var dom;
+    var dom = $.parseXML(xmlStr);
     var node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("//fileOptions");
-    node.selectSingleNode("fileName").text = oForm.filename.value;
+    node = $(dom).find("fileOptions");
+    $(node).find("fileName").text(oForm.filename.value);
 
     var sel = oDummyForm.tmName;
-    node = dom.selectSingleNode("//tmOptions");
-    node.selectSingleNode("tmName").text =
-      sel.options[sel.selectedIndex].value;
+    node = $(dom).find("tmOptions");
+    $(node).find("tmName").text(sel.options[sel.selectedIndex].value);
 
     if (oForm.filename.value == "")
     {
@@ -153,28 +132,15 @@ function selectValue(select, value)
 function parseOptions()
 {
     var form = document.oDummyForm;
-    var dom;
+    var dom = $.parseXML(xmlStr);
     var nodes, node, fileName, tmName, syncMode;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("//fileOptions");
-    fileName = node.selectSingleNode("fileName").text;
+    node = $(dom).find("fileOptions");
+    fileName = $(node).find("fileName").text();
 
-    node = dom.selectSingleNode("//tmOptions");
-    tmName = node.selectSingleNode("tmName").text;
-    syncMode = node.selectSingleNode("syncMode").text;
+    node = $(dom).find("tmOptions");
+    tmName = $(node).find("tmName").text();
+    syncMode = $(node).find("syncMode").text();
 
     document.oForm.filename.value = fileName;
     selectValue(oDummyForm.tmName, tmName);

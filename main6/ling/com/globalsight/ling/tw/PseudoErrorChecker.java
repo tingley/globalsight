@@ -801,11 +801,30 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                                 .get(PseudoConstants.ADDABLE_TMX_TAG);
                     }
 
-                    TagNode dynamicMapItem = new TagNode(tmxName,
-                            strTrgTagName, POMI.m_hAttributes);
+                    if (tmxName == null)
+                    {
+                    	bHasInvalid = true;
+                        nInvalidCnt += 1;
 
-                    m_TrgTagList.setElementAt(dynamicMapItem,
-                            m_TrgTagList.indexOf(strTrgTagName));
+                        if (invalidNames.length() > 0)
+                        {
+                            invalidNames += ", ";
+                        }
+                        if ((nInvalidCnt % 10) == 0)
+                        {
+                            invalidNames += "\n\t";
+                        }
+                        invalidNames += PseudoConstants.PSEUDO_OPEN_TAG + strTrgTagName
+                                + PseudoConstants.PSEUDO_CLOSE_TAG;
+                    }
+                    else
+                    {
+                    	TagNode dynamicMapItem = new TagNode(tmxName,
+                                strTrgTagName, POMI.m_hAttributes);
+
+                        m_TrgTagList.setElementAt(dynamicMapItem,
+                                m_TrgTagList.indexOf(strTrgTagName));
+                    }                                       
                 }
             }
             else
@@ -1462,6 +1481,12 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         if (itext.contains("<ept ") && itext.contains("</ept>"))
         {
             StringIndex si = StringIndex.getValueBetween(sb, 0, "<ept ", "</ept>");
+            
+            // it is from new extractor.
+            if (si != null && si.value.contains("&lt;/style&gt;"))
+            {
+            	return false;
+            }
             
             if (si != null && si.value.contains("&lt;") && si.value.contains("&gt;"))
             {

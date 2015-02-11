@@ -106,5 +106,6 @@ public class FormUtil
         public static final String NEW_ATTRIBUTE = "newAttribute";
         public static final String NEW_ATTRIBUTE_GROUP = "newAttributeGroup";
         public static final String SKIP_ACTIVITIES = "skipActivities";
+        public static final String LOGIN = "login";
     }
 }

@@ -55,6 +55,7 @@
     String completeURL = complete.getPageURL()+ DEFAULT_PARAM;
     String detailsURL = jobDetails.getPageURL();
     String exportedURL = exported.getPageURL()+ startIndex + "&searchType=" + thisSearch;
+    String discardURL = exported.getPageURL()+ startIndex;
     String modifyURL = modify.getPageURL();
     String pendingURL = pending.getPageURL()+ DEFAULT_PARAM;
     String progressURL = progress.getPageURL()+ DEFAULT_PARAM;
@@ -392,6 +393,18 @@ function submitForm(buttonClicked)
       JobForm.submit();
       return;
    }
+   else if (buttonClicked == "Discard")
+   {
+      if ( !confirm("<%=bundle.getString("jsmsg_warning")%>\n\n" +
+                    "<%=bundle.getString("jsmsg_discard_job")%>"))
+      {
+         return false;
+      };
+
+      ShowStatusMessage("<%=bundle.getString("jsmsg_discarding_selected_jobs")%>")
+      JobForm.action = "<%=discardURL%>";
+      jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
+	}
 
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    if (buttonClicked == "ExportForUpdate")
@@ -548,12 +561,15 @@ is defined in header.jspIncl which must be included in the body.
         <INPUT TYPE="BUTTON" NAME=ExportForUpdate VALUE="<%=bundle.getString("lb_export_source")%>..." onClick="submitForm('ExportForUpdate');">
         </amb:permission>
 <% } %>        
+		<amb:permission name="<%=Permission.JOBS_DISCARD%>" >
+	            <INPUT TYPE="BUTTON" NAME=Discard VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
+	    </amb:permission>
         <amb:permission name="<%=Permission.JOBS_ARCHIVE%>" >
         <INPUT TYPE="BUTTON" NAME=Archive VALUE="<%=bundle.getString("action_archive")%>" onClick="submitForm('Archive');">
         </amb:permission>
-    <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
-        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
-    </amb:permission>
+	    <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
+	        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
+	    </amb:permission>
 </DIV>
 </TD></TR>
 </TABLE>

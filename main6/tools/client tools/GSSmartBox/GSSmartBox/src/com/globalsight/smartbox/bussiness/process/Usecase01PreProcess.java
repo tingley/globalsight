@@ -70,9 +70,9 @@ public class Usecase01PreProcess implements PreProcess
         }
 
         // Temp directory used for saving converted file
-        String tempDirPath = originFilePath.substring(0, originFilePath.indexOf(".zip"));
+        String tempDirPath = originFilePath.substring(0, originFilePath.lastIndexOf(".zip"));
         File tempDir = new File(tempDirPath);
-        tempDir.mkdir();
+        tempDir.mkdirs();
         jobInfo.setTempFile(tempDirPath);
 
         // Handing original file

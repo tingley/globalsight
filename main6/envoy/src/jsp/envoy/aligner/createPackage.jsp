@@ -53,11 +53,12 @@ String lb_helptext = bundle.getString("helper_text_aligner_package_create");
 <HEAD>
 <!-- JSP file: createPackage.jsp -->
 <TITLE><%=lb_title%></TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
 var objectName = "<%=bundle.getString("lb_aligner_package")%>";
@@ -100,15 +101,7 @@ function doNext()
 
         oForm.action = url;   
              
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.gapoptions.value = oOptions.XMLDocument.xml;
-        	oForm.gapoptions.value = result.dom.xml;
-        }
-        else
-        {
-        	oForm.gapoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.gapoptions.value = getDomString(result.dom);
         
         oForm.submit();
     }
@@ -118,24 +111,11 @@ function buildOptions()
 {
     var result = new Result("", null, null);
     var form = document.oDummyForm;
-    var dom ;
+    var dom = $.parseXML(xmlStr);
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
     var node;
 
-    node = dom.selectSingleNode("/alignerPackageOptions");
+    node = $(dom).find("alignerPackageOptions");
 
     var name = form.idPackageName.value;
 
@@ -164,99 +144,38 @@ function buildOptions()
 
     var sel = form.idFileFormat;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	node.selectSingleNode("packageName").text = name;
-    	node.selectSingleNode("//extractionOptions/formatType").text = 
-    			sel.options[sel.selectedIndex].value;
-    }
-    else 
-    {
-    	node.selectSingleNode("packageName").textContent = name;
-    	node.selectSingleNode("//extractionOptions/formatType").textContent = 
-    			sel.options[sel.selectedIndex].value;
-    }
+    $(node).find("packageName").text(name);
+    $(node).find("extractionOptions formatType").text(sel.options[sel.selectedIndex].value);
     
     var sel = form.idRules;
     if (sel.disabled)
     {
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-    	  node.selectSingleNode("//extractionOptions/rules").text = '';
-      }
-      else 
-      {
-    	  node.selectSingleNode("//extractionOptions/rules").textContent = '';
-      }
+    	$(node).find("extractionOptions rules").text('');
     }
     else
     {
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-    	  node.selectSingleNode("//extractionOptions/rules").text = 
-    		  sel.options[sel.selectedIndex].value;
-      }
-      else 
-      {
-    	  node.selectSingleNode("//extractionOptions/rules").textContent = 
-    		  sel.options[sel.selectedIndex].value;
-      }
+    	$(node).find("extractionOptions rules").text(sel.options[sel.selectedIndex].value);
     }
 
-    var sel = form.idSourceLocale;    
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	node.selectSingleNode("//extractionOptions/sourceLocale").text =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    else 
-    {
-    	node.selectSingleNode("//extractionOptions/sourceLocale").textContent =
-    	      sel.options[sel.selectedIndex].value;
-    }
+    var sel = form.idSourceLocale;  
+    $(node).find("extractionOptions sourceLocale").text(sel.options[sel.selectedIndex].value);
     
     var sel = form.idTargetLocale;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	node.selectSingleNode("//extractionOptions/targetLocale").text =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    else 
-    {
-    	node.selectSingleNode("//extractionOptions/targetLocale").textContent =
-    	      sel.options[sel.selectedIndex].value;
-    }
+    $(node).find("extractionOptions targetLocale").text(sel.options[sel.selectedIndex].value);
     
     var sel = form.idSourceEncoding;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	node.selectSingleNode("//extractionOptions/sourceEncoding").text =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    else 
-    {
-    	node.selectSingleNode("//extractionOptions/sourceEncoding").textContent =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    
-    var sel = form.idTargetEncoding;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	node.selectSingleNode("//extractionOptions/targetEncoding").text =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    else 
-    {
-    	node.selectSingleNode("//extractionOptions/targetEncoding").textContent =
-    	      sel.options[sel.selectedIndex].value;
-    }
-    
-    var exts = node.selectSingleNode("//extractionOptions/extensions");
-    while (exts.hasChildNodes())
-    {
-        exts.removeChild(exts.firstChild);
-    }
+    $(node).find("extractionOptions sourceEncoding").text(sel.options[sel.selectedIndex].value);
 
+    var sel = form.idTargetEncoding;
+    $(node).find("extractionOptions targetEncoding").text(sel.options[sel.selectedIndex].value);
+    
+    var exts = $(node).find("extractionOptions extensions");
+    var len = exts.children().length;
+    while(len){
+    		exts.children().eq(0).remove();
+    		len = exts.children().length;
+    }
+    
     var haveExtension = false;
 
     if (form.idAllExtensions.checked)
@@ -277,16 +196,8 @@ function buildOptions()
             haveExtension = true;
 
             var ext = dom.createElement("extension");
-           
-            if(window.navigator.userAgent.indexOf("MSIE")>0)
-            {
-            	 ext.text = opt.value;
-            }
-            else 
-            {
-            	 ext.textContent = opt.value;
-            }
-            exts.appendChild(ext);
+            exts.append(ext);
+            $(exts).find("extension").text(opt.value);
           }
         }
     }
@@ -295,7 +206,6 @@ function buildOptions()
     {
         return new Result("<%=bundle.getString("jsmsg_aligner_package_create_need_ext") %>", form.idExtensions, null);
     }
-
     result.dom = dom;
     return result;
 }
@@ -360,34 +270,21 @@ function formatUsesXmlRuleFile(p_format)
 function parseOptions()
 {
     var form = document.oDummyForm;
-    var dom ;
+    var dom = $.parseXML(xmlStr);
     var nodes, node;
     var packageName, formatType, rules, srcLocale, trgLocale;
     var srcEncoding, trgEncoding;
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("/alignerPackageOptions");
-    packageName = node.selectSingleNode("packageName").text;
+    node = $(dom).find("alignerPackageOptions");
+    packageName = $(node).find("packageName").text();
 
-    node = dom.selectSingleNode("//extractionOptions");
-    formatType = node.selectSingleNode("formatType").text;
-    rules = node.selectSingleNode("rules").text;
-    srcLocale = node.selectSingleNode("sourceLocale").text;
-    trgLocale = node.selectSingleNode("targetLocale").text;
-    srcEncoding = node.selectSingleNode("sourceEncoding").text;
-    trgEncoding = node.selectSingleNode("targetEncoding").text;
+    node = $(dom).find("extractionOptions");
+    formatType = $(node).find("formatType").text();
+    rules = $(node).find("rules").text();
+    srcLocale = $(node).find("sourceLocale").text();
+    trgLocale = $(node).find("targetLocale").text();
+    srcEncoding = $(node).find("sourceEncoding").text();
+    trgEncoding = $(node).find("targetEncoding").text();
 
 	document.getElementById("idPackageName").value=packageName;//form.idPackageName.value = packageName;
     selectValue(form.idFileFormat, formatType);
@@ -397,7 +294,7 @@ function parseOptions()
     selectValue(form.idSourceEncoding, srcEncoding);
     selectValue(form.idTargetEncoding, trgEncoding);
 
-    var nodes = dom.selectNodes("//extractionOptions//extension");
+    var nodes = $(dom).find("extractionOptions extension");
 
     if (nodes.length == 0)
     {
@@ -407,9 +304,10 @@ function parseOptions()
     {
       for (var i = 0; i < nodes.length; i++)
       {
-        var ext = nodes.item(i);
+        //var ext = nodes.item(i);
+        var ext = nodes[i];
 
-        selectMultipleValue(form.idExtensions, ext.text);
+        selectMultipleValue(form.idExtensions, ext.text());
       }
     }
 }

@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.page.PageManagerLocal;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
@@ -690,4 +691,27 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         }
     }
 
+    public TuvImpl getSourceTuv(long companyId)
+    {
+    	if (this.getLeverageGroupId() < 1)
+    		return null;
+    	
+    	PageManagerLocal local = new PageManagerLocal();
+		SourcePage sp = local.getSourcePageByLeverageGroupId(this
+				.getLeverageGroupId());
+    	if (sp == null)
+    		return null;
+    	
+    	try 
+    	{
+			return SegmentTuvUtil.getTuvByTuIdLocaleId(this.getId(),
+					sp.getLocaleId(), companyId);
+		} 
+    	catch (Exception e) 
+    	{
+			logger.error(e.getMessage(), e);
+		}
+    	
+    	return null;
+    }
 }

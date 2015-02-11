@@ -307,19 +307,11 @@ public class FMPreviewerHelper
                     {
                         paraLine.append("<FTag `'>").append(NewLine);
                     }
-                    else
+                    else if (lineTrimmed.startsWith("<String `"))
                     {
-                        paraLine.append(line).append(NewLine);
-                    }
-
-                    if (lineTrimmed.equals(Tag.PARALINE_END))
-                    {
-                        String oriParaLine = paraLine.toString();
-                        inParaLine = false;
-                        StringBuffer newString = new StringBuffer();
-
                         if (multiGSColors != null && multiGSColors.size() > 0)
                         {
+                            StringBuffer newString = new StringBuffer();
                             int mcsize = multiGSColors.size();
                             for (int j = 0; j < mcsize; j++)
                             {
@@ -337,18 +329,27 @@ public class FMPreviewerHelper
                                     newString.append(NewLine);
                                 }
                             }
-
+                            
+                            String newLine = newString.toString();
+                            paraLine.append(newLine).append(NewLine);
                             paraProcessed = true;
-                        }
-
-                        if (newString.length() == 0)
-                        {
-                            para.append(oriParaLine);
+                            multiGSColors.clear();
                         }
                         else
                         {
-                            para.append(oriParaLine.replace(paraLineStringTag, newString.toString()));
+                            paraLine.append(line).append(NewLine);
                         }
+                    }
+                    else
+                    {
+                        paraLine.append(line).append(NewLine);
+                    }
+                    
+                    if (lineTrimmed.equals(Tag.PARALINE_END))
+                    {
+                        String oriParaLine = paraLine.toString();
+                        inParaLine = false;
+                        para.append(oriParaLine);
                     } // end of lineTrimmed.equals(Tag.PARALINE_END)
                 }
                 else

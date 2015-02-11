@@ -393,6 +393,7 @@ public class ExportHelper
                 getSegments(pageObj.getGlobalSightLocale()),
                 pageObj.getGlobalSightLocale(), true, null);
         DiplomatAPI diplomat = new DiplomatAPI();
+        diplomat.setPreview(true);
         byte[] mergeResult = diplomat.merge(page, p_targetEncoding,
                 p_keepGsTags);
         String s = new String(mergeResult, p_targetEncoding);
@@ -1576,6 +1577,7 @@ public class ExportHelper
         }
 
         boolean needToAddGsColor = needToAddColorTag(p_isPreview);
+        boolean isInddOrIdml = isInddOrIdml();
         if (needToAddGsColor)
         {
             needToAddGsColor = initGsColor();
@@ -1608,7 +1610,7 @@ public class ExportHelper
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
                 updateSegValue(p_template, segment, p_isPreview,
                         needToAddGsColor, p_tuvIds, p_corpusSegments,
-                        isLocalizable);
+                        isLocalizable, isInddOrIdml);
             }
         }
 
@@ -2332,7 +2334,7 @@ public class ExportHelper
     @SuppressWarnings("rawtypes")
     private void updateSegValue(PageTemplate p_template, Tuv p_segment,
             boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds,
-            Map p_targetCorpusMappings, boolean p_isLocalizable)
+            Map p_targetCorpusMappings, boolean p_isLocalizable, boolean isInddOrIdml)
     {
         SourcePage sp = p_template.getSourcePage();
         long companyId = sp != null ? sp.getCompanyId() : Long
@@ -2425,7 +2427,7 @@ public class ExportHelper
         if (p_needToAddGsColor)
         {
             tuvContent = addGlobalSightColorTag(tuvContent, p_segment,
-                    companyId);
+                    companyId, isInddOrIdml);
         }
 
         p_template.insertTuvContent(tuId, tuvContent);
@@ -2581,7 +2583,7 @@ public class ExportHelper
     }
 
     private String addGlobalSightColorTag(String tuvContent, Tuv p_segment,
-            long companyId)
+            long companyId, boolean isInddOrIdml)
     {
         if (tuvContent == null || "".equals(tuvContent.trim()))
         {
@@ -2657,7 +2659,7 @@ public class ExportHelper
                     && tuvContent.endsWith("</segment>"))
             {
                 return HtmlPreviewerHelper.addGSColorForSegment(m_format,
-                        tuvContent, start, end);
+                        tuvContent, start, end, isInddOrIdml);
             }
             else
             {
@@ -2708,7 +2710,26 @@ public class ExportHelper
         {
             return true;
         }
+        
+        if (isInddOrIdml())
+        {
+            return true;
+        }
 
+        return false;
+    }
+
+    private boolean isInddOrIdml()
+    {
+        if (IFormatNames.FORMAT_XML.equals(m_format))
+        {
+            String srcPageId = m_sourcePage.getExternalPageId().toLowerCase();
+            if (srcPageId.endsWith(".idml") || srcPageId.endsWith(".indd"))
+            {
+                return true;
+            }
+        }
+        
         return false;
     }
 

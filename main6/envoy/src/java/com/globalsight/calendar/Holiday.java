@@ -16,6 +16,8 @@
  */
 package com.globalsight.calendar;
 
+import java.util.Calendar;
+
 import com.globalsight.everest.persistence.PersistentObject;
 
 /**
@@ -400,6 +402,66 @@ public class Holiday extends PersistentObject
     public boolean isAbsolute()
     {
         return m_isAbsolute;
+    }
+
+    /**
+     * Check if the day is this holiday
+     * 
+     * @param calendar
+     * @return
+     */
+    public boolean isHoliday(Calendar calendar)
+    {
+        if (getIsAbsolute())
+        {
+            int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+            int month = calendar.get(Calendar.MONTH);
+            int endingYear = getEndingYear().intValue();
+            if (endingYear > 0)
+            {
+                int year = calendar.get(Calendar.YEAR);
+
+                if (year == endingYear && month == m_month
+                        && dayOfMonth == m_dayOfMonth)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (month == m_month && dayOfMonth == m_dayOfMonth)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            int dayOfWeek = calendar.get(Calendar.DAY_OF_MONTH);
+            String weekOfMonth = calendar.get(Calendar.WEEK_OF_MONTH) + "";
+            int month = calendar.get(Calendar.MONTH);
+            String lastMonth = calendar.getMaximum(Calendar.WEEK_OF_MONTH) + "";
+
+            if (dayOfWeek == m_dayOfWeek
+                    && month == m_month
+                    && (m_weekOfMonth.equals(weekOfMonth) || (m_weekOfMonth
+                            .equals("$") && lastMonth.equals(weekOfMonth))))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     // ////////////////////////////////////////////////////////////////////

@@ -386,6 +386,7 @@
       <permission id="<%=Permission.JOBS_ARCHIVE%>"/>
       <permission id="<%=Permission.JOBS_DOWNLOAD%>"/>
       <permission id="<%=Permission.JOBS_MAKE_READY%>"/>
+      <permission id="<%=Permission.JOBS_RECREATE%>"/>
       <permission id="<%=Permission.JOBS_ESTIMATEDCOMPDATE%>"/>
       <permission id="<%=Permission.JOBS_ESTIMATEDTRANSLATECOMPDATE%>"/>
       <permission id="<%=Permission.JOBS_DETAILS%>">

@@ -1222,4 +1222,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         
         return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX, langInfo);
     }
+
+    public void setUserId(String p_userId)
+    {
+        this.m_userId = p_userId;
+    }
 }

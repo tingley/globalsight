@@ -61,9 +61,11 @@ public class DocumentUtil
 	{
 		removeSpellError(document);
 		removeSmartTags(document);
-		handleStyle(document);
 		mergeSameNode(getWr(document));
+		handleStyle(document);
 		mergeNodes(getWr(document));
+		handleHyperlink(document);
+        mergeNodes(getWr(document));
 	}
 	
 	private void removeSpellError(Document document)

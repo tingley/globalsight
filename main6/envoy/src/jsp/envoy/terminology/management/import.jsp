@@ -44,6 +44,7 @@ String urlNextExcel = nextExcel.getPageURL();
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/import.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
@@ -78,29 +79,11 @@ function doNext()
     else
     {
         var url;
+        var dom = result.dom;
         
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//var dom = oImportOptions.XMLDocument;
-        	var dom = result.dom;
-        }
-        else
-        {
-        	var dom = result.dom;
-        }
-        
-        var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+        var node = $(dom).find("importOptions fileOptions fileType");
+        var nodeText = node.text();
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          	var nodeText = node.text;
-        }
-        else
-        {
-          	var nodeText = node.textContent;
-        }
-        
-        
         if (nodeText == "<%=ImportOptions.TYPE_XML%>" ||
             nodeText == "<%=ImportOptions.TYPE_MTF%>" ||
             nodeText == "<%=ImportOptions.TYPE_TBX%>")
@@ -118,15 +101,7 @@ function doNext()
 
         oForm.action = url;
         
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          	//oForm.importoptions.value = oImportOptions.xml;
-        	oForm.importoptions.value = result.dom.xml;
-        }
-        else
-        {
-          	oForm.importoptions.value = XML.getDomString(result.dom);	
-        }
+        oForm.importoptions.value = getDomString(result.dom);
         
         oForm.submit();
         document.getElementById("nextButton").disabled = true;
@@ -151,15 +126,7 @@ function doExcelImport()
     {
         oForm.action = "<%=urlNextExcel%>&<%=WebAppConstants.TERMBASE_ACTION%>" +
             "=<%=WebAppConstants.TERMBASE_ACTION_UPLOAD_IMPORT_EXCEL_FILE%>";
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.importoptions.value = oImportOptions.xml;
-        	oForm.importoptions.value = result.dom.xml;
-        }
-        else
-        {
-        	oForm.importoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -250,24 +217,11 @@ function buildFileOptions()
     var result = new Result("", "", null, null);
    
     var xmlStr = "<%=xmlImportOptions.trim()%>";
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
     
+    dom = $.parseXML(xmlStr);
     var node;
 
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-
+    node = $(dom).find("importOptions fileOptions");
     var fileType = "";
     
     if (document.oDummyForm.idXml.checked)
@@ -294,22 +248,13 @@ function buildFileOptions()
 
     var sel = document.oDummyForm.oEncoding;
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    node.selectSingleNode("fileEncoding").text =
-      sel.options[sel.selectedIndex].value;
-    node.selectSingleNode("fileName").text = document.oForm.filename.value;  
-    node.selectSingleNode("fileType").text = fileType; 
-    } 
-    else
-    {
-    node.selectSingleNode("fileEncoding").textContent =
-      sel.options[sel.selectedIndex].value;
-    node.selectSingleNode("fileName").textContent = document.oForm.filename.value;  
-    node.selectSingleNode("fileType").textContent = fileType; 
-    } 
+    $(node).find("fileEncoding").text(sel.options[sel.selectedIndex].value);
+    
+    $(node).find("fileName").text(document.oForm.filename.value);
+    
+    $(node).find("fileType").text(fileType);
 
-    var separator = node.selectSingleNode("separator");
+    var separator = $(node).find("separator");
     for (var key in Delimitor)
     {
        // IE 5.0 adds prototype functions as keys
@@ -322,29 +267,14 @@ function buildFileOptions()
        var index = Delimitor[key];
        if (document.oDummyForm.oDelimit[index].checked)
        {
-          if(window.navigator.userAgent.indexOf("MSIE")>0)
-          {
-            separator.text = key;
-          }
-          else
-          {
-            separator.textContent = key;         
-          }
+            separator.text(key);
           break;
        }
     }
-    
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      var isOther = (separator.text == "other");
-    }
-    else
-    {
-      var isOther = (separator.textContent == "other");    
-    }
-
+    var isOther = (separator.text() == "other");
     if (isOther)
     {
+    	alert("document.oDummyForm.oDelimitText.value="+document.oDummyForm.oDelimitText.value);
         var value = document.oDummyForm.oDelimitText.value;
         if (value == "")
         {
@@ -354,38 +284,17 @@ function buildFileOptions()
             document.oDummyForm.oDelimitText);
         }
         
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          node.selectSingleNode("separator").text = value;
-        }
-        else
-        {
-          node.selectSingleNode("separator").textContent = value;        
-        }
+        $(node).find("separator").text(value); 
     }
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
 	    if (document.oDummyForm.oIgnoreHeader.checked)
 	    {
-	       node.selectSingleNode("ignoreHeader").text = "true";
+	    	$(node).find("ignoreHeader").text("true");
 	    }
 	    else
 	    {
-	       node.selectSingleNode("ignoreHeader").text = "false";
-	    }
-    }
-    else
-    {
-	    if (document.oDummyForm.oIgnoreHeader.checked)
-	    {
-	       node.selectSingleNode("ignoreHeader").textContent = "true";
-	    }
-	    else
-	    {
-	       node.selectSingleNode("ignoreHeader").textContent = "false";
+	    	$(node).find("ignoreHeader").text("false");
 	    }    
-    }
 
     if (oForm.filename.value == "")
     {
@@ -394,7 +303,6 @@ function buildFileOptions()
           "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_import_specify_filename"))%>",
           oForm.filename);
     }
-    
     result.dom = dom;
     return result;
 }
@@ -404,41 +312,18 @@ function parseFileOptions()
     var form = document.oDummyForm;
     
     var xmlStr = "<%=xmlImportOptions.trim()%>";
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
+    dom = $.parseXML(xmlStr);
     
     var nodes, node, fileName, fileType, fileEncoding;
     var separator, ignoreHeader;
 
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-	    fileName = node.selectSingleNode("fileName").text;
-	    fileType = node.selectSingleNode("fileType").text;
-	    fileEncoding = node.selectSingleNode("fileEncoding").text;
-	    separator = node.selectSingleNode("separator").text;
-	    ignoreHeader = node.selectSingleNode("ignoreHeader").text;
-    }
-    else
-    {
-	    fileName = node.selectSingleNode("fileName").textContent;
-	    fileType = node.selectSingleNode("fileType").textContent;
-	    fileEncoding = node.selectSingleNode("fileEncoding").textContent;
-	    separator = node.selectSingleNode("separator").textContent;
-	    ignoreHeader = node.selectSingleNode("ignoreHeader").textContent;    
-    }
+    node = $(dom).find("importOptions fileOptions");
+    
+    fileName = $(node).find("fileName").text();
+    fileType = $(node).find("fileType").text();
+    fileEncoding = $(node).find("fileEncoding").text();
+    separator = $(node).find("separator").text();
+    ignoreHeader = $(node).find("ignoreHeader").text();
 
     if (fileType == "<%=ImportOptions.TYPE_XML%>")
     {

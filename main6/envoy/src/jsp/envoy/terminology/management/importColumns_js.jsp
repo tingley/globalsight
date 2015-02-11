@@ -86,7 +86,7 @@ function Associate(event)
     {
         idBody.cursor = "wait";
         
-        var dom;
+        var dom,nodes;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
     	{
       		//dom = oImportOptions.XMLDocument;
@@ -100,16 +100,19 @@ function Associate(event)
       		dom = parser.parseFromString(xmlImportOptions,"text/xml");
     	}
 
-        node = dom.selectSingleNode(
-            "/importOptions/columnOptions/column[@id='" + id + "']");
+        //node = dom.selectSingleNode("/importOptions/columnOptions/column[@id='" + id + "']");
+        nodes = $(dom).find("importOptions columnOptions column");
+        for(i=0;i < nodes.length;i++)
+        {
+        	var attrVlue = $(nodes[i]).attr("id");
+        	if(attrVlue == id)
+        	{
+        		node = nodes[i]
+        	}
+        }
 
-        //var name = node.selectSingleNode("name").text;
-        var example = node.selectSingleNode("example").text;
-        //var type = node.selectSingleNode("type").text;
-        var encoding = node.selectSingleNode("encoding").text;
-        //var associatedColumn = node.selectSingleNode("associatedColumn").text;
-        //var termLanguage = node.selectSingleNode("termLanguage").text;
-        
+        var example = $(node).find("example").text();
+        var encoding = $(node).find("encoding").text();
         var name 				= oProperties.name;
     	var type 				= oProperties.type;
     	var associatedColumn 	= oProperties.associatedColumn;

@@ -35,6 +35,7 @@ String lb_select_field_type = bundle.getString("lb_select_field_type");
 }
 </STYLE>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/envoy/administration/projects/importObjects_js.jsp"></SCRIPT>
@@ -62,13 +63,20 @@ function doClose(ok)
       return;
     }
 
-    var node = args.importOptions.selectSingleNode(
-      "/importOptions/columnOptions/column[@id='" + args.id + "']");
-
-    node.selectSingleNode("name").text = idName.value;
-    node.selectSingleNode("type").text = type;
-    node.selectSingleNode("subtype").text = getSubType();
-    
+    var dom = args.importOptions;
+    var nodes = $(dom).find("importOptions columnOptions column");
+    var node,attrValue;
+    for (i = 0; i < nodes.length; ++i)
+    {
+  	  attrValue = $(nodes[i]).attr("id");
+  	  if(attrValue == args.id){
+  	 	node = nodes[i];
+  	  }
+    }
+    $(node).find("name").text(idName.value);
+	$(node).find("type").text(type);
+	$(node).find("subtype").text(getSubType());
+	
     window.returnValue = args;
   }
   else
@@ -198,14 +206,19 @@ function doLoad()
 
   initTypes();
 
-  var node = args.importOptions.selectSingleNode(
-      "/importOptions/columnOptions/column[@id='" + args.id + "']");
-
-  idName.value = node.selectSingleNode("name").text;
-  setType(node.selectSingleNode("type").text);
-
-  selectType(node.selectSingleNode("subtype").text);
-
+  var dom = args.importOptions;
+  var nodes = $(dom).find("importOptions columnOptions column");
+  var node,attrValue;
+  for(var i = 0; i < nodes.length; ++i)
+  {
+	  node = nodes[i];
+	  attrValue = $(node).attr("id");
+	  if(attrValue == args.id){
+		  idName.value = $(node).find("name").text();
+		  setType($(node).find("type").text());
+		  selectType($(node).find("subtype").text());
+	  }
+  }
   idName.focus();
 }
 </script>

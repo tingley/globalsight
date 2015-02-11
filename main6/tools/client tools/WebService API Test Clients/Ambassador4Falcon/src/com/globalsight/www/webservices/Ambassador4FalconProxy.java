@@ -92,6 +92,24 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.modifyWorkflowTemplateAssignees(p_accessToken, p_workflowTemplateName, p_companyName, p_activityAssigneesInJson);
   }
   
+  public java.lang.String getWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType);
+  }
+  
+  public java.lang.String uploadWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, int p_workOfflineFileType, java.lang.String p_fileName, byte[] bytes) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.uploadWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType, p_fileName, bytes);
+  }
+  
+  public java.lang.String importWorkOfflineFiles(java.lang.String p_accessToken, java.lang.Long p_taskId, java.lang.String p_identifyKey, int p_workOfflineFileType) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.importWorkOfflineFiles(p_accessToken, p_taskId, p_identifyKey, p_workOfflineFileType);
+  }
+  
   public boolean isInstalled() throws java.rmi.RemoteException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();

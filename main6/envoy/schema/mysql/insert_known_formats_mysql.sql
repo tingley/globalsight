@@ -312,7 +312,7 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 );
 
 INSERT INTO KNOWN_FORMAT_TYPE VALUES (
-54, '(Beta) New Office 2010 Filter (DOCX only)','Microsoft Office 2010 document','office-xml',
+54, '(Beta) New Office 2010 Filter (DOCX and PPTX)','Microsoft Office 2010 document','office-xml',
    'MSOFFICE_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );

@@ -1,6 +1,7 @@
 package com.globalsight.ling.tm3.core;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -19,7 +20,7 @@ public class TM3ImportHelper extends TM3Event
     public synchronized static TM3Event createTM3Event(TM3Tm<GSTuvData> tm,
             String user, int eventType, String attr, Date modifyDate)
     {
-        Statement stmt = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         TM3Event event = null;
         try
@@ -28,22 +29,24 @@ public class TM3ImportHelper extends TM3Event
             {
                 modifyDate = new Date();
             }
-            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr,
-                    modifyDate);
+            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr, modifyDate);
 
-            stmt = tm.getConnection().createStatement();
-            StringBuilder sql = new StringBuilder();
-            sql.append("INSERT INTO TM3_EVENTS (time, userName, tmId, type, arg) VALUES ('");
-            sql.append(new Timestamp(event.getTimestamp().getTime()));
-            sql.append("','").append(user).append("',").append(tm.getId())
-                    .append(",").append(eventType);
-            sql.append(",'").append(attr).append("')");
-            stmt.execute(sql.toString(), Statement.RETURN_GENERATED_KEYS);
-            rs = stmt.getGeneratedKeys();
+            String sql = "INSERT INTO TM3_EVENTS (time, userName, tmId, type, arg) VALUES (?, ?, ?, ?, ?)";
+            ps = tm.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setTimestamp(1, new Timestamp(event.getTimestamp().getTime()));
+            ps.setString(2, user);
+            ps.setLong(3, tm.getId());
+            ps.setInt(4, eventType);
+            ps.setString(5, attr);
+            ps.execute();
+            rs = ps.getGeneratedKeys();
             long eventId = 0;
-            if (rs.next()) {
+            if (rs.next())
+            {
                 eventId = rs.getLong(1);
-            } else {
+            }
+            else
+            {
                 boolean isAutoCommit = tm.getConnection().getAutoCommit();
                 LOGGER.error("debug info :: fail to get eventId. isAutoCommit = "
                         + isAutoCommit);
@@ -58,7 +61,7 @@ public class TM3ImportHelper extends TM3Event
         finally
         {
             DbUtil.silentClose(rs);
-            DbUtil.silentClose(stmt);
+            DbUtil.silentClose(ps);
         }
 
         return event;

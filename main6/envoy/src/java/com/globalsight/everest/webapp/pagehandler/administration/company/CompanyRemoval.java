@@ -25,6 +25,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -510,10 +511,25 @@ public class CompanyRemoval
 
     /**
      * Remove job data from database when user discard a job
-     * @param conn Database connection
-     * @param job Job instance that needs to be removed
+     * 
+     * @param job
+     *            Job instance that needs to be removed
      */
     public void removeJob(Job job)
+    {
+        boolean isRecreateJob = false;
+        removeJob(job, isRecreateJob);
+    }
+
+    /**
+     * Remove job data from database when user discard a job
+     * 
+     * @param job
+     *            Job -- instance that needs to be removed
+     * @param isRecreateJob
+     *            -- Default true; if false, do not delete data in "job" table.
+     */
+    public void removeJob(Job job, boolean isRecreateJob)
     {
         Connection conn = null;
         try
@@ -560,8 +576,11 @@ public class CompanyRemoval
             removeExportBatchEvent(conn, jobIds);
 
             //remove job comments
-            removeJobComments(conn, jobId);
-            
+            if (!isRecreateJob)
+            {
+                removeJobComments(conn, jobId);                
+            }
+
             // remove requests
             ArrayList<Request> requests = new ArrayList<Request>(job.getRequestList());
             ArrayList<String> eventFlowXmls = new ArrayList<String>();
@@ -569,12 +588,15 @@ public class CompanyRemoval
                 eventFlowXmls.add(ri.getEventFlowXml());
             }
             removeRequest(conn, jobIds);
-            
-            logStart("JOB");
-            execOnce(conn, "delete from JOB where ID=?", jobId);
-            logEnd("JOB");
-            
-            removeJobFiles(jobFileInfo);
+
+            if (!isRecreateJob)
+            {
+                logStart("JOB");
+                execOnce(conn, "delete from JOB where ID=?", jobId);
+                logEnd("JOB");                
+            }
+
+            removeJobFiles(jobFileInfo, isRecreateJob);
             if (eventFlowXmls.size() > 0) {
                 for (String eventFlowXml : eventFlowXmls) {
                     CompanyFileRemoval fileRemoval = new CompanyFileRemoval(eventFlowXml);
@@ -654,7 +676,8 @@ public class CompanyRemoval
         logEnd("COMMENTS");
     }
 
-    private void removeJobFiles(HashMap<String, String> jobFileInfo)
+    private void removeJobFiles(HashMap<String, String> jobFileInfo,
+            boolean isRecreateJob)
     {
         String jobId = jobFileInfo.get("jobId");
         String jobName = jobFileInfo.get("jobName");
@@ -667,10 +690,19 @@ public class CompanyRemoval
         logStart("Remove files of job " + jobName);
         // remove files in doc dir
         File jobDocFileDir = AmbFileStoragePathUtils.getCxeDocDir(companyId);
-        File dir = null, previewDir = null, previewTmpDir = null;
-        
-        deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);
-        
+        File previewDir = null;
+
+        // If this job's name is another job's id, we do not delete files by name.
+        try {
+            long id = Long.parseLong(jobName);
+            Job job = ServerProxy.getJobHandler().getJobById(id);
+            if (job != null) {
+                deleteJobFiles(jobId, null, jobDocFileDir, sourceLocale);                
+            }
+        } catch (Exception e) {
+            deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);            
+        }
+
         previewDir = new File(AmbFileStoragePathUtils.getPdfPreviewDir(companyId), userId);
         deleteJobFiles(jobId, jobName, previewDir, sourceLocale);
         
@@ -687,14 +719,18 @@ public class CompanyRemoval
         deleteJobFiles(jobId, null, jobDocFileDir, null);
         
         // remove comment files
-        jobDocFileDir = AmbFileStoragePathUtils.getCommentReferenceDir(companyId);
-        if (StringUtil.isNotEmpty(comments)) {
-            String[] commentsArray = comments.split(",");
-            for (String comment : commentsArray) {
-                deleteJobFiles(comment, null, jobDocFileDir, null);
+        if (!isRecreateJob)
+        {
+            jobDocFileDir = AmbFileStoragePathUtils
+                    .getCommentReferenceDir(companyId);
+            if (StringUtil.isNotEmpty(comments)) {
+                String[] commentsArray = comments.split(",");
+                for (String comment : commentsArray) {
+                    deleteJobFiles(comment, null, jobDocFileDir, null);
+                }
             }
         }
-        
+
         // remove corpus files
         jobDocFileDir = AmbFileStoragePathUtils.getCorpusDir(companyId);
         deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);
@@ -2452,31 +2488,21 @@ public class CompanyRemoval
             List<List<Object>> sourcePageIds, long companyId)
             throws SQLException
     {
-        String tableName = "LEVERAGE_MATCH";
-        if (DbUtil.isTableExisted(conn, tableName))
-        {
-            logStart(tableName);
-            exec(conn, "delete from " + tableName + " where SOURCE_PAGE_ID in ",
-                    sourcePageIds);
-            logEnd(tableName);
-        }
+        List<String> tables = new ArrayList<String>();
+        tables.add("LEVERAGE_MATCH");
+        tables.add("LEVERAGE_MATCH_ARCHIVED");
+        tables.add("LEVERAGE_MATCH_" + companyId);
+        tables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
 
-        tableName += "_" + companyId;
-        if (DbUtil.isTableExisted(conn, tableName))
+        for (String tableName : tables)
         {
-            logStart(tableName);
-            exec(conn, "delete from " + tableName + " where SOURCE_PAGE_ID in ",
-                    sourcePageIds);
-            logEnd(tableName);
-        }
-
-        tableName += "_archived";
-        if (DbUtil.isTableExisted(conn, tableName))
-        {
-            logStart(tableName);
-            exec(conn, "delete from " + tableName + " where SOURCE_PAGE_ID in ",
-                    sourcePageIds);
-            logEnd(tableName);
+            if (DbUtil.isTableExisted(conn, tableName))
+            {
+                logStart(tableName);
+                exec(conn, "delete from " + tableName
+                        + " where SOURCE_PAGE_ID in ", sourcePageIds);
+                logEnd(tableName);
+            }
         }
     }
 
@@ -2840,42 +2866,46 @@ public class CompanyRemoval
     private void removeTuTuvForJobRemoval(Connection conn, long companyId,
             List<List<Object>> leverageGroupIds) throws SQLException
     {
-        // remove TU data of job
-        String tuTableName = "TRANSLATION_UNIT_" + companyId;
-        if (!DbUtil.isTableExisted(conn, tuTableName))
-        {
-            tuTableName = "TRANSLATION_UNIT";
-        }
-        List<List<Object>> tuIds = queryBatchList(conn, "select ID from "
-                + tuTableName + " where LEVERAGE_GROUP_ID in ",
-                leverageGroupIds);
-        if (tuIds.size() > 0)
-        {
-            removeRemovedPrefixTag(conn, tuIds);
-            removeRemovedSuffixTag(conn, tuIds);
-            removeRemovedTag(conn, tuIds);
-        }
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put("TRANSLATION_UNIT", "TRANSLATION_UNIT_VARIANT");
+        map.put("TRANSLATION_UNIT_ARCHIVED", "TRANSLATION_UNIT_VARIANT_ARCHIVED");
+        map.put("TRANSLATION_UNIT_" + companyId, "TRANSLATION_UNIT_VARIANT_" + companyId);
+        map.put("TRANSLATION_UNIT_" + companyId + "_ARCHIVED", "TRANSLATION_UNIT_VARIANT_" + companyId + "_ARCHIVED");
 
-        // remove TUV data of job
-        String tuvTableName = "";
-        if ("TRANSLATION_UNIT".equals(tuTableName))
+        String tuTableName = null;
+        String tuvTableName = null;
+        for (Entry<String, String> entry : map.entrySet())
         {
-            tuvTableName = "TRANSLATION_UNIT_VARIANT";            
-        }
-        else
-        {
-            tuvTableName = "TRANSLATION_UNIT_VARIANT_" + companyId;            
-        }
-        List<List<Object>> tuvIds = queryBatchList(conn, "select ID from "
-                + tuvTableName + " where TU_ID in ", tuIds);
-        if (tuvIds.size() > 0)
-        {
-            removeXliffAlt(conn, tuvIds);
-            removeIssues(conn, tuvIds);
-            exec(conn, "delete from " + tuvTableName + " where ID in ", tuvIds);
-        }
+            tuTableName = entry.getKey();
+            tuvTableName = entry.getValue();
 
-        exec(conn, "delete from " + tuTableName + " where ID in ", tuIds);
+            // remove TU data of job
+            if (!DbUtil.isTableExisted(conn, tuTableName))
+            {
+                continue;
+            }
+            List<List<Object>> tuIds = queryBatchList(conn, "select ID from "
+                    + tuTableName + " where LEVERAGE_GROUP_ID in ",
+                    leverageGroupIds);
+            if (tuIds.size() > 0)
+            {
+                removeRemovedPrefixTag(conn, tuIds);
+                removeRemovedSuffixTag(conn, tuIds);
+                removeRemovedTag(conn, tuIds);
+            }
+
+            // remove TUV data of job
+            List<List<Object>> tuvIds = queryBatchList(conn, "select ID from "
+                    + tuvTableName + " where TU_ID in ", tuIds);
+            if (tuvIds.size() > 0)
+            {
+                removeXliffAlt(conn, tuvIds);
+                removeIssues(conn, tuvIds);
+                exec(conn, "delete from " + tuvTableName + " where ID in ", tuvIds);
+            }
+
+            exec(conn, "delete from " + tuTableName + " where ID in ", tuIds); 
+        }
     }
 
     /**

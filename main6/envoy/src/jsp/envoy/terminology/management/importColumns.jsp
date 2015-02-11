@@ -70,9 +70,10 @@ TEXTAREA     { overflow: auto; }
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/protocol.js"></SCRIPT>
-<SCRIPT src="/globalsight/envoy/terminology/management/importObjects_js.jsp"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/import.js"></SCRIPT>
+<SCRIPT src="/globalsight/envoy/terminology/management/importObjects_js.jsp"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/importColumns_js.jsp"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
@@ -113,15 +114,8 @@ function doNext()
         "&" + WebAppConstants.TERMBASE_ACTION +
         "=" + WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-		//oForm.importoptions.value = oImportOptions.xml;
-    	  oForm.importoptions.value = result.domImportOptions.xml;
-      }
-      else if(window.DOMParser)
-      { 
-    	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-      }
+      oForm.importoptions.value = getDomString(result.domImportOptions);
+      
       oForm.submit();
     }
 }
@@ -170,15 +164,8 @@ function doReAnalyze()
         "&" + WebAppConstants.TERMBASE_ACTION +
         "=" + WebAppConstants.TERMBASE_ACTION_ANALYZE_FILE%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-		//oForm.importoptions.value = oImportOptions.xml;
-    	  oForm.importoptions.value = result.domImportOptions.xml;
-      }
-      else if(window.DOMParser)
-      { 
-    	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-      }
+      oForm.importoptions.value = getDomString(result.domImportOptions);
+      
       oForm.submit();
     }
 }
@@ -213,15 +200,8 @@ function doTestrun()
         "&" + WebAppConstants.TERMBASE_ACTION +
         "=" + WebAppConstants.TERMBASE_ACTION_TEST_IMPORT%>";
 
-      if(window.navigator.userAgent.indexOf("MSIE")>0)
-      {
-		//oForm.importoptions.value = oImportOptions.xml;
-    	  oForm.importoptions.value = result.domImportOptions.xml;
-      }
-      else if(window.DOMParser)
-      { 
-    	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-      }
+      oForm.importoptions.value = getDomString(result.domImportOptions);
+      
       oForm.submit();
     }
 }
@@ -231,24 +211,15 @@ function buildOptions()
     var result = new Result("", null,null);
 
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-     // dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    dom = $.parseXML(xmlImportOptions);
     var node;
 
-    node = dom.selectSingleNode("/importOptions/columnOptions");
-    while (node.hasChildNodes())
+    node = $(dom).find("importOptions columnOptions");
+    var len = node.children().length;
+    while(len > 0)
     {
-        node.removeChild(node.firstChild);
+   		node.children().eq(0).remove();
+   		len = node.children().length;
     }
 
     var foundTerm = false;
@@ -257,37 +228,36 @@ function buildOptions()
     {
         var oCol = aColumns[i];
 
-        var id = dom.createAttribute("id");
         var elem = dom.createElement("column");
+        node.append(elem);
+        var len = $(dom).find("importOptions columnOptions column").length;
+        elem = $(dom).find("importOptions columnOptions column").eq(len-1);
+        
         var name = dom.createElement("name");
         var example = dom.createElement("example");
         var type = dom.createElement("type");
         var termLanguage = dom.createElement("termLanguage");
         var encoding = dom.createElement("encoding");
         var assocCol = dom.createElement("associatedColumn");
-
-        id.value = oCol.id;
-        name.text = oCol.name;
-        example.text = oCol.example;
-        type.text = oCol.type;
-        termLanguage.text = oCol.termLanguage;
-        encoding.text = oCol.encoding;
-        assocCol.text = oCol.associatedColumn;
-
+        elem.append(name);
+        elem.append(example);
+        elem.append(type);
+        elem.append(termLanguage);
+        elem.append(encoding);
+        elem.append(assocCol);
+        
+        $(elem).attr("id",oCol.id);
+        $(elem).find("name").text(oCol.name);
+        $(elem).find("example").text(oCol.example);
+        $(elem).find("type").text(oCol.type);
+        $(elem).find("termLanguage").text(oCol.termLanguage);
+        $(elem).find("encoding").text(oCol.encoding);
+        $(elem).find("associatedColumn").text(oCol.associatedColumn);
+        
         if (oCol.type == "term")
         {
            foundTerm = true;
         }
-
-        elem.attributes.setNamedItem(id);
-        elem.appendChild(name);
-        elem.appendChild(example);
-        elem.appendChild(type);
-        elem.appendChild(termLanguage);
-        elem.appendChild(encoding);
-        elem.appendChild(assocCol);
-
-        node.appendChild(elem);
     }
 
     if (!foundTerm)
@@ -295,7 +265,6 @@ function buildOptions()
         return new Result("<%=EditUtil.toJavascript(lb_no_col_mapped)%>",
           null);
     }
-
     result.domImportOptions=dom;
     return result;
 }
@@ -303,24 +272,12 @@ function buildOptions()
 function buildFileOptions()
 {
     var result = new Result("", null, null);
-    var dom;
-    var node;
+    var dom,node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-    var separator = node.selectSingleNode("separator");
+	dom = $.parseXML(xmlImportOptions);
+    node = $(dom).find("importOptions fileOptions");
+    var separator = $(node).find("separator");
+
     for (var key in Delimitor)
     {
        // IE 5.0 adds prototype functions as keys
@@ -333,12 +290,12 @@ function buildFileOptions()
        var index = Delimitor[key];
        if (document.oDummyForm.oDelimit[index].checked)
        {
-          separator.text = key;
+          separator.text(key);
           break;
        }
     }
 
-    if (separator.text == "other")
+    if (separator.text() == "other")
     {
         var value = document.oDummyForm.oDelimitText.value;
         if (value == "")
@@ -348,17 +305,16 @@ function buildFileOptions()
             document.oDummyForm.oDelimitText);
         }
 
-        separator.text = value;
+        separator.text(value);
     }
     if (document.oDummyForm.oIgnoreHeader.checked)
     {
-       node.selectSingleNode("ignoreHeader").text = "true";
+    	$(node).find("ignoreHeader").text("true");
     }
     else
     {
-       node.selectSingleNode("ignoreHeader").text = "false";
+       $(node).find("ignoreHeader").text("false");
     }
-
     result.domImportOptions=dom;
     return result;
 }
@@ -369,51 +325,40 @@ function parseColumns()
     var nodes, node, id, name, example, type, encoding;
     var associatedColumn, termLanguage;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    nodes = dom.selectNodes("/importOptions/columnOptions/column");
-
+    dom = $.parseXML(xmlImportOptions);
+    
+    nodes = $(dom).find("importOptions columnOptions column");
+	
     for (i = 0; i < nodes.length; ++i)
     {
         node = nodes[i];//node = nodes.item(i)
 
         id = node.getAttribute("id");
 
-        if (node.selectSingleNode("name"))
+        if ($(node).find("name"))
         {
-            name = node.selectSingleNode("name").text;
+            name = $(node).find("name").text();
         }
-        if (node.selectSingleNode("example"))
+        if ($(node).find("example"))
         {
-            example = node.selectSingleNode("example").text;
+            example = $(node).find("example").text();
         }
-        if (node.selectSingleNode("type"))
+        if ($(node).find("type"))
         {
-            type = node.selectSingleNode("type").text;
+            type = $(node).find("type").text();
         }
-        if (node.selectSingleNode("encoding"))
+        if ($(node).find("encoding"))
         {
-            encoding = node.selectSingleNode("encoding").text;
+            encoding = $(node).find("encoding").text();
         }
-        if (node.selectSingleNode("associatedColumn"))
+        if ($(node).find("associatedColumn"))
         {
-            associatedColumn = node.selectSingleNode("associatedColumn").text;
+            associatedColumn = $(node).find("associatedColumn").text();
         }
-        if (node.selectSingleNode("termLanguage"))
+        if ($(node).find("termLanguage"))
         {
-            termLanguage = node.selectSingleNode("termLanguage").text;
+            termLanguage = $(node).find("termLanguage").text();
         }
-
         aColumns.push(new Column(id, name, example, type,
             encoding, associatedColumn, termLanguage));
     }
@@ -424,21 +369,11 @@ function parseColumns()
 function checkAnalysisError()
 {
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    dom = $.parseXML(xmlImportOptions);
     
-    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
-    var errorMessage = node.text;
+    var node = $(dom).find("importOptions fileOptions errorMessage");
+    var errorMessage = node.text();
+
     if (errorMessage != "")
     {
         node.text = "";
@@ -450,15 +385,9 @@ function checkAnalysisError()
           "&" + WebAppConstants.TERMBASE_ACTION +
           "=" + WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-  		oForm.importoptions.value = oImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-      	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-        }
-        oForm.submit();
+      	oForm.importoptions.value = getDomString(oImportOptions);
+
+      	oForm.submit();
         return true;
     }
 
@@ -472,23 +401,13 @@ function parseFileOptions()
     var nodes, node, fileName, fileType, fileEncoding;
     var separator, ignoreHeader;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    dom = $.parseXML(xmlImportOptions);
+    
+    node = $(dom).find("importOptions fileOptions");
 
-    separator = node.selectSingleNode("separator").text;
-    ignoreHeader = node.selectSingleNode("ignoreHeader").text;
-
+    separator = $(node).find("separator").text();
+    ignoreHeader = $(node).find("ignoreHeader").text();
+	
     idDelimiterSpan.innerText = separator;
 
     var found = 0;
@@ -535,18 +454,8 @@ function doOnLoad()
     }
 
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlDefinition);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlDefinition,"text/xml");
-    }
+    dom = $.parseXML(xmlDefinition);
+    
     addCustomFields(dom);
 
     parseFileOptions();

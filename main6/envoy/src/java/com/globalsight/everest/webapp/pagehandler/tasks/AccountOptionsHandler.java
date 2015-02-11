@@ -137,6 +137,10 @@ public class AccountOptionsHandler
             PageHandler.getUserParameter(
                 p_session, EDITOR_AUTO_SAVE_SEGMENT).getValue());
 
+        p_request.setAttribute(EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT,
+                PageHandler.getUserParameter(
+                    p_session, EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT).getValue());
+        
         p_request.setAttribute(EDITOR_AUTO_UNLOCK,
             PageHandler.getUserParameter(
                 p_session, EDITOR_AUTO_UNLOCK).getValue());
@@ -240,6 +244,8 @@ public class AccountOptionsHandler
                 p_request.getParameter(EDITOR_SEGMENTS_MAX_NUM));        
         optionsHash.put(EDITOR_AUTO_SAVE_SEGMENT,
             p_request.getParameter(EDITOR_AUTO_SAVE_SEGMENT));
+        optionsHash.put(EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT, 
+        	p_request.getParameter(EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT));
         optionsHash.put(EDITOR_AUTO_UNLOCK,
             p_request.getParameter(EDITOR_AUTO_UNLOCK));
         optionsHash.put(EDITOR_AUTO_SYNC,

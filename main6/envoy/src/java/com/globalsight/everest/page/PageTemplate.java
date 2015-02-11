@@ -37,6 +37,7 @@ import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 
@@ -425,6 +426,12 @@ public class PageTemplate extends PersistentObject
                     if (needRevertXlfTargetCase1(sourceTuv, targetTuv))
                     {
                         tuvString = tu.getXliffTarget();
+                        // For PO, if use secondary filter, the original target
+                        // content may be lost.
+                        if (StringUtil.isEmpty(tuvString))
+                        {
+                            tuvString = sourceTuv.getGxml();
+                        }
                     }
                 }
 

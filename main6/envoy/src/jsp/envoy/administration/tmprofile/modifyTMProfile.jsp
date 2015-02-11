@@ -78,6 +78,7 @@
    String multLGEM = TMProfileConstants.MULTIPLE_EXACT_MATCHES_REIMPORT;
    String multMatchesPenaltyReimport = TMProfileConstants.MULTIPLE_EXACT_MATCHES_PENALTY_REIMPORT;
    String dynLevGold = TMProfileConstants.DYN_LEV_GOLD;
+   String dynLevStopSearch = TMProfileConstants.DYN_LEV_STOP_SEARCH;
    String dynLevInProgress = TMProfileConstants.DYN_LEV_IN_PROGRESS;
    String dynLevPopulation = TMProfileConstants.DYN_LEV_POPULATION;
    String dynLevReference = TMProfileConstants.DYN_LEV_REFERENCE;
@@ -129,6 +130,7 @@
    String msgDuplicateName = bundle.getString("msg_duplicate_tm_profile_name");
    String lbDynLevOptions = bundle.getString("lb_dynLevOptions");
    String lbDynLevGoldTm = bundle.getString("lb_dynLevGoldTm");
+   String lbDynLevStopSearch = bundle.getString("lb_dynLevStopSearch");
    String lbDynLevInProgressTm = bundle.getString("lb_dynLevInProgressTm");
    String lbDynLevPopulationTm = bundle.getString("lb_dynLevPopulationTm");
    String lbDynLevReferenceTm = bundle.getString("lb_dynLevReferenceTm");
@@ -211,6 +213,12 @@
    if(tmProfile.dynamicLeveragesFromGoldTm())
    {
        isDynLevGoldChecked = "CHECKED";
+   }
+   
+   String isDynLevStopSearchChecked = "";
+   if(tmProfile.getDynLevStopSearch())
+   {
+       isDynLevStopSearchChecked = "CHECKED";
    }
 
    String isDynLevInProgressChecked = "";
@@ -1539,6 +1547,9 @@ function doOnLoad()
                                <INPUT TYPE="checkbox" NAME="<%=dynLevReference%>" VALUE="true" <%=isDynLevReferenceChecked%> <%=isDynLevInProgressDisabled%>><%=lbDynLevReferenceTm%>
                             </TD>
                         </TR>
+                        <TR style="display:none"><TD>
+                               <INPUT TYPE="checkbox" NAME="<%=dynLevStopSearch%>" VALUE="true" <%=isDynLevStopSearchChecked%>><%=lbDynLevStopSearch%>
+                        </TD></TR>
                    </TABLE>
                 </TD>
 

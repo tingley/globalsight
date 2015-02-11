@@ -338,6 +338,13 @@ public class UserParameterPersistenceManagerLocal implements
             result.add(param);
         }
 
+        if (!haveParam(p_existing, EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT))
+        {
+            param = new UserParameterImpl(p_userId, EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT,
+            		EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT_DEFAULT);
+            result.add(param);
+        }
+        
         if (!haveParam(p_existing, EDITOR_AUTO_UNLOCK))
         {
             param = new UserParameterImpl(p_userId, EDITOR_AUTO_UNLOCK,

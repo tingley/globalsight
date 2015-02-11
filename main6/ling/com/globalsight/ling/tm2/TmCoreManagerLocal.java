@@ -34,6 +34,8 @@ import javax.naming.NamingException;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -663,6 +665,16 @@ public class TmCoreManagerLocal implements TmCoreManager
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
             String companyId) throws RemoteException, LingManagerException
     {
+        return leverageSegments(p_tuvs, p_srcLocale, p_tgtLocales, p_options,
+                companyId, null);
+    }
+    
+    public LeverageDataCenter leverageSegments(
+            List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
+            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
+            String companyId, Job p_job) throws RemoteException,
+            LingManagerException
+    {
         LeverageDataCenter leverageDataCenter = new LeverageDataCenter(
                 p_srcLocale, p_tgtLocales, p_options);
         for (BaseTmTuv tuv : p_tuvs)
@@ -676,20 +688,46 @@ public class TmCoreManagerLocal implements TmCoreManager
 
         try
         {
-            LeverageMatchResults levMatchResult = new LeverageMatchResults();
-            if (sortedTms.tm2Tms.size() > 0)
+            if (!p_options.dynamicLeveragesStopSearch())
             {
-                levMatchResult = new Tm2SegmentTmInfo().leverage(
-                        sortedTms.tm2Tms, leverageDataCenter, companyId);
+                LeverageMatchResults levMatchResult = new LeverageMatchResults();
+                if (sortedTms.tm2Tms.size() > 0)
+                {
+                    levMatchResult = new Tm2SegmentTmInfo().leverage(
+                            sortedTms.tm2Tms, leverageDataCenter, companyId);
+                }
+                if (sortedTms.tm3Tms.size() > 0)
+                {
+                    levMatchResult.merge(new Tm3SegmentTmInfo().leverage(
+                            sortedTms.tm3Tms, leverageDataCenter, companyId));
+                }
+                leverageDataCenter
+                        .addLeverageResultsOfSegmentTmMatching(levMatchResult);
+                leverageDataCenter.applySegmentTmOptions();
             }
-            if (sortedTms.tm3Tms.size() > 0)
+            else
             {
-                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(
-                        sortedTms.tm3Tms, leverageDataCenter, companyId));
+                Session session = HibernateUtil.getSession();
+                Leverager lv = new Leverager(session);
+                lv.setJobId(getJobId());
+
+                Job job = p_job == null ? null : p_job;
+                if (job == null)
+                {
+                    try
+                    {
+                        job = ServerProxy.getJobHandler()
+                                .getJobById(getJobId());
+                    }
+                    catch (Exception e)
+                    {
+                        // ignore
+                    }
+                }
+
+                lv.leverageDataCenterWithStopSearch(job, leverageDataCenter,
+                        sortedTms.tm2Tms, sortedTms.tm3Tms, companyId);
             }
-            leverageDataCenter
-                    .addLeverageResultsOfSegmentTmMatching(levMatchResult);
-            leverageDataCenter.applySegmentTmOptions();
         }
         catch (LingManagerException le)
         {

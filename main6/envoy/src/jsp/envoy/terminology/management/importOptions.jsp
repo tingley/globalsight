@@ -72,6 +72,7 @@ FORM         { display: inline; }
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/importOptions.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
@@ -171,31 +172,20 @@ function doPrev()
     {
         var url;
         var dom;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          //dom = oImportOptions.XMLDocument;
-        	dom=new ActiveXObject("Microsoft.XMLDOM");
-            dom.async="false";
-            dom.loadXML(xmlImportOptions);
-        }
-        else if(window.DOMParser)
-        { 
-          var parser = new DOMParser();
-          dom = parser.parseFromString(xmlImportOptions,"text/xml");
-        }
+        dom = $.parseXML(xmlImportOptions);
         
-        var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
-
-        if (node.text == "<%=ImportOptions.TYPE_XML%>" ||
-            node.text == "<%=ImportOptions.TYPE_MTF%>")
+        var node = $(dom).find("importOptions fileOptions fileType");
+		alert("doPrev--node.text()="+node.text());
+        if (node.text() == "<%=ImportOptions.TYPE_XML%>" ||
+            node.text() == "<%=ImportOptions.TYPE_MTF%>")
         {
             url = "<%=urlPrevXml%>";
         }
-        else if (node.text == "<%=ImportOptions.TYPE_CSV%>")
+        else if (node.text() == "<%=ImportOptions.TYPE_CSV%>")
         {
             url = "<%=urlPrevCsv%>";
         }
-        else if (node.text == "<%=ImportOptions.TYPE_TBX%>")
+        else if (node.text() == "<%=ImportOptions.TYPE_TBX%>")
         {
         	url = "<%=urlPrevXml%>";
         }
@@ -204,15 +194,7 @@ function doPrev()
             "&<%=WebAppConstants.TERMBASE_ACTION%>" +
             "=<%=WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-      		//oForm.importoptions.value = oImportOptions.xml;
-        	oForm.importoptions.value = result.domImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-        }
+        oForm.importoptions.value = getDomString(result.domImportOptions);
         
         oForm.submit();
     }
@@ -230,21 +212,11 @@ function doNext()
     else
     {
     	var dom;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          //dom = oImportOptions.XMLDocument;
-        	dom=new ActiveXObject("Microsoft.XMLDOM");
-            dom.async="false";
-            dom.loadXML(xmlImportOptions);
-        }
-        else if(window.DOMParser)
-        { 
-          var parser = new DOMParser();
-          dom = parser.parseFromString(xmlImportOptions,"text/xml");
-        }
-    	var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
-
-    	if (node.text == "<%=ImportOptions.TYPE_TBX%>")
+        dom = $.parseXML(xmlImportOptions);
+        
+    	var node = $(dom).find("importOptions fileOptions fileType");
+    	
+    	if (node.text() == "<%=ImportOptions.TYPE_TBX%>")
     	{
     		oForm.action = "<%=urlNext +
   	          "&" + WebAppConstants.TERMBASE_ACTION +
@@ -257,53 +229,35 @@ function doNext()
     	          "=" + WebAppConstants.TERMBASE_ACTION_START_IMPORT%>";
     	}
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-      		//oForm.importoptions.value = oImportOptions.xml;
-        	oForm.importoptions.value = result.domImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-        }
-        oForm.submit();
+         oForm.importoptions.value = getDomString(result.domImportOptions);
+
+         oForm.submit();
     }
 }
 
 function checkAnalysisError()
 {
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-      dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    dom = $.parseXML(xmlImportOptions);
     
-    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
-    var errorMessage = node.text;
+    var node = $(dom).find("importOptions fileOptions errorMessage");
+    var errorMessage = $(node).text();
     if (errorMessage != "")
     {
-        node.text = "";
+        node.text("");
 
         alert("<%=EditUtil.toJavascript(lb_failedToAnalyze)%>" + errorMessage);
         
         var url;
-        node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+        node = $(dom).find("importOptions fileOptions fileType");
 
-        if (node.text == "<%=ImportOptions.TYPE_XML%>" ||
-            node.text == "<%=ImportOptions.TYPE_MTF%>" ||
-            node.text == "<%=ImportOptions.TYPE_TBX%>")
+        if ($(node).text() == "<%=ImportOptions.TYPE_XML%>" ||
+        	$(node).text() == "<%=ImportOptions.TYPE_MTF%>" ||
+        	$(node).text() == "<%=ImportOptions.TYPE_TBX%>")
         {
             url = "<%=urlPrevXml%>";
         }
-        else if (node.text == "<%=ImportOptions.TYPE_CSV%>")
+        else if ($(node).text() == "<%=ImportOptions.TYPE_CSV%>")
         {
             url = "<%=urlPrevCsv%>";
         }
@@ -324,54 +278,56 @@ function Result(message, element)
 
 function buildImportOptions()
 {
-    var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    var dom,node;
+    
+    dom = $.parseXML(xmlImportOptions);
     
     var result = new Result("", null);
-    var node;
-    node = dom.selectSingleNode("/importOptions/syncOptions");
-    while (node.hasChildNodes())
+    node = $(dom).find("importOptions syncOptions");
+    var len = node.children().length;
+    while(len)
     {
-        node.removeChild(node.firstChild);
-    }
-
-    var syncMode = dom.createElement("syncMode");
-    var syncLanguage = dom.createElement("syncLanguage");
-    var syncAction = dom.createElement("syncAction");
-    var nosyncAction = dom.createElement("nosyncAction");
-
+		node.children().eq(0).remove();
+		len = node.children().length;
+	}
+    
+	var syncMode,syncLanguage,syncAction,nosyncAction;
+    syncMode = dom.createElement("syncMode");
+    syncLanguage = dom.createElement("syncLanguage");
+    syncAction = dom.createElement("syncAction");
+    nosyncAction = dom.createElement("nosyncAction");
+    
+    node.append(syncMode);
+    node.append(syncLanguage);
+    node.append(syncAction);
+    node.append(nosyncAction);
+    
+    syncMode = $(node).find("syncMode");
+    syncLanguage = $(node).find("syncLanguage");
+    syncAction = $(node).find("syncAction");
+    nosyncAction = $(node).find("nosyncAction");
+    
     var form = document.oDummyForm;
 
     for (var i = 0; i < 3; i++)
     {
         if (form.oSync[i].checked)
         {
-            syncMode.text = Mode[i];
+            syncMode.text(Mode[i]);
             if (Mode[i] == "add_as_new")
             {
-                syncAction.text = "";
-                syncLanguage.text = "";
+            	syncAction.text("");
+            	syncLanguage.text("");
             }
             if (Mode[i] == "sync_on_concept")
             {
-                syncLanguage.text = "";
+                syncLanguage.text("");
 
                 for (var j = 0; j < 3; j++)
                 {
                     if (form.oSyncId[j].checked)
                     {
-                        syncAction.text = Action[j];
+                    	syncAction.text(Action[j]);
                     }
                 }
                 
@@ -379,20 +335,20 @@ function buildImportOptions()
                 {
                     if (form.oNosyncLang[j].checked)
                     {
-                        nosyncAction.text = NoAction[j];
+                    	nosyncAction.text(NoAction[j]);
                     }
                 }
             }
             if (Mode[i] == "sync_on_language")
             {
                 var lang = form.oLanguage.options[form.oLanguage.selectedIndex].value;
-                syncLanguage.text = lang;
+                syncLanguage.text(lang);
 
                 for (var j = 0; j < 3; j++)
                 {
                     if (form.oSyncLang[j].checked)
                     {
-                        syncAction.text = Action[j];
+                    	syncAction.text(Action[j]);
                     }
                 }
 
@@ -400,17 +356,12 @@ function buildImportOptions()
                 {
                     if (form.oNosyncLang[j].checked)
                     {
-                        nosyncAction.text = NoAction[j];
+                    	nosyncAction.text(NoAction[j]);
                     }
                 }
             }
         }
     }
-
-    node.appendChild(syncMode);
-    node.appendChild(syncLanguage);
-    node.appendChild(syncAction);
-    node.appendChild(nosyncAction);
 
     result.domImportOptions=dom;
     return result;
@@ -419,39 +370,30 @@ function buildImportOptions()
 function parseImportOptions()
 {
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
+    dom = $.parseXML(xmlImportOptions);
+    
     var nodes, node, fileName, fileType, fileEncoding, separater, ignoreHeader;
-    nodes = dom.selectNodes("/importOptions/syncOptions");
+    nodes = $(dom).find("importOptions syncOptions");
+    
     if (nodes.length > 0)
     {
         node = nodes[0];//node = nodes.item(0);
 
-        if (node.selectSingleNode("syncMode"))
+        if ($(node).find("syncMode"))
         {
-            syncMode = node.selectSingleNode("syncMode").text;
+            syncMode = $(node).find("syncMode").text();
         }
-        if (node.selectSingleNode("syncLanguage"))
+        if ($(node).find("syncLanguage"))
         {
-            syncLanguage = node.selectSingleNode("syncLanguage").text;
+            syncLanguage = $(node).find("syncLanguage").text();
         }
-        if (node.selectSingleNode("syncAction"))
+        if ($(node).find("syncAction"))
         {
-            syncAction = node.selectSingleNode("syncAction").text;
+            syncAction = $(node).find("syncAction").text();
         }
-        if (node.selectSingleNode("nosyncAction"))
+        if ($(node).find("nosyncAction"))
         {
-            nosyncAction = node.selectSingleNode("nosyncAction").text;
+            nosyncAction = $(node).find("nosyncAction").text();
         }
 
         var form = document.oDummyForm;
@@ -505,24 +447,12 @@ function doOnLoad()
     loadGuides();
 
     var dom;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlDefinition);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlDefinition,"text/xml");
-    }
-    
-    var names = dom.selectNodes("/definition/languages/language/name");
+    dom = $.parseXML(xmlDefinition);
+    var names = $(dom).find("definition languages language name");
 
     for (var i = 0; i < names.length; ++i)
     {
-        var name = names[i].text;//var name = names.item(i).text;
+        var name = $(names[i]).text();
 
         oOption = document.createElement("OPTION");
         oOption.text = name;

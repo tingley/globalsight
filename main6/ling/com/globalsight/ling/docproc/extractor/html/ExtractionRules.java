@@ -37,6 +37,7 @@ import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeExcelFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
+import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.extractor.msoffice.DynamicExcelRules;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -314,6 +315,16 @@ public class ExtractionRules
                         .equalsIgnoreCase(mainFilterTableName))
                 {
                     JavaPropertiesFilter proFilter = (JavaPropertiesFilter) FilterHelper
+                            .getFilter(mainFilterTableName, mainFilterId);
+                    long secondFilterId = proFilter.getSecondFilterId();
+                    if (secondFilterId > 0)
+                    {
+                        htmlFilter = FilterHelper.getHtmlFilter(secondFilterId);
+                    }
+                }
+                else if (FilterConstants.PO_TABLENAME.equalsIgnoreCase(mainFilterTableName))
+                {
+                    POFilter proFilter = (POFilter) FilterHelper
                             .getFilter(mainFilterTableName, mainFilterId);
                     long secondFilterId = proFilter.getSecondFilterId();
                     if (secondFilterId > 0)

@@ -74,7 +74,7 @@ public class JobControlExportedHandler
         
         //"Job Details" >> "View Error" >> "Re-Export" (GBS-908)
         //After re-export,UI will turn back to "Exported" search results list.
-        try 
+        try
         {
             String isFromExportErrorPage = p_request.getParameter("fromExportErrorPage");
             if (isFromExportErrorPage != null && "true".equals(isFromExportErrorPage))
@@ -184,9 +184,12 @@ public class JobControlExportedHandler
     protected void performAppropriateOperation(HttpServletRequest p_request)
     throws EnvoyServletException
     {
-        String param = p_request.getParameter(ARCHIVE_JOB_PARAM);
-        String action = p_request.getParameter("action");
-        if (param != null)
+    	HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+
+        String param = null;
+        if ((param = p_request.getParameter(ARCHIVE_JOB_PARAM)) != null)
         {
             String jobId = null;
             StringTokenizer tokenizer = new StringTokenizer(param);
@@ -197,10 +200,30 @@ public class JobControlExportedHandler
                 WorkflowHandlerHelper.archiveJob(job);
             }
         }
-        else if (action != null && action.equals(PLANNED_COMP_DATE))
+        else if (PLANNED_COMP_DATE.equals(p_request.getParameter("action")))
         {
             WorkflowHandlerHelper.
                 updatePlannedCompletionDates(p_request);
+        }
+        else if ((param = p_request.getParameter(DISCARD_JOB_PARAM)) != null)
+        {
+            if (isRefresh(sessionMgr, param, DISCARD_JOB_PARAM))
+            {
+                return;
+            }
+            sessionMgr.setAttribute(DISCARD_JOB_PARAM, param);
+            String jobId;
+            StringTokenizer tokenizer = new StringTokenizer(param);
+            while (tokenizer.hasMoreTokens())
+            {
+                jobId = tokenizer.nextToken();
+                Job job = WorkflowHandlerHelper.getJobById(Long
+                        .parseLong(jobId));
+                String userId = ((User) sessionMgr
+                        .getAttribute(WebAppConstants.USER)).getUserId();
+
+                WorkflowHandlerHelper.cancelJob(userId, job, null);
+            }
         }
         else  
         {

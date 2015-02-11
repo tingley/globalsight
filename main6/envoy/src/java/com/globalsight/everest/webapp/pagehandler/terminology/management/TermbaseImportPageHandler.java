@@ -112,6 +112,10 @@ public class TermbaseImportPageHandler
         String action  = (String)p_request.getParameter(TERMBASE_ACTION);
         String options = (String)p_request.getParameter(TERMBASE_IMPORT_OPTIONS);
         String tbid    = (String)p_request.getParameter(RADIO_BUTTON);
+        if(action.equals(TERMBASE_ACTION_REFRESH)){
+        	String warning = (String)p_request.getParameter("warning");
+        	p_request.setAttribute("warning", warning);
+        }
         String name    = null;
 
         ImportManager importer = (ImportManager) sessionMgr

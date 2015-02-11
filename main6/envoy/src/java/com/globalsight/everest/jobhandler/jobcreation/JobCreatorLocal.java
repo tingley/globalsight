@@ -206,6 +206,10 @@ public class JobCreatorLocal implements JobCreator
             boolean isBatchComplete = isBatchComplete(job, monitor);
             if (isBatchComplete)
             {
+                // GBS-3389: If all source files are handled, all requests
+                // should be in DB, set this flag to true;
+                job.setIsAllRequestGenerated(true);
+                HibernateUtil.update(job);
                 updateForWorkflowsWithoutTargetPages(job);
             }
 

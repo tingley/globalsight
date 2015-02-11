@@ -35,6 +35,7 @@ String lb_options = lb_title;
 String lb_general_options = bundle.getString("lb_general_options");
 String lb_me_options = bundle.getString("lb_main_editor_options");
 String lb_se_options = bundle.getString("lb_segment_editor_options");
+String lb_report_option = bundle.getString("lb_report_option");
 
 String lb_ok = bundle.getString("lb_done");
 String lb_cancel = bundle.getString("lb_cancel");
@@ -53,6 +54,7 @@ String lb_editor_same_window =  bundle.getString("lb_inline_editor");
 String lb_editor_popup_window = bundle.getString("lb_popup_editor") + " (" + bundle.getString("lb_advanced") + ")";
 String lb_autosave = bundle.getString("lb_autosave");
 String lb_autowhite = bundle.getString("lb_autowhite");
+String lb_abbreviate_report_name = bundle.getString("lb_abbreviate_report_name");
 String lb_tmThreshold = bundle.getString("lb_tm_threshold");
 String lb_tbThreshold = bundle.getString("lb_tb_threshold");
 String lb_linkColor        = bundle.getString("lb_normal_link_color");
@@ -99,6 +101,9 @@ String autosaveChecked = autosave.equals("0") ? "" : "CHECKED";
 String autowhite = (String)request.getAttribute(UserParamNames.EDITOR_AUTO_ADJUST_WHITESPACE);
 String autowhiteChecked = autowhite.equals("0") ? "" : "CHECKED";
 String ptagmode = (String)request.getAttribute(UserParamNames.EDITOR_PTAGMODE);
+
+String abbreReportNname = (String)request.getAttribute(UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT);
+String abbreReportNnameChecked = abbreReportNname.equals("no") ? "" : "CHECKED";
 
 String closeAllComments = (String)request.getAttribute(UserParamNames.EDITOR_SHOW_CLOSEALLCOMMENT);
 String closeAllCommentsChecked = closeAllComments.equals("0") ? "" : "CHECKED";
@@ -285,7 +290,15 @@ function checkForm()
     {
       form.<%=UserParamNames.EDITOR_PTAGMODE%>.value = "<%=EditorConstants.PTAGS_VERBOSE%>";
     }
-
+	<%--field = form.abbreReportNname;
+	if (field.checked)
+	{--%>
+	  form.<%=UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT%>.value = "yes";
+	  <%--}
+	else
+	{
+	  form.<%=UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT%>.value = "no";
+	}--%>
 <%--
     field = form.<%=UserParamNames.TM_MATCHING_THRESHOLD%>;
     if (!isRange(field, 1, 100))
@@ -304,7 +317,6 @@ function checkForm()
     }
 --%>
 <% } /*end activities edit perm check*/ %>
-
     if (canSubmit)
     {
       form.submit();
@@ -394,6 +406,7 @@ function init()
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_AUTO_SAVE_SEGMENT%>" value="mlah!">
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_PTAGMODE%>" value="<%=ptagmode%>">
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_SHOW_CLOSEALLCOMMENT%>" value="mlah!">
+<INPUT type="hidden" name="<%=UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT%>" value="mlah!">
 
 <P class="header2">&nbsp;<%=lb_general_options%></P>
 <TABLE>  
@@ -597,7 +610,7 @@ function init()
       <label for="idPtagMode2"><%=lb_verbose%></label></INPUT>
     </TD>
   </TR>
-  <TR><TD colspan="2">&nbsp;</TD></TR>
+  
   <%--
   <TR>
     <TD><SPAN class="standardText"><%=lb_tmThreshold%></SPAN></TD>
@@ -613,12 +626,22 @@ function init()
     <TD colspan=2>&nbsp;</TD>
   </TR>
   --%>
-  <TR>
-    <TD>
-    </TD>
-  </TR>
 </TABLE>
 </amb:permission>
+<%--Report Options --%>
+<!--  
+<amb:permission name="<%=Permission.ACTIVITIES_FILES_EDIT%>" >
+	<P class="header2">&nbsp;<%=lb_report_option%></P>
+	<TABLE>
+		<TR>
+			<TD><SPAN class="standardText"><%=lb_abbreviate_report_name %></SPAN></TD>
+			<TD><INPUT type="checkbox" name="abbreReportNname" <%=abbreReportNnameChecked%> ></TD>
+		</TR>
+		<TR><TD colspan="2">&nbsp;</TD></TR>
+		<TR><TD></TD></TR>
+	</TABLE>
+</amb:permission>
+-->
       <INPUT type="button" name="cancel" value="<%=lb_cancel%>"
       onclick="location.replace('<%=url_cancel%>')">
 &nbsp;&nbsp;

@@ -53,6 +53,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
@@ -242,6 +243,19 @@ public class OfflinePtagErrorChecker implements Cancelable
             {
                 if (!pTagData.getPTagSourceString().equals(segment))
                 {
+                	String content = tuv.getGxmlExcludeTopTags();
+                	TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                	if (tu != null)
+                	{
+                		Tuv stuv = tu.getSourceTuv(companyId);
+                		if (stuv != null)
+                		{
+                			content = stuv.getGxmlExcludeTopTags();
+                		}
+                	}
+                	
+                	TmxPseudo.tmx2Pseudo(content, pTagData);
+                	
                     pTagData.setPTagTargetString(segment);
                     pTagData.setDataType(tuv.getDataType(companyId));
                     if ((errMsg = errorChecker.check(pTagData, "",
@@ -261,13 +275,13 @@ public class OfflinePtagErrorChecker implements Cancelable
                             seg.add(errorChecker.geStrInternalErrMsg());
                             errorInternalList.add(seg);
                         }
+                        
+                    	tuv.setGxmlExcludeTopTags(TmxPseudo.pseudo2Tmx(pTagData),
+                                companyId);
+                        tuv.setLastModifiedUser(p_user.getUserId());
+                        tuv.setState(TuvState.LOCALIZED);
+                        tuvs.add(tuv);
                     }
-
-                    tuv.setGxmlExcludeTopTags(TmxPseudo.pseudo2Tmx(pTagData),
-                            companyId);
-                    tuv.setLastModifiedUser(p_user.getUserId());
-                    tuv.setState(TuvState.LOCALIZED);
-                    tuvs.add(tuv);
                 }
             }
         }

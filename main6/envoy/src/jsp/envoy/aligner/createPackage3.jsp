@@ -43,6 +43,8 @@ String lb_helptext = bundle.getString("helper_text_aligner_package_create3");
 <HEAD>
 <!-- JSP file: createPackage3.jsp -->
 <TITLE><%=lb_title%></TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+<SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -90,15 +92,8 @@ function doPrevious()
         oForm.action = url;
         oForm.<%=WebAppConstants.GAP_ACTION%>.value =
           '<%=WebAppConstants.GAP_ACTION_SELECTFILES%>';
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.gapoptions.value = oOptions.XMLDocument.xml;
-        	oForm.gapoptions.value = result.dom.xml;
-        }
-        else
-        {
-        	oForm.gapoptions.value = XML.getDomString(result.dom);
-        }
+        
+        oForm.gapoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -119,15 +114,8 @@ function doAlign()
         oForm.action = url;
         oForm.<%=WebAppConstants.GAP_ACTION%>.value =
           '<%=WebAppConstants.GAP_ACTION_CREATEPACKAGE%>';
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.gapoptions.value = oOptions.XMLDocument.xml;
-        	oForm.gapoptions.value = result.dom.xml;
-        }
-        else
-        {
-        	oForm.gapoptions.value = XML.getDomString(result.dom);
-        }
+        
+        oForm.gapoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -135,31 +123,18 @@ function doAlign()
 function buildOptions()
 {
     var result = new Result("", "", null,null);
-    var dom ;
+    var dom = $.parseXML(xmlStrForJS);
     var node;
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStrForJS);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStrForJS,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("//alignerOptions");
+    node = $(dom).find("alignerOptions");
 
     if (document.oDummyForm.idIgnoreFormatting.checked)
     {
-       node.selectSingleNode("ignoreFormatting").text = "true";
+       $(node).find("ignoreFormatting").text("true");
     }
     else
     {
-       node.selectSingleNode("ignoreFormatting").text = "false";
+    	$(node).find("ignoreFormatting").text("false");
     }
     result.dom = dom;
     return result;
@@ -168,25 +143,12 @@ function buildOptions()
 function parseOptions()
 {
     var form = document.oDummyForm;
-    var dom ;
+    var dom = $.parseXML(xmlStrForJS);
     var nodes, node, ignoreFormatting;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStrForJS);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStrForJS,"text/xml");
-    }
+    node = $(dom).find("alignerOptions");
 
-    node = dom.selectSingleNode("//alignerOptions");
-
-    ignoreFormatting = node.selectSingleNode("ignoreFormatting").text;
+    ignoreFormatting = $(node).find("ignoreFormatting").text();
 
     if (ignoreFormatting == "true")
     {

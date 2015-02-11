@@ -137,6 +137,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private Date completedDate = null;
 
     private boolean isMigrated = false;
+    private boolean isAllRequestGenerated = false;
 
     public JobImpl()
     {
@@ -337,8 +338,12 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
     public GlobalSightLocale getSourceLocale()
     {
-        m_sourceLocale = getL10nProfile().getSourceLocale();
         return m_sourceLocale;
+    }
+
+    public void setSourceLocale(GlobalSightLocale p_sourceLocale)
+    {
+        m_sourceLocale = p_sourceLocale;
     }
 
     /**
@@ -584,11 +589,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         }
 
         return containsFailedWorkflow;
-    }
-
-    public void setSourceLocale(GlobalSightLocale p_sourceLocale)
-    {
-        m_sourceLocale = p_sourceLocale;
     }
 
     public void setJobName(String p_jobName)
@@ -1585,5 +1585,15 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public boolean isMigrated()
     {
         return isMigrated;
+    }
+
+    public boolean getIsAllRequestGenerated()
+    {
+        return isAllRequestGenerated;
+    }
+
+    public void setIsAllRequestGenerated(boolean isAllRequestGenerated)
+    {
+        this.isAllRequestGenerated = isAllRequestGenerated;
     }
 }

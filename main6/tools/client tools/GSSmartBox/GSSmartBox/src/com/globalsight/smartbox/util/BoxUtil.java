@@ -91,11 +91,7 @@ public class BoxUtil
     private static void downloadFileToInboxFromFTP(CompanyConfiguration cpConfig,
             FTPConfiguration ftpConfig)
     {
-        String ftpHost = ftpConfig.getFtpHost();
-        String ftpUsername = ftpConfig.getFtpUsername();
-        String ftpPassword = ftpConfig.getFtpPassword();
-        int ftpPort = ftpConfig.getFtpPort();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
+        FtpHelper ftpHelper = new FtpHelper(ftpConfig);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {
@@ -213,12 +209,7 @@ public class BoxUtil
     public static void uploadFailedboxFilesToFTP(String failedboxPath,
             FTPConfiguration ftpConfig)
     {
-        String ftpHost = ftpConfig.getFtpHost();
-        String ftpUsername = ftpConfig.getFtpUsername();
-        String ftpPassword = ftpConfig.getFtpPassword();
-        String ftpFailedbox = ftpConfig.getFtpFailedbox();
-        int ftpPort = ftpConfig.getFtpPort();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
+        FtpHelper ftpHelper = new FtpHelper(ftpConfig);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {
@@ -226,9 +217,9 @@ public class BoxUtil
             File[] files = failedBox.listFiles();
             for (File file : files)
             {
-                ftpHelper.ftpUploadDirectory(ftpFailedbox, file, failedboxPath);
+                ftpHelper.ftpUploadDirectory(ftpConfig.getFtpFailedbox(), file,
+                        failedboxPath);
             }
-
         }
     }
 
@@ -260,12 +251,8 @@ public class BoxUtil
     public static void uploadOutboxFilesToFTP(String outboxPath,
             FTPConfiguration ftpConfig)
     {
-        String ftpHost = ftpConfig.getFtpHost();
-        String ftpUsername = ftpConfig.getFtpUsername();
-        String ftpPassword = ftpConfig.getFtpPassword();
         String ftpOutbox = ftpConfig.getFtpOutbox();
-        int ftpPort = ftpConfig.getFtpPort();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
+        FtpHelper ftpHelper = new FtpHelper(ftpConfig);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {

@@ -813,6 +813,18 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         m_isFromOfficeContent = false;
                     }
                     // add <span dir=rtl> to the paragraph if necessary
+                    if (IFormatNames.FORMAT_XML.equals(srcDataType))
+                    {
+                        if (chunk.contains("&lt;GS-IDML-LF/&gt;"))
+                        {
+                            // change MARK_LF_IDML back to LINE_BREAK during
+                            // export
+                            chunk = StringUtil.replace(chunk,
+                                    "&lt;GS-IDML-LF/&gt;",
+                                    IdmlHelper.LINE_BREAK);
+                        }
+                    }
+                    
                     parseDiplomatSnippet(addSpanRtl(chunk));
                     m_stateStack.pop();
                     break;

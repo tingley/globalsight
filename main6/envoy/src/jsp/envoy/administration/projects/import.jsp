@@ -43,6 +43,7 @@ String lb_project_export_description = "This screen allows you to import schedul
 <SCRIPT language="Javascript" src="envoy/terminology/management/import.js"></SCRIPT>
 <!-- To get showError and showWarning functions -->
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
@@ -75,23 +76,15 @@ function doNext()
     else
     {
         var url;
-        var dom;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-          dom = oImportOptions.XMLDocument;
-        }
-        else if(window.DOMParser)
-        { 
-          dom = result.dom;
-        }
+        var dom = result.dom;
         
-        var node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
+        var node = $(dom).find("importOptions fileOptions fileType");
 
-        if (node.text == "<%=ImportOptions.TYPE_XML%>")
+        if (node.text() == "<%=ImportOptions.TYPE_XML%>")
         {
             url = "<%=urlNextXml%>";
         }
-        else if (node.text == "<%=ImportOptions.TYPE_CSV%>")
+        else if (node.text() == "<%=ImportOptions.TYPE_CSV%>")
         {
             url = "<%=urlNextCsv%>";
         }
@@ -101,14 +94,8 @@ function doNext()
             "=<%=WebAppConstants.TM_ACTION_UPLOAD_FILE%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-      		oForm.importoptions.value = oImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-          	oForm.importoptions.value = XML.getDomString(result.dom);
-        }
+        
+        oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -166,24 +153,15 @@ function setFileType()
 function buildFileOptions()
 {
     var result = new Result("", "", null);
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
     var node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
     
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    node = $(dom).find("importOptions fileOptions");
 
-    node.selectSingleNode("fileName").text = document.oForm.filename.value;
+    $(node).find("fileName").text(document.oForm.filename.value);
 
-    node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_CSV%>";
+    $(node).find("fileType").text("<%=ImportOptions.TYPE_CSV%>");
 
 <%--
     if (document.oDummyForm.oType[0].checked)
@@ -197,10 +175,9 @@ function buildFileOptions()
 --%>
 
     var sel = document.oDummyForm.oEncoding;
-    node.selectSingleNode("fileEncoding").text =
-      sel.options[sel.selectedIndex].value;
+    $(node).find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
-    var separator = node.selectSingleNode("separator");
+    var separator = $(node).find("separator");
     for (var key in Delimitor)
     {
        // IE 5.0 adds prototype functions as keys
@@ -213,12 +190,12 @@ function buildFileOptions()
        var index = Delimitor[key];
        if (document.oDummyForm.oDelimit[index].checked)
        {
-          separator.text = key;
+          separator.text(key);
           break;
        }
     }
 
-    if (separator.text == "other")
+    if (separator.text() == "other")
     {
         var value = document.oDummyForm.oDelimitText.value;
         if (value == "")
@@ -229,15 +206,15 @@ function buildFileOptions()
             document.oDummyForm.oDelimitText);
         }
 
-        node.selectSingleNode("separator").text = value;
+        $(node).find("separator").text(value);
     }
     if (document.oDummyForm.oIgnoreHeader.checked)
     {
-       node.selectSingleNode("ignoreHeader").text = "true";
+       $(node).find("ignoreHeader").text("true");
     }
     else
     {
-       node.selectSingleNode("ignoreHeader").text = "false";
+    	$(node).find("ignoreHeader").text("false");
     }
 
     if (oForm.filename.value == "")
@@ -255,28 +232,17 @@ function buildFileOptions()
 function parseFileOptions()
 {
     var form = document.oDummyForm;
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
     var nodes, node, fileName, fileType, fileEncoding;
     var separator, ignoreHeader;
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
     
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    node = $(dom).find("importOptions fileOptions");
 
-    fileName = node.selectSingleNode("fileName").text;
-    fileType = node.selectSingleNode("fileType").text;
-    fileEncoding = node.selectSingleNode("fileEncoding").text;
-    separator = node.selectSingleNode("separator").text;
-    ignoreHeader = node.selectSingleNode("ignoreHeader").text;
-
+    fileName = $(node).find("fileName").text();
+    fileType = $(node).find("fileType").text();
+    fileEncoding = $(node).find("fileEncoding").text();
+    separator = $(node).find("separator").text();
+    ignoreHeader = $(node).find("ignoreHeader").text();
 <%--
     if (fileType == "<%=ImportOptions.TYPE_XML%>")
     {

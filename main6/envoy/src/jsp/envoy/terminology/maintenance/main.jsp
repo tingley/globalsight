@@ -48,6 +48,7 @@ FORM { display: inline; }
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js"></SCRIPT>
@@ -242,47 +243,31 @@ function getTextFields(fieldTypes)
 function parseDefinition()
 {
     var nodes, node;
-    var dom ;
+    var dom = $.parseXML(xmlStr);;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    nodes = dom.selectNodes("/definition/languages/language");
+    nodes = $(dom).find("definition languages language");
     for (var i = 0; i < nodes.length; i++)
     {
-        //node = nodes.item(i);
         node = nodes[i];
 
-        var name = node.selectSingleNode("name").text;
-        var locale = node.selectSingleNode("locale").text;
-        var hasterms = node.selectSingleNode("hasterms").text;
+        var name = $(node).find("name").text();
+        var locale = $(node).find("locale").text();
+        var hasterms = $(node).find("hasterms").text();
         hasterms = (hasterms == "true" ? true : false);
         var exists = true;
 
         aLanguages.push(new Language(name, locale, hasterms, exists));
     }
 
-    nodes = dom.selectNodes("/definition/fields/field");
+    nodes = $(dom).find("definition fields field");
     for (var i = 0; i < nodes.length; i++)
     {
-        //node = nodes.item(i);
         node = nodes[i];
 
-        var name = node.selectSingleNode("name").text;
-        var type = node.selectSingleNode("type").text;
-        var system =
-            (node.selectSingleNode("system").text == "true" ? true : false);
-        var values = node.selectSingleNode("values").text;
+        var name = $(node).find("name").text();
+        var type = $(node).find("type").text();
+        var system = ($(node).find("system").text() == "true" ? true : false);
+        var values = $(node).find("values").text();
         var format = getFieldFormatByType(type);
 
         aFields.push(new Field(name, type, format, system, values));

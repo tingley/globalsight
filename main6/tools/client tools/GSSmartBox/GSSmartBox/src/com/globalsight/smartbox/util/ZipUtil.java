@@ -113,7 +113,7 @@ public class ZipUtil implements Serializable
     {
         String zipdir = getZipDir(p_zipFileName);
         File zipDirFile = new File(zipdir);
-        zipDirFile.mkdir();
+        zipDirFile.mkdirs();
         ZipFile zipfile = new ZipFile(p_zipFileName);
 
         Enumeration entries = zipfile.getEntries();

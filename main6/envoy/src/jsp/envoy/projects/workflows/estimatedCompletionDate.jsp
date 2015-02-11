@@ -20,7 +20,10 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobDetails" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-
+<jsp:useBean id="jobInProgress" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobReady" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr =
@@ -31,8 +34,9 @@
 
     String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
     saveUrl += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
+    Object from = request.getAttribute("from");
 
-    String title= bundle.getString("lb_edit") + " " + bundle.getString("lb_estimated_completion_date");
+    String title= bundle.getString("lb_edit") + " " + bundle.getString("lb_estimated_workflow_completion_date");
 
     // For sla report issue
     TimeZone timezone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
@@ -40,7 +44,7 @@
     // Labels of the column titles
     String targLocaleCol = bundle.getString("lb_target_locale");
     String completeCol = bundle.getString("lb_percent_complete");
-    String estimatedCol = bundle.getString("lb_estimated_completion_date") + " (mm/dd/yyyy hh:mm)";
+    String estimatedCol = bundle.getString("lb_estimated_workflow_completion_date") + " (mm/dd/yyyy hh:mm)";
 
     // Button names
     String saveButton = bundle.getString("lb_save");
@@ -275,6 +279,9 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
     <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
+    <div class="mainHeading" style="margin-bottom:8px">
+	<%=bundle.getString("lb_job")%>: ${Job.name}
+    </div>
     <span class="mainHeading">
     <%=title%>
     </span>
@@ -594,6 +601,9 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 </TD>
 </TR>
 </TABLE>
+<% if (from != null) { %>
+    <input type="hidden" name="from" value="<%=from%>" />
+<% } %>
 </FORM>
 </BODY>
 </html>

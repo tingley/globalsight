@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlRepairer;
+import com.globalsight.cxe.adapter.msoffice.PptxFileManager;
 import com.globalsight.cxe.adapter.msoffice2010.MsOffice2010Converter;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
@@ -228,6 +229,13 @@ public class PreviewPageHandler extends PageHandler
 
                         if (IFormatNames.FORMAT_OFFICE_XML.equals(formatType))
                         {
+                            if (odFile.getPath().toLowerCase()
+                                    .endsWith(".pptx"))
+                            {
+                                PptxFileManager m = new PptxFileManager();
+                                m.splitFile(zipDir.getPath());
+                            }
+                            
                             writeXMLFileForOffice(p_request, userid, state);
                             OfficeXmlRepairer.repair(zipDir.getPath());
                             MsOffice2010Converter converter = new MsOffice2010Converter();

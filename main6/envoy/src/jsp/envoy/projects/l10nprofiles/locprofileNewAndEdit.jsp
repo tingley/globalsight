@@ -304,7 +304,7 @@ $(document).ready(function editPage(){
 				<input type="text" id="LocProfileName" name="LocProfileName" maxlength="40" size="30" value="${LocProfileName}"/>
 			</div>
 			<div>
-				<label for="LocProfileDescription"><%=bundle.getString("lb_description")%>:</label>
+				<label for="LocProfileDescription" style="vertical-align:top"><%=bundle.getString("lb_description")%>:</label>
 				<textarea id="LocProfileDescription" rows="6" cols="40" name="LocProfileDescription">${LocProfileDescription}</textarea>
 			</div>
 			<div>

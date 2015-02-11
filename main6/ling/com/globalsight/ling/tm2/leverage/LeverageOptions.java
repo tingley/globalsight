@@ -310,6 +310,11 @@ public class LeverageOptions
     {
         return m_tmProfile.getDynLevFromReferenceTm();
     }
+    
+    public boolean dynamicLeveragesStopSearch()
+    {
+        return m_tmProfile.getDynLevStopSearch();
+    }
 
     public boolean isTmProcedence()
     {

@@ -57,6 +57,7 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <!-- To get showError and showWarning functions -->
 <SCRIPT language="Javascript" src="/globalsight/envoy/tm/management/protocol.js"></SCRIPT>
@@ -89,29 +90,19 @@ function buildExportOptions()
 {
   var result = new Result("", "", null);
   var form = document.oDummyForm;
-  var dom;
-  var node;
-  var check;
+  var dom = $.parseXML(xmlExportOptions);
+  var node,check;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
   // OUTPUT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
+  node = $(dom).find("exportOptions outputOptions");
 
   if (form.oHeader.checked)
   {
-     node.selectSingleNode("header").text = "true";
+     $(node).find("header").text("true");
   }
   else
   {
-     node.selectSingleNode("header").text = "false";
+     $(node).find("header").text("false");
   }
 
   var value = '';
@@ -151,10 +142,10 @@ function buildExportOptions()
       "The separator cannot be a space character", "", form.oDelimitText);
   }
 
-  node.selectSingleNode("separator").text = value;
+  $(node).find("separator").text(value);
 
   var dateformat = form.oDateFormat.options[form.oDateFormat.selectedIndex].value;
-  node.selectSingleNode("subtype").text = dateformat;
+  $(node).find("subtype").text(dateformat);
 
   result.dom = dom;
   return result;
@@ -163,23 +154,12 @@ function buildExportOptions()
 function parseExportOptions()
 {
   var form = document.oDummyForm;
-  var dom;
-  var nodes, node;
-  var header, separator;
+  var dom = $.parseXML(xmlExportOptions);
+  var nodes, node,header,separator;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
-  
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
-  header = node.selectSingleNode("header").text;
-  separator = node.selectSingleNode("separator").text;
+  node = $(dom).find("exportOptions outputOptions");
+  header = $(node).find("header").text();
+  separator = $(node).find("separator").text();
 
   checkValue(form.oHeader, header);
 
@@ -245,14 +225,8 @@ function doPrevious()
         "=<%=WebAppConstants.TM_ACTION_SET_EXPORT_OPTIONS%>";
 
     oForm.action = url;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	oForm.exportoptions.value = oExportOptions.xml;
-    }
-    else if(window.DOMParser)
-    { 
-    	oForm.exportoptions.value = XML.getDomString(result.dom);
-    }
+    oForm.exportoptions.value = getDomString(result.dom);
+
     oForm.submit();
 }
 
@@ -275,14 +249,8 @@ function doNext()
             "=<%=WebAppConstants.TM_ACTION_START_EXPORT%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	oForm.exportoptions.value = oExportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.exportoptions.value = getDomString(result.dom);
+        
         oForm.submit();
     }
 }

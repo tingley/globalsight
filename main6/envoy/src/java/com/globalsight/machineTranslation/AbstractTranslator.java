@@ -768,7 +768,7 @@ public abstract class AbstractTranslator implements MachineTranslator
             case Asia_Online:
                 return 99999;
             case Safaba:
-                return 100;
+                return 50;
             case MS_Translator:
                 return 50;
             case IPTranslator:

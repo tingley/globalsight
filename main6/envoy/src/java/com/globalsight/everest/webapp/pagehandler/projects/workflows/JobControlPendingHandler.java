@@ -20,6 +20,8 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -34,6 +36,7 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
@@ -41,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoPendingSearcher;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.StringUtil;
 
 public class JobControlPendingHandler extends JobManagementHandler
 {
@@ -66,25 +70,42 @@ public class JobControlPendingHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
-        HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
-                BASE_BEAN);
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request, BASE_BEAN);
         // error bean.
         m_importErrorBean = new NavigationBean(ERROR_BEAN,
                 p_thePageDescriptor.getPageName());
 
         p_request.setAttribute("searchType",
                 p_request.getParameter("searchType"));
-        performAppropriateOperation(p_request);
-        Vector jobStates = new Vector();
+        Vector<String> jobStates = new Vector<String>();
         jobStates.addAll(Job.PENDING_STATUS_LIST);
-        
+
+        performAppropriateOperation(p_request);////////
+
+        // For "Re-Create" job
+        String recreateJobIds = p_request.getParameter(RECREATE_JOB_PARAM);
+        if (StringUtil.isNotEmpty(recreateJobIds))
+        {
+            if (!isRefresh(sessionMgr, recreateJobIds, RECREATE_JOB_PARAM))
+            {
+                String message = recreateJob(p_request);
+                if (StringUtil.isNotEmpty(message))
+                {
+                    p_request.setAttribute("recreateMessage", message);
+                }
+            }
+        }
+
         JobVoPendingSearcher searcher = new JobVoPendingSearcher();
         searcher.setJobVos(p_request);
-        
         p_request.setAttribute(ERROR_URL_PARAM, m_importErrorBean.getPageURL());
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(DISCARD_JOB_PARAM, DISCARD_JOB_PARAM);
         p_request.setAttribute(MAKE_READY_JOB_PARAM, MAKE_READY_JOB_PARAM);
+        p_request.setAttribute(RECREATE_JOB_PARAM, RECREATE_JOB_PARAM);
         p_request.setAttribute(JOB_LIST_START_PARAM,
                 p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(
@@ -93,9 +114,6 @@ public class JobControlPendingHandler extends JobManagementHandler
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         jobStates));
 
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute("destinationPage", "pending");
 
         // turn on cache. do both. "pragma" for the older browsers.
@@ -172,9 +190,10 @@ public class JobControlPendingHandler extends JobManagementHandler
             while (tokenizer.hasMoreTokens())
             {
                 jobId = tokenizer.nextToken();
-                WorkflowHandlerHelper
-                        .cancelJob(userId, WorkflowHandlerHelper
-                                .getJobById(Long.parseLong(jobId)));
+                Job job = WorkflowHandlerHelper.getJobById(Long
+                        .parseLong(jobId));
+
+                WorkflowHandlerHelper.cancelJob(userId, job, null);
             }
         }
         // FOR CANCELLING THE IMPORT ERROR PAGES IN A IMPORT_FAILED JOB
@@ -195,6 +214,95 @@ public class JobControlPendingHandler extends JobManagementHandler
         {
             WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
         }
+    }
 
+    private String recreateJob(HttpServletRequest p_request)
+    {
+        String message = null;
+
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+
+        Set<Long> allJobIds = new HashSet<Long>();
+        String ids = p_request.getParameter(RECREATE_JOB_PARAM);
+        StringTokenizer tokenizer = new StringTokenizer(ids);
+        while (tokenizer.hasMoreTokens())
+        {
+            allJobIds.add(Long.parseLong(tokenizer.nextToken()));
+        }
+
+        Set<Long> problemJobIds = checkJobs(allJobIds);
+        allJobIds.removeAll(problemJobIds);
+        if (allJobIds.size() > 0)
+        {
+            sessionMgr.setAttribute(RECREATE_JOB_PARAM, ids);
+            for (long id : allJobIds)
+            {
+                WorkflowHandlerHelper.recreateJob(id);
+            }
+            sessionMgr.removeElement(RECREATE_JOB_PARAM);
+        }
+
+        if (problemJobIds.size() > 0)
+        {
+            message = getMessage(problemJobIds);
+        }
+
+        return message;
+    }
+
+    /**
+     * To recreate job, it need all the request information in "request" table.
+     * If there are source files that have no requests info, after recreate job,
+     * the new job will lost such source files. So do not allow such jobs to
+     * recreate.
+     * 
+     * @param jobIds
+     * @return problem job ID list.
+     */
+    private Set<Long> checkJobs(Set<Long> jobIds)
+    {
+        Set<Long> problemIds = new HashSet<Long>();
+        for (long id : jobIds)
+        {
+            try
+            {
+                Job job = ServerProxy.getJobHandler().getJobById(id);
+                if (!job.getIsAllRequestGenerated())
+                {
+                    problemIds.add(id);
+                }
+            }
+            catch (Exception e)
+            {
+                problemIds.add(id);
+            }
+        }
+
+        return problemIds;
+    }
+
+    /**
+     * Get a message to warn to user that these jobs can not be recreated.
+     * @param jobIds
+     * @return String -- A message to warn to user.
+     */
+    private String getMessage(Set<Long> jobIds)
+    {
+        String message = null;
+
+        StringBuffer msg = new StringBuffer();
+        if (jobIds.size() > 0)
+        {
+            msg.append("Job ");
+            for (long id : jobIds) {
+                msg.append(id).append(",");
+            }
+            message = msg.substring(0, msg.length()-1);
+            message += " can not be re-created because its requests information are not fully generated.";
+        }
+
+        return message;
     }
 }

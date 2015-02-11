@@ -198,6 +198,7 @@ import com.globalsight.everest.workflowmanager.ArrorInfo;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
@@ -311,6 +312,8 @@ public class Ambassador extends AbstractWebService
     public static final String EXPORT_JOB = "exportJob";
 
     public static final String ARCHIVE_JOB = "archiveJob";
+    
+    public static final String GET_IMPORT_EXPORT_STATUS = "getImportExportStatus";
 
     public static final String GET_USER_UNAVAILABILITY_REPORT = "getUserUnavailabilityReport";
 
@@ -356,7 +359,8 @@ public class Ambassador extends AbstractWebService
     // Cached jobIds that jobs creation had been started, this is used to avoid
     // job with same ID to be created repeatedly.
     // For "uploadFile...()" and "CreateJob...()" APIs only.
-    private static Set<Long> cachedJobIds = new HashSet<Long>();
+    private static Set<Long> cachedJobIds = Collections
+            .synchronizedSet(new HashSet<Long>());
 
     private static String NOT_IN_DB = "This job is not ready for query: ";
 
@@ -1412,11 +1416,15 @@ public class Ambassador extends AbstractWebService
         String jobId = (String) args.get("jobId");
         job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
         String jobName = job.getJobName();
-        String msg = checkIfCreateJobCalled("createJobOnInitial", job.getId(),
-                jobName);
-        if (msg != null)
+        String recreateFlag = (String) args.get("recreate");
+        if (!"true".equalsIgnoreCase(recreateFlag))
         {
-            throw new WebServiceException(msg);
+            String msg = checkIfCreateJobCalled("createJobOnInitial",
+                    job.getId(), jobName);
+            if (msg != null)
+            {
+                throw new WebServiceException(msg);
+            }
         }
         cachedJobIds.add(job.getId());
 
@@ -1442,6 +1450,11 @@ public class Ambassador extends AbstractWebService
         ArrayList<String> zipFiles = null;
         long referenceFPId = 0l;
 
+        boolean isWSFlag = true;
+        if ("false".equals((String) args.get("isJobCreatedOriginallyViaWS"))) {
+            isWSFlag = false;
+        }
+
         try
         {
             fppm = ServerProxy.getFileProfilePersistenceManager();
@@ -1459,9 +1472,9 @@ public class Ambassador extends AbstractWebService
                 filename = (String) filePaths.get(i);
                 filename = filename.replace('\\', File.separatorChar);
                 String srcLocale = findSrcLocale(fpId);
-                filename = getRealPath(jobId, filename, srcLocale);
-                realFilename = AmbFileStoragePathUtils.getCxeDocDir()
-                        + File.separator + filename;
+                filename = getRealPath(jobId, filename, srcLocale, isWSFlag);
+                realFilename = AmbFileStoragePathUtils.getCxeDocDir(job
+                        .getCompanyId()) + File.separator + filename;
                 file = new File(realFilename);
                 if (file.getAbsolutePath().endsWith(".xml"))
                 {
@@ -1722,7 +1735,7 @@ public class Ambassador extends AbstractWebService
             filePath = filePath.replace('\\', File.separatorChar);
             String fileProfileId = (String) iFileProfileIds.next();
             String srcLocale = findSrcLocale(fileProfileId);
-            filePath = getRealPath(jobName, filePath, srcLocale);
+            filePath = getRealPath(jobName, filePath, srcLocale, true);
             File file = new File(AmbFileStoragePathUtils.getCxeDocDir(),
                     filePath);
             if (file.getAbsolutePath().endsWith(".xml"))
@@ -2057,7 +2070,7 @@ public class Ambassador extends AbstractWebService
             filePath = filePath.replace('\\', File.separatorChar);
             // Save file.
             String srcLocale = findSrcLocale(fileProfileId);
-            String path = getRealPath(jobId, filePath, srcLocale);
+            String path = getRealPath(jobId, filePath, srcLocale, true);
             writeFile(path, bytes, fp.getCompanyId());
         }
         catch (Exception e)
@@ -3889,6 +3902,40 @@ public class Ambassador extends AbstractWebService
         	return null;
 		}
     }
+    
+    /**
+     * Returns number of jobs importing and number of workflows exporting.
+     * 
+     * @param p_accessToken
+     * @return String An XML description which contains number of jobs importing 
+     * 			and number of workflows exporting
+     * @throws WebServiceException
+     */
+    public String getImportExportStatus(String p_accessToken)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_IMPORT_EXPORT_STATUS);
+
+        User curUser = getUser(getUsernameFromSession(p_accessToken));
+        Company company = getCompanyByName(curUser.getCompanyName());
+        String jobsCreatingNumSql = "select count(ID) from JobImpl "
+        	+ " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
+        	+ "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
+        	+ Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')"
+        	+ " and COMPANY_ID = " + company.getId();
+        int jobsCreatingNum = HibernateUtil.count(jobsCreatingNumSql);       
+        int localesExportingNum = WorkflowExportingHelper.getExportingWorkflowNumber(
+        		false, company.getId());
+        
+        StringBuffer xml = new StringBuffer(
+        		"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");       	
+        xml.append("<ImportExportStatus>\r\n");
+		xml.append("\t<jobsCreating>").append(jobsCreatingNum).append("</jobsCreating>\r\n");
+		xml.append("\t<localesExporting>").append(localesExportingNum).append("</localesExporting>\r\n");
+    	xml.append("</ImportExportStatus>\r\n");
+    	
+    	return xml.toString();
+    }
 
     /**
      * Returns basic information about all the accepted tasks in the specified
@@ -5360,11 +5407,15 @@ public class Ambassador extends AbstractWebService
                         status = "downloadable";
                     else
                     {
-                        job = queryJob(jobName, p_accessToken);
-                        if (job != null
-                                && jobDirs.contains(String.valueOf(job
-                                        .getJobId())))
-                            status = "downloadable";
+                        try {
+                            job = queryJob(jobName, p_accessToken);
+                            if (job != null
+                                    && jobDirs.contains(String.valueOf(job
+                                            .getJobId())))
+                                status = "downloadable";
+                        } catch (WebServiceException ignore) {
+
+                        }
                     }
 
                     jobElement.element("status").setText(status);
@@ -5790,13 +5841,19 @@ public class Ambassador extends AbstractWebService
      *            Source locale
      * @return
      */
-    private String getRealPath(String jobId, String filePath, String srcLocale)
+    private String getRealPath(String jobId, String filePath, String srcLocale,
+            boolean hasWebserviceInPath)
     {
-        String newPath = new StringBuffer(srcLocale).append(File.separator)
-                .append("webservice").append(File.separator).append(jobId)
-                .append(File.separator).append(filePath).toString();
+        StringBuffer newPath = new StringBuffer();
+        newPath.append(srcLocale);
+        if (hasWebserviceInPath)
+        {
+            newPath.append(File.separator).append("webservice");
+        }
+        newPath.append(File.separator).append(jobId);
+        newPath.append(File.separator).append(filePath);
 
-        return newPath;
+        return newPath.toString();
     }
 
     /**
@@ -12926,6 +12983,7 @@ public class Ambassador extends AbstractWebService
      * server for one activity/task on origianl server, discard them all one by
      * one.
      * 
+     * @deprecated -- GS Edition API.
      * @param p_accessToken
      * @param p_userIdToDiscardJob
      *            String: userId who will dicard job(s) on target server.

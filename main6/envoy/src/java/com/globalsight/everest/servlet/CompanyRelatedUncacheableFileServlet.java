@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
@@ -52,6 +53,9 @@ import com.sun.jndi.toolkit.url.UrlUtil;
 public class CompanyRelatedUncacheableFileServlet extends HttpServlet
 {
     private static final long serialVersionUID = -2008264458473698612L;
+
+    private static final Logger logger = Logger
+            .getLogger(CompanyRelatedUncacheableFileServlet.class);
 
     static public final int BUFSIZE = 4096;
     private static final String SUPER_COMPANY_ID = "1";
@@ -111,52 +115,31 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
         try
         {
             boolean zipFile = false;
-
             String docHome = getInitParameter("docHome");
 
-            WorkObject wo = (WorkObject) TaskHelper.retrieveObject(
-                    p_request.getSession(), WebAppConstants.WORK_OBJECT);
-
-            String companyName = "";
-            if (wo == null)
-            {
-                companyName = UserUtil.getCurrentCompanyName(p_request);
-            }
-            else
-            {
-                if (wo instanceof Task)
-                {
-                    Task task = (Task) wo;
-                    long companyId = task.getCompanyId();
-                    companyName = ServerProxy.getJobHandler()
-                            .getCompanyById(companyId).getName();
-                }
-                else if (wo instanceof Job)
-                {
-                    Job job = (Job) wo;
-                    long companyId = job.getCompanyId();
-                    companyName = ServerProxy.getJobHandler()
-                            .getCompanyById(companyId).getName();
-                }
-            }
-            // String fileName = p_request.getParameter("file");
-            //
-            // // securyty consideration. This servlet returns a file only in
-            // // "docHome" directory.
-            // if(fileName.indexOf('/') != -1 || fileName.indexOf('\\') != -1)
-            // {
-            // throw new ServletException("File "
-            // + fileName + " cannot be accessible.");
-            // }
-
-            // File file = new File(docHome, fileName);
-
-            // For Global LP
-
-            String companyId = CompanyWrapper.getCompanyIdByName(companyName);
             String fileFullPath;
+            String companyName = null;
+            String companyId = null;
+            try
+            {
+                companyName = getCompanyName(p_request);
+                companyId = CompanyWrapper.getCompanyIdByName(companyName);
+            }
+            catch (Exception e)
+            {
+                logger.warn("Can not get company name or company ID.");
+            }
 
-            if (SUPER_COMPANY_ID.equals(companyId))
+            // Report storage path does not differ company, always use super
+            // path.
+            if (isDownloadingReport(p_request))
+            {
+                fileFullPath = new StringBuffer().append(docHome)
+                        .append(File.separator).append("Reports")
+                        .append(p_request.getPathInfo()).toString()
+                        .replace("\\", "/").replace("/", File.separator);
+            }
+            else if (SUPER_COMPANY_ID.equals(companyId))
             {
                 fileFullPath = new StringBuffer().append(docHome)
                         .append(p_request.getServletPath())
@@ -211,6 +194,50 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
         {
             e.printStackTrace();
         }
+    }
+
+    private String getCompanyName(HttpServletRequest p_request)
+            throws Exception
+    {
+        WorkObject wo = (WorkObject) TaskHelper.retrieveObject(
+                p_request.getSession(), WebAppConstants.WORK_OBJECT);
+
+        String companyName = "";
+        if (wo == null)
+        {
+            companyName = UserUtil.getCurrentCompanyName(p_request);
+        }
+        else
+        {
+            if (wo instanceof Task)
+            {
+                Task task = (Task) wo;
+                long companyId = task.getCompanyId();
+                companyName = ServerProxy.getJobHandler()
+                        .getCompanyById(companyId).getName();
+            }
+            else if (wo instanceof Job)
+            {
+                Job job = (Job) wo;
+                long companyId = job.getCompanyId();
+                companyName = ServerProxy.getJobHandler()
+                        .getCompanyById(companyId).getName();
+            }
+        }
+
+        return companyName;
+    }
+
+    private boolean isDownloadingReport(HttpServletRequest p_request)
+    {
+        String servletpath = p_request.getServletPath();
+//        String pathInfo = p_request.getPathInfo();
+        if ("/DownloadReports".equals(servletpath))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private String getContentTypeByExtension(String p_ext)

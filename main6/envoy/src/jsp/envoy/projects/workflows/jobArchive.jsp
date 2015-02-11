@@ -217,7 +217,9 @@ function submitForm(buttonClicked)
       return false;
    }
    
-   ShowStatusMessage("<%=bundle.getString("lb_preparing_for_export")%>");
+   if(buttonClicked == "ExportForUpdate" || buttonClicked == "Export"){
+   		ShowStatusMessage("<%=bundle.getString("lb_preparing_for_export")%>");
+   }
    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
 
@@ -291,6 +293,19 @@ function submitForm(buttonClicked)
       JobForm.submit();
       return;
    }
+   else if(buttonClicked == "Discard")
+   {
+	   if ( !confirm("<%=bundle.getString("jsmsg_warning")%>\n\n" +
+               "<%=bundle.getString("jsmsg_discard_job")%>"))
+	   {
+		   return false;
+		};
+
+	  ShowStatusMessage("<%=bundle.getString("jsmsg_discarding_selected_jobs")%>")
+	  JobForm.action = "<%=refreshUrl%>";
+	  jobActionParam = "<%=JobManagementHandler.DISCARD_JOB_PARAM%>";
+   }
+   
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    if (buttonClicked == "ExportForUpdate")
    {
@@ -422,7 +437,10 @@ function handleSelectAll() {
         <amb:permission name="<%=Permission.JOBS_EXPORT_SOURCE%>" >
         <INPUT TYPE="BUTTON" NAME=ExportForUpdate VALUE="<%=bundle.getString("lb_export_source")%>..." onClick="submitForm('ExportForUpdate');">
         </amb:permission>
-<% } %>        
+<% } %> 
+	 <amb:permission name="<%=Permission.JOBS_DISCARD%>" >
+            <INPUT TYPE="BUTTON" NAME=Discard VALUE="<%=bundle.getString("lb_discard")%>" onClick="submitForm('Discard');">
+	 </amb:permission>       
     <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
         <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
     </amb:permission>

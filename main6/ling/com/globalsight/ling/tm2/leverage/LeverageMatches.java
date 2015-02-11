@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -653,6 +654,47 @@ public class LeverageMatches
             while (itOtherLeverageTu.hasNext())
             {
                 add((LeveragedTu) itOtherLeverageTu.next());
+            }
+        }
+    }
+    
+    public void merge(LeverageMatches p_other, GlobalSightLocale targetLocale) throws Exception
+    {
+        if (p_other != null)
+        {
+            if (!m_originalSourceTuv.equals(p_other.m_originalSourceTuv))
+            {
+                throw new LingManagerException("LevMatchesMergeUnequalOrig",
+                        null, null);
+            }
+
+            m_orderedMatchSegments = null;
+            Iterator itOtherLeverageTu = p_other.m_leveragedTus.iterator();
+            while (itOtherLeverageTu.hasNext())
+            {
+                LeveragedTu ltu = (LeveragedTu) itOtherLeverageTu.next();
+                GlobalSightLocale srcLocale = ltu.getSourceLocale();
+                List<BaseTmTuv> tuvs = ltu.getTuvs();
+                List<BaseTmTuv> removeTuvs = new ArrayList<BaseTmTuv>();
+                for (BaseTmTuv baseTmTuv : tuvs)
+                {
+                    if (baseTmTuv.getLocale().equals(srcLocale)
+                            || baseTmTuv.getLocale().equals(targetLocale))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        removeTuvs.add(baseTmTuv);
+                    }
+                }
+
+                for (BaseTmTuv baseTmTuv : removeTuvs)
+                {
+                    ltu.removeTuv(baseTmTuv);
+                }
+
+                add(ltu);
             }
         }
     }

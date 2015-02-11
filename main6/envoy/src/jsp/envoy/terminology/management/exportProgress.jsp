@@ -86,6 +86,7 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_ERROR);
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT>
@@ -143,21 +144,10 @@ function showProgress(entryCount, percentage, message)
 function parseExportOptions()
 {
   var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    //dom = oExportOptions.XMLDocument;
-	  dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlExportOptions);
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  dom = $.parseXML(xmlExportOptions);
   
-  var node = dom.selectSingleNode("/exportOptions/fileOptions");
-  g_filename = node.selectSingleNode("fileName").text;
+  var node = $(dom).find("exportOptions fileOptions");
+  g_filename = $(node).find("fileName").text();
 <%
 String companyFolder = "";
 if (!"1".equals(CompanyThreadLocal.getInstance().getValue()))

@@ -130,7 +130,7 @@ namespace GlobalSight.InDesignConverter
                         //when execute the preview command(*.pv_command) file
                         m_statusFileName = m_statusFileName.Substring(0,
                                     m_statusFileName.LastIndexOf(".")) + ".ip_status";
-                        indesignApp.ConvertIdmlToPDF(m_originalFileName, m_newFileName);
+                        indesignApp.ConvertIdmlToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                     }
                     else
                     {

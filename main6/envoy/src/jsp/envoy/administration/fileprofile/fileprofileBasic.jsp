@@ -853,6 +853,11 @@ function thisFormatMustUseUTF8(format)
         return true;
     }
 
+    if (format.indexOf("New Office 2010") >= 0)
+    {
+        return true;
+    }
+
     return false;
 }
 
@@ -910,7 +915,7 @@ function isOpenOffice(format)
 
 function isOffice2010(format)
 {
-    if (format == "Office2010 document" || format == "(Beta) New Office 2010 Filter (DOCX only)")
+    if (format == "Office2010 document" || format.indexOf("New Office 2010") >= 0)
     {
         return true;
     }

@@ -1099,6 +1099,8 @@
         <PageLink linkName="miniSearch" destinationPageName="SJ"></PageLink> 
         <PageLink linkName="plannedCompletionDate" destinationPageName="PDATE"></PageLink>
         <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
+        <PageLink linkName="estimatedCompletionDate" destinationPageName="ECDATE"></PageLink>
+        <PageLink linkName="estimatedTranslateCompletionDate" destinationPageName="ETCDATE"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="jobsInProgress">
@@ -1122,6 +1124,8 @@
         <PageLink linkName="plannedCompletionDate" destinationPageName="PDATE"></PageLink>
         <PageLink linkName="download" destinationPageName="CUST_FILE"></PageLink>
         <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
+        <PageLink linkName="estimatedCompletionDate" destinationPageName="ECDATE"></PageLink>
+        <PageLink linkName="estimatedTranslateCompletionDate" destinationPageName="ETCDATE"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="jobsLocalized">
@@ -1466,11 +1470,15 @@
         <PageLink linkName="self" destinationPageName="ECDATE"></PageLink>
         <PageLink linkName="estimatedWorkflowCompDate" destinationPageName="ECDATE"></PageLink>
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobInProgress" destinationPageName="WF3"></PageLink>
+        <PageLink linkName="jobReady" destinationPageName="WF2"></PageLink>
       </WebPage>
       <WebPage pageName="ETCDATE" isDefault="false" jspName="/envoy/projects/workflows/estimatedTranslateCompletionDate.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.EstimatedTranslateCompletionDateHandler">
         <PageLink linkName="self" destinationPageName="ETCDATE"></PageLink>
         <PageLink linkName="estimatedTranslateCompDate" destinationPageName="ETCDATE"></PageLink>
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobInProgress" destinationPageName="WF3"></PageLink>
+        <PageLink linkName="jobReady" destinationPageName="WF2"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

@@ -113,10 +113,6 @@
     color: red;
 }
 
-.listborder {
-    border: 1px solid <%=skin.getProperty("skin.list.borderColor")%>;
-}
-
 .mainHeading {
     font-family: Arial, Helvetica, sans-serif;
     color: #0C1476;

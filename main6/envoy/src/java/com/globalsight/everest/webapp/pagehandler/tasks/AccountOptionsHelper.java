@@ -123,6 +123,7 @@ public class AccountOptionsHelper
         setParameter(p_session, optionsHash, userName, EDITOR_SELECTION, tempList);
         setParameter(p_session, optionsHash, userName, EDITOR_SEGMENTS_MAX_NUM, tempList);
         setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SAVE_SEGMENT, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT, tempList);
         setParameter(p_session, optionsHash, userName, EDITOR_AUTO_UNLOCK, tempList);
         setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SYNC, tempList); 
         setParameter(p_session, optionsHash, userName, EDITOR_AUTO_ADJUST_WHITESPACE, tempList);

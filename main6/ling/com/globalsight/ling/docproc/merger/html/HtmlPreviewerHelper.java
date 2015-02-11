@@ -115,54 +115,125 @@ public class HtmlPreviewerHelper
      * @return
      */
     public static String addGSColorForSegment(String format, String tuvContent,
-            String start, String end)
+            String start, String end, boolean isInddOrIdml)
     {
         int index_s = tuvContent.indexOf(">") + 1;
         int index_e = tuvContent.length() - 10;
         Vector<Integer> starts = new Vector<Integer>();
         Vector<Integer> ends = new Vector<Integer>();
+        boolean isOfficeXml = IFormatNames.FORMAT_OFFICE_XML.equals(format);
 
-        if (IFormatNames.FORMAT_OFFICE_XML.equals(format))
+        if (isOfficeXml)
         {
-            //For a issue that add bold style for pptx and preview,  
-            // ((GS_COLOR_START) will displayed in content.
-            Pattern p = Pattern.compile("(</[^>]*>)([^<]+)<");
-            Matcher m = p.matcher(tuvContent);
-            
-            while(m.find())
-            {
-                String all = m.group();
-                String pre = m.group(1);
-                String c = m.group(2);
-                String newStr = pre + start + c + end + "<";
-                
-                tuvContent = tuvContent.replace(all, newStr);
-            }         
+            return addGSColorTag(tuvContent, start, end);
+        }
+        // indd xml
+        else if (isInddOrIdml)
+        {
+            String eee = end + " ";
+            return addGSColorTag(tuvContent, start, eee);
+        }
+        // FM mif files
+        else if (IFormatNames.FORMAT_MIF.equals(format))
+        {
+            return addGSColorTag(tuvContent, start, end);
         }
         // add color tag to contain all text
         else
         {
             starts.add(index_s);
             ends.add(index_e);
-        }
-
-        // insert color tags
-        StringBuffer sb = new StringBuffer(tuvContent);
-        for (int i = starts.size() - 1; i >= 0; i--)
-        {
-            int s = starts.get(i);
-            int e = ends.get(i);
-
-            while (sb.charAt(e) == '(' && sb.charAt(e - 1) == '(')
+            
+            String eee = end;
+            StringBuffer sb = new StringBuffer(tuvContent);
+            for (int i = starts.size() - 1; i >= 0; i--)
             {
-                e = e - 1;
+                int s = starts.get(i);
+                int e = ends.get(i);
+
+                while (sb.charAt(e) == '(' && sb.charAt(e - 1) == '(')
+                {
+                    e = e - 1;
+                }
+
+                sb.insert(e, eee);
+                sb.insert(s, start);
             }
 
-            sb.insert(e, end);
-            sb.insert(s, start);
+            return sb.toString();
         }
+    }
 
-        return sb.toString();
+    private static String addGSColorTag(String tuvContent, String start,
+            String end)
+    {
+        int index_s;
+        int index_e;
+        //For a issue that add bold style for pptx and preview,  
+        // ((GS_COLOR_START) will displayed in content.
+        Pattern p = Pattern.compile("(</[^>]*>)([^<]+)<");
+        Matcher m = p.matcher(tuvContent);
+        
+        while(m.find())
+        {
+            String all = m.group();
+            String pre = m.group(1);
+            if ("</sub>".equals(pre))
+            {
+                continue;
+            }
+            
+            String c = m.group(2);
+            String newStr = pre + start + c + end + "<";
+            
+            tuvContent = tuvContent.replace(all, newStr);
+        }
+        
+        index_s = tuvContent.indexOf(">") + 1;
+        index_e = tuvContent.length() - 10;
+        String s1 = tuvContent.substring(0, index_s);
+        String sss = tuvContent.substring(index_s, index_e);
+        String s2 = tuvContent.substring(index_e);
+        if (!sss.startsWith("<") && !sss.startsWith(start))
+        {
+            int index_lt = sss.indexOf("<");
+            String newsss = null;
+            if (index_lt > -1)
+            {
+                newsss = start + sss.substring(0, index_lt) + end
+                        + sss.substring(index_lt);
+            }
+            else
+            {
+                newsss = start + sss + end;
+            }
+            
+            tuvContent = s1 + newsss + s2;
+        }
+        
+        index_s = tuvContent.indexOf(">") + 1;
+        index_e = tuvContent.length() - 10;
+        s1 = tuvContent.substring(0, index_s);
+        sss = tuvContent.substring(index_s, index_e);
+        s2 = tuvContent.substring(index_e);
+        if (!sss.endsWith(">") && !sss.endsWith(end))
+        {
+            int index_gt = sss.lastIndexOf(">");
+            String newsss = null;
+            if (index_gt > -1)
+            {
+                newsss = sss.substring(0, index_gt + 1) + start
+                        + sss.substring(index_gt + 1) + end;
+            }
+            else
+            {
+                newsss = start + sss + end;
+            }
+            
+            tuvContent = s1 + newsss + s2;
+        }
+        
+        return tuvContent;
     }
 
     /**

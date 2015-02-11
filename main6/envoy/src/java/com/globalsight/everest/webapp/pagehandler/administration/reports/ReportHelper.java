@@ -40,6 +40,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
@@ -49,6 +52,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -340,33 +344,67 @@ public class ReportHelper
      *            The operator user id.
      */
     public static File[] moveReports(List<File> p_fileList, String p_userID)
-    {
-        if(p_fileList == null || p_fileList.size() == 0)
+ {
+        if (p_fileList == null || p_fileList.size() == 0)
             return new File[0];
         
-        File reports[] = new File[p_fileList.size()];
-        for (int i = 0; i < reports.length; i++)
-        {
-            File srcReport = p_fileList.get(i);
-            String name = srcReport.getName();
-            String srcPath = srcReport.getPath();
-            srcPath = srcPath.substring(0, srcPath.lastIndexOf(File.separator) + 1);
-            String destPath = p_userID + File.separator;
-            destPath += name.substring(0, name.indexOf("-")) + File.separator;
-            destPath += new SimpleDateFormat("yyyyMMdd").format(new Date()) + File.separator;
-            destPath = srcPath + destPath;
-            File destFolder = new File(destPath);
-            destFolder.mkdirs();
-            
-            File report = new File(destPath + srcReport.getName());
-            if(report.exists())
-                report.delete();
-            srcReport.renameTo(report);
-            reports[i] = report;
-        }
-        
-        return reports;
-    }
+//		String roleName = TaskThread.roleName;
+		String value = "yes";
+//		try {
+//			UserParameter userParam;
+//			if (roleName != null) {
+//				userParam = ServerProxy
+//						.getUserParameterManager()
+//						.getUserParameter(
+//								roleName,
+//								UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT);
+//			} else {
+//				userParam = ServerProxy
+//						.getUserParameterManager()
+//						.getUserParameter(
+//								p_userID,
+//								UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT);
+//			}
+//			if (userParam != null) {
+//				value = userParam.getValue();
+//			}
+//		} catch (Exception e) {
+//		}
+
+		File reports[] = new File[p_fileList.size()];
+		for (int i = 0; i < reports.length; i++)
+		{
+			File srcReport = p_fileList.get(i);
+			String name = srcReport.getName();
+			String srcPath = srcReport.getPath();
+			srcPath = srcPath.substring(0,
+					srcPath.lastIndexOf(File.separator) + 1);
+			String destPath = p_userID + File.separator;
+			destPath += name.substring(0, name.indexOf("-")) + File.separator;
+			destPath += new SimpleDateFormat("yyyyMMdd").format(new Date())
+					+ File.separator;
+			destPath = srcPath + destPath;
+			File destFolder = new File(destPath);
+			destFolder.mkdirs();
+
+			String fullReportName = name.substring(0, name.indexOf("-"));
+            if ("yes".equals(value)
+                    && ReportConstants.reportNameMap
+                            .containsKey(fullReportName))
+			{
+                name = ReportConstants.reportNameMap.get(fullReportName)
+                        + name.substring(name.indexOf("-"), name.length());
+			}
+
+			File report = new File(destPath + name);
+			if (report.exists())
+				report.delete();
+			srcReport.renameTo(report);
+			reports[i] = report;
+		}
+
+		return reports;
+	}
 
     /**
      * Send File to Client

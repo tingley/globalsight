@@ -95,6 +95,7 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <!-- To get showError and showWarning functions -->
 <SCRIPT LANGUAGE="JavaScript" SRC="envoy/tm/management/protocol.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
@@ -141,11 +142,11 @@ function showProgress(entryCount, percentage, message)
 
   //idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
+  //if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
+  //{
     idProgressBar.style.minHeight = '15px';
 	idProgressBar.innerHTML='&nbsp';    
-  }
+  //}
   
   if (message != null && message != "")
   {
@@ -163,19 +164,10 @@ function copyToClipboard()
 
 function parseExportOptions()
 {
-  var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  var dom = $.parseXML(xmlExportOptions);
   
-  var node = dom.selectSingleNode("/exportOptions/fileOptions");
-  g_filename = node.selectSingleNode("fileName").text;
+  var node = $(dom).find("exportOptions fileOptions");
+  g_filename = $(node).find("fileName").text();
   
   document.getElementById("idExportfile").href = 
 	  "/globalsight/<%=IExportManager.EXPORT_DIRECTORY%>/<%=companyName%>/" + g_filename;

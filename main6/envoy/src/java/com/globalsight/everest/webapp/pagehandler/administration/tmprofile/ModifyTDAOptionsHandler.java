@@ -16,10 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,26 +26,16 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.tda.TdaHelper;
-import com.globalsight.everest.tm.exporter.ExportUtil;
 
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
-
-import org.apache.http.*;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 public class ModifyTDAOptionsHandler extends PageHandler implements
         TMProfileConstants

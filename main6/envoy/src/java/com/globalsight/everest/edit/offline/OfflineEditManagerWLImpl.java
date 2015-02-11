@@ -152,10 +152,20 @@ public final class OfflineEditManagerWLImpl
     }
 
 	@Override
-	public void runProcessDownloadRequest(DownloadParams downloadParams)
-			throws OfflineEditorManagerException, RemoteException {
-		m_localInstance.runProcessDownloadRequest(downloadParams);
-	}
+    public void runProcessDownloadRequest(DownloadParams downloadParams)
+            throws OfflineEditorManagerException, RemoteException
+    {
+        m_localInstance.runProcessDownloadRequest(downloadParams);
+    }
+
+	@Override
+    public String runProcessUploadReportPage(File p_tmpFile, User p_user,
+            Task p_task, String p_fileName, String p_reportName)
+            throws AmbassadorDwUpException
+    {
+        return m_localInstance.runProcessUploadReportPage(p_tmpFile, p_user,
+                p_task, p_fileName, p_reportName);
+    }
 
 	@Override
 	public void cancel() 

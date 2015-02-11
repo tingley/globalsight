@@ -107,25 +107,25 @@ public abstract class JobVoSearcher implements WebAppConstants
         return sql.toString();
     }
 
-    private void setSortValues(List<JobVo> jobVos, HttpSession p_session, String p_criteria,
-            Timestamp ts)
+    private void setSortValues(List<JobVo> jobVos, HttpSession p_session,
+            String p_criteria, Timestamp ts)
     {
-    	int n = -1;
-    	
-    	if (p_criteria != null)
-    	{
-    		n = Integer.parseInt(p_criteria);
-    	}
-    	else 
-    	{
-    		JobVoComparator comparator = (JobVoComparator) p_session
+        int n = -1;
+
+        if (p_criteria != null)
+        {
+            n = Integer.parseInt(p_criteria);
+        }
+        else
+        {
+            JobVoComparator comparator = (JobVoComparator) p_session
                     .getAttribute("jobVocomparator");
             if (comparator != null)
             {
-            	n = comparator.getSortColumn();
+                n = comparator.getSortColumn();
             }
-    	}
-    	
+        }
+
         if (n > 0)
         {
             switch (n)
@@ -214,12 +214,10 @@ public abstract class JobVoSearcher implements WebAppConstants
             return;
 
         StringBuffer sb = new StringBuffer();
-        sb.append("SELECT w.JOB_ID, max(w.ESTIMATED_COMPLETION_DATE) ");
+        sb.append("SELECT w.JOB_ID, max(w.ESTI_TRANSLATE_CMPLTN_DATE) ");
         sb.append("FROM ");
         sb.append("  WORKFLOW w ");
         sb.append("WHERE ");
-        // sb.append("  W.STATE <> 'CANCELLED'  ");
-        // sb.append("  AND  W.STATE <> 'IMPORT_FAILED'  ");
         sb.append("  w.JOB_ID in (");
         for (int i = 0; i < jobVos.size() - 1; i++)
         {

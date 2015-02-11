@@ -226,6 +226,7 @@ public class Permission
     static public final String JOBS_ARCHIVE = "jobs.archive";
     static public final String JOBS_DOWNLOAD = "jobs.download";
     static public final String JOBS_MAKE_READY = "jobs.makeready";
+    static public final String JOBS_RECREATE = "jobs.recreate";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
 //    static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";//GBS-2875
 
@@ -1023,7 +1024,9 @@ public class Permission
         
         // For GBS-3339, New CreateJob feature that does not use Java applet
         added = addPermission(393, CREATE_JOB_NO_APPLET) || added;
-        
+        // GBS-3389: recreate job in pending job list
+        added = addPermission(394, JOBS_RECREATE) || added;
+
         return added;
     }
 

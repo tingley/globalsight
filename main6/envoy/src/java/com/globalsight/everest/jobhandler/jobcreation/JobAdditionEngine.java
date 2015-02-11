@@ -247,6 +247,7 @@ public class JobAdditionEngine
             newJob.setJobName(EditUtil.removeCRLF(p_jobName));
             newJob.setLeverageMatchThreshold((int) p_request.getL10nProfile()
                     .getTranslationMemoryProfile().getFuzzyMatchThreshold());
+            newJob.setSourceLocale(p_request.getL10nProfile().getSourceLocale());
             newJob.setCreateDate(new Date());
             listOfWorkflows = createWorkflowInstances(p_request, newJob,
                     p_targetPages);

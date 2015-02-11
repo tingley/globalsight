@@ -191,10 +191,10 @@ public class Config
             // Create FTP directory for failedBox and outBox
             failedBox = failedBox + File.separator + "ftp";
             File failedBoxDir = new File(failedBox);
-            failedBoxDir.mkdir();
+            failedBoxDir.mkdirs();
             outbox = outbox + File.separator + "ftp";
             File outboxDir = new File(outbox);
-            outboxDir.mkdir();
+            outboxDir.mkdirs();
         }
 
         if (useSMB)
@@ -202,19 +202,19 @@ public class Config
             // Create SMB directory for failedBox and outBox
             failedBox = failedBox + File.separator + "smb";
             File failedBoxDir = new File(failedBox);
-            failedBoxDir.mkdir();
+            failedBoxDir.mkdirs();
             outbox = outbox + File.separator + "smb";
             File outboxDir = new File(outbox);
-            outboxDir.mkdir();
+            outboxDir.mkdirs();
         }
 
         // Create Import and Export folder under failed box in local
         String failedBoxImport = failedBox + File.separator + "Import";
         File failedBoxImportDir = new File(failedBoxImport);
-        failedBoxImportDir.mkdir();
+        failedBoxImportDir.mkdirs();
         String failedBoxExport = failedBox + File.separator + "Export";
         File failedBoxExportDir = new File(failedBoxExport);
-        failedBoxExportDir.mkdir();
+        failedBoxExportDir.mkdirs();
 
         String host = r.getString(ConfigConstants.HOST);
         String port = r.getString(ConfigConstants.PORT);
@@ -306,7 +306,7 @@ public class Config
             File file = new File(newPath);
             if (!file.exists())
             {
-                if (!file.mkdir())
+                if (!file.mkdirs())
                 {
                     String message = "Configuration error for \"" + paramName
                             + "\" in GSSmartBox.conf.";
@@ -472,12 +472,12 @@ public class Config
             SmbFile sfFailedboxImport = new SmbFile(smbFailedbox + "/Import");
             if (!sfFailedboxImport.exists())
             {
-                sfFailedboxImport.mkdir();
+                sfFailedboxImport.mkdirs();
             }
             SmbFile sfFailedboxExport = new SmbFile(smbFailedbox + "/Export");
             if (!sfFailedboxExport.exists())
             {
-                sfFailedboxExport.mkdir();
+                sfFailedboxExport.mkdirs();
             }
         }
         catch (Exception e)

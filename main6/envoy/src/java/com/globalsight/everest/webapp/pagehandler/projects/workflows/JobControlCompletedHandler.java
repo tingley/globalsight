@@ -16,9 +16,11 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
@@ -28,6 +30,8 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -119,13 +123,32 @@ public class JobControlCompletedHandler extends JobManagementHandler
     //////////////////////////////////////////////////////////////////////////////
     protected void performAppropriateOperation(HttpServletRequest p_request)
     throws EnvoyServletException
-    {
-        String action = p_request.getParameter("action");
-        if (action != null && action.equals(PLANNED_COMP_DATE))
-        {
-            WorkflowHandlerHelper.
-                updatePlannedCompletionDates(p_request);
-        }
-        // DO NOTHING.... since this takes you to another screen.
-    }
+ {
+		HttpSession session = p_request.getSession(false);
+		SessionManager sessionMgr = (SessionManager) session
+				.getAttribute(SESSION_MANAGER);
+
+		String param = null;
+
+		String action = p_request.getParameter("action");
+		if (action != null && action.equals(PLANNED_COMP_DATE)) {
+			WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
+		} else if ((param = p_request.getParameter(DISCARD_JOB_PARAM)) != null) {
+			if (isRefresh(sessionMgr, param, DISCARD_JOB_PARAM)) {
+				return;
+			}
+			sessionMgr.setAttribute(DISCARD_JOB_PARAM, param);
+			String jobId;
+			StringTokenizer tokenizer = new StringTokenizer(param);
+			while (tokenizer.hasMoreTokens()) {
+				jobId = tokenizer.nextToken();
+				Job job = WorkflowHandlerHelper.getJobById(Long
+						.parseLong(jobId));
+				String userId = ((User) sessionMgr
+						.getAttribute(WebAppConstants.USER)).getUserId();
+
+				WorkflowHandlerHelper.cancelJob(userId, job, null);
+			}
+		}
+	}
 }

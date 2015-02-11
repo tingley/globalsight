@@ -30,6 +30,8 @@ String urlCancel = cancel.getPageURL();
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+<SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT src="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT src="envoy/terminology/management/import.js"></SCRIPT>
 <SCRIPT>
@@ -70,45 +72,24 @@ function doNext()
             "=<%=WebAppConstants.TERMBASE_ACTION_UPLOAD_FILE%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-  			//oForm.importoptions.value = oImportOptions.xml;
-  			oForm.importoptions.value = result.dom.xml;
-        }
-        else if(window.DOMParser)
-        { 
-      		oForm.importoptions.value = XML.getDomString(result.dom);
-        }
-        oForm.submit();
+      	oForm.importoptions.value = getDomString(result.dom);
+        
+      	oForm.submit();
     }
 }
 
 function buildFileOptions()
 {
     var result = new Result("", "", null);
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
     var node;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    node = $(dom).find("importOptions fileOptions");
 
-    node.selectSingleNode("fileName").text = oForm.filename.value;
+    $(node).find("fileName").text(oForm.filename.value);
 
     var sel = document.oDummyForm.oEncoding;
-    node.selectSingleNode("fileEncoding").text =
-      sel.options[sel.selectedIndex].value;
+    $(node).find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
     if (oForm.filename.value == "")
     {
@@ -123,25 +104,13 @@ function buildFileOptions()
 function parseFileOptions()
 {
     var form = document.oDummyForm;
-    var dom;
+    var dom = $.parseXML(xmlImportOptions);
     var nodes, node, fileName, fileEncoding;
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-     // dom = oImportOptions.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlImportOptions);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    }
-    node = dom.selectSingleNode("/importOptions/fileOptions");
+    node = $(dom).find("importOptions fileOptions");
 
-    fileName = node.selectSingleNode("fileName").text;
-    fileEncoding = node.selectSingleNode("fileEncoding").text;
+    fileName = $(node).find("fileName").text();
+    fileEncoding = $(node).find("fileEncoding").text();
 
     id = Encodings[fileEncoding];
     form.oEncoding.selectedIndex = id;

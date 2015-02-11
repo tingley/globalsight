@@ -805,21 +805,31 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
      */
     private void logUploadResultForReport(User user, Task task, String fileName)
     {
-        List<TargetPage> targetPages = task.getTargetPages();
-        int percentageSum = 0;
-        for (TargetPage tp : targetPages)
+        try
         {
-            percentageSum += SegmentTuvUtil
-                    .getTranslatedPercentageForTargetPage(tp.getId());
-        }
-        int filePercentage = Math.round(BigDecimalHelper.divide(
-                percentageSum * 100, targetPages.size() * 100));
-        long jobId = task.getJobId();
-        String locale = task.getTargetLocale().toString();
+            Task tsk = ServerProxy.getTaskManager().getTask(task.getId());
+            List<TargetPage> targetPages = tsk.getTargetPages();
+            int percentageSum = 0;
+            for (TargetPage tp : targetPages)
+            {
+                percentageSum += SegmentTuvUtil
+                        .getTranslatedPercentageForTargetPage(tp.getId());
+            }
+            int filePercentage = Math.round(BigDecimalHelper.divide(
+                    percentageSum * 100, targetPages.size() * 100));
+            long jobId = tsk.getJobId();
+            String locale = tsk.getTargetLocale().toString();
 
-        s_category.info(user.getUserName() + " uploaded " + fileName + ", "
-                + filePercentage + "% translated, job id: " + jobId
-                + ", locale: " + locale);
+            s_category.info(user.getUserName() + " uploaded " + fileName + ", "
+                    + filePercentage + "% translated, job id: " + jobId
+                    + ", locale: " + locale);
+        }
+        catch (Exception e)
+        {
+            s_category
+                    .warn("Ignored: error happens in logUploadResultForReport method : "
+                            + e.getMessage());
+        }
     }
 
     /**
@@ -915,7 +925,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             final String p_reportName) throws AmbassadorDwUpException,
             RemoteException
     {
-        // Note: Currently ther is only one thread encompassing the
+        // Note: Currently there is only one thread encompassing the
         // entire upload process - used to enable process status
         // feedback.
         Runnable runnable = new Runnable()
@@ -957,7 +967,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
      * 
      * @see OfflineEditManager interface
      */
-    public void runProcessUploadReportPage(File p_tmpFile, User p_user,
+    public String runProcessUploadReportPage(File p_tmpFile, User p_user,
             Task p_task, String p_fileName, String p_reportName)
             throws AmbassadorDwUpException
     {
@@ -965,10 +975,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 .getDefaultUILocale()));
 
         String fileName = m_resource.getString("lb_upload_file") + p_fileName;
-
+        String errorString = null;
         try
         {
-            String errorString = null;
             m_status.speak(0, fileName);
             String extension = fileName
                     .substring(fileName.lastIndexOf(".") + 1);
@@ -1015,6 +1024,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 s_category.error(e.getMessage(), e);
             }
         }
+
+        return errorString;
     }
 
     /**

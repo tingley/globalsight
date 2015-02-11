@@ -137,7 +137,7 @@
 					</amb:permission>
 			    </c:if>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_translate_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
-			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
+			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_workflow_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_priority")%>&nbsp;&nbsp;&nbsp;</span></td>
 			</tr>
 		</thead>
@@ -531,12 +531,7 @@ function realSubmitForm(specificButton){
 	//choose 1 or more checkbox, below buttons are available.Start.
 	else if (specificButton == "Discard")
 	{
-	    if (wfState.indexOf("ARCHIVED") != -1 ||
-	        wfState.indexOf("BATCH_RESERVED") != -1 ||
-	        wfState.indexOf("EXPORTED") != -1 ||
-	        wfState.indexOf("EXPORT_FAILED") != -1 ||
-	        wfState.indexOf("LOCALIZED") != -1 ||
-	        wfState.indexOf("PENDING") != -1)
+	    if (wfState.indexOf("BATCH_RESERVED") != -1)
 	    {
             // You can only discard workflows that are...DISPATCHED, READY_TO_BE_DISPATCHED
             alert("<%=bundle.getString("jsmsg_cannot_discard_workflow")%>");

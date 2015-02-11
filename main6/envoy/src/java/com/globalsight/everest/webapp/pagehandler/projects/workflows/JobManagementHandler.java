@@ -416,6 +416,8 @@ public abstract class JobManagementHandler extends PageHandler
 
     public static final String MAKE_READY_JOB_PARAM = "makeReadyJob";
 
+    public static final String RECREATE_JOB_PARAM = "reCreateJob";
+
     public static final String CANCEL_IMPORT_ERROR_PAGES_PARAM = "cancelImportErrorPages";
 
     // sort

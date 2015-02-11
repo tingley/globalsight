@@ -22,6 +22,7 @@ ProcessStatus m_status =
   (ProcessStatus)sessionMgr.getAttribute(WebAppConstants.TERMBASE_STATUS);
  ProcessStatus2 m_status_reindex =
   (ProcessStatus2)sessionMgr.getAttribute(WebAppConstants.TERMBASE_REINDEX_STATUS);
+ String warning = (String)request.getParameter("warning");
 boolean done   = m_status.getPercentage() >= 100;
 int counter    = m_status.getCounter();
 int percentage = m_status.getPercentage();
@@ -97,9 +98,9 @@ if("<%=done%>" != "false")
     <%=percentage2_reindex%>);
 }
   // refresh frame
-  if ("<%=done_reindex%>" == "false")
+  if ("<%=done_reindex%>" == "false" && "<%=warning%>" == "false")
   {
-    window.setTimeout("doRefresh()", 5000, "JavaScript");
+    window.setTimeout(document.location.reload(), 5000);
   }
   else
   {

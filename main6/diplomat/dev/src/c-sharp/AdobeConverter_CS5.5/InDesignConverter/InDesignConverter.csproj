@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InDesignColorHelper.cs" />
     <Compile Include="InDesignApplication.cs" />
     <Compile Include="InDesignController.cs" />
     <Compile Include="InDesignConverterImpl.cs" />

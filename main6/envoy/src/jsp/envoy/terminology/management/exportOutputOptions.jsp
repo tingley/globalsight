@@ -59,6 +59,7 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
@@ -84,33 +85,20 @@ function buildExportOptions()
 {
   var result = new Result("", "", null);
   var form = document.oDummyForm;
-  var dom ;
-  var node;
-  var check;
+  var dom,node,check ;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    //dom = oExportOptions.XMLDocument;
-	  dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlExportOptions);
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  dom = $.parseXML(xmlExportOptions);
   
   // SELECT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
+  node = $(dom).find("exportOptions outputOptions");
 
   if (form.oSystemFields.checked)
   {
-     node.selectSingleNode("systemFields").text = "true";
+	  $(node).find("systemFields").text("true");
   }
   else
   {
-     node.selectSingleNode("systemFields").text = "false";
+     $(node).find("systemFields").text("false");
   }
 
   result.dom = dom;
@@ -120,29 +108,17 @@ function buildExportOptions()
 function parseExportOptions()
 {
   var form = document.oDummyForm;
-  var dom;
-  var nodes, node;
+  var dom,nodes, node;
   var systemFields;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    //dom = oExportOptions.XMLDocument;
-	  dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlExportOptions);
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  dom = $.parseXML(xmlExportOptions);
   
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
-  systemFields = node.selectSingleNode("systemFields").text;
+  node = $(dom).find("exportOptions outputOptions");
+  systemFields = $(node).find("systemFields").text();
 
   checkValue(form.oSystemFields, systemFields);
 
-  var count = dom.selectSingleNode("/exportOptions/fileOptions/entryCount").text;
+  var count = $(dom).find("exportOptions fileOptions entryCount").text();
   idEntryCount.innerText = count;
 
   if (parseInt(count) == 0)
@@ -200,15 +176,7 @@ function doNext()
 
         oForm.action = url;
         
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	//oForm.exportoptions.value = oExportOptions.xml;
-        	oForm.exportoptions.value = result.dom.xml
-        }
-        else
-        {
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.exportoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }

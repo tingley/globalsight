@@ -1,5 +1,8 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public interface ReportConstants
 {
     public static final String EXTENSION_XLSX = ".xlsx";
@@ -27,10 +30,14 @@ public interface ReportConstants
     public static final String ACTIVITY_DURATION_REPORT = "ActivityDurationReport";
     public static final String ONLINE_JOBS_REPORT = "OnlineJobsReport";
     public static final String DETAILED_WORDCOUNTS_REPORT = "DetailedWordCountsReport";
+    
     public static final String REVIEWERS_COMMENTS_REPORT = "ReviewersCommentsReport";
+    public static final String REVIEWERS_COMMENTS_REPORT_ABBREVIATION = "RCR";
+    
     public static final String COMMENTS_ANALYSIS_REPORT = "CommentsAnalysisReport";
     public static final String CHARACTER_COUNT_REPORT = "CharacterCountReport";
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
+    public static final String TRANSLATIONS_EDIT_REPORT_ABBREVIATION = "TER";
     public static final String SUMMARY_REPORT = "SummaryReport";
     
     public static final String COMMENTS_REPORT = "CommentsReport";
@@ -56,5 +63,16 @@ public interface ReportConstants
     // Excel parameter name
     public static final String CATEGORY_LIST = "categoryList";
     
+    public static final Map<String, String> reportNameMap = new HashMap<String, String>()
+    {
+        private static final long serialVersionUID = -4245555507397871284L;
+        {
+            put(REVIEWERS_COMMENTS_REPORT,
+                    REVIEWERS_COMMENTS_REPORT_ABBREVIATION);
+            put(TRANSLATIONS_EDIT_REPORT,
+            		TRANSLATIONS_EDIT_REPORT_ABBREVIATION);
+        }
+    };
+
     public static final String ERROR_PAGE = "/envoy/administration/reports/error.jsp";
 }

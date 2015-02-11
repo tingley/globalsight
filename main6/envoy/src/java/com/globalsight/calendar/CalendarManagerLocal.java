@@ -19,6 +19,7 @@ package com.globalsight.calendar;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -140,6 +141,95 @@ public class CalendarManagerLocal implements CalendarManager
         {
             throw new CalendarManagerException(e);
         }
+    }
+
+    /**
+     * @see CalendarManager.computeInterval(FluxCalendar, Date, Date)
+     */
+    public long computeInterval(FluxCalendar p_Calendar, Date oriDate,
+            Date newDate) throws RemoteException, CalendarManagerException
+    {
+        long changedTime;
+        boolean isAfter = newDate.after(oriDate);
+        Calendar startCalendar = Calendar.getInstance(p_Calendar.getTimeZone());
+        Calendar endCalendar = Calendar.getInstance(p_Calendar.getTimeZone());
+
+        if (isAfter)
+        {
+            startCalendar.setTime(oriDate);
+            endCalendar.setTime(newDate);
+        }
+        else
+        {
+            startCalendar.setTime(newDate);
+            endCalendar.setTime(oriDate);
+        }
+
+        // set them as 0 to ignore seconds & millisecond
+        startCalendar.set(Calendar.SECOND, 0);
+        startCalendar.set(Calendar.MILLISECOND, 0);
+        endCalendar.set(Calendar.SECOND, 0);
+        endCalendar.set(Calendar.MILLISECOND, 0);
+
+        // get working days
+        List wds = p_Calendar.getWorkingDays();
+        HashMap<String, WorkingDay> workingDays = new HashMap<String, WorkingDay>();
+        for (int i = 0; i < wds.size(); i++)
+        {
+            WorkingDay wd = (WorkingDay) wds.get(i);
+            workingDays.put(wd.getDay() + "", wd);
+        }
+
+        // computer time day by day
+        int startYear = startCalendar.get(Calendar.YEAR);
+        int startDayOfYear = startCalendar.get(Calendar.DAY_OF_YEAR);
+        int endDayOfYear = endCalendar.get(Calendar.DAY_OF_YEAR);
+        int endYear = endCalendar.get(Calendar.YEAR);
+
+        int daysCount = 0;
+        List holiDays = p_Calendar.getHolidaysList();
+        while (true)
+        {
+            // if both the year and dayOfYear are same, loop terminates
+            if (startYear == endYear && startDayOfYear == endDayOfYear)
+            {
+                break;
+            }
+
+            if (isWorkingDay(startCalendar, workingDays, holiDays))
+            {
+                daysCount = daysCount + 1;
+            }
+
+            // add one day to Calendar
+            startCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            startYear = startCalendar.get(Calendar.YEAR);
+            startDayOfYear = startCalendar.get(Calendar.DAY_OF_YEAR);
+        }
+
+        // int hoursPerDay = companyCalendar.getHoursPerDay();
+        changedTime = 24 * 60 * 60 * 1000 * daysCount;
+        if (!isAfter)
+        {
+            changedTime = 0 - changedTime;
+        }
+
+        if (isWorkingDay(startCalendar, workingDays, holiDays))
+        {
+            // add time in one day
+            long cc = endCalendar.getTimeInMillis()
+                    - startCalendar.getTimeInMillis();
+            if (isAfter)
+            {
+                changedTime = changedTime + cc;
+            }
+            else
+            {
+                changedTime = changedTime - cc;
+            }
+        }
+
+        return changedTime;
     }
 
     /**
@@ -1020,6 +1110,48 @@ public class CalendarManagerLocal implements CalendarManager
     // ////////////////////////////////////////////////////////////////////
     // Begin: Private Methods
     // ////////////////////////////////////////////////////////////////////
+
+    private boolean isWorkingDay(Calendar calendar,
+            HashMap<String, WorkingDay> workingDays, List holiDays)
+    {
+        boolean isWorkingDay = false;
+
+        int startDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        // is working day, then check if it is holiday
+        if (workingDays.containsKey("" + startDayOfWeek))
+        {
+            boolean isHoliday = false;
+            for (int i = 0; i < holiDays.size(); i++)
+            {
+                Holiday holiday = (Holiday) holiDays.get(i);
+
+                if (holiday.isHoliday(calendar))
+                {
+                    // is holiday, ignore
+                    isHoliday = true;
+                    break;
+                }
+
+            }
+
+            // if is working day, and is not holiday, count it
+            if (!isHoliday)
+            {
+                isWorkingDay = true;
+            }
+            else
+            {
+                isWorkingDay = false;
+            }
+        }
+        else
+        {
+            // is weekend (non-working day), ignore
+            isWorkingDay = false;
+        }
+
+        return isWorkingDay;
+    }
 
     // Flux uses time expression for date related calculations. A time
     // expression is created based on the following examples that are

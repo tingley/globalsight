@@ -20,12 +20,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -1688,5 +1692,39 @@ public class AjaxService extends HttpServlet
         }
 
         writer.write(xml);
+    }
+
+    public void validateTime()
+    {
+        String time = request.getParameter("time");
+        String[] ts = time.split("\\|");
+        TimeZone timezone = (TimeZone) request.getSession().getAttribute(
+                WebAppConstants.USER_TIME_ZONE);
+        SimpleDateFormat f = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        f.setTimeZone(timezone);
+        Date d;
+        Date n = new Date();
+        try
+        {
+            String r = "true";
+            for (String t : ts)
+            {
+                if (t.trim().length() == 0)
+                    continue;
+
+                d = f.parse(t);
+                if (d.before(n))
+                {
+                    r = "false";
+                    break;
+                }
+            }
+            writer.write(r);
+        }
+        catch (ParseException e)
+        {
+            // e.printStackTrace();
+            writer.write("false");
+        }
     }
 }

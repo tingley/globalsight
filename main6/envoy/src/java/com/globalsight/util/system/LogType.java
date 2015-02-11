@@ -2,7 +2,7 @@ package com.globalsight.util.system;
 
 public enum LogType
 {
-    JOB("JOB"), WORKFLOW("WORKFLOW"), TASK("TASK");
+    JOB("JOB"), FILEPROFILE("File Profile"), TMProfile("Translation Memory Profile");
 
     private String logType = "";
 

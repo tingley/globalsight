@@ -33,10 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.apache.regexp.RE;
-import org.apache.regexp.RECompiler;
-import org.apache.regexp.REProgram;
-import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -101,38 +97,17 @@ public class OfflinePtagErrorChecker implements Cancelable
     static private final String tradosSegMid = "<\\s*\\}\\s*\\d+\\s*\\{\\s*>";
     static private final String tradosSegTarget = "(.*)";
     static private final String tradosSegEnd = "<\\s*0\\s*\\}";
-    static private final REProgram RE_TRADOS_MARKUP = createProgram(tradosSegStart
-            + tradosSegSource + tradosSegMid + tradosSegTarget + tradosSegEnd);
-    static private final RE RE_SEGMENT_START = new RE(
-            createProgram(tradosSegStart), RE.MATCH_SINGLELINE);
-    static private final RE RE_SEGMENT_MID = new RE(
-            createProgram(tradosSegMid), RE.MATCH_SINGLELINE);
-    static private final RE RE_SEGMENT_END = new RE(
-            createProgram(tradosSegEnd), RE.MATCH_SINGLELINE);
+    static private final Pattern pattern = Pattern.compile(tradosSegStart
+            + tradosSegSource + tradosSegMid + tradosSegTarget + tradosSegEnd,
+            Pattern.DOTALL);
+
+    static private final Pattern RE_SEGMENT_START = Pattern.compile(tradosSegStart, Pattern.DOTALL);
+    static private final Pattern RE_SEGMENT_MID = Pattern.compile(tradosSegMid, Pattern.DOTALL);
+    static private final Pattern RE_SEGMENT_END = Pattern.compile(tradosSegEnd, Pattern.DOTALL);
+
     private OEMProcessStatus status = null;
     private boolean cancel = false;
     private String filename = null;
-
-    private static REProgram createProgram(String p_pattern)
-    {
-        REProgram pattern = null;
-
-        try
-        {
-            RECompiler compiler = new RECompiler();
-            pattern = compiler.compile(p_pattern);
-        }
-        catch (RESyntaxException ex)
-        {
-            // Pattern syntax error. Stop the application.
-            throw new RuntimeException(ex.getMessage());
-        }
-
-        return pattern;
-    }
-
-    // resource keys
-    static private final String RESKEY_BAD_HEADER = "BadHeader";
 
     /**
      * Maximum size of a segment in UTF-8 chars. Together these values can be
@@ -250,12 +225,15 @@ public class OfflinePtagErrorChecker implements Cancelable
                     String sourceGxml = allSrcGxmls.get(key);
                     String targetGxml = allTrgGxmls.get(key);
                     TmxPseudo.tmx2Pseudo(targetGxml, pTagData);
+                    String targetString = pTagData.getPTagSourceString();
+                    TmxPseudo.tmx2Pseudo(sourceGxml, pTagData);
+                    String sourceString = pTagData.getPTagSourceString();
                     // Compare original target and translation from TER report.
-                    if (compactTrans != null
-                            && !pTagData.getPTagSourceString().equals(compactTrans))
-                    {
+					if (compactTrans != null
+							&& !targetString.equals(compactTrans)
+							&& !sourceString.equals(compactTrans))
+					{
                         isChanged = true;
-                        TmxPseudo.tmx2Pseudo(sourceGxml, pTagData);
                         pTagData.setPTagTargetString(compactTrans);
                         pTagData.setDataType(dataType);
                         // Tag check (TER translation VS source)
@@ -426,6 +404,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      * @return On error, we return an error message. If there are no errors we
      *         return null.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
     public String check(ArrayList<PageData> p_referencePages,
             OfflinePageData p_uploadPage, boolean p_adjustWS)
     {
@@ -556,16 +535,13 @@ public class OfflinePtagErrorChecker implements Cancelable
                     {
                         refSeg.setWriteAsProtectedSegment(false);
 
-                        // detect uncleaned Trados segments,
-                        RE tradosMarkup = new RE(RE_TRADOS_MARKUP,
-                                RE.MATCH_SINGLELINE);
-                        if (tradosMarkup.match(tempUploadTargetDisplayText))
+                        // detect uncleaned Trados segments
+                        Matcher matcher = pattern.matcher(tempUploadTargetDisplayText);
+                        if (matcher.matches())
                         {
-                            tempUploadTargetDisplayText = tradosMarkup
-                                    .getParen(TRADOS_REGX_TARGET_PAREN);
-                            String src = tradosMarkup
-                                    .getParen(TRADOS_REGX_SOURCE_PAREN);
-                            
+                            tempUploadTargetDisplayText = matcher.group(TRADOS_REGX_TARGET_PAREN);
+                            String src = matcher.group(TRADOS_REGX_SOURCE_PAREN);
+
                             if (isIncludeSeparateFlag(src))
                             {
                                 errMsg = m_messages
@@ -574,14 +550,6 @@ public class OfflinePtagErrorChecker implements Cancelable
                                         errMsg);
 
                                 return m_errWriter.buildPage().toString();
-                            }
-
-                            if (CATEGORY.isDebugEnabled())
-                            {
-                                CATEGORY.debug("\n\nDetected trados markup in segment "
-                                        + uploadSeg.getDisplaySegmentID()
-                                        + " and extracted the following target text: \n\n"
-                                        + tempUploadTargetDisplayText);
                             }
                         }
                         else
@@ -632,7 +600,6 @@ public class OfflinePtagErrorChecker implements Cancelable
                         // requires subflows to always be re-joined
                         // with targets.
                         
-                        
                         // for xliff upload, x tag id issue 
                         String oriTarget = refSeg.getDisplayTargetText();
                         String oriSource = refSeg.getDisplaySourceText();
@@ -662,27 +629,16 @@ public class OfflinePtagErrorChecker implements Cancelable
                         String refTarget = pTagData.getPTagSourceString(); // intentional
 
                         // For GBS-608. I think the method refinePseudoTag is
-                        // wrong.
-                        // we can't replace all tags just by order.
+                        // wrong. we can't replace all tags just by order.
 
-                        // tempUploadTargetDisplayText =
-                        // refinePseudoTag(tempUploadTargetDisplayText,
-                        // refTarget);
-                        // uploadSeg.setDisplayTargetText(tempUploadTargetDisplayText);
-
-                        if (!refTarget.equals(tempUploadTargetDisplayText))
-                        {
-                            if (CATEGORY.isDebugEnabled())
-                            {
-                                CATEGORY.debug("Segment modified:"
-                                        + "\r\nOriginal: " + refTarget
-                                        + "\r\nUploaded: "
-                                        + tempUploadTargetDisplayText);
-                            }
-
+                        convertor.tmx2Pseudo(oriSource, pTagData);
+                        String refSource = pTagData.getPTagSourceString();
+                        if (!refTarget.equals(tempUploadTargetDisplayText)
+                                && !refSource.equals(tempUploadTargetDisplayText))
+						{
                             uploadSeg.setTargetHasBeenEdited(true);
-                        }
-                        
+						}
+
 //                        if (p_uploadPage.isOmegaT())
 //                        {
 //                            PseudoData targetPtagData = new PseudoData();
@@ -699,19 +655,7 @@ public class OfflinePtagErrorChecker implements Cancelable
 //                            }
 //                        }
                         
-
-                        // Now load the source and target segments for the
-                        // error checker. Set source (ptag format set above).
-                        if (false && CATEGORY.isDebugEnabled())
-                        {
-                            CATEGORY.debug("\n\nREF Source GXML set for next Target"
-                                    + " ptag-to-Gxml conversion: "
-                                    + refSeg.getDisplaySourceText());
-                        }
-
-                        convertor.tmx2Pseudo(oriSource, pTagData);
                         pTagData.setPTagTargetString(tempUploadTargetDisplayText);
-
                         // Here we do ptag error checking with optional
                         // checks on the max length of the entire Gxml
                         // string and the max length of the native
@@ -734,12 +678,6 @@ public class OfflinePtagErrorChecker implements Cancelable
                             errorList.add("Segment "
                                     + uploadSeg.getDisplaySegmentID()
                                     + " error : " + errMsg);
-                            if (false && CATEGORY.isDebugEnabled())
-                            {
-                                CATEGORY.debug("NEW Target GXML as result of "
-                                        + "ptag-to-gxml conversion: "
-                                        + "aborted due to ptag error.");
-                            }
                         }
                         else
                         {
@@ -812,13 +750,6 @@ public class OfflinePtagErrorChecker implements Cancelable
                             }
 
                             uploadSeg.setDisplayTargetText(newGxml);
-
-                            if (false && CATEGORY.isDebugEnabled())
-                            {
-                                CATEGORY.debug("NEW Target GXML as result of "
-                                        + "ptag-to-gxml conversion: "
-                                        + uploadSeg.getDisplayTargetText());
-                            }
                         }
                     }
                 }
@@ -1002,16 +933,14 @@ public class OfflinePtagErrorChecker implements Cancelable
         // think there are some targets are missing.
 
         boolean isInclude = false;
-        List res = new ArrayList();
+        List<Pattern> res = new ArrayList<Pattern>();
         res.add(RE_SEGMENT_START);
         res.add(RE_SEGMENT_MID);
         res.add(RE_SEGMENT_END);
 
-        for (int i = 0; i < res.size(); i++)
+        for (Pattern pattern : res)
         {
-            RE re = (RE) res.get(i);
-            isInclude = re
-                    .match(tempUploadTargetDisplayText);
+            isInclude = pattern.matcher(tempUploadTargetDisplayText).matches();
             if (isInclude)
             {
                 break;

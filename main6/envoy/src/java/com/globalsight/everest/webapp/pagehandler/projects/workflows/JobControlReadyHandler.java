@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
@@ -156,7 +157,8 @@ public class JobControlReadyHandler extends JobManagementHandler
         {
 
             String id = p_request.getParameter("jobId");
-            String jobName = p_request.getParameter("jobName");
+            String jobName = new String (p_request.getParameter("jobName").getBytes(), "UTF-8");
+            jobName = URLDecoder.decode(jobName, "UTF-8");
             JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
             job.setJobName(EditUtil.removeCRLF(jobName));
             try

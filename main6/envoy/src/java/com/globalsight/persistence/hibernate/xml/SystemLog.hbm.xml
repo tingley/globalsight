@@ -5,9 +5,9 @@
         <id name="id" column="ID" type="long">
             <generator class="native" />
         </id>
-        <property name="eventType" length="6" column="EVENT_TYPE"
+        <property name="eventType" length="20" column="EVENT_TYPE"
             type="string" not-null="true" unique="false" />
-        <property name="objectType" length="20" column="OBJECT_TYPE"
+        <property name="objectType" length="60" column="OBJECT_TYPE"
             type="string" not-null="true" unique="false" />
         <property name="objectId" length="20" column="OBJECT_ID"
             type="string" not-null="false" unique="false" />

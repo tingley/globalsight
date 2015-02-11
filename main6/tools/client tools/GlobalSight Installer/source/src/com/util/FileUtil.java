@@ -127,9 +127,12 @@ public class FileUtil
         else
         {
             File[] fs = root.listFiles();
-            for (File f : fs)
+            if (fs != null)
             {
-                files.addAll(getAllFiles(f, filter));
+            	for (File f : fs)
+                {
+                    files.addAll(getAllFiles(f, filter));
+                }
             }
         }
 

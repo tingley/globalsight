@@ -63,7 +63,8 @@ public class TaskVo implements Serializable
     private String companyName;
     private String activityName;
     private String assignees;
-
+    private String isUploading;
+    
     public long getSourceLocaleId()
     {
         return sourceLocaleId;
@@ -444,4 +445,12 @@ public class TaskVo implements Serializable
     {
         this.assignees = assignees;
     }
+
+	public void setIsUploading(String isUploading) {
+		this.isUploading = isUploading;
+	}
+
+	public String getIsUploading() {
+		return isUploading;
+	}
 }

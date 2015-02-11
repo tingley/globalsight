@@ -190,6 +190,7 @@ public class WorkflowActivitiesHandler extends PageHandler
      *            the Servlet context
      * @return A vector of serializable objects to be passed to applet.
      */
+    @SuppressWarnings("rawtypes")
     public Vector invokePageHandlerForApplet(boolean p_isDoGet,
             WebPageDescriptor p_thePageDescriptor,
             HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
@@ -199,13 +200,12 @@ public class WorkflowActivitiesHandler extends PageHandler
         Vector retVal = null;
         if (p_isDoGet)
         {
-            retVal = getDisplayData(p_theRequest, p_session);
+            retVal = getDisplayData(p_session);
         }
 
         return retVal;
     }
 
-    @SuppressWarnings("unchecked")
     private String getActivitiesText(HttpSession p_session,
             WorkflowInstance wfi, Locale p_uiLocale, TimeZone p_timeZone)
             throws EnvoyServletException
@@ -319,10 +319,11 @@ public class WorkflowActivitiesHandler extends PageHandler
      * @return
      * @exception EnvoyServletException
      */
-    private Vector getDisplayData(HttpServletRequest p_request,
-            HttpSession p_session) throws EnvoyServletException
+    private Vector getDisplayData(HttpSession p_session)
+            throws EnvoyServletException
     {
-        SessionManager sm = getSessionManager(p_request);
+        SessionManager sm = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
         Vector<Object> objs = new Vector<Object>();
 
         WorkflowInstance wfi = (WorkflowInstance) sm

@@ -40,6 +40,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.SynchronizationManager;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.download.DownLoadApi;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
@@ -49,6 +50,7 @@ import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.tuv.TuvManager;
@@ -57,6 +59,7 @@ import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -109,6 +112,7 @@ public class PageSaverMDB extends GenericQueueMDB
         GlobalSightLocale targetLocale = null;
         GlobalSightLocale userLocale = null;
         String compandIdStr = null;
+        List<Task> isUploadingTasks = null;
 
         SynchronizationManager syncMgr = getSynchronizationManager();
 
@@ -162,6 +166,7 @@ public class PageSaverMDB extends GenericQueueMDB
             fileName = (String) map.get(UploadPageSaver.FILE_NAME);
             targetPageId = (Long) map.get(UploadPageSaver.UPLOAD_PAGE_ID);
             Boolean isLast = (Boolean) map.get(UploadPageSaver.IS_LAST_PAGE);
+            isUploadingTasks = (List<Task>)map.get(UploadPageSaver.IS_UPLOADING_TASKS);
 
             // Notify editor of page uploaded having started.
             try
@@ -174,7 +179,7 @@ public class PageSaverMDB extends GenericQueueMDB
 
             savePageToDb(modifiedTuvs, newComments, modifiedComments,
                     sourceLocale, targetLocale, userLocale, user, fileName,
-                    targetPageId, isLast.booleanValue());
+                    targetPageId, isLast.booleanValue(), isUploadingTasks);
         }
         catch (Exception ex)
         {
@@ -224,8 +229,8 @@ public class PageSaverMDB extends GenericQueueMDB
     private void savePageToDb(List<TuvImplVo> modifiedTuvs, List newComments,
             Map modifiedComments, GlobalSightLocale sourceLocale,
             GlobalSightLocale targetLocale, GlobalSightLocale userLocale,
-            User user, String p_fileName, Long p_targetPageId, boolean isLast)
-            throws UploadPageSaverException
+            User user, String p_fileName, Long p_targetPageId, boolean isLast,
+            List<Task> p_isUploadingTasks)throws UploadPageSaverException
     {
         String companyIdStr = null;
         long jobId = -1;
@@ -311,6 +316,15 @@ public class PageSaverMDB extends GenericQueueMDB
             OfflineEditHelper.notifyUser(user, p_fileName, localePair,
                     OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
                     OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE, companyIdStr);
+        }
+        
+        if (isLast && p_isUploadingTasks != null && p_isUploadingTasks.size() > 0)
+        {
+            for (Task isUploadingTask : p_isUploadingTasks)
+            {
+                // Update task status (Upload Done)
+                TaskHelper.updateTaskStatus(isUploadingTask, AmbassadorDwUpConstants.UPLOAD_DONE, false);
+            }
         }
     }
 

@@ -108,6 +108,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     private String[] m_roles;
     private boolean m_initialRoleType;
     private int m_initialRateCriteria;
+    private JTextArea reportUploadCheckText;
     private JTextArea noteText;
 
     private String m_expenseRateDefaultChoice;
@@ -117,6 +118,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     private int m_rateSelectionCriteria = WorkflowConstants.USE_ONLY_SELECTED_RATE;
     private Choice m_participantChoice;
     private Checkbox[] m_rateSelectionCheckbox;
+    private Checkbox m_reportUploadCheckBox;
     private Hashtable m_allRates; // key into index is the activity chosen.
 
     private boolean m_isCalendarInstalled;
@@ -415,6 +417,8 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 });
             }
         }
+        m_reportUploadCheckBox = new Checkbox();
+        m_reportUploadCheckBox.setFocusable(false);
 
         m_isCalendarInstalled = ((Boolean) getValue("isCalendarInstalled"))
                 .booleanValue();
@@ -557,6 +561,14 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 updateButtonStatus(isDirty());
             }
         });
+        
+        m_reportUploadCheckBox.addItemListener(new ItemListener()
+        {
+            public void itemStateChanged(ItemEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
         // create user role table
         createUserRoleTable();
@@ -655,6 +667,14 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         noteText.setWrapStyleWord(true);
         noteText.setFont(EnvoyFonts.getCellFont());
 
+        String reportUploadCheckMsg = m_labels[36];
+        reportUploadCheckText = new JTextArea(reportUploadCheckMsg);
+        reportUploadCheckText.setEditable(false);
+        reportUploadCheckText.setBackground(this.getBackground());
+        reportUploadCheckText.setLineWrap(true);
+        reportUploadCheckText.setWrapStyleWord(true);
+        reportUploadCheckText.setFont(panelFont);
+        
         panel.add(titleLabel, new EnvoyConstraints(getDialogWidth(), m_height,
                 1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
                 EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
@@ -672,6 +692,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         panel.add(m_systemActionChoice, new EnvoyConstraints(m_width, m_height,
                 1, EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
                 EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(reportUploadCheckText,new EnvoyConstraints(m_width , 40,
+                1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.NOT_END_OF_LINE));
+        
+        panel.add(m_reportUploadCheckBox, new EnvoyConstraints(m_width,
+                40, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
         panel.add(timeToAcceptLabel, new EnvoyConstraints(m_width, m_height, 1,
                 EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
                 EnvoyConstraints.Y_NOT_RESIZABLE,
@@ -1147,6 +1176,18 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 showHourlyRateField(null);
             }
         }
+        
+        if(m_taskInfoBean == null)
+        {
+        	if(p_workflowtask.getReportUploadCheck() == 1)
+        	{
+        		m_reportUploadCheckBox.setState(true);
+        	}
+        }
+        else if(m_taskInfoBean.getIsReportUploadCheck() == 1)
+        {
+        	m_reportUploadCheckBox.setState(true);
+        }
 
         m_isModifyMode = p_workflowtask.getTaskId() > -1;
     }
@@ -1292,6 +1333,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
             // reset the role preference since it's only used if
             // calendaring is installed (will be set below).
             workflowtask.setRolePreference(null);
+            
+            if(m_reportUploadCheckBox.getState())
+            {
+            	workflowtask.setReportUploadCheck(1);
+            }
+            else
+            {
+            	workflowtask.setReportUploadCheck(0);
+            }
 
             if (m_isCalendarInstalled)
             {
@@ -1343,6 +1393,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 boolean hasAmountChanged = false;
                 boolean hasRevenueChanged = false;
                 boolean hasRateSelectionChanged = false;
+                boolean hasReportUploadCheckChanged = false;
                 String hours = null;
                 String text = null;
                 boolean useOnlySelectedRate = m_rateSelectionCheckbox[0]
@@ -1412,6 +1463,19 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                         hasAmountChanged = true;
                     }
                 }
+                
+                int isReportUploadCheck = 0;
+                if(m_reportUploadCheckBox.getState())
+                {
+                	isReportUploadCheck = 1;
+                }
+                if(m_taskInfoBean != null)
+                {
+                	if(m_taskInfoBean.getIsReportUploadCheck() != isReportUploadCheck)
+                		hasReportUploadCheckChanged = true;
+                }
+                
+                
                 // compare the currently selected rate with the initial value
                 // if they are not the same, add TaskInfoBean to m_values (if
                 // rate type
@@ -1423,7 +1487,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                         && !m_expenseRateChoice.getSelectedItem().equals(
                                 m_initialExpenseRateName) || hasRevenueChanged
                         || hasAmountChanged || hasRateSelectionChanged
-                        || hasActivityChanged)
+                        || hasActivityChanged || hasReportUploadCheckChanged)
                 {
                     String estimatedHours = null;
                     String actualHours = null;
@@ -1451,7 +1515,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                                     : m_taskInfoBean.getTaskId(),
                             estimatedHours, actualHours, expenseRate,
                             revenueRate, rateSelectionCriteria,
-                            selectedActivityName);
+                            selectedActivityName, isReportUploadCheck);
 
                     if (getValue("modifiedTaskInfoMap") != null)
                     {
@@ -1496,15 +1560,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     {
         if (m_userRoleTable.isVisible())
         {
-            return m_isWorkflowTaskInstance ? 605 : 575;
+            return m_isWorkflowTaskInstance ? 650 : 620;
         }
         else if (m_costingEnabled)
         {
-            return m_isWorkflowTaskInstance ? 500 : 470;
+            return m_isWorkflowTaskInstance ? 545 : 515;
         }
         else
         {
-            return 350;
+            return 395;
         }
     }
 

@@ -19,39 +19,34 @@ package com.globalsight.everest.webapp.pagehandler.tm.management;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.TmManager;
 import com.globalsight.everest.tm.TmManagerLocal;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 
 import com.globalsight.exporter.IExportManager;
 
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Vector;
-import javax.servlet.RequestDispatcher;
+import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -122,14 +117,13 @@ public class TmExportPageHandler
         Locale uiLocale = (Locale)session.getAttribute(UILOCALE);
         ResourceBundle bundle = getBundle(session);
 
-        String userId = getUser(session).getUserId();
-
         String action  = (String)p_request.getParameter(TM_ACTION);
         String options = (String)p_request.getParameter(TM_EXPORT_OPTIONS);
         String tmid    = (String)p_request.getParameter(RADIO_TM_ID);
         String name    = null;
         String definition = null;
         String tmtype = "TM2";
+        String jobAttribute = "";
         Tm tm = null;
 
         IExportManager exporter =
@@ -150,11 +144,13 @@ public class TmExportPageHandler
                 // and pass that as long as a TM has no proper definition.
                 // Note that the JSP uses both the languages and whether or 
                 // not the TM is empty.
-                definition = LingServerProxy.getTmCoreManager()
-                        .getTmStatistics(tm, uiLocale, true).asXML(true);
+                StatisticsInfo tmStatistics = LingServerProxy.getTmCoreManager()
+                        .getTmStatistics(tm, uiLocale, true);
+                definition = tmStatistics.asXML(true);
                 
                 Long tm3id = tm.getTm3Id();
                 tmtype = tm3id == null ? "TM2" : "TM3";
+                jobAttribute = getAttributes(tm.getId(), tm.getTm3Id(), tm.getCompanyId());
             }
 
             if (options != null)
@@ -200,6 +196,7 @@ public class TmExportPageHandler
                 sessionMgr.setAttribute(TM_EXPORT_OPTIONS, options);
                 sessionMgr.setAttribute(TM_EXPORTER, exporter);
                 sessionMgr.setAttribute(TM_TYPE, tmtype);
+                sessionMgr.setAttribute(TM_ATTRIBUTE, jobAttribute);
             }
             else if (action.equals(TM_ACTION_ANALYZE_TM))
             {
@@ -315,5 +312,63 @@ public class TmExportPageHandler
 
         super.invokePageHandler(p_pageDescriptor, p_request,
             p_response, p_context);
+    }
+    
+    private String getAttributes(Long tmId, Long tm3Id, long companyId)
+    {
+    	List<String> attributeNameList = new ArrayList<String>();
+    	List<Set<String>> attributeValuesList = new ArrayList<Set<String>>();
+    	StringBuffer attributes = new StringBuffer();
+    	String sql;
+    	if(tm3Id == null)
+    	{
+    		sql = "SELECT prop.prop_type,prop.prop_value FROM project_tm_tu_t_prop AS prop, " +
+    				" project_tm_tu_t AS tu WHERE prop.tu_id = tu.id AND tu.tm_id =" +tmId ;
+    	}
+    	else
+    	{
+    		sql = "SELECT att.name, attrVal.value FROM tm3_attr att, " +
+    				" (SELECT DISTINCT attrid, VALUE FROM tm3_attr_val_shared_" + companyId + " ) AS attrVal " +
+    				" WHERE att.id = attrVal.attrid AND att.tmId = " + tm3Id +
+    				" AND att.valueType = 'com.globalsight.ling.tm3.core.TM3AttributeValueType$CustomType' ";
+    	}
+    	
+    	List result = HibernateUtil.searchWithSql(sql, null);
+        for (int i = 0; i < result.size(); i++)
+        {
+        	Object[] contents = (Object[]) result.get(i);
+        	String name = contents[0].toString();
+        	if(tm3Id == null)
+        		name = name.substring(5);
+        	String value = contents[1].toString();
+        	if(attributeNameList.contains(name))
+        	{
+        		attributeValuesList.get(attributeNameList.indexOf(name)).add(value);
+        	}
+        	else
+        	{
+        		attributeNameList.add(name);
+        		Set<String> valueSet = new HashSet<String>();
+        		valueSet.add(value);
+        		attributeValuesList.add(valueSet);
+        	}
+        }
+        XmlEntities m_xmlEntities = new XmlEntities();
+    	attributes.append("<attributes>");
+    	for(int i =0; i < attributeNameList.size(); i++)
+    	{
+    		attributes.append("<attribute>");
+    		attributes.append("<name>").append(attributeNameList.get(i)).append("</name>");
+    		attributes.append("<values>");
+    		for(String value: attributeValuesList.get(i))
+    		{
+    			value = m_xmlEntities.encodeStringBasic(value);
+    			attributes.append("<value>").append(value).append("</value>");
+    		}
+    		attributes.append("</values>");
+    		attributes.append("</attribute>");
+    	}
+    	attributes.append("</attributes>");
+    	return attributes.toString();
     }
 }

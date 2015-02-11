@@ -420,6 +420,7 @@ public class AjaxService extends HttpServlet
         loadPOFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
+        saveBaseFilterMapping(filter.getId(),FilterConstants.PO_TABLENAME);
         writer.write(Long.toString(filter.getId()));
     }
 
@@ -438,6 +439,7 @@ public class AjaxService extends HttpServlet
         {
             loadPOFilterParameter(filter);
             HibernateUtil.update(filter);
+            saveBaseFilterMapping(filter.getId(),FilterConstants.PO_TABLENAME);
         }
     }
 

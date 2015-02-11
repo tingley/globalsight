@@ -178,7 +178,7 @@ function parseExportOptions()
     form.oEntryLang.disabled = false;
   }
 
-  selectValue(form.oEntryLang, selectLanguage);
+  selectMultipleValue(form.oEntryLang, selectLanguage);
 
 <%--
   if (duplicateHandling == "<%=ExportOptions.DUPLICATE_OUTPUT%>")
@@ -230,7 +230,23 @@ function buildExportOptions()
   }
 
   sel = form.oEntryLang;
-  $(node).find("selectLanguage").text(sel.options[sel.selectedIndex].value);
+  if (sel.options.length > 0)
+  {
+	  	var optionsList = new Array();
+		var i = 0;
+		for( var loop = 0; loop < sel.options.length; loop ++){
+			if (sel.options[loop].selected == true) {
+				i++;
+				optionsList[optionsList.length] = sel.options[loop].value;
+			}
+		}
+		if(i < 2 && !form.oEntries[0].checked)
+		{
+			alert("Please select at least two languages.");
+			return false;
+		}
+		$(node).find("selectLanguage").text(optionsList.toString());
+  }
 
 <%--
   if (form.oSynonyms[0].checked)
@@ -525,6 +541,21 @@ function selectValue(select, value)
   }
 }
 
+function selectMultipleValue(select, values)
+{
+	var langs = values.split(",");
+	for(var j = 0; j < langs.length; j++)
+	{
+		for (var i = 0; i < select.options.length; ++i)
+		{
+		    if (select.options[i].value == langs[j])
+		    {
+		    	select.options[i].selected = true;
+		    }
+		}
+	}
+}
+
 function fillLanguages()
 {
   var domDefinition = fnGetDOM(oDefinition,xmlDefinition);//var dom = oDefinition.XMLDocument;
@@ -684,15 +715,27 @@ function doOnLoad()
 <div style="margin-bottom:10px">
 <B><%=bundle.getString("lb_terminology_select_entries_to_export")%></B><BR>
 <div style="margin-left: 40px">
-<input type="radio" name="oEntries" id="idEntries1" CHECKED
-  onclick="doByEntry()">
-  <label for="idEntries1"><%=bundle.getString("lb_terminology_entire_termbase")%></label>
-<br>
-<input type="radio" name="oEntries" id="idEntries2"
-  onclick="idLanguageList.disabled = false; idLanguageList.focus();">
-  <label for="idEntries2"><%=bundle.getString("lb_by_language")%></label>
-  <select name="oEntryLang" id="idLanguageList" disabled
-    onchange="doByLanguage()"></select>
+<table CELLPADDING=2 CELLSPACING=0 BORDER=0 CLASS="standardText">
+	<tr>
+		<td>
+			<input type="radio" name="oEntries" id="idEntries1" CHECKED
+			  onclick="doByEntry()">
+			  <label for="idEntries1"><%=bundle.getString("lb_terminology_entire_termbase")%></label>
+		</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>
+			<input type="radio" name="oEntries" id="idEntries2"
+			  onclick="idLanguageList.disabled = false; idLanguageList.focus();">
+			  <label for="idEntries2"><%=bundle.getString("lb_by_language")%></label>
+		</td>
+		<td>
+			  <select name="oEntryLang" id="idLanguageList" disabled multiple="multiple" size="8"
+			    onchange="doByLanguage()"></select>
+		</td>
+	</tr>
+</table>
 <br>
 </div>
 </div>

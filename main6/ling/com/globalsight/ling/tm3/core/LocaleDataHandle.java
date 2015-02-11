@@ -4,9 +4,11 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     private TM3Locale locale;
+    private Set<String> m_jobAttrinbuteSet;
     private int increment = 100; // Load 100 at a time
     
     LocaleDataHandle(BaseTm<T> tm, TM3Locale locale) {
@@ -20,6 +22,13 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         this.locale = locale;
     }
     
+    LocaleDataHandle(BaseTm<T> tm, TM3Locale locale, 
+    				Date start, Date end,Set<String> jobAttributeSet) {
+		super(tm, start, end);
+		this.locale = locale;
+		m_jobAttrinbuteSet = jobAttributeSet;
+	}
+    
     @Override
     public void purgeData() throws TM3Exception {
         throw new UnsupportedOperationException();
@@ -28,8 +37,16 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     @Override
     public long getCount() throws TM3Exception {
         try {
-            return getTm().getStorageInfo().getTuStorage()
-                    .getTuCountByLocale(locale, getStart(), getEnd());
+        	if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
+        	{
+        		return getTm().getStorageInfo().getTuStorage()
+                .getTuCountByLocale(locale, getStart(), getEnd());
+        	}
+        	else
+        	{
+        		return getTm().getStorageInfo().getTuStorage()
+                .getTuCountByLocale(locale, getStart(), getEnd(),m_jobAttrinbuteSet);
+        	}
         } catch (SQLException e) {
             throw new TM3Exception(e);
         }
@@ -61,8 +78,17 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         @Override
         protected void loadPage() {
             try {
-                List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
-                            .getTuPageByLocale(startId, increment, locale, getStart(), getEnd());
+                List<TM3Tu<T>> page;
+                if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
+            	{
+                	page= getTm().getStorageInfo().getTuStorage()
+                    	.getTuPageByLocale(startId, increment, locale, getStart(), getEnd());
+            	}
+                else
+                {
+                	page= getTm().getStorageInfo().getTuStorage()
+                		.getTuPageByLocale(startId, increment, locale, getStart(), getEnd(),m_jobAttrinbuteSet);
+                }
                 if (page.size() > 0) {
                     startId = page.get(page.size() - 1).getId();
                     currentPage = page.iterator();

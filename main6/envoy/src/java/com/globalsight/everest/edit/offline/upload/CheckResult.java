@@ -49,20 +49,47 @@ public class CheckResult
         }
         sb.append("<br>");
         sb.append("<table border=\"0\"  cellpadding=0 cellspacing=0 style=\"width: 100%;  \"  CLASS=\"standardText\">"
-                + "<tr><td style=\"width: 33% \">");
-        if (pageId != null)
-        {
-            sb.append("Page ID: " + pageId);
-        }
-        sb.append("</td><td style=\"width: 33% \" align=\"center\">");
+                + "<tr><td>");
+		if (pageId != null)
+		{
+			sb.append("Page ID: ");
+			StringBuffer sbf = new StringBuffer();
+			int count = 0;
+			if (pageId.length() > 0)
+			{
+				String[] pageIds = pageId.split(",");
+				for (int i = 0; i < pageIds.length; i++)
+				{
+					count++;
+					if (i != pageIds.length - 1)
+					{
+						sbf.append(pageIds[i]);
+						sbf.append(",");
+					}
+					else
+					{
+						sbf.append(pageIds[i]);
+					}
+					if (count == 20)
+					{
+						sbf.append("<br>");
+						count = 0;
+					}
+				}
+			}
+			sb.append(sbf.toString());
+		}
+        sb.append("</td></tr>");
+        sb.append("<tr><td>");
         if (workflowId != null)
         {
-            sb.append("Workflow ID:" + workflowId);
+            sb.append("Workflow ID: " + workflowId);
         }
-        sb.append("</td><td align=\"right\">");
+        sb.append("</td></tr>");
+        sb.append("<tr><td>");
         if (taskId != null)
         {
-            sb.append("Task ID:" + taskId);
+            sb.append("Task ID: " + taskId);
         }
         sb.append("</td></tr>");
         sb.append("<table border=\"0\"  cellpadding=0 cellspacing=0 style=\"width: 100% \" class=\"list, standardText\">");

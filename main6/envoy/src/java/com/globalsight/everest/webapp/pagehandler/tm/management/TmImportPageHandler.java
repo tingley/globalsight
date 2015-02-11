@@ -263,7 +263,6 @@ public class TmImportPageHandler extends PageHandler implements
                         .getAttribute(TM_UPLOAD_STATUS);
 
                 p_response.setHeader("Charset", "UTF-8");
-                // PrintWriter out = p_response.getWriter();
                 ServletOutputStream os = p_response.getOutputStream();
                 String resultMsg;
                 if (tmStatus != null && !tmStatus.isCanceled())

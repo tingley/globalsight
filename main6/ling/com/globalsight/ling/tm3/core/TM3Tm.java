@@ -281,6 +281,8 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getAllData(Date start, Date end);
     
+    public TM3Handle<T> getAllData(Date start, Date end, Set<String> jobAttributeSet);
+    
     /**
      * Get a handle to all the TU data in this TM that includes 
      * a TUV with the specified locale, optionally
@@ -296,6 +298,8 @@ public interface TM3Tm<T extends TM3Data> {
      * @return handle to the requested TU data
      */
     public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end);
+    
+    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end,  Set<String> jobAttributeSet);
     
     /**
      * Get a handle to all segments in this TM whose IDs are included
@@ -317,6 +321,9 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
                                             Date start, Date end);
+    
+    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
+            Date start, Date end,  Set<String> jobAttributeSet);
 
 
     /**

@@ -51,6 +51,7 @@ public class Permission
      * won't be recognized.
      */
     static public final String LOGS_VIEW = "logs.view";
+    static public final String OPERATION_LOG_VIEW = "operationLog.view";
     static public final String SHUTDOWN_SYSTEM = "shutdown.system";
     static public final String LOCALE_PAIRS_VIEW = "localePairs.view";
     static public final String LOCALE_PAIRS_REMOVE = "localePairs.remove";
@@ -517,6 +518,7 @@ public class Permission
     static public final String EDIT_SCORECARD = "editScorecard";
     static public final String REPORTS_SCORECARD = "reports.scorecard";
     static public final String VIEW_SCORECARD = "viewScorecard";
+    static public final String ELOQUA = "eloqua";
     
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
@@ -1059,6 +1061,8 @@ public class Permission
         added = addPermission(403, EDIT_SCORECARD) || added;
         added = addPermission(404, REPORTS_SCORECARD) || added;
         added = addPermission(405, VIEW_SCORECARD) || added;
+        added = addPermission(406, OPERATION_LOG_VIEW) || added;
+        added = addPermission(407, ELOQUA) || added;
         
         return added;
     }

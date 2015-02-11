@@ -636,5 +636,13 @@ public interface Task extends WorkObject
      * @return The uploading state.
      */
     public void setIsUploading(char p_isUploading);
+    
+    public void setIsReportUploadCheck(int p_isReportUploadCheck);
+
+	public int getIsReportUploadCheck();
+
+	public void setIsReportUploaded(int p_isReportUploaded);
+
+	public int getIsReportUploaded();
 
 }

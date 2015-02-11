@@ -127,6 +127,10 @@ public interface SegmentTmInfo
 
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws LingManagerException;
+    
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter, Connection conn, Set<String> jobAttributeSet) 
+    		throws LingManagerException;
 
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException;
@@ -134,13 +138,24 @@ public interface SegmentTmInfo
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
+            
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
+            throws LingManagerException;
 
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
+            
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
+            throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws LingManagerException;
+    
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter, Set<String> jobAttributeSet) throws LingManagerException;
 
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
@@ -148,9 +163,17 @@ public interface SegmentTmInfo
     public int getSegmentsCountByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter)
             throws LingManagerException;
+    
+    public int getSegmentsCountByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Set<String> jobAttributeSet)
+            throws LingManagerException;
 
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
+            throws LingManagerException;
+    
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
 
     public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,

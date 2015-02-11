@@ -743,10 +743,10 @@ public class XmlExtractor extends AbstractExtractor implements
         String nodeValue = p_node.getNodeValue();
         Node parentNode = p_node.getParentNode();
         boolean isParentTagInternal = Rule.isInternal(m_ruleMap, parentNode);
-        boolean isInline = Rule.isInline(m_ruleMap,
-                getChildNode(parentNode, 1));
-        boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap,
-                parentNode, m_xmlFilterHelper.isPreserveWhiteSpaces());
+        boolean isInline = Rule
+                .isInline(m_ruleMap, getChildNode(parentNode, 1));
+        boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap, parentNode,
+                m_xmlFilterHelper.isPreserveWhiteSpaces());
         if (isInExtraction)
         {
             // Marks words that not need count and translate.
@@ -780,6 +780,8 @@ public class XmlExtractor extends AbstractExtractor implements
                 {
                     String temp = m_xmlFilterHelper.processText(nodeValue,
                             isInline, isPreserveWS);
+                    // GBS-3577
+                    temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
@@ -810,6 +812,8 @@ public class XmlExtractor extends AbstractExtractor implements
                         outputSrcComment(srcComment, isTranslatable);
                     }
 
+                    // GBS-3577
+                    temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
 
@@ -847,7 +851,7 @@ public class XmlExtractor extends AbstractExtractor implements
             outputSkeleton("<![CDATA[]]>");
             return;
         }
-        
+
         String preservedTag = ATTRIBUTE_PRESERVE_CLOSED_TAG + "=\"\"";
         if (nodeValue.contains(preservedTag))
         {
@@ -977,7 +981,8 @@ public class XmlExtractor extends AbstractExtractor implements
             {
                 if (switchesExtraction || m_isElementPost)
                 {
-                    m_switchExtractionBuffer += name;
+                    m_switchExtractionBuffer += m_xmlEncoder
+                            .encodeStringBasic(name);
                 }
                 else
                 {
@@ -992,14 +997,32 @@ public class XmlExtractor extends AbstractExtractor implements
         }
     }
 
+    private String nbspPh()
+    {
+        String nbsp = "<ph type=\"x-nbspace\" erasable=\"yes\">&amp;amp;nbsp;</ph>";
+        return nbsp;
+    }
+
     private String wrapEntity(String entityTag)
     {
+        boolean isNbsp = "nbsp".equals(entityTag) ? true : false;
         String entityName = "&" + entityTag + ";";
         String entityRef = m_xmlEncoder.encodeStringBasic(entityName);
 
         StringBuffer temp = new StringBuffer();
-        temp.append("<ph type=\"").append("entity-");
-        temp.append(entityTag).append("\">").append(entityRef);
+        temp.append("<ph type=\"");
+        if (isNbsp)
+        {
+            temp.append("x-nbspace\"");
+            temp.append(" erasable=\"yes");
+        }
+        else
+        {
+            temp.append("entity-");
+            temp.append(entityTag);
+        }
+        temp.append("\">");
+        temp.append(entityRef);
         temp.append("</ph>");
 
         return temp.toString();
@@ -1008,9 +1031,21 @@ public class XmlExtractor extends AbstractExtractor implements
     // For non-entity case such as "&amp;copy;" for protection purpose.
     private String wrapAsEntity(String entityTag, String entityRef)
     {
+        boolean isNbsp = "nbsp".equals(entityTag) ? true : false;
         StringBuffer temp = new StringBuffer();
-        temp.append("<ph type=\"").append("entity-");
-        temp.append(entityTag).append("\">").append(entityRef);
+        temp.append("<ph type=\"");
+        if (isNbsp)
+        {
+            temp.append("x-nbspace\"");
+            temp.append(" erasable=\"yes");
+        }
+        else
+        {
+            temp.append("entity-");
+            temp.append(entityTag);
+        }
+        temp.append("\">");
+        temp.append(entityRef);
         temp.append("</ph>");
 
         return temp.toString();
@@ -1580,6 +1615,7 @@ public class XmlExtractor extends AbstractExtractor implements
 
     /**
      * Internal Tag works for element with only one TEXT child node only.
+     * 
      * @param p_node
      * @return
      */
@@ -2207,7 +2243,8 @@ public class XmlExtractor extends AbstractExtractor implements
                             Segmentable segmentableElement = (Segmentable) element;
                             segmentableElement.setDataType(otherFormat);
                             String chunk = segmentableElement.getChunk();
-                            chunk = specialPostReplacement(chunk);
+                            chunk = specialPostReplacement(chunk,
+                                    (isCdata || m_isOriginalXmlNode));
                             if (isEntityOrSpaceOnly(chunk))
                             {
                                 outputSkeleton(chunk);
@@ -2224,7 +2261,8 @@ public class XmlExtractor extends AbstractExtractor implements
                         case DocumentElement.SKELETON:
                             String skeleton = ((SkeletonElement) element)
                                     .getSkeleton();
-                            skeleton = specialPostReplacement(skeleton);
+                            skeleton = specialPostReplacement(skeleton,
+                                    (isCdata || m_isOriginalXmlNode));
                             if (isCdata)
                             {
                                 skeleton = StringUtil.replace(skeleton, "�",
@@ -2268,22 +2306,44 @@ public class XmlExtractor extends AbstractExtractor implements
             replaced = StringUtil.replace(replaced, "&copy;", "_ampcopyright_");
         }
         replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+        // GBS-3577
+        if (!isCdata)
+        {
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
+        }
+        else
+        {
+            replaced = StringUtil.replace(replaced, "&nbsp;", "_cdata_nbsp_");
+        }
 
         // To send to html filter, need encode again
-        char[] specXmlEncodeChar = {'&'};
+        char[] specXmlEncodeChar =
+        { '&' };
         replaced = XmlFilterHelper.encodeSpecifiedEntities(replaced,
                 specXmlEncodeChar);
 
         return replaced;
     }
 
-    private String specialPostReplacement(String chunk)
+    private String specialPostReplacement(String chunk, boolean isCdata)
     {
         // &copy;
         chunk = StringUtil.replace(chunk, "_copyright_",
                 wrapAsEntity("copy", "&copy;"));
         chunk = StringUtil.replace(chunk, "_ampcopyright_",
                 wrapAsEntity("copy", "&amp;copy;"));
+        if (!isCdata)
+        {
+            // &nbsp; for GBS-3577
+            chunk = StringUtil.replace(chunk, "&amp;nbsp;",
+                    wrapAsEntity("nbsp", "&nbsp;"));
+            chunk = StringUtil.replace(chunk, "_amp_amp_nbsp_",
+                    wrapAsEntity("nbsp", "&amp;nbsp;"));
+        }
+        else
+        {
+            chunk = StringUtil.replace(chunk, "_cdata_nbsp_", "&amp;nbsp;");
+        }
 
         return chunk;
     }

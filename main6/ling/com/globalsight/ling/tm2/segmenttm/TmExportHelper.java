@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,6 +37,13 @@ public class TmExportHelper {
         int result = getAllCount(conn, tm, createdAfter, createdBefore, "TU");
         return result;
     }
+    
+    static int getAllTuCount(Connection conn, Tm tm, String createdAfter, String createdBefore,Set<String> attributeSet)
+    		throws SQLException
+	{
+		int result = getAllCount(conn, tm, createdAfter, createdBefore, "TU", attributeSet);
+		return result;
+	}
     
     /**
      * Get the count of all TUs in the TM.
@@ -117,6 +125,91 @@ public class TmExportHelper {
         }
 
         return result;
+    }
+
+    private static int getAllCount(Connection conn, Tm tm, String createdAfter,
+            String createdBefore, String type,Set<String> jobAttributeSet) throws SQLException
+    {
+        int result = 0;
+
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        try
+        {
+            String sql ="";
+            if("TU".equals(type))
+            {
+                sql = "SELECT COUNT(DISTINCT tu.id) ";
+                        
+            }
+            else
+            {
+                // TUV
+                sql = "SELECT COUNT(tu.id) ";
+            }
+            sql += "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
+                    + "  WHERE tu.id = tuv.tu_id and tu.tm_id = " + tm.getId();
+            if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+            sql += getSqlExpression("tuv", createdAfter, createdBefore);
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+            if (rset.next())
+            {
+                result = rset.getInt(1);
+            }
+        }
+        catch (SQLException e)
+        {
+            try
+            {
+                conn.rollback();
+            }
+            catch (Throwable ignore)
+            {
+            }
+            CATEGORY.warn("can't read TM data", e);
+
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null)
+                    rset.close();
+                if (stmt != null)
+                    stmt.close();
+            }
+            catch (Throwable ignore)
+            {
+            }
+
+        }
+
+        return result;
+    }
+    
+    private static String getAttributeSql(Set<String> jobAttributeSet)
+    {
+    	
+    	StringBuffer sql = new StringBuffer();
+    	String key;
+		String value;
+		int count = 0;
+		
+    	for(String keyAndValue: jobAttributeSet)
+    	{
+    		count++;
+    		key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
+			value = keyAndValue.substring(keyAndValue.indexOf(":") + 1).replaceAll("'", "''");
+			sql.append(" and tu.id in ( select DISTINCT tu_id  from  project_tm_tu_t_prop as prop where prop.prop_value = '" + value + "' and prop.prop_type = 'Att::" + key + "' )");
+    	}
+    	
+    	return sql.toString();
     }
 
     private static int getAllCount(Connection conn, Tm tm, long startTUId, String type) throws SQLException
@@ -238,6 +331,64 @@ public class TmExportHelper {
 
         return result;
     }
+    
+    static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore,Set<String> jobAttributeSet)
+    			throws SQLException
+	{
+		List<Long> result = new ArrayList<Long>();
+		
+		Statement stmt = null;
+		ResultSet rset = null;
+		
+		try
+		{
+		    String sql = "SELECT DISTINCT tu.id "
+		            + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
+		            +" WHERE tu.id = tuv.tu_id and tu.tm_id = "
+		            + tm.getId();
+		    
+		    if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+		    sql += getSqlExpression("tuv", createdAfter, createdBefore);
+		    sql += " ORDER by tu.id ASC";
+		    stmt = conn.createStatement();
+		    rset = stmt.executeQuery(sql);
+		
+		    while (rset.next())
+		    {
+		        result.add(new Long(rset.getLong(1)));
+		    }
+		}
+		catch (SQLException e)
+		{
+		    try
+		    {
+		        conn.rollback();
+		    }
+		    catch (Throwable ignore)
+		    {
+		    }
+		    CATEGORY.warn("can't read TM data", e);
+		
+		    throw e;
+		}
+		finally
+		{
+		    try
+		    {
+		        if (rset != null) rset.close();
+		        if (stmt != null) stmt.close();
+		    }
+		    catch (Throwable ignore)
+		    {
+		    }
+		
+		}
+		
+		return result;
+	}
 
     /**
      * Gets all TU IDs in the TM.
@@ -360,6 +511,72 @@ public class TmExportHelper {
         return result;
      }
     
+
+	static int getFilteredTuCount(Tm tm, String p_locale, String createdAfter,
+			String createdBefore,Set<String> jobAttributeSet) throws Exception 
+	{
+		int result = 0;
+
+		long localeId = 0;
+
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rset = null;
+
+		try 
+		{
+			localeId = ExportUtil.getLocaleId(p_locale);
+			String sql = "SELECT COUNT(DISTINCT tu.id) "
+					+ "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
+					+ "WHERE tuv.locale_id = " + localeId
+					+ "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+					+ tm.getId();
+			
+			if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+			
+			sql += getSqlExpression("tuv", createdAfter, createdBefore);
+
+			conn = SqlUtil.hireConnection();
+			stmt = conn.createStatement();
+			rset = stmt.executeQuery(sql);
+
+			if (rset.next()) {
+				result = rset.getInt(1);
+			}
+		} 
+		catch (/* SQL */Exception e) 
+		{
+			try 
+			{
+				conn.rollback();
+			} 
+			catch (Throwable ignore) 
+			{}
+			CATEGORY.warn("can't read TM data", e);
+
+			throw e;
+		} 
+		finally 
+		{
+			try 
+			{
+				if (rset != null)
+					rset.close();
+				if (stmt != null)
+					stmt.close();
+			} 
+			catch (Throwable ignore) 
+			{}
+
+			SqlUtil.fireConnection(conn);
+		}
+
+		return result;
+	}
+    
     /**
      * Gets the number of TUs that have a TUV in a given language.
      * 
@@ -385,6 +602,65 @@ public class TmExportHelper {
                     + "WHERE tuv.locale_id = " + localeId
                     + "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
                     + tm.getId();
+            sql += getSqlExpression("tuv", createdAfter, createdBefore);
+            sql += " ORDER by tu.id ASC";
+
+            conn = SqlUtil.hireConnection();
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+
+            while (rset.next())
+            {
+                result.add(new Long(rset.getLong(1)));
+            }
+        }
+        catch (/* SQL */Exception e)
+        {
+            CATEGORY.warn("can't read TM data", e);
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null) rset.close();
+                if (stmt != null) stmt.close();
+            }
+            catch (Throwable ignore)
+            {
+            }
+
+            SqlUtil.fireConnection(conn);
+        }
+
+        return result;
+    }
+
+    static List<Long> getFilteredTuIds(Tm tm, String p_locale, String createdAfter,
+            String createdBefore,Set<String> jobAttributeSet) throws Exception
+    {
+        List<Long> result = new ArrayList<Long>();
+
+        long localeId = 0;
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        try
+        {
+            localeId = ExportUtil.getLocaleId(p_locale);
+            String sql = "SELECT DISTINCT tu.id "
+                    + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
+                    + "WHERE tuv.locale_id = " + localeId
+                    + "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+                    + tm.getId();
+            
+            if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+            
             sql += getSqlExpression("tuv", createdAfter, createdBefore);
             sql += " ORDER by tu.id ASC";
 
@@ -465,6 +741,58 @@ public class TmExportHelper {
         return result;
     }
     
+    static int getProjectTuCount(Tm tm, String projectName, String createdAfter,
+            String createdBefore,Set<String> jobAttributeSet) throws Exception  
+    {
+        int result = 0;
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rset = null;
+        try
+        {
+            String sql = "SELECT COUNT(DISTINCT tu.id) " +
+                         "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop " +
+                         "WHERE (" + buildCondition(projectName) +
+                         ")  AND tuv.updated_by_project is NOT NULL  AND tuv.tu_id = tu.id " +
+                         "  AND tu.tm_id = " + tm.getId();
+            
+            if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+            
+            sql+=getSqlExpression("tuv", createdAfter, createdBefore);            
+
+            conn = SqlUtil.hireConnection();
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+
+            if (rset.next())
+            {
+                result = rset.getInt(1);
+            }
+        }
+        catch (/*SQL*/Exception e)
+        {
+            CATEGORY.warn("can't read TM data", e);
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null) rset.close();
+                if (stmt != null) stmt.close();
+            }
+            catch (Throwable ignore) {}
+
+            SqlUtil.fireConnection(conn);
+        }
+
+        return result;
+    }
+    
     static List<Long> getProjectNameTuIds(Tm tm, String propType,
             String createdAfter, String createdBefore) throws Exception 
     {
@@ -481,6 +809,60 @@ public class TmExportHelper {
             "WHERE ("+buildCondition(propType)+
             ")  AND tuv.tu_id = tu.id " +
             "  AND tu.tm_id = " + tm.getId();
+            sql+=getSqlExpression("tuv", createdAfter, createdBefore);
+            sql+=" ORDER by tu.id ASC";
+            
+            conn = SqlUtil.hireConnection();
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+
+            while (rset.next())
+            {
+                result.add(new Long(rset.getLong(1)));
+            }
+        }
+        catch (/*SQL*/Exception e)
+        {
+            CATEGORY.warn("can't read TM data", e);
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null) rset.close();
+                if (stmt != null) stmt.close();
+            }
+            catch (Throwable ignore) {}
+
+            SqlUtil.fireConnection(conn);
+        }
+
+        return result;
+    }
+    
+    static List<Long> getProjectNameTuIds(Tm tm, String propType,
+            String createdAfter, String createdBefore, Set<String> jobAttributeSet) throws Exception 
+    {
+        List<Long> result = new ArrayList<Long>();
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rset = null;
+        String propTypeCondition = buildCondition(propType);
+        try
+        {            
+            String sql = "SELECT DISTINCT tu.id " +
+            "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop " +
+            "WHERE ("+buildCondition(propType)+
+            ")  AND tuv.tu_id = tu.id " +
+            "  AND tu.tm_id = " + tm.getId();
+            
+            if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+            {
+            	sql += getAttributeSql(jobAttributeSet);
+            }
+            
             sql+=getSqlExpression("tuv", createdAfter, createdBefore);
             sql+=" ORDER by tu.id ASC";
             

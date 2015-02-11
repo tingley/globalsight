@@ -113,6 +113,10 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
     // for gbs-1939
     private char m_isUploading;
+    
+    //for gbs-3574
+    private int m_isReportUploaded = 0;//0:not upload; 1: uploaded.
+    private int m_isReportUploadCheck = 0;//0:not check; 1: check.
 
     /**
      * Get state of the uploading this activity belong to.
@@ -133,6 +137,22 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     {
         this.m_isUploading = p_isUploading;
     }
+    
+    public void setIsReportUploadCheck(int p_isReportUploadCheck) {
+    	this.m_isReportUploadCheck = p_isReportUploadCheck;
+	}
+
+	public int getIsReportUploadCheck() {
+		return this.m_isReportUploadCheck;
+	}
+
+	public void setIsReportUploaded(int p_isReportUploaded) {
+		this.m_isReportUploaded = p_isReportUploaded;
+	}
+
+	public int getIsReportUploaded() {
+		return this.m_isReportUploaded;
+	}
 
     /**
      * Default constructor to be used by TopLink only.
@@ -704,6 +724,10 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void setState(int p_state)
     {
         m_state = p_state;
+        if(m_state == STATE_ACTIVE)
+        {
+        	setIsReportUploaded(0);
+        }
     }
 
     /**
@@ -1217,6 +1241,10 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void setStateStr(String p_state)
     {
         m_state = getStateAsInt(p_state);
+        if(m_state == STATE_ACTIVE)
+        {
+        	setIsReportUploaded(0);
+        }
     }
 
     public String getStateStr()

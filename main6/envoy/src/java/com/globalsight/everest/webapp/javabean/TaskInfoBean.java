@@ -31,6 +31,7 @@ public class TaskInfoBean implements java.io.Serializable
     private Rate m_expenseRate = null;
     private Rate m_revenueRate = null;
     private int m_rateSelectionCriteria = 1;
+    private int m_isReportUploadCheck = 0;
 
     /**
      * Constructor that leaves the actual amount of hours set to null.
@@ -80,7 +81,7 @@ public class TaskInfoBean implements java.io.Serializable
      */
     public TaskInfoBean(long p_taskId, String p_estimatedHours,
             String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
-            int p_rateSelectionCriteria)
+            int p_rateSelectionCriteria, int p_isReportUploadCheck)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -88,11 +89,13 @@ public class TaskInfoBean implements java.io.Serializable
         m_expenseRate = p_expenseRate;
         m_revenueRate = p_revenueRate;
         m_rateSelectionCriteria = p_rateSelectionCriteria;
+        m_isReportUploadCheck = p_isReportUploadCheck;
     }
 
     public TaskInfoBean(long p_taskId, String p_estimatedHours,
             String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
-            int p_rateSelectionCriteria, String p_activityName)
+            int p_rateSelectionCriteria, String p_activityName,
+            int p_isReportUploadCheck)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -101,6 +104,7 @@ public class TaskInfoBean implements java.io.Serializable
         m_revenueRate = p_revenueRate;
         m_rateSelectionCriteria = p_rateSelectionCriteria;
         m_activityName = p_activityName;
+        m_isReportUploadCheck = p_isReportUploadCheck;
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -201,4 +205,12 @@ public class TaskInfoBean implements java.io.Serializable
     // ////////////////////////////////////////////////////////////////////
     // End: Helper methods
     // ////////////////////////////////////////////////////////////////////
+
+	public void setIsReportUploadCheck(int m_isReportUploadCheck) {
+		this.m_isReportUploadCheck = m_isReportUploadCheck;
+	}
+
+	public int getIsReportUploadCheck() {
+		return m_isReportUploadCheck;
+	}
 }

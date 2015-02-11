@@ -34,9 +34,11 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
 String xmlDefinition =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_DEFINITION);
 String xmlExportOptions =
-  (String)sessionMgr.getAttribute(WebAppConstants.TM_EXPORT_OPTIONS);
+  ((String)sessionMgr.getAttribute(WebAppConstants.TM_EXPORT_OPTIONS)).replaceAll("\"","&quot;");
 String xmlProject = 
     (String)sessionMgr.getAttribute(WebAppConstants.TM_PROJECT);
+String xmlAttribute = 
+	(String)sessionMgr.getAttribute(WebAppConstants.TM_ATTRIBUTE);
 String termbaseName =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_NAME);
 
@@ -65,6 +67,13 @@ INPUT, SELECT { font: Tahoma Verdana Arial 10pt; }
 LEGEND        { font-size: smaller; font-weight: bold; }
 .link         { color: blue; cursor: hand; }
 .calendar     { width:16px; height:15px; cursor:pointer; vertical-align:middle; }
+.row1 {
+  background-color: #DFE3EE;
+}
+
+.row2 {
+  background-color: #FFFFFF;
+}
 </STYLE>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -72,6 +81,7 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <SCRIPT type="text/javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/includes/report/calendar.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery.xmlext.js"></SCRIPT>
 <SCRIPT type="text/javascript">
 var needWarning = false;
 var objectName = "";
@@ -80,6 +90,7 @@ var helpFile = "<%=bundle.getString("help_tm_export")%>";
 var xmlProject = "<%=xmlProject.replace("\n","").replace("\r","").trim()%>";
 var xmlDefinition = "<%=xmlDefinition.replace("\n","").replace("\r","").trim()%>";
 var xmlExportOptions = "<%=xmlExportOptions.replace("\n","").replace("\r","").trim()%>";
+var xmlAttribute = "<%=xmlAttribute.replace("\n","").replace("\r","").trim()%>";
 
 function Result(message, description, element, dom)
 {
@@ -145,6 +156,15 @@ function parseExportOptions()
   if (selectChangeCreationId == "true") {
 	  form.oChangeCreationId.checked = true;
   }
+
+  $xml.find("exportOptions > attributes").children().each(function(){
+	  var key = $(this).find("key").text();
+	  var value= $(this).find("value").text();
+	  opt = document.createElement("OPTION");
+	  opt.text = opt.value = opt.title = key + ":" + value;
+	  oDummyForm.allItems.add(opt);	
+  });
+  setOptionColor();
 }
 
 function buildExportOptions()
@@ -229,9 +249,23 @@ function buildExportOptions()
   var sel = form.oEncoding;
   node.find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
+  $xml.find("exportOptions > attributes").remove();
+  $xml.find("exportOptions").appendXml("<attributes></attributes>");
+  	$("#allItems").children("option").each(function()
+	{
+		var keyAndValue=$(this).val();
+		var key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
+		var value = keyAndValue.substring(keyAndValue.indexOf(":") + 1);
+		value = value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("'","&apos;").replaceAll('"',"&quot;");
+		$xml.find("exportOptions > attributes").appendXml("<attribute><key>"+key+"</key><value>"+value+"</value></attribute>");
+	});
   result.dom = $xml;
   return result;
 }
+
+String.prototype.replaceAll = function(s1, s2) {      
+    return this.replace(new RegExp(s1, "gm"), s2);     
+} 
 
 function doCancel()
 {
@@ -370,6 +404,114 @@ function fillProjects(){
     });
 }
 
+function fillAttributes()
+{
+    $("#choiceListAttributeValue").hide();
+    $("#addAttributeButton").hide();
+    
+	var $xml = $( $.parseXML( xmlAttribute ) );
+    $xml.find("attributes > attribute").each(function(){
+    	var name   = $(this).find("name").text();
+    	opt = document.createElement("OPTION");
+        opt.text = opt.value = name;
+        oDummyForm.oEntryAttribute.add(opt);
+    });
+}
+ 
+function getAttributeOptions(value)
+{
+	if(value == "")
+	{
+		$("#choiceListAttributeValue").hide();
+	    $("#addAttributeButton").hide();
+	}
+	else
+	{
+		$("#addAttributeButton").show();
+		
+		var $xml = $( $.parseXML( xmlAttribute ) );
+	    $xml.find("attributes > attribute").each(function()
+	   	{
+	    	var name  = $(this).find("name").text();
+	    	if(name == value)
+	    	{
+		    		document.getElementById("choiceListAttributeValue").options.length=0; 
+		    		$(this).find("values > value").each(function()
+				    {
+		    			opt = document.createElement("OPTION");
+		    	        opt.text = opt.value = $(this).text();
+		    	        oDummyForm.choiceListAttributeValue.add(opt);
+			    	});
+		    		$("#choiceListAttributeValue").show();
+		    	    $("#textAttributeValue").hide();
+	    	}
+	    });
+ 
+	}
+}
+ 
+function addAttribute()
+{
+	var key = $("#idAttributeList").val();
+	var value = $("#choiceListAttributeValue").val();
+	if(value == '' || value == null)
+	{
+		alert("Please select attribute value.");
+		return;
+	}
+
+	opt = document.createElement("OPTION");
+    opt.text = opt.value = opt.title = key + ":" + value;
+    var added = false;
+    $("#allItems").children("option").each(function()
+	{
+		if($(this).val() == key + ":" + value)
+		{
+			added = true;
+			alert("You have added this attribute.");
+		}
+	});
+	if(!added)
+	{
+    	oDummyForm.allItems.add(opt);	
+    	setOptionColor();
+	}
+}
+
+function removeAddedAttribute()
+{
+	var selectBox = document.getElementById("allItems");
+    var options =  selectBox.options;
+    for (var i = options.length-1; i>=0; i--)
+    {
+        if (options[i].selected)
+        {
+        	selectBox.remove(i);
+        }
+    }
+    
+    setOptionColor();
+}
+
+function setOptionColor()
+{
+	var options =  document.getElementById("allItems").options;
+	var flag = true;
+    for (var i = 0; i<options.length; i++)
+    {
+		if (flag)
+		{
+		    options[i].className="row1";
+			flag = false;
+		}
+        else
+		{
+			options[i].className="row2";
+			flag = true;
+		}
+    }
+}
+
 function fillEncodings()
 {
     var form = document.oDummyForm;
@@ -446,6 +588,8 @@ function doOnLoad()
    
    fillProjects();
    selectValue(document.oDummyForm.oEncoding, "UTF-8");
+
+   fillAttributes();
 
    parseExportOptions();
 
@@ -527,6 +671,35 @@ function doOnLoad()
    </tr>
   </TABLE>
  </div>
+ <div style="margin-bottom:10px">
+ <div style="margin-left: 40px">
+  <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
+  <tr>
+  	<td valign="top">
+  		TM Attribute Name:
+  		<select name="oEntryAttribute" id="idAttributeList" style="width:200px" onchange="getAttributeOptions(this.value)">
+	   	<option value="">Choose...</option>
+	    </select>
+   </td>
+   <td valign="top">
+   		<select name="choiceListAttributeValue" id="choiceListAttributeValue" style="width:200px"></select>
+   </td>
+   <td valign="top">
+   		<input name="addAttributeButton" id="addAttributeButton" type="button" value="Add" onclick="addAttribute()">
+   <td>
+  </tr>
+  <tr>
+  <td valign="top" align="right">
+  	<select id="allItems" style="width: 200px" size="5" name="allItems">
+	</select>
+  </td>
+  <td valign="top" colspan="2">
+  	<input name="remove" type="button" value="Remove" onclick="removeAddedAttribute()">
+  </td>
+  </tr>
+  </TABLE>
+ </div>
+</div>
 </div>
 
 

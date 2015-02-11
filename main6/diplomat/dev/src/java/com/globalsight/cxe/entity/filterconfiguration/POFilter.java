@@ -80,6 +80,8 @@ public class POFilter implements Filter
 
     public String toJSON(long companyId)
     {
+    	long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
+        		getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -95,7 +97,10 @@ public class POFilter implements Filter
         sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
         sb.append("\"secondFilterTableName\":").append("\"")
                 .append(FilterHelper.escape(secondFilterTableName))
-                .append("\"");
+                .append("\"").append(",");
+		sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
+				.append("\"");
+        
         sb.append("}");
         return sb.toString();
     }

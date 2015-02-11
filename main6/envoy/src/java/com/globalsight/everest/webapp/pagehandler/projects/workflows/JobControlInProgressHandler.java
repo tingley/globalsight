@@ -17,8 +17,10 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -33,6 +35,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
@@ -40,6 +43,7 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 
 public class JobControlInProgressHandler extends JobManagementHandler
 {
@@ -90,6 +94,32 @@ public class JobControlInProgressHandler extends JobManagementHandler
         {
             m_exportUrl = ((NavigationBean) beanMap.get(EXPORT_BEAN))
                     .getPageURL();
+        }
+        
+        if(p_request.getParameter("checkIsUploadingForExport") != null)
+        {
+        	long jobId = Long.parseLong(p_request.getParameter("jobId"));
+        	Job job = WorkflowHandlerHelper.getJobById(jobId);
+        	String result = "";
+        	for (Workflow workflow: job.getWorkflows())
+        	{
+        		if(result.length() > 0)
+        			break;
+        		Hashtable<Long, Task> tasks = workflow.getTasks();
+        		for(Long taskKey:  tasks.keySet())
+        		{
+        			if(tasks.get(taskKey).getIsUploading() == 'Y')
+        			{
+        				result = "uploading";
+        				break;
+        			}
+        		}
+        	}
+            PrintWriter out = p_response.getWriter();
+            p_response.setContentType("text/html");
+            out.write(result);
+            out.close();
+            return;
         }
 
         performAppropriateOperation(p_request);

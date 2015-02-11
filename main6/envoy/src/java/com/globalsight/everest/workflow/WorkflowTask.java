@@ -91,6 +91,7 @@ public class WorkflowTask implements Serializable
     private long m_overduetoUser = 0;
     private String m_roleName = DEFAULT_ROLE_NAME;
     private String m_systemActionType = NO_ACTION;
+    private int m_reportUploadCheck = 0;//0: Not check . 1: Check.
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructors
@@ -1277,4 +1278,12 @@ public class WorkflowTask implements Serializable
     {
         m_overduetoUser = p_time;
     }
+
+	public void setReportUploadCheck(int p_reportUploadCheck) {
+		this.m_reportUploadCheck = p_reportUploadCheck;
+	}
+
+	public int getReportUploadCheck() {
+		return m_reportUploadCheck;
+	}
 }

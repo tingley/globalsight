@@ -16,19 +16,19 @@
  */
 package com.globalsight.machineTranslation.google;
 
-import org.apache.log4j.Logger;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
 
+import org.apache.log4j.Logger;
+import org.google.translate.api.v2.core.Translator;
+import org.google.translate.api.v2.core.model.Translation;
+
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
+import com.globalsight.machineTranslation.AbstractTranslator;
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
-import com.globalsight.machineTranslation.AbstractTranslator;
-
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.google.api.detect.Detect;
-import com.google.api.detect.DetectResult;
-import com.google.api.translate.Language;
-import com.google.api.translate.Translate;
-
-import java.util.*;
 
 /**
  * Acts as a proxy to the free translation Machine Translation Service.
@@ -42,6 +42,8 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
      * Hash Set of all supported languages.
      */
     private static final HashSet<String> s_supportedLanguage;
+    
+    public static final int MT_GOOGLE_MAX_CHARACTER_NUM = 4000;
 
     // Insert all supported languages into the hash set
     static
@@ -155,6 +157,31 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
         s_supportedLanguage.add("cy");
         //Yiddish
         s_supportedLanguage.add("yi");
+        
+//        Azerbaijani	
+        s_supportedLanguage.add("az");
+//        Basque	
+        s_supportedLanguage.add("eu");
+//        Bengali	
+        s_supportedLanguage.add("bn");
+//        Esperanto	
+        s_supportedLanguage.add("eo");
+//        Georgian	
+        s_supportedLanguage.add("ka");
+//        Gujarati	
+        s_supportedLanguage.add("gu");
+//        Haitian Creole	
+        s_supportedLanguage.add("ht");
+//        Kannada	
+        s_supportedLanguage.add("kn");
+//        Latin	
+        s_supportedLanguage.add("la");
+//        Tamil	
+        s_supportedLanguage.add("ta");
+//        Telugu	
+        s_supportedLanguage.add("te");
+//        Urdu	
+        s_supportedLanguage.add("ur");
     }
     
     public GoogleProxy() throws MachineTranslationException
@@ -210,110 +237,106 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
     /**
      * Actually does the real work of communicating with the MT engine.
      */
+    @SuppressWarnings("rawtypes")
     protected String doTranslation(Locale p_sourceLocale,
             Locale p_targetLocale, String p_string)
         throws MachineTranslationException
     {
-    	String result = "";
-    	try 
-    	{
-    		String sourceLang = p_sourceLocale.getLanguage();
-    		String sourceCountry = p_sourceLocale.getCountry();
-    		sourceLang = checkLang(sourceLang, sourceCountry);
-    		
-    		String targetLang = p_targetLocale.getLanguage();
-    		String targetCountry = p_targetLocale.getCountry();
-    		targetLang = checkLang(targetLang, targetCountry);
+		String sourceLang = p_sourceLocale.getLanguage();
+		String sourceCountry = p_sourceLocale.getCountry();
+		sourceLang = checkLang(sourceLang, sourceCountry);
 
-    		Language srcLang = Language.fromString(sourceLang);
-    		Language trgLang = Language.fromString(targetLang);
-    		if (srcLang != null && trgLang != null) 
-    		{
-    			SystemConfiguration config = SystemConfiguration.getInstance();
-                String server_host = config.getStringParameter(SystemConfiguration.SERVER_HOST);
-                String server_port = config.getStringParameter(SystemConfiguration.SERVER_PORT);
-                String httpReferrer = "http://" + server_host + ":" + server_port;
-    			Translate.setHttpReferrer(httpReferrer);
-        		result = Translate.execute(p_string.trim(), srcLang, trgLang );
-    		}
+		String targetLang = p_targetLocale.getLanguage();
+		String targetCountry = p_targetLocale.getCountry();
+		targetLang = checkLang(targetLang, targetCountry);
 
-    		if (result == null || "null".equalsIgnoreCase(result)) {
-                result = "";
+        if (sourceLang != null && targetLang != null)
+        {
+            HashMap paramMap = getMtParameterMap();
+            String apiKey = (String) paramMap
+                    .get(MTProfileConstants.MT_GOOGLE_API_KEY);
+            Translator translator = new Translator(apiKey);
+            Translation translation = null;
+
+            try
+            {
+                translation = translator.translate(p_string, sourceLang,
+                        targetLang);
             }
-    	}
-    	catch (Exception ex)
-    	{
-    		CATEGORY.error(ex.getMessage(), ex);
-    	}
+            catch (Exception e)
+            {
+                CATEGORY.error(e);
+            }
+
+            if (translation != null)
+            {
+                return translation.toString();
+            }
+        }
     	
-    	return result;
+    	return null;
     }
     
-    /**
-     * Actually does the real work of communicating with the MT engine.
-     */
     protected String[] doBatchTranslation(Locale p_sourceLocale,
             Locale p_targetLocale, String[] p_segments)
             throws MachineTranslationException
     {
-        String[] translatedSegments = null;
-        try
+    	 if (MTHelper.isLogDetailedInfo(ENGINE_GOOGLE))
+         {
+             for (int i = 0; i < p_segments.length; i++)
+             {
+                 CATEGORY.info("Source segment[" + i + "]:" + p_segments[i]);
+             }
+         }
+
+    	String sourceLang = p_sourceLocale.getLanguage();
+		String sourceCountry = p_sourceLocale.getCountry();
+		sourceLang = checkLang(sourceLang, sourceCountry);
+
+		String targetLang = p_targetLocale.getLanguage();
+		String targetCountry = p_targetLocale.getCountry();
+		targetLang = checkLang(targetLang, targetCountry);
+		Translation[] translations =null;
+		
+        if (sourceLang != null && targetLang != null)
         {
-            String sourceLang = p_sourceLocale.getLanguage();
-            String sourceCountry = p_sourceLocale.getCountry();
-            sourceLang = checkLang(sourceLang, sourceCountry);
+            String apiKey = getMtParameterMap().get(
+                    MTProfileConstants.MT_GOOGLE_API_KEY).toString();
+            Translator translator = new Translator(apiKey);
 
-            String targetLang = p_targetLocale.getLanguage();
-            String targetCountry = p_targetLocale.getCountry();
-            targetLang = checkLang(targetLang, targetCountry);
-
-            Language srcLang = Language.fromString(sourceLang);
-            Language trgLang = Language.fromString(targetLang);
-            if (srcLang != null && trgLang != null)
+            try
             {
-                SystemConfiguration config = SystemConfiguration.getInstance();
-                String server_host = config
-                        .getStringParameter(SystemConfiguration.SERVER_HOST);
-                String server_port = config
-                        .getStringParameter(SystemConfiguration.SERVER_PORT);
-                String httpReferrer = "http://" + server_host + ":" + server_port;
-                Translate.setHttpReferrer(httpReferrer);
-                // Invoke 3 times at most.
-                int count = 0;
-                while (count < 3) {
-                    count++;
-                    try {
-                        translatedSegments =
-                            Translate.execute(p_segments, srcLang, trgLang);
-                        break;
-                    } catch (Exception e) {
-                        // If exception occurs,sleep 5 seconds before next time.
-                        if (count != 3) {
-                            Thread.sleep(5000);
-                        }
-                        if (CATEGORY.isDebugEnabled()) {
-                            CATEGORY.error(e.getMessage(), e);
-                        }
-                    }
+                translations = translator.translate(p_segments, sourceLang,
+                        targetLang);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e);
+            }
+        }
+		String[] results;
+		
+		if (translations != null && translations.length == p_segments.length)
+		{
+			results = new String[translations.length];
+
+			for (int i=0; i<translations.length; i++)
+			{
+				results[i] = translations[i].getTranslatedText();
+			}
+
+			if (MTHelper.isLogDetailedInfo(ENGINE_GOOGLE))
+            {
+                for (int i = 0; i < results.length; i++)
+                {
+                    CATEGORY.info("Translated segment[" + i + "]:" + results[i]);
                 }
             }
-            
-            /**
-            if (translatedSegments == null
-                    || translatedSegments.length != p_segments.length)
-            {
-                translatedSegments = p_segments;
-            }
-            */
-        }
-        catch (Exception ex)
-        {
-            if (CATEGORY.isDebugEnabled()) {
-                CATEGORY.error(ex.getMessage(), ex);                
-            }
-        }
 
-        return translatedSegments;
+			return results;
+		}
+
+		return null;
     }
     
     private String checkLang(String lang, String country)
@@ -358,23 +381,22 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
     {
         if (p_string == null || "".equals(p_string.trim()))
         {
-            return "";
+            return null;
         }
         
-        String result = "";
+        String result = null;
         try
         {
-            String httpReferrer = "GlobalSight";
-            Detect.setHttpReferrer(httpReferrer);
-            DetectResult dr = Detect.execute(p_string);
-            Language lang = dr.getLanguage();
-            result = lang.toString();
+//            String httpReferrer = "GlobalSight";
+//            Detect.setHttpReferrer(httpReferrer);
+//            DetectResult dr = Detect.execute(p_string);
+//            Language lang = dr.getLanguage();
+//            result = lang.toString();
         }
         catch (Exception e)
         {
         }
         
-        //CATEGORY.info("Google detectLanguage "+result+"\t"+p_string);
         return result;
     }
 }

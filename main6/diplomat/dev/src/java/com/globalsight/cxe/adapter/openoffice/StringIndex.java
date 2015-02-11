@@ -17,9 +17,15 @@
 
 package com.globalsight.cxe.adapter.openoffice;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Util class to find one content from source content base on start string and end
+ * string
+ * 
+ * @author Wayzou
+ * 
+ */
 public class StringIndex
 {
     public String value;
@@ -37,6 +43,30 @@ public class StringIndex
         start = s;
     }
 
+    public static StringIndex getValueBetween(String src, int s, String start,
+            String end)
+    {
+        int index_s = src.indexOf(start, s);
+        if (index_s != -1)
+        {
+            int index_e = src.indexOf(end, index_s + start.length());
+
+            if (index_e != -1)
+            {
+                int st = index_s + start.length();
+                StringIndex si = new StringIndex(src.substring(st, index_e),
+                        st, index_e);
+                si.allStart = index_s;
+                si.allEnd = index_e + 1;
+                si.allValue = src.substring(index_s, index_e + 1);
+
+                return si;
+            }
+        }
+
+        return null;
+    }
+
     public static StringIndex getValueBetween(StringBuffer src, int s,
             String start, String end)
     {
@@ -48,6 +78,60 @@ public class StringIndex
             if (index_e != -1)
             {
                 int st = index_s + start.length();
+                StringIndex si = new StringIndex(src.substring(st, index_e),
+                        st, index_e);
+                si.allStart = index_s;
+                si.allEnd = index_e + 1;
+                si.allValue = src.substring(index_s, index_e + 1);
+
+                return si;
+            }
+        }
+
+        return null;
+    }
+
+    public static StringIndex getValueBetween(String src, int s,
+            List<String> starts, String end)
+    {
+        int startIndexFind = -1;
+        String startTagFind = null;
+
+        if (starts != null)
+        {
+            for (String start : starts)
+            {
+                int index_s = src.indexOf(start, s);
+                if (index_s > -1)
+                {
+                    String findStart = start;
+
+                    if (startIndexFind == -1)
+                    {
+                        startIndexFind = index_s;
+                        startTagFind = findStart;
+                    }
+                    else
+
+                    if (index_s < startIndexFind)
+                    {
+                        startIndexFind = index_s;
+                        startTagFind = findStart;
+
+                    }
+                }
+            }
+        }
+
+        if (startIndexFind != -1)
+        {
+            int index_s = startIndexFind;
+            String findStart = startTagFind;
+            int index_e = src.indexOf(end, index_s + findStart.length());
+
+            if (index_e != -1)
+            {
+                int st = index_s + findStart.length();
                 StringIndex si = new StringIndex(src.substring(st, index_e),
                         st, index_e);
                 si.allStart = index_s;

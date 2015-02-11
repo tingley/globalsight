@@ -793,6 +793,14 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm)
                 .getAllSegments(tm, createdBefore, createdAfter, conn);
     }
+    
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter, Connection conn, Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException
+    {
+        return getInfo(tm)
+                .getAllSegments(tm, createdBefore, createdAfter, conn, jobAttributeSet);
+    }
 
     /**
      * WARNING: This routine will leak a session object to the SegmentResultSet
@@ -806,6 +814,15 @@ public class TmCoreManagerLocal implements TmCoreManager
     {
         return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
                 createdAfter, conn);
+    }
+    
+    @Override
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException
+    {
+        return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
+                createdAfter, conn, jobAttributeSet);
     }
 
     /**
@@ -821,12 +838,27 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter, conn);
     }
+    
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException
+    {
+        return getInfo(tm).getSegmentsByProjectName(tm, projectName,
+                createdBefore, createdAfter, conn, jobAttributeSet);
+    }
 
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
     {
         return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter);
+    }
+    
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter, Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException
+    {
+        return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter, jobAttributeSet);
     }
 
     @Override
@@ -837,6 +869,14 @@ public class TmCoreManagerLocal implements TmCoreManager
         return getInfo(tm).getSegmentsCountByLocale(tm, locale, createdBefore,
                 createdAfter);
     }
+    
+    public int getSegmentsCountByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter,Set<String> jobAttributeSet) 
+    		throws RemoteException,LingManagerException
+    {
+        return getInfo(tm).getSegmentsCountByLocale(tm, locale, createdBefore,
+                createdAfter,jobAttributeSet);
+    }
 
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
@@ -845,6 +885,14 @@ public class TmCoreManagerLocal implements TmCoreManager
     {
         return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
                 createdBefore, createdAfter);
+    }
+    
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter,Set<String> jobAttributeSet)
+    		throws RemoteException, LingManagerException
+    {
+        return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
+                createdBefore, createdAfter, jobAttributeSet);
     }
 
     // TODO: this needs to have session handling code added

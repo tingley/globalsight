@@ -1293,6 +1293,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     String trgPagePath = getTargetPagePath(tp);
                     File pdf = getPreviewPdf(trgPagePath, companyId, p_userid);
                     if (pdf.exists())
+                    	pdf = setCopyOnlyPermission(pdf);
                         pdfs.add(pdf);
                 }
             }

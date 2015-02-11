@@ -24,12 +24,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.cxe.engine.eventflow.Category;
 import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
 import com.globalsight.cxe.engine.eventflow.EventFlow;
@@ -79,6 +81,8 @@ public class IdmlHelper
     private static String tags_End = "</Content></CharacterStyleRange>";
     private static String tag_Start = "<CharacterStyleRange";
     private static String content_Start = "<Content>";
+    
+    private static String Visible_false = "Visible=\"false\"";
 
     private static final Logger logger = Logger.getLogger(IdmlHelper.class);
 
@@ -515,11 +519,11 @@ public class IdmlHelper
 
         File designmap = new File(dir + File.separator + DESIGNMAP);
         String content = FileUtil.readFile(designmap, "utf-8");
-        StringBuffer s = new StringBuffer(
+        StringBuffer buff = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        s.append(FileUtil.lineSeparator);
-        s.append("<stories>");
-        
+        buff.append(FileUtil.lineSeparator);
+        buff.append("<stories>");
+
         boolean addDesignMapXml = false;
         // extract Text Variables
         if (includeTextVariable(content))
@@ -542,12 +546,12 @@ public class IdmlHelper
             String c = content.replaceFirst("<\\?xml ", "<xml ");
             c = c.replaceFirst("\"\\?>", "\"/>");
 
-            s.append(FileUtil.lineSeparator);
-            s.append("<story name=\"").append(DESIGNMAP).append("\">");
-            s.append(FileUtil.lineSeparator);
-            s.append(c);
-            s.append(FileUtil.lineSeparator);
-            s.append("</story>");
+            buff.append(FileUtil.lineSeparator);
+            buff.append("<story name=\"").append(DESIGNMAP).append("\">");
+            buff.append(FileUtil.lineSeparator);
+            buff.append(c);
+            buff.append(FileUtil.lineSeparator);
+            buff.append("</story>");
         }
 
         if (isTranslateFileInfo())
@@ -561,15 +565,15 @@ public class IdmlHelper
                 c = c.replaceFirst("\"\\?>", "\"/>");
                 c = formatForImport(c);
 
-                s.append(FileUtil.lineSeparator);
-                s.append("<story name=\"").append(METADATA).append("\">");
-                s.append(FileUtil.lineSeparator);
-                s.append(c);
-                s.append(FileUtil.lineSeparator);
-                s.append("</story>");
+                buff.append(FileUtil.lineSeparator);
+                buff.append("<story name=\"").append(METADATA).append("\">");
+                buff.append(FileUtil.lineSeparator);
+                buff.append(c);
+                buff.append(FileUtil.lineSeparator);
+                buff.append("</story>");
             }
         }
-        
+
         // 1 find MasterSpread & Spread by order
         List<String> spreadFiles = new ArrayList<String>();
         Pattern pMasterSpread = Pattern
@@ -580,7 +584,7 @@ public class IdmlHelper
             String masterSpread = mMasterSpread.group(1);
             spreadFiles.add(masterSpread);
         }
-        
+
         Pattern pSpread = Pattern
                 .compile("<idPkg:Spread src=\"([^\"]*?/Spread_([^\"]*?).xml)\"\\s*/>");
         Matcher mSpread = pSpread.matcher(content);
@@ -589,45 +593,140 @@ public class IdmlHelper
             String spread = mSpread.group(1);
             spreadFiles.add(spread);
         }
-        
+
         // 2 find all TextFrame from Spread
-        List<String> textFrameIds = new ArrayList<String>();
+        LinkedList<TextFrameObj> allTextFrameList = new LinkedList<TextFrameObj>();
+        ArrayList<TextFrameObj> spreadTextFrameList = new ArrayList<TextFrameObj>();
+        List<Double> pageXlist = new ArrayList<Double>();
+        List<String> overrideList = new ArrayList<String>();
+        Pattern pPage = Pattern
+                .compile("<Page[\\s]+[^>]*ItemTransform=\"([^\"]+)\"[^>]*>");
         Pattern pTextFrame = Pattern
-                .compile("<TextFrame[\\s]+[^>]*ParentStory=\"([^\"]+)\"[^>]*>");
-        
+                .compile("<TextFrame[\\s]+[^>]*ParentStory=\"([^\"]+)\"[^>]*ItemTransform=\"([^\"]+)\"[^>]*>");
+
         for (String src : spreadFiles)
         {
             String path = dir + File.separator + src;
             File f = new File(path);
-
-            String c = FileUtil.readFile(f, "utf-8");
-            Matcher mTextFrame = pTextFrame.matcher(c);
+            String c = FileUtil.readFile(f, "utf-8").trim();
+            pageXlist.clear();
+            overrideList.clear();
+            spreadTextFrameList.clear();
+            boolean isMaster = c.endsWith("</idPkg:MasterSpread>");
             
-            while(mTextFrame.find())
+            // get DOMVersion
+            String domVersion = "8.0";
+            StringIndex si = StringIndex.getValueBetween(c, 0, "DOMVersion=\"", "\"");
+            if (si != null)
             {
-                String id = mTextFrame.group(1);
-                if (!textFrameIds.contains(id))
-                {
-                    textFrameIds.add(id);
+                domVersion = si.value;
+            }
 
-                    // 2.2 find all TextFrame from story
-                    String storyFile = dir + File.separator + "Stories/Story_"
-                            + id + ".xml";
-                    File sfile = new File(storyFile);
-                    if (sfile.exists())
+            // get page locations
+            Matcher mPage = pPage.matcher(c);
+            while (mPage.find())
+            {
+                String itemTransform = mPage.group(1);
+                String[] arrTransform = itemTransform.trim().split(" ");
+                if (arrTransform.length == 6)
+                {
+                    String tempX = arrTransform[4].trim();
+                    double dblX = Double.parseDouble(tempX);
+                    pageXlist.add(dblX);
+                }
+                
+                String pageTag = mPage.group();
+                StringIndex siOverList = StringIndex.getValueBetween(pageTag,
+                        0, "OverrideList=\"", "\"");
+                if (siOverList != null)
+                {
+                    String temp = siOverList.value;
+                    String[] tempArray = temp.split(" ");
+                    for (String tempS : tempArray)
                     {
-                        String storyContent = FileUtil.readFile(sfile, "utf-8");
-                        Matcher storyTextFrame = pTextFrame.matcher(storyContent);
-                        
-                        while(storyTextFrame.find())
+                        overrideList.add(tempS);
+                    }
+                }
+            }
+
+            if (pageXlist.size() == 0)
+            {
+                pageXlist.add(new Double(0));
+            }
+
+            // find TextFrame
+            Matcher mTextFrame = pTextFrame.matcher(c);
+            while (mTextFrame.find())
+            {
+                String textFrameInSpread = mTextFrame.group();
+                String id = mTextFrame.group(1);
+                String itemTransform = mTextFrame.group(2);
+                boolean isHidden = false;
+
+                TextFrameObj textFrame = TextFrameObj.createInstance(
+                        domVersion, textFrameInSpread, id, itemTransform, c,
+                        mTextFrame, overrideList);
+
+                // ignore hidden layer
+                if (!isTranslateHiddenLayer()
+                        && textFrameInSpread.contains(Visible_false))
+                {
+                    isHidden = true;
+                    textFrame.isHidden = true;
+                }
+
+                if (spreadTextFrameList.contains(textFrame))
+                {
+                    continue;
+                }
+                spreadTextFrameList.add(textFrame);
+
+                // 2.2 find all TextFrame from story
+                String storyFile = dir + File.separator + "Stories/Story_" + id
+                        + ".xml";
+                File sfile = new File(storyFile);
+                if (sfile.exists())
+                {
+                    String storyContent = FileUtil.readFile(sfile, "utf-8");
+                    Matcher storyTextFrame = pTextFrame.matcher(storyContent);
+
+                    while (storyTextFrame.find())
+                    {
+                        String textFrameG = storyTextFrame.group();
+                        String subid = storyTextFrame.group(1);
+                        String subitemTransform = storyTextFrame.group(1);
+                        TextFrameObj subtextFrame = TextFrameObj
+                                .createInstance(domVersion, textFrameG, subid,
+                                        subitemTransform, storyContent,
+                                        storyTextFrame, overrideList);
+
+                        // ignore hidden layer
+                        if (isHidden
+                                || (!isTranslateHiddenLayer() && textFrameG
+                                        .contains(Visible_false)))
                         {
-                            String sssid = storyTextFrame.group(1);
-                            if (!textFrameIds.contains(sssid))
-                            {
-                                textFrameIds.add(sssid);
-                            }
+                            subtextFrame.isHidden = true;
+                        }
+
+                        if (!spreadTextFrameList.contains(subtextFrame))
+                        {
+                            spreadTextFrameList.add(subtextFrame);
                         }
                     }
+                }
+            }
+
+            if (spreadTextFrameList.size() > 0)
+            {
+                Collections.sort(pageXlist);
+                
+                TextFrameComparator tfcom = new TextFrameComparator();
+                tfcom.setPageX(pageXlist);
+                Collections.sort(spreadTextFrameList, tfcom);
+
+                for (TextFrameObj textFrameObj : spreadTextFrameList)
+                {
+                    allTextFrameList.add(textFrameObj);
                 }
             }
         }
@@ -646,15 +745,14 @@ public class IdmlHelper
             {
                 continue;
             }
-            
+
             String src = m.group(1);
             storySrc.add(src);
         }
-        
+
         // sort them
         List<String> storySrcSorted = new ArrayList<String>();
-        if (textFrameIds == null || textFrameIds.size() == 0
-                || textFrameIds.size() < storySrc.size())
+        if (allTextFrameList == null || allTextFrameList.size() == 0)
         {
             // sort all stories by Document StoryList attributes
             Pattern pDocument = Pattern
@@ -665,12 +763,13 @@ public class IdmlHelper
             {
                 String ids = mDocument.group(1);
                 String[] idList = ids.split("\\s");
-                
+
                 for (String storyId : idList)
                 {
                     String story = "Stories/Story_" + storyId + ".xml";
-                    
-                    if (storySrc.contains(story))
+
+                    if (storySrc.contains(story)
+                            && !storySrcSorted.contains(story))
                     {
                         storySrcSorted.add(story);
                     }
@@ -679,41 +778,78 @@ public class IdmlHelper
         }
         else
         {
-            for (String sid : textFrameIds)
+            for (TextFrameObj tfo : allTextFrameList)
             {
-                String story = "Stories/Story_" + sid + ".xml";
-                if (storySrc.contains(story))
+                if (tfo.isHidden)
+                {
+                    continue;
+                }
+
+                String story = "Stories/Story_" + tfo.parentStory + ".xml";
+                if (storySrc.contains(story) && !storySrcSorted.contains(story))
                 {
                     storySrcSorted.add(story);
                 }
             }
+
+            if (allTextFrameList.size() < storySrc.size())
+            {
+                List<String> notIn = new ArrayList<String>();
+                List<String> allTextFrameStories = new ArrayList<String>();
+
+                for (TextFrameObj tfo : allTextFrameList)
+                {
+                    String story = "Stories/Story_" + tfo.parentStory + ".xml";
+                    allTextFrameStories.add(story);
+                }
+
+                for (String story : storySrc)
+                {
+                    if (!allTextFrameStories.contains(story))
+                    {
+                        notIn.add(story);
+                    }
+                }
+
+                for (String story : notIn)
+                {
+                    if (!storySrcSorted.contains(story))
+                    {
+                        storySrcSorted.add(story);
+                    }
+                }
+            }
+
         }
-        
+
         // add story content
         for (String src : storySrcSorted)
         {
             String path = dir + File.separator + src;
             File f = new File(path);
+            if (!f.exists())
+            {
+                continue;
+            }
 
             String c = FileUtil.readFile(f, "utf-8");
-
             c = c.replaceFirst("<\\?xml ", "<xml ");
             c = c.replaceFirst("\"\\?>", "\"/>");
             c = formatForImport(c);
 
-            s.append(FileUtil.lineSeparator);
-            s.append("<story name=\"").append(src).append("\">");
-            s.append(FileUtil.lineSeparator);
-            s.append(c);
-            s.append(FileUtil.lineSeparator);
-            s.append("</story>");
+            buff.append(FileUtil.lineSeparator);
+            buff.append("<story name=\"").append(src).append("\">");
+            buff.append(FileUtil.lineSeparator);
+            buff.append(c);
+            buff.append(FileUtil.lineSeparator);
+            buff.append("</story>");
         }
 
-        s.append(FileUtil.lineSeparator);
-        s.append("</stories>");
+        buff.append(FileUtil.lineSeparator);
+        buff.append("</stories>");
 
         File f = new File(dir + CONTENT);
-        FileUtil.writeFile(f, s.toString(), "utf-8");
+        FileUtil.writeFile(f, buff.toString(), "utf-8");
 
         return f;
     }
@@ -815,6 +951,16 @@ public class IdmlHelper
 
         return filter;
     }
+    
+    private boolean isTranslateHiddenLayer()
+    {
+        return getInddFilter().getTranslateHiddenLayer();
+    }
+    
+    private boolean isTranslateMasterLayer()
+    {
+        return getInddFilter().getTranslateMasterLayer();
+    }
 
     private boolean isTranslateFileInfo()
     {
@@ -833,8 +979,12 @@ public class IdmlHelper
 
     private boolean isReplaceNonbreakingSpace()
     {
-
         return getInddFilter().isReplaceNonbreakingSpace();
+    }
+    
+    private boolean isSkipTrackingKerning()
+    {
+        return getInddFilter().getSkipTrackingKerning();
     }
 
     /**
@@ -847,18 +997,8 @@ public class IdmlHelper
      */
     private boolean isTranslate(String id, String dir) throws Exception
     {
-        if (filter == null)
-        {
-            filter = getMainFilter();
-        }
-
-        if (filter == null)
-        {
-            filter = new InddFilter();
-        }
-
-        boolean isTranslateHiddenLayer = filter.getTranslateHiddenLayer();
-        boolean isTranslateMaster = filter.getTranslateMasterLayer();
+        boolean isTranslateHiddenLayer = isTranslateHiddenLayer();
+        boolean isTranslateMaster = isTranslateMasterLayer();
 
         if (!isTranslateHiddenLayer && isHidden(id, dir))
         {
@@ -1288,7 +1428,7 @@ public class IdmlHelper
 
     private String mergeTag(String s)
     {
-        if (filter == null || !filter.getSkipTrackingKerning())
+        if (!isSkipTrackingKerning())
         {
             return s;
         }

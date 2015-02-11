@@ -188,6 +188,7 @@ function validPair(pair)
 
 function checkForDuplicateName()
 {
+	dupTemplateForm.nameTF.value = ATrim(dupTemplateForm.nameTF.value);
     if (hasSpecialChars(dupTemplateForm.nameTF.value))
     {
         alert("<%=bundle.getString("lb_name")%>" + "<%=bundle.getString("msg_invalid_entry")%>");

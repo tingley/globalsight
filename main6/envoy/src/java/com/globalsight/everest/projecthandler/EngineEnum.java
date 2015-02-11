@@ -113,6 +113,19 @@ public enum EngineEnum
             return "com.globalsight.machineTranslation.safaba.SafabaProxy";
 
         }
+    },
+    Google_Translate
+    {
+        String[] getInfo()
+        {
+            return new String[]
+            { "mtProfileID", "url", "port", "clientName", "password",
+                    "CATEGORY", MTProfileConstants.MT_GOOGLE_API_KEY };
+        }
+    	
+    	String getClassName(){
+    		return "com.globalsight.machineTranslation.google.GoogleProxy";
+    	}
     };
 
     public static EngineEnum getEngine(String name)

@@ -16,7 +16,11 @@
  */
 package com.globalsight.everest.projecthandler;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.google.translate.api.v2.core.Translator;
+import org.google.translate.api.v2.core.TranslatorException;
+import org.google.translate.api.v2.core.model.Translation;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.tempuri.SoapService;
@@ -102,10 +109,27 @@ public class MachineTranslateAdapter
             case DoMT:
                 setDoMtParams(p_request, mtProfile);
                 break;
+            case Google_Translate:
+            	setGoogleParams(p_request, mtProfile);
+            	break;
         }
     }
 
-    private void makeBaseMT(HttpServletRequest p_request,
+    private void setGoogleParams(HttpServletRequest p_request,
+            MachineTranslationProfile mtProfile)
+    {
+        String apiKey = p_request.getParameter(
+                MTProfileConstants.MT_GOOGLE_API_KEY);
+        if (apiKey != null)
+            apiKey = apiKey.trim();
+
+        if (StringUtils.isNotBlank(apiKey))
+        {
+            mtProfile.setAccountinfo(apiKey);
+        }
+    }
+
+	private void makeBaseMT(HttpServletRequest p_request,
             MachineTranslationProfile mtProfile, String engine)
     {
         String mtProfileName = p_request.getParameter("MtProfileName");
@@ -370,12 +394,53 @@ public class MachineTranslateAdapter
                 return testIPHost(mtProfile, writer);
             case DoMT:
                 return testDoMT(mtProfile, writer);
+            case Google_Translate:
+            	return testGoogle(mtProfile, writer);
         }
 
         return false;
     }
 
-    /**
+    private boolean testGoogle(MachineTranslationProfile mtProfile,
+            PrintWriter writer) throws JSONException
+    {
+        String encodedText = "";
+
+        try
+        {
+            encodedText = URLEncoder.encode("This is test", "UTF-8");
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+            logger.error(e1);
+        }
+
+        String apiKey = mtProfile.getAccountinfo();
+        Translator translator = new Translator(apiKey);
+        Translation translation = null;
+        
+        try
+        {
+            translation = translator.translate(encodedText, "en", "fr");
+        }
+        catch (Exception e)
+        {
+            JSONObject jso = new JSONObject();
+            jso.put("ExceptionInfo", new String("Connection to https://www.googleapis.com refused."));
+            writer.write(jso.toString());
+            logger.error(e);
+            return false;
+        }
+
+        if (translation != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+	/**
      * Test the MS MT engine is reachable for specified parameters.
      * 
      * @param mtProfile
@@ -419,7 +484,7 @@ public class MachineTranslateAdapter
             else if (exceptionInfo2.indexOf("ArgumentOutOfRangeException") != -1
                     || exceptionInfo2.indexOf("ArgumentException") != -1)
             {
-                exceptionInfo2 = "ArgumentException: invalid Parameter.";
+                exceptionInfo2 = "Invalid Parameter.";
             }
             JSONObject jso = new JSONObject();
             jso.put("ExceptionInfo", exceptionInfo2);
@@ -630,7 +695,7 @@ public class MachineTranslateAdapter
                 int index = exMsg.toLowerCase().indexOf("unknownhostexception");
                 exMsg = exMsg.substring(index + "unknownhostexception".length()
                         + 1, exMsg.length());
-                exMsg = "Unkown Host:" + exMsg;
+//                exMsg = "Unkown Host:" + exMsg;
             }
 
             try
@@ -707,10 +772,10 @@ public class MachineTranslateAdapter
         }
         catch (Exception e)
         {
-            String errString = "ArgumentException:IP Translator server is not reachable.";
+            String errString = "IP Translator server is not reachable.";
             if (StringUtils.isNotEmpty(errString))
             {
-                errString = "ArgumentException:IP Translator URL or Key is invalid.";
+                errString = "IP Translator URL or Key is invalid.";
                 logger.warn(e.getMessage());
             }
             JSONObject jso = new JSONObject();

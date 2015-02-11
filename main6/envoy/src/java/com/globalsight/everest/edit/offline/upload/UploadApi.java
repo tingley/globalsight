@@ -360,6 +360,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Task task = getTask(p_ownerTaskId);
                 if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                 {
+                	completeUploadingTask(isUploadingTasks);
                     return errPage;
                 }
                 p_excludedItemTypes = getExcludedItemTypes(task);
@@ -372,6 +373,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                     {
+                    	completeUploadingTask(isUploadingTasks);
                         return errPage;
                     }
                 }
@@ -379,6 +381,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_reader)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -390,12 +393,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     m_uploadPageData.getTaskId(), p_excludedItemTypes,
                     DOWNLOAD_FILE_FORMAT_TXT)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -403,26 +408,28 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
+            	completeUploadingTask(isUploadingTasks);
                 return "IsContinue=fasle";
             }
 
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
-                    p_jmsQueueDestination, p_user, p_fileName)) != null)
+                    p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
         }
         finally
         {
-            if (isUploadingTasks != null)
-            {
-                for (Task isUploadingTask : isUploadingTasks)
-                {
-                    // Update task status (Upload Done)
-                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE);
-                }
-            }
+//            if (isUploadingTasks != null)
+//            {
+//                for (Task isUploadingTask : isUploadingTasks)
+//                {
+//                    // Update task status (Upload Done)
+//                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
+//                }
+//            }
         }
 
         return null;
@@ -459,6 +466,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     {
         try
         {
+        	
+        	List<Task> isUploadingTasks = new ArrayList<Task>();
+        	isUploadingTasks.add(getTask(Long.valueOf(m_uploadPageData.getTaskId())));
             // m_referencePageData = new PageData();
             // so getPage() will be cleared if errors occur
             m_uploadPageData = new OfflinePageData();
@@ -494,6 +504,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Task task = getTask(p_ownerTaskId);
                 if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                 {
+                	completeUploadingTask(isUploadingTasks);
                     return errPage;
                 }
                 p_excludedItemTypes = getExcludedItemTypes(task);
@@ -501,6 +512,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_rtfDoc)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -508,12 +520,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     m_uploadPageData.getTaskId(), p_excludedItemTypes,
                     DOWNLOAD_FILE_FORMAT_RTF_PARAVIEW_ONE)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -521,20 +535,22 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
+            	completeUploadingTask(isUploadingTasks);
                 return "IsContinue=fasle";
             }
 
             // Now we're ready to save.
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
-                    p_jmsQueueDestination, p_user, p_fileName)) != null)
+                    p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
         }
         finally
         {
             // Update task status (Upload Done)
-            TaskHelper.updateTaskStatus(p_ownerTaskId, UPLOAD_DONE);
+//            TaskHelper.updateTaskStatus(p_ownerTaskId, UPLOAD_DONE);
         }
 
         return null;
@@ -545,6 +561,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             throws Exception
     {
         String errPage = null;
+        boolean uploaded = false;
 
         long taskId = p_task.getId();
         long jobId = p_task.getJobId();
@@ -593,11 +610,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return null;
 
             uploadComments(p_user, p_reportName, jobId);
+            
+            uploaded = true;
         }
         finally
         {
             // Update task status (Upload Done)
-            TaskHelper.updateTaskStatus(taskId, UPLOAD_DONE);
+            TaskHelper.updateTaskStatus(taskId, UPLOAD_DONE, uploaded);
         }
         
         return null;
@@ -2035,6 +2054,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Task task = getTask(p_ownerTaskId);
                 if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                 {
+                	completeUploadingTask(isUploadingTasks);
                     return errPage;
                 }
                 p_excludedItemTypes = getExcludedItemTypes(task);
@@ -2047,6 +2067,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     if ((errPage = checkTask(p_user, task, p_fileName)) != null)
                     {
+                    	completeUploadingTask(isUploadingTasks);
                         return errPage;
                     }
                 }
@@ -2054,6 +2075,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_rtfDoc)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -2065,12 +2087,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     m_uploadPageData.getTaskId(), p_excludedItemTypes,
                     DOWNLOAD_FILE_FORMAT_TXT)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
 
@@ -2078,27 +2102,41 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
+            	completeUploadingTask(isUploadingTasks);
                 return "IsContinue=fasle";
             }
 
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
-                    p_jmsQueueDestination, p_user, p_fileName)) != null)
+                    p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
+            	completeUploadingTask(isUploadingTasks);
                 return errPage;
             }
         }
         finally
         {
-            if (isUploadingTasks != null && isUploadingTasks.size() > 0)
-            {
-                for (Task isUploadingTask : isUploadingTasks)
-                {
-                    // Update task status (Upload Done)
-                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE);
-                }
-            }
+//            if (isUploadingTasks != null && isUploadingTasks.size() > 0)
+//            {
+//                for (Task isUploadingTask : isUploadingTasks)
+//                {
+//                    // Update task status (Upload Done)
+//                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
+//                }
+//            }
         }
         return null;
+    }
+    
+    private void completeUploadingTask(List<Task> isUploadingTasks)
+    {
+    	if (isUploadingTasks != null && isUploadingTasks.size() > 0)
+          {
+              for (Task isUploadingTask : isUploadingTasks)
+              {
+                  // Update task status (Upload Done)
+                  TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
+              }
+          }
     }
 
     /**
@@ -3062,12 +3100,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     private String save(OfflinePageData m_uploadPageData,
             ArrayList<PageData> m_refPageDatas, String p_jmsQueueDestination,
-            User p_user, String p_fileName)
+            User p_user, String p_fileName, List<Task> p_isUploadingTasks)
     {
         try
         {
             m_uploadPageSaver.savePageToDb(m_uploadPageData, m_refPageDatas,
-                    p_jmsQueueDestination, p_user, p_fileName);
+                    p_jmsQueueDestination, p_user, p_fileName, p_isUploadingTasks);
         }
         catch (UploadPageSaverException ex)
         {

@@ -26,7 +26,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 
 String xmlExportOptions =
-  (String)sessionMgr.getAttribute(WebAppConstants.TM_EXPORT_OPTIONS);
+  ((String)sessionMgr.getAttribute(WebAppConstants.TM_EXPORT_OPTIONS)).replaceAll("\"","&quot;");
 String str_databaseName =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_NAME);
 String str_databaseId =

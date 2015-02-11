@@ -11,6 +11,7 @@
          com.globalsight.util.edit.EditUtil,
          com.globalsight.util.GlobalSightLocale,
          com.globalsight.everest.taskmanager.Task,
+         com.globalsight.everest.taskmanager.TaskImpl,
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.util.resourcebundle.SystemResourceBundle,
          com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
@@ -54,6 +55,8 @@
          session="true"
 %>
 <jsp:useBean id="downloadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -109,6 +112,9 @@
     Task task = (Task)TaskHelper.retrieveObject(
       session, WebAppConstants.WORK_OBJECT);
 	Task theTask = task;
+	TaskImpl taskImpl = (TaskImpl)theTask;
+    int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
+    int isUploaded = taskImpl.getIsReportUploaded();
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -117,6 +123,13 @@
     		theTask.isType(Task.TYPE_REVIEW))
     {
     	needScore = true;
+    }
+    String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
+    String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    if(theTask.isType(Task.TYPE_REVIEW))
+    {
+    	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
+    	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
     String downloadcommentUrl = downloadcomment.getPageURL() + "&action=downloadFiles"
 								+ "&" + JobManagementHandler.JOB_ID
@@ -194,6 +207,13 @@
             "=" + state +
             "&" + WebAppConstants.TASK_ID +
             "=" + task_id;
+            
+	String uploadReportUrl = uploadreport.getPageURL()
+			    + "&" + WebAppConstants.TASK_ID
+				+ "=" + task_id
+				+ "&" + WebAppConstants.TASK_STATE +
+				"=" + state;
+
     boolean alreadyAccepted = false;
     boolean disableButtons = false;
     boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId)? true:false;;

@@ -886,6 +886,8 @@ public class JobAdditionEngine
                 // set Task Type; Translation Task or DTP Task
                 task.setTaskType(p_wf.getWorkflowType());
                 task.setRateSelectionCriteria(wti.getRateSelectionCriteria());
+                task.setIsReportUploadCheck(wti.getReportUploadCheck());
+                task.setIsReportUploaded(0);
                 // if an expense rate is specified
                 if (wti.getExpenseRateId() > 0)
                 {

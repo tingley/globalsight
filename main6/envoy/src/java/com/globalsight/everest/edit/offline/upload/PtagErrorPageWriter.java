@@ -138,7 +138,31 @@ public class PtagErrorPageWriter
         String[] params = new String[8];
         params[1] = m_fileName;
         params[2] = m_labels.getString(LABEL_PAGE_ID);
-        params[3] = " " + m_pageId;
+        StringBuffer sbf = new StringBuffer();
+    	if (m_pageId.length() > 0)
+		{
+    		int count =0;
+			String[] pageIds = m_pageId.split(",");
+			for (int i = 0; i < pageIds.length; i++)
+			{
+				count++;
+				if (i != pageIds.length - 1)
+				{
+					sbf.append(pageIds[i]);
+					sbf.append(",");
+				}
+				else
+				{
+					sbf.append(pageIds[i]);
+				}
+				if (count == 40)
+				{
+					sbf.append("<br>");
+					count = 0;
+				}
+			}
+		}
+        params[3] = " " + sbf.toString();
         params[4] = m_labels.getString(LABEL_JOB_ID);
         params[5] = " " + m_JobId;
         params[6] = m_labels.getString(LABEL_STAGE_ID);

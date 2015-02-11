@@ -419,6 +419,21 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter, Connection conn, Set<String> jobAttributeSet) 
+    		throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(conn, TmExportHelper.getAllTuIds(
+                    conn, tm, createdAfter, createdBefore, jobAttributeSet), EXPORT_BATCH_SIZE);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
 
     @Override
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
@@ -445,6 +460,26 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             conn = DbUtil.getConnection();
             return TmExportHelper.getAllTuCount(conn, tm, createdAfter,
                     createdBefore);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+    
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter, Set<String> jobAttributeSet) throws LingManagerException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            return TmExportHelper.getAllTuCount(conn, tm, createdAfter,
+                    createdBefore, jobAttributeSet);
         }
         catch (Exception e)
         {
@@ -492,6 +527,22 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(conn,
+                    TmExportHelper.getFilteredTuIds(tm, locale, createdAfter,
+                            createdBefore, jobAttributeSet), EXPORT_BATCH_SIZE);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
 
     @Override
     public int getSegmentsCountByLocale(Tm tm, String locale,
@@ -502,6 +553,21 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         {
             return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter,
                     createdBefore);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
+    
+    public int getSegmentsCountByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter,Set<String> jobAttributeSet)
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter,
+                    createdBefore, jobAttributeSet);
         }
         catch (Exception e)
         {
@@ -525,6 +591,22 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             throw new LingManagerException(e);
         }
     }
+    
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(conn,
+                    TmExportHelper.getProjectNameTuIds(tm, projectName,
+                            createdAfter, createdBefore,jobAttributeSet), EXPORT_BATCH_SIZE);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
 
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
@@ -535,6 +617,21 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         {
             return TmExportHelper.getProjectTuCount(tm, projectName,
                     createdAfter, createdBefore);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
+    
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Set<String> jobAttributeSet)
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getProjectTuCount(tm, projectName,
+                    createdAfter, createdBefore, jobAttributeSet);
         }
         catch (Exception e)
         {

@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -364,15 +363,14 @@ public class WorkflowTemplateHandler extends PageHandler implements
         return intVal;
     }
 
-    @SuppressWarnings("unchecked")
-	private void saveDuplicates(HttpServletRequest p_request,
+    private void saveDuplicates(HttpServletRequest p_request,
             HttpSession session) throws EnvoyServletException
     {
         try
         {
             String wftiId = (String) session.getAttribute(WF_TEMPLATE_INFO_ID);
             String list = (String) p_request.getParameter("localePairs");
-            String name = (String) p_request.getParameter("nameTF");
+            String name = (String) p_request.getParameter("nameTF").trim();
             String projectId = p_request.getParameter(PROJECT_FIELD);
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     Long.parseLong(projectId));
@@ -385,31 +383,6 @@ public class WorkflowTemplateHandler extends PageHandler implements
                         Long.parseLong(id)));
             }
 
-			List<WorkflowTemplateInfo> listAll = WorkflowTemplateHandlerHelper.getAllWorkflowTemplateInfos();
-            Locale uiLocale = (Locale) session
-                    .getAttribute(WebAppConstants.UILOCALE);
-            List localePairs = WorkflowTemplateHandlerHelper.getAllLocalePairs(uiLocale);
-			Iterator<LocalePair> ite = localePairs.iterator();
-            while (ite.hasNext())
-            {
-            	LocalePair localePair = (LocalePair) ite.next();
-                StringBuffer sb = new StringBuffer();
-                sb.append(name);
-                sb.append("_");
-                sb.append(localePair.getSource().toString());
-                sb.append("_");
-                sb.append(localePair.getTarget().toString());
-                String name2 = sb.toString();
-                
-                Iterator<WorkflowTemplateInfo> it = listAll.iterator();
-                while(it.hasNext())
-                {
-                	WorkflowTemplateInfo wf = it.next();
-                	String nameWf = wf.getName();
-                	if(nameWf.equals(name2))
-                		return;
-                }
-            }
             WorkflowTemplateHandlerHelper.duplicateWorkflowTemplateInfo(
                     Long.parseLong(wftiId), alist, name, project,
                     getBundle(session));

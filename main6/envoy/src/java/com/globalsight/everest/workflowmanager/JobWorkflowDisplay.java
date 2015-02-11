@@ -11,6 +11,7 @@ public class JobWorkflowDisplay
     private String estimatedStartTimestamp;
     private String estimatedTranslateCompletionDateTimestamp;
     private String estimatedCompletionDateTimestamp;
+    private String isUploading;
     
     public JobWorkflowDisplay(Workflow workflow){
         this.workflow = workflow;
@@ -102,4 +103,12 @@ public class JobWorkflowDisplay
     {
         this.estimatedCompletionDateTimestamp = estimatedCompletionDateTimestamp;
     }
+
+	public void setIsUploading(String isUploading) {
+		this.isUploading = isUploading;
+	}
+
+	public String getIsUploading() {
+		return isUploading;
+	}
 }

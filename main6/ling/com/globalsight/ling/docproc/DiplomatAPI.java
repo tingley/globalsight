@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -44,17 +43,18 @@ import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
+import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.segmentationhelper.Segmentation;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.common.LocaleCreater;
 import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
-import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
@@ -169,7 +169,10 @@ public class DiplomatAPI implements IFormatNames
     private List<ExtractRule> rules = new ArrayList<ExtractRule>();
     
     private AbstractExtractor extractor = null;
-    
+    public static final String m_tag_internal_start = "&lt;GS-INTERNAL-TEXT&gt;";
+    public static final String m_tag_internal_end = "&lt;/GS-INTERNAL-TEXT&gt;";
+    public static final String tag_internal_start = "<GS-INTERNAL-TEXT>";
+    public static final String tag_internal_end = "</GS-INTERNAL-TEXT>";
     /**
      * Diplomat Extractor Options.
      */
@@ -441,18 +444,28 @@ public class DiplomatAPI implements IFormatNames
 
     private String jsFilterRegex = null;
     private CxeMessage cxeMessage = null;
+    private FileProfileImpl fileProfile = null;
     private String fileProfileId;
     private long filterId = 0;
     private boolean isPreview = false;
 
     private String filterTableName;
 
-    public String getFilterTableName()
+   
+    public FileProfileImpl getFileProfile()
+	{
+		return fileProfile;
+	}
+	public void setFileProfile(FileProfileImpl fileProfile)
+	{
+		this.fileProfile = fileProfile;
+	}
+
+	public String getFilterTableName()
     {
         return filterTableName;
     }
-
-    public void setFilterTableName(String filterTableName)
+	public void setFilterTableName(String filterTableName)
     {
         this.filterTableName = filterTableName;
     }
@@ -1184,22 +1197,26 @@ public class DiplomatAPI implements IFormatNames
         {
             InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
         }
+        
         // # GBS-2894 : do segmentation before internal text
-        if (extractor.isDoSegBeforeInlText())
-        {
-            boolean useBptTag = true;
-
-            if (mainFilter != null
-                    && mainFilter instanceof JavaPropertiesFilter)
-            {
-                JavaPropertiesFilter jf = (JavaPropertiesFilter) mainFilter;
-                long scid = jf.getSecondFilterId();
-                String scTableName = jf.getSecondFilterTableName();
-                useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
-            }
-
-            InternalTextHelper.handleOutput(m_output, mainFilter, useBptTag);
-        }
+		if (extractor.isDoSegBeforeInlText())
+		{
+			boolean checkPOAndProp = checkPOAndPropertiesFilter(mainFilter);
+			if (checkPOAndProp)
+			{
+				if (fileProfile != null)
+				{
+					Filter filter = FilterHelper.getFilter(
+							fileProfile.getFilterTableName(),
+							fileProfile.getFilterId());
+					InternalTextHelper.handleOutput(m_output, filter, true);
+				}
+				else
+				{
+					InternalTextHelper.handleOutput(m_output, mainFilter, true);
+				}
+			}
+		}
 
         if (m_debug)
         {
@@ -1266,6 +1283,49 @@ public class DiplomatAPI implements IFormatNames
 
     }
 
+    /**
+     * 
+     * 
+     * */
+	private boolean checkPOAndPropertiesFilter(Filter mainFilter)
+	{
+		if (mainFilter != null)
+		{
+			boolean propFilter = mainFilter instanceof JavaPropertiesFilter ? true
+					: false;
+			boolean poFilter = mainFilter instanceof POFilter ? true : false;
+			if ((!propFilter && fileProfile == null) && (!poFilter && fileProfile == null))
+			{
+				return true;
+			}
+			else if (propFilter || poFilter && fileProfile == null)
+			{
+				boolean useBptTag = true;
+				if (propFilter)
+				{
+					JavaPropertiesFilter jf = (JavaPropertiesFilter) mainFilter;
+					long scid = jf.getSecondFilterId();
+					String scTableName = jf.getSecondFilterTableName();
+					useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
+					return useBptTag;
+				}
+				else if (poFilter)
+				{
+					POFilter po = (POFilter) mainFilter;
+					long scid = po.getSecondFilterId();
+					String scTableName = po.getSecondFilterTableName();
+					useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
+					return useBptTag;
+				}
+			}
+			else if (!propFilter || !poFilter && fileProfile != null)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
     public Filter getMainFilter() throws Exception
     {
         if (filterId >= 0 && filterTableName != null)
@@ -1348,30 +1408,12 @@ public class DiplomatAPI implements IFormatNames
 
         merger.init(p_gxml, l10ncontent);
         merger.setKeepGsa(p_keepGsa);
-        // if this job is using "html_filter" as secondary filter,when
-        // exported,need convert to entity.
-        boolean isUseSecondaryFilter = false;
-        boolean convertHtmlEntry = false;
-        try
-        {
-            FileProfileImpl fp = (FileProfileImpl) ServerProxy
-                    .getFileProfilePersistenceManager().getFileProfileById(
-                            Long.parseLong(this.fileProfileId), false);
-            long secondFilterId = fp.getSecondFilterId();
-            String secondFilterName = fp.getSecondFilterTableName();
-            if (secondFilterId > 0 && "html_filter".equals(secondFilterName))
-            {
-                isUseSecondaryFilter = true;
-                HtmlFilter htmlFilter = FilterHelper
-                        .getHtmlFilter(secondFilterId);
-                convertHtmlEntry = htmlFilter.isConvertHtmlEntry();
-            }
-        }
-        catch (Exception e)
-        {
-        }
-        merger.setIsUseSecondaryFilter(isUseSecondaryFilter);
-        merger.setConvertHtmlEntryFromSecondFilter(convertHtmlEntry);
+
+        // if job is using "html_filter" as secondary filter,when export,
+        // whether to convert html entity is decided by html filter setting.
+        Boolean[] isConvert = isConvertHtmlEntity();
+        merger.setIsUseSecondaryFilter(isConvert[0]);
+        merger.setConvertHtmlEntryFromSecondFilter(isConvert[1]);
 
         merger.merge();
 
@@ -1419,42 +1461,12 @@ public class DiplomatAPI implements IFormatNames
         merger.setKeepGsa(p_keepGsa);
         merger.setTargetEncoding(m_encoding);
 
-        // if this job is using "html_filter" as secondary filter,when
-        // exported,need convert to entity.
-        boolean isUseSecondaryFilter = false;
-        boolean convertHtmlEntry = false;
-        try
-        {
-            FileProfileImpl fp = (FileProfileImpl) ServerProxy
-                    .getFileProfilePersistenceManager().getFileProfileById(
-                            Long.parseLong(this.fileProfileId), false);
-            long secondFilterId = fp.getSecondFilterId();
-            String secondFilterName = fp.getSecondFilterTableName();
-            if (secondFilterId > 0 && "html_filter".equals(secondFilterName))
-            {
-                isUseSecondaryFilter = true;
-                HtmlFilter htmlFilter = FilterHelper
-                        .getHtmlFilter(secondFilterId);
-                convertHtmlEntry = htmlFilter.isConvertHtmlEntry();
-            }
+        // if job is using "html_filter" as secondary filter,when export,
+        // whether to convert html entity is decided by html filter setting.
+        Boolean[] isConvert = isConvertHtmlEntity();
+        merger.setIsUseSecondaryFilter(isConvert[0]);
+        merger.setConvertHtmlEntryFromSecondFilter(isConvert[1]);
 
-            KnownFormatType kft = ServerProxy
-                    .getFileProfilePersistenceManager().getKnownFormatTypeById(
-                            fp.getKnownFormatTypeId(), false);
-            String format = kft.getFormatType();
-
-            // PO need not "Convert HTML Entity For Export".
-            if (FORMAT_PO.equals(format))
-            {
-                convertHtmlEntry = false;
-            }
-        }
-        catch (Exception e)
-        {
-        }
-
-        merger.setIsUseSecondaryFilter(isUseSecondaryFilter);
-        merger.setConvertHtmlEntryFromSecondFilter(convertHtmlEntry);
         merger.setCxeMessage(cxeMessage);
         merger.merge();
 
@@ -1807,6 +1819,46 @@ public class DiplomatAPI implements IFormatNames
             throw new ExtractorException(
                     ExtractorExceptionConstants.INTERNAL_ERROR, e);
         }
+    }
+
+    // Actually "isConvertHtmlEntity" can be true only for JavaProperties.
+    private Boolean[] isConvertHtmlEntity()
+    {
+        boolean isUseSecondaryHtmlFilter = false;
+        boolean isConvertHtmlEntity = false;
+        try
+        {
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
+            FileProfileImpl fp = (FileProfileImpl) fpManager
+                    .getFileProfileById(Long.parseLong(this.fileProfileId),
+                            false);
+            KnownFormatType kft = fpManager.getKnownFormatTypeById(
+                    fp.getKnownFormatTypeId(), false);
+
+            long secondFilterId = fp.getSecondFilterId();
+            String secondFilterName = fp.getSecondFilterTableName();
+            if (secondFilterId > 0 && "html_filter".equals(secondFilterName))
+            {
+                isUseSecondaryHtmlFilter = true;
+                HtmlFilter htmlFilter = FilterHelper
+                        .getHtmlFilter(secondFilterId);
+                isConvertHtmlEntity = htmlFilter.isConvertHtmlEntry();
+            }
+
+            // PO need not "Convert HTML Entity For Export".
+            String format = kft.getFormatType();
+            if (FORMAT_PO.equals(format))
+            {
+                isConvertHtmlEntity = false;
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
+        return new Boolean[]
+        { isUseSecondaryHtmlFilter, isConvertHtmlEntity };        
     }
 
     public String getJsFilterRegex()

@@ -1125,11 +1125,23 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AllTusDataHandle<T>(this, start, end);
     }
 
+    public TM3Handle<T> getAllData(Date start, Date end,Set<String> jobAttributeSet)
+    {
+        checkDateRange(start, end);
+        return new AllTusDataHandle<T>(this, start, end, jobAttributeSet);
+    }
+
     @Override
     public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end)
     {
         checkDateRange(start, end);
         return new LocaleDataHandle<T>(this, locale, start, end);
+    }
+    
+    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end, Set<String> jobAttributeSet)
+    {
+        checkDateRange(start, end);
+        return new LocaleDataHandle<T>(this, locale, start, end, jobAttributeSet);
     }
 
     @Override
@@ -1145,6 +1157,14 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         checkDateRange(start, end);
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
                 getCustomAttributes(attrs), start, end);
+    }
+    
+    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
+            Date start, Date end, Set<String> jobAttributeSet)
+    {
+        checkDateRange(start, end);
+        return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
+                getCustomAttributes(attrs), start, end, jobAttributeSet);
     }
 
     @Override

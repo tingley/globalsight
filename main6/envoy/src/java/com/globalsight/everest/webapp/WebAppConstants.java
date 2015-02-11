@@ -659,6 +659,7 @@ public interface WebAppConstants
     public static final String TM_EXIST_NAMES = "existNames";
     public static final String TM_TM3_ID = "tm3id";
     public static final String TM_TYPE = "tmType";
+    public static final String TM_ATTRIBUTE = "tmAttribute";
     public static final String TM_AVAILABLE_ATTS = "tmAvailableAtts";
     public static final String TM_TM_ATTS = "tmTMAtts";
     public static final String TMP_AVAILABLE_ATTS = "tmpAvailableAtts";

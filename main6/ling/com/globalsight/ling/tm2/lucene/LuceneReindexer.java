@@ -76,7 +76,7 @@ public class LuceneReindexer
 
     private Lock m_lock = null;
     private IndexWriter m_indexWriter;
-
+    private File m_indexDir;
     private GlobalSightLocale m_locale;
     
     
@@ -95,11 +95,11 @@ public class LuceneReindexer
         m_tmId = p_tmId;
         m_analyzer = new GsAnalyzer(p_locale);
         
-        File indexDir
+        m_indexDir
             = LuceneUtil.getGoldTmIndexDirectory(p_tmId, p_locale, true);
 
         // get the directory
-        FSDirectory directory = FSDirectory.open(indexDir);
+        FSDirectory directory = FSDirectory.open(m_indexDir);
         
         // get a lock on the directory
         m_lock = directory.makeLock(LuceneIndexWriter.LOCK_NAME);
@@ -123,7 +123,7 @@ public class LuceneReindexer
         catch (IndexFormatTooOldException ie)
         {
             // delete too old index
-            File[] files = indexDir.listFiles();
+            File[] files = m_indexDir.listFiles();
             if (files != null && files.length > 0)
             {
                 for (int i = 0; i < files.length; i++)
@@ -146,6 +146,9 @@ public class LuceneReindexer
                 m_lock.release();
             }
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_indexDir);
     }
     
 

@@ -87,6 +87,7 @@ import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.SetDefaultRoleUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.WorkflowInfos;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -114,6 +115,8 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.system.LogManager;
+import com.globalsight.util.system.LogType;
 
 /**
  * This class is responsible for managing projects and localization profiles
@@ -263,6 +266,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                                 localePair.getSource());
 
                 String autoName = generateAutoName(p_newName, localePair);
+                c_category.info("The value of name is " + autoName);
                 duplicatedProfile.setName(autoName);
                 duplicatedProfile.setSourceLocale(localePair.getSource());
                 WorkflowTemplateInfo wftInfo = duplicateWorkflowTemplate(
@@ -2594,6 +2598,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         WorkflowTemplateInfo origWorkflowTemplateInfo = null;
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
+        List<WorkflowTemplateInfo> listAll = WorkflowTemplateHandlerHelper.getAllWorkflowTemplateInfos();
         try
         {
             origWorkflowTemplateInfo = getWorkflowTemplateInfoById(p_wfTemplateInfoId);
@@ -2604,6 +2609,16 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 LocalePair localePair = (LocalePair) it.next();
                 String name = generateAutoName(p_newName, localePair);
+                
+                Iterator<WorkflowTemplateInfo> it2 = listAll.iterator();
+                while(it2.hasNext())
+                {
+                    WorkflowTemplateInfo wf = it2.next();
+                    String nameWf = wf.getName();
+                    if(nameWf.equals(name))
+                        return;
+                }
+                c_category.info("The value of name is " + name);
                 WorkflowTemplateInfo dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(
                         name, project, localePair, origWorkflowTemplateInfo,
                         false);
@@ -2693,6 +2708,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 }
 
                 String name = generateAutoName(p_newName, localePair);
+                c_category.info("The value of name is " + name);
                 Attribute attribute = (Attribute) doc
                         .selectSingleNode("/process-definition/@name");
                 attribute.setValue(name);
@@ -3041,7 +3057,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         sb.append("_");
         sb.append(p_localePair.getTarget().toString());
         String name = sb.toString();
-        c_category.info("The value of name is " + name);
+        
         return name;
     }
 
@@ -3993,6 +4009,10 @@ public class ProjectHandlerLocal implements ProjectHandler
             connection.commit();
 
             HibernateUtil.delete(tmprofile);
+            
+            LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE, tmprofile.getId(),
+                    "Delete Translation Memory Profile [" + tmprofile.getName() + "]", tmprofile.getCompanyId());
+            
         }
         catch (ConnectionPoolException cpe)
         {

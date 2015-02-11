@@ -245,7 +245,7 @@ function checkForDuplicateName()
         {
             if (id == localePairIdArray[j])
             {
-                dupName = dupTemplateForm.nameTF.value + "_" + dupNamesArray[j];
+                dupName = ATrim(dupTemplateForm.nameTF.value) + "_" + dupNamesArray[j];
                 for (k=0; k < l10nNamesArray.length; k++)
                 {
                     if (l10nNamesArray[k].toLowerCase() == dupName.toLowerCase())
@@ -265,7 +265,7 @@ function checkForDuplicateName()
         {
             if (id == localePairIdArray[j])
             {
-                dupName = dupTemplateForm.nameTF.value + "_" + dupNamesArray[j];
+                dupName = ATrim(dupTemplateForm.nameTF.value) + "_" + dupNamesArray[j];
                 
                 for (k=0; k < wfNamesArray.length; k++)
                 {

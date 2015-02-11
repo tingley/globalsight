@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -229,8 +230,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
             
             map.put("process", status.isUseProcess() ?  status.getProcess() + "%" : null);            
             
-            PrintWriter out = p_response.getWriter();
-            out.write(JsonUtil.toJson(map));
+            ServletOutputStream out = p_response.getOutputStream();
+            out.write(JsonUtil.toJson(map).getBytes("UTF-8"));
             out.close();
         }
     }
@@ -263,11 +264,11 @@ public class UploadPageHandlerHelper implements WebAppConstants
         map.put("jobName", task.getJobName());
         map.put("taskId", buffer.toString());
 
-        PrintWriter out = p_response.getWriter();
-        out.write(JsonUtil.toJson(map));
+        ServletOutputStream out = p_response.getOutputStream();
+        out.write(JsonUtil.toJson(map).getBytes("UTF-8"));
         out.close();
     }
-    
+
     // process uploaded file
     public void processRequest(HttpServletRequest p_request,
             OEMProcessStatus p_status) throws EnvoyServletException

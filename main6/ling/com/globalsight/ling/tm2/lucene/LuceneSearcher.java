@@ -53,7 +53,7 @@ public class LuceneSearcher
             LuceneSearcher.class);
 
     private GlobalSightLocale m_targetLocale;
-    private IndexSearcher m_indexSearcher;
+    private LuceneCache luceneCache;
     private Analyzer m_analyzer;
     
     
@@ -93,7 +93,8 @@ public class LuceneSearcher
         throws Exception
     {
         m_targetLocale = p_targetLocale;
-        ArrayList searchers = new ArrayList();
+        ArrayList<LuceneCache> searchers = new ArrayList<LuceneCache>();
+        ArrayList<Long> tmIds = new ArrayList<Long>();
         
         for(Iterator it = p_tmIds.iterator(); it.hasNext();)
         {
@@ -105,37 +106,32 @@ public class LuceneSearcher
                 continue;
             }
             
-            Directory ind = new SimpleFSDirectory(indexDir);
-            if(indexDir != null && DirectoryReader.indexExists(ind))
+            LuceneCache lc = LuceneCache.getLuceneCache(indexDir);
+            if(lc != null)
             {
-                IndexSearcher searcher
-                    = new IndexSearcher(DirectoryReader.open(ind));
-                searchers.add(searcher);
+                searchers.add(lc);
+                tmIds.add(tmId);
             }
         }
 
         if(searchers.size() == 0)
         {
-            m_indexSearcher = null;
+            luceneCache = null;
         }
         else if(searchers.size() == 1)
         {
-            m_indexSearcher = (IndexSearcher)searchers.get(0);
+            luceneCache = searchers.get(0);
         }
         else
         {
-            IndexSearcher[] searcherArray = new IndexSearcher[searchers.size()];
-            searcherArray = (IndexSearcher[]) searchers.toArray(searcherArray);
-
-            IndexReader[] readers = new IndexReader[searchers.size()];
-            for (int i = 0; i < readers.length; i++)
+            IndexReader[] ireaderArray = new IndexReader[searchers.size()];
+            
+            for (int i = 0; i < ireaderArray.length; i++)
             {
-                readers[i] = searcherArray[i].getIndexReader();
+                ireaderArray[i] = searchers.get(i).getIndexReader();
             }
-
-            MultiReader mr = new MultiReader(readers);
-
-            m_indexSearcher = new IndexSearcher(mr);
+            
+            luceneCache = LuceneCache.getLuceneCache(tmIds, ireaderArray);
         }
 
         // create analyzer
@@ -153,7 +149,7 @@ public class LuceneSearcher
         throws Exception
     {
         // no index to search
-        if(m_indexSearcher == null)
+        if(luceneCache == null)
         {
             return Collections.emptyList();
         }
@@ -182,13 +178,13 @@ public class LuceneSearcher
                 + query.toString(TuvDocument.TEXT_FIELD));
         }
         
-        TopDocs topdocs = m_indexSearcher.search(query, 100);
+        TopDocs topdocs = luceneCache.getIndexSearcher().search(query, 100);
         ScoreDoc[] hits = topdocs.scoreDocs;
         if (hits != null)
         {
             for(int i = 0; i < hits.length; i++)
             {
-                Document doc = m_indexSearcher.doc(hits[i].doc);
+                Document doc = luceneCache.getIndexSearcher().doc(hits[i].doc);
                 float score = hits[i].score;
                 TuvDocument tuvDoc = new TuvDocument(doc);
                 TMidTUid tt = new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId(),
@@ -204,13 +200,7 @@ public class LuceneSearcher
         return result;
     }
 
-
-    public void close()
-        throws Exception
+    public void close() throws Exception
     {
-        if(m_indexSearcher != null)
-        {
-            m_indexSearcher.getIndexReader().close();
-        }
     }
 }

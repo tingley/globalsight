@@ -8,26 +8,28 @@ var taskItem = ["<tr class=\"row\"><td class=\"taskIdField selectAll\"><input ty
                 "",   //Job ID, 7
                 "</td><td class=\"jobNameField standardText left\">",
                 "",   //Job Name, 9
+                "</td><td class=\"isUploadingField standardText center\" width=7%>",
+                "",   //isUploading, 11
                 "</td><td class=\"activityField standardText left\" width=7%>",
-                "",   //Activity Name, 11
+                "",   //Activity Name, 13
                 "</td><td class=\"assigneesField standardText left\" width=7%>",
-                "",   //Assignees Name, 13
+                "",   //Assignees Name, 15
                 "</td><td class=\"sourceWordCountField standardText center\" width=7%>",
-                "",   //Source Word Count, 15
+                "",   //Source Word Count, 17
                 "</td><td class=\"translatedText standardText center\" width=7%>",
-                "",   //Translated Text, 17
+                "",   //Translated Text, 19
                 "</td><td class=\"sourceLocaleField standardText\" width=7%>",
-                "",   //Source Locale, 19
+                "",   //Source Locale, 21
                 "</td><td class=\"targetLocaleField standardText\" width=7%>",
-                "",   //Target Locale, 21
+                "",   //Target Locale, 23
                 "</td><td class=\"taskDate standardText\" width=10%>",
-                "",   //Accept By or Due By or Completed Date, 23
+                "",   //Accept By or Due By or Completed Date, 25
                 "</td><td class=\"ecdDate standardText\" width=7%>",
-                "",   //Estimated Completion Date, 25
+                "",   //Estimated Completion Date, 27
                 "</td><td class=\"taskStatus standardText center\" width=7%>",
-                "",   //Task Status, 27
+                "",   //Task Status, 29
                 "</td><td class=\"company standardText center\" width=7%>",
-                "",   //Company, 29
+                "",   //Company, 31
                 "</td></tr>"];
 var recordInfo = ["Displaying <b>",
                   "",	//Start record
@@ -502,32 +504,84 @@ function initButtonActions() {
             {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
-            if (data.isFinishedTaskId) {
-            	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
-                for(var i=0;i<rowsPerPage;i++)
-                {
-                	taskIds = taskIds.replace(","," ");
-                }
-                if (data.unTranslatedTaskId) {
-                	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
-                }
-                if (confirm(confirmInfo)) {
-                    $.post(selfUrl, {
-                        state:currentTaskState,
-                        taskAction:"completeActivity",
-                        taskParam:data.isFinishedTaskId
-                    }, function(data) {
-                        submitSearch();
-                    });
-                }
-            }
-            else
-			{
-				 if (data.unTranslatedTaskId) 
+            
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            if(taskIds.indexOf(",") < 0)
+            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+            var isFinishUnUploadReportTask = true;
+            if(data.isNeedReportUploadCheckTaskId)
+            {
+            	if(!confirm(reportUploadCheckConfirmInfo))
             	{
-            		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+            		isFinishUnUploadReportTask = false;
             	}
-			}
+            }
+            
+            if(isFinishUnUploadReportTask)
+            {
+            	if (data.isFinishedTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+
+                    
+                	if (confirm(confirmInfo)) {
+                		$.post(selfUrl, {
+                			state:currentTaskState,
+                			taskAction:"completeActivity",
+                			taskParam:data.isFinishedTaskId
+                		}, function(data) {
+                			submitSearch();
+                		});
+                	}
+                }
+                else
+    			{
+                	if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }
+            if(!isFinishUnUploadReportTask)
+            {
+            	if (data.isFinishedReportUploadTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
+	            	{
+	            		$.post(selfUrl, {
+	            			state:currentTaskState,
+	            			taskAction:"completeActivity",
+	            			taskParam:data.isFinishedReportUploadTaskId
+	            		}, function(data) {
+	            			submitSearch();
+	            		});
+	            	}
+	            	else
+	            	{
+	            		submitSearch();
+	            	}   
+                }
+                else
+    			{
+    				if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }
         });
     });
 
@@ -551,32 +605,84 @@ function initButtonActions() {
             {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
-            if (data.isFinishedTaskId) {
-            	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
-                for(var i=0;i<rowsPerPage;i++)
-                {
-                	taskIds = taskIds.replace(","," ");
-                }
-                if (data.unTranslatedTaskId) {
-                	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
-                }
-                if (confirm(confirmInfo)) {
-                    $.post(selfUrl, {
-                        state:currentTaskState,
-                        taskAction:"completeWorkflow",
-                        taskParam:data.isFinishedTaskId
-                    }, function(data) {
-                        submitSearch();
-                    });
-                }
-            }
-            else
-			{
-            	if (data.unTranslatedTaskId) 
+            
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            if(taskIds.indexOf(",") < 0)
+            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+            var isFinishUnUploadReportTask = true;
+            if(data.isNeedReportUploadCheckTaskId)
+            {
+            	if(!confirm(reportUploadCheckConfirmInfo))
             	{
-            		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+            		isFinishUnUploadReportTask = false;
             	}
-			}
+            }
+            
+            if(isFinishUnUploadReportTask)
+            {
+            	if (data.isFinishedTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+
+                    
+                	if (confirm(confirmInfo)) {
+                		$.post(selfUrl, {
+                			state:currentTaskState,
+                			taskAction:"completeWorkflow",
+                			taskParam:data.isFinishedTaskId
+                		}, function(data) {
+                			submitSearch();
+                		});
+                	}
+                }
+                else
+    			{
+                	if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }
+            if(!isFinishUnUploadReportTask)
+            {
+            	if (data.isFinishedReportUploadTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
+	            	{
+	            		$.post(selfUrl, {
+	            			state:currentTaskState,
+	            			taskAction:"completeActivity",
+	            			taskParam:data.isFinishedReportUploadTaskId
+	            		}, function(data) {
+	            			submitSearch();
+	            		});
+	            	}
+	            	else
+	            	{
+	            		submitSearch();
+	            	}   
+                }
+                else
+    			{
+    				if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }
         });
     });
 
@@ -681,10 +787,17 @@ function initButtonActions() {
             taskId:taskIds,
             random:random
         }, function(data) {
-            wfId = data.workflowId;
-            var action = exportUrl + "&exportSelectedWorkflowsOnly=true&wfId=" + wfId + "&taskId=" + taskIds + "&state=" + currentTaskState;
-            $("#listForm").attr("action", action);
-            $("#listForm").submit();
+        	wfId = data.workflowId;
+        	var action = exportUrl + "&exportSelectedWorkflowsOnly=true&wfId=" + wfId + "&taskId=" + taskIds + "&state=" + currentTaskState;
+        	if(data.isUploading)
+        	{
+        		alert("The activity is uploading. Please wait.");
+        	}
+        	else
+        	{
+        		$("#listForm").attr("action", action);
+                $("#listForm").submit();
+        	}
         });
 	});
 
@@ -900,31 +1013,39 @@ function getTaskList(state, pagenum, rowsperpage, sortcolumn, sorttype) {
 						var contextForTab = "oncontextmenu=\"contextForTab('" + item.state + "','" + item.taskId + "',event)\"";
 						tmp[9] = "<a href=\"" + detailUrl + "&state=" + currentTaskState + "&taskId=" + item.taskId + "&jobname=" + item.jobName + "\" " + contextForTab + ">" + item.jobName + "</a>";
 					}
-					tmp[11] = item.activityName;
+					if(item.isUploading == "Yes")
+					{
+						tmp[11] = "<span style=\"color:red\">Yes</span>";
+					}
+					else
+					{
+						tmp[11] = "No";
+					}
+					tmp[13] = item.activityName;
 					if(item.state == -1 || item.state==6)
 					{
-						tmp[13] = "";
+						tmp[15] = "";
 					}
 					else
 					{
-						tmp[13] = item.assignees;
+						tmp[15] = item.assignees;
 					}
 					if (item.state == 6)
-						tmp[15] = item.wordCount;
+						tmp[17] = item.wordCount;
 					else
-						tmp[15] = "<a href=\"#\" class=\"wordCountLink\" onclick='wordCountLink(" + item.taskId + ")'>" + item.wordCount + "</a>";
-					tmp[17] = "";
-					tmp[19] = item.sourceLocaleName;
-					tmp[21] = item.targetLocaleName;
+						tmp[17] = "<a href=\"#\" class=\"wordCountLink\" onclick='wordCountLink(" + item.taskId + ")'>" + item.wordCount + "</a>";
+					tmp[19] = "";
+					tmp[21] = item.sourceLocaleName;
+					tmp[23] = item.targetLocaleName;
 					if (!hash[item.targetLocaleName])
 					{
 						tls.push(item.targetLocaleName);
 						hash[item.targetLocaleName] = true;
 					}
-					tmp[23] = item.taskDateString;
-					tmp[25] = item.estimatedCompletionDateString;
-					tmp[27] = item.stateString;
-					tmp[29] = item.companyName;
+					tmp[25] = item.taskDateString;
+					tmp[27] = item.estimatedCompletionDateString;
+					tmp[29] = item.stateString;
+					tmp[31] = item.companyName;
 					
 					$("#list tbody").append(tmp.join(""));
 				});
@@ -1073,6 +1194,8 @@ function showAndHide(currentTaskState)
     $(".activityField").show();
     $(".assigneeItem").show();
     $(".assigneesField").show();
+    $(".isUploadingItem").hide();
+    $(".isUploadingField").hide();
     if ($("#isSuperUser").val() == "true")
     	$(".company").show();
     else
@@ -1088,6 +1211,8 @@ function showAndHide(currentTaskState)
             $(".translatedText").show();
             $(".taskDate").show();
             $(".ecdDate").hide();
+            $(".isUploadingItem").show();
+            $(".isUploadingField").show();
             break;
         case -1: //Finish
             $(".translatedText").hide();

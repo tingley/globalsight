@@ -19,6 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 // Envoy packages
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,6 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -91,7 +95,8 @@ public class ExcelReportsMainHandler extends PageHandler
         HttpSession session = p_request.getSession(false);
         uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
 
-        initData();
+        User curUser = getUser(session);
+        initData(curUser.getUserId(), activityName);
 
         List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
         if (reportNameListUsing6States.contains(activityName))
@@ -119,7 +124,7 @@ public class ExcelReportsMainHandler extends PageHandler
      * this !!!
      */
     @SuppressWarnings("unchecked")
-    private void initData()
+    private void initData(String p_curUserId, String reportType)
     {
         try
         {
@@ -128,8 +133,17 @@ public class ExcelReportsMainHandler extends PageHandler
             SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
                     getUILocale()));
 
-            projectList = new ArrayList<Project>(ServerProxy
-                    .getProjectHandler().getAllProjects());
+            // Detailed Word Count Report
+            if ("xlsReportFileList".equalsIgnoreCase(reportType))
+            {
+                projectList = (ArrayList<Project>) ServerProxy
+                        .getProjectHandler().getProjectsByUser(p_curUserId);
+            }
+            else
+            {
+                projectList = new ArrayList<Project>(ServerProxy
+                        .getProjectHandler().getAllProjects());
+            }
             SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
         }
         catch (Exception e)
@@ -148,6 +162,7 @@ public class ExcelReportsMainHandler extends PageHandler
                 ReportHelper.getJobInfo(stateList).values());
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
+            filterReportJobInfoByProject(reportJobInfoList);
             SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
                     JobComparator.NAME, getUILocale()));
         }
@@ -166,11 +181,42 @@ public class ExcelReportsMainHandler extends PageHandler
                 ReportHelper.getJobInfo(stateList).values());
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
+            filterReportJobInfoByProject(reportJobInfoList);
             SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
                     JobComparator.NAME, getUILocale()));
         }
 
         return reportJobInfoList;
+    }
+
+    // If job does not belong to projects current user is member of, remove this
+    // job.
+    private void filterReportJobInfoByProject(
+            List<ReportJobInfo> reportJobInfoList)
+    {
+        Set<String> projectIds = getProjectIdSet();
+        for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it
+                .hasNext();)
+        {
+            ReportJobInfo info = it.next();
+            if (!projectIds.contains(info.getProjectId()))
+            {
+                it.remove();
+            }
+        }
+    }
+
+    private Set<String> getProjectIdSet()
+    {
+        Set<String> projectIds = new HashSet<String>();
+        if (projectList != null && projectList.size() > 0)
+        {
+            for (Project pro : projectList)
+            {
+                projectIds.add(String.valueOf(pro.getId()));
+            }
+        }
+        return projectIds;
     }
 
     protected Locale getUILocale()

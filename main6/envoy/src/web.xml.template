@@ -79,6 +79,21 @@
     </user-data-constraint>
 </security-constraint>
 %%ssl_comments_start%% -->
+<!--Fix McAfee security issue "OPTIONS Method Enabled"-->
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>NoAccess</web-resource-name>     
+        <url-pattern>/*</url-pattern> 
+        <http-method>OPTIONS</http-method>
+    </web-resource-collection>
+	<auth-constraint></auth-constraint>
+</security-constraint>
+<!--Fix McAfee security issue "Cookie Not Marked as HttpOnly"-->
+<session-config>
+  <cookie-config>
+    <http-only>true</http-only>
+  </cookie-config>
+</session-config>
 
 <!-- Begin: Filter -->
     <!-- Note: EncodingFilter must be the first filter. -->

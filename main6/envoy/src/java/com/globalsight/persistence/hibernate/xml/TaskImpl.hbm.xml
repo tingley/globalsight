@@ -64,6 +64,14 @@
          
         <property name="isUploading" length="1" column="IS_UPLOADING"
             type="character" not-null="false" unique="false" />
+            
+        <property name="isReportUploaded"
+            column="IS_REPORT_UPLOADED" type="int" not-null="true"
+            unique="false" />
+            
+        <property name="isReportUploadCheck"
+            column="IS_REPORT_UPLOAD_CHECK" type="int" not-null="true"
+            unique="false" />
 
         <bag name="ratings" inverse="true" cascade="save-update">
             <key column="TASK_ID" />

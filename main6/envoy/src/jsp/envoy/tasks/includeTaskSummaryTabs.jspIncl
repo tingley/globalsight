@@ -116,14 +116,14 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","<%=labelFinishWarning%>"];
-var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-complActivity"]
+var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>"];
+var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
 var dialogParam={
         modal: true,
 		autoOpen: false,
-		width: 500,
+		width: 550,
 		minHeight: 110,
         buttons: {
             OK: function () {
@@ -138,7 +138,7 @@ var dialogParam={
 var dialogParam1={
         modal: true,
 		autoOpen: false,
-		width: 500,
+		width: 550,
 		minHeight: 110,
         buttons: {
         	Close: function () {
@@ -146,14 +146,40 @@ var dialogParam1={
             }
         }
     }
+var dialogParam2={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
+                document.location.replace($(this).prop("urlSent"));
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+                document.location.replace($(this).prop("urlCancel"));
+            }
+        }
+    };
 $(function () {
 	for(var i=0;i<popDialogId.length;i++){
 		var temp=$(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
 		temp.attr("title",popTile[i]);
-		temp.dialog(dialogParam1);
+		if(i< popDialogId.length - 2)
+		{
+			temp.dialog(dialogParam1);
+		}
+		else if(i == popDialogId.length - 1)
+		{
+			temp.dialog(dialogParam2);
+		}
+		else
+		{
+			temp.dialog(dialogParam);
+		}
 	}
-	temp.dialog(dialogParam);
 });
 
 /**
@@ -168,8 +194,11 @@ $(function () {
  * 5) Other
  */
 function doFinished(urlSent) {
+	var isReportUploadCheck = <%=isReportUploadCheck%>;
+	var isUploaded = <%=isUploaded%>;
     var stfStatusMessage = "<%=stfStatusMessage%>";
     var isExportSTF = "<%=isExportSTF%>";
+    var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
     if (stfStatusMessage != "null" && isExportSTF == "true") {
         if (stfStatusMessage == "inprogress") {
             alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
@@ -193,8 +222,6 @@ function doFinished(urlSent) {
     	alert('Please score before finishing the activity.');
         return false;
    	}
-    
-
     
         var checked = false;
         var selectedRadioBtn = null;
@@ -270,9 +297,21 @@ function doFinished(urlSent) {
 				warningMessage += getScrollableDiv(tempMsg, pagesArr);
 				warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
 				
-				$("#dialog-complActivity").html(warningMessage);
-				$("#dialog-complActivity").prop("urlSent", urlSent);
-				$("#dialog-complActivity").dialog("open").height("auto");
+				if(isReportUploadCheck == 1 &&
+						isUploaded != 1)
+				{
+					var urlCancel = "<%=uploadReportUrl%>";
+					$("#dialog-reportUploadCheck").html(labelReportUploadCheckWarningMessage);
+					$("#dialog-reportUploadCheck").prop("urlSent", urlSent);
+					$("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
+					$("#dialog-reportUploadCheck").dialog("open").height("auto");
+				}
+				else
+				{
+					$("#dialog-complActivity").html(warningMessage);
+					$("#dialog-complActivity").prop("urlSent", urlSent);
+					$("#dialog-complActivity").dialog("open").height("auto");
+				}
 			});
         }
 }
@@ -385,6 +424,23 @@ function validate()
         }
     }
     return true;
+}
+
+function doUploadingCheck(urlSent)
+{
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=uploadingCheck&taskId="+taskId+"&t=" + new Date();
+	$.getJSON(url, function (data) {
+		if(data.isUploading == true)
+		{
+			$("#dialog-taskIsUploading").html("The activity is uploading. Please wait.");
+			$("#dialog-taskIsUploading").prop("urlSent", urlSent);
+			$("#dialog-taskIsUploading").dialog("open").height("auto");
+		}
+		else
+		{
+			location.replace(urlSent);
+		}
+	});
 }
 </SCRIPT>
 <iframe style="width:0; height:0;display:none" name="hiddenFrame"></iframe>
@@ -598,7 +654,7 @@ function validate()
 	       (perms.getPermissionFor(Permission.ACTIVITIES_EXPORT) ||
 	        (state == stateInProgress && perms.getPermissionFor(Permission.ACTIVITIES_EXPORT_INPROGRESS))))
 	    {%>
-	         <INPUT TYPE=BUTTON NAME=ExportButton VALUE="<%= bundle.getString("lb_export")%>..." ONCLICK="location.replace('<%= exportLink.toString() %>')">
+	         <INPUT TYPE=BUTTON NAME=ExportButton VALUE="<%= bundle.getString("lb_export")%>..." ONCLICK="doUploadingCheck('<%= exportLink.toString() %>')">
 	    <%}	    
 	    if(Task.STATE_REDEAY_DISPATCH_GSEDTION == state) {%>
 	        <INPUT TYPE=BUTTON NAME=ReCreateGSEditionJobButton VALUE="<%= bundle.getString("lb_recreate_edition_job") %>..." ONCLICK="recreateGSEdition('<%= recreateGSUrl %>')">
@@ -671,7 +727,7 @@ function validate()
 	                
 	                if (review_only)
 	                {
-	                	if(reviewCommentReportPermission)
+	                	if(reviewCommentReportPermission || isReportUploadCheck == 1)
 	                	{
 	                %>
 	                	 <td WIDTH="2"></td>

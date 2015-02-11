@@ -28,6 +28,7 @@ org/apache/xml/dtm/ref
 org/apache/bcel/util
 org/apache/xml/res
 org/apache/bcel/verifier/exc
+org/apache/regexp
 org/apache/xpath/res
 org/apache/xpath/axes
 org

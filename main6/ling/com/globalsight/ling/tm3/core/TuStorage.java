@@ -748,6 +748,8 @@ abstract class TuStorage<T extends TM3Data>
     //
 
     public abstract long getTuCount(Date start, Date end) throws SQLException;
+    
+    public abstract long getTuCount(Date start, Date end, Set<String> jobAttributeSet) throws SQLException;
 
     public abstract long getTuvCount(Date start, Date end) throws SQLException;
 
@@ -755,6 +757,9 @@ abstract class TuStorage<T extends TM3Data>
 
     public abstract long getTuCountByLocale(TM3Locale locale, Date start,
             Date end) throws SQLException;
+     
+    public abstract long getTuCountByLocale(TM3Locale locale, Date start,
+            Date end, Set<String> jobAttributeSet) throws SQLException;
 
     public abstract long getTuvCountByLocale(TM3Locale locale, Date start,
             Date end) throws SQLException;
@@ -766,6 +771,11 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
             throws SQLException;
+            
+    public abstract long getTuCountByAttributes(
+            Map<TM3Attribute, Object> inlineAttrs,
+            Map<TM3Attribute, String> customAttrs, Date start, Date end, Set<String> jobAttributeSet)
+            throws SQLException;
 
     public abstract long getTuvCountByAttributes(
             Map<TM3Attribute, Object> inlineAttrs,
@@ -775,13 +785,23 @@ abstract class TuStorage<T extends TM3Data>
     // Paging interface for data handles
     public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
             Date start, Date end) throws SQLException;
+    
+    public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
+            Date start, Date end, Set<String> jobAttributeSet) throws SQLException;
 
     public abstract List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
             TM3Locale locale, Date start, Date end) throws SQLException;
+            
+    public abstract List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
+            TM3Locale locale, Date start, Date end,  Set<String> jobAttributeSet) throws SQLException;
 
     public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
             int count, Map<TM3Attribute, Object> inlineAttrs,
             Map<TM3Attribute, String> customAttrs, Date start, Date end)
+            throws SQLException;
+     public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
+            int count, Map<TM3Attribute, Object> inlineAttrs,
+            Map<TM3Attribute, String> customAttrs, Date start, Date end, Set<String> jobAttributeSet)
             throws SQLException;
 
     // Support for the "get tu by tuv" hack.

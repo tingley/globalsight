@@ -677,6 +677,13 @@ public class DownloadFileHandler extends PageHandler
         Set<String> xlzFolders = new HashSet<String>();
         for (File file : files)
         {
+        	// is eloqua obj file
+        	String name = file.getName();
+        	if (name.startsWith("(") && name.endsWith(".obj"))
+        	{
+        		continue;
+        	}
+        	
             DownloadFile downloadFolder = new DownloadFile(file);
             if (file.isDirectory() && !FileUtil.isEmpty(file))
             {

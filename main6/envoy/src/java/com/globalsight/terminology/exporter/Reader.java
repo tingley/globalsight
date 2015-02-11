@@ -174,7 +174,7 @@ public class Reader
             if (mode.equals(options.SELECT_ALL))
             {
                 // TODO: add db filtering for better UI feedback
-                count = m_termbase.getEntryCount(filter);
+                count = m_termbase.getTermCount(lang, filter, true);
 
                 m_options.setStatus(m_options.ANALYZED);
                 m_options.setExpectedEntryCount(count);
@@ -182,7 +182,7 @@ public class Reader
             else if (mode.equals(options.SELECT_LANGUAGE))
             {
                 // TODO: add db filtering for better UI feedback
-                count = m_termbase.getTermCount(lang, filter);
+                count = m_termbase.getTermCount(lang, filter, true);
 
                 m_options.setStatus(m_options.ANALYZED);
                 m_options.setExpectedEntryCount(count);

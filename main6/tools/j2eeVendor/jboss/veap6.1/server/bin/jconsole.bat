@@ -5,7 +5,7 @@ rem -------------------------------------------------------------------------
 rem
 rem A script for running jconsole with the remoting-jmx libraries on the classpath.
 
-rem $Id: jconsole.bat,v 1.1 2013/04/19 06:06:24 leo Exp $
+rem $Id: jconsole.bat,v 1.2 2014/08/11 09:41:42 yorkjin Exp $
 
 @if not "%ECHO%" == ""  echo %ECHO%
 @if "%OS%" == "Windows_NT" setlocal
@@ -68,6 +68,7 @@ set CLASSPATH=%CLASSPATH%;%JAVA_HOME%\lib\tools.jar
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\remoting-jmx\main"
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\remoting3\main"
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\logging\main"
+call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\logging\jul-to-slf4j-stub\main"
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\xnio\main"
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\xnio\nio\main"
 call :SearchForJars "%JBOSS_MODULEPATH%\system\layers\base\org\jboss\sasl\main"

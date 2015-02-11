@@ -235,7 +235,7 @@ public class TMSearchEditEntryHandlerHelper
                 ProjectTmTuTProp p = it.next();
                 String propType = p.getPropType();
                 propType = propType.substring(5);
-                tuAttributes.add(propType + ":" + p.getPropValue());
+                tuAttributes.add(fixString(EditUtil.encodeXmlEntities(propType + ":" + p.getPropValue())));
             }
             entryInfo.put("tuAttributes", tuAttributes);
         }
@@ -251,18 +251,18 @@ public class TMSearchEditEntryHandlerHelper
         String modifyUser = trgTuv.getModifyUser();
         String modifyDate = UTC.valueOf(trgTuv.getModifyDate());
 
-        entryInfo.put("sid", sid);
+		entryInfo.put("sid", sid == null ? na : fixString(EditUtil.encodeXmlEntities(sid)));
         String createdByName = UserUtil.getUserNameById(createdBy);
         entryInfo.put("createdBy", createdBy == null ? 
-                na : EditUtil.encodeXmlEntities(createdByName));
+                na : fixString(EditUtil.encodeXmlEntities(createdByName)));
         entryInfo.put("createdOn", createdOn == null ? na : createdOn);
         String modifyUserName = UserUtil.getUserNameById(modifyUser);
         entryInfo.put("modifiedBy", modifyUser == null ?
-                na : EditUtil.encodeXmlEntities(modifyUserName));
+                na : fixString(EditUtil.encodeXmlEntities(modifyUserName)));
         entryInfo.put("modifiedOn", modifyDate == null ? na : modifyDate);
         entryInfo.put("sourceLocale", srcTuv.getLocale().getDisplayName());
         entryInfo.put("targetLocale", targetLocale.getDisplayName());
-        entryInfo.put("tmName", EditUtil.encodeXmlEntities(tm.getName()));
+        entryInfo.put("tmName", fixString(EditUtil.encodeXmlEntities(tm.getName())));
 
         String srcSegment = GxmlUtil.stripRootTag(srcTuv.getSegment());
         SegmentManager segmentManagerSource = new SegmentManager();
@@ -277,7 +277,7 @@ public class TMSearchEditEntryHandlerHelper
         source = source.replace("\n", "\\n");
         String ptagsSource = segmentManagerSource.getPtagString();
         entryInfo.put("source", source);
-        entryInfo.put("ptagsSource", ptagsSource);
+        entryInfo.put("ptagsSource", ptagsSource); 
 
         String trgSegment = GxmlUtil.stripRootTag(trgTuv.getSegment());
         SegmentManager segmentManagerTarget = new SegmentManager();
@@ -348,5 +348,11 @@ public class TMSearchEditEntryHandlerHelper
             }
         }
         return trgTuv;
+    }
+    
+    private static String fixString(String str)
+    {
+        str = str.replace("\\", "\\\\");
+        return str;
     }
 }

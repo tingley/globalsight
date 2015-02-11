@@ -113,7 +113,7 @@ function changed(){
 		$.ajax({
 			  type: 'GET',
 			   dataType: "text",
-			  url: ajaxUrl+"?linkName=ready&pageName=WF2&action=renameJobSummary&jobId="+${jobId}+"&jobName="+newvl,
+			  url: ajaxUrl+"?linkName=ready&pageName=WF2&action=renameJobSummary&jobId="+${jobId}+"&jobName="+ encodeURI(encodeURI(newvl)),
 			  success: function(data)
 		        {
 		            if (data=="")

@@ -89,6 +89,15 @@ public class ReaderThread
             // entry and output.
             ArrayList entryIds = getEntryIds();
             EntryOperation eo = new EntryOperationImpl();
+            
+            com.globalsight.terminology.exporter.ExportOptions options =
+                (com.globalsight.terminology.exporter.ExportOptions)m_options;
+            String selectMode = options.getSelectMode();
+            String selectLanguages = "";
+            if (!selectMode.equals(options.SELECT_ALL))
+            {
+            	selectLanguages = options.getSelectLanguage();
+            }
 
             for (int i = 0; i < entryIds.size(); ++i)
             {
@@ -106,12 +115,12 @@ public class ReaderThread
                                             com.globalsight.terminology.exporter.ExportOptions.TYPE_TBX))
                     {
                         entryXml = eo.getTbxEntryForExport(m_termbase.getId(),
-                                entryId, 0, "", "", m_session);
+                                entryId, 0, selectLanguages, "", m_session);
                     }
                     else
                     {
                         entryXml = eo.getEntryForExport(m_termbase.getId(),
-                                entryId, 0, "", "", m_session);
+                                entryId, 0, selectLanguages, "", m_session);
                     }
 
                     if (!applyFilter(entryXml))
@@ -120,6 +129,9 @@ public class ReaderThread
                         m_results.fireResult(result);
                         continue;
                     }
+
+                    if(entryXml.length() == 0)
+                    	continue;
 
                     result.setResultObject(entryXml);
 

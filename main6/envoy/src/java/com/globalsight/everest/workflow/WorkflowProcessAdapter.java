@@ -886,6 +886,10 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         String actionType = p_param.getAttribute(
                 WorkflowConstants.FIELD_ACTION_TYPE,
                 WorkflowTaskInstance.NO_ACTION);
+        
+        int reportUploadCheck = p_param.getIntAttribute(
+                WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK,
+                WorkflowConstants.REPORT_UPLOAD_CHECK);
 
         String rolePreference = p_param
                 .getAttribute(WorkflowConstants.FIELD_ROLE_PREFERENCE);
@@ -905,6 +909,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         p_wti.setCompletedTime(timeToComplete);
         p_wti.setOverdueToPM(overduePM);
         p_wti.setOverdueToUser(overdueUser);
+        p_wti.setReportUploadCheck(reportUploadCheck);
         p_wti.setDisplayRoleName(UserUtil.getUserNamesByIds(displayRoleName));
     }
 

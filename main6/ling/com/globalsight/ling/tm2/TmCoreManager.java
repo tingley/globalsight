@@ -346,6 +346,10 @@ public interface TmCoreManager
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter, Connection conn) throws RemoteException,
             LingManagerException;
+    
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter, Connection conn, Set<String> jobAttributeSet)
+    		throws RemoteException, LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a
@@ -365,6 +369,9 @@ public interface TmCoreManager
      */
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException;
+    
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter, Set<String> jobAttributeSet) throws RemoteException, LingManagerException;
 
     /**
      * Return an Iterator that will return all the segments in a TM that have a
@@ -393,6 +400,10 @@ public interface TmCoreManager
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter, Connection conn)
             throws RemoteException, LingManagerException;
+            
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a
@@ -417,6 +428,10 @@ public interface TmCoreManager
     public int getSegmentsCountByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException;
+    
+    public int getSegmentsCountByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter,Set<String> jobAttributeSet)
+    		throws RemoteException, LingManagerException;
 
     /**
      * Return an Iterator that returns all the segments in a TM that were added
@@ -446,6 +461,10 @@ public interface TmCoreManager
     public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter, Connection conn)
             throws RemoteException, LingManagerException;
+            
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException;
 
     /**
      * Return the count of the number of segments that would be returned to a
@@ -471,6 +490,10 @@ public interface TmCoreManager
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException;
+    
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter,Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException;
 
     /**
      * Perform a concordance query for the given string across the specified

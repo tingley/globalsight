@@ -199,6 +199,7 @@ public class MTProfileHandlerHelper
         mtEnginesSupportAll.add(EngineEnum.MS_Translator);
         mtEnginesSupportAll.add(EngineEnum.Safaba);
         mtEnginesSupportAll.add(EngineEnum.DoMT);
+        mtEnginesSupportAll.add(EngineEnum.Google_Translate);
         return getMTProfilesByEngine(mtEnginesSupportAll);
     }
 

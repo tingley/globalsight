@@ -17,8 +17,10 @@
 package com.globalsight.ling.tm2.population;
 
 import java.sql.Connection;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -202,8 +204,10 @@ public class TmPopulator
                     p_options.getSaveTmId(), true);
             SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
             segtmInfo.setJob(job);
+            Timestamp newCreationDate = new Timestamp(new Date().getTime());
             mappingHolder = segtmInfo.saveToSegmentTm(
-                    pageJobData.getTusToSaveToSegmentTm(p_options),
+            		reSetTuvDate(newCreationDate, 
+            				pageJobData.getTusToSaveToSegmentTm(p_options)),
                     sourceLocale, tm, p_targetLocales,
                     TmCoreManager.SYNC_MERGE, false);
         }
@@ -221,6 +225,22 @@ public class TmPopulator
         }
 
         return mappingHolder;
+    }
+    
+    //Set exportDate as tuv's creationDate and modifyDate for populate TM
+    private Collection reSetTuvDate(Timestamp p_creationDate,
+    					Collection<? extends BaseTmTu> p_segments)
+    {
+    	for(BaseTmTu baseTu: p_segments)
+    	{
+    		for(BaseTmTuv baseTuv : baseTu.getTuvs())
+    		{
+    			baseTuv.setCreationDate(p_creationDate);
+    			baseTuv.setModifyDate(p_creationDate);
+    		}
+    	}
+
+    	return p_segments;
     }
 
     /**

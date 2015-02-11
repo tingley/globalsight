@@ -20,15 +20,19 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
-
 import org.quartz.Calendar;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
-import org.quartz.SimpleTrigger;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
+import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
 
 import com.globalsight.everest.util.system.SystemShutdownException;
@@ -166,13 +170,15 @@ public class Quartz
 	private ScheduledEvent _findEvent(String eventId) throws Exception
 	{
 		ScheduledEvent event = new ScheduledEvent();
-		JobDetail jobDetail = scheduler.getJobDetail(eventId,
-				SchedulerConstants.DEFAULT_GROUP);
-		Trigger trigger = scheduler.getTrigger(eventId + TRIGGER_SUFFIX,
-				SchedulerConstants.DEFAULT_GROUP);
-		event.setId(jobDetail.getName());
-		event.setState(String.valueOf(scheduler.getTriggerState(trigger
-				.getName(), SchedulerConstants.DEFAULT_GROUP)));
+		JobDetail jobDetail = scheduler.getJobDetail(new JobKey(eventId, SchedulerConstants.DEFAULT_GROUP));
+		
+		Trigger trigger = scheduler.getTrigger(new TriggerKey(eventId + TRIGGER_SUFFIX,
+				SchedulerConstants.DEFAULT_GROUP));
+		
+		event.setId(jobDetail.getKey().getName());
+		
+		event.setState(String.valueOf(scheduler.getTriggerState(trigger.getKey())));
+		
 		event.setEventInfo((EventInfo) jobDetail.getJobDataMap().get(
 				SchedulerConstants.KEY_PARAM));
 
@@ -190,8 +196,9 @@ public class Quartz
 	private void _modifyJob(EventInfo eventInfo, String jobName)
 			throws Exception
 	{
-		JobDetail jobDetail = scheduler.getJobDetail(jobName,
-				SchedulerConstants.DEFAULT_GROUP);
+		JobDetail jobDetail = scheduler.getJobDetail(new JobKey(jobName,
+				SchedulerConstants.DEFAULT_GROUP));
+		
 		jobDetail.getJobDataMap().put(SchedulerConstants.KEY_PARAM, eventInfo);
 		scheduler.addJob(jobDetail, true);
 	}
@@ -208,9 +215,11 @@ public class Quartz
 		String jobName = JOB_PREFIX + System.currentTimeMillis() + getIndex();
 
 		// Build job detail
-		JobDetail jobDetail = new JobDetail(jobName,
-				SchedulerConstants.DEFAULT_GROUP, event.getEventHandlerClass());
-
+		JobDetailImpl jobDetail = new JobDetailImpl();
+		jobDetail.setName(jobName);
+		jobDetail.setGroup(SchedulerConstants.DEFAULT_GROUP);
+		jobDetail.setJobClass(event.getEventHandlerClass());
+		
 		JobDataMap jobDataMap = jobDetail.getJobDataMap();
 		jobDataMap.put(SchedulerConstants.EVENT_KEY, EventHandler.INITIAL);
 		jobDataMap.put(SchedulerConstants.KEY_PARAM, event.getEventInfo());
@@ -221,21 +230,68 @@ public class Quartz
 				event.getRecurrenceRule());
 
 		if (timeExpressionConverter.isInterval())
-		{
+ {
 			int repeatCount = (event.getRepeatCount() > -1) ? event
 					.getRepeatCount() : -1;
-			trigger = new SimpleTrigger(jobName + TRIGGER_SUFFIX,
-					SchedulerConstants.DEFAULT_GROUP, repeatCount,
-					timeExpressionConverter.getIntervalMilli());
+
+			if (event.getCalendar() != null
+					|| timeExpressionConverter.getCalendar() != null) {
+				trigger = TriggerBuilder.newTrigger().withIdentity(
+						jobName + TRIGGER_SUFFIX,
+						SchedulerConstants.DEFAULT_GROUP).withSchedule(
+						SimpleScheduleBuilder.simpleSchedule()
+								.withIntervalInMilliseconds(
+										timeExpressionConverter
+												.getIntervalMilli())
+								.withRepeatCount(repeatCount))
+						.modifiedByCalendar(jobName + CALENDAR_SUFFIX).startAt(
+								event.getStartTime() == null ? new Date()
+										: event.getStartTime()).endAt(
+								event.getEndTime() != null ? event.getEndTime()
+										: null).build();
+			} else {
+				trigger = TriggerBuilder.newTrigger().withIdentity(
+						jobName + TRIGGER_SUFFIX,
+						SchedulerConstants.DEFAULT_GROUP).withSchedule(
+						SimpleScheduleBuilder.simpleSchedule()
+								.withIntervalInMilliseconds(
+										timeExpressionConverter
+												.getIntervalMilli())
+								.withRepeatCount(repeatCount)).startAt(
+						event.getStartTime() == null ? new Date() : event
+								.getStartTime()).endAt(
+						event.getEndTime() != null ? event.getEndTime() : null)
+						.build();
+			}
 		}
 		else
-		{
-			trigger = new CronTrigger(jobName + TRIGGER_SUFFIX,
-					SchedulerConstants.DEFAULT_GROUP, timeExpressionConverter
-							.getCronExpression());
+ {
+			if (event.getCalendar() != null
+					|| timeExpressionConverter.getCalendar() != null) {
+				trigger = (CronTrigger) TriggerBuilder.newTrigger()
+						.withIdentity(jobName + TRIGGER_SUFFIX,
+								SchedulerConstants.DEFAULT_GROUP).withSchedule(
+								CronScheduleBuilder
+										.cronSchedule(timeExpressionConverter
+												.getCronExpression()))
+						.modifiedByCalendar(jobName + CALENDAR_SUFFIX).startAt(
+								event.getStartTime() == null ? new Date()
+										: event.getStartTime()).endAt(
+								event.getEndTime() != null ? event.getEndTime()
+										: null).build();
+			} else {
+				trigger = (CronTrigger) TriggerBuilder.newTrigger()
+						.withIdentity(jobName + TRIGGER_SUFFIX,
+								SchedulerConstants.DEFAULT_GROUP).withSchedule(
+								CronScheduleBuilder
+										.cronSchedule(timeExpressionConverter
+												.getCronExpression())).startAt(
+								event.getStartTime() == null ? new Date()
+										: event.getStartTime()).endAt(
+								event.getEndTime() != null ? event.getEndTime()
+										: null).build();
+			}
 		}
-		trigger.setStartTime(event.getStartTime() == null ? new Date() : event
-				.getStartTime());
 
 		// Add calendar if necessary
 		if (event.getCalendar() != null
@@ -252,13 +308,6 @@ public class Quartz
 
 			scheduler.addCalendar(jobName + CALENDAR_SUFFIX, multiCalendar,
 					true, true);
-			trigger.setCalendarName(jobName + CALENDAR_SUFFIX);
-		}
-
-		Date d = event.getEndTime();
-		if (d != null)
-		{
-			trigger.setEndTime(d);
 		}
 
 		scheduler.scheduleJob(jobDetail, trigger);
@@ -291,7 +340,8 @@ public class Quartz
      */
 	private boolean _unschedule(String jobName) throws Exception
 	{
-		return scheduler.deleteJob(jobName, SchedulerConstants.DEFAULT_GROUP)
+		return scheduler.deleteJob(new JobKey(jobName,
+				SchedulerConstants.DEFAULT_GROUP))
 				&& scheduler.deleteCalendar(jobName + CALENDAR_SUFFIX);
 	}
 

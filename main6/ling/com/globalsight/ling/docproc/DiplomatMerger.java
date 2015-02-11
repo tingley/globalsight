@@ -113,8 +113,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     // convert the target contents to entity '<','>','&',''' and '"'.
     private boolean isUseSecondaryFilter = false;
     // this is from HTML filter configuration
-    private boolean convertHtmlEntryFromSecondFilter = false;
+    private boolean convertHtmlEntityFromSecondFilter = false;
 
+    private static Pattern repairOfficeXml = Pattern
+            .compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
     //
     // Constructors
     //
@@ -232,8 +234,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             targetSeg = convertHtmlEntityForXml(targetSeg,
                     m_convertHtmlEntityForXml);
-
-            m_isCDATA = false;
         }
         else if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
                 || !isXmlFilterConfigured)
@@ -283,14 +283,19 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return s;
     }
 
-    private String convertHtmlEntityForXml(String s, boolean isEscapeEverything)
+    private String convertHtmlEntityForXml(String s,
+            boolean convertHtmlEntityForXml)
     {
         if (s == null || s.length() == 0)
             return s;
 
         s = decoding(s);
         s = decoding(s);
-        s = encoding(s, isEscapeEverything);
+
+        if (convertHtmlEntityForXml)
+        {
+            s = encoding(s, convertHtmlEntityForXml);
+        }
 
         return s;
     }
@@ -632,6 +637,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     && !FORMAT_PO.equals(mainFormat)
                     && !FORMAT_HTML.equals(mainFormat))
             {
+                // Do not encode CDATA content from XML and passing HTML.
                 if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
                         && ExtractorRegistry.FORMAT_HTML
                                 .equalsIgnoreCase(format) && m_isCDATA))
@@ -715,16 +721,19 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 }
             }
 
-            // if this segment is parsed twice(original parser and HTML parser),
-            // encode again to transform them all to entity.
-            // This will affect javaProperties,XML,and excel source files with
-            // secondary filter settings.
-            // TODO :: for now, only "javaProperties" and "PO" filters are using
-            // secondary filter, XML filter has abandoned this. Need refactor to
-            // use post filter way. [York 2014-05-27]
+            // GBS-3596 
+            if (isContent()
+                    && ExtractorRegistry.FORMAT_PO.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
+            {
+                tmp = fixPoStr(tmp);
+            }
+
+            // Only for JavaProperties file
             if (this.isUseSecondaryFilter
-                    && this.convertHtmlEntryFromSecondFilter
-                    && !ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
+                    && this.convertHtmlEntityFromSecondFilter
+                    && ExtractorRegistry.FORMAT_JAVAPROP
+                            .equalsIgnoreCase(mainFormat))
             {
                 char[] specXmlEncodeChar =
                 { '<', '>', '&', '"' };
@@ -742,9 +751,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     // For GBS-2521.
     private String repair(String s)
     {
-        Pattern p = Pattern
-                .compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
-        Matcher m = p.matcher(s);
+        Matcher m = repairOfficeXml.matcher(s);
 
         while (m.find())
         {
@@ -755,6 +762,30 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             s = s.replace(m.group(), m.group(1) + content + m.group(3));
         }
+
+        return s;
+    }
+
+    /**
+     * For PO content, "\'" and "\"" can be in 2 styles:
+     * Style one: \', \"
+     * Style two: &apos; , &quot;
+     * So, if there is "\", keep unchanged; for single ", encode it;
+     * for single ', keep unchanged, always output character style ' or \'.
+     * @param s
+     * @return
+     */
+    private String fixPoStr(String s)
+    {
+        // protect \' and \"
+        s = s.replace("\\\'", "_LeftSlashApos_");
+        s = s.replace("\\\"", "_LeftSlashQuot_");
+        // encode single ' and ""
+//        s = s.replace("\'", "&apos;");
+        s = s.replace("\"", "&quot;");
+        // revert \' and \"
+        s = s.replace("_LeftSlashApos_", "\\\'");
+        s = s.replace("_LeftSlashQuot_", "\\\"");
 
         return s;
     }
@@ -880,7 +911,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             encoderForSkeleton);
                     if (IFormatNames.FORMAT_XLIFF.equals(srcDataType)
                             || IFormatNames.FORMAT_XLIFF_NAME
-                                    .equals(srcDataType))
+                                    .equals(srcDataType)
+                            || IFormatNames.FORMAT_PO.equals(srcDataType))
                     {
                         tmp = entityEncodeForSkeleton(tmp, true);
                     }
@@ -1132,7 +1164,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return m_xmlEntityConverter.decodeStringBasic(p_xml);
     }
 
-    @SuppressWarnings("unused")
     private String encode(String p_xml)
     {
         return m_xmlEntityConverter.encodeStringBasic(p_xml);
@@ -1249,12 +1280,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     public void setConvertHtmlEntryFromSecondFilter(
             boolean p_convertHtmlEntryFromSecondFilter)
     {
-        this.convertHtmlEntryFromSecondFilter = p_convertHtmlEntryFromSecondFilter;
+        this.convertHtmlEntityFromSecondFilter = p_convertHtmlEntryFromSecondFilter;
     }
 
     public boolean getConvertHtmlEntryFromSecondFilter()
     {
-        return this.convertHtmlEntryFromSecondFilter;
+        return this.convertHtmlEntityFromSecondFilter;
     }
 
     public CxeMessage getCxeMessage()

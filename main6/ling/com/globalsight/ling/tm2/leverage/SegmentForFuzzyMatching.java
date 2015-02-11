@@ -47,6 +47,7 @@ class SegmentForFuzzyMatching
 
     private Map<String, Token> m_tokenMap;
     private int m_totalTokenCount;
+    private String m_text;
 
     
     // constructor
@@ -55,11 +56,13 @@ class SegmentForFuzzyMatching
     {
         m_tuvId = p_tuv.getId();
         m_subId = ((SegmentTmTu)p_tuv.getTu()).getSubId();
+        
+        String text = p_tuv.getFuzzyIndexFormat();
 
         List<Token> tokens = LuceneUtil.createGsTokens(
-            p_tuv.getFuzzyIndexFormat(), p_tuv.getLocale());
+                text, p_tuv.getLocale());
 
-
+        m_text = text;
         m_tokenMap = new HashMap<String, Token>(tokens.size());
         
         if(tokens.size() > 0)
@@ -86,6 +89,11 @@ class SegmentForFuzzyMatching
     public String getSubId()
     {
         return m_subId;
+    }
+    
+    public String getAllText()
+    {
+        return m_text;
     }
     
     public Set<String> getAllTokenStrings()

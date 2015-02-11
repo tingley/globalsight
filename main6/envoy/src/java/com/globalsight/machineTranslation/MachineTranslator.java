@@ -26,7 +26,7 @@ import java.util.Locale;
  */
 public interface MachineTranslator
 {
-    public static final String ENGINE_GOOGLE = "Google";
+    public static final String ENGINE_GOOGLE = "Google_Translate";
     public static final String ENGINE_PROMT = "ProMT";
     public static final String ENGINE_MSTRANSLATOR = "MS_Translator";
     public static final String ENGINE_ASIA_ONLINE = "Asia_Online";
@@ -79,7 +79,7 @@ public interface MachineTranslator
 
     public static final String[] gsSupportedMTEngines =
     { ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE, ENGINE_SAFABA,
-            ENGINE_IPTRANSLATOR, ENGINE_DOMT };
+            ENGINE_IPTRANSLATOR, ENGINE_DOMT, ENGINE_GOOGLE};
 
     /**
      * Returns the MT engine name.

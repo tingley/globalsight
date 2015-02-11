@@ -16,10 +16,12 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.mtprofile;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
@@ -333,8 +335,10 @@ public class MTProfileImportHandler extends PageHandler
 				String strValue = null;
 				InputStream is;
 				is = new FileInputStream(uploadedFile);
+				BufferedReader bf = new BufferedReader(
+						new InputStreamReader(is));
 				Properties prop = new Properties();
-				prop.load(is);
+				prop.load(bf);
 				Enumeration enum1 = prop.propertyNames();
 				while (enum1.hasMoreElements())
 				{

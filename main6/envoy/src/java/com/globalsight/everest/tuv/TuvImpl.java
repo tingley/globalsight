@@ -1437,12 +1437,12 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return IssueImpl
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public IssueImpl getComment()
     {
         String hql = "from IssueImpl i where "
                 + "i.levelObjectTypeAsString = :type "
-                + "&& i.levelObjectId = :oId";
+                + "and i.levelObjectId = :oId";
         Map map = new HashMap();
         map.put("type", "S");
         map.put("oId", getId());

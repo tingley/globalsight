@@ -43,7 +43,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.TMProfileComparator;
-//import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -51,6 +50,9 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
+import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManager;
+import com.globalsight.util.system.LogManager;
+import com.globalsight.util.system.LogType;
 
 /**
  * TMProfileHandler is the page handler responsible for displaying a list of tm
@@ -132,6 +134,8 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 TMProfileHandlerHelper.saveTMProfile(tmProfile);
                 clearSessionExceptTableInfo(sess, TMP_KEY);
 
+                // log event before "saveRelationShipWithSR()".
+                logModifyEvent(p_request, tmProfile);
                 saveRelationShipWithSR(p_request, tmProfile);
             }
         }
@@ -869,4 +873,55 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 
 		return sessionMgr;
 	}
+
+	/**
+	 * When edit TM profile, log the edit event into log.
+	 * @param p_request
+	 * @param p_tmProfile
+	 */
+    private void logModifyEvent(HttpServletRequest p_request,
+            TranslationMemoryProfile p_tmProfile)
+    {
+        try
+        {
+            SegmentationRuleFilePersistenceManager srxManger = ServerProxy
+                    .getSegmentationRuleFilePersistenceManager();
+            String newRuleId = p_request.getParameter(TMProfileConstants.SELECTED_SR);
+            String newRuleName = "default";
+            if (!newRuleId.equals("-2"))
+            {
+                SegmentationRuleFile newRuleFile = srxManger
+                        .readSegmentationRuleFile(Long.parseLong(newRuleId));
+                newRuleName = newRuleFile.getName();
+            }
+            String tmpId = p_tmProfile.getIdAsLong().toString();
+
+            String oldRuleId = "-2";
+            String oldRuleName = "default";
+            SegmentationRuleFile srxFile = srxManger
+                    .getSegmentationRuleFileByTmpid(tmpId);
+            if (srxFile != null)
+            {
+                oldRuleId = String.valueOf(srxFile.getId());
+                oldRuleName = srxFile.getName();
+            }
+
+            if (newRuleId.equals(oldRuleId))
+            {
+                LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_UPDATE, p_tmProfile.getId(),
+                        "Update Translation Memory Profile [" + p_tmProfile.getName() + "]", p_tmProfile.getCompanyId());
+            }
+            else
+            {
+                LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_UPDATE, p_tmProfile.getId(),
+                        "Update Translation Memory Profile [" + p_tmProfile.getName() + "], segmentation rule is changed from \"" + oldRuleName + "\" to \"" + newRuleName + "\".", p_tmProfile.getCompanyId());
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.warn("Failed to log TM profile modification events: "
+                    + e.getMessage());
+            // ignore
+        }
+    }
 }

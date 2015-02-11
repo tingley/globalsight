@@ -30,6 +30,7 @@
       com.globalsight.everest.servlet.util.ServerProxy,
       com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.taskmanager.Task,
+      com.globalsight.everest.taskmanager.TaskImpl,
       com.globalsight.everest.util.system.SystemConfigParamNames,
       com.globalsight.everest.util.system.SystemConfiguration,
       com.globalsight.everest.webapp.WebAppConstants,
@@ -104,6 +105,8 @@
 <jsp:useBean id="editcomment" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="downloadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="originalSourceFile" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -321,6 +324,8 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelEditorWarning = bundle.getString("lb_editor_warning");
     String labelFinishWarning = bundle.getString("jsmsg_my_activities_finished");
     String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
+    String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
+    String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
     //use to get the translated text
     StringBuffer tarPageIds = new StringBuffer();
 
@@ -328,6 +333,9 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+    TaskImpl taskImpl = (TaskImpl)theTask;
+    int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
+    int isUploaded = taskImpl.getIsReportUploaded();
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -336,6 +344,11 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     		theTask.isType(Task.TYPE_REVIEW))
     {
     	needScore = true;
+    }
+    if(theTask.isType(Task.TYPE_REVIEW))
+    {
+    	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
+    	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
 
     //Urls of the links on this page
@@ -394,6 +407,12 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     		+ "=" + theTask.getId()
     		+ "&" + WebAppConstants.TASK_STATE +
     		"=" + theTask.getState();
+    
+    String uploadReportUrl = uploadreport.getPageURL()
+				    + "&" + WebAppConstants.TASK_ID
+					+ "=" + theTask.getId()
+					+ "&" + WebAppConstants.TASK_STATE +
+					"=" + theTask.getState();
   
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");

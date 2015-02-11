@@ -179,9 +179,9 @@ function doOnload()
 					        workDir = module.getRealPath();
                             String btr = module.getBranch();
                             if (btr != null && "HEAD".equalsIgnoreCase(btr)) {
-                            	cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "co", names[i]};
+                            	cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "-q", "co", "-P", names[i]};
                             } else {
-                            	cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "co", "-r", module.getBranch(), names[i]};
+                            	cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "-q", "co", "-P", "-r", module.getBranch(), names[i]};
                             }
 					        result = CVSUtil.exeCmd(cmd, workDir);
 					        out.println(result);
@@ -189,9 +189,9 @@ function doOnload()
 					        workDir += File.separator + names[i];
 					        //if is "HEAD", add "-A" parameter to remove sticky tag
 							if (btr != null && "HEAD".equalsIgnoreCase(btr)) {
-						        cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "update", "-d", "-A"};
+						        cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "-q", "update", "-P", "-d", "-A"};
 							} else {
-						        cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "update", "-d"};
+						        cmd = new String[]{"cvs", "-d", server.getCVSRootEnv(), "-q", "update", "-P", "-d"};
 							}
 					        CVSUtil.exeCmd(cmd, workDir);
 				        }
@@ -211,7 +211,7 @@ function doOnload()
 			        	    	sb.append("\"").append(names[i]).append("\" ");
 			        	    }
 			        	    sb.append("\"").append(names[nameLen]).append("\"");
-			        	    cmd = new String[]{"cvs","-d", server.getCVSRootEnv(), "update", "-d", sb.toString()};
+			        	    cmd = new String[]{"cvs","-d", server.getCVSRootEnv(), "-q", "update", "-P", "-d", sb.toString()};
 			        	    result = CVSUtil.exeCmd(cmd, workDir);
 			        	    out.println("");
 			        	    out.println(result);

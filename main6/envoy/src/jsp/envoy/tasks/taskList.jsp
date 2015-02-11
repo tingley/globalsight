@@ -425,6 +425,7 @@
                         <th class="smallCell overdueItem" width="5px"><img src="/globalsight/images/clock.gif" height="12" width="12" alt="Overdue"></th>
                         <th class="headerCell jobIdItem" id="jobIdItem" width=7%><%=bundle.getString("lb_job_id") %><span id="jobIdSort"></span></th>
                         <th class="headerCell jobNameItem" id="jobNameItem"><%=bundle.getString("lb_job_name") %><span id="jobNameSort"></span></th>
+                        <th class="headerCell isUploadingItem" id="isUploadingItem">Uploading</th>
                         <th class="headerCell activityItem" id="activityNameItem"><%=bundle.getString("lb_activity") %><span id="activityNameSort"></span></th>
                         <th class="headerCell assigneeItem"><%=bundle.getString("lb_assignees") %></th>
                         <th class="headerCell sourceWordCountItem" id="sourceWordCountItem"><%=bundle.getString("lb_source_word_count") %><span id="sourceWordCountSort"></span></th>
@@ -458,6 +459,7 @@
 	                        <input class="standardText jobIdField" type="text" id="jobIdFilter" name="jobIdFilter" />
                         </th>
                         <th class="jobNameItem"><input class="standardText" type="text" id="jobNameFilter" name="jobNameFilter" /></th>
+                        <th class="isUploadingItem">&nbsp;</th>
                         <th class="activityItem"><input class="standardText" type="text" id="activityNameFilter" name="activityNameFilter" /></th>
                         <th class="assigneeItem"><input class="standardText" type="text" id="assigneesNameFilter" name="assigneesNameFilter" /></th>
                         <th class="sourceWordCountItem">&nbsp;</th>

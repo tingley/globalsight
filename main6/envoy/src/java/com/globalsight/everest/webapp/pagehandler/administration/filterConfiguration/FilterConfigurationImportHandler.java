@@ -16,10 +16,12 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -41,8 +43,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
@@ -336,6 +336,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 		private Map<Long, Long> msOfficeExcelFilterIdMap = new HashMap<Long, Long>();
 		private Map<Long, Long> msOfficePPTFilterIdMap = new HashMap<Long, Long>();
 		private Map<Long, Long> plainTextFilterIdMap = new HashMap<Long, Long>();
+		private Map<Long,Long>  poFilterIdMap = new HashMap<Long,Long>();
 
 		public DoImport(String sessionId, File uploadedFile, String companyId)
 		{
@@ -362,7 +363,9 @@ public class FilterConfigurationImportHandler extends PageHandler
 				String strValue = null;
 				InputStream is = new FileInputStream(uploadedFile);
 				Properties prop = new Properties();
-				prop.load(is);
+				BufferedReader bf = new BufferedReader(
+						new InputStreamReader(is));
+				prop.load(bf);
 				Enumeration enum1 = prop.propertyNames();
 				while (enum1.hasMoreElements())
 				{
@@ -1428,6 +1431,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 				{
 					poFilter = poFilterList.get(i);
 					String name = poFilter.getFilterName();
+					Long id = poFilter.getId();
 					// get new filter name
 					String newFilterName = checkFilterNameExists(name,
 							"POFilter");
@@ -1455,6 +1459,10 @@ public class FilterConfigurationImportHandler extends PageHandler
 					HibernateUtil.save(poFilter);
 					addMessage("<b>" + newFilterName
 							+ "</b>  is imported successfully !");
+					// get new id
+					Long newId = selectNewId(newFilterName,
+							"POFilter");
+					poFilterIdMap.put(id, newId);
 				}
 			}
 			catch (Exception e)
@@ -1597,6 +1605,14 @@ public class FilterConfigurationImportHandler extends PageHandler
 						if (xmlRuleFilterIdMap.containsKey(filterId))
 						{
 							baseFilterMapping.setFilterId(xmlRuleFilterIdMap
+									.get(filterId));
+						}
+					}
+					else if ("po_filter".equalsIgnoreCase(filterTableName))
+					{
+						if (poFilterIdMap.containsKey(filterId))
+						{
+							baseFilterMapping.setFilterId(poFilterIdMap
 									.get(filterId));
 						}
 					}

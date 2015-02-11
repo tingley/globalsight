@@ -220,7 +220,9 @@ public class ExportFilterHelper
 					.equalsIgnoreCase(FilterConstants.JAVAPROPERTIES_TABLENAME))
 			{
 				JavaPropertiesFilter javaPropertiesFilter = (JavaPropertiesFilter) filter;
-				if (javaPropertiesFilter.getSecondFilterTableName() != null)
+				if (javaPropertiesFilter.getSecondFilterTableName() != null
+						&& !"".equals(javaPropertiesFilter
+								.getSecondFilterTableName()))
 				{
 					filterSet.add(javaPropertiesFilter
 							.getSecondFilterTableName()
@@ -345,7 +347,8 @@ public class ExportFilterHelper
 					.equalsIgnoreCase(FilterConstants.PO_TABLENAME))
 			{
 				POFilter poFilter = (POFilter) filter;
-				if (poFilter.getSecondFilterTableName() != null)
+				if (poFilter.getSecondFilterTableName() != null
+						&& !"".equals(poFilter.getSecondFilterTableName()))
 				{
 					filterSet.add(poFilter.getSecondFilterTableName() + "."
 							+ poFilter.getSecondFilterId());
@@ -512,6 +515,7 @@ public class ExportFilterHelper
 							}
 						}
 					}
+					
 				}
 			}
 			else if (filterTableName
@@ -1552,7 +1556,7 @@ public class ExportFilterHelper
 					.append(Long.toString(baseFilter.getCompanyId()))
 					.append(NEW_LINE);
 			buffer.append("base_filter.").append(baseFilter.getId())
-					.append(".CONFIG_XML = ").append(baseFilter.getConfigXml())
+					.append(".CONFIG_XML = ").append(checkSpecialChar(baseFilter.getConfigXml()))
 					.append(NEW_LINE);
 			buffer.append("##base_filter.").append(baseFilter.getId())
 					.append(".end").append(NEW_LINE).append(NEW_LINE);
@@ -1900,5 +1904,21 @@ public class ExportFilterHelper
 
 			}
 		}
+	}
+	
+	private static String checkSpecialChar(String str)
+	{
+		char[] chars = str.toCharArray();
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < chars.length; i++)
+		{
+			char ch = chars[i];
+			if (ch == '\\')
+			{
+				buffer.append('\\');
+			}
+			buffer.append(ch);
+		}
+		return buffer.toString();
 	}
 }

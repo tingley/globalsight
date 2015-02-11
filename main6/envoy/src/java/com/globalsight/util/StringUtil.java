@@ -81,7 +81,7 @@ public class StringUtil
     public static String replace(String src, String oldString, String newString)
     {
         if (src == null || src.length() == 0 || oldString == null
-                || oldString.length() == 0)
+                || oldString.length() == 0 || oldString.equals(newString))
         {
             return src;
         }
@@ -168,10 +168,10 @@ public class StringUtil
         return output.toString();
     }
 
-    public static void replaceStringBuffer(StringBuffer src, String oldString, String newString,
-            boolean oneTime)
+    public static void replaceStringBuffer(StringBuffer src, String oldString,
+            String newString, boolean oneTime)
     {
-        if (src == null || oldString == null)
+        if (src == null || oldString == null || oldString.equals(newString))
         {
             return;
         }

@@ -304,16 +304,31 @@ public class TaskListServlet extends HttpServlet
     private String getWorkflowIdOfTask(String taskId) {
         JSONObject obj = new JSONObject();
         String wfId = "-1";
+        boolean isUploading = false;
         if (StringUtil.isNotEmpty(taskId)) {
             try {
                 TaskImpl task = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
                 if (task != null)
-                    wfId = String.valueOf(task.getWorkflow().getId());
+                {
+                	wfId = String.valueOf(task.getWorkflow().getId());
+                	if(task.getIsUploading() == 'Y')
+                	{
+                		isUploading = true;
+                	}
+                }
             } catch (Exception e) {
                 logger.error("Cannot find workflow by task id [" + taskId + "]", e);
             }
         }
         obj.put("workflowId", wfId);
+        if(isUploading)
+        {
+        	obj.put("isUploading", true);
+        }
+        else
+        {
+        	obj.put("isUploading", false);
+        }
 
         return obj.toJSONString();
     }
@@ -514,6 +529,14 @@ public class TaskListServlet extends HttpServlet
                 if (params.isProjectManager() || params.isCanManageProjects())
                     TaskSearchUtil.setAllAssignees(taskImpl);
                 task.setAssignees(taskImpl.getAllAssigneesAsString());
+                if(taskImpl.getIsUploading() == 'Y')
+                {
+                	task.setIsUploading("Yes");
+                }
+                else
+                {
+                	task.setIsUploading("No");
+                }
                 
                 result.add(task);
             }

@@ -121,7 +121,7 @@ public class CreateJobsMainHandler extends PageHandler
     private static final String DISABLED = "disabled";
     private static final String SELECTED = "selected";
     private static final String SELECTED_FOLDER = "selected_folder_path_in_create_job";
-    private static final String CREATING_JOBS_NUM_SQL = "select count(ID) from JobImpl "
+    public static final String CREATING_JOBS_NUM_SQL = "select count(ID) from JobImpl "
     	+ " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
     	+ "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
     	+ Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')";
@@ -129,8 +129,8 @@ public class CreateJobsMainHandler extends PageHandler
     private static final int FAIL = 1;
     private final static int MAX_LINE_LENGTH = 4096;
     private Map<String, List<FileProfileImpl>> extensionToFileProfileMap;
-    private Map<String, String> l10NToTargetLocalesMap;
-    private Map<String, String> l10NToJobAttributeMap;
+    private Map<String, String> l10NToTargetLocalesMap = new HashMap<String, String>();
+    private Map<String, String> l10NToJobAttributeMap = new HashMap<String, String>();
 
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
             HttpServletRequest request, HttpServletResponse response,
@@ -450,8 +450,6 @@ public class CreateJobsMainHandler extends PageHandler
         {
             request.setAttribute("tmpFolderName", tmpFolderName);
             extensionToFileProfileMap = new HashMap<String, List<FileProfileImpl>>();
-            l10NToTargetLocalesMap = new HashMap<String, String>();
-            l10NToJobAttributeMap = new HashMap<String, String>();
         }
         SystemConfiguration sysConfig = SystemConfiguration.getInstance();
         boolean useSSL = sysConfig

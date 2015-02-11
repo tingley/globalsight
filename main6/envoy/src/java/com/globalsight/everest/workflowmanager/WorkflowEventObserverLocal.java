@@ -368,6 +368,18 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
 
             // delete in-progress TM data for the job
             deleteInProgressTmData(jobClone);
+
+            if (p_wfState.equals(Job.EXPORTED))
+            {
+                File diExportedDir = AmbFileStoragePathUtils
+                        .getDesktopIconExportedDir(p_wf.getCompanyId());
+                File jobDir = new File(diExportedDir, String.valueOf(p_wf
+                        .getJob().getId()));
+                if (!jobDir.exists())
+                {
+                    jobDir.mkdirs();
+                }
+            }
         }
     }
 

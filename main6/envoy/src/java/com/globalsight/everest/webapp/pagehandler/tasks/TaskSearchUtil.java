@@ -605,26 +605,9 @@ public class TaskSearchUtil
                 .get(TaskSearchParameters.ACTIVITY_NAME);
         if (name != null)
         {
-            String condition = (String) parameters.get(new Integer(
-                    TaskSearchParameters.ACTIVITY_NAME_CONDITION));
-        	if (SearchCriteriaParameters.CONTAINS.equals(condition))
-        	{
-        		name = "%" + name + "%";     		
-        		sql.append(" and t.name like :name ");
-        	}
-        	else if (name.indexOf("*") >= 0)
-            {
-                name = name.replace('*', '%');
-                sql.append(" and t.name like :name ");
-            }
-            else
-            {
-            	long companyId = CompanyWrapper.getCompanyByName(companyName)
-            	.getId();
-                sql.append(" and t.name = :name ");
-                name = name + "_" + companyId;
-            }
-
+    		name = "%" + name + "%_%";
+    		sql.append(" and t.name like :name ");
+        	
             params.put("name", name);
         }
         

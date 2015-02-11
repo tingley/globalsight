@@ -54,7 +54,8 @@
         userPerms.getPermissionFor(Permission.CVS_FILE_PROFILES) ||
         userPerms.getPermissionFor(Permission.ATTRIBUTE_VIEW) ||
         userPerms.getPermissionFor(Permission.ATTRIBUTE_GROUP_VIEW) ||
-        userPerms.getPermissionFor(Permission.LOGS_VIEW))
+        userPerms.getPermissionFor(Permission.LOGS_VIEW) ||
+        userPerms.getPermissionFor(Permission.OPERATION_LOG_VIEW))
             hasSetupMenu = true;
 
     boolean hasDataSourceMenu = false;
@@ -150,6 +151,7 @@
    String localePairsUrl = LinkHelper.getWebActivityURL(request, "locales");
    //String logoutUrl = LinkHelper.getWebActivityURL(request, "login");
    String logsUrl = LinkHelper.getWebActivityURL(request, "viewLogs");
+   String operationLogUrl = LinkHelper.getWebActivityURL(request, "operationLog");
    String myActivitiesUrl = LinkHelper.getWebActivityURL(request, "myactivities");
    String simpleOfflineUploadUrl = LinkHelper.getWebActivityURL(request, "simpleofflineupload");
    String myJobsUrl = LinkHelper.getWebActivityURL(request, "workflows");
@@ -168,6 +170,7 @@
    String createJobUrl = LinkHelper.getWebActivityURL(request, "createJobs");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
    String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
+   String eloquaUrl = LinkHelper.getWebActivityURL(request, "eloqua");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String adminSystemParametersUrl = LinkHelper.getWebActivityURL(request, "adminConfiguration");
    String remoteIpUrl = LinkHelper.getWebActivityURL(request, "remoteIpConfiguration");
@@ -422,6 +425,10 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_remote_ip_webse
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_logs")%>", "javascript:goToUrl('<%=logsUrl%>');", ""));
 <% } %>
 
+<% if (userPerms.getPermissionFor(Permission.OPERATION_LOG_VIEW) && isSuperAdmin3) { %>
+setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_logs_operation")%>", "javascript:goToUrl('<%=operationLogUrl%>');", ""));
+<% } %>
+
 <% if (ShutdownMainHandler.shutdownUserInterfaceEnabled() && isSuperAdmin3) { %>
 <% if (userPerms.getPermissionFor(Permission.SHUTDOWN_SYSTEM)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_shutdown")%>", "javascript:goToUrl('<%=shutdownUrl%>');", ""));
@@ -541,6 +548,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_jo
 
 <% if (userPerms.getPermissionFor(Permission.COTI_JOB)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_coti_job")%>", "javascript:goToUrl('<%=createCotiJobUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.ELOQUA)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_eloqua")%>", "javascript:goToUrl('<%=eloquaUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

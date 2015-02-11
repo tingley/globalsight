@@ -807,7 +807,7 @@ function generateBaseFilterList(filterTableName, filter)
 	var bfs = existBaseFilters;
 	var str = new StringBuffer("<select id='" + filterTableName + "_baseFilterSelect' ");
 	
-	if (filterTableName == "java_properties_filter")
+	if (filterTableName == "java_properties_filter" || filterTableName == "po_filter")
 	{
 		str.append("style='width:200px'");
 	}

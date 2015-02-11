@@ -386,7 +386,7 @@ body {
                                 </TD>
                                 <TD>
                                     <SPAN CLASS="standardText">
-                                        <input type="password" name="passwordField" size="18" tabIndex="2" style="width: 145px" value="<c:out value="${password}"/>" />
+                                        <input autocomplete="off" type="password" name="passwordField" size="18" tabIndex="2" style="width: 145px" value="<c:out value="${password}"/>" />
                                     </SPAN>
                                 </TD>
                             </TR>

@@ -771,7 +771,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         String srgGxml = srcTuv.getGxmlExcludeTopTags();
-        if (InternalTextUtil.isInternalText(srgGxml)
+        if ((InternalTextUtil.isInternalText(srgGxml) && !trgTuv.isLocalized())
                 || isPopulateSrcAsTrg(trgScore))
         {
             trgGxml = srgGxml;

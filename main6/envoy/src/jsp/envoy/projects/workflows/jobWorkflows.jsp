@@ -143,6 +143,7 @@
 			    </c:if>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_translate_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_estimated_workflow_completion_date")%>&nbsp;&nbsp;&nbsp;</span></td>
+			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold">Uploading&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_priority")%>&nbsp;&nbsp;&nbsp;</span></td>
 			</tr>
 		</thead>
@@ -203,6 +204,14 @@
 			    		<amb:permission name="<%=Permission.JOBS_ESTIMATEDCOMPDATE%>">
 			    			</a>
 			    		</amb:permission>
+			    	</c:if>
+			    </td>
+			    <td>
+			    	<c:if test="${item.isUploading == 'Yes'}">
+			    		<span style="color:red">Yes</span>
+			    	</c:if>
+			    	<c:if test="${item.isUploading == 'No'}">
+			    		No
 			    	</c:if>
 			    </td>
 			    <td style="text-align:center">
@@ -636,9 +645,23 @@ function realSubmitForm(specificButton){
          alert("<%=bundle.getString("jsmsg_cannot_operate_workflow_exporting")%>");
          return false;
       }
-	  var url = "${export.pageURL}&wfId=" + wfId + "&exportSelectedWorkflowsOnly=true&jobId=${jobId}";;
-	  $("#workflowForm").attr("action", url);
-	  $("#workflowForm").submit();
+
+     	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&wfId=" + wfId + "&t=" + new Date().getTime();
+		$.post(checkUrl,function(data){
+			var url = "${export.pageURL}&wfId=" + wfId + "&exportSelectedWorkflowsOnly=true&jobId=${jobId}";
+			if(data == "uploading")
+			{
+				alert("One or more workflows are uploading. Please wait.");
+				return false;
+			}
+			else
+			{
+			  $("#workflowForm").attr("action", url);
+			  $("#workflowForm").submit();
+			}
+		});
+		   
+	  
    }
    else if (specificButton == "Dispatch")
    {

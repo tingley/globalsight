@@ -18,11 +18,13 @@
 package com.globalsight.everest.tm.exporter;
 
 import java.sql.Connection;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.exporter.ExportOptions.JobAttributeOptions;
 import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
@@ -136,22 +138,48 @@ public class ReaderThread extends Thread
         FilterOptions filterString = options.getFilterOptions();
         String createdAfter = filterString.m_createdAfter;
         String createdBefore = filterString.m_createdBefore;
+        JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
+        Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
         TmCoreManager mgr = LingServerProxy.getTmCoreManager();
 
         if (mode.equals(ExportOptions.SELECT_ALL))
         {
-            return mgr.getAllSegments(m_database, createdBefore, createdAfter,
-                    conn);
+        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
+        	{
+        		return mgr.getAllSegments(m_database, createdBefore, createdAfter,
+        				conn);
+        	}
+        	else 
+        	{
+        		return mgr.getAllSegments(m_database, createdBefore, createdAfter,
+        				conn, jobAttributeSet);
+			}
         }
         else if (mode.equals(ExportOptions.SELECT_FILTERED))
         {
-            return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
-                    createdAfter, conn);
+        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
+        	{
+	            return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+	                    createdAfter, conn);
+        	}
+        	else
+        	{
+        		return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+	                    createdAfter, conn,jobAttributeSet);
+        	}
         }
         else if (mode.equals(options.SELECT_FILTER_PROP_TYPE))
         {
-            return mgr.getSegmentsByProjectName(m_database, propType,
-                    createdBefore, createdAfter, conn);
+        	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
+        	{
+        		return mgr.getSegmentsByProjectName(m_database, propType,
+        				createdBefore, createdAfter, conn);
+        	}
+        	else
+        	{
+        		return mgr.getSegmentsByProjectName(m_database, propType,
+        				createdBefore, createdAfter, conn,jobAttributeSet);
+        	}
         }
         else
         {

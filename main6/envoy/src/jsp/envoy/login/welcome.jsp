@@ -354,7 +354,10 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=remoteIpUrl%>"><%=bundle.getString("lb_remote_ip_webservices")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.LOGS_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=logsUrl%>"><%=bundle.getString("lb_logs")%></A>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=logsUrl%>"><%=bundle.getString("lb_logs")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.OPERATION_LOG_VIEW%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=operationLogUrl%>"><%=bundle.getString("lb_logs_operation")%></A>
         </amb:permission>
 <%
 	}
@@ -463,6 +466,9 @@ function openWizardWindow(url)
         </amb:permission>
         <amb:permission name="<%=Permission.COTI_JOB%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createCotiJobUrl%>"><%=bundle.getString("lb_coti_job")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.ELOQUA%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=eloquaUrl%>"><%=bundle.getString("lb_eloqua")%></A><BR>
         </amb:permission>
       </TD>
     <%

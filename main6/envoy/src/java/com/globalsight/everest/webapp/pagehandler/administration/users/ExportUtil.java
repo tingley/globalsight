@@ -22,8 +22,7 @@ public class ExportUtil
         try
         {
             outx = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-
+            response.setContentType("application/octet-stream;charset=utf-8");
             response.setHeader("Content-Disposition", "attachment;filename="
                     + gbToUtf8(fileName));
 

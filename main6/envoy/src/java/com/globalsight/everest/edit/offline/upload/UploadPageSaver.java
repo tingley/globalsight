@@ -51,6 +51,7 @@ import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.TuvImplVo;
@@ -60,7 +61,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
-import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -90,6 +90,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     static public final String UPLOAD_PAGE_SOURCE_LOCALE = "uploadPageSourceLocale";
     static public final String UPLOAD_PAGE_TARGET_LOCALE = "uploadPageTargetLocale";
     static public final String UPLOAD_PAGE_USER_LOCALE = "uploadPageUserLocale";
+    static public final String IS_UPLOADING_TASKS="isUploadingTasks";
 
     static private final String UPLOAD_SUCCESSFUL_SUBJECT = "uploadSuccessfulSubject";
     static private final String UPLOAD_SUCCESSFUL_MESSAGE = "uploadSuccessfulMessage";
@@ -445,7 +446,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * @exception GeneralException
      */
     public void savePageToDb(OfflinePageData p_uploadPage,
-            String p_jmsDestinationQueue, User p_user, String p_fileName)
+            String p_jmsDestinationQueue, User p_user, String p_fileName,
+            List<Task> p_isUploadingTasks)
             throws GeneralException, DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
@@ -596,7 +598,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         long trgPageId = m_ref_PageData.getPageSegments().getSourcePage()
                 .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
         save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                p_jmsDestinationQueue, true, trgPageId);
+                p_jmsDestinationQueue, true, trgPageId, p_isUploadingTasks);
     }
 
     /**
@@ -626,7 +628,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     @SuppressWarnings("rawtypes")
     public void savePageToDb(OfflinePageData p_uploadPage,
             ArrayList<PageData> p_referencePages, String p_jmsDestinationQueue,
-            User p_user, String p_fileName) throws GeneralException,
+            User p_user, String p_fileName,List<Task> p_isUploadingTasks) throws GeneralException,
             DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
@@ -709,22 +711,14 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                 .getSegmentPairByTuId(
                                         uploadSegment.getTuIdAsLong()
                                                 .longValue(), m_targetLocale);
-                        String srcGxml = segmentPair.getSourceTuv()
-                                .getGxmlExcludeTopTags();
-                        String tgtGxml = segmentPair.getTargetTuv()
-                                .getGxmlExcludeTopTags();
-                        if (!(InternalTextUtil.isInternalText(srcGxml)
-                                && InternalTextUtil.isInternalText(tgtGxml)))
-                        {
-                            // set the text
-                            segmentPair.getTargetTuv()
-                                    .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            uploadSegment.getDisplayTargetText(),
-                                            jobId);
+                        // set the text
+                        segmentPair.getTargetTuv()
+                                .setGxmlExcludeTopTagsIgnoreSubflows(
+                                        uploadSegment.getDisplayTargetText(),
+                                        jobId);
 
-                            // set the modified flag
-                            segmentPair.setModified();
-                        }
+                        // set the modified flag
+                        segmentPair.setModified();
                     }
                 }
                 else if (isRepeatedSegments)
@@ -808,7 +802,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             long trgPageId = refPageData.getPageSegments().getSourcePage()
                     .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
             save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                    p_jmsDestinationQueue, isLastOne, trgPageId);
+                    p_jmsDestinationQueue, isLastOne, trgPageId, p_isUploadingTasks);
         }
     }
 
@@ -1042,8 +1036,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     // "modifiedTuvs" are from same page/job.
     private void save(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
             Map p_replyComments, User p_user, String p_fileName,
-            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId)
-            throws GeneralException
+            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
+            List<Task> p_isUploadingTasks) throws GeneralException
     {
         if (s_category.isDebugEnabled())
         {
@@ -1073,6 +1067,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             map.put(USER, p_user);
             map.put(FILE_NAME, p_fileName);
             map.put(IS_LAST_PAGE, new Boolean(p_isLastOne));
+            map.put(IS_UPLOADING_TASKS, p_isUploadingTasks);
 
             // Send all data through the JMS queue to PageSaverMDB.
             JmsHelper.sendMessageToQueue(map, p_jmsDestinationQueue);

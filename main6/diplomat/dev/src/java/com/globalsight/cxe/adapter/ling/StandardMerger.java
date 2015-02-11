@@ -231,7 +231,9 @@ public class StandardMerger implements IFormatNames
     {
         // Do not fix GXML for HTML, this is because if we replace consecutive
         // "&nbsp;" with " ", it will cause HTML formatting error.
-        if (m_cxeMessage.getMessageType().getValue() != CxeMessageType.HTML_LOCALIZED_EVENT)
+        // also do not fix &nbsp; for xml because of GBS-3577
+        if (m_cxeMessage.getMessageType().getValue() != CxeMessageType.HTML_LOCALIZED_EVENT
+                && m_cxeMessage.getMessageType().getValue() != CxeMessageType.XML_LOCALIZED_EVENT)
         {
             // this follows the original logic.
             p_mergeResult = fixGxml(p_mergeResult, "&nbsp;", " ");
@@ -490,7 +492,7 @@ public class StandardMerger implements IFormatNames
                         if (m_logger.isDebugEnabled())
                         {
                             m_logger.debug("No xml rule found for file profile \""
-                                    + fp.getName() + "\"");                            
+                                    + fp.getName() + "\"");
                         }
                     }
                     return p_mergeResult;

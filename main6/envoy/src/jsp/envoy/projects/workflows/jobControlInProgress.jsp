@@ -346,11 +346,33 @@ function submitForm(buttonClicked, curJobId)
        }
     }
 
-   if (buttonClicked == "Export" || buttonClicked == "ExportForUpdate")
+   if (buttonClicked == "Export")
    {
-      ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
-      JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
-      jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+	  
+	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
+	var isContinue = true;
+	$.ajaxSetup({async: false}); 
+	$.get(checkUrl,function(data){
+		if(data == "uploading")
+		{
+			alert("The job is uploading. Please wait.");
+			isContinue =  false;
+		}
+	});
+	$.ajaxSetup({ async: true}); 
+
+	if(!isContinue)
+		return false;
+	  
+	ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
+   }
+   else if(buttonClicked == "ExportForUpdate")
+   {
+	   	ShowStatusMessage("<%=bundle.getString("jsmsg_preparing_for_export")%>");
+	    JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
+	    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
    }
    else if (buttonClicked == "Discard")
    {

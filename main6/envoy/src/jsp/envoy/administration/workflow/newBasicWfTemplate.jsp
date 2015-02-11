@@ -96,7 +96,7 @@
           WorkflowTemplateInfo wft = (WorkflowTemplateInfo)templates.get(i);
           if(isNew || wfTemplateInfoId != wft.getId())
           {
-              jsmsg += "if(basicTemplateForm." + nameField + ".value.toLowerCase() == \"" + wft.getName() + "\".toLowerCase())\n" +
+              jsmsg += "if(ATrim(basicTemplateForm." + nameField + ".value).toLowerCase() == \"" + wft.getName() + "\".toLowerCase())\n" +
                       "   {\n" +
                       "      alert('" + msgDuplicateName + "');\n" +
                       "      return false;\n" +
@@ -335,7 +335,7 @@ function submitForm(formAction)
 }
 
 function confirmForm(formSent) {
-    var theName = formSent.<%=nameField%>.value;
+    var theName = ATrim(formSent.<%=nameField%>.value);
 	theName = stripBlanks (theName);
 	formSent.<%=nameField%>.value = theName;
 	if (isEmptyString(formSent.<%=nameField%>.value)) {

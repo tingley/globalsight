@@ -44,7 +44,7 @@ public class JPEscapeSequence
         int len = p_str.length();
         StringBuffer result = new StringBuffer(len);
 
-        for (int x=0; x<len; )
+        for (int x = 0; x < len;)
         {
             aChar = p_str.charAt(x++);
             if (aChar == '\\')
@@ -66,15 +66,16 @@ public class JPEscapeSequence
                 }
                 else
                 {
-                    if      (aChar == 't') aChar = '\t';
-                    else if (aChar == 'r') aChar = '\r';
-                    else if (aChar == 'n') aChar = '\n';
-                    else if (aChar == 'f') aChar = '\f';
-                    else if(isJavaProperty) {
-                        result.append('\\');
+                    if (aChar == 't' || aChar == 'r' || aChar == 'n'
+                            || isJavaProperty)
+                    {
+                        result.append("\\");
+                        result.append(aChar);
                     }
-                    
-                    result.append(aChar);
+                    else if (aChar == 'f')
+                    {
+                        result.append('\f');// same as before
+                    }
                 }
             }
             else
@@ -135,6 +136,8 @@ public class JPEscapeSequence
             case '\f': result.append('\\'); result.append('f');
                 continue;
             case '\\':
+                    result.append('\\');
+
                     boolean thisIsEscapeChar = false;
                     if (x < len)
                     {
@@ -148,19 +151,17 @@ public class JPEscapeSequence
                     if (x >= 2)
                     {
                         char prec = p_str.charAt(x - 2);
-                        
+
                         if ("\\".contains("" + prec))
                         {
                             thisIsEscapeChar = true;
                         }
                     }
-                    result.append('\\');
-                    if (!thisIsEscapeChar)
+                    if (thisIsEscapeChar)
                     {
                         result.append('\\');
                     }
-
-                    continue;
+                continue;
 
                 /*
             case '#': result.append('\\'); result.append('#');

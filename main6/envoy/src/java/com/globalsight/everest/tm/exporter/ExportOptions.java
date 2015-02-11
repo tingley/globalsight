@@ -18,16 +18,16 @@
 package com.globalsight.everest.tm.exporter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import org.dom4j.Element;
 
 import com.globalsight.exporter.ExporterException;
-import com.globalsight.terminology.exporter.ExportOptions.FilterCondition;
-import com.globalsight.terminology.exporter.ExportOptions.FilterOptions;
 import com.globalsight.util.edit.EditUtil;
-
 /**
  * This class collects all the options related to exporting
  * TM databases to files. There are the following sets of options:
@@ -294,6 +294,33 @@ public class ExportOptions
             return result.toString();
         }
     }
+    
+    public class JobAttributeOptions
+    {
+    	public Set<String> jobAttributeSet = new HashSet<String>();
+    	
+    	public String asXML()
+    	{
+    		StringBuffer result = new StringBuffer();
+    		
+    		result.append("<attributes>");
+    		for(String keyAndValue : jobAttributeSet)
+    		{
+    			String key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
+    			String value = keyAndValue.substring(keyAndValue.indexOf(":") + 1);
+    			result.append("<attribute>");
+    			result.append("<key>");
+    			result.append(EditUtil.encodeXmlEntities(key));
+    			result.append("</key>");
+    			result.append("<value>");
+    			result.append(EditUtil.encodeXmlEntities(value));
+    			result.append("</value>");
+    			result.append("</attribute>");
+    		}
+    		result.append("</attributes>");
+    		return result.toString();
+    	}
+    }
 
     //
     // Private Members
@@ -301,6 +328,7 @@ public class ExportOptions
     private SelectOptions m_selectOptions = new SelectOptions();
     private OutputOptions m_outputOptions = new OutputOptions();
     private FilterOptions m_filterOptions = new FilterOptions();
+    private JobAttributeOptions m_jobAttributeOptions = new JobAttributeOptions();
 
     //
     // Public Methods
@@ -317,6 +345,10 @@ public class ExportOptions
     public FilterOptions getFilterOptions()
     {
         return m_filterOptions;
+    }
+    public JobAttributeOptions getJobAttributeOptions()
+    {
+    	return m_jobAttributeOptions;
     }
 
     public String getSelectMode()
@@ -385,6 +417,7 @@ public class ExportOptions
         result.append(m_selectOptions.asXML());
         result.append(m_filterOptions.asXML());
         result.append(m_outputOptions.asXML());
+        result.append(m_jobAttributeOptions.asXML());
 
         return result.toString();
     }
@@ -413,6 +446,18 @@ public class ExportOptions
 
             elem = (Element)p_root.selectSingleNode("//outputOptions");
             m_outputOptions.m_systemFields = elem.elementText("systemFields");
+            
+            List<Element> attributeNodes = p_root.selectNodes("//attribute");
+            Set<String> attributeSet = new HashSet<String>();
+            if(attributeNodes!= null && attributeNodes.size() > 0)
+            {
+            	for(Element attributeElem: attributeNodes)
+            	{
+            		attributeSet.add(attributeElem.elementText("key") + ":" +
+            				attributeElem.elementText("value"));
+            	}
+            }
+            m_jobAttributeOptions.jobAttributeSet = attributeSet;
         }
         catch (Exception e)
         {

@@ -106,12 +106,13 @@ public class EntryOperationImpl implements EntryOperation
                             + " and t.Cid ="
                             + p_entryId
                             + " and t.TBID="
-                            + tbid + " and t.Lid = l.Lid " + "order by l.lid");
+                            + tbid + getSqlInLanguageString(p_srcLang)
+                            + " and t.Lid = l.Lid " + "order by l.lid");
 
             long previousLid = 0;
+            int langNum =0;
             while (rset.next())
             {
-
                 long lid = rset.getLong("LID");
                 long tid = rset.getLong("TID");
                 String langName = rset.getString("NAME");
@@ -122,6 +123,7 @@ public class EntryOperationImpl implements EntryOperation
                 // start a new languageGrp for a new language
                 if (lid != previousLid)
                 {
+                	langNum++;
                     if (previousLid != 0)
                     {
                         result.append("</languageGrp>");
@@ -165,8 +167,9 @@ public class EntryOperationImpl implements EntryOperation
                 result.append("</termGrp>");
 
                 previousLid = lid;
-
             }
+            if(langNum <2)
+            	return "";
 
             // there could be entries with no languages at all??
             if (previousLid != 0)
@@ -256,11 +259,13 @@ public class EntryOperationImpl implements EntryOperation
                             + tbid
                             + " and t.Cid ="
                             + p_entryId
+                            + getSqlInLanguageString(p_srcLang)
                             + " and t.Lid = l.Lid "
                             + "order by l.lid");
 
             long previousLid = 0;
 
+            int langNum= 0;
             while (rset.next())
             {
                 long lid = rset.getLong("LID");
@@ -270,6 +275,7 @@ public class EntryOperationImpl implements EntryOperation
                 // start a new languageGrp for a new language
                 if (lid != previousLid)
                 {
+                	langNum++;
                     if (previousLid != 0)
                     {
                         result.append("</langSet>");
@@ -287,6 +293,8 @@ public class EntryOperationImpl implements EntryOperation
 
                 previousLid = lid;
             }
+            if(langNum <2)
+            	return "";
             // there could be entries with no languages at all??
             if (previousLid != 0)
             {
@@ -333,6 +341,23 @@ public class EntryOperationImpl implements EntryOperation
         }
     }
 
+    private String getSqlInLanguageString(String p_Langs)
+    {
+    	 String sql = "";
+         if(StringUtil.isNotEmpty(p_Langs))
+         {
+         	String[] langs = p_Langs.split(",");
+         	for(String lang: langs)
+         	{
+         		sql = sql + "'" + lang + "',";
+         	}
+         	
+         	sql = " and t.lang_name in ( " + sql.substring(0,sql.length() - 1) + ") ";
+         }
+         
+         return sql;
+    }
+    
     private String getEntry(long p_entryId, long p_termId, String p_srcLang,
             String p_trgLang, SessionInfo p_session, boolean isForBrowser)
             throws TermbaseException

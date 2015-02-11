@@ -3113,6 +3113,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         oldRevenueRate = p_task.getRevenueRate();
 
         taskClone.setRateSelectionCriteria(p_tib.getRateSelectionCriteria());
+        taskClone.setIsReportUploadCheck(p_tib.getIsReportUploadCheck());
         // update task name and type
         String taskName = p_tib.getActivityName();
         taskClone.setTaskName(taskName);

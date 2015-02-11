@@ -351,13 +351,16 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
     // Get all the info required to be displayed on the graphical workflow UI.
     // The info required for the dialog boxes for each node should also be
     // included.
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Vector getDisplayData(HttpServletRequest p_request,
-            HttpSession p_session) throws EnvoyServletException
+            HttpSession p_appletSession) throws EnvoyServletException
     {
-        String wfId = (String) WorkflowTemplateHandlerHelper.getSessionManager(
-                p_request).getAttribute(TEMPLATE_ID);
+        SessionManager sessionMgr = (SessionManager) p_appletSession
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String wfId = (String) sessionMgr.getAttribute(TEMPLATE_ID);
+
         // create the resource java bean
-        ResourceBundle bundle = getBundle(p_session);
+        ResourceBundle bundle = getBundle(p_appletSession);
         Vector objs = new Vector();
 
         // all images
@@ -381,12 +384,10 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
 
         objs.addElement(imageHash); // 0
         objs.addElement(dataItemRefName); // 1
-        objs.addElement(getDataForDialog(p_request, p_session)); // 2
+        objs.addElement(getDataForDialog(sessionMgr, p_appletSession)); // 2
         // if the template id is null, we'll be in create mode (blank page).
-        // Otherwise,
-        // a user has clicked on a workflow template within a table and has
-        // passed the id
-        // for us.
+        // Otherwise, a user has clicked on a workflow template within a table
+        // and has passed the id for us.
         if (wfId != null)
         {
             addWorkflowInfo(wfId, objs); // 3
@@ -395,18 +396,18 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         {
             objs.addElement(new WorkflowTemplate()); // 3
         }
-        objs.addElement(p_session.getAttribute(WebAppConstants.UILOCALE));// 4
+        objs.addElement(p_appletSession.getAttribute(WebAppConstants.UILOCALE));// 4
 
         return objs;
-
     }
 
     // perform the Post action (i.e. save, return data based on UI request,...)
     private Vector postAction(HttpServletRequest p_request,
-            HttpSession p_session) throws EnvoyServletException, IOException
+            HttpSession p_appletSession) throws EnvoyServletException,
+            IOException
     {
         Vector outData = null;
-        SessionManager sessionMgr = (SessionManager) p_session
+        SessionManager sessionMgr = (SessionManager) p_appletSession
                 .getAttribute(SESSION_MANAGER);
         try
         {
@@ -428,7 +429,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                 else if (command.equals("save"))
                 {
                     // save the modified workflows.
-                    saveWorkflow(sessionMgr, p_session,
+                    saveWorkflow(sessionMgr, p_appletSession,
                             (WorkflowTemplate) inData.elementAt(1));
                 }
             }
@@ -518,14 +519,11 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
     }
 
     // get the data required for the activity dialog
-    private Hashtable getDataForDialog(HttpServletRequest p_request,
+    private Hashtable getDataForDialog(SessionManager sessionMgr,
             HttpSession p_session) throws EnvoyServletException
     {
         ResourceBundle bundle = getBundle(p_session);
         Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
-
-        SessionManager sessionMgr = WorkflowTemplateHandlerHelper
-                .getSessionManager(p_request);
 
         // Start Dialog data
         return WorkflowTemplateHandlerHelper.getDataForDialog(bundle, uiLocale,
@@ -550,7 +548,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             HttpSession p_session, WorkflowTemplate p_workflowTemplate)
             throws EnvoyServletException
     {
-        // first get the workflow tempalte info
+        // first get the workflow template info
         WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) p_sessionMgr
                 .getAttribute(WF_TEMPLATE_INFO);
 
@@ -562,6 +560,5 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                 p_workflowTemplate);
 
         clearSessionExceptTableInfo(p_session, KEY);
-
     }
 }

@@ -3,6 +3,7 @@
     	contentType="text/html; charset=UTF-8"
 		errorPage="/envoy/common/error.jsp"
 		import="java.util.*,com.globalsight.everest.taskmanager.Task,
+				com.globalsight.everest.taskmanager.TaskImpl,
                 com.globalsight.util.edit.EditUtil,
                 com.globalsight.cxe.entity.fileprofile.FileProfile,
                 com.globalsight.everest.costing.AmountOfWork,
@@ -153,7 +154,7 @@
     {
     	if(reviewCommentSimpleReport)
        		reportType = ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT;
-    	if(reviewCommentReport)
+    	else
        		reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
        	downloadInstruction = bundle.getString("helper_text_download_language_instruction");
        	downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_LSO"));
@@ -189,6 +190,9 @@
 %>
 <%
 	Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+	TaskImpl taskImpl = (TaskImpl)theTask;
+	int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
+	int isUploaded = taskImpl.getIsReportUploaded();
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
 	ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
 	boolean needScore = false;
@@ -197,6 +201,13 @@
     		theTask.isType(Task.TYPE_REVIEW))
     {
     	needScore = true;
+    }
+	String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
+    String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    if(theTask.isType(Task.TYPE_REVIEW))
+    {
+    	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
+    	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
 	String activityName = task.getTaskDisplayName();
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);

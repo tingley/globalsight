@@ -47,6 +47,7 @@ import org.xml.sax.SAXException;
 
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.IConverterHelper2;
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.cxe.engine.eventflow.Category;
 import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
 import com.globalsight.cxe.engine.eventflow.EventFlow;
@@ -93,6 +94,8 @@ public class OfficeXmlHelper implements IConverterHelper2
     private String m_oriDisplayName = null;
     private boolean m_isImport = true;
 
+    private PptxFileManager pptxFileManager = null;
+    
     private boolean m_isHeaderTranslate = false;
     private boolean m_isFootendNotesTranslate = false;
     private boolean m_isURLTranslate = false;
@@ -272,8 +275,26 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private void mergePages(String dir)
     {
-        PptxFileManager m = new PptxFileManager();
-        m.mergeFile(dir);
+        pptxFileManager = new PptxFileManager();
+        MSOffice2010Filter msf = getMainFilter();
+        if (msf == null)
+        {
+            msf = new MSOffice2010Filter();
+        }
+        pptxFileManager.setFilter(msf);
+        pptxFileManager.mergeFile(dir);
+    }
+    
+    private String[] createPage(String dir) throws IOException
+    {
+        StringBuffer sb = new StringBuffer(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+        sb.append("<pptx><nocontent/></pptx>");
+
+        String path = dir + "/ppt/slide.xml";
+        FileUtil.writeFile(new File(path), sb.toString(), "UTF-8");
+
+        return new String[] { path };
     }
 
     private void sortSegments(String dir, List<String> hIds, String excelOrder)
@@ -374,6 +395,13 @@ public class OfficeXmlHelper implements IConverterHelper2
                 // call GC to free memory for large file
                 System.gc();
                 gcCounter = 0;
+            }
+            
+            // all hidden PPTX stop creating job
+            if (m_type == OFFICE_PPTX && !useNewExtractor && xmlFiles != null
+                    && xmlFiles.length == 0)
+            {
+                xmlFiles = createPage(dir);
             }
 
             MessageData[] messageData = readXmlOutput(filename, xmlFiles);
@@ -2233,7 +2261,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
     }
 
-    private void getUrlFilesForPptx(String dir, List<String> list)
+    private void getUrlFilesForPptx(String dir, List<String> list, List<String> slideHiddenFiles)
     {
         if (m_isURLTranslate)
         {
@@ -2268,6 +2296,11 @@ public class OfficeXmlHelper implements IConverterHelper2
 
                 for (File f : fs)
                 {
+                    if (PptxFileManager.isSlideHiddenFile(slideHiddenFiles, f))
+                    {
+                        continue;
+                    }
+                    
                     list.add(f.getAbsolutePath());
                 }
             }
@@ -2303,6 +2336,11 @@ public class OfficeXmlHelper implements IConverterHelper2
 
                 for (File f : fs)
                 {
+                    if (PptxFileManager.isSlideHiddenFile(slideHiddenFiles, f))
+                    {
+                        continue;
+                    }
+                    
                     list.add(f.getAbsolutePath());
                 }
             }
@@ -2525,6 +2563,55 @@ public class OfficeXmlHelper implements IConverterHelper2
             // ignore
             logException(e);
         }
+        
+        // get slides
+        List<String> hiddenSlideFiles = new ArrayList<String>();
+        File slidesDir = new File(dir, PPTX_SLIDES_DIR);
+        if (slidesDir.isDirectory())
+        {
+            File[] slides = listAcceptFiles(slidesDir, prefix_slide);
+
+            if (slides != null && slides.length >= 0)
+            {
+                for (int i = 0; i < slides.length; i++)
+                {
+                    File f = slides[i];
+
+                    if (m_isHiddenTextTranslate)
+                    {
+                        list.add(f.getPath());
+                    }
+                    else
+                    {
+                        // check if this slide is hidden : GBS-3576
+                        boolean isHidden = false;
+                        try
+                        {
+                            String text = FileUtils.read(f, "UTF-8");
+                            StringIndex si = StringIndex.getValueBetween(text,
+                                    0, "<p:sld ", ">");
+
+                            // check if this slide is hidden
+                            if (si != null
+                                    && si.allValue.contains("show=\"0\""))
+                            {
+                                isHidden = true;
+                                PptxFileManager.findHiddenFiles(hiddenSlideFiles, f);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            logException(e);
+                        }
+
+                        if (!isHidden)
+                        {
+                            list.add(f.getPath());
+                        }
+                    }
+                }
+            }
+        }
 
         // check if there is diagram data
         File diagramDir = new File(dir, PPTX_DIAGRAMS_DIR);
@@ -2539,6 +2626,10 @@ public class OfficeXmlHelper implements IConverterHelper2
                 for (int i = 0; i < datafiles.length; i++)
                 {
                     File f = datafiles[i];
+                    if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles, f))
+                    {
+                        continue;
+                    }
                     if (isFileContains(f, "</a:t>", false))
                     {
                         list.add(f.getPath());
@@ -2559,26 +2650,14 @@ public class OfficeXmlHelper implements IConverterHelper2
                 for (int i = 0; i < datafiles.length; i++)
                 {
                     File f = datafiles[i];
+                    if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles, f))
+                    {
+                        continue;
+                    }
                     if (isFileContains(f, "</a:t>", false))
                     {
                         list.add(f.getPath());
                     }
-                }
-            }
-        }
-
-        // get slides
-        File slidesDir = new File(dir, PPTX_SLIDES_DIR);
-        if (slidesDir.isDirectory())
-        {
-            File[] slides = listAcceptFiles(slidesDir, prefix_slide);
-
-            if (slides != null && slides.length >= 0)
-            {
-                for (int i = 0; i < slides.length; i++)
-                {
-                    File f = slides[i];
-                    list.add(f.getPath());
                 }
             }
         }
@@ -2595,6 +2674,10 @@ public class OfficeXmlHelper implements IConverterHelper2
                 for (int i = 0; i < datafiles.length; i++)
                 {
                     File f = datafiles[i];
+                    if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles, f))
+                    {
+                        continue;
+                    }
                     if (isFileContains(f, "</a:t>", false))
                     {
                         list.add(f.getPath());
@@ -2616,6 +2699,14 @@ public class OfficeXmlHelper implements IConverterHelper2
                     for (int i = 0; i < notes.length; i++)
                     {
                         File f = notes[i];
+                        String fname = f.getName();
+                        
+                        // ignore hidden slide's node : GBS-3576
+                        if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles, f))
+                        {
+                            continue;
+                        }
+                        
                         if (isFileContains(f, "</a:r>", false))
                         {
                             list.add(f.getPath());
@@ -2714,7 +2805,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
 
-        getUrlFilesForPptx(dir, list);
+        getUrlFilesForPptx(dir, list, hiddenSlideFiles);
     }
 
     private void getNewLocalizedXmlFilesPPTX(String dir, List<String> list)
@@ -2817,7 +2908,9 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
 
-        getUrlFilesForPptx(dir, list);
+        getUrlFilesForPptx(dir, list,
+                pptxFileManager != null ? pptxFileManager.getSlideHiddenFiles()
+                        : null);
     }
 
     private boolean isFileExists(String xmlFile)

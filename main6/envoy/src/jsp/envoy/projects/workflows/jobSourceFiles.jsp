@@ -215,10 +215,6 @@ function searchPages(){
     var locale = localesSelect.options[index].value;
     var searchText = document.getElementById("pageSearchText").value;
     searchText = ATrim(searchText);
-    if(searchText != "" && searchText.length < 3){
-    	alert("Search text length is less than three !");
-    	return;
-    }
     var targetLocaleId = null;
     if(locale == "targetLocale"){
     	var targetLocaleSelect = document.getElementById("targetLocale");
@@ -250,7 +246,7 @@ function searchPages(){
 		    <FORM name="pageSearchTextForm"  id="pageSearchTextForm" method="post" action=""  ENCTYPE="multipart/form-data">
 				<table  CELLSPACING="0" CELLPADDING="0" BORDER="0" style="border:solid 1px slategray;background:#DEE3ED;width:900;height:40">
 				  <tr valign="middle">
-				  	  <td class="standardText"><%=bundle.getString("lb_search_in")%>：</td>
+				  	  <td class="standardText"><%=bundle.getString("lb_search_in")%>:</td>
 					  <td  class="standardText">
 					  		<select class="standardText" id="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" name="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" onchange="contorlTargetLocale(this.value);">
 					  			<option value="sourceLocale" <%=thisSearchLocale.equals("sourceLocale") ? "selected" : ""%>><%=bundle.getString("lb_tm_search_source_locale")%></option>

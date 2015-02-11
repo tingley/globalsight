@@ -222,7 +222,7 @@ public class AmbFileStoragePathUtils
 
     /**
      * Get the storage dir for company base on the company_id in current thread.
-     * 
+     * @deprecated
      * @return
      */
     public static String getFileStorageDirPath()
@@ -280,6 +280,9 @@ public class AmbFileStoragePathUtils
         return (File) fileStorageDirs.get(p_companyId);
     }
 
+    /**
+     * @deprecated
+     */
     public static File getFileStorageDir()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
@@ -619,7 +622,7 @@ public class AmbFileStoragePathUtils
     {
         if (desktopIconDir.get(companyId) == null)
         {
-            File desktopiconDir = new File(getFileStorageDirPath(),
+            File desktopiconDir = new File(getFileStorageDirPath(companyId),
                     DESKTOPICON_DIRECTORY);
             desktopiconDir.mkdirs();
             desktopIconDir.put(companyId, desktopiconDir);

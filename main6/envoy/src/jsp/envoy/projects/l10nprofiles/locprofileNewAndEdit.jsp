@@ -197,6 +197,7 @@ function submitForm(formAction)
 
 function confirmForm()
 {
+	LocalizationPccrofiles.LocProfileName.value = ATrim(LocalizationPccrofiles.LocProfileName.value);
     if (isEmptyString($("#LocProfileName").val())) {
         alert("<%= bundle.getString("jsmsg_loc_profiles_name") %>");
         $("#LocProfileName").focus();

@@ -158,9 +158,10 @@
 		                if(data){
 		                	if(data.ExceptionInfo){
 			                	var vl=data.ExceptionInfo+"";
-			                	var s=vl.indexOf(":");
-								vl=vl.substr(s+1);
+			                	//var s=vl.indexOf(":");
+								//vl=vl.substr(s+1);
 								alert(vl);
+								
 		                	}else if(data.Info){
 		                		 self.location.href='<%=cancelMTOptionsUrl%>'; 
 		                	}else{
@@ -173,7 +174,7 @@
 		            },  
 		            error: function(XmlHttpRequest, textStatus, errorThrown){  
 		            	$("#baseInfo").unmask("Connecting engine...");
-		                alert( "error"+textStatus);  
+		                alert( "error "+textStatus);  
 		                $("#OK").attr("disabled",false);
 		            }  
 		        }); 
@@ -310,6 +311,16 @@
                 return false;
 			}
 		}
+		else if (formAction == "Google_Translate") 
+		{
+			var apiKey = $.trim($("#idAPIKey").val());
+			if (apiKey ==null || apiKey == "") 
+			{
+                alert("Machine Translation engine API Key can't be empty or null!");
+                return false;                	
+            }
+		}
+			
 	    return true;
 	}
 
@@ -393,7 +404,8 @@
         var safaMtDiv = document.getElementById("safaMtDiv");
         var IPTranslatorDiv=document.getElementById("IPTranslatorDiv");
         var doMtDiv=document.getElementById("doMtDiv");
-
+		var googleDiv = document.getElementById("googleDiv");
+        
         var engineSelect = document.getElementById("mtEngine");
         var selectedEngineName = engineSelect.options[engineSelect.selectedIndex].value;
         // hide them all first
@@ -403,11 +415,12 @@
         safaMtDiv.style.display='none';
         IPTranslatorDiv.style.display='none';
         doMtDiv.style.display='none';
+        googleDiv.style.display='none';
 
         // display corresponding div by selected engine name.
-	    if (selectedEngineName.toLowerCase() == "google") 
+	    if (selectedEngineName.toLowerCase() == "google_translate") 
 		{
-            //do nothing
+           googleDiv.style.display='block';
 	    }
 	    else if (selectedEngineName.toLowerCase() == "promt") 
 		{
@@ -436,7 +449,7 @@
 
         //2.Display "Save" button or "Next" button
         var okBtn = document.getElementById("OK");
-	    if (selectedEngineName.toLowerCase() == "google"
+	    if (selectedEngineName.toLowerCase() == "google_translate"
 		    || selectedEngineName.toLowerCase() == "ms_translator" 
 		    || selectedEngineName.toLowerCase() == "safaba"
 		    || selectedEngineName == "IPTranslator"
@@ -676,7 +689,7 @@
 						<div id="msMtDiv" style="display: none;">
 					<%}%>
 							<p>
-							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="87%">
+							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="100%">
 								<tr>
 									<td colspan="3"><b><%=bundle.getString("lb_tm_ms_mt_title")%></b></td>
 								</tr>
@@ -944,6 +957,31 @@
                                     </TABLE>
                                 </div>
                         <!-- **************** DoMT MT Options : End ******************** -->
+                        
+                        <!-- **************** Google MT Options : Start ****************** -->
+                        	 <%if ("Google_Translate".equalsIgnoreCase(current_engine))
+                        	  {
+                                 mtProfile4val = mtProfile;%>
+                                 <div id="googleDiv" style="display: block;">
+                             <%} else {
+                                 mtProfile4val = new MachineTranslationProfile();%>
+                                 <div id="googleDiv" style="display: none;">
+                             <%}%>
+                             	
+                             	 <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="90%">
+                             	 	 <tr>
+                                           <td colspan="3"><b>Settings for Google machine translation engine. Google uses fixed URL: https://www.googleapis.com</b></td>
+                                        </tr>
+                             	 	<tr>
+                             	 		 <td ALIGN="LEFT">Google API Key<font color="red">*</font>:</td>
+                             	 		 <td><INPUT CLASS="standardText" ID="idAPIKey"
+                                                NAME="<%=MTProfileConstants.MT_GOOGLE_API_KEY%>"
+                                                value="<%=mtProfile4val.getAccountinfo()%>" TYPE="text"
+                                                MAXLENGTH="80" SIZE="80" /></td>
+                             	 	</tr>
+                             	</TABLE>
+                             </div>
+                        <!-- **************** Google MT Options : End ******************** -->
 
         <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
             ID="Cancel" onclick="submitForm('cancelMTOptions');"/>

@@ -23,6 +23,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportDBUtil;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.util.system.ConfigException;
 
 /**
@@ -203,6 +204,8 @@ public abstract class SystemControlTemplate implements SystemControl
 
                         // Clean "REPORTS_DATA" table for unexpected restart. 
                         ReportDBUtil.delAllReportsData();
+                        // set isUploading = 'N' for unexpected restart.
+                        TaskHelper.installTaskIsUploading();
                     }
                     catch (ClassNotFoundException cnfe)
                     {

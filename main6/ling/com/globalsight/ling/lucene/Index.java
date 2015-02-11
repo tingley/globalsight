@@ -56,6 +56,7 @@ import com.globalsight.ling.lucene.highlight.QueryScorer;
 import com.globalsight.ling.lucene.highlight.SimpleFormatter;
 import com.globalsight.ling.lucene.locks.WriterPreferenceReadWriteLock;
 import com.globalsight.ling.lucene.search.DictionarySimilarity;
+import com.globalsight.ling.tm2.lucene.LuceneCache;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -158,7 +159,6 @@ abstract public class Index
     protected Analyzer m_analyzer;
 
     private IndexWriter m_ramIndexWriter;
-    private IndexReader m_indexReader;
     private RAMDirectory m_ramdir;
 
     private Integer m_state = STATE_CLOSED;
@@ -366,6 +366,9 @@ abstract public class Index
             diskwriter.addIndexes(ds);
             //diskwriter.optimize();
             //diskwriter.close();
+            
+            // clean cache if have
+            LuceneCache.cleanLuceneCache(m_directory);
         }
         catch (IOException ex)
         {
@@ -441,6 +444,9 @@ abstract public class Index
             // disable new readers & writers
             m_state = STATE_CLOSING;
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_directory);
 
         try
         {
@@ -480,6 +486,9 @@ abstract public class Index
             // disable new readers & writers
             m_state = STATE_CREATING;
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_directory);
 
         try
         {
@@ -575,6 +584,9 @@ abstract public class Index
                 throw new IOException("index is not available");
             }
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_directory);
 
         try
         {
@@ -609,6 +621,9 @@ abstract public class Index
                 throw new IOException("index is not available");
             }
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_directory);
 
         try
         {
@@ -663,9 +678,13 @@ abstract public class Index
             try
             {
                 // Search the current index.
-                IndexReader reader = DirectoryReader.open(m_fsDir);
+                //IndexReader reader = DirectoryReader.open(m_fsDir);
+                //IndexSearcher searcher = new IndexSearcher(reader);
+                IndexSearcher searcher = LuceneCache
+                        .getLuceneCache(m_directory).getIndexSearcher();
+                
                 Query query = getQuery(p_text);
-                IndexSearcher searcher = new IndexSearcher(reader);
+                
                 int maxHits = end - begin;
                 TopDocs topDocs = searcher.search(query, maxHits);
                 
@@ -704,7 +723,7 @@ abstract public class Index
                 }
 
                 //searcher.close();
-                reader.close();
+                // reader.close();
 
                 return result;
             }
@@ -749,9 +768,9 @@ abstract public class Index
 
             try
             {
-                IndexReader reader = DirectoryReader.open(m_fsDir);
+                IndexReader reader = LuceneCache.getLuceneCache(m_directory)
+                        .getIndexReader();
                 int result = reader.numDocs();
-                reader.close();
                 return result;
             }
             finally

@@ -53,9 +53,8 @@ public class LuceneIndexReader
         Logger.getLogger(
             LuceneIndexReader.class);
 
-    private IndexReader m_indexReader;
     private Analyzer m_analyzer;
-    private IndexSearcher m_searcher;
+    private LuceneCache luceneCache;
     
     
     /**
@@ -73,8 +72,9 @@ public class LuceneIndexReader
     public LuceneIndexReader(Collection<Long> p_tmIds, GlobalSightLocale p_locale)
         throws Exception
     {
-        ArrayList readers = new ArrayList();
+        ArrayList<LuceneCache> readers = new ArrayList<LuceneCache>();
         m_analyzer = new GsAnalyzer(p_locale);
+        ArrayList<Long> tmIds = new ArrayList<Long>();
         
         for(Iterator<Long> it = p_tmIds.iterator(); it.hasNext();)
         {
@@ -86,32 +86,37 @@ public class LuceneIndexReader
                 continue;
             }
             
-            Directory indexD = SimpleFSDirectory.open(indexDir);
-            if(indexDir != null && DirectoryReader.indexExists(indexD))
+            LuceneCache lc = LuceneCache.getLuceneCache(indexDir);
+            if (lc != null)
             {
-                IndexReader reader = DirectoryReader.open(indexD);
-                readers.add(reader);
-            } else {
+                readers.add(lc);
+                tmIds.add(tmId);
+            }
+            else
+            {
                 c_logger.debug("No GoldTmIndex directory found. Maybe this is a bug, worth paying attension to");
             }
         }
         
         if(readers.size() == 0)
         {
-            m_indexReader = null;
+            luceneCache = null;
         }
         else if(readers.size() == 1)
         {
-            m_indexReader = (IndexReader)readers.get(0);
+            luceneCache = (LuceneCache)readers.get(0);
         }
         else
         {
-            IndexReader[] readerArray = new IndexReader[readers.size()];
-            readerArray = (IndexReader[])readers.toArray(readerArray);
-            m_indexReader = new MultiReader(readerArray);
+            IndexReader[] ireaderArray = new IndexReader[readers.size()];
+            
+            for (int i = 0; i < ireaderArray.length; i++)
+            {
+                ireaderArray[i] = readers.get(i).getIndexReader();
+            }
+            
+            luceneCache = LuceneCache.getLuceneCache(tmIds, ireaderArray);
         }
-
-        m_searcher = m_indexReader == null ? null : new IndexSearcher(m_indexReader);
     }
     
 
@@ -122,7 +127,7 @@ public class LuceneIndexReader
     public List getGsTokensByTerm(String p_term, boolean lookupTarget)
             throws Exception
     {
-        if(m_indexReader == null)
+        if(luceneCache == null)
         {
             return null;
         }
@@ -133,25 +138,25 @@ public class LuceneIndexReader
                 TuvDocument.TEXT_FIELD, m_analyzer);
         String qqq = QueryParser.escape(p_term);
         Query q = parser.parse(qqq);
-        TopDocs results = m_searcher.search(q, 100);
-        
+        TopDocs results = luceneCache.getIndexSearcher().search(q, 200);
+
         // fix a issue for lucene which cannot find : enterpris
         if (results.totalHits == 0 && p_term.endsWith("is"))
         {
             q = parser.parse(p_term + "e");
-            results = m_searcher.search(q, 100);
+            results = luceneCache.getIndexSearcher().search(q, 200);
         }
         
         ScoreDoc[] hits = results.scoreDocs;
         int numTotalHits = results.totalHits;
         Term term = new Term(TuvDocument.TEXT_FIELD, p_term);
-        int docFreq = m_indexReader.docFreq(term);
+        int docFreq = luceneCache.getIndexReader().docFreq(term);
         
         if (hits != null)
         {
             for (int i = 0; i < hits.length; i++)
             {
-                Document doc = m_searcher.doc(hits[i].doc);
+                Document doc = luceneCache.getIndexSearcher().doc(hits[i].doc);
 
                 TuvDocument tuvDocument = new TuvDocument(doc);
 
@@ -206,15 +211,15 @@ public class LuceneIndexReader
         
         return tokenList;
     }
-
-
-    public void close()
-        throws Exception
+    
+    public LuceneCache getLuceneCache()
     {
-        if(m_indexReader != null)
-        {
-            m_indexReader.close();
-        }
+        return luceneCache;
+    }
+
+    public void close() throws Exception
+    {
+        // do not close, for cache
     }
     
 }

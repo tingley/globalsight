@@ -223,10 +223,25 @@ public class JSEscapeSequence
             char ch = c.charValue();
             if (ch == '\\' || ch == '\'' || ch == '\"') // don't decode \,',"
             {
-                ret.append('\\');                 // so: output backslash again
+                ret.append('\\'); // so: output backslash again
             }
 
-            ret.append(c);
+            if (ch == '\n')
+            {
+                ret.append("\\n");
+            }
+            else if (ch == '\r')
+            {
+                ret.append("\\r");
+            }
+            else if (ch == '\t')
+            {
+                ret.append("\\t");
+            }
+            else
+            {
+                ret.append(c);
+            }
         }
 
         ret.append(s.substring(last_index));
@@ -234,8 +249,6 @@ public class JSEscapeSequence
         // PASS 2: deal with the quotes
         s = ret.toString();
         ret = new StringBuffer();
-
-        // System.err.println("d " + s);
 
         boolean b_escaped = false;
         char theQuote = '\0';
@@ -248,7 +261,7 @@ public class JSEscapeSequence
                 if (!b_escaped)
                 {
                     b_escaped = true;
-                    continue;                     // output later
+                    continue; // output later
                 }
                 else
                 {
@@ -286,15 +299,13 @@ public class JSEscapeSequence
             ret.append(ch);
         }
 
-        // System.err.println("D " + ret.toString());
-
         return ret.toString();
     }
 
 
     /**
      * <P>Encodes characters in strings to JavaScript escape
-     * sequences.  Characters that will always be encoded are
+     * sequences. Characters that will always be encoded are
      * \b,\f,\t,\n,\r,\v, as defined in chapter 7.7.4 in Standard
      * ECMA-262 (ECMAScript Language Specification).</P>
      *
@@ -309,10 +320,8 @@ public class JSEscapeSequence
     {
         StringBuffer ret = new StringBuffer();
 
-        // System.err.println(s);
-
         boolean b_escaped = false;
-        char theQuote = '\0';
+//        char theQuote = '\0';
         char ch;
         for (int i = 0; i < s.length(); ++i)
         {
@@ -322,7 +331,7 @@ public class JSEscapeSequence
                 if (!b_escaped)
                 {
                     b_escaped = true;
-                    continue;                     // output later
+                    continue; // output later
                 }
                 else
                 {
@@ -331,7 +340,8 @@ public class JSEscapeSequence
             }
             else if (ch == '\'' || ch == '\"')
             {
-                ret.append('\\'); b_escaped = false;
+                ret.append('\\');
+                b_escaped = false;
 
 //              else if (ch == '\'' || ch == '\"')
 //              {
@@ -358,7 +368,7 @@ public class JSEscapeSequence
             }
             else if (b_escaped)
             {
-                ret.append('\\'); // ret.append('\\');
+                ret.append('\\');
                 b_escaped = false;
             }
 
@@ -367,9 +377,6 @@ public class JSEscapeSequence
 
         s = ret.toString();
         ret = new StringBuffer();
-
-        // System.err.println("e " + s);
-
         for (int i = 0; i < s.length(); ++i)
         {
             Character c = new Character(s.charAt(i));
@@ -400,16 +407,12 @@ public class JSEscapeSequence
             }
         }
 
-        // System.err.println("E " + ret.toString());
-
         return ret.toString();
     }
-
 
     //
     // Private Methods
     //
-
     private static Character decodeHexSequence(String s)
     {
         Character c;

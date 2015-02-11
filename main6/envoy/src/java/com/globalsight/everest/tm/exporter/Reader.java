@@ -17,10 +17,13 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.exporter.ExportOptions.JobAttributeOptions;
 import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IReader;
@@ -172,10 +175,20 @@ public class Reader implements IReader
 
             TmCoreManager mgr = LingServerProxy.getTmCoreManager();
             
+            JobAttributeOptions jobAttributes = options.getJobAttributeOptions();
+            Set<String> jobAttributeSet = jobAttributes.jobAttributeSet;
+            
             if (mode
                     .equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL))
             {
-                count = mgr.getAllSegmentsCount(m_database, createdBefore, createdAfter);
+            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
+            	{
+            		count = mgr.getAllSegmentsCount(m_database, createdBefore, createdAfter, jobAttributeSet);
+            	}
+            	else
+            	{
+            		count = mgr.getAllSegmentsCount(m_database, createdBefore, createdAfter);
+            	}
 
                 m_options.setStatus(ExportOptions.ANALYZED);
                 m_options.setExpectedEntryCount(count);
@@ -183,14 +196,28 @@ public class Reader implements IReader
             else if (mode
                     .equals(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED))
             {
-                count = mgr.getSegmentsCountByLocale(m_database, lang, createdBefore, createdAfter);
+            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
+            	{
+            		count = mgr.getSegmentsCountByLocale(m_database, lang, createdBefore, createdAfter, jobAttributeSet);
+            	}
+            	else
+            	{
+            		count = mgr.getSegmentsCountByLocale(m_database, lang, createdBefore, createdAfter);
+            	}
 
                 m_options.setStatus(ExportOptions.ANALYZED);
                 m_options.setExpectedEntryCount(count);
             }
             else if (mode.equals(options.SELECT_FILTER_PROP_TYPE)) 
             {    
-                count = mgr.getSegmentsCountByProjectName(m_database, propType, createdBefore, createdAfter);
+            	if(jobAttributeSet != null && jobAttributeSet.size() >0)
+            	{
+            		 count = mgr.getSegmentsCountByProjectName(m_database, propType, createdBefore, createdAfter, jobAttributeSet);
+            	}
+            	else
+            	{
+            		 count = mgr.getSegmentsCountByProjectName(m_database, propType, createdBefore, createdAfter);
+            	}
 
                 m_options.setStatus(m_options.ANALYZED);
                 m_options.setExpectedEntryCount(count);                             

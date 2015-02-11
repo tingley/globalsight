@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,9 +41,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.globalsight.connector.eloqua.models.Email;
+import com.globalsight.connector.eloqua.models.LandingPage;
+import com.globalsight.connector.eloqua.util.EloquaHelper;
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.eloqua.EloquaConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -54,6 +57,7 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
+import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
@@ -177,7 +181,7 @@ public class Exporter
             parseEventFlowXml();
 
             finalFileName = determineFinalFileName();
-
+            String finalFileStr = null;
             File finalFile = new File(finalFileName);
             finalFile.getParentFile().mkdirs();
 
@@ -392,6 +396,7 @@ public class Exporter
                 }
             }
 
+            finalFileStr = finalFile.getAbsolutePath();
             String scriptOnExport = fp.getScriptOnExport();
 
             if (scriptOnExport != null && scriptOnExport.length() > 0)
@@ -407,9 +412,6 @@ public class Exporter
                 {
                     try
                     {
-                        // Copy the original source files to target folder.
-                        copyOriFilesToTargetFolder(targetFolder, companyId,
-                        	finalFileName.substring(finalFileName.lastIndexOf(File.separator) + 1));
                         // execute script
                         // TODO: Need to remove the "PostProcessed" parameter,
                         // it is useless and harmless.
@@ -426,7 +428,8 @@ public class Exporter
                         {
                         }
                         m_logger.info("Script on Export " + scriptOnExport
-                                + " is called to handle " + targetFolder);
+                                + " is called to handle files in folder: "
+                                + targetFolder);
                     }
                     catch (Exception e)
                     {
@@ -443,16 +446,22 @@ public class Exporter
                         return exportStatusMsg;
                     }
                     finally
-                    {
-                        // FileUtils.deleteSilently(finalFileName);
-                        FileUtils.deleteAllFilesSilently(targetFolder);
-                    }
+					{
+						// FileUtils.deleteSilently(finalFileName);
+						FileUtils.deleteAllFilesSilently(targetFolder);
+						finalFileStr = finalFile.getParentFile()
+								.getParentFile().getAbsolutePath()
+								+ File.separator + finalFile.getName();
+					}
                 }
             }
+            
+            // For eloqua file
+            handleEloquaFiles(finalFileName, fp, wf);
 
-            // Added by Vincent Yan
-            HashMap<String, String> infos = CVSUtil.seperateFileInfo(
-                    finalFile.getAbsolutePath(), m_exportLocation);
+			// Added by Vincent Yan
+			HashMap<String, String> infos = CVSUtil.seperateFileInfo(
+					finalFileStr, m_exportLocation);
             if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
             {
                 CVSUtil.saveCVSFile(
@@ -564,6 +573,119 @@ public class Exporter
         }
 
         return exportStatusMsg;
+    }
+    
+    private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf)
+    {
+        if (finalFileName.endsWith(".email.html") || finalFileName.endsWith(".landingPage.html"))
+        {
+            String name = finalFileName.substring(
+                    finalFileName.lastIndexOf(File.separator) + 1,
+                    finalFileName.lastIndexOf("."));
+            name = name.substring(0, name.lastIndexOf("."));
+            String targetFolder = finalFileName.substring(0,
+                    finalFileName.lastIndexOf(File.separator));        
+            String companyId = String.valueOf(fp.getCompanyId());
+            String sourceFolder = determineSourceFolder(companyId);
+            
+            File f = new File(targetFolder, name + ".obj");
+            boolean uploaded = f.exists();
+            if (!uploaded)
+            {
+                f = new File(sourceFolder, name + ".obj");
+            }
+            
+            if (f.exists())
+            {
+                // It seems that there is a issue with html export. Need do unescape again
+                File sf = new File(finalFileName);
+                try
+                {
+                    String content = FileUtil.readFile(sf, "utf-8");
+                    content = XmlUtil.unescapeString(content);
+                    FileUtil.writeFile(sf, content, "utf-8");
+                }
+                catch (IOException e)
+                {
+                    m_logger.error(e);
+                }
+                
+                if (finalFileName.endsWith(".email.html"))
+                {
+                    File emailFile = new File(finalFileName);
+                    Email m = new Email();
+                    m.loadFromFile(f);
+                    if (m.getName() != null)
+                    {
+                        m.updateFromFile(emailFile);
+                        
+                        EloquaConnector conn = m.getConnect();
+                        EloquaHelper h = new EloquaHelper(conn);
+                        
+                        if (uploaded && h.getEmail(m.getId()) != null)
+                        {
+                            h.updateEmail(m);
+                        }
+                        else
+                        {
+                        	if (!uploaded)
+                        	{
+                        		String eloquaName = m.getName();
+                                String targetLocale = wf.getTargetLocale().toString();
+                                eloquaName = eloquaName + "(" + targetLocale + ")";
+                                m.setName(eloquaName);
+                        	}
+                            
+                            m.setId("");
+                            m = h.saveEmail(m);
+                        }
+                        
+                        if (m != null)
+                        {
+                            f = new File(targetFolder, name + ".obj");
+                            m.setConnect(conn);
+                            m.saveJsonToFile(f);
+                        }
+                    }
+                }
+                else if (finalFileName.endsWith(".landingPage.html"))
+                {
+                    File saveFile = new File(finalFileName);
+                    LandingPage m = new LandingPage();
+                    m.loadFromFile(f);
+                    if (m.getName() != null)
+                    {
+                        m.updateFromFile(saveFile);
+                        EloquaConnector conn = m.getConnect();
+                        EloquaHelper h = new EloquaHelper(conn);
+                        
+                        if (uploaded && h.getLandingPage(m.getId()) != null)
+                        {
+                            h.updateLandingPage(m);
+                        }
+                        else
+                        {
+                        	if (!uploaded)
+                        	{
+                        		String eloquaName = m.getName();
+                                String targetLocale = wf.getTargetLocale().toString();
+                                eloquaName = eloquaName + "(" + targetLocale + ")";
+                                m.setName(eloquaName);
+                        	}
+                            m.setId("");
+                            m = h.saveLandingPage(m);
+                        }
+                        
+                        if (m != null)
+                        {
+                            f = new File(targetFolder, name + ".obj");
+                            m.setConnect(conn);
+                            m.saveJsonToFile(f);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private String replaceFileLocale(String content, String targetLocale)
@@ -764,7 +886,6 @@ public class Exporter
 
             while (s != null)
             {
-
                 s2 = null;
                 if (s.startsWith("#") || s.startsWith("!"))
                 {
@@ -1008,7 +1129,6 @@ public class Exporter
             aChar = in[off++];
             if (aChar == '\\')
             {
-                boolean isConvert = true;
                 aChar = in[off++];
                 if (aChar == 'u')
                 {
@@ -1056,26 +1176,8 @@ public class Exporter
                 }
                 else
                 {
-                    if (aChar == 't')
-                        aChar = '\t';
-                    else if (aChar == 'r')
-                        aChar = '\r';
-                    else if (aChar == 'n')
-                        aChar = '\n';
-                    else if (aChar == 'f')
-                        aChar = '\f';
-                    else
-                        isConvert = false;
-
-                    if (isConvert)
-                    {
-                        out[outLen++] = aChar;
-                    }
-                    else
-                    {
-                        out[outLen++] = '\\';
-                        out[outLen++] = aChar;
-                    }
+                    out[outLen++] = '\\';
+                    out[outLen++] = aChar;
                 }
             }
             else

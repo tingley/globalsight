@@ -322,6 +322,29 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
 
         return null;
     }
+    
+    public List<Language> getLanguages(String p_names)
+    {
+    	List<Language> langs = new ArrayList<Language>();
+    	String[] langStrs = p_names.split(",");
+        for (int i = 0, max = m_languages.size(); i < max; ++i)
+        {
+            Language lang = (Language) m_languages.get(i);
+
+            for(String langName : langStrs)
+            {
+            	if (lang.getName().equalsIgnoreCase(langName))
+            	{
+            		langs.add(lang);
+            		break;
+            	}
+            }
+        }
+        if(langs.size() > 0)
+        	return langs;
+
+        return null;
+    }
 
     public ArrayList getFields()
     {

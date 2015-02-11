@@ -318,6 +318,42 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+    
+    public long getTuCount(Date start, Date end, Set<String> attributeSet) throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+                        .append(getStorage().getTuTableName())
+                        .append(" as tu, ")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ")
+                        .append("TM3_EVENTS as event ")
+                        .append("WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+                        .append("AND event.time >= ? AND event.time <= ?")
+                        .addValues(start, end);
+            }
+            else
+            {
+                sb.append("SELECT COUNT(id) FROM ").append(
+                        getStorage().getTuTableName());
+            }
+            return SQLUtil.execCountQuery(conn, sb);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
 
     @Override
     public long getTuvCount(Date start, Date end) throws SQLException
@@ -796,4 +832,43 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+
+	@Override
+	public List<TM3Tu<T>> getTuPage(long startId, int count, Date start,
+			Date end, Set<String> attributeSet) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long getTuCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Date start, Date end,
+			Set<String> attributeSet) throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTuCountByLocale(TM3Locale locale, Date start, Date end,
+			Set<String> attributeSet) throws SQLException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByAttributes(long startId, int count,
+			Map<TM3Attribute, Object> inlineAttrs,
+			Map<TM3Attribute, String> customAttrs, Date start, Date end,
+			Set<String> attributeSet) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
+			TM3Locale locale, Date start, Date end, Set<String> attributeSet)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

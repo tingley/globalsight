@@ -135,8 +135,10 @@ public class FontMappingHelper
 
     public static boolean isInddXml(String p_format, String p_content)
     {
-        if ("xml".equalsIgnoreCase(p_format) && p_content != null
-                && p_content.contains("</Inddgsstory>")
+        if ("xml".equalsIgnoreCase(p_format)
+                && p_content != null
+                && (p_content.contains("</Inddgsstory>") || p_content
+                        .contains("</Inddgstextframe>"))
                 && p_content.contains("</Root>")
                 && p_content.contains("InddFontFamily="))
         {

@@ -317,6 +317,23 @@ public class TaskListHandler extends PageHandler
             p_response.getWriter().write(taskStatusJSON);
             return;
         }
+        else if("uploadingCheck".equals(action))
+        {
+        	String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
+            String result = "";
+            if(task.getIsUploading() == 'Y')
+            {
+            	result = "{\"isUploading\":true}";
+            }
+            else
+            {
+            	result = "{\"isUploading\":false}";
+            }
+        	p_response.getWriter().write(result);
+        	return;
+        }
         // for GBS-1939
         else if (TASK_ACTION_SELECTED_TASKSSTATUS.equals(action))
         {
@@ -1351,6 +1368,8 @@ public class TaskListHandler extends PageHandler
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
         StringBuffer isNeedScoreTaskId = new StringBuffer();
+        StringBuffer isNeedReportUploadCheckTaskId = new StringBuffer();
+        StringBuffer isFinishedReportUploadTaskId = new StringBuffer();
         StringBuffer unTranslatedTaskId = new StringBuffer();
         int percentage = 0;
 
@@ -1396,6 +1415,21 @@ public class TaskListHandler extends PageHandler
                             if (100 == percentage)
                             {
                                 isFinishedTaskId.append(taskId).append(" ");
+                                
+                                if(task.getIsReportUploadCheck() == 0 
+                                		||(task.getIsReportUploadCheck() == 1 
+                                        		&&  task.getIsReportUploaded() == 1))
+                                {
+                                	isFinishedReportUploadTaskId.append(taskId).append(" ");
+                                }
+                                
+                                if(task.getIsReportUploadCheck() == 1 
+                                		&&  task.getIsReportUploaded() == 0)
+                                {
+                                	isNeedReportUploadCheckTaskId.append("[JobID:")
+                                	.append(task.getJobId()).append(",JobName:")
+                                	.append(task.getJobName()).append("],");
+                                }
                             }
                             else
                             {
@@ -1405,7 +1439,23 @@ public class TaskListHandler extends PageHandler
                         else
                         {
                             isFinishedTaskId.append(taskId).append(" ");
+                            
+                            if(task.getIsReportUploadCheck() == 0 
+                            		||(task.getIsReportUploadCheck() == 1 
+                                    		&&  task.getIsReportUploaded() == 1))
+                            {
+                            	isFinishedReportUploadTaskId.append(taskId).append(" ");
+                            }
+                            
+                            if(task.getIsReportUploadCheck() == 1 
+                            		&&  task.getIsReportUploaded() == 0)
+                            {
+                            	isNeedReportUploadCheckTaskId.append("[JobID:")
+                            	.append(task.getJobId()).append(",JobName:")
+                            	.append(task.getJobName()).append("],");
+                            }
                         }
+                        
                     }
                 }
             }
@@ -1426,6 +1476,16 @@ public class TaskListHandler extends PageHandler
             	result = result + "\"isNeedScoreTaskId\":\"" 
     					+ isNeedScoreTaskId.substring(0,
     							isNeedScoreTaskId.length() - 1) + "\",";
+            }
+            if(isNeedReportUploadCheckTaskId.length() != 0)
+            {
+            	result = result + "\"isNeedReportUploadCheckTaskId\":\"" 
+				+ isNeedReportUploadCheckTaskId.toString().trim() + "\",";
+            }
+            if(isFinishedReportUploadTaskId.length() != 0)
+            {
+            	result = result + "\"isFinishedReportUploadTaskId\":\"" 
+				+ isFinishedReportUploadTaskId.toString().trim() + "\",";
             }
             if(unTranslatedTaskId.length()  != 0)
             {

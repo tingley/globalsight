@@ -170,5 +170,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIDocument.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIPackage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIProject.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/EloquaConnector.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

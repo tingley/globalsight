@@ -32,6 +32,23 @@ public class LogInfo implements Serializable
     private String message;
     private long companyId;
 
+    public LogInfo()
+    {
+    }
+
+    public LogInfo(String objectType, String eventType, String objectId,
+            String operator, Timestamp operateTime, String message,
+            long companyId)
+    {
+        this.objectType = objectType;
+        this.eventType = eventType;
+        this.objectId = objectId;
+        this.operator = operator;
+        this.operateTime = operateTime;
+        this.message = message;
+        this.companyId = companyId;
+    }
+
     public String getEventType()
     {
         return eventType;

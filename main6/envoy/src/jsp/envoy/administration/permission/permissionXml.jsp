@@ -253,6 +253,7 @@
 <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
   <permission id="<%=Permission.SYSTEM_PARAMS%>"/>
   <permission id="<%=Permission.LOGS_VIEW%>"/>
+  <!--  <permission id="<%=Permission.OPERATION_LOG_VIEW%>"/>-->
 <% if (ShutdownMainHandler.shutdownUserInterfaceEnabled()) { %>
   <permission id="<%=Permission.SHUTDOWN_SYSTEM%>"/>
 <% } %>
@@ -366,6 +367,7 @@
  <permission id="<%=Permission.CREATE_JOB%>"/>
  <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
  <permission id="<%=Permission.COTI_JOB%>"/>
+ <permission id="<%=Permission.ELOQUA%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>

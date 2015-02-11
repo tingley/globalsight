@@ -275,7 +275,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" as tuv, ").append("TM3_EVENTS as event ")
                         .append("WHERE tuv.lastEventId = event.id ")
                         .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ?")
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ?")
                         .addValues(parseStartDate(start), parseEndDate(end));
             }
             else
@@ -294,6 +294,75 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         {
             DbUtil.silentReturnConnection(conn);
         }
+    }
+    
+    public long getTuCount(Date start, Date end, Set<String> jobAttributeSet) throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ").append("TM3_EVENTS as event ")
+                        .append("WHERE tuv.lastEventId = event.id ")
+                        .append("AND tuv.tmId = ? ").addValue(tmId)
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ?")
+                        .addValues(parseStartDate(start), parseEndDate(end));
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+            }
+            else
+            {
+                sb.append("SELECT COUNT(tu.id) FROM ")
+                        .append(getStorage().getTuTableName()).append(" as tu ")
+                        .append(" WHERE tu.tmId = ?").addValue(tmId);
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, false);
+                }
+            }
+            
+            return SQLUtil.execCountQuery(conn, sb);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+    
+    private void appendAttributeSql(Set<String> jobAttributeSet, StatementBuilder sb,
+    		boolean forTuv)
+    {
+    	String key;
+		String value;
+		int count = 0;
+    	for(String keyAndValue: jobAttributeSet)
+    	{
+    		count++;
+    		key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
+			value = keyAndValue.substring(keyAndValue.indexOf(":") + 1).replaceAll("'", "''");
+			if(forTuv)
+			{
+				sb.append(" and tuv.tuId in ( ");
+			}
+			else
+			{
+				sb.append(" and tu.id in ( ");
+			}
+			sb.append(" select DISTINCT attrVal.tuId FROM " + getStorage().getAttrValTableName() + " AS attrVal,  TM3_ATTR AS attr WHERE attrVal.value = '" + value + "' and attr.name = '" + key + "' )");
+    	}
     }
 
     @Override
@@ -388,7 +457,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" as tuv, ").append("TM3_EVENTS as event ")
                         .append("WHERE tuv.lastEventId = event.id ")
                         .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
                         .addValues(parseStartDate(start), parseEndDate(end))
                         .append("AND tuv.localeId = ?")
                         .addValue(locale.getId());
@@ -411,6 +480,55 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+    
+    public long getTuCountByLocale(TM3Locale locale, Date start, Date end,Set<String> jobAttributeSet)
+    		throws SQLException
+	{
+		Connection conn = null;
+		try
+		{
+		    conn = DbUtil.getConnection();
+		    StatementBuilder sb = new StatementBuilder();
+		    if (start != null && end != null)
+		    {
+		        sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
+		                .append(getStorage().getTuvTableName())
+		                .append(" as tuv, ").append("TM3_EVENTS as event ")
+		                .append("WHERE tuv.lastEventId = event.id ")
+		                .append("AND tuv.tmId = ? ").addValue(tmId)
+		                .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
+		                .addValues(parseStartDate(start), parseEndDate(end))
+		                .append("AND tuv.localeId = ?")
+		                .addValue(locale.getId());
+		        
+		        if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+		    }
+		    else
+		    {
+		        sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
+		                .append(getStorage().getTuvTableName()).append(" as tuv ")
+		                .append(" WHERE tuv.tmId = ? AND tuv.localeId = ?")
+		                .addValues(tmId, locale.getId());
+		        
+		        if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+		    }
+		    return SQLUtil.execCountQuery(conn, sb);
+		}
+		catch (Exception e)
+		{
+		    throw new SQLException(e);
+		}
+		finally
+		{
+		    DbUtil.silentReturnConnection(conn);
+		}
+	}
 
     @Override
     public long getTuvCountByLocale(TM3Locale locale, Date start, Date end)
@@ -531,6 +649,64 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
             DbUtil.silentReturnConnection(conn);
         }
     }
+    
+    public long getTuCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
+            Map<TM3Attribute, String> customAttrs, Date start, Date end, Set<String> jobAttributeSet)
+            throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+                        .append(getStorage().getTuTableName())
+                        .append(" as tu ,")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ").append("TM3_EVENTS as event ");
+                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+                sb.append(
+                        "WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+                        .append("AND tu.tmId = ? ").addValue(tmId)
+                        .append(" AND event.time >= ? AND event.time <= ? ")
+                        .addValues(parseStartDate(start), parseEndDate(end));
+                        
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+            }
+            else
+            {
+                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+                        .append(getStorage().getTuTableName())
+                        .append(" as tu ");
+                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+                sb.append(" WHERE tu.tmId = ?").addValue(tmId);
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, false);
+                }
+            }
+            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
+            {
+                sb.append(" AND tu.").append(e.getKey().getColumnName())
+                        .append(" = ?").addValues(e.getValue());
+            }
+            return SQLUtil.execCountQuery(conn, sb);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
 
     @Override
     public long getTuvCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
@@ -600,7 +776,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" as tuv, ").append("TM3_EVENTS as event ")
                         .append("WHERE tuv.lastEventId = event.id ")
                         .append("AND tuv.tmId = ? ").addValue(tmId)
-                        .append(" AND event.time >= ? AND event.time <= ? ")
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
                         .addValues(parseStartDate(start), parseEndDate(end))
                         .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
                         .addValues(startId, count);
@@ -612,6 +788,61 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" WHERE tmId = ? AND id > ? ORDER BY id ASC LIMIT ?")
                         .addValues(tmId, startId, count);
             }
+            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+    
+    public List<TM3Tu<T>> getTuPage(long startId, int count, Date start,
+            Date end, Set<String> jobAttributeSet) throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT DISTINCT tuv.tuId FROM ")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ").append("TM3_EVENTS as event ")
+                        .append("WHERE tuv.lastEventId = event.id ")
+                        .append("AND tuv.tmId = ? ").addValue(tmId)
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
+                        .addValues(parseStartDate(start), parseEndDate(end));
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+                
+                sb.append("AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+                        .addValues(startId, count);
+                
+            }
+            else
+            {
+                sb.append("SELECT DISTINCT tu.id FROM ")
+                        .append(getStorage().getTuTableName()).append(" as tu ")
+                        .append(" WHERE tu.tmId = ? AND tu.id > ? ");
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, false);
+                }
+                
+                sb.append(" ORDER BY tu.id ASC LIMIT ?")
+                        .addValues(tmId, startId, count);
+                
+            }
+            
             return getTu(SQLUtil.execIdsQuery(conn, sb), false);
         }
         catch (Exception e)
@@ -642,7 +873,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append("WHERE tuv.lastEventId = event.id AND tuv.tmId = ? ")
                         .addValue(tmId).append("AND tuv.localeId = ?")
                         .addValue(locale.getId())
-                        .append(" AND event.time >= ? AND event.time <= ? ")
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
                         .addValues(parseStartDate(start), parseEndDate(end))
                         .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
                         .addValues(startId, count);
@@ -654,6 +885,61 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                         .append(" WHERE tmId = ? ")
                         .addValue(tmId)
                         .append(" AND localeId = ? AND tuId > ? ORDER BY tuId ASC LIMIT ?")
+                        .addValues(locale.getId(), startId, count);
+            }
+            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+    
+    public List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
+            TM3Locale locale, Date start, Date end, Set<String> jobAttributeSet) throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT DISTINCT tuv.tuId FROM ")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ")
+                        .append("TM3_EVENTS as event ")
+                        .append("WHERE tuv.lastEventId = event.id AND tuv.tmId = ? ")
+                        .addValue(tmId).append("AND tuv.localeId = ?")
+                        .addValue(locale.getId())
+                        .append(" AND tuv.creationDate >= ? AND tuv.creationDate <= ? ")
+                        .addValues(parseStartDate(start), parseEndDate(end));
+                        
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+                
+                sb.append("AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
+                        .addValues(startId, count);
+            }
+            else
+            {
+                sb.append("SELECT DISTINCT tuv.tuId FROM ")
+                        .append(getStorage().getTuvTableName()).append(" as tuv ")
+                        .append(" WHERE tuv.tmId = ? ")
+                        .addValue(tmId);
+                        
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+                
+                sb.append(" AND tuv.localeId = ? AND tuv.tuId > ? ORDER BY tuv.tuId ASC LIMIT ?")
                         .addValues(locale.getId(), startId, count);
             }
             return getTu(SQLUtil.execIdsQuery(conn, sb), false);
@@ -702,6 +988,75 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
                 getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
                 sb.append(" WHERE tu.tmId = ? ").addValue(tmId)
                         .append(" AND tu.id > ?").addValues(startId);
+            }
+            for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
+            {
+                sb.append(" AND tu.").append(e.getKey().getColumnName())
+                        .append(" = ?").addValues(e.getValue());
+            }
+            if (start != null && end != null)
+            {
+                sb.append(" ORDER BY tuv.tuId ASC LIMIT ?").addValues(count);
+            }
+            else
+            {
+                sb.append(" ORDER BY tu.id ASC LIMIT ?").addValues(count);
+            }
+            return getTu(SQLUtil.execIdsQuery(conn, sb), false);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+    
+    public List<TM3Tu<T>> getTuPageByAttributes(long startId, int count,
+            Map<TM3Attribute, Object> inlineAttrs,
+            Map<TM3Attribute, String> customAttrs, Date start, Date end,Set<String> jobAttributeSet)
+            throws SQLException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            if (start != null && end != null)
+            {
+                sb.append("SELECT DISTINCT tuv.tuId FROM ")
+                        .append(getStorage().getTuvTableName())
+                        .append(" as tuv, ")
+                        .append(getStorage().getTuTableName())
+                        .append(" as tu, ").append("TM3_EVENTS as event ");
+                getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
+                sb.append(
+                        " WHERE tuv.tuid=tu.id AND tuv.lastEventId = event.id ")
+                        .append("AND tuv.tmId = ? ").addValue(tmId)
+                        .append(" AND event.time >= ? AND event.time <= ? ")
+                        .addValues(parseStartDate(start), parseEndDate(end))
+                        .append("AND tuv.tuId > ?").addValues(startId);
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, true);
+                }
+            }
+            else
+            {
+                sb.append("SELECT DISTINCT tu.id FROM ")
+                        .append(getStorage().getTuTableName())
+                        .append(" as tu ");
+                getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
+                sb.append(" WHERE tu.tmId = ? ").addValue(tmId)
+                        .append(" AND tu.id > ?").addValues(startId);
+                
+                if(jobAttributeSet != null && jobAttributeSet.size() > 0)
+                {
+                	appendAttributeSql(jobAttributeSet, sb, false);
+                }
             }
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
             {

@@ -205,6 +205,8 @@ public interface MTProfileConstants
     public static final String MT_SAFA_PASSWORD = "safa_mt_password";
     public static final String MT_SAFA_CLIENT = "safaba_client";
     
+    public static final String MT_GOOGLE_API_KEY = "mt_google_api_key";
+
     public static final String MT_ENGINE_GOOGLE = "Google";
     public static final String MT_ENGINE_PROMT = "Promt";
     public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";

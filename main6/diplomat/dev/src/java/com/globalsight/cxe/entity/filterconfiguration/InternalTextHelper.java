@@ -60,7 +60,7 @@ public class InternalTextHelper
     public static String GS_INTERNALT_TAG_START = "<GS-INTERNAL-TEXT>";
     public static String GS_INTERNALT_TAG_END = "</GS-INTERNAL-TEXT>";
     public static String REG_INTERNAL_TEXT = "<(GS-INTERNAL-TEXT)>(.*)</GS-INTERNAL-TEXT>";
-
+    public static final String m_tag_amp = "AmpersandOfGS";
     /**
      * Handle the internal texts for one string
      * 
@@ -402,7 +402,10 @@ public class InternalTextHelper
             result.add(s);
             return result;
         }
-
+		if (s.contains(m_tag_amp))
+		{
+			s = s.replace(m_tag_amp, "&amp;");
+		}
         if (!it.isRE())
         {
             String internalText = getInternalTextValue(it.getName(), format);

@@ -346,7 +346,7 @@ public class WorkflowTemplateHandlerHelper
     /**
      * Get a collection of existing active worklfow template infos.
      */
-    static List getAllWorkflowTemplateInfos() throws EnvoyServletException
+    public static List getAllWorkflowTemplateInfos() throws EnvoyServletException
     {
         try
         {
@@ -982,7 +982,7 @@ public class WorkflowTemplateHandlerHelper
         String[] array;
         // if(p_isCalendarInstalled)
         // {
-        array = new String[36];
+        array = new String[37];
         // }
         // else
         // {
@@ -1035,6 +1035,8 @@ public class WorkflowTemplateHandlerHelper
         array[34] = p_bundle.getString("lb_Overdue_PM") + "* " + colon;
         array[35] = p_bundle.getString("lb_Overdue_user") + "* " + colon;
 
+        array[36] = p_bundle.getString("lb_report_upload_check") + colon;
+              
         return array;
     }
 

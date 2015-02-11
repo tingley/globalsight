@@ -81,6 +81,13 @@
       </WebPage>
     </WebActivity>
   </WebModule>
+  <WebModule webModuleName="operationLog">
+    <WebActivity webActivityName="operationLog">
+      <WebPage pageName="OPERATIONLOG" isDefault="true" jspName="/envoy/administration/logs/operationLog.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.logs.OperationLogMainHandler">
+        <PageLink linkName="self" destinationPageName="OPERATIONLOG"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
   <WebModule webModuleName="shutdown">
     <WebActivity webActivityName="shutdown">
       <WebPage pageName="SD1" isDefault="true" jspName="/envoy/administration/shutdown/shutdown.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler"></WebPage>
@@ -660,7 +667,7 @@
         <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
-    <WebActivity webActivityName="createZipJobs">
+    <WebActivity webActivityName="createZipJobs" clearSession="false">
       <WebPage pageName="CZJ" isDefault="true" jspName="/envoy/administration/createjob/createZipJobs.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler">
         <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
         <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
@@ -681,6 +688,34 @@
         <PageLink linkName="allStatus" destinationPageName="cojs"></PageLink>
       </WebPage>
       <WebPage pageName="cojd" isDefault="true" jspName="/envoy/administration/cotijob/cotiJobDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.cotijob.CotiJobDetailHandler">
+      </WebPage>
+    </WebActivity>
+    
+    <WebActivity webActivityName="eloqua">
+      <WebPage pageName="em" isDefault="true" jspName="/envoy/connecter/eloqua/eloquaMain.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaMainHandler">
+        <PageLink linkName="self" destinationPageName="em"></PageLink>
+        <PageLink linkName="new1" destinationPageName="em2"></PageLink>
+        <PageLink linkName="edit" destinationPageName="em2"></PageLink>
+        <PageLink linkName="remove" destinationPageName="em"></PageLink>
+        <PageLink linkName="connect" destinationPageName="em3"></PageLink>
+      </WebPage>
+      <WebPage pageName="em2" isDefault="false" jspName="/envoy/connecter/eloqua/eloquaBasic.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaBasicHandler">
+        <PageLink linkName="cancel" destinationPageName="em"></PageLink>
+        <PageLink linkName="save" destinationPageName="em"></PageLink>
+        <PageLink linkName="self" destinationPageName="em2"></PageLink>
+        <PageLink linkName="connect" destinationPageName="em3"></PageLink>
+      </WebPage>
+      <WebPage pageName="em4" isDefault="false" jspName="/envoy/connecter/eloqua/eloquaFileList.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaFileListHandler">
+        <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
+        <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JA"></PageLink>
+        <PageLink linkName="self" destinationPageName="em3"></PageLink>
+      </WebPage>
+      <WebPage pageName="em3" isDefault="false" jspName="/envoy/connecter/eloqua/eloquaCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.eloqua.EloquaCreateJobHandler">
+        <PageLink linkName="createZipJob" destinationPageName="CZJ"></PageLink>
+        <PageLink linkName="selectFile" destinationPageName="SF"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JA"></PageLink>
+        <PageLink linkName="self" destinationPageName="em3"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="fileprofiles">
@@ -1850,6 +1885,7 @@
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
+        <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
         <PageLink linkName="wordcountList" destinationPageName="TPWCL"></PageLink>
         <PageLink linkName="queryOpenIssuesXml" destinationPageName="QOI"></PageLink>
@@ -1879,6 +1915,7 @@
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
+        <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
         <PageLink linkName="wordcountList" destinationPageName="TPWCL"></PageLink>
         <PageLink linkName="queryOpenIssuesXml" destinationPageName="QOI"></PageLink>
@@ -1907,6 +1944,7 @@
         <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
+        <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
         <PageLink linkName="wordcountList" destinationPageName="TPWCL"></PageLink>
         <PageLink linkName="queryOpenIssuesXml" destinationPageName="QOI"></PageLink>
@@ -1941,6 +1979,7 @@
         <PageLink linkName="detail" destinationPageName="TK2"></PageLink>
         <PageLink linkName="download" destinationPageName="TK6"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
+        <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="referenceUpload" destinationPageName="TK12"></PageLink>
         <PageLink linkName="delete" destinationPageName="TK5"></PageLink>
         <PageLink linkName="update" destinationPageName="TK5"></PageLink>

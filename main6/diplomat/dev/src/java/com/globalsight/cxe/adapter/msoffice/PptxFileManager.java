@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
+import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.util.FileUtil;
 
 public class PptxFileManager 
@@ -38,20 +41,25 @@ public class PptxFileManager
 	
 	private static Pattern ROOT_PATTERN = Pattern.compile("<([^:>]*:\\S*) ([^>]*)>");
 	
+	private MSOffice2010Filter filter = null;
+	private List<String> slideHiddenFiles = new ArrayList<String>();
+	
 	private static List<PptxFileType> TYPES = new ArrayList<PptxFileType>();
 	static
 	{
+	    // add slide first to check if it is hidden
+        PptxFileType slide = new PptxFileType();
+        slide.setDir("ppt/slides");
+        slide.setMergeFile("ppt/slide.xml");
+        slide.setPrefix("slide");
+        TYPES.add(slide);
+	    
+        // add slides' node
 		PptxFileType note = new PptxFileType();
 		note.setDir("ppt/notesSlides");
 		note.setMergeFile("ppt/notesSlide.xml");
 		note.setPrefix("notesSlide");
 		TYPES.add(note);
-		
-		PptxFileType slide = new PptxFileType();
-		slide.setDir("ppt/slides");
-		slide.setMergeFile("ppt/slide.xml");
-		slide.setPrefix("slide");
-		TYPES.add(slide);
 		
 		PptxFileType notesMaster = new PptxFileType();
 		notesMaster.setDir("ppt/notesMasters");
@@ -96,7 +104,17 @@ public class PptxFileManager
 		TYPES.add(drawing);
 	}
 	
-	public void mergeFile(String dir) 
+	public MSOffice2010Filter getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter(MSOffice2010Filter filter)
+    {
+        this.filter = filter;
+    }
+
+    public void mergeFile(String dir) 
 	{
 		for (PptxFileType type : TYPES)
 		{
@@ -192,7 +210,6 @@ public class PptxFileManager
 	
 	private void mergeFiles(String dir, PptxFileType type) throws IOException
     {
-		
 		List<File> fs = new ArrayList<File>();
 		File root = new File(dir, type.getDir());
 		File[] ffs = root.listFiles(type.getFileFilter());
@@ -257,55 +274,191 @@ public class PptxFileManager
         
         for (File f : fs)
         {
-        	addFile(sb, f);
+        	addFile(sb, f, type);
         }
         sb.append("</").append(name).append(">").append(FileUtil.lineSeparator);
         
 		FileUtil.writeFile(new File(dir, type.getMergeFile()), sb.toString(), "UTF-8");
     }
 	
-	private void addFile(StringBuffer sb, File f)
+	private void addFile(StringBuffer sb, File f, PptxFileType type)
     {
-    	BufferedReader br = null;
-    	try 
-    	{
-			InputStreamReader r = new InputStreamReader(new FileInputStream(f),
-					"UTF-8");
-			String line = null;
-			br = new BufferedReader(r);
+        boolean isSlide = "slide".equals(type.getPrefix());
+        boolean isTranslateHidden = (filter == null ? true : filter
+                .isHiddenTextTranslate());
+        boolean addThisFile = true;
+        boolean isSlideNode = "notesSlide".equals(type.getPrefix());
+        boolean isDataXml = "data".equals(type.getPrefix());
+        boolean isChartXml = "chart".equals(type.getPrefix());
+        boolean isDrawingXml = "drawing".equals(type.getPrefix());
+        
+        BufferedReader br = null;
+        try
+        {
+            String fname = f.getName();
+            InputStreamReader r = new InputStreamReader(new FileInputStream(f),
+                    "UTF-8");
+            br = new BufferedReader(r);
 
-			sb.append("<file name=\"").append(f.getName()).append("\">")
-					.append(FileUtil.lineSeparator);
-			//ignore first line
-			String n = br.readLine();
-			if (n!= null && !n.startsWith("<?xml"))
-			{
-				sb.append(n).append(FileUtil.lineSeparator);
-			}
-			
-			while((line=br.readLine())!=null)
-			{     
-				sb.append(line).append(FileUtil.lineSeparator);
-			}
-			sb.append("</file>").append(FileUtil.lineSeparator);
-		} 
-    	catch (Exception e) 
-		{
-    		logger.error(e);
-		}
-    	finally
-    	{
-    		if (br != null)
-    		{
-    			try 
-    			{
-					br.close();
-				} 
-    			catch (IOException e) 
-    			{
-    				logger.error(e);;
-				}
-    		}
-    	}
+            String line1 = br.readLine();
+            String line2 = br.readLine();
+
+            // ignore hidden slides and its node : GBS-3576
+            if (!isTranslateHidden)
+            {
+                if (isSlide)
+                {
+                    String s = (line1 != null && line1.startsWith("<p:sld ")) ? line1
+                            : line2;
+
+                    if (s != null)
+                    {
+                        StringIndex si = StringIndex.getValueBetween(s, 0,
+                                "<p:sld ", ">");
+
+                        // check if this slide is hidden
+                        if (si != null && si.allValue.contains("show=\"0\""))
+                        {
+                            addThisFile = false;
+
+                            findHiddenFiles(slideHiddenFiles, f);
+                        }
+                    }
+                }
+                else
+                {
+                    if ((isSlideNode || isDataXml || isChartXml || isDrawingXml)
+                            && isSlideHiddenFile(slideHiddenFiles, f))
+                    {
+                        addThisFile = false;
+                    }
+                }
+            }
+
+            if (addThisFile)
+            {
+                sb.append("<file name=\"").append(fname).append("\">")
+                        .append(FileUtil.lineSeparator);
+
+                // ignore first line
+                if (line1 != null && !line1.startsWith("<?xml"))
+                {
+                    sb.append(line1).append(FileUtil.lineSeparator);
+                }
+
+                sb.append(line2).append(FileUtil.lineSeparator);
+
+                String line = null;
+                while ((line = br.readLine()) != null)
+                {
+                    sb.append(line).append(FileUtil.lineSeparator);
+                }
+                sb.append("</file>").append(FileUtil.lineSeparator);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+        finally
+        {
+            if (br != null)
+            {
+                try
+                {
+                    br.close();
+                }
+                catch (IOException e)
+                {
+                    logger.error(e);
+                }
+            }
+        }
+    }
+	
+	public List<String> getSlideHiddenFiles()
+    {
+        return slideHiddenFiles;
+    }
+
+    /**
+	 * Check if this file is hidden reference, ignore hidden slide's files : GBS-3576
+	 * @param slideHiddenFiles2
+	 * @param f
+	 * @return
+	 */
+    public static boolean isSlideHiddenFile(List<String> p_slideHiddenFiles, File p_file)
+    {
+        if (p_slideHiddenFiles == null || p_slideHiddenFiles.size() == 0
+                || p_file == null)
+        {
+            return false;
+        }
+
+        String key = p_file.getParentFile().getName() + "/" + p_file.getName();
+        return p_slideHiddenFiles.contains(key);
+    }
+
+    /**
+     * Find the reference files for one hidden slide
+     * @param p_slideFile
+     * @param p_hiddenSlideFiles
+     * @throws IOException
+     */
+    public static void findHiddenFiles(List<String> p_hiddenSlideFiles, File p_slideFile)
+            throws IOException
+    {
+        String relsFileName = "_rels/" + p_slideFile.getName() + ".rels";
+        File relsFile = new File(p_slideFile.getParentFile(), relsFileName);
+        if (relsFile.exists())
+        {
+            p_hiddenSlideFiles.add(relsFileName);
+
+            String relsText = FileUtils.read(relsFile, "UTF-8");
+            int start = 0;
+            StringIndex relsSI = StringIndex.getValueBetween(relsText, start,
+                    "Target=\"../", "\"");
+            while (relsSI != null)
+            {
+                p_hiddenSlideFiles.add(relsSI.value);
+                start = relsSI.allEnd;
+
+                String[] names = relsSI.value.split("/");
+                if (names != null && names.length == 2)
+                {
+                    if (names[1].startsWith("data"))
+                    {
+                        String dataRelsFileName = "_rels/" + names[1] + ".rels";
+                        p_hiddenSlideFiles.add(dataRelsFileName);
+                    }
+                    else if (names[1].startsWith("chart"))
+                    {
+                        String chartRelsFileName = "_rels/" + names[1]
+                                + ".rels";
+                        File chartRelsFile = new File(p_slideFile
+                                .getParentFile().getParentFile(), "charts/"
+                                + chartRelsFileName);
+                        if (chartRelsFile.exists())
+                        {
+                            String chartRelsText = FileUtils.read(chartRelsFile, "UTF-8");
+                            int chartStart = 0;
+                            StringIndex chartRelsSI = StringIndex.getValueBetween(chartRelsText, chartStart,
+                                    "Target=\"../", "\"");
+                            while (chartRelsSI != null)
+                            {
+                                p_hiddenSlideFiles.add(chartRelsSI.value);
+                                chartStart = chartRelsSI.allEnd;
+                                
+                                chartRelsSI = StringIndex.getValueBetween(chartRelsText, chartStart,
+                                        "Target=\"../", "\"");
+                            }
+                        }
+                    }
+                }
+
+                relsSI = StringIndex.getValueBetween(relsText, start,
+                        "Target=\"../", "\"");
+            }
+        }
     }
 }

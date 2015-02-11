@@ -217,6 +217,10 @@ function doOnLoad()
 </DIV>
 
 <DIV>
+	Entries with only 1 term will be ignored.
+</DIV>
+
+<DIV>
 	<%=bundle.getString("lb_terminology_expected_number_of_entries_to_be_exported")%>
 <SPAN id="idEntryCount" style="font-weight: bold"></SPAN>.
 </DIV>

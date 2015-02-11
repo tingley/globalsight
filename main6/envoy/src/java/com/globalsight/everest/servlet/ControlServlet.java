@@ -332,7 +332,8 @@ public class ControlServlet extends HttpServlet
                 targetPageDescriptor = activityDescriptor
                         .getDefaultPageDescriptor();
             }
-            else if (pageName != null && pageName.equals(RETRIEVE_PAGE))
+            else if (pageName != null && pageName.equals(RETRIEVE_PAGE)
+                    && LoginUtil.isFromLoginPage(p_request))
             {
                 targetPageDescriptor = WebSiteDescription.instance()
                         .getPageDescriptor(RETRIEVE_PAGE);
@@ -341,7 +342,7 @@ public class ControlServlet extends HttpServlet
             else if (p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD) == null
                     && p_request.getParameter("ssoResponseData") == null)
             {
-            	LoginUtil.addSubmitToken(p_request);
+                LoginUtil.addSubmitToken(p_request);
                 // the entry page does not receive login parameters
                 // retrieve the page descriptor for entry page (this is
                 // a default)
@@ -404,7 +405,7 @@ public class ControlServlet extends HttpServlet
                                 userSession, sourcePageHandler);
                     }
                 }
-                
+
                 LoginUtil.addSubmitToken(p_request);
 
                 // determine the target page
@@ -415,7 +416,7 @@ public class ControlServlet extends HttpServlet
             }
             else
             {
-            	LoginUtil.addSubmitToken(p_request);
+                LoginUtil.addSubmitToken(p_request);
                 // the entry page does not receive login parameters
                 // retrieve the page descriptor for entry page (this is
                 // a default)
@@ -542,10 +543,10 @@ public class ControlServlet extends HttpServlet
                 // defined
                 String activityName = p_request
                         .getParameter(LinkHelper.ACTIVITY_NAME);
-                
+
                 if ("login".equals(activityName))
                 {
-                	LoginUtil.addSubmitToken(p_request);
+                    LoginUtil.addSubmitToken(p_request);
                 }
 
                 if (CATEGORY.isDebugEnabled())
@@ -907,8 +908,7 @@ public class ControlServlet extends HttpServlet
             final HttpServletRequest p_request,
             final HttpServletResponse p_response) throws IOException
     {
-        String activityName = p_request
-                .getParameter(LinkHelper.ACTIVITY_NAME);
+        String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
         if ("checkSessionStatus".equals(activityName))
         {
             String sessionStatus = "valid";
@@ -922,9 +922,10 @@ public class ControlServlet extends HttpServlet
             {
                 p_response.setContentType("text/plain");
                 out = p_response.getOutputStream();
-                String returns = "{\"sessionStatus\":\"" + sessionStatus + "\"}";
+                String returns = "{\"sessionStatus\":\"" + sessionStatus
+                        + "\"}";
                 out.write(returns.getBytes("UTF-8"));
-                
+
                 return true;
             }
             catch (Exception e)

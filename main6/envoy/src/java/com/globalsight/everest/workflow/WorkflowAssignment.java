@@ -68,6 +68,8 @@ public class WorkflowAssignment implements AssignmentHandler
     private String role_preference;
 
     private String point;
+    
+    private String report_upload_check;
 
     public void assign(Assignable arg0, ExecutionContext arg1) throws Exception
     {
@@ -287,4 +289,12 @@ public class WorkflowAssignment implements AssignmentHandler
     {
         this.overdueToUser_time = voerdutpm_time;
     }
+
+	public void setReport_upload_check(String report_upload_check) {
+		this.report_upload_check = report_upload_check;
+	}
+
+	public String getReport_upload_check() {
+		return report_upload_check;
+	}
 }

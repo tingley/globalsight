@@ -28,6 +28,7 @@
       com.globalsight.everest.servlet.util.ServerProxy,
       com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.taskmanager.Task,
+      com.globalsight.everest.taskmanager.TaskImpl,
       com.globalsight.everest.util.system.SystemConfigParamNames,
       com.globalsight.everest.util.system.SystemConfiguration,
       com.globalsight.everest.webapp.WebAppConstants,
@@ -105,6 +106,8 @@
 <jsp:useBean id="editcomment" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="downloadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="originalSourceFile" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -338,6 +341,8 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelEditorWarning = bundle.getString("lb_editor_warning");
     String labelFinishWarning = bundle.getString("jsmsg_my_activities_finished");
     String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
+    String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
+    String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
     //use to get the translated text
     StringBuffer tarPageIds = new StringBuffer();
 
@@ -345,6 +350,9 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+    TaskImpl taskImpl = (TaskImpl)theTask;
+    int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
+    int isUploaded = taskImpl.getIsReportUploaded();
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -353,6 +361,11 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     		theTask.isType(Task.TYPE_REVIEW))
     { 
     	needScore = true;
+    }
+    if(theTask.isType(Task.TYPE_REVIEW))
+    {
+    	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
+    	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
    	boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
     //Urls of the links on this page
@@ -429,6 +442,12 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
 					    		+ "&" + WebAppConstants.TASK_STATE +
 					    		"=" + theTask.getState();
     
+    String uploadReportUrl = uploadreport.getPageURL()
+						    + "&" + WebAppConstants.TASK_ID
+							+ "=" + theTask.getId()
+							+ "&" + WebAppConstants.TASK_STATE +
+							"=" + theTask.getState();
+
     String searchTextUrl = searchText.getPageURL()
 				    		+ "&" + WebAppConstants.TASK_ID
 				    		+ "=" + theTask.getId()
@@ -1142,10 +1161,6 @@ function searchPages(){
     var locale = localesSelect.options[index].value;
     var searchText = document.getElementById("pageSearchText").value;
     searchText = ATrim(searchText);
-    if(searchText != "" && searchText.length < 3){
-    	alert("Search text length is less than three !");
-    	return;
-    }
     if(checkSomeSpecialChars(searchText)){
    		alert("<%= bundle.getString("lb_tm_search_text") %>" + "<%= bundle.getString("msg_invalid_entry4") %>" + iChars);
         return false;
@@ -1184,7 +1199,7 @@ function searchPages(){
 	    <FORM name=pageSearchTextForm  id="pageSearchTextForm" method="post" action=""  ENCTYPE="multipart/form-data">
 			<table  CELLSPACING="0" CELLPADDING="2" BORDER="0" style="border:solid 1px slategray;background:#DEE3ED;width:100%;height:40">
 			  <tr>
-			  	<td class="standardText" style="width:8%"><%=bundle.getString("lb_search_in")%>：</td>
+			  	<td class="standardText" style="width:8%"><%=bundle.getString("lb_search_in")%>:</td>
 			  	<td class="standardText" style="width:14%">
 			  		<select id="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>"  name="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" style="width:100%">
 			  			<option value="sourceLocale" <%=thisSearchLocale.equals("sourceLocale") ? "selected":""%>><%=bundle.getString("lb_tm_search_source_locale")%></option>

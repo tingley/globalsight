@@ -5,7 +5,7 @@ function POFilter()
 	this.filterPopupContentId = "poFilterPopupContent";
 	this.filterNameId = "poFilterName";
 	this.filterDesId = "poFilterDes";
-	this.textWidth = getWidthNum(this.filterDialogId)-150;
+	this.textWidth = getWidthNum(this.filterDialogId)-200;
 }
 
 POFilter.prototype.setFilter = function (filter)
@@ -30,7 +30,13 @@ POFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 	str.append(jsSecondaryFilter);
 	str.append(":</lable></td><td>");
 	str.append(this.getSecondaryFilterSelect(this.filter));
-	str.append("</td></tr></table>");
+	str.append("</td></tr>");
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='specialFilter_dialog_label'>" +  generateBaseFilterList(this.filterTableName, this.filter) + "</td>");
+	str.append("</tr></table>");
 	
 	var dialogObj = document.getElementById(this.filterPopupContentId);
 	dialogObj.innerHTML = str.toString();
@@ -62,7 +68,14 @@ POFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append(":</lable></td><td>");
 	var filter = getFilterById(topFilterId);
 	str.append(this.getSecondaryFilterSelect(filter));
-	str.append("</td></tr></table>");
+	str.append("</td></tr>");
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='specialFilter_dialog_label'>" + generateBaseFilterList(this.filterTableName) + "</td>");
+	str.append("</tr>");
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById(this.filterPopupContentId);
 	dialogObj.innerHTML = str.toString();
@@ -113,7 +126,10 @@ function savePOFilter()
 		secondFilterTableName = secondaryFilterIdAndTableName.substring(index+1);
 	}
 	
-	var obj = {filterTableName:this.filterTableName, isNew:isNew, filterName:filterName, filterId:filterId, filterDesc:filterDesc, companyId:companyId, secondFilterId:secondFilterId, secondFilterTableName:secondFilterTableName};
+	var baseFilterId = document.getElementById("po_filter_baseFilterSelect").value;
+	alertUserBaseFilter(baseFilterId);
+	
+	var obj = {filterTableName:this.filterTableName, isNew:isNew, filterName:filterName, filterId:filterId, filterDesc:filterDesc, companyId:companyId, secondFilterId:secondFilterId, secondFilterTableName:secondFilterTableName,baseFilterId:baseFilterId};
 
 	sendAjax(obj, "checkExist", "checkExistPOFilterCallback");
 	
@@ -136,6 +152,8 @@ function updatePOFilterCallback(data)
 		jpFilter.secondFilterId = checkExistPOFilterCallback.obj.secondFilterId;
 		jpFilter.secondFilterTableName = checkExistPOFilterCallback.obj.secondFilterTableName;
 		jpFilter.companyId = companyId;
+		jpFilter.baseFilterId = checkExistPOFilterCallback.obj.baseFilterId;
+		
 		var specialFilters = updateSpecialFilter(savePOFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -177,6 +195,7 @@ function savePOFilterCallback(data)
 		jpFilter.companyId = companyId;
 		jpFilter.secondFilterId = checkExistPOFilterCallback.obj.secondFilterId;
 		jpFilter.secondFilterTableName = checkExistPOFilterCallback.obj.secondFilterTableName;
+		jpFilter.baseFilterId = checkExistPOFilterCallback.obj.baseFilterId;
 		
 		filter.specialFilters.push(jpFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);

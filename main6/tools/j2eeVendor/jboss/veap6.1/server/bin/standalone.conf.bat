@@ -4,7 +4,7 @@ rem #  JBoss Bootstrap Script Configuration                                    #
 rem #                                                                          ##
 rem #############################################################################
 
-rem # $Id: standalone.conf.bat,v 1.1.24.1 2014/08/15 06:13:23 yorkjin Exp $
+rem # $Id: standalone.conf.bat,v 1.2 2014/08/15 06:09:40 yorkjin Exp $
 
 rem #
 rem # This batch file is executed by run.bat to initialize the environment

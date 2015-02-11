@@ -174,6 +174,35 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             out.close();
             return;
         }
+        else if(p_request.getParameter("checkIsUploadingForExport") != null)
+        {
+        	String[] wfIds = p_request.getParameter("wfId").split(" ");
+        	for(String wfIdStr: wfIds)
+        	{
+        		long wfId = Long.parseLong(wfIdStr);
+        		Workflow workflow =  WorkflowHandlerHelper.getWorkflowById(wfId);
+        		Hashtable<Long, Task> tasks = workflow.getTasks();
+        		String result = "";
+        		for(Long taskKey:  tasks.keySet())
+        		{
+        			if(tasks.get(taskKey).getIsUploading() == 'Y')
+        			{
+        				result = "uploading";
+        				break;
+        			}
+        		}
+        		
+        		if(result.length() > 0)
+        		{
+        			PrintWriter out = p_response.getWriter();
+        			p_response.setContentType("text/html");
+        			out.write(result);
+        			out.close();
+        			break;
+        		}
+        	}
+            return;
+        }
         else if ("getUpdateWCPercentage".equals(p_request
                 .getParameter("action")))
         {
@@ -1011,6 +1040,16 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             JobWorkflowDisplay jobWorkflowDisplay = new JobWorkflowDisplay(
                     workflow);
+            jobWorkflowDisplay.setIsUploading("No");
+            Hashtable<Long, Task> tasks = workflow.getTasks();
+            for(Long taskKey:  tasks.keySet())
+            {
+            	if(tasks.get(taskKey).getIsUploading() == 'Y')
+            	{
+            		jobWorkflowDisplay.setIsUploading("Yes");
+            		break;
+            	}
+            }
             jobWorkflowDisplay.setTargetLocaleDisplayName(workflow
                     .getTargetLocale().getDisplayName(uiLocale));
             jobWorkflowDisplay.setTotalWordCount(getTotalWordCount(workflow));

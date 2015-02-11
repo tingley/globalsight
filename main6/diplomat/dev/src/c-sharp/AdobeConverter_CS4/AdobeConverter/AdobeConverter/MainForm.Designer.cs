@@ -189,7 +189,7 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe CS4 Converter - Version: 8.5.3";
+            this.Text = "Adobe CS4 Converter - Version: 8.5.7";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.ResumeLayout(false);

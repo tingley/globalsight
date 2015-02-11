@@ -707,6 +707,10 @@ public class CVSUtil
         return result > 0;
     }
 
+	/**
+	 * When the export or task completed, get the files from the target folder,
+	 * and then copy to the inbox, and from the inbox uploaded to the cvs server
+	 * */
     public static void saveCVSFile(HashMap<String, String> infos,
             String p_srcLocale)
     {

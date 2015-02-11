@@ -1196,7 +1196,13 @@ public class TaskHelper
     public static Task updateTaskStatus(long p_taskId, String p_status)
     {
         Task task = getTask(p_taskId);
-        return updateTaskStatus(task, p_status);
+        return updateTaskStatus(task, p_status , false);
+    }
+    
+    public static Task updateTaskStatus(long p_taskId, String p_status, boolean isUploaded)
+    {
+        Task task = getTask(p_taskId);
+        return updateTaskStatus(task, p_status, isUploaded);
     }
     
     /**
@@ -1207,7 +1213,7 @@ public class TaskHelper
      * @param p_status
      *            Task status(UPLOAD_IN_PROGRESS/UPLOAD_DONE)
      */
-    public static Task updateTaskStatus(Task p_task, String p_status)
+    public static Task updateTaskStatus(Task p_task, String p_status, boolean isUploaded)
     {
         if (p_task == null)
             return null;
@@ -1220,9 +1226,39 @@ public class TaskHelper
         else if (AmbassadorDwUpConstants.UPLOAD_DONE.equals(p_status))
         {
             p_task.setIsUploading('N');
+            if(isUploaded)
+            {
+            	p_task.setIsReportUploaded(1);
+            }
             HibernateUtil.update(p_task);
         }
 
         return p_task;
+    }
+    
+    public static synchronized boolean installTaskIsUploading()
+    {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = SqlUtil.hireConnection();
+            ps = conn.prepareStatement(" UPDATE task_info SET is_uploading = 'N' WHERE is_uploading = 'Y' ");
+            ps.execute();
+        }
+        catch (SQLException e)
+        {
+        	CATEGORY.error("delAllReportsData error.", e);
+            return false;
+        }
+        finally
+        {
+            SqlUtil.silentClose(rs);
+            SqlUtil.silentClose(ps);
+            SqlUtil.fireConnection(conn);
+        }
+
+        return true;
     }
 }

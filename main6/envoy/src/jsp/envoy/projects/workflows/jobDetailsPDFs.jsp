@@ -39,7 +39,7 @@
    String title = bundle.getString("lb_job_details") + " " + bundle.getString("lb_pdfs");
    String label_createPDF = bundle.getString("lb_create_pdf");
    String label_download = bundle.getString("lb_download");
-   String label_cancel = bundle.getString("lb_cancel");
+   String label_reset = bundle.getString("lb_reset");
 %>
 <html>
 <head>
@@ -158,8 +158,8 @@ function fnDownloadPDF(){
 	});
 }
 
-// Cancel Create PDF
-function fnCancel(){
+// Reset Create PDF
+function fnReset(){
 	var wfids = [];
 	$("input[name='dataCheck']:checked").each(function(i){
 		wfids[i] = $(this).val();
@@ -225,7 +225,7 @@ function fnCancel(){
 <div id="buttonDiv" style="padding-top:5px;width:80%">
 <input type="button" id="btnCreatePDF" onclick="fnCreatePDF();" value="<%=label_createPDF%>" class="standardText">
 <input type="button" id="btnDownPDF" onclick="fnDownloadPDF();" value="<%=label_download%>" class="standardText">
-<input type="button" id="btnCancel" onclick="fnCancel();" value="<%=label_cancel%>" class="standardText">
+<input type="button" id="btnCancel" onclick="fnReset();" value="<%=label_reset%>" class="standardText">
 </div>
 </div>
 </div>

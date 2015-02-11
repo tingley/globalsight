@@ -256,13 +256,14 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
     // Get all the info required to be displayed on the graphical workflow UI.
     // The info required for the dialog boxes for each node should also be
     // included.
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Vector getDisplayData(HttpServletRequest p_request,
-            HttpSession p_session) throws WorkflowManagerException,
+            HttpSession p_appletSession) throws WorkflowManagerException,
             RemoteException, GeneralException
     {
-        SessionManager sm = WorkflowTemplateHandlerHelper
-                .getSessionManager(p_request);
-        ResourceBundle bundle = getBundle(p_session);
+        SessionManager sessionMgr = (SessionManager) p_appletSession
+                .getAttribute(SESSION_MANAGER);
+        ResourceBundle bundle = getBundle(p_appletSession);
         Vector objs = new Vector();
 
         boolean isReady = false;
@@ -271,7 +272,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
         GlobalSightLocale targetLocale = null;
         boolean hasCosting = WorkflowTemplateHandlerHelper.isCostingEnabled();
         boolean hasRevenue = WorkflowTemplateHandlerHelper.isRevenueEnabled();
-        Workflow wf = (Workflow) sm.getAttribute(WF_INSTANCE);
+        Workflow wf = (Workflow) sessionMgr.getAttribute(WF_INSTANCE);
         /*
          * Reget the workflow object because the object in the sessin is getted
          * by lazy initlize by hibernate
@@ -310,21 +311,22 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
         objs.addElement(imageHash); // 0
         objs.addElement(dataItemRefName); // 1
         // activity dialog info
-        objs.addElement(getDataForDialog(p_request, p_session, srcLocale,
+        objs.addElement(getDataForDialog(p_appletSession, srcLocale,
                 targetLocale)); // 2
         objs.addElement(wfi); // 3
-        objs.addElement(p_session.getAttribute(UILOCALE));// 4
+        objs.addElement(p_appletSession.getAttribute(UILOCALE));// 4
         objs.addElement(new Boolean(isReady)); // 5
         objs.addElement(getTaskInfoMap(wf, hasCosting, hasRevenue)); // 6
         return objs;
     }
 
     // save the newly created workflow template
-    private Vector saveData(HttpServletRequest p_request, HttpSession p_session)
-            throws EnvoyServletException, IOException
+    private Vector saveData(HttpServletRequest p_request,
+            HttpSession p_appletSession) throws EnvoyServletException,
+            IOException
     {
         Vector outData = null;
-        SessionManager sessionMgr = (SessionManager) p_session
+        SessionManager sessionMgr = (SessionManager) p_appletSession
                 .getAttribute(SESSION_MANAGER);
         try
         {
@@ -340,7 +342,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
                 {
                     outData = new Vector();
                     outData.addElement(getDataForRole((Long) inData
-                            .elementAt(2), p_session, (String) inData
+                            .elementAt(2), p_appletSession, (String) inData
                             .elementAt(1), isUserRole, sessionMgr,
                             (GlobalSightLocale) sessionMgr
                                     .getAttribute(SOURCE_LOCALE),
@@ -350,7 +352,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
                 else if (command.equals(SAVE_ACTION))
                 {
                     // save the modified workflows.
-                    saveWorkflow(p_session, sessionMgr, inData.elementAt(1),
+                    saveWorkflow(p_appletSession, sessionMgr, inData.elementAt(1),
                             (Hashtable) inData.elementAt(2));
                 }
             }
@@ -517,9 +519,9 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
      * private String[] dialogLabels(ResourceBundle p_bundle) }
      */
     // get the data needed for the dialog
-    private Hashtable getDataForDialog(HttpServletRequest p_request,
-            HttpSession p_session, GlobalSightLocale p_srcLocale,
-            GlobalSightLocale p_targetLocale) throws EnvoyServletException
+    private Hashtable getDataForDialog(HttpSession p_session,
+            GlobalSightLocale p_srcLocale, GlobalSightLocale p_targetLocale)
+            throws EnvoyServletException
     {
         ResourceBundle bundle = getBundle(p_session);
         Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
@@ -686,7 +688,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
                     }
                     TaskInfoBean tib = new TaskInfoBean(t.getId(),
                             estimatedHourAmount, actualHourAmount, expenseRate,
-                            revenueRate, rateSelectionCriteria);
+                            revenueRate, rateSelectionCriteria, t.getIsReportUploadCheck());
                     ht.put(new Long(t.getId()), tib);
                 }
             }

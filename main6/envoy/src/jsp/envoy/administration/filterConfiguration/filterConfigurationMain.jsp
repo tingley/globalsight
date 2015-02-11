@@ -253,7 +253,7 @@ session="true" %>
                         </div>
                     </span>
                     <span id="po_filter_content">
-                        <div id='poFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:370px;position:absolute;top:100px;z-index:21'>
+                        <div id='poFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:400px;position:absolute;top:100px;z-index:21'>
                             <div id='poFilterDialogT' onmousedown="DragAndDrop(document.getElementById('poFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%=bundle.getString("lb_filter_pofilter")%>

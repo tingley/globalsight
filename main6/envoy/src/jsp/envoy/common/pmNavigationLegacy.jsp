@@ -35,6 +35,7 @@
    String localePairsUrl = LinkHelper.getWebActivityURL(request, "locales");
    String logoutUrl = LinkHelper.getWebActivityURL(request, "login");
    String logsUrl = LinkHelper.getWebActivityURL(request, "viewLogs");
+   String operationLogUrl = LinkHelper.getWebActivityURL(request, "operationLog");
    String myActivitiesUrl = LinkHelper.getWebActivityURL(request, "myactivities");
    String myJobsUrl = LinkHelper.getWebActivityURL(request, "workflows");
    String projectsUrl = LinkHelper.getWebActivityURL(request, "projects");
@@ -152,6 +153,10 @@ arMenu2 = new Array(
     "<%= locProfilesUrl %>",
     0,
 
+    "<%= menuBundle.getString("lb_logs_operation") %>",
+    "<%= operationLogUrl %>",
+    0,
+    
     "<%= menuBundle.getString("lb_supportFiles") %>",
     "<%= glossariesUrl %>",
     0

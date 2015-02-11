@@ -28,6 +28,7 @@
             com.globalsight.everest.projecthandler.ProjectImpl,
             com.globalsight.everest.workflowmanager.WorkflowImpl,
             com.globalsight.everest.taskmanager.Task,
+            com.globalsight.everest.taskmanager.TaskImpl,
             com.globalsight.everest.util.comparator.TargetPageComparator,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -358,6 +359,9 @@
 %>
 <%
 	Task theTask = task;
+	TaskImpl taskImpl = (TaskImpl)theTask;
+	int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
+	int isUploaded = taskImpl.getIsReportUploaded();
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
 	ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
 	boolean needScore = false;
@@ -366,6 +370,13 @@
     		theTask.isType(Task.TYPE_REVIEW))
     {
     	needScore = true;
+    }
+	String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
+    String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    if(theTask.isType(Task.TYPE_REVIEW))
+    {
+    	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
+    	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
@@ -1017,12 +1028,12 @@ $(document).ready(function(){
         <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadUrl%>"><%=lbDownload%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=uploadUrl%>"><%=lbUpload%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <amb:permission name="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>">
+        <%if(isReportUploadCheck == 1 || perms.getPermissionFor(Permission.REPORTS_TRANSLATIONS_EDIT)) {%>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
         <TD WIDTH="2"></TD>
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=uploadReportUrl%>"><%=lbUploadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        </amb:permission>
+        <% }%>
 </TR>
 </TABLE>
 <!-- End Second Tabs table -->

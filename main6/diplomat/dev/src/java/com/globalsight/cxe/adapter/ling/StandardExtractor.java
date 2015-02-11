@@ -510,7 +510,7 @@ public class StandardExtractor
 
         if (fileProfile != null && fileProfile.isExtractWithSecondFilter())
         {
-            String secondFilterTableName = fileProfile.getSecondFilterTableName();
+        	String secondFilterTableName = fileProfile.getSecondFilterTableName();
             long secondFilterId = fileProfile.getSecondFilterId();
             boolean isFilterExist = false;
             if (StringUtil.isNotEmpty(secondFilterTableName)
@@ -537,8 +537,8 @@ public class StandardExtractor
                 }
                 else
                 {
-                    doSecondFilter(extractedOutPut, it, diplomat, fileProfile,
-                            String.valueOf(fileProfile.getId()),
+                    doSecondFilterForJP(extractedOutPut, it, diplomat,
+                            fileProfile, String.valueOf(fileProfile.getId()),
                             secondFilterId, secondFilterTableName);
                 }
 
@@ -639,7 +639,7 @@ public class StandardExtractor
     /**
      * Apply secondary filter.
      */
-    private void doSecondFilter(Output extractedOutPut, Iterator it,
+    private void doSecondFilterForJP(Output extractedOutPut, Iterator it,
             DiplomatAPI diplomat, FileProfileImpl fp, String fpId,
             long secondFilterId, String secondFilterTableName)
             throws ExtractorException, DiplomatWordCounterException,
@@ -662,6 +662,7 @@ public class StandardExtractor
                         // Not from aligner.
                         if (fp != null)
                         {
+                        	diplomat.setFileProfile(fp);
                             diplomat.setFileProfileId(fpId);
                             diplomat.setFilterId(secondFilterId);
                             diplomat.setFilterTableName(secondFilterTableName);
@@ -672,9 +673,9 @@ public class StandardExtractor
 
                         SegmentNode node = (SegmentNode) segments.get(i);
                         XmlEntities xe = new XmlEntities();
-                        boolean hasLtGt = node.getSegment().contains("<")
-                                || node.getSegment().contains(">");
                         String temp = node.getSegment();
+                        boolean hasLtGt = temp.contains("&lt;")
+                                || temp.contains("&gt;");
                         List<String> internalTexts = new ArrayList<String>();
                         temp = InternalTextHelper.protectInternalTexts(temp,
                                 internalTexts);
@@ -708,10 +709,20 @@ public class StandardExtractor
                         }
                         // extract this segment
                         diplomat.setExtractor(null);
-                        String str = diplomat.extract();
-                        if (m_logger.isDebugEnabled())
+                        try
                         {
-                            m_logger.info("After extracted string : " + str);
+                            String str = diplomat.extract();
+                            if (m_logger.isDebugEnabled())
+                            {
+                                m_logger.info("After extracted string : " + str);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TranslatableElement newElement = new TranslatableElement();
+                            newElement.addSegment(node);
+                            extractedOutPut.addDocumentElement(newElement);
+                            continue;
                         }
 
                         Output _output = diplomat.getOutput();
@@ -849,6 +860,7 @@ public class StandardExtractor
                         p_diplomat.resetForChainFilter();
                         if (p_fp != null)
                         {
+                        	p_diplomat.setFileProfile(p_fp);
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);
                             p_diplomat

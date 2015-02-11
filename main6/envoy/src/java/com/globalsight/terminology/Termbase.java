@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -1435,7 +1436,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      */
     public int getTermCount(String p_language) throws TermbaseException
     {
-        return getTermCount(p_language, null);
+        return getTermCount(p_language, null, false);
     }
 
     /**
@@ -1444,45 +1445,52 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * 
      * @see getStatistics()
      */
-    public int getTermCount(String p_language, EntryFilter p_filter)
+    public int getTermCount(String p_language, EntryFilter p_filter, boolean isExport)
             throws TermbaseException
     {
         addReader();
 
         try
         {
-            Definition.Language language = m_definition.getLanguage(p_language);
-
-            if (language == null)
-            {
-                String[] args =
-                { "unknown language" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            com.globalsight.terminology.java.Termbase tbase = HibernateUtil
-                    .get(com.globalsight.terminology.java.Termbase.class, m_id);
-            String hql = "from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase "
-                    + "and tm.tbLanguage.name=:planguage ";
-            HashMap map = new HashMap();
-            map.put("tbase", tbase);
-            map.put("planguage", SqlUtil.quote(SqlUtil.quote(p_language)));
-
-            if (p_filter != null && p_filter.isDbFiltering())
-            {
-                hql += p_filter.getSqlExpression("tm.tbLanguage.concept", true);
-                HashMap map1 = p_filter.getQueryMap();
-                map.putAll(map1);
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("getEntryCount(filter): " + hql);
-                }
-            }
-
-            Collection terms = HibernateUtil.search(hql, map);
-            return terms.size();
-
+        	if(isExport)
+        	{
+        		List entryIdList =  getEntryIds(p_language,p_filter);
+        		return entryIdList.size();
+        	}
+        	else
+        	{
+        		Definition.Language language = m_definition.getLanguage(p_language);
+        		
+        		if (language == null)
+        		{
+        			String[] args =
+        			{ "unknown language" };
+        			throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        		}
+        		
+        		com.globalsight.terminology.java.Termbase tbase = HibernateUtil
+        		.get(com.globalsight.terminology.java.Termbase.class, m_id);
+        		String hql = "from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase "
+        			+ "and tm.tbLanguage.name=:planguage ";
+        		HashMap map = new HashMap();
+        		map.put("tbase", tbase);
+        		map.put("planguage", SqlUtil.quote(SqlUtil.quote(p_language)));
+        		
+        		if (p_filter != null && p_filter.isDbFiltering())
+        		{
+        			hql += p_filter.getSqlExpression("tm.tbLanguage.concept", true);
+        			HashMap map1 = p_filter.getQueryMap();
+        			map.putAll(map1);
+        			
+        			if (CATEGORY.isDebugEnabled())
+        			{
+        				CATEGORY.debug("getEntryCount(filter): " + hql);
+        			}
+        		}
+        		
+        		Collection terms = HibernateUtil.search(hql, map);
+        		return terms.size();
+        	}
         }
         catch (Exception e)
         {
@@ -1557,31 +1565,101 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     {
         addReader();
 
-        StringBuffer hql = new StringBuffer();
-        hql.append("select t.concept.id from TbLanguage t ");
-        hql.append("where t.concept.termbase.id=");
-        hql.append(m_id);
-        
         if (p_language != null && !p_language.trim().equals(""))
         {
-            hql.append(" and t.name='").append(p_language).append("' ");
+        	Set resultSet = new HashSet();
+        	String[] languageNames = p_language.split(",");
+        	List<Set> idSets = new ArrayList<Set>();
+        	try
+        	{
+        		for(String languageName :languageNames)
+        		{
+        			StringBuffer hql = new StringBuffer();
+        			hql.append("select t.concept.id from TbLanguage t ");
+        			hql.append("where t.concept.termbase.id=");
+        			hql.append(m_id);
+        			
+        			if (p_language != null && !p_language.trim().equals(""))
+        			{
+        				hql.append(" and t.name='").append(languageName).append("' ");
+        			}
+        			
+        			if (p_filter != null && p_filter.isDbFiltering())
+        			{
+        				hql.append(p_filter.getSqlExpression("t.concept", true));
+        			}
+        			
+        			HashMap map1 = p_filter.getQueryMap();
+        			Set set = new HashSet(HibernateUtil.search(hql.toString(), map1));
+        			if(set != null && set.size() > 0)
+        				idSets.add(set);
+        		}
+        		for(int i = 0; i < idSets.size(); i++)
+        		{
+        			if(i == idSets.size() -1)
+        				break;
+        			
+        			Set set1 = idSets.get(i);
+        			for(int j = i + 1; j < idSets.size(); j++)
+        			{
+        				Set set2 = idSets.get(j);
+        				resultSet.addAll(getIntersectionSet(set1, set2));
+        			}
+        		}
+        		return new ArrayList(resultSet);
+        	}
+        	finally
+        	{
+        		releaseReader();
+        	}
         }
-
-        if (p_filter != null && p_filter.isDbFiltering())
+        else
         {
-            hql.append(p_filter.getSqlExpression("t.concept", true));
+        	StringBuffer hql = new StringBuffer();
+        	hql.append("select t.concept.id from TbLanguage t ");
+        	hql.append("where t.concept.termbase.id=");
+        	hql.append(m_id);
+        	
+        	if (p_filter != null && p_filter.isDbFiltering())
+        	{
+        		hql.append(p_filter.getSqlExpression("t.concept", true));
+        	}
+        	
+        	try
+        	{
+        		HashMap map1 = p_filter.getQueryMap();
+        		Set set = new HashSet(HibernateUtil.search(hql.toString(), map1));
+        		return new ArrayList(set);
+        	}
+        	finally
+        	{
+        		releaseReader();
+        	}
         }
-
-        try
-        {
-            HashMap map1 = p_filter.getQueryMap();
-            Set set = new HashSet(HibernateUtil.search(hql.toString(), map1));
-            return new ArrayList(set);
-        }
-        finally
-        {
-            releaseReader();
-        }
+    }
+    
+    private Set getIntersectionSet(Set set1, Set set2)
+    {
+    	Set insertsectionSet = new HashSet();
+    	
+    	if(set1.size() < set2.size())
+    	{
+    		for(Object obj: set1)
+    		{
+    			if(set2.contains(obj))
+    				insertsectionSet.add(obj);
+    		}
+    	}
+    	else
+    	{
+    		for(Object obj: set2)
+    		{
+    			if(set1.contains(obj))
+    				insertsectionSet.add(obj);
+    		}
+    	}
+    	
+    	return insertsectionSet;
     }
     
     public void checkEntry(ArrayList p_entries, String fileType)

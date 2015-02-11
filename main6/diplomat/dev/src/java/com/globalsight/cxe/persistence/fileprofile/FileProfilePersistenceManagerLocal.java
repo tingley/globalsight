@@ -45,6 +45,8 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.system.LogManager;
+import com.globalsight.util.system.LogType;
 
 /**
  * Implements the service interface for performing CRUD operations for
@@ -142,6 +144,9 @@ public class FileProfilePersistenceManagerLocal implements
         try
         {
             HibernateUtil.delete(p_fileProfile);
+
+            LogManager.log(LogType.FILEPROFILE, LogManager.EVENT_TYPE_REMOVE, p_fileProfile.getId(),
+                    "Delete File Profile [" + p_fileProfile.getName() + "]", p_fileProfile.getCompanyId());
         }
         catch (Exception pe)
         {

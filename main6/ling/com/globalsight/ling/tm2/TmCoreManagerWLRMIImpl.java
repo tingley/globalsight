@@ -50,7 +50,7 @@ import com.globalsight.util.progress.ProgressReporter;
 public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         TmCoreManagerWLRemote
 {
-    private TmCoreManager m_localInstance = null;;
+    private TmCoreManager m_localInstance = null;
 
     public TmCoreManagerWLRMIImpl() throws RemoteException,
             LingManagerException
@@ -315,6 +315,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getAllSegments(tm, createdBefore, createdAfter,
                 conn);
     }
+    
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter, Connection conn,Set<String> jobAttributeSet) 
+    		throws RemoteException,LingManagerException
+    {
+        return m_localInstance.getAllSegments(tm, createdBefore, createdAfter,
+                conn, jobAttributeSet);
+    }
 
     @Override
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
@@ -323,6 +331,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance.getSegmentsByLocale(tm, locale, createdBefore,
                 createdAfter, conn);
+    }
+    
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException
+    {
+        return m_localInstance.getSegmentsByLocale(tm, locale, createdBefore,
+                createdAfter, conn, jobAttributeSet);
     }
 
     @Override
@@ -333,6 +349,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter, conn);
     }
+    
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
+            throws RemoteException, LingManagerException
+    {
+        return m_localInstance.getSegmentsByProjectName(tm, projectName,
+                createdBefore, createdAfter, conn, jobAttributeSet);
+    }
 
     @Override
     public int getAllSegmentsCount(Tm tm, String createdBefore,
@@ -340,6 +364,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance.getAllSegmentsCount(tm, createdBefore,
                 createdAfter);
+    }
+    
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter, Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException
+    {
+        return m_localInstance.getAllSegmentsCount(tm, createdBefore,
+                createdAfter, jobAttributeSet);
     }
 
     @Override
@@ -350,6 +382,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getSegmentsCountByLocale(tm, locale,
                 createdBefore, createdAfter);
     }
+    
+    public int getSegmentsCountByLocale(Tm tm, String locale,
+            String createdBefore, String createdAfter, Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException
+    {
+        return m_localInstance.getSegmentsCountByLocale(tm, locale,
+                createdBefore, createdAfter, jobAttributeSet);
+    }
 
     @Override
     public int getSegmentsCountByProjectName(Tm tm, String projectName,
@@ -358,6 +398,14 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance.getSegmentsCountByProjectName(tm, projectName,
                 createdBefore, createdAfter);
+    }
+    
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter, Set<String> jobAttributeSet) 
+    		throws RemoteException, LingManagerException
+    {
+        return m_localInstance.getSegmentsCountByProjectName(tm, projectName,
+                createdBefore, createdAfter, jobAttributeSet);
     }
 
     @Override

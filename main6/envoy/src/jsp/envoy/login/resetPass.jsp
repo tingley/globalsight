@@ -378,6 +378,7 @@ if(null==mess || mess.length()==0)
         </TD>
        </TR>
       </TABLE>
+      <input type="hidden" name="token.login" value="<%=request.getAttribute("token.login")%>" />
      </FORM>
 
     </DIV>

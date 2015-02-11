@@ -162,7 +162,7 @@ public class LocProfileMainHandler extends PageHandler implements
         HttpSession session = p_request.getSession();
         String lpId = (String) p_request.getParameter("DupLocProfile");
         String list = (String) p_request.getParameter("localePairs");
-        String name = (String) p_request.getParameter("nameTF");
+        String name = (String) p_request.getParameter("nameTF").trim();
         try
         {
             ArrayList alist = new ArrayList();

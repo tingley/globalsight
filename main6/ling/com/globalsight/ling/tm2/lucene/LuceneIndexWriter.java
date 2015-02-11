@@ -74,6 +74,7 @@ public class LuceneIndexWriter
 
     private Lock m_lock = null;
     private Directory m_directory;
+    private File m_indexDir;
     
     
     /**
@@ -90,7 +91,7 @@ public class LuceneIndexWriter
         m_tmId = p_tmId;
         m_analyzer = new GsPerFieldAnalyzer(p_locale);
         
-        File indexDir
+        m_indexDir
             = LuceneUtil.getGoldTmIndexDirectory(p_tmId, p_locale, true);
 
         // get the directory. Note that the directory cannot be
@@ -98,7 +99,7 @@ public class LuceneIndexWriter
         // FSDirectory.getDirectory(dir, true) doesn't really create
         // index files. It just clear out the old index files and lock
         // file.
-        m_directory = FSDirectory.open(indexDir);
+        m_directory = FSDirectory.open(m_indexDir);
 
         // get a lock on the directory
         m_lock = m_directory.makeLock(LOCK_NAME);
@@ -125,7 +126,7 @@ public class LuceneIndexWriter
             catch (IndexFormatTooOldException ie)
             {
                 // delete too old index
-                File[] files = indexDir.listFiles();
+                File[] files = m_indexDir.listFiles();
                 if (files != null && files.length > 0)
                 {
                     for (int i = 0; i < files.length; i++)
@@ -200,6 +201,9 @@ public class LuceneIndexWriter
                     
                     // delete index directory 
                     FileUtil.deleteFile(directory);
+                    
+                    // clean cache if have
+                    LuceneCache.cleanLuceneCache(directory);
                 }
                 catch(Exception e)
                 {
@@ -252,6 +256,9 @@ public class LuceneIndexWriter
         {
             fsIndexWriter.close();
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_indexDir);
     }
 
     /*
@@ -292,6 +299,9 @@ public class LuceneIndexWriter
             writer.commit();
             writer.close();
         }
+        
+        // clean cache if have
+        LuceneCache.cleanLuceneCache(m_indexDir);
     }
     
     public void close()

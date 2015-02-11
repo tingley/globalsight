@@ -448,9 +448,12 @@ public class SlideUtil
 			    Node next = attce.getNextSibling();
                 String pName2 = next == null ? "null" : next.getNodeName();
                 attce.setAttribute("gs-next", pName2);
-			    
-				ec.appendChild(attc);
 			}
+			
+			for (Node attc : attcs)
+            {
+                ec.appendChild(attc);
+            }
 		}
 		
 		List<Node> cs = util.getChildNodes(at);

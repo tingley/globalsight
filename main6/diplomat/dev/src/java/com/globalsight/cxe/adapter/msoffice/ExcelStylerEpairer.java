@@ -94,7 +94,8 @@ public class ExcelStylerEpairer
 
         }
 
-        saveToFile(document, path + "/xl/sharedStrings.xml");
+        String filePath = path + "/xl/sharedStrings.xml";
+        saveToFile(document, filePath);
     }
 
     /**
@@ -271,42 +272,42 @@ public class ExcelStylerEpairer
 
     private boolean noPre(Node n)
     {
-        Node c = n.getFirstChild();
-        if (c.getNodeType() != Node.ELEMENT_NODE)
-            c = c.getNextSibling();
+        Node n1 = n.getFirstChild();
+        if (n1.getNodeType() != Node.ELEMENT_NODE)
+            n1 = n1.getNextSibling();
 
-        if (c == null)
+        if (n1 == null)
             return false;
 
-        if ("t".equals(c.getNodeName()))
+        if ("t".equals(n1.getNodeName()))
             return true;
 
-        if ("r".equals(c.getNodeName()))
+        if ("r".equals(n1.getNodeName()))
         {
-            Node c2 = n.getFirstChild();
-            while (c2 != null)
+            Node n2 = n.getFirstChild();
+            while (n2 != null)
             {
-                if (c2.getNodeName().equals("rPr"))
+                if (n2.getNodeName().equals("rPr"))
                 {
                     return false;
                 }
 
-                c2 = c2.getNextSibling();
+                n2 = n2.getNextSibling();
             }
             
-            Node c3 = n.getFirstChild();
-            if (c3 != null && c3.getNodeName().equals("r"))
+            Node n3 = n.getFirstChild();
+            if (n3 != null && n3.getNodeName().equals("r"))
             {
-                Node c3Child = c3.getFirstChild();
+                Node n3Child = n3.getFirstChild();
                 
-                while (c3Child != null)
+                while (n3Child != null)
                 {
-                    if (c3Child.getNodeName().equals("rPr"))
+                    if (n3Child.getNodeName().equals("rPr"))
                     {
                         return false;
                     }
 
-                    c3Child = c3Child.getNextSibling();
+                    n3Child = n3Child.getNextSibling();
                 }
             }
 
@@ -332,8 +333,8 @@ public class ExcelStylerEpairer
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(
-                path), "UTF-8");
+        FileOutputStream fout = new FileOutputStream(path);
+        OutputStreamWriter ou = new OutputStreamWriter(fout, "UTF-8");
         StreamResult result = new StreamResult(ou);
         transformer.transform(source, result);
     }

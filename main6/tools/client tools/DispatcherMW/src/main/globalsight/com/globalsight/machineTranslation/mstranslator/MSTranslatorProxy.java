@@ -212,13 +212,13 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             Locale p_targetLocale, String[] segments)
             throws MachineTranslationException
     {
-//        if (MTHelper.isLogDetailedInfo())
-//        {
-//            for (int i = 0; i < segments.length; i++)
-//            {
-//                CATEGORY.info("Source segment[" + i + "]:" + segments[i]);
-//            }
-//        }
+        if (MTHelper.isLogDetailedInfo(ENGINE_MSTRANSLATOR))
+        {
+            for (int i = 0; i < segments.length; i++)
+            {
+                CATEGORY.info("Source segment[" + i + "]:" + segments[i]);
+            }
+        }
     	String[] results = null;
 
         String sourceLang = p_sourceLocale.getLanguage();
@@ -301,7 +301,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             {
                 results[i] = result[i].getTranslatedText();
             }
-            if (MTHelper.isLogDetailedInfo())
+            if (MTHelper.isLogDetailedInfo(ENGINE_MSTRANSLATOR))
             {
                 for (int i = 0; i < results.length; i++)
                 {

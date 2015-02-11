@@ -44,6 +44,8 @@ String lb_help = bundle.getString("lb_help");
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+
 <SCRIPT>
 var defaultTermbase = "<%=defaultTermbase%>";
 var helpFile = "<%=bundle.getString("help_main_editor_termbases")%>";
@@ -60,21 +62,9 @@ function helpSwitch()
 
 function doLoad()
 {
-  var dom ;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    //dom = oTermbases.XMLDocument;
-	  dom=new ActiveXObject("Microsoft.XMLDOM");
-      dom.async="false";
-      dom.loadXML(xmlTermbases);
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlTermbases,"text/xml");
-  }
+  var dom = $.parseXML(xmlTermbases);
 
-  var nodes = dom.selectNodes("/termbases/termbase");  
+  var nodes = $(dom).find("termbases termbase");  
   if (nodes.length > 0)
   {
     for (i = tbody.rows.length; i > 0; --i)
@@ -85,10 +75,10 @@ function doLoad()
     for (i = 0; i < nodes.length; ++i)
     {
       var node = nodes[i];//var node = nodes.item(i);
-      var id = node.getAttribute("id");
-      var name = node.selectSingleNode("name").text;
-      var desc = node.selectSingleNode("description").text;
-
+      var id = $(node).attr("id");
+      var name = $(node).find("name").text();
+      var desc = $(node).find("description").text();
+      
       row = tbody.insertRow(-1);//row = tbody.insertRow();
       cell = row.insertCell(-1);//cell = row.insertCell();
       cell.setAttribute("id", id.toString(10));

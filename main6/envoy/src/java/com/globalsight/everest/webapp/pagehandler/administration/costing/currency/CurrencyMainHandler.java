@@ -20,6 +20,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.costing.curren
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.IsoCurrency;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -40,10 +42,12 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 public class CurrencyMainHandler extends PageHandler implements
         CurrencyConstants
 {
+	static private int NUM_PER_PAGE = 10;
     /**
      * Invokes this PageHandler
      * 
@@ -62,8 +66,12 @@ public class CurrencyMainHandler extends PageHandler implements
             EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         Currency pivot = CurrencyHandlerHelper.getPivotCurrency();
         String action = p_request.getParameter("action");
+
+        setNumberOfPerPage(p_request);
 
         try
         {
@@ -82,7 +90,18 @@ public class CurrencyMainHandler extends PageHandler implements
             {
                 checkPreReqData(p_request, session, pivot);
             }
+
+            String currencyCompanyFilterValue = (String) sessionManager
+                    .getAttribute(CurrencyConstants.FILTER_CURRENCY_COMPANY);
+            String currencyNameFilterValue = (String) sessionManager
+                    .getAttribute(CurrencyConstants.FILTER_CURRENCY_NAME);
             clearSessionExceptTableInfo(session, CURRENCY_KEY);
+            sessionManager.setAttribute(
+                    CurrencyConstants.FILTER_CURRENCY_COMPANY,
+                    currencyCompanyFilterValue);
+            sessionManager.setAttribute(CurrencyConstants.FILTER_CURRENCY_NAME,
+                    currencyNameFilterValue);
+
             dataForTable(p_request, session, pivot);
         }
         catch (NamingException ne)
@@ -100,6 +119,7 @@ public class CurrencyMainHandler extends PageHandler implements
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
                     ge);
         }
+
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
@@ -161,14 +181,18 @@ public class CurrencyMainHandler extends PageHandler implements
     private void dataForTable(HttpServletRequest p_request,
             HttpSession p_session, Currency p_pivot) throws RemoteException,
             NamingException, GeneralException
-    {
+    { 
         ArrayList currencies = (ArrayList) CurrencyHandlerHelper
                 .getAllCurrencies();
+        // Filter currencies by company name
+        filterCurrenciesByCompanyName(p_request, p_session, currencies);
+        // Filter currencies by currencies name
+        filterCurrenciesByCurrencyName(p_request, p_session, currencies);
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
 
         setTableNavigation(p_request, p_session, currencies,
-                new CurrencyComparator(uiLocale), 10, CURRENCY_LIST,
+                new CurrencyComparator(uiLocale), NUM_PER_PAGE, CURRENCY_LIST,
                 CURRENCY_KEY);
 
         // Set pivot for enabling/disabling edit button in UI
@@ -176,5 +200,93 @@ public class CurrencyMainHandler extends PageHandler implements
             p_request.setAttribute("pivot", p_pivot.getIsoCode());
         else
             p_request.setAttribute("pivot", "");
+    }
+   
+    private void filterCurrenciesByCurrencyName(HttpServletRequest p_request,
+            HttpSession p_session, ArrayList p_currency)
+    {
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        String currencyNameFilterValue = p_request
+                .getParameter(CurrencyConstants.FILTER_CURRENCY_NAME);
+        if (currencyNameFilterValue == null)
+        {
+        	currencyNameFilterValue = (String) sessionManager
+                    .getAttribute(CurrencyConstants.FILTER_CURRENCY_NAME);
+        }
+        if (currencyNameFilterValue == null)
+        {
+        	currencyNameFilterValue = "";
+        }
+        sessionManager.setAttribute(CurrencyConstants.FILTER_CURRENCY_NAME,
+        		currencyNameFilterValue.trim());
+
+        if (StringUtil.isNotEmpty(currencyNameFilterValue))
+        {
+            for (Iterator it = p_currency.iterator(); it.hasNext();)
+            {
+            	Currency currency = (Currency) it.next();
+            	String name = currency.getDisplayName().toLowerCase();
+                if (name.indexOf(currencyNameFilterValue.trim().toLowerCase()) == -1)
+                {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    
+    private void filterCurrenciesByCompanyName(HttpServletRequest p_request,
+            HttpSession p_session, ArrayList p_currency)
+    {
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        String companyFilterValue = p_request
+                .getParameter(CurrencyConstants.FILTER_CURRENCY_COMPANY);
+        if (companyFilterValue == null)
+        {
+            companyFilterValue = (String) sessionManager
+                    .getAttribute(CurrencyConstants.FILTER_CURRENCY_COMPANY);
+        }
+        if (companyFilterValue == null)
+        {
+            companyFilterValue = "";
+        }
+        sessionManager.setAttribute(CurrencyConstants.FILTER_CURRENCY_COMPANY,
+                companyFilterValue.trim());
+
+        if (StringUtil.isNotEmpty(companyFilterValue))
+        {
+            for (Iterator it = p_currency.iterator(); it.hasNext();)
+            {
+                Currency currency = (Currency) it.next();
+                String comName = CompanyWrapper.getCompanyNameById(
+                        currency.getCompanyId()).toLowerCase();
+
+                if (comName.indexOf(companyFilterValue.trim().toLowerCase()) == -1)
+                {
+                    it.remove();
+                }
+            }
+        }
+    }
+ 
+    private void setNumberOfPerPage(HttpServletRequest req)
+    {
+        String pageSize = (String) req.getParameter("numOfPageSize");
+
+        if (StringUtil.isNotEmpty(pageSize))
+        {
+            try
+            {
+                NUM_PER_PAGE = Integer.parseInt(pageSize);
+            }
+            catch (Exception e)
+            {
+                NUM_PER_PAGE = Integer.MAX_VALUE;
+            }
+        }
     }
 }

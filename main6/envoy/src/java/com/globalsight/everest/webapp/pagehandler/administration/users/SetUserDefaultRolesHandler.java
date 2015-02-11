@@ -134,14 +134,14 @@ public class SetUserDefaultRolesHandler extends PageHandler
 					role.setTargetLocaleId(targetLocaleId);
 					role.setSourceLocaleObject(localeManager.getLocaleById(sourceLocaleId));
 					role.setTargetLocaleObject(localeManager.getLocaleById(targetLocaleId));
-					role.setStatus("A");
+					role.setStatus(UserDefaultRole.ADD);
 				} else {
 					//To save a modified default role
-					if (!role.getStatus().equals("A"))
-						role.setStatus("E");
+					if (!role.getStatus().equals(UserDefaultRole.ADD))
+						role.setStatus(UserDefaultRole.EDIT);
 					role.setActivities(null);
 				}
-				
+
 				activities = new HashSet<UserDefaultActivity>();
 				//Procced selected activities
 				for (int j=0;j<acs.size();j++) {

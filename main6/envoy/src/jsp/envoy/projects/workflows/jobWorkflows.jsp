@@ -120,7 +120,10 @@
 </div>
 <amb:permission name="<%=Permission.JOB_WORKFLOWS_VIEW%>" >
 <div id="workflowBlock" name="workflowBlock" style="clear:both;margin:0;padding:0">
-<form name="workflowForm" id="workflowForm" method="post"></form>
+<form name="workflowForm" id="workflowForm" method="post">
+	<input type="hidden" id="downloadWorkflowIds" name="<%=DownloadFileHandler.PARAM_WORKFLOW_ID%>" value=""/>
+	<input type="hidden" id="downloadJobId" name="<%=DownloadFileHandler.PARAM_JOB_ID%>" value=""/>
+</form>
 	<div id="workflowBlockTitle" class="standardTextBold" style="margin:0;padding:0"><%=bundle.getString("lb_workflows")%></div>
 	<table cellpadding="2" cellspacing="0" border="0" style="min-width:1024px;width:80%;border:solid 1px slategray">
 		<thead>
@@ -699,7 +702,9 @@ function checkDelayTime(wfId){
 		if(parseInt(leftTime) > 0){
 			alert("<%=bundle.getString("msg_task_download_time")%>".replace("%1", delayTime).replace("%2", leftTime));
 		}else{
-			var submitUrl = "${download.pageURL}&fromJobDetail=true&firstEntry=true&<%=DownloadFileHandler.PARAM_JOB_ID%>=${jobId}&<%=DownloadFileHandler.PARAM_WORKFLOW_ID%>=" + wfId + "&redirectToWorkflow=${jobId}";
+			$("#downloadJobId").val("${jobId}");
+			$("#downloadWorkflowIds").val(wfId);
+			var submitUrl = "${download.pageURL}&fromJobDetail=true&firstEntry=true&redirectToWorkflow=${jobId}";
 		    $("#workflowForm").attr("action", submitUrl);
 			$("#workflowForm").submit();
 		}

@@ -366,10 +366,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
         // download parameters verified by OfflineEditManager
         m_downloadParams = p_params;
-        // set them false : 
-        // [#GBS-3147] Changes required to the translators download screen before releasing OmegaT
-        // We need to delete the option to "Populate 100% matches" 
-        // as this is apparently populated by the TM in OmegaT. 
+        // set them false :
+        // [#GBS-3147] Changes required to the translators download screen
+        // before releasing OmegaT
+        // We need to delete the option to "Populate 100% matches"
+        // as this is apparently populated by the TM in OmegaT.
         m_downloadParams.setPopulate100(false);
         m_downloadParams.setPopulateFuzzy(false);
         m_status = p_status;
@@ -772,6 +773,13 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     }
                     // Add the target file
                     OfflinePageData OPD = data.getOfflinePageData();
+                    // GBS-3467
+                    if (m_downloadParams.excludeFullyLeveragedFiles()
+                            && allSegmentsFullyLeveraged(OPD))
+                    {
+                        continue page_loop;
+                    }
+
                     if (m_firstPage)
                     {
                         pageData = OPD;
@@ -1140,6 +1148,27 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
     }
 
+    /**
+     * Checks if all the segments in the offline page are fully leveraged or
+     * not.
+     * 
+     * @since GBS-3467
+     */
+    private boolean allSegmentsFullyLeveraged(OfflinePageData opd)
+    {
+        Vector segments = opd.getSegmentList();
+        for (int i = 0; i < segments.size(); i++)
+        {
+            OfflineSegmentData segment = (OfflineSegmentData) segments.get(i);
+            if (segment.getTargetTuv().getState().getValue() != TuvState.EXACT_MATCH_LOCALIZED
+                    .getValue())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private HashMap filterRepeatedSegmentMap(HashMap segmentMap, Vector slist)
     {
         HashMap result = new HashMap();
@@ -1197,14 +1226,16 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         return result;
     }
 
-    private OfflinePageData consolidate(List<OfflinePageData> datas, boolean forTMX)
+    private OfflinePageData consolidate(List<OfflinePageData> datas,
+            boolean forTMX)
     {
         OfflinePageData consolidatedData = new OfflinePageData();
         consolidatedData.setPageName(m_downloadParams.getFullJobName());
         HashSet<OfflineSegmentData> allDatas = new HashSet<OfflineSegmentData>();
         boolean inited = false;
-        
+
         Vector<OfflineSegmentData> segmentsUnmerged = new Vector<OfflineSegmentData>();
+        Set<OfflineSegmentData> segmentsUnmergedSet = new HashSet<OfflineSegmentData>();
 
         for (OfflinePageData data : datas)
         {
@@ -1218,12 +1249,13 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             }
 
             allDatas.addAll(data.getSegmentList());
-            
+
             if (forTMX)
             {
-                segmentsUnmerged.addAll(data.getSegmentList());
+            	segmentsUnmergedSet.addAll(data.getSegmentList());
             }
         }
+        segmentsUnmerged.addAll(segmentsUnmergedSet);
 
         Vector<OfflineSegmentData> segments = new Vector<OfflineSegmentData>();
         segments.addAll(allDatas);
@@ -1240,8 +1272,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         });
 
         consolidatedData.setSegmentList(segments);
-        
-        if(forTMX)
+
+        if (forTMX)
         {
             consolidatedData.setSegmentListUnmerged(segmentsUnmerged);
         }
@@ -1259,7 +1291,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
 
-            if (segment.isProtectedChangeable() && segment.getMatchValue() == 100
+            if (segment.isProtectedChangeable()
+                    && segment.getMatchValue() == 100
                     && segment.getTargetTuv().getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
                             .getValue())
             {
@@ -1295,9 +1328,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 subId = segment.getSubflowId();
             }
-            
-            if (segment.isProtectedChangeable() && LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    new Vector(), subId, companyId))
+
+            if (segment.isProtectedChangeable()
+                    && LeverageUtil.isIncontextMatch(i, splittedTuvs, null,
+                            matchs, new Vector(), subId, companyId))
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
@@ -1328,7 +1362,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             .get(j);
                     Tuv tuv = segment.getSourceTuv();
                     // Only apply this to "main" segment
-                    if (segment.isProtectedChangeable() && tuv != null && tuv.getId() == id
+                    if (segment.isProtectedChangeable() && tuv != null
+                            && tuv.getId() == id
                             && "".equals(segment.getSubflowId()))
                     {
                         if (opd.getTMEditType() != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
@@ -1376,8 +1411,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     /** ***** Begin zipper methods ******/
 
     /**
-     * OmegaT : auto for TM ice match, non_ice_match.tmx for TM non ice, penalty-xx for TM+MT
-     * Others : 
+     * OmegaT : auto for TM ice match, non_ice_match.tmx for TM non ice,
+     * penalty-xx for TM+MT Others :
+     * 
      * @param p_page
      * @param p_downloadParams
      * @throws IOException
@@ -1488,75 +1524,106 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
                         TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
 
-                // GBS-3163 : change this to /tm/mt
-                String tmxPenalty = DownloadHelper
-                        .makeTmxParentPath(m_downloadParams);
-                Job j = m_downloadParams.getRightJob();
-                int mtConfidenceScore = 100;
-                boolean useMT = true;
-                try
+                // GBS-3163 : change this to /tm/mt/penalty-xx/
+                List<Job> jobList = new ArrayList<Job>();
+                if(m_downloadParams.getAllJob() != null)
                 {
-                    if (j != null)
-                    {
-                        j = ServerProxy.getJobHandler().getJobById(j.getId());
-                    }
-                    else
-                    {
-                        j = ServerProxy.getJobHandler().getJobByJobName(
-                                m_downloadParams.getFullJobName());
-                    }
-                }
-                catch (NamingException e)
-                {
-                    j = null;
-                }
-
-                if (j != null)
-                {
-                    Collection<Workflow> wfs = j.getWorkflows();
-                    Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator()
-                            : null;
-
-                    while (wfsIt.hasNext())
-                    {
-                        Workflow wf = wfsIt.next();
-                        if (wf.getTargetLocale().getId() == m_downloadParams
-                                .getTargetLocale().getId())
-                        {
-                            mtConfidenceScore = wf.getMtConfidenceScore();
-                            useMT = wf.getUseMT();
-                            break;
-                        }
-                    }
-                }
-                // GBS-3163 : change this to /tm/mt
-                String penaltyDir = "mt/";
-                tmxPenalty = tmxPenalty + penaltyDir + fname;
-
-                sb = new StringBuffer();
-                if (useMT)
-                {
-                    sb.append(m_resource.getString("msg_dnld_adding_file"));
-                    sb.append("/tm/");
-                    sb.append(penaltyDir);
-                    sb.append(fname);
+                	jobList = m_downloadParams.getAllJob();
                 }
                 else
                 {
+                	jobList.add(m_downloadParams.getRightJob());
+				}
+                Set<Integer> mtConfidenceScoreSet = new HashSet<Integer>();
+                int mtConfidenceScore = 100;
+                boolean useMT = false;
+                for(Job j: jobList)
+                {
+                	try
+                    {
+                        if (j != null)
+                        {
+                            j = ServerProxy.getJobHandler().getJobById(j.getId());
+                        }
+                        else
+                        {
+                            j = ServerProxy.getJobHandler().getJobByJobName(
+                                    m_downloadParams.getFullJobName());
+                        }
+                    }
+                    catch (NamingException e)
+                    {
+                        j = null;
+                    }
+                    
+                    if (j != null)
+                    {
+                        Collection<Workflow> wfs = j.getWorkflows();
+                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator()
+                                : null;
+
+                        while (wfsIt.hasNext())
+                        {
+                            Workflow wf = wfsIt.next();
+                            if (wf.getTargetLocale().getId() == m_downloadParams
+                                    .getTargetLocale().getId())
+                            {
+                            	if(wf.getUseMT())
+                            	{	
+                            		mtConfidenceScoreSet.add(wf.getMtConfidenceScore());
+                            		useMT = true;
+                            	}
+                            }
+                        }
+                    }
+                }
+
+                Vector<OfflineSegmentData> allSegments = p_page.getSegmentList();
+                sb = new StringBuffer();
+                if(useMT)
+                {
+                	for(Integer score: mtConfidenceScoreSet)
+                    {
+                		String tmxPenalty = DownloadHelper
+                        		.makeTmxParentPath(m_downloadParams);
+                    	mtConfidenceScore = 100 - score;
+                        String penaltyDir = "mt/penalty-" + mtConfidenceScore + "/";
+                        tmxPenalty = tmxPenalty + penaltyDir + fname;
+                        
+                        sb.setLength(0);
+                        sb.append(m_resource.getString("msg_dnld_adding_file"));
+                        sb.append("/tm/");
+                        sb.append(penaltyDir);
+                        sb.append(fname);
+                        
+                        m_pageCounter++;
+                        m_status.speak(m_pageCounter, sb.toString());
+                        
+                        Vector<OfflineSegmentData> tempSegments = new Vector<OfflineSegmentData>();
+                        for(OfflineSegmentData segment: allSegments)
+                        {
+                        	if(segment.getMatchValue() == score)
+                        	{
+                        		tempSegments.add(segment);
+                        	}
+                        }
+                        p_page.setSegmentList(tempSegments);
+                        m_zipper.writePath(tmxPenalty);
+                        m_zipper.writeTmxPage(p_page, p_downloadParams,
+                                TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                    }
+                }
+                else
+                {
+                    String penaltyDir = "mt/penalty-100/";
                     sb.append("/tm/");
                     sb.append(penaltyDir);
                     sb.append(fname);
                     sb.append(" ");
                     sb.append(m_resource.getString("msg_job_create_empty_file"));
-                }
-                m_pageCounter++;
-                m_status.speak(m_pageCounter, sb.toString());
-
-                if (useMT)
-                {
-                    m_zipper.writePath(tmxPenalty);
-                    m_zipper.writeTmxPage(p_page, p_downloadParams,
-                            TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                
+	                m_pageCounter++;
+	                m_status.speak(m_pageCounter, sb.toString());
                 }
             }
 

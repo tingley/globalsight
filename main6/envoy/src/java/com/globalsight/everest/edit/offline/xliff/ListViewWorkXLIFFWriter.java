@@ -695,40 +695,44 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     private void writePhase(DownloadParams p_downloadParams) throws IOException
     {
-        Task task = getTask(p_downloadParams);
-        String name = task.getTaskDisplayName();
-        String typeName = "Translation";
-
-        try
-        {
-            Activity act = ServerProxy.getJobHandler().getActivity(
-                    task.getTaskName());
-
-            int type = act.getActivityType();
-
-            if (Activity.TYPE_REVIEW == type)
-            {
-                typeName = "Review";
-            }
-            else if (TaskImpl.TYPE_REVIEW_EDITABLE == type)
-            {
-                typeName = "Review Editable";
-            }
+        List<Task> tasks = getTasks(p_downloadParams);
+        
+        for(Task task:tasks)
+        {	
+        	String name = task.getTaskDisplayName();
+        	String typeName = "Translation";
+        	
+        	try
+        	{
+        		Activity act = ServerProxy.getJobHandler().getActivity(
+        				task.getTaskName());
+        		
+        		int type = act.getActivityType();
+        		
+        		if (Activity.TYPE_REVIEW == type)
+        		{
+        			typeName = "Review";
+        		}
+        		else if (TaskImpl.TYPE_REVIEW_EDITABLE == type)
+        		{
+        			typeName = "Review Editable";
+        		}
+        	}
+        	catch (Exception e)
+        	{
+        		logger.error(e.getMessage(), e);
+        		throw new AmbassadorDwUpException(e);
+        	}
+        	
+        	String phase = MessageFormat.format(PHASE, name, typeName);
+        	m_outputStream.write(phase);
         }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new AmbassadorDwUpException(e);
-        }
-
-        String phase = MessageFormat.format(PHASE, name, typeName);
-        m_outputStream.write(phase);
     }
 
     private void writeAnnotation(DownloadParams p_downloadParams)
             throws IOException, AmbassadorDwUpException
     {
-        String acceptTaskTime = getAcceptTaskTime(getTask(p_downloadParams));
+        String acceptTaskTime = getAcceptTaskTime(getTasks(p_downloadParams));
 
         m_outputStream.write("<header>");
         m_outputStream.write(m_strEOL);
@@ -825,7 +829,19 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
         m_outputStream.write(XliffConstants.HASH_MARK);
         m_outputStream.write("Task ID:");
-        m_outputStream.write(m_page.getTaskId());
+        if(m_page.getTaskIds() != null)
+        {
+        	StringBuffer taskIds = new StringBuffer();
+            for(Long taskId: m_page.getTaskIds())
+            {
+            	taskIds.append(taskId).append(",");
+            }
+            m_outputStream.write(taskIds.substring(0, taskIds.length() - 1));
+        }
+        else
+        {       	
+        	m_outputStream.write(m_page.getTaskId());
+        }
         m_outputStream.write(m_strEOL);
 
         m_outputStream.write(XliffConstants.HASH_MARK);
@@ -911,7 +927,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     private void writeUserComments(DownloadParams p_downloadParams)
             throws IOException, AmbassadorDwUpException
     {
-        List commentLists = getComments(getTask(p_downloadParams));
+        List commentLists = getComments(getTasks(p_downloadParams));
         String comments = "";
         if (commentLists == null)
         {
@@ -936,37 +952,57 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     }
 
     @SuppressWarnings("unchecked")
-    private List getComments(Task task)
+    private List getComments(List<Task> p_tasks)
     {
         List<Comment> comments = new ArrayList<Comment>();
-        Workflow wf = task.getWorkflow();
-        Job job = wf.getJob();
-        Iterator workflows = job.getWorkflows().iterator();
-        while (workflows.hasNext())
+        for(Task task:p_tasks)
         {
-            Workflow t_wf = (Workflow) workflows.next();
-            Hashtable tasks = t_wf.getTasks();
-            for (Iterator i = tasks.values().iterator(); i.hasNext();)
-            {
-                Task t = (Task) i.next();
-                comments.addAll(t.getTaskComments());
-            }
+        	Workflow wf = task.getWorkflow();
+        	Job job = wf.getJob();
+        	Iterator workflows = job.getWorkflows().iterator();
+        	while (workflows.hasNext())
+        	{
+        		Workflow t_wf = (Workflow) workflows.next();
+        		Hashtable tasks = t_wf.getTasks();
+        		for (Iterator i = tasks.values().iterator(); i.hasNext();)
+        		{
+        			Task t = (Task) i.next();
+        			comments.addAll(t.getTaskComments());
+        		}
+        	}
         }
         return comments;
     }
 
-    private String getAcceptTaskTime(Task task)
+    private String getAcceptTaskTime(List<Task> tasks)
     {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        return dateFormat.format(task.getEstimatedAcceptanceDate());
+        StringBuffer acceptTime = new StringBuffer();
+        for(Task task:tasks)
+        {
+        	acceptTime.append(dateFormat.format(task.getEstimatedAcceptanceDate()))
+        				.append(",");
+        }
+        return acceptTime.substring(0, acceptTime.length() - 1);
     }
 
-    private Task getTask(DownloadParams p_downloadParams)
+    private List<Task> getTasks(DownloadParams p_downloadParams)
     {
-        Task task = null;
-        long taskId = Long.parseLong(p_downloadParams.getTaskID());
-        task = TaskHelper.getTask(taskId);
-        return task;
+        List<Task> tasks = new ArrayList<Task>();
+        List<Long>  taskIds = p_downloadParams.getAllTaskIds();
+        if(taskIds != null)
+        {       	
+        	for(Long taskId:taskIds)
+        	{
+        		tasks.add(TaskHelper.getTask(taskId));
+        	}
+        }
+        else
+        {
+        	long taskId = Long.parseLong(p_downloadParams.getTaskID());
+        	tasks.add(TaskHelper.getTask(taskId));
+        }
+        return tasks;
     }
 
     // parse string to "string"

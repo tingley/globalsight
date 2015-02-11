@@ -120,15 +120,15 @@ TR.standardText
 </SPAN>
 <P>
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
-<TR><TD WIDTH=538><%=bundle.getString("helper_text_reports")%></TD></TR>
-<TR><TD WIDTH=538>&nbsp</TD></TR>
+<TR><TD WIDTH=850><%=bundle.getString("helper_text_reports")%></TD></TR>
+<TR><TD WIDTH=850>&nbsp</TD></TR>
 <TR><TD>
 <span id="companySpan" style="display:none;"><%=bundle.getString("lb_current_company")%>&nbsp<select id='companySel'><option value=' '>ALL</option></select></span>
 <input type="button" style="float:right;" value="Recent Reports" onClick="fnOpenRecentReports();">
 </TD></TR>
 </TABLE>
 <P>
-    <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH=600 CLASS="standardText" id="contentTable">
+    <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH=850 CLASS="standardText" id="contentTable">
     <% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN)) {%>
         <TR>
             <TD CLASS="tableHeadingBasic"><%=bundle.getString("reportName")%></TD>
@@ -364,6 +364,17 @@ TR.standardText
              </A>
             </TD>
             <TD><%=bundle.getString("review_reviewers_comments_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
+        <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportLanguageSignOffSimple","LanguageSignOffSimple")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportLanguageSignOffSimple'; return true"><%=bundle.getString("review_reviewers_comments_simple")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("review_reviewers_comments_simple_desc")%></TD>
         </TR>
         </amb:permission>
 

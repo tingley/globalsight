@@ -92,6 +92,8 @@
  class="java.util.ArrayList" />
 <jsp:useBean id="segmentCommentList" scope="request"
  class="java.util.ArrayList" />
+ <jsp:useBean id="wordcountList" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr =
@@ -264,6 +266,7 @@
     String labelRejected = bundle.getString("lb_rejected");
     String labelAccepted = bundle.getString("lb_accepted");
     String labelFinishing = bundle.getString("lb_finishing");
+    String labelSave = bundle.getString("lb_save");
     String labelCompletedOn = bundle.getString("lb_completed_on") + bundle.getString("lb_colon");
     ts.setDate(theTask.getCompletedDate());
     String completedOn = ts.toString();
@@ -359,6 +362,21 @@
 							"=" + task_id+
 							"&" + WebAppConstants.TASK_STATE+
 							"=" + state;
+    
+    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
+						//GBS-2913 Added to the url parameter taskId,state;
+					    "&"+WebAppConstants.TASK_ID+
+					    "="+theTask.getId()+
+					    "&"+WebAppConstants.TASK_STATE+
+					    "="+theTask.getState();
+	String saveUrl = detail.getPageURL() +
+			        "&" + WebAppConstants.TASK_ACTION +
+			        "=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
+			        "&" + WebAppConstants.TASK_STATE +
+			        "=" + state +
+			        "&" + WebAppConstants.TASK_ID +
+			        "=" + task_id;
+    
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
                                 "&firstEntry=true&fromTaskDetail=true");

@@ -1604,6 +1604,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         String taskId = XliffFileUtil.getTaskId(doc);
         if (taskId != null)
         {
+        	if(taskId.indexOf(",") > 0)
+        		taskId = taskId.substring(0, taskId.indexOf(","));
             Task task = TaskHelper.getTask(Long.parseLong(taskId));
             companyId = task != null ? task.getCompanyId() : Long
                     .parseLong(CompanyWrapper.getCurrentCompanyId());

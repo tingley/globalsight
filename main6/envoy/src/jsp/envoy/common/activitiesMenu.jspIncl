@@ -38,7 +38,7 @@
 var myActivitiesMenu = new WebFXMenu;
 
 // search activity
-myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_search_activities")%>", "javascript:goToUrl('<%=tasksSearchUrl%>');", ""));
+//myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_search_activities")%>", "javascript:goToUrl('<%=tasksSearchUrl%>');", ""));
 
 <%
 //Offline Upload, fix for GBS-2191

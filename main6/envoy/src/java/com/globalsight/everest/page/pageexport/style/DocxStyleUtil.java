@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -41,8 +42,10 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.everest.page.pageexport.style.docx.AtStyleStyle;
 import com.globalsight.everest.page.pageexport.style.docx.BoldStyle;
+import com.globalsight.everest.page.pageexport.style.docx.CapsStyle;
 import com.globalsight.everest.page.pageexport.style.docx.ColorStyle;
 import com.globalsight.everest.page.pageexport.style.docx.Comment;
 import com.globalsight.everest.page.pageexport.style.docx.FldChar;
@@ -64,6 +67,7 @@ import com.globalsight.everest.page.pageexport.style.docx.SuperscriptStyle;
 import com.globalsight.everest.page.pageexport.style.docx.UnderlineStyle;
 import com.globalsight.everest.page.pageexport.style.docx.Wr;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * A util class that used to handle the docx style tag.
@@ -91,7 +95,7 @@ public class DocxStyleUtil extends StyleUtil
     @Override
     public String preHandle(String content)
     {
-    	OfficeTagUtil util = new OfficeTagUtil();
+        OfficeTagUtil util = new OfficeTagUtil();
         content = util.handleString(content);
 
         List<String> bs = new ArrayList<String>();
@@ -171,7 +175,8 @@ public class DocxStyleUtil extends StyleUtil
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(path)),"utf-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                new FileInputStream(new File(path)), "utf-8"));
 
         Document document = db.parse(new InputSource(br));
         List<Style> styles = getAllStyles();
@@ -217,12 +222,12 @@ public class DocxStyleUtil extends StyleUtil
         styles.add(new SuperscriptStyle());
         styles.add(new SubscriptStyle());
         styles.add(new StyleStyle());
-//        styles.add(new LangStyle());
+        // styles.add(new LangStyle());
         styles.add(new PositionStyle());
         styles.add(new ColorStyle());
         styles.add(new HighLightStyle());
         styles.add(new SizeStyle());
-//        styles.add(new SpacingStyle());
+        // styles.add(new SpacingStyle());
         styles.add(new FontStyle());
         styles.add(new NoProofStyle());
         styles.add(new Hyperlink());
@@ -232,7 +237,8 @@ public class DocxStyleUtil extends StyleUtil
         styles.add(new Wr());
         styles.add(new StrikeStyle());
         styles.add(new AtStyleStyle());
-        
+        styles.add(new CapsStyle());
+
         return styles;
     }
 
@@ -244,7 +250,14 @@ public class DocxStyleUtil extends StyleUtil
     {
         try
         {
-        	repairAttributeValue(filePath);
+            // GBS-2941
+            File f = new File(filePath);
+            String content = FileUtil.readFile(f, "utf-8");
+            if (content.contains(OfficeXmlHelper.NUMBERING_TAG_ADDED_START))
+            {
+                forNumberingStyles(f);
+            }
+            repairAttributeValue(filePath);
             forStylesInWt(filePath);
             forStylesNotInWt(filePath);
         }
@@ -253,25 +266,68 @@ public class DocxStyleUtil extends StyleUtil
             s_logger.error(e);
         }
     }
-    
+
+    /**
+     * Updates the numbering translation to its native place and also deletes
+     * the added tag.
+     * <p>
+     * For GBS-2941
+     */
+    private static void forNumberingStyles(File f) throws Exception
+    {
+        String content = FileUtil.readFile(f, "utf-8");
+
+        StringBuilder re = new StringBuilder();
+        re.append("(<w:pStyle w:val=\"[^\"]*\"></w:pStyle><w:lvlText w:val=\")([^%\"]*?)(\\s*%\\d+\"></w:lvlText>)");
+        re.append(OfficeXmlHelper.NUMBERING_TAG_ADDED_START);
+        // translation - m.group(4)
+        re.append("([\\d\\D]*?)");
+        re.append(OfficeXmlHelper.NUMBERING_TAG_ADDED_END);
+
+        Pattern p = Pattern.compile(re.toString());
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            String newString = m.group(1) + m.group(4) + m.group(3);
+            content = StringUtil.replace(content, m.group(), newString);
+        }
+
+        re = new StringBuilder();
+        re.append("(<w:pStyle w:val=\"[^\"]*\"/><w:lvlText w:val=\")([^%\"]*?)(\\s*%\\d+\"/>)");
+        re.append(OfficeXmlHelper.NUMBERING_TAG_ADDED_START);
+        // translation - m.group(4)
+        re.append("([\\d\\D]*?)");
+        re.append(OfficeXmlHelper.NUMBERING_TAG_ADDED_END);
+
+        p = Pattern.compile(re.toString());
+        m = p.matcher(content);
+        while (m.find())
+        {
+            String newString = m.group(1) + m.group(4) + m.group(3);
+            content = StringUtil.replace(content, m.group(), newString);
+        }
+        FileUtil.writeFile(f, content, "utf-8");
+    }
+
     private void forStylesNotInWt(String filePath)
     {
-    	try 
-    	{
-			String content = FileUtil.readFile(new File(filePath), "utf-8");
-			content = content.replaceAll("<[/]?[biu]?>", "");
-			content = content.replaceAll("<[/]?su[bp]?>", "");
-			
-			//For text not in node.
-			content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<", "");
-			FileUtil.writeFile(new File(filePath), content, "utf-8");
-		} 
-    	catch (IOException e) 
-		{
-			s_logger.error(e);
-		}
+        try
+        {
+            String content = FileUtil.readFile(new File(filePath), "utf-8");
+            content = content.replaceAll("<[/]?[biu]?>", "");
+            content = content.replaceAll("<[/]?su[bp]?>", "");
+
+            // For text not in node.
+            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<",
+                    "");
+            FileUtil.writeFile(new File(filePath), content, "utf-8");
+        }
+        catch (IOException e)
+        {
+            s_logger.error(e);
+        }
     }
-    
+
     /**
      * Saves the document to a XML files.
      * 
@@ -288,7 +344,8 @@ public class DocxStyleUtil extends StyleUtil
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(
+                path), "UTF-8");
         StreamResult result = new StreamResult(ou);
         transformer.transform(source, result);
     }

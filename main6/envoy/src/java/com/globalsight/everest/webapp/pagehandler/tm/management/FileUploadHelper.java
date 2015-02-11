@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
-import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
@@ -135,23 +135,19 @@ public class FileUploadHelper implements Runnable
 
     }
 
-    private File saveTmpFile(List<DiskFileItem> fileItems) throws Exception
+    private File saveTmpFile(List<FileItem> fileItems) throws Exception
     {
-
         File file = null;
 
-        // Create a temporary file to store the
-        // contents in it for now. We might not have
-        // additional information, such as TUV id for
-        // building the complete file path. We will
-        // save the contents in this file for now and
-        // finally rename it to correct file name.
-        //
+        // Create a temporary file to store the contents in it for now. We might
+        // not have additional information, such as TUV id for building the
+        // complete file path. We will save the contents in this file for now
+        // and finally rename it to correct file name.
         file = File.createTempFile("GSTMUpload", null);
 
         // Set overall request size constraint
         long uploadTotalSize = 0;
-        for (DiskFileItem item : fileItems)
+        for (FileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -160,7 +156,7 @@ public class FileUploadHelper implements Runnable
         }
         status.setTotalSize(uploadTotalSize);
 
-        for (DiskFileItem item : fileItems)
+        for (FileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -299,8 +295,7 @@ public class FileUploadHelper implements Runnable
         factory.setSizeThreshold(1024000);
         ServletFileUpload upload = new ServletFileUpload(factory);
 
-        @SuppressWarnings("unchecked")
-        List<DiskFileItem> fileItems = upload.parseRequest(p_request);
+        List<FileItem> fileItems = upload.parseRequest(p_request);
 
         outFile = saveTmpFile(fileItems);
     }

@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,7 @@ import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -55,6 +57,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -71,6 +74,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -110,6 +114,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     public static final int SEGMENT_START_ROW = 7;
     // "F" column, index 5
     public static final int CATEGORY_FAILURE_COLUMN = 5;
+    // "G" column, index 6
+    public static final int COMMENT_STATUS_COLUMN = 6;
 
     private Locale m_uiLocale;
     private String m_companyName = "";
@@ -118,9 +124,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     private String m_dateFormat;
     private ResourceBundle m_bundle;
     String m_userId;
-
+    
     private boolean cancel = false;
-
+    
     public TranslationsEditReportGenerator(String p_currentCompanyName)
     {
         m_companyName = p_currentCompanyName;
@@ -428,6 +434,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
      * @param p_row
      *            the segment row in sheet
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
             GlobalSightLocale p_targetLocale, String p_srcPageId, String p_dateFormat,
             int p_row) throws Exception
@@ -436,7 +443,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
         TranslationMemoryProfile tmp = null;
-        List<String> excludItems = null;
+        Vector<String> excludItems = null;
 
         for (Workflow workflow : p_job.getWorkflows())
         {
@@ -457,8 +464,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                         .getTranslationMemoryProfile();
                 if (tmp != null)
                 {
-                    excludItems = new ArrayList<String>(
-                            tmp.getJobExcludeTuTypes());
+                    excludItems = tmp.getJobExcludeTuTypes();
                 }
             }
         }
@@ -470,7 +476,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         }
         else
         {
-            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
+            LeverageMatchLingManager lmLingManager = LingServerProxy
                     .getLeverageMatchLingManager();
             TermLeverageManager termLeverageManager = ServerProxy
                     .getTermLeverageManager();
@@ -478,9 +484,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
             Locale targetPageLocale = p_targetLocale.getLocale();
             TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                    sourcePageLocale, targetPageLocale, p_job
-                            .getL10nProfile().getProject()
-                            .getTermbaseName(),
+                    sourcePageLocale, targetPageLocale, p_job.getL10nProfile()
+                            .getProject().getTermbaseName(),
                     String.valueOf(p_job.getCompanyId()));
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
             if (termLeverageOptions != null)
@@ -494,6 +499,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
             String sid = null;
+            Set<Integer> rowsWithCommentSet = new HashSet<Integer>();
             for (int i = 0; i < targetPages.size(); i++)
             {
                 if (cancel)
@@ -514,10 +520,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
-                Map exactMatches = leverageMatchLingManager.getExactMatches(
-                        sourcePage.getIdAsLong(),
-                        new Long(targetPage.getLocaleId()));
-                Map<Long, Set<LeverageMatch>> leverageMatcheMap = leverageMatchLingManager
+
+                MatchTypeStatistics tuvMatchTypes = lmLingManager
+                        .getMatchTypesForStatistics(
+                                sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId(),
+                                p_job.getLeverageMatchThreshold());
+                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchMap = lmLingManager
                         .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
                                 targetPage.getLocaleId()));
 
@@ -571,8 +580,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
 
                     sid = sourceTuv.getSid();
 
-                    StringBuilder matches = getMatches(exactMatches,
-                    		leverageMatcheMap, targetTuv, sourceTuv);
+                    StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                            sourceTuv, targetTuv, companyId);
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -647,8 +657,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     cell_G.setCellStyle(commentCS);
                     // add comment status drop down list for current row.
                     String[] statusArray = getCommentStatusList(lastComment);
-                    addCommentStatusValidation(p_sheet, statusArray, p_row,
-                            p_row, col, col);
+                    if(statusArray.length > 1){
+                    	rowsWithCommentSet.add(p_row);
+                    }
                     col++;
                     
                     // TM match
@@ -707,15 +718,96 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     p_row++;
                 }
             }
-
+            //Add comment status
+            addCommentStatus(p_sheet, rowsWithCommentSet, p_row);
             // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row-1,
                     CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
         }
 
         return p_row;
     }
 
+    private void addCommentStatus(Sheet p_sheet,
+            Set<Integer> rowsWithCommentSet, int last_row)
+    {
+		DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+		DataValidationConstraint dvConstraintAll = null;
+		DataValidationConstraint dvConstraintOne = null;
+		CellRangeAddressList addressListOne = new CellRangeAddressList();
+		CellRangeAddressList addressListAll = new CellRangeAddressList();
+		CellRangeAddress cellAddress = null;
+
+        List<String> status = new ArrayList<String>();
+        status.addAll(IssueOptions.getAllStatus());
+        String[] allStatus = new String[status.size()];
+        status.toArray(allStatus);
+        dvConstraintAll = dvHelper.createExplicitListConstraint(allStatus);
+
+        String[] oneStatus = { Issue.STATUS_QUERY };
+        dvConstraintOne = dvHelper.createExplicitListConstraint(oneStatus);
+
+        if (rowsWithCommentSet.size() == 0)
+        {
+            cellAddress = new CellRangeAddress(SEGMENT_START_ROW, last_row - 1,
+                    COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+            addressListOne.addCellRangeAddress(cellAddress);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
+                    addressListOne);
+        }
+        else
+        {
+            boolean hasComment = false;
+            int startRow = SEGMENT_START_ROW;
+            int endRow = -1;
+            for (int row = SEGMENT_START_ROW; row < last_row; row++)
+            {
+                if (rowsWithCommentSet.contains(row))
+                {
+                    if (!hasComment && row != SEGMENT_START_ROW)
+                    {
+                        endRow = row - 1;
+                        cellAddress = new CellRangeAddress(startRow, endRow,
+                              COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        addressListOne.addCellRangeAddress(cellAddress);
+                        startRow = row;
+                    }
+                    hasComment = true;
+                }
+                else
+                {
+                    if (hasComment)
+                    {
+                        endRow = row - 1;
+                        cellAddress = new CellRangeAddress(startRow, endRow,
+                                COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        addressListAll.addCellRangeAddress(cellAddress);
+                        startRow = row;
+                    }
+                    hasComment = false;
+                }
+
+                if (row == last_row - 1)
+                {
+                    cellAddress = new CellRangeAddress(startRow, last_row - 1,
+                            COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                    if (hasComment)
+                    {
+                        addressListAll.addCellRangeAddress(cellAddress);
+                    }
+                    else
+                    {
+                        addressListOne.addCellRangeAddress(cellAddress);
+                    }                    
+                }
+            }
+
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintAll,
+                    addressListAll);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
+                    addressListOne);
+        }
+	}
     /**
      * Populates a term leverage options object.
      */
@@ -1077,19 +1169,18 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     }
 
     private void addCommentStatusValidation(Sheet p_sheet,
-            String[] statusArray, int startRow, int lastRow, int startCol,
-            int lastCol)
+            DataValidationHelper dvHelper,
+            DataValidationConstraint dvConstraint,
+            CellRangeAddressList addressList)
     {
-        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
-        DataValidationConstraint dvConstraint = dvHelper
-                .createExplicitListConstraint(statusArray);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startCol, lastCol);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
+        if (addressList == null || addressList.getSize() == 0)
+            return;
+
+        DataValidation validationOne = dvHelper.createValidation(dvConstraint,
                 addressList);
-        validation.setSuppressDropDownArrow(true);
-        validation.setShowErrorBox(true);
-        p_sheet.addValidationData(validation);
+        validationOne.setSuppressDropDownArrow(true);
+        validationOne.setShowErrorBox(true);
+        p_sheet.addValidationData(validationOne);
     }
 
     /**
@@ -1120,26 +1211,31 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     /**
      * Get TM matches.
      */
-    private StringBuilder getMatches(Map exactMatches, Map leverageMatcheMap,
-    		Tuv targetTuv, Tuv sourceTuv)
+    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
+            MatchTypeStatistics tuvMatchTypes,
+            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
+            Tuv sourceTuv, Tuv targetTuv, long companyId)
     {
     	StringBuilder matches = new StringBuilder();
-        Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
-                .getIdAsLong());
 
-        if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
+    	Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
+                .getIdAsLong());
+        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
+                tuvMatchTypes, excludedItemTypes, companyId))
+        {
+            matches.append(m_bundle.getString("lb_in_context_match"));
+        }
+        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
         {
             matches.append(StringUtil.formatPCT(100));
         }
-        else if (leverageMatches != null)
+        else if (fuzzyLeverageMatches != null)
         {
             int count = 0;
-            for (Iterator ite = leverageMatches.iterator(); ite
-                    .hasNext();)
+            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
             {
-                LeverageMatch leverageMatch = (LeverageMatch) ite
-                        .next();
-                if ((leverageMatches.size() > 1))
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
+                if ((fuzzyLeverageMatches.size() > 1))
                 {
                     matches.append(++count)
                             .append(", ")
@@ -1160,6 +1256,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         {
             matches.append(m_bundle.getString("lb_no_match_report"));
         }
+
         if (targetTuv.isRepeated())
         {
             matches.append("\r\n")
@@ -1172,7 +1269,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     .append(m_bundle
                             .getString("jobinfo.tradosmatches.invoice.repetition"));
         }
-        
+
         return matches;
     }
     

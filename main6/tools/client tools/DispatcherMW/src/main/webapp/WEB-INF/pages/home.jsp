@@ -27,8 +27,9 @@
 				<ul id="menu">
 					<li><a href="./">Home</a></li>
 					<li><a href="./mtProfiles/main.htm">MT Profile</a></li>
-					<li><a href="./mtpLanguages/main.htm">Languages</a></li>
 					<li><a href="./account/main.htm">Accounts</a></li>
+					<li><a href="./mtpLanguages/main.htm">Languages</a></li>
+					<li><a href="./fileManagement/main.htm">File Management</a></li>					
 					<li><a href="./onlineTest/main.htm">Test</a></li>
 				</ul>
 				<div class="clear"></div>
@@ -40,9 +41,10 @@
 			Welcome to Dispatcher MW (Middleware). <p/>
 			Dispatcher MW will allow you to translate XLIFF file with Machine Translation engines. <p/>
 			On the <b>MT Profile</b> page, indicate the name of the MT Engine profile, URL and account options for all MT engines that will be used. <p/>
-			On the <b>Languages</b> page, create language info and associate them with MT engines in the MT Profile tab.<p/>
 			On the <b>Accounts</b> page, indicate account name, description and security code for all Accounts that will be used.<p/>
-			On the <b>Test</b> page, translate text with specified language.<p/><p/>
+			On the <b>Languages</b> page, create language info and associate them with MT Profile and Accounts.<p/>
+			On the <b>File Management</b> page, download or remove source and target files.<p/>
+			On the <b>Test</b> page, translate text or XLIFF file.<p/><p/>
 		</div>
 		
 		<%@ include file="/WEB-INF/pages/footer.jspIncl" %>

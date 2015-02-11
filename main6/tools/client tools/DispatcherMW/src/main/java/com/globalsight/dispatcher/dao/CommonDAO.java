@@ -24,8 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.dispatcher.bo.Account;
 import com.globalsight.dispatcher.bo.AppConstants;
 import com.globalsight.dispatcher.bo.GlobalSightLocale;
+import com.globalsight.dispatcher.bo.TranslateFileBO;
+import com.globalsight.dispatcher.util.FileUtil;
 
 /**
  * Dispatcher Common DAO.
@@ -35,15 +40,18 @@ import com.globalsight.dispatcher.bo.GlobalSightLocale;
  */
 public class CommonDAO implements AppConstants
 {
+    protected static final Logger logger = Logger.getLogger(CommonDAO.class);
     protected static List<GlobalSightLocale> allLocalesByDisplayName;
     protected static List<GlobalSightLocale> allLocalesById;
-    protected static Map<String, GlobalSightLocale> allLocalesMap;
-        
-    public static final String appDataRoot = 
-            System.getProperty("user.home") + "/AppData/Local/" + PROJECT_NAME;
+    protected static Map<String, GlobalSightLocale> allLocalesMap;        
+    public static final String appDataRoot;
     
-    static{
-       System.setProperty("appDataRoot", appDataRoot); 
+    static
+    {
+        String serverPath = System.getProperty("user.dir");
+        serverPath = serverPath.substring(0, serverPath.lastIndexOf(File.separator));
+        appDataRoot = serverPath + File.separator + PROJECT_NAME;
+        System.setProperty("appDataRoot", appDataRoot);
     }
     
     /**
@@ -261,5 +269,47 @@ public class CommonDAO implements AppConstants
         if (!file.exists())
             file.mkdirs();
         return file;
+    }
+    
+    public List<TranslateFileBO> getTranslateFile(Account p_account)
+    {
+        List<TranslateFileBO> result = new ArrayList<TranslateFileBO>();
+        File accountFile = new File(getFileStorage(), p_account.getAccountName());
+        if (!FileUtil.isExists(accountFile))
+            return result;
+        
+        for (File jobFile : accountFile.listFiles())
+        {
+            String jobID = jobFile.getName();
+            File srcFile = getFirstSubFile(new File(jobFile, XLF_SOURCE_FOLDER));
+            File trgFile = getFirstSubFile(new File(jobFile, XLF_TARGET_FOLDER));
+            if (FileUtil.isExists(srcFile) || FileUtil.isExists(trgFile))
+                result.add(new TranslateFileBO(p_account.getId(), jobID, jobFile.lastModified(), srcFile, trgFile));
+
+        }
+        
+        Collections.sort(result, new Comparator<TranslateFileBO>(){
+            public int compare(TranslateFileBO o1, TranslateFileBO o2)
+            {
+                if (o1.getLastModifyDate().after(o2.getLastModifyDate()))
+                    return -1;
+                else if (o1.getLastModifyDate().before(o2.getLastModifyDate()))
+                    return 1;
+                else
+                    return 0;
+            }
+        });
+        
+        return result;
+    }
+    
+    // Get the first sub file of Parent File.
+    private File getFirstSubFile(File p_parentFile)
+    {
+        if(p_parentFile == null || !p_parentFile.exists())
+            return null;
+        
+        File subFiles[] = p_parentFile.listFiles();
+        return (subFiles == null || subFiles.length == 0) ? null : subFiles[0];
     }
 }

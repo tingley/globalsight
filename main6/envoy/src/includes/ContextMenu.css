@@ -74,7 +74,6 @@
 .WebFX-ContextMenu-Disabled .WebFX-ContextMenu-DisabledContainer
 {
   display:            block;
-  background:         GrayText;
   filter:             chroma(color=#010101) dropshadow(color=ButtonHighlight, offx=1, offy=1);
   width:              100%;
   vertical-align:     center;

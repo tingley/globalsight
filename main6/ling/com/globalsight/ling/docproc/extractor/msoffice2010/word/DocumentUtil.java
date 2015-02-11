@@ -44,6 +44,7 @@ public class DocumentUtil
 		IGNORE_ATT.add("w:szCs");
 		IGNORE_ATT.add("w:w");
 		IGNORE_ATT.add("w:spacing");
+		IGNORE_ATT.add("w:shd");
 	}
 	
 	private static List<String> IGNORE_FONT_ATT = new ArrayList<String>();

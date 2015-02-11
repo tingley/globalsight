@@ -73,6 +73,11 @@ public class JobControlPendingHandler extends JobManagementHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+    	if(Job.PENDING.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+			stateMarch = true;
+    	setJobSearchFilters(sessionMgr, p_request, stateMarch);
+    	
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request, BASE_BEAN);
         // error bean.
         m_importErrorBean = new NavigationBean(ERROR_BEAN,
@@ -99,6 +104,7 @@ public class JobControlPendingHandler extends JobManagementHandler
             }
         }
 
+        sessionMgr.setMyjobsAttribute("lastState", Job.PENDING);
         JobVoPendingSearcher searcher = new JobVoPendingSearcher();
         searcher.setJobVos(p_request);
         p_request.setAttribute(ERROR_URL_PARAM, m_importErrorBean.getPageURL());
@@ -115,6 +121,7 @@ public class JobControlPendingHandler extends JobManagementHandler
                         jobStates));
 
         sessionMgr.setAttribute("destinationPage", "pending");
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0

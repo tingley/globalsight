@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -39,12 +41,14 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 /**
  * TaskSearchUtil is used to improve performance of searching activity.
  */
 public class TaskSearchUtil
 {
+    private static Logger logger = Logger.getLogger(TaskSearchUtil.class);
     private static String IS_REJECT_SQL = null;
     static
     {
@@ -94,7 +98,9 @@ public class TaskSearchUtil
 
         sb.append("select distinct t.TASK_ID, j.ID, j.NAME, ");
         sb.append("w.TOTAL_WORD_COUNT, t.ESTIMATED_COMPLETION_DATE, ");
-        sb.append("w.IFLOW_INSTANCE_ID, w.TARGET_LOCALE_ID  ");
+        sb.append("w.IFLOW_INSTANCE_ID, w.TARGET_LOCALE_ID, ");
+        sb.append("w.PRIORITY, t.ACCEPTED_DATE, t.COMPLETED_DATE, ");
+        sb.append("t.ESTIMATED_ACCEPTANCE_DATE, j.SOURCE_LOCALE_ID, t.TASK_TYPE, t.COMPANY_ID ");
         sb.append("from JBPM_TASKINSTANCE ti ");
         sb.append("inner join JBPM_TASK jt on jt.ID_ = ti.TASK_ ");
         sb.append("inner join TASK_INFO t on t.TASK_ID = jt.TASKNODE_ ");
@@ -561,26 +567,100 @@ public class TaskSearchUtil
                 .get(TaskSearchParameters.ACTIVITY_NAME);
         if (name != null)
         {
-            long companyId = CompanyWrapper.getCompanyByName(companyName)
-                    .getId();
-
-            if (name.indexOf("*") >= 0)
+            String condition = (String) parameters.get(new Integer(
+                    TaskSearchParameters.ACTIVITY_NAME_CONDITION));
+        	if (SearchCriteriaParameters.CONTAINS.equals(condition))
+        	{
+        		name = "%" + name + "%";     		
+        		sql.append(" and t.name like :name ");
+        	}
+        	else if (name.indexOf("*") >= 0)
             {
                 name = name.replace('*', '%');
                 sql.append(" and t.name like :name ");
             }
             else
             {
+            	long companyId = CompanyWrapper.getCompanyByName(companyName)
+            	.getId();
                 sql.append(" and t.name = :name ");
                 name = name + "_" + companyId;
             }
 
             params.put("name", name);
         }
+        
+        String assigneesName = (String) parameters
+        		.get(TaskSearchParameters.ASSIGNEES_NAME);
+        if(assigneesName != null)
+        {
+        	assigneesName = "%" + assigneesName + "%";
+        	sql.append(" and (ti.actorid_ like :assigneesName or (pa.actorid_ like :assigneesName and t.state = :avaiable)) ");
+        	params.put("avaiable", TaskImpl.STATE_ACTIVE_STR);
+        	params.put("assigneesName", assigneesName);
+        }
 
-        sql.append(")");
+        sql.append(") ");
+        
+        String sortColumn = (String) parameters.get(TaskSearchParameters.SORT_COLUMN);
+        if (StringUtil.isNotEmpty(sortColumn)) {
+            sql.append("ORDER BY ").append(getSortColumn(sortColumn));
+            Boolean isAscSort = (Boolean) parameters.get(TaskSearchParameters.SORT_TYPE);
+            if (isAscSort == null || isAscSort)
+                sql.append(" ASC");
+            else 
+                sql.append(" DESC");
+        }
+        /**
+        Integer rowStart = (Integer) parameters.get(TaskSearchParameters.ROW_START);
+        if (rowStart != null) {
+            Integer rowPerPage = (Integer) parameters.get(TaskSearchParameters.ROW_PER_PAGE);
+            if (rowPerPage == null)
+                rowPerPage = 20;
+            
+            sql.append(" LIMIT " + rowStart.intValue() + "," + rowPerPage.intValue());
+        }
 
+        logger.info("Executed SQL == " + sql.toString());
+        */
         return sql.toString();
+    }
+    
+    private static String getSortColumn(String column) {
+        if ("jobId".equals(column))
+            return "j.ID";
+        else if ("jobName".equals(column))
+            return "j.NAME";
+        else if ("activityName".equals(column))
+            return "t.NAME";
+        else if ("wordCount".equals(column))
+            return "w.TOTAL_WORD_COUNT";
+        else if ("acceptedDate".equals(column))
+            return "t.ACCEPTED_DATE";
+        else if ("completedDate".equals(column))
+            return "t.COMPLETED_DATE";
+        else if ("ecdDate".equals(column))
+            return "t.ESTIMATED_COMPLETION_DATE";
+        else if ("ecaDate".equals(column))
+            return "t.ESTIMATED_ACCEPTANCE_DATE";
+        else if ("priority".equals(column))
+            return "w.PRIORITY";
+        else if ("sourceLocale".equals(column))
+            return "j.SOURCE_LOCALE_ID";
+        else if ("targetLocale".equals(column))
+            return "w.TARGET_LOCALE_ID";
+        else if ("company".equals(column))
+            return "t.COMPANY_ID";
+        else if ("sourceWordCount".equals(column))
+            return "w.TOTAL_WORD_COUNT";
+        else if ("priority".equals(column))
+            return "w.PRIORITY";
+        else if ("sourceLocale".equals(column))
+            return "j.SOURCE_LOCALE_ID";
+        else if ("targetLocale".equals(column))
+            return "w.TARGET_LOCALE_ID";
+        
+        return "";
     }
 
     private static String dealWithCondition(String s, String condition,
@@ -625,6 +705,7 @@ public class TaskSearchUtil
     {
         Map<String, Object> params = new HashMap<String, Object>();
         String sql = getSearchSql(user, sp, params);
+        //logger.info("Search SQL == " + sql);
 
         List result = HibernateUtil.searchWithSql(sql, params);
         int state = (Integer) sp.getParameters()
@@ -665,14 +746,26 @@ public class TaskSearchUtil
             taskVo.setJobId(Long.parseLong(contents[1].toString()));
             taskVo.setJobName(contents[2].toString());
             taskVo.setWordCount(Integer.parseInt(contents[3].toString()));
-            Timestamp time = (Timestamp) contents[4];
+            Timestamp time = null; 
+            time = (Timestamp) contents[4];
             if (time != null)
-            {
                 taskVo.setEstimatedCompletionDate(new Date(time.getTime()));
-            }
 
             taskVo.setWorkflowId(Long.parseLong(contents[5].toString()));
-            taskVo.setLocaleId(Long.parseLong(contents[6].toString()));
+            taskVo.setTargetLocaleId(Long.parseLong(contents[6].toString()));
+            taskVo.setPriority(Integer.parseInt(contents[7].toString()));
+            time = (Timestamp) contents[8];
+            if (time != null)
+                taskVo.setAcceptedDate(new Date(time.getTime()));
+            time = (Timestamp) contents[9];
+            if (time != null)
+                taskVo.setCompletedDate(new Date(time.getTime()));
+            time = (Timestamp) contents[10];
+            if (time != null)
+                taskVo.setEstimatedAcceptanceDate(new Date(time.getTime()));
+            taskVo.setSourceLocaleId(Long.parseLong(contents[11].toString()));
+            taskVo.setTaskType(contents[12].toString());
+            taskVo.setCompanyId(Long.parseLong(contents[13].toString()));
 
             tasks.add(taskVo);
         }

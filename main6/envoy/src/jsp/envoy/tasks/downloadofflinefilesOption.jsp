@@ -245,6 +245,14 @@ function dsubmit(){
                     </SPAN>
                 </TD>
             </TR>
+            <TR id="excludeFullyLeveragedFilesBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_exclude_fully_leveraged_files") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="excludeFullyLeveragedFiles" name="excludeFullyLeveragedFiles" value="true" checked="checked"/>
+                    </SPAN>
+                </TD>
+            </TR>
             <TR>
                     <TD COLSPAN="3"> &nbsp;  </TD>
             </TR>

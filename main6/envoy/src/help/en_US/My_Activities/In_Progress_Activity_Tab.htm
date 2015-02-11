@@ -122,7 +122,8 @@ else
 <h1>In Progress Activities</h1>
 
 <p class="whs1">See also <a href="Available_Activity_Tab.htm">Available</a>, 
- <a href="Finished_Activity_Tab.htm">Finished</a>, and <a href="Rejected_Activity_Tab.htm">Rejected</a>.</p>
+ <a href="Finished_Activity_Tab.htm">Finished</a>, <a href="Rejected_Activity_Tab.htm">Rejected</a>,
+ and <a href="All_Status_Activity_Tab.htm">All Status</a>.</p>
 
 <p class="whs1">&nbsp;</p>
 
@@ -136,15 +137,14 @@ else
 <p class="whs7">Summary:</td>
 <td width="74.346%" class="whs8">
 <p class="whs7">Activities you have accepted appear here. 
- &nbsp;<span style="font-family: Arial, sans-serif;">If 
- you are the project manager, in progress activities for jobs you are managing 
- appear here.</span></p>
+ &nbsp;If you are the project manager, in progress activities for jobs you are managing 
+ appear here.</p>
 <ul type="square" class="whs9">
 	
 	<li class=kadov-p><p class="whs10">Finishing an activity 
  moves it to the <a href="Finished_Activity_Tab.htm">Finished</a> status.</p></li>
 	
-	<li class=kadov-p><p class="whs10">Un-Accepting an activity 
+	<li class=kadov-p><p class="whs10">Rejecting an activity 
  moves it to the <a href="Rejected_Activity_Tab.htm">Rejected</a> status.</p></li>
 </ul></td></tr>
 
@@ -170,29 +170,8 @@ else
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p>Select an activity status (<span style="font-weight: bold;"><B>Available</B></span>, 
  <span style="font-weight: bold;"><B>In Progress</B></span>, <span style="font-weight: bold;"><B>Finished</B></span>, 
- <span style="font-weight: bold;"><B>Rejected</B></span>) to filter the jobs displayed 
- in the search results.</td></tr>
-
-<tr valign="top" class="whs13">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs15">Job Name: </td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p><span style="font-weight: bold;"><B>begins with:</B></span> Activities whose 
- job name begins with the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></p>
-<p><span style="font-weight: bold;"><B>ends with:</B></span> Activities whose 
- job name ends with the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></p>
-<p><span style="font-weight: bold;"><B>contains:</B></span> Activities whose job 
- name contains the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></td></tr>
-
-<tr valign="top" class="whs13">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs15">(Blank Text Field)</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p>Search matches the text in this box to job names and filters the jobs 
- displayed in the search results.</td></tr>
+ <span style="font-weight: bold;"><B>Rejected</B></span>,<span style="font-weight: bold;"><B>All Status</B></span>) 
+ to filter the jobs displayed in the search results.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
@@ -200,11 +179,53 @@ else
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p>Displays in progress activities. &nbsp;Click 
  a column header to sort the table based on data in that column; click 
- a second time to reverse the sort order. &nbsp;<span 
- style="font-family: Arial, sans-serif;">Select 
- an activity by clicking the radio button next to the job. &nbsp;Click 
- on the activity name to view the <a href="In_Progress_Activity_Details.htm">Activity 
- Details</a>.</span></td></tr>
+ a second time to reverse the sort order.&nbsp;Check the check box before each activity to select it or
+ check the check box in table header to select all in progress  activities. &nbsp;Click 
+ on the job name to view the activity details.</td></tr>
+ 
+<tr valign="top" class="whs18">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs17">Inputs</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>&nbsp;</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Job Id: </td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Select =,&gt; or &lt; and type job id to filter activities equal to,
+ greater than or less than specified value.</p></td></tr>
+
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Job Name</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in job name text filed.</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Activity</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in activity text filed.</td></tr>
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Assignees</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in assignees text filed.</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Source Locale</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by selected source locale.</td></tr>
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Target Locale</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by selected target locale.</td></tr>
 
 <tr valign="top" class="whs18">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
@@ -212,18 +233,11 @@ else
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p>&nbsp;</td></tr>
 
-<tr valign="top" class="whs19">
+<tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Search</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p class="whs10">Searches based on the criteria entered.</td></tr>
-
-<tr valign="top" class="whs19">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs7">Advanced Search</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs10">Search for activities based on additional 
- criteria (see <a href="My_Activities_-_Search.htm">My Activities - Search</a>).</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
@@ -235,56 +249,53 @@ else
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Complete Activity</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs10">Complete select activities.</td></tr>
+<p class="whs10">Complete selected activities.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Complete Workflow</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs10">Complete select workflows.</td></tr>
+<p class="whs10">Complete selected workflows.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs7">Detailed Word Counts...</td>
+<p class="whs7">Detailed Word Count...</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs10">Use checkbox to view word counts for selected 
- activities. (see <a href="Detailed_Word_Counts.htm">Detailed Word Counts</a>)</td></tr>
+<p class="whs10">Select a single activities to view detailed word counts.
+This button is disabled when multipe activities are selected. 
+(see <a href="Detailed_Word_Counts.htm">Detailed Word Counts</a>)</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Search/Replace</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p class="whs10">If this feature is enabled you can search 
- and replace text in this activity see (see <a href="../My_Jobs/Search_(Search_Replace_p.1).htm">Search</a>).</td></tr>
+ and replace text in target segments for selected activity. (see <a href="../My_Jobs/Search_(Search_Replace_p.1).htm">Search</a>).</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Export</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs20">If you are a Project Manager, you will have 
- an &quot;<a href="../My_Jobs/Export.htm">Export...</a>&quot; button that 
- lets you export the Activity from this screen. You can choose which pages 
- are exported. All work done up to that point on the selected pages will 
- be exported.</td></tr>
+<p>Export target files for selected activities.you may need relevant permissions to enable this feature.</td></tr>
  
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Download</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p>Download checked activities using previously saved settings.</td></tr>
+<p>Download selected activities using previously saved download settings.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Download Combined</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p>Download checked activities combined using previously saved settings. It only works
+<p>Download selected activities combined using previously saved download settings. It only works
  for activities with same locale pair. </td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
 <p class="whs7">Offline Upload</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p>Offline upload trans-kit quick entrence.</td></tr>
+<p>Upload offline transiation kit without go to work offline page.</td></tr>
 
 </table>
 

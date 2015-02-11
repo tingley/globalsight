@@ -189,7 +189,18 @@ public abstract class Optimizer
         if (content != null)
         {
             tag = new RemovedTag();
-            int index = s.indexOf('>' + content + '<') + 1;
+            
+            int i = -1;
+            
+            //for content is &lt;r&gt;
+            int index = s.indexOf('>' + content + '<', i);
+            while (index > 0 && s.indexOf('>' + content + "</", i) == index)
+            {
+                i = index + 1;
+                index = s.indexOf('>' + content + '<', i);
+            }
+            
+            index++;
             String start = s.substring(0, index);
             if (isNotExtract(start))
             {

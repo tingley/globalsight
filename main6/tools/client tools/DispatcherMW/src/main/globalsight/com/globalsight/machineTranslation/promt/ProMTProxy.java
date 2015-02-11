@@ -25,17 +25,16 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.dispatcher.bo.MachineTranslationProfile;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
-import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 import com.globalsight.util.gxml.GxmlElement;
@@ -48,7 +47,6 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
     private static final Logger s_logger = Logger
             .getLogger(ProMTProxy.class);
 
-    private static final String ENGINE_NAME = "ProMT";
     private DiplomatAPI m_diplomat = null;
     private int count = 0;
     
@@ -58,7 +56,7 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
 
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_PROMT;
     }
 
     /**
@@ -97,166 +95,108 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
         // get ptsUrlFlag
 
         // Translate via PTS9 APIs
-            try
-            {
+        try
+        {
             MachineTranslationExtentInfo ptsInfo = getProMTInfoBySrcTrgLocale(
-                    p_sourceLocale,
-                        p_targetLocale);
+                    p_sourceLocale, p_targetLocale);
 
-                long dirId = -1;
-                String topicTemplateId = "";
-                if (ptsInfo != null)
-                {
+            long dirId = -1;
+            String topicTemplateId = "";
+            if (ptsInfo != null)
+            {
                 dirId = ptsInfo.getLanguagePairCode();
                 topicTemplateId = ptsInfo.getDomainCode();
 
-                    ProMtPts9Invoker invoker = getProMtPts9Invoker();
-                    int times = 0;
-                    String stringBak = new String(p_string);
-                    while (times < 2)
+                ProMtPts9Invoker invoker = getProMtPts9Invoker();
+                int times = 0;
+                String stringBak = new String(p_string);
+                while (times < 2)
+                {
+                    // All segments from XLF file are re-wrapped,before send
+                    // them to PTS9,need revert them.
+                    Map paramMap = getMtParameterMap();
+                    GxmlElement ge = null;
+                    List<String> idList = null;
+                    List<String> xList = null;
+                    boolean isXlf = MTHelper.needSpecialProcessingXlfSegs(paramMap);
+                    boolean containTags = isContainTags();
+                    if (isXlf && containTags)
                     {
-                        // All segments from XLF file are re-wrapped,before send
-                        // them to PTS9,need revert them.
-                        Map paramMap = getMtParameterMap();
-                        GxmlElement ge = null;
-                        List idList = null;
-                        List xList = null;
-                        boolean isXlf = false; //MTHelper.needRevertXlfSegment(paramMap);
-                        boolean containTags = isContainTags();
-                        if (isXlf && containTags)
+                        ge = getSourceGxmlElement(p_string);
+                        if (ge != null)
                         {
-                            ge = getSourceGxmlElement(p_string);
-                            if (ge != null)
-                            {
-                                idList = SegmentUtil2.getAttValuesByName(ge, "id");
-                                xList = SegmentUtil2.getAttValuesByName(ge, "x");
-                            }
-                            String locale = p_sourceLocale.getLanguage() + "_"
-                                    + p_sourceLocale.getCountry();
-                            stringBak = MTHelper.wrappText(p_string, locale);
-                            stringBak = MTHelper.revertXlfSegment(stringBak, locale);
-                            stringBak = encodeLtGtInGxmlAttributeValueForPTS9Trans(stringBak);
+                            idList = SegmentUtil2.getAttValuesByName(ge, "id");
+                            xList = SegmentUtil2.getAttValuesByName(ge, "x");
                         }
-                        // Send to PTS9 for translation
-                        result = invoker.translateText(dirId, topicTemplateId, stringBak);
-                        if (result != null && !result.startsWith("-1 Error")
-                                && isXlf && containTags)
-                        {
-                            result = result.replaceAll("_gt;_", ">");
-                            /** 
+                        String locale = p_sourceLocale.getLanguage() + "_"
+                                + p_sourceLocale.getCountry();
+                        stringBak = MTHelper.wrappText(p_string, locale);
+                        stringBak = MTHelper.revertXlfSegment(stringBak, locale);
+                        stringBak = MTHelper.encodeLtGtInGxmlAttributeValue(stringBak);
+                    }
+                    // Send to PTS9 for translation
+                    result = invoker.translateText(dirId, topicTemplateId, stringBak);
+                    if (result != null && !result.startsWith("-1 Error")
+                            && isXlf && containTags)
+                    {
+                        result = result.replaceAll("_gt;_", ">");
+                        /**
                             result = result.replaceAll("&#x9;", "&amp;#x9;");// while-space
                             result = result.replaceAll("&#xa;", "&amp;#xa;");// \r
                             result = result.replaceAll("&#xd;", "&amp;#xd;");// \n
                             // handle '<' and '"' in attribute value
                             result = encodeGxmlAttributeEntities2(result);
                             */
-                            // handle single '&' in MT translation
-                            result = MTHelper.encodeSeparatedAndChar(result);
-                        }
-                        // Parse the translation back 
-                        if (isXlf && containTags)
-                        {
-                            DiplomatAPI api = getDiplomatApi();
-                            SegmentNode sn = extractSegment(api, result, "xlf", p_sourceLocale);
-                            if (sn != null)
-                            {
-                                result = sn.getSegment();
-                                // Handle entity
-                                result = encodeTranslationResult(result, idList, xList);
-                            }
-                            else
-                            {
-                                result = null;
-                            }
-                        }
-                        if (result != null && !"null".equalsIgnoreCase(result)
-                                && !result.startsWith("-1"))
-                        {
-                            break;
-                        }
-                        times++;
+                        // handle single '&' in MT translation
+                        result = MTHelper.encodeSeparatedAndChar(result);
                     }
+                    // Parse the translation back
+                    if (isXlf && containTags)
+                    {
+                        DiplomatAPI api = getDiplomatApi();
+                        SegmentNode sn = SegmentUtil2.extractSegment(api,
+                                result, "xlf", p_sourceLocale);
+                        if (sn != null)
+                        {
+                            result = sn.getSegment();
+                            // Handle entity
+                            result = MTHelper.resetIdAndXAttributesValues(
+                                    result, idList, xList);
+                        }
+                        else
+                        {
+                            result = null;
+                        }
+                    }
+                    if (result != null && !"null".equalsIgnoreCase(result)
+                            && !result.startsWith("-1"))
+                    {
+                        break;
+                    }
+                    times++;
+                }
 
-                    if (result != null && result.startsWith("-1 Error:"))
+                if (result != null && result.startsWith("-1 Error:"))
+                {
+                    s_logger.error("Failed to get translation from PTS9 engine.");
+                    if (s_logger.isDebugEnabled())
                     {
-                        s_logger.error("Failed to get translation from PTS9 engine.");
-                        if (s_logger.isDebugEnabled())
-                        {
-                            s_logger.error(result);                            
-                        }
-                    }
-                    if (result == null || "null".equalsIgnoreCase(result)
-                            || result.startsWith("-1"))
-                    {
-                        result = "";
+                        s_logger.error(result);
                     }
                 }
+                if (result == null || "null".equalsIgnoreCase(result)
+                        || result.startsWith("-1"))
+                {
+                    result = "";
+                }
             }
-            catch (Exception ex)
-            {
+        }
+        catch (Exception ex)
+        {
 //                s_logger.error(ex.getMessage(), ex);
-            }
+        }
 
         return result;
-    }
-    
-    /**
-     * Extract segment to get translatable element.
-     */
-    public static SegmentNode extractSegment(DiplomatAPI p_api,
-            String p_segment, String p_datatype,
-            Locale p_sourceLocale)
-    {
-        if (p_segment == null || "null".equalsIgnoreCase(p_segment)
-                || "".equals(p_segment.trim()))
-        {
-            return null;
-        }
-
-        DiplomatAPI api = null;
-        if (p_api == null)
-        {
-            api = new DiplomatAPI();
-        }
-        else
-        {
-            p_api.reset();
-            api = p_api;
-        }
-        api.setEncoding("UTF-8");
-        api.setLocale(p_sourceLocale);
-        api.setInputFormat(p_datatype);
-        api.setSentenceSegmentation(false);
-        api.setSegmenterPreserveWhitespace(true);
-        StringBuffer sourceString = new StringBuffer();
-        sourceString.append("<trans-unit><source>" + p_segment + "</source>");
-        sourceString.append("<target>" + p_segment + "</target></trans-unit>");
-        api.setSourceString(sourceString.toString());
-
-        try
-        {
-            api.extract();
-            Output output = api.getOutput();
-
-            for (Iterator it = output.documentElementIterator(); it.hasNext();)
-            {
-                DocumentElement element = (DocumentElement) it.next();
-                if (element instanceof TranslatableElement)
-                {
-                    TranslatableElement trans = (TranslatableElement) element;
-                    return (SegmentNode) (trans.getSegments().get(0));
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            if (s_logger.isDebugEnabled())
-            {
-                s_logger.error(e.getMessage());
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -364,7 +304,26 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
 
         return result;
     }
-    
+
+    private MachineTranslationProfile getMTProfile()
+    {
+        MachineTranslationProfile result = null;
+
+        HashMap paramMap = getMtParameterMap();
+        String mtId = (String) paramMap.get(MachineTranslator.MT_PROFILE_ID);
+        try
+        {
+            result = MTProfileHandlerHelper.getMTProfileById(mtId);
+        }
+        catch (Exception e)
+        {
+            s_logger.error("Failed to get translation memory profile for profile ID : "
+                    + mtId);
+        }
+
+        return result;
+    }
+
     /**
      * Get language pair name. Note that PROMT only support simplified Chinese.
      * 
@@ -550,145 +509,6 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
         return false;
     }
     
-    /**
-     * Keep same with original source TUV content.
-     * 
-     * @param p_segString
-     * @return
-     */
-    private String encodeTranslationResult(String p_segString, List idList, List xList)
-    {
-        if (p_segString == null || p_segString.trim().length() == 0)
-        {
-            return null;
-        }
-        
-        String result = null;
-        try 
-        {
-            StringBuffer sb = new StringBuffer();
-            sb.append("<segment>").append(p_segString).append("</segment>");
-            GxmlElement gxmlElement = SegmentUtil2.getGxmlElement(sb.toString());
-
-            this.count = 0;
-            resetIdAndX(gxmlElement, idList, xList);
-            
-            String gxml = gxmlElement.toGxml("xlf");
-            result = GxmlUtil.stripRootTag(gxml);
-        }
-        catch (Exception e)
-        {
-            result = p_segString;
-        }
-        
-        return result;
-    }
-    
-    private void resetIdAndX(GxmlElement element, List idList, List xList)
-    {
-        if (element == null)
-        {
-            return;
-        }
-        
-        String id = element.getAttribute("id");
-        if (id != null)
-        {
-            String idValue = null;
-            if (idList != null && idList.size() > count)
-            {
-                idValue = (String) idList.get(count);
-            }
-            else
-            {
-                idValue  = String.valueOf(count + 1);
-            }
-            element.setAttribute("id", idValue);
-        }
-        
-        String x = element.getAttribute("x");        
-        if (x != null)
-        {
-            String xValue = null;
-            if (xList != null && xList.size() > count)
-            {
-                xValue = (String) xList.get(count);
-            }
-            else
-            {
-                xValue = String.valueOf(count + 1);
-            }
-            element.setAttribute("x", xValue);
-        }
-        
-        if (id != null || x != null)
-        {
-            this.count++;
-        }
-        
-        Iterator childIt = element.getChildElements().iterator();
-        while (childIt.hasNext())
-        {
-            GxmlElement ele = (GxmlElement) childIt.next();
-            resetIdAndX(ele, idList, xList);
-        }
-    }
-    
-    /**
-     * If XML attribute has "<" in it ,it will parse error. This method replaces
-     * the attribute "<" into "&lt;".
-     * 
-     * As PROMT can not support ">" in attribute value,also replace ">" to "_gt;_".
-     * 
-     * Note that this method should keep private!
-     */
-    private static String encodeLtGtInGxmlAttributeValueForPTS9Trans(String segement)
-    {
-        // this flag for recording the xml element begin.
-        boolean flagXML = false;
-        // this flag for recording the attribute begin, because if in "<  >",
-        // and begin as double quote, it will be a attribute.
-        boolean flagQuote = false;
-        StringBuffer sb = new StringBuffer();
-
-        for (int i = 0; i < segement.length(); i++)
-        {
-            char c = segement.charAt(i);
-
-            if (!flagXML && !flagQuote && c == '<')
-            {
-                flagXML = true;
-            }
-            else if (flagXML && !flagQuote && c == '"')
-            {
-                flagQuote = true;
-            }
-            else if (flagXML && !flagQuote && c == '>')
-            {
-                flagXML = false;
-            }
-            else if (flagXML && flagQuote && c == '"')
-            {
-                flagQuote = false;
-            }
-
-            if (flagXML && flagQuote && c == '<')
-            {
-                sb.append("&lt;");
-            }
-            else if (flagXML && flagQuote && c == '>')
-            {
-                sb.append("_gt;_");
-            }
-            else
-            {
-                sb.append(c);
-            }
-        }
-
-        return sb.toString();
-    }
-    
      /**
      * XML attribute value can't have '<' and '"', so find all "&lt;" and 
      * "&quot;" in attribute value and encode them again. 
@@ -807,7 +627,6 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         */

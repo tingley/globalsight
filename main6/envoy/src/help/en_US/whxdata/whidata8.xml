@@ -33,6 +33,7 @@
   <topic name="Export Source" url="My_Jobs/Export_Source.htm" />
   <topic name="Export TM" url="Setup/Translation_Memory/Export_TM.htm" />
   <topic name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
+  <topic name="Filter Configuration Import Screen" url="Data_Sources/File_Profiles/Filter_Configuration_Import_Screen.htm" />
   <topic name="GlobalSight TeamSite Branch Definitions" url="Appendix/TeamSite/GlobalSight_TeamSite_Branch_Definitions.htm" />
   <topic name="How is a GlobalSight segment different from a Trados segment" url="Appendix/Linguistic_FAQ/How_is_a_GlobalSight_segment_different_from_a_Trados_segment.htm" />
   <topic name="Import" url="Setup/Terminology/Import.htm" />

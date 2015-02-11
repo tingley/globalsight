@@ -5,12 +5,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
+
 /**
  * A abstract class that to handle the style node. For example <b> node in DOCX
  * document.xml file.
  * 
  */
-public abstract class Style
+public abstract class Style extends XmlUtil
 {
     /**
      * Adds style to the DOCX document. Should not be null.
@@ -93,11 +95,23 @@ public abstract class Style
      * 
      * @param bNode
      */
-    private void handleStyleNode(Node bNode)
+    protected void handleStyleNode(Node bNode)
     {
+        if (bNode == null)
+            return;
+        
         Node wtNode = bNode.getParentNode();
+        if (wtNode == null)
+            return;
+        
         Node wrNode = wtNode.getParentNode();
+        
+        if (wrNode == null)
+            return;
+        
         Node root = wrNode.getParentNode();
+        if (root == null)
+            return;
 
         if (wtNode.getNodeName().equals("t"))
         {
@@ -123,29 +137,33 @@ public abstract class Style
                 while (cNode != null)
                 {
                     Node cloneNode = wrNode.cloneNode(true);
-
-                    if (cNode.getNodeName().equals(getNodeName()))
-                    {
-                        addrPrNode(cloneNode, getAddNodeName(),
-                                getAddNodeValue(), wtNode.getNodeName());
-                        // Style node can be nested.
-                    }
-
-                    changeText(cloneNode, wtNode.getNodeName(), cNode);
-
-                    root.insertBefore(cloneNode, wrNode);
-
-                    // The br style should be removed.
-                    if (cNode.getNextSibling() != null)
-                    {
-                        removeBr(cloneNode);
-                    }
-
+                    updateStyle(cNode, cloneNode, wtNode, wrNode, root);
                     cNode = cNode.getNextSibling();
                 }
 
                 root.removeChild(wrNode);
             }
+        }
+    }
+    
+    protected void updateStyle(Node cNode, Node cloneNode, Node wtNode,
+            Node wrNode, Node root)
+    {
+        if (cNode.getNodeName().equals(getNodeName()))
+        {
+            addrPrNode(cloneNode, getAddNodeName(),
+                    getAddNodeValue(), wtNode.getNodeName());
+            // Style node can be nested.
+        }
+
+        changeText(cloneNode, wtNode.getNodeName(), cNode);
+
+        root.insertBefore(cloneNode, wrNode);
+
+        // The br style should be removed.
+        if (cNode.getNextSibling() != null)
+        {
+            removeBr(cloneNode);
         }
     }
 
@@ -231,7 +249,7 @@ public abstract class Style
         }
     }
 
-    private Node getChild(Node node, String name)
+    protected Node getChild(Node node, String name)
     {
         Node n = node.getFirstChild();
         while (n != null && !name.equals(n.getNodeName()))

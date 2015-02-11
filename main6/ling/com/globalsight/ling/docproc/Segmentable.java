@@ -20,6 +20,7 @@ import java.util.*;
 
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlWriter;
+import com.globalsight.util.edit.EditUtil;
 
 public abstract class Segmentable
 {
@@ -229,11 +230,18 @@ public abstract class Segmentable
         return sid;
     }
 
+    /**
+     * As SID may contain "<", ">", "'", """ or standalone "&", need encode them
+     * to avoid possible parse error. But the SID should not be encoded
+     * repeatedly.
+     * 
+     * @param sid
+     */
     public void setSid(String sid)
     {
-        this.sid = sid;
+        this.sid = EditUtil.encodeXmlEntities(sid);
     }
-    
+
     public String getIsLocalized() {
         return this.isLocalized;
     }

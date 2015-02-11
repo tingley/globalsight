@@ -211,13 +211,18 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return result.toString();
     }
 
-/**
-     * For "Entity Encoding issue" If the source segment string contains special
-     * signs(e.g. '&apos;'), Then For CDATA Replace the '&lt;' to char '<'
-     * Replace the '&gt;' to char '>' Replace the '&amp;' to char '&' Replace
-     * the '&apos;' to single quote ''' Replace the '&quot;' to double quote '"'
-     * For Node Replace the '&apos;' to single quote ''' Replace the '&quot;' to
-     * double quote '"' Replace the '&gt;' to char '>'
+    /**
+     * For "Entity Encoding issue", if source segment string contains special signs,
+     * For CDATA:
+     *     Replace the '&lt;' to char '<'
+     *     Replace the '&gt;' to char '>'
+     *     Replace the '&amp;' to char '&'
+     *     Replace the '&apos;' to single quote '''
+     *     Replace the '&quot;' to double quote '"'
+     * For Node:
+     *     Replace the '&apos;' to single quote '''
+     *     Replace the '&quot;' to double quote '"'
+     *     Replace the '&gt;' to char '>'
      */
     private String entityEncode(String sourceSeg)
     {
@@ -370,7 +375,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             format = m_output.getDataFormat();
         }
-        
+
         CxeMessageType msgType = (cxeMessage == null ? CxeMessageType
                 .getCxeMessageType(CxeMessageType.HTML_LOCALIZED_EVENT)
                 : cxeMessage.getMessageType());
@@ -661,6 +666,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     tmp = tmp.replaceAll("&apos;", "\'");
                     tmp = tmp.replaceAll("&quot;", "\"");
                 }
+                
+                if (m_isCDATA && isXmlFilterConfigured
+                        && m_convertHtmlEntityForXml)
+                {
+                    tmp = encode(tmp);
+                }
             }
 
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
@@ -824,7 +835,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                                     IdmlHelper.LINE_BREAK);
                         }
                     }
-                    
+
                     parseDiplomatSnippet(addSpanRtl(chunk));
                     m_stateStack.pop();
                     break;

@@ -141,6 +141,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String DOCX_RELS_XML = "word/_rels/document.xml.rels";
     public static final String DOCX_COMMENT_XML = "word/comments.xml";
     public static final String DOCX_STYLE_XML = "word/styles.xml";
+    public static final String DOCX_NUMBERING_XML = "word/numbering.xml";
     public static final String DOCX_WORD_DIR = "word";
     public static final String DOCX_DIAGRAMS_DIR = "word/diagrams";
     public static final String DOCX_CHAR_DIR = "word/charts";
@@ -213,6 +214,10 @@ public class OfficeXmlHelper implements IConverterHelper2
             .compile("(<c[^>]*t=\"s\"[^>]*>)([\\d\\D]*?)(</c>)");
     private static final Pattern V = Pattern.compile("<v>([\\d]*?)</v>");
 
+    // GBS-2941
+    public static final String NUMBERING_TAG_ADDED_START = "<gs-numbering-added-for-translation>";
+    public static final String NUMBERING_TAG_ADDED_END = "</gs-numbering-added-for-translation>";
+
     /**
      * Init OfficeXmlHelper for office 2010 importing
      */
@@ -236,19 +241,19 @@ public class OfficeXmlHelper implements IConverterHelper2
         copyToTargetLocales(new String[]
         { oofile });
     }
-    
+
     private void splitFiles(String dirName)
     {
-    	PptxFileManager m = new PptxFileManager();
-    	m.splitFile(dirName);
+        PptxFileManager m = new PptxFileManager();
+        m.splitFile(dirName);
     }
-    
+
     private void mergePages(String dir)
     {
-    	PptxFileManager m = new PptxFileManager();
-    	m.mergeFile(dir);
+        PptxFileManager m = new PptxFileManager();
+        m.mergeFile(dir);
     }
-    
+
     /**
      * Perform conversion
      * 
@@ -270,25 +275,25 @@ public class OfficeXmlHelper implements IConverterHelper2
             convert(filename);
             // 4 wait for Converter to convert
             String dir = getUnzipDir(filename);
-            
+
             String fpIdstr = m_eventFlow.getSource().getDataSourceId();
             boolean useNewExtractor = WordExtractor.useNewExtractor(fpIdstr);
-            
+
             if (m_type == OFFICE_PPTX && useNewExtractor)
             {
-            	mergePages(dir);
+                mergePages(dir);
             }
-            
+
             String[] xmlFiles = getLocalizeXmlFiles(dir, useNewExtractor);
-            
+
             // 5 merge tags
-            
+
             if (!(m_type == OFFICE_DOCX && useNewExtractor))
             {
-            	 OfficeXmlTagHelper help = new OfficeXmlTagHelper(m_type);
-                 help.mergeTags(xmlFiles);
+                OfficeXmlTagHelper help = new OfficeXmlTagHelper(m_type);
+                help.mergeTags(xmlFiles);
             }
-           
+
             if (gcCounter > 100)
             {
                 // call GC to free memory for large file
@@ -910,9 +915,9 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             if (m_type == OFFICE_PPTX)
             {
-            	splitFiles(dirName);
+                splitFiles(dirName);
             }
-        	
+
             String filename = getCategory().getDiplomatAttribute(
                     "safeBaseFileName").getValue();
             oxc.convertXmlToOffice(filename, dirName);
@@ -978,9 +983,9 @@ public class OfficeXmlHelper implements IConverterHelper2
 
         if (m_type == OFFICE_PPTX)
         {
-        	if ("000".equals(fileNumber))
-        		fileNumber = "";
-        	
+            if ("000".equals(fileNumber))
+                fileNumber = "";
+
             if (fileNamePrefix.startsWith("data"))
             {
                 newDisplayName = DNAME_PRE_PPTX_DIAGRAM + fileNamePrefix + ") "
@@ -988,7 +993,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
             else if (fileNamePrefix.equals("diagramData"))
             {
-            	newDisplayName = "(diagram data) " + m_oriDisplayName;
+                newDisplayName = "(diagram data) " + m_oriDisplayName;
             }
             else if (fileNamePrefix.startsWith("chart"))
             {
@@ -1071,6 +1076,10 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
             else if (fileNamePrefix.startsWith("chart")
                     || fileNamePrefix.startsWith("drawing"))
+            {
+                newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
+            }
+            else if (fileNamePrefix.startsWith("numbering"))
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
             }
@@ -1345,22 +1354,20 @@ public class OfficeXmlHelper implements IConverterHelper2
         String newDisplayName = null;
         if (m_type == OFFICE_XLSX && m_isURLTranslate)
         {
-            String name = FileUtils
-                    .getBaseName(p_xmlFilename);
+            String name = FileUtils.getBaseName(p_xmlFilename);
             if (name.endsWith(".xml.rels"))
             {
-            	name = name.substring(0, name.length() - ".xml.rels".length());
-				newDisplayName = "(" + name + " Hyperlinks)"
-						+ m_oriDisplayName;
+                name = name.substring(0, name.length() - ".xml.rels".length());
+                newDisplayName = "(" + name + " Hyperlinks)" + m_oriDisplayName;
             }
         }
-        
+
         if (newDisplayName == null)
         {
-        	String number = getPageNumber(fileNamePrefix);
+            String number = getPageNumber(fileNamePrefix);
             newDisplayName = getNewDisplayName(fileNamePrefix, number);
         }
-        
+
         m_eventFlow.setDisplayName(newDisplayName);
     }
 
@@ -1436,10 +1443,10 @@ public class OfficeXmlHelper implements IConverterHelper2
         } // xlsx
         else if (m_type == OFFICE_PPTX)
         {
-			if (useNewExtractor)
-				getNewLocalizedXmlFilesPPTX(dir, list);
-			else
-				getLocalizedXmlFilesPPTX(dir, list);
+            if (useNewExtractor)
+                getNewLocalizedXmlFilesPPTX(dir, list);
+            else
+                getLocalizedXmlFilesPPTX(dir, list);
         } // pptx
 
         if (list.isEmpty())
@@ -1459,8 +1466,13 @@ public class OfficeXmlHelper implements IConverterHelper2
     {
         String contentXml = FileUtils.concatPath(dir, DOCX_CONTENT_XML);
         String commentXml = FileUtils.concatPath(dir, DOCX_COMMENT_XML);
+        String numberingXml = FileUtils.concatPath(dir, DOCX_NUMBERING_XML);
         list.add(contentXml);
 
+        if (hasContentToExtract(numberingXml, contentXml))
+        {
+            list.add(numberingXml);
+        }
         // get comments xml
         if (isFileExists(commentXml))
         {
@@ -1580,6 +1592,49 @@ public class OfficeXmlHelper implements IConverterHelper2
                     }
                 }
             }
+        }
+    }
+
+    private boolean hasContentToExtract(String numberingXml, String documentXml)
+    {
+        File numbering = new File(numberingXml);
+        if (!numbering.exists())
+        {
+            return false;
+        }
+        File document = new File(documentXml);
+        try
+        {
+            String ds = FileUtil.readFile(document, "utf-8");
+            String ns = FileUtil.readFile(numbering, "utf-8");
+            Pattern p = Pattern
+                    .compile("<w:pStyle w:val=\"([^\"]*)\"/><w:lvlText w:val=\"([^%\"]*?)\\s*%\\d+\"/>");
+            Matcher m = p.matcher(ns);
+            boolean found = false;
+            while (m.find())
+            {
+                String pStyle = m.group(1);
+                String text = m.group(2);
+                // check if the text is empty and whether the pStyle exists in
+                // document xml
+                if (!text.isEmpty() && ds.contains(pStyle))
+                {
+                    found = true;
+                    // add a new node with the numbering text for translation.
+                    // This node will be deleted and the translation will be
+                    // updated to w:lvlText w:val attribute at export stage
+                    String newString = m.group() + NUMBERING_TAG_ADDED_START
+                            + text + NUMBERING_TAG_ADDED_END;
+                    ns = ns.replace(m.group(), newString);
+                    FileUtil.writeFile(numbering, ns, "utf-8");
+                }
+            }
+            return found;
+        }
+        catch (IOException e)
+        {
+            m_logger.error("Error when reading xml content", e);
+            return false;
         }
     }
 
@@ -2010,12 +2065,12 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
     }
-    
+
     private void getUrlFiles(String dir, List<String> list)
     {
         if (m_isURLTranslate)
         {
-        	File root = new File(dir, XLSX_RELS_DIR);
+            File root = new File(dir, XLSX_RELS_DIR);
             if (root.exists())
             {
                 List<File> fs = FileUtil.getAllFiles(root, new FileFilter()
@@ -2029,11 +2084,11 @@ public class OfficeXmlHelper implements IConverterHelper2
                             try
                             {
                                 String text = FileUtils.read(arg0, "UTF-8");
-    							if (text.contains(" TargetMode=\"External\"")
-    									&& text.contains("/hyperlink\""))
-                                	return true;
-    							
-    							return false;
+                                if (text.contains(" TargetMode=\"External\"")
+                                        && text.contains("/hyperlink\""))
+                                    return true;
+
+                                return false;
                             }
                             catch (IOException e)
                             {
@@ -2158,7 +2213,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
     }
-    
+
     private void getLocalizedXmlFilesPPTX(String dir, List<String> list)
     {
         // check if section name exists
@@ -2399,25 +2454,25 @@ public class OfficeXmlHelper implements IConverterHelper2
         File diagramData = new File(dir, "ppt/diagramData.xml");
         if (isFileContains(diagramData, "</a:t>", false))
         {
-              list.add(diagramData.getPath());
+            list.add(diagramData.getPath());
         }
 
         // charts
         File chart = new File(dir, "ppt/chart.xml");
         if (isFileContains(chart, "</a:t>", false))
         {
-              list.add(chart.getPath());
+            list.add(chart.getPath());
         }
 
         // get slides
         File slide = new File(dir, "ppt/slide.xml");
         if (slide.exists())
-        	list.add(slide.getAbsolutePath());
-        
+            list.add(slide.getAbsolutePath());
+
         File drawing = new File(dir, "ppt/drawing.xml");
         if (isFileContains(drawing, "</a:t>", false))
         {
-              list.add(drawing.getPath());
+            list.add(drawing.getPath());
         }
 
         // get notes if needed
@@ -2426,49 +2481,49 @@ public class OfficeXmlHelper implements IConverterHelper2
             File notesSlide = new File(dir, "ppt/notesSlide.xml");
             if (isFileContains(notesSlide, "</a:r>", false))
             {
-                  list.add(notesSlide.getPath());
+                list.add(notesSlide.getPath());
             }
         }
 
         // get master pages if needed
         if (m_isMasterTranslate)
         {
-        	File notesMaster = new File(dir, "ppt/slideMaster.xml");
-        	if (isFileContains(notesMaster, "</a:r>", false))
+            File notesMaster = new File(dir, "ppt/slideMaster.xml");
+            if (isFileContains(notesMaster, "</a:r>", false))
             {
-                  list.add(notesMaster.getPath());
+                list.add(notesMaster.getPath());
             }
         }
 
         // get slide layouts if needed
         if (m_isSlideLayoutTranslate)
         {
-        	File slideLayout = new File(dir, "ppt/slideLayout.xml");
-        	if (isFileContains(slideLayout, "</a:r>", false))
+            File slideLayout = new File(dir, "ppt/slideLayout.xml");
+            if (isFileContains(slideLayout, "</a:r>", false))
             {
-                  list.add(slideLayout.getPath());
+                list.add(slideLayout.getPath());
             }
-            	
+
         }
 
         // get master pages if needed
         if (m_isNotesMasterTranslate)
         {
-        	File notesMaster = new File(dir, "ppt/notesMaster.xml");
-        	if (isFileContains(notesMaster, "</a:r>", false))
+            File notesMaster = new File(dir, "ppt/notesMaster.xml");
+            if (isFileContains(notesMaster, "</a:r>", false))
             {
-                  list.add(notesMaster.getPath());
+                list.add(notesMaster.getPath());
             }
-            	
+
         }
 
         // get master pages if needed
         if (m_isHandoutMasterTranslate)
         {
-        	File handoutMaster = new File(dir, "ppt/handoutMaster.xml");
-        	if (isFileContains(handoutMaster, "</a:r>", false))
+            File handoutMaster = new File(dir, "ppt/handoutMaster.xml");
+            if (isFileContains(handoutMaster, "</a:r>", false))
             {
-                  list.add(handoutMaster.getPath());
+                list.add(handoutMaster.getPath());
             }
         }
     }
@@ -2494,9 +2549,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     private boolean isFileContains(File file, String keyText,
             boolean resultOfException)
     {
-    	if (!file.exists())
-    		return false;
-    	
+        if (!file.exists())
+            return false;
+
         boolean contains = false;
         try
         {

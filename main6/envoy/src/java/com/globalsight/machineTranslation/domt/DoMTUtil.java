@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.util.StringUtil;
 
 public class DoMTUtil
@@ -67,7 +68,7 @@ public class DoMTUtil
             Object[] params = new Object[]{ xliff };
             Object[] returning = (Object[]) client.execute("run", params);
 
-//            if (logger.isDebugEnabled())
+            if (MTHelper.isLogDetailedInfo(DoMTProxy.ENGINE_DOMT))
             {
                 logRunInfo(returning);
             }
@@ -223,7 +224,7 @@ public class DoMTUtil
                         Object[] content = (Object[]) value;
                         if (content.length > 0)
                         {
-                            logger.info("content :: " + content[0]);
+//                            logger.info("content :: " + content[0]);
                         }
                         else
                         {
@@ -271,6 +272,10 @@ public class DoMTUtil
                         {
                             logger.info("'" + key + "' job list is empty!");
                         }
+                    }
+                    else if ("substatus".equalsIgnoreCase(key))
+                    {
+                        // ignore this as it is confused.
                     }
                     else
                     {

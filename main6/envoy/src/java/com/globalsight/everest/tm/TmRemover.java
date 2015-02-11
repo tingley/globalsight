@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -46,6 +47,8 @@ import com.globalsight.util.progress.ProgressReporter;
 public class TmRemover extends MultiCompanySupportedThread implements
         ProcessMonitor, ProgressReporter, Serializable
 {
+    private static final long serialVersionUID = -5050592130567158673L;
+
     static private final Logger c_logger = Logger.getLogger(TmRemover.class);
 
     // private long m_tmId;
@@ -82,13 +85,14 @@ public class TmRemover extends MultiCompanySupportedThread implements
             super.run();
 
             setPercentage(0);
-            ArrayList<String> dependencyTms = new ArrayList<String>();
+            ArrayList<String> dependencyTmpProfileNames = new ArrayList<String>();
             ArrayList<String> nonDependencyTms = new ArrayList<String>(tmIds);
 
-            getDependentTmProfileNames(dependencyTms, nonDependencyTms);
+            getDependentTmProfileNames(dependencyTmpProfileNames,
+                    nonDependencyTms);
 
-            if (dependencyTms.size() > 0)
-                setDependencyError(dependencyTms);
+            if (dependencyTmpProfileNames.size() > 0)
+                setDependencyError(dependencyTmpProfileNames);
             int size = nonDependencyTms.size();
             long tmId = -1l;
             if (size > 0)
@@ -318,7 +322,8 @@ public class TmRemover extends MultiCompanySupportedThread implements
         throw new InterruptException();
     }
 
-    private void getDependentTmProfileNames(ArrayList<String> dependencyTms,
+    private void getDependentTmProfileNames(
+            ArrayList<String> dependencyTmpProfileNames,
             ArrayList<String> nonDependencyTms) throws Exception
     {
         Collection tmProfiles = ServerProxy.getProjectHandler()
@@ -326,33 +331,28 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
         String tmp = null;
         long tmpTmId = -1l;
-        Tm tm = null;
-        for (Iterator itTmProfiles = tmProfiles.iterator(); itTmProfiles
-                .hasNext();)
+        for (Iterator itTmProfiles = tmProfiles.iterator(); itTmProfiles.hasNext();)
         {
-            TranslationMemoryProfile profile = (TranslationMemoryProfile) itTmProfiles
-                    .next();
-
+            TranslationMemoryProfile profile =
+                    (TranslationMemoryProfile) itTmProfiles.next();
             tmpTmId = profile.getProjectTmIdForSave();
             // check with the Tm to save
             if (tmIds.contains(String.valueOf(tmpTmId)))
             {
-                ProjectTM projectTM = ServerProxy.getProjectHandler()
-                        .getProjectTMById(tmpTmId, false);
-                dependencyTms.add(projectTM.getName());
+                dependencyTmpProfileNames.add(profile.getName());
                 nonDependencyTms.remove(String.valueOf(tmpTmId));
                 continue;
             }
 
             // check with the Tm to leverage from
-            Collection tms = profile.getProjectTMsToLeverageFrom();
-            for (Iterator itTms = tms.iterator(); itTms.hasNext();)
+            Vector<LeverageProjectTM> tms = profile
+                    .getProjectTMsToLeverageFrom();
+            for (LeverageProjectTM lptm : tms)
             {
-                LeverageProjectTM lptm = (LeverageProjectTM) itTms.next();
                 tmp = String.valueOf(lptm.getProjectTmId());
                 if (tmIds.contains(tmp))
                 {
-                    dependencyTms.add(profile.getName());
+                    dependencyTmpProfileNames.add(profile.getName());
                     nonDependencyTms.remove(tmp);
                     break;
                 }

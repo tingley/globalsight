@@ -232,6 +232,14 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
             }
         }
     }
+    
+    public void removeTuvsForLocale(GlobalSightLocale locale)
+    {
+        if (m_tuvs != null && locale != null && m_tuvs.containsKey(locale))
+        {
+            m_tuvs.remove(locale);
+        }
+    }
 
     public void addProp(ProjectTmTuTProp p_p)
     {

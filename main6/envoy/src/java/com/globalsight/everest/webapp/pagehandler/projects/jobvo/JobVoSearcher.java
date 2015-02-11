@@ -26,15 +26,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
@@ -49,9 +48,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
-import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -132,6 +129,10 @@ public abstract class JobVoSearcher implements WebAppConstants
             {
                 case JobVoComparator.WORD_COUNT:
                     setWordCount(jobVos);
+                    break;
+
+                case JobVoComparator.EST_COMPLETION_DATE:
+                    setPlannedDate(jobVos, ts);
                     break;
 
                 case JobVoComparator.PLANNED_DATE:
@@ -321,7 +322,7 @@ public abstract class JobVoSearcher implements WebAppConstants
         else
         {
             // Get search from session
-            return getSessionSearchParams(request, session, sp, searchType);
+            return getSessionSearchParams(sessionMgr, session, sp, searchType);
         }
     }
 
@@ -330,7 +331,6 @@ public abstract class JobVoSearcher implements WebAppConstants
             JobSearchParameters sp, String userId, String searchType)
             throws EnvoyServletException
     {
-        StringBuffer jobSearch = new StringBuffer();
         try
         {
             // set parameters
@@ -338,19 +338,10 @@ public abstract class JobVoSearcher implements WebAppConstants
             // name
             String buf = (String) request
                     .getParameter(JobSearchConstants.NAME_FIELD);
-            if (buf.trim().length() != 0)
+            if (buf != null && !buf.equals("null") && buf.trim().length() != 0)
             {
                 sp.setJobName(buf);
-                sp.setJobNameCondition((String) request
-                        .getParameter(JobSearchConstants.NAME_OPTIONS));
-                jobSearch
-                        .append(JobSearchConstants.NAME_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.NAME_OPTIONS));
-                jobSearch.append(":");
-                jobSearch.append(JobSearchConstants.NAME_FIELD + "=" + buf);
-                jobSearch.append(":");
+                sp.setJobNameCondition(SearchCriteriaParameters.CONTAINS);
             }
 
             // status
@@ -379,199 +370,44 @@ public abstract class JobVoSearcher implements WebAppConstants
                 }
             }
             sp.setJobState(list);
-            jobSearch.append(JobSearchConstants.STATUS_OPTIONS + "=" + status);
-            jobSearch.append(":");
-
-            if (searchType.equals(JobSearchConstants.MINI_JOB_SEARCH_COOKIE))
-            {
-                String cookieName = JobSearchConstants.MINI_JOB_SEARCH_COOKIE
-                        + userId.hashCode();
-                Cookie cookie = new Cookie(cookieName, jobSearch.toString());
-                sessionMgr.setAttribute(cookieName, cookie);
-                return sp;
-            }
 
             // id
             buf = (String) request.getParameter(JobSearchConstants.ID_FIELD);
-            if (buf.trim().length() != 0)
+            if (buf != null && !buf.equals("null") && buf.trim().length() != 0)
             {
                 sp.setJobId(buf);
-                sp.setJobIdCondition(request
-                        .getParameter(JobSearchConstants.ID_OPTIONS));
-                jobSearch.append(JobSearchConstants.ID_OPTIONS + "="
-                        + request.getParameter(JobSearchConstants.ID_OPTIONS));
-                jobSearch.append(":");
-                jobSearch.append(JobSearchConstants.ID_FIELD + "=" + buf);
-                jobSearch.append(":");
+                String idOption = (String) request
+                        .getParameter(JobSearchConstants.ID_OPTIONS);
+                if (idOption.equals("GT"))
+                {
+                    sp.setJobIdCondition(SearchCriteriaParameters.GREATER_THAN);
+                }
+                else if (idOption.equals("LT"))
+                {
+
+                    sp.setJobIdCondition(SearchCriteriaParameters.LESS_THAN);
+                }
+                else
+                {
+                    sp.setJobIdCondition(SearchCriteriaParameters.EQUALS);
+                }
             }
 
             // project
             buf = (String) request
                     .getParameter(JobSearchConstants.PROJECT_OPTIONS);
-            if (!buf.equals("-1"))
+            if (buf != null && !buf.equals("null") && !buf.equals("-1"))
             {
                 sp.setProjectId(buf);
-                jobSearch
-                        .append(JobSearchConstants.PROJECT_OPTIONS + "=" + buf);
-                jobSearch.append(":");
             }
 
             // source locale
             buf = (String) request.getParameter(JobSearchConstants.SRC_LOCALE);
-            if (!buf.equals("-1"))
+            if (buf != null && !buf.equals("null") && !buf.equals("-1"))
             {
                 sp.setSourceLocale(ServerProxy.getLocaleManager()
                         .getLocaleById(Long.parseLong(buf)));
-                jobSearch.append(JobSearchConstants.SRC_LOCALE + "=" + buf);
-                jobSearch.append(":");
             }
-
-            // target locale
-            buf = (String) request.getParameter(JobSearchConstants.TARG_LOCALE);
-            if (!buf.equals("-1"))
-            {
-                sp.setTargetLocale(ServerProxy.getLocaleManager()
-                        .getLocaleById(Long.parseLong(buf)));
-                jobSearch.append(JobSearchConstants.TARG_LOCALE + "=" + buf);
-                jobSearch.append(":");
-            }
-
-            // priority
-            buf = (String) request
-                    .getParameter(JobSearchConstants.PRIORITY_OPTIONS);
-            if (!buf.equals("-1"))
-            {
-                sp.setPriority(buf);
-                jobSearch.append(JobSearchConstants.PRIORITY_OPTIONS + "="
-                        + buf);
-                jobSearch.append(":");
-            }
-
-            // Creation Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_START);
-            if (buf.trim().length() != 0)
-            {
-                sp.setCreationStart(new Integer(buf));
-                sp.setCreationStartCondition(request
-                        .getParameter(JobSearchConstants.CREATION_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.CREATION_START + "=" + buf);
-                jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.CREATION_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.CREATION_START_OPTIONS));
-                jobSearch.append(":");
-            }
-
-            // Creation Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_END);
-            if (buf.trim().length() != 0)
-            {
-                sp.setCreationEnd(new Integer(buf));
-                jobSearch.append(JobSearchConstants.CREATION_END + "=" + buf);
-                jobSearch.append(":");
-            }
-
-            // Creation Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-            if (!buf.equals("-1"))
-            {
-                sp.setCreationEndCondition(buf);
-                jobSearch.append(JobSearchConstants.CREATION_END_OPTIONS + "="
-                        + buf);
-                jobSearch.append(":");
-            }
-
-            // Completion Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_START);
-            if (buf.trim().length() != 0)
-            {
-                sp.setEstCompletionStart(new Integer(buf));
-                sp.setEstCompletionStartCondition(request
-                        .getParameter(JobSearchConstants.EST_COMPLETION_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_START + "="
-                        + buf);
-                jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.EST_COMPLETION_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.EST_COMPLETION_START_OPTIONS));
-                jobSearch.append(":");
-            }
-
-            // Completion Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_END);
-            if (buf.trim().length() != 0)
-            {
-                sp.setEstCompletionEnd(new Integer(buf));
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_END + "="
-                        + buf);
-                jobSearch.append(":");
-            }
-
-            // Completion Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_END_OPTIONS);
-            if (!buf.equals("-1"))
-            {
-                sp.setEstCompletionEndCondition(buf);
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_END_OPTIONS
-                        + "=" + buf);
-                jobSearch.append(":");
-            }
-
-            // Creation Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_START);
-            if (buf.trim().length() != 0)
-            {
-                sp.setExportDateStart(new Integer(buf));
-                sp.setExportDateStartOptions(request
-                        .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_START + "="
-                        + buf);
-                jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.EXPORT_DATE_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
-                jobSearch.append(":");
-            }
-
-            // Creation Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_END);
-            if (buf.trim().length() != 0)
-            {
-                sp.setExportDateEnd(new Integer(buf));
-                jobSearch
-                        .append(JobSearchConstants.EXPORT_DATE_END + "=" + buf);
-                jobSearch.append(":");
-            }
-
-            // Creation Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_END_OPTIONS);
-            if (!buf.equals("-1"))
-            {
-                sp.setExportDateEndOptions(buf);
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_END_OPTIONS
-                        + "=" + buf);
-                jobSearch.append(":");
-            }
-
-            String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE
-                    + userId.hashCode();
-            Cookie cookie = new Cookie(cookieName, jobSearch.toString());
-            sessionMgr.setAttribute(cookieName, cookie);
         }
         catch (Exception e)
         {
@@ -582,165 +418,78 @@ public abstract class JobVoSearcher implements WebAppConstants
     }
 
     private JobSearchParameters getSessionSearchParams(
-            HttpServletRequest request, HttpSession session,
+            SessionManager sessionMgr, HttpSession session,
             JobSearchParameters sp, String searchType)
             throws EnvoyServletException
     {
         try
         {
-            Cookie cookie = JobSearchHandlerHelper.getJobSearchCookie(session,
-                    request, searchType);
-            if (cookie == null)
-                return sp;
-
-            String cookieValue = URLDecoder.decode(cookie.getValue());
-            StringTokenizer strtok = new StringTokenizer(cookieValue, ":");
-            while (strtok.hasMoreTokens())
+            String temp = (String) sessionMgr
+                    .getMyjobsAttribute("jobNameFilter");
+            if (!temp.equals(""))
             {
-                String key = "";
-                String value = "";
-                try
+                sp.setJobName(temp);
+                sp.setJobNameCondition(SearchCriteriaParameters.CONTAINS);
+            }
+
+            temp = (String) sessionMgr.getMyjobsAttribute("jobIdFilter");
+            if (!temp.equals(""))
+            {
+                sp.setJobId(temp);
+                temp = (String) sessionMgr.getMyjobsAttribute("jobIdOption");
+                if (temp.equals("GT"))
                 {
-                    String tok = strtok.nextToken();
-                    int idx = tok.indexOf("=");
-                    key = tok.substring(0, idx);
-                    value = tok.substring(idx + 1);
+                    sp.setJobIdCondition(SearchCriteriaParameters.GREATER_THAN);
                 }
-                catch (Exception e)
+                else if (temp.equals("LT"))
                 {
-                    continue;
+                    sp.setJobIdCondition(SearchCriteriaParameters.LESS_THAN);
                 }
-                if (key.equals(JobSearchConstants.NAME_FIELD))
+                else
                 {
-                    if (!value.equals(""))
-                        sp.setJobName(value);
-                }
-                else if (key.equals(JobSearchConstants.NAME_OPTIONS))
-                {
-                    sp.setJobNameCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.ID_FIELD))
-                {
-                    if (!value.equals(""))
-                        sp.setJobId(value);
-                }
-                else if (key.equals(JobSearchConstants.ID_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setJobIdCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.STATUS_OPTIONS))
-                {
-                    List<String> list = new ArrayList<String>();
-                    if (value.equals(Job.ALLSTATUS))
-                    {
-                        list.addAll(Job.ALLSTATUSLIST);
-                        list.addAll(Job.GRAY_STATUS_LIST);
-                    }
-                    else
-                    {
-                        if (value.equals(Job.PENDING))
-                        {
-                            list.addAll(Job.PENDING_STATUS_LIST);
-                        }
-                        else if (value.equals(Job.EXPORTED))
-                        {
-                            list.add(Job.EXPORTED);
-                            list.add(Job.EXPORT_FAIL);
-                        }
-                        else
-                        {
-                            list.add(value);
-                        }
-                    }
-                    sp.setJobState(list);
-                }
-                else if (key.equals(JobSearchConstants.PROJECT_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setProjectId(value);
-                }
-                else if (key.equals(JobSearchConstants.SRC_LOCALE))
-                {
-                    if (!value.equals("-1"))
-                        sp.setSourceLocale(ServerProxy.getLocaleManager()
-                                .getLocaleById(Long.parseLong(value)));
-                }
-                else if (key.equals(JobSearchConstants.TARG_LOCALE))
-                {
-                    if (!value.equals("-1"))
-                        sp.setTargetLocale(ServerProxy.getLocaleManager()
-                                .getLocaleById(Long.parseLong(value)));
-                }
-                else if (key.equals(JobSearchConstants.PRIORITY_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setPriority(value);
-                }
-                else if (key.equals(JobSearchConstants.CREATION_START))
-                {
-                    if (!value.equals(""))
-                        sp.setCreationStart(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.CREATION_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setCreationStartCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.CREATION_END))
-                {
-                    if (!value.equals(""))
-                        sp.setCreationEnd(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.CREATION_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setCreationEndCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EST_COMPLETION_START))
-                {
-                    if (!value.equals(""))
-                        sp.setEstCompletionStart(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EST_COMPLETION_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setEstCompletionStartCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EST_COMPLETION_END))
-                {
-                    if (!value.equals(""))
-                        sp.setEstCompletionEnd(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EST_COMPLETION_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setEstCompletionEndCondition(value);
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_START))
-                {
-                    if (!value.equals(""))
-                        sp.setExportDateStart(new Integer(value));
-                }
-                else if (key
-                        .equals(JobSearchConstants.EXPORT_DATE_START_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setExportDateStartOptions(value);
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_END))
-                {
-                    if (!value.equals(""))
-                        sp.setExportDateEnd(new Integer(value));
-                }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_END_OPTIONS))
-                {
-                    if (!value.equals("-1"))
-                        sp.setExportDateEndOptions(value);
+                    sp.setJobIdCondition(SearchCriteriaParameters.EQUALS);
                 }
             }
+
+            temp = (String) sessionMgr.getMyjobsAttribute("lastState");
+            List<String> list = new ArrayList<String>();
+            if (temp.equals(Job.ALLSTATUS))
+            {
+                list.addAll(Job.ALLSTATUSLIST);
+                list.addAll(Job.GRAY_STATUS_LIST);
+            }
+            else
+            {
+                if (temp.equals(Job.PENDING))
+                {
+                    list.addAll(Job.PENDING_STATUS_LIST);
+                }
+                else if (temp.equals(Job.EXPORTED))
+                {
+                    list.add(Job.EXPORTED);
+                    list.add(Job.EXPORT_FAIL);
+                }
+                else
+                {
+                    list.add(temp);
+                }
+            }
+            sp.setJobState(list);
+
+            temp = (String) sessionMgr.getMyjobsAttribute("jobProjectFilter");
+            if (!temp.equals("-1"))
+            {
+                sp.setProjectId((String) sessionMgr
+                        .getMyjobsAttribute("jobProjectFilter"));
+            }
+
+            temp = (String) sessionMgr.getMyjobsAttribute("sourceLocaleFilter");
+            if (!temp.equals("-1"))
+            {
+                sp.setSourceLocale(ServerProxy.getLocaleManager()
+                        .getLocaleById(Long.parseLong(temp)));
+            }
+
             return sp;
         }
         catch (Exception e)
@@ -797,11 +546,7 @@ public abstract class JobVoSearcher implements WebAppConstants
         String searchType = (String) request.getParameter("searchType");
         if (searchType == null)
         {
-            searchType = (String) session.getAttribute("searchType");
-        }
-        else
-        {
-            session.setAttribute("searchType", searchType);
+            searchType = "";
         }
 
         sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
@@ -814,28 +559,47 @@ public abstract class JobVoSearcher implements WebAppConstants
 
         // Gets job
         List<JobVo> jobVos;
-        if ("stateOnly".equals(searchType))
-        {
-            jobVos = getJobVos(ts, null);
-        }
-        else
-        {
-            User user = (User) sessionMgr.getAttribute(USER);
-            JobSearchParameters searchParams = getSearchParams(request,
-                    session, user, searchType);
-            jobVos = getJobVos(ts, searchParams);
-        }
+        User user = (User) sessionMgr.getAttribute(USER);
+        JobSearchParameters searchParams = getSearchParams(request, session,
+                user, searchType);
+        // if ("stateOnly".equals(searchType))
+        // {
+        // jobVos = getJobVos(ts, null);
+        // }
+        // else
+        // {
+        jobVos = getJobVos(ts, searchParams);
+        // }
 
         String criteria = request.getParameter(JobManagementHandler.SORT_PARAM);
         setSortValues(jobVos, session, criteria, ts);
         sortJobVos(criteria, session, uiLocale, jobVos);
         int numOfJobs = jobVos.size();
 
-        int jobListStart = determineStartIndex(request, session, sessionMgr);
-        int jobListEnd = (jobListStart + JobManagementHandler.s_jobsPerPage) > numOfJobs ? numOfJobs
-                : (jobListStart + JobManagementHandler.s_jobsPerPage);
+        int numPerPage = 20;
+        if (sessionMgr.getMyjobsAttribute("numPerPage") != null)
+            numPerPage = (Integer) sessionMgr.getMyjobsAttribute("numPerPage");
+        int jobListStart = determineStartIndex(request, sessionMgr);
+        int jobListEnd = (jobListStart + numPerPage) > numOfJobs ? numOfJobs
+                : (jobListStart + numPerPage);
+        if (jobListStart > jobListEnd)
+        {
+            jobListStart = jobListEnd / numPerPage * numPerPage;
+            if (jobListEnd % numPerPage == 0)
+            {
+                jobListStart = jobListStart - numPerPage;
+            }
+        }
+        else if (jobListStart == jobListEnd)
+        {
+            jobListStart = (jobListEnd / numPerPage - 1) * numPerPage;
+        }
 
-        List<JobVo> nJobVo = jobVos.subList(jobListStart, jobListEnd);
+        List<JobVo> nJobVo = new ArrayList<JobVo>();
+        if (jobListEnd > 0)
+        {
+            nJobVo = jobVos.subList(jobListStart, jobListEnd);
+        }
         setWordCount(nJobVo);
         setPlannedDate(nJobVo, ts);
         setTranslateCompletionDate(nJobVo, ts);
@@ -875,13 +639,13 @@ public abstract class JobVoSearcher implements WebAppConstants
     }
 
     private int determineStartIndex(HttpServletRequest p_request,
-            HttpSession p_session, SessionManager p_sm)
+            SessionManager p_sm)
     {
         int jobListStart;
         try
         {
-            String jobListStartStr = (String) p_request
-                    .getParameter(JobManagementHandler.JOB_LIST_START);
+            String jobListStartStr = (String) p_sm
+                        .getMyjobsAttribute("jobListStart");
 
             jobListStart = Integer.parseInt(jobListStartStr);
             p_sm.setAttribute(JobManagementHandler.JOB_LIST_START, new Integer(

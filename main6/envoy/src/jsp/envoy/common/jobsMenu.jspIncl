@@ -45,7 +45,6 @@
 var myJobsMenu = new WebFXMenu;
 
 // search job
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_search_jobs")%>", "javascript:goToUrl('<%=jobsSearchUrl%>');", ""));
 
 // last job
 <%
@@ -101,8 +100,6 @@ myJobsMenu.add(new WebFXMenuItem("<%=menuLabel%>", "javascript:goToUrl('<%=lastJ
 <%
 }
 %>
-
-myJobsMenu.add(new WebFXMenuSeparator());
 
 // Pending, etc
 myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_pending")%>", "javascript:goToUrl('<%=jobsPendingUrl%>');", ""));

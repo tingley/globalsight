@@ -102,6 +102,8 @@ public interface BaseTmTu
      *            Tuv to be removed
      */
     public void removeTuv(BaseTmTuv p_tuv);
+    
+    public void removeTuvsForLocale(GlobalSightLocale locale);
 
     /**
      * Get a first Tuv in a Tuv array in a given locale.

@@ -1057,8 +1057,8 @@ public class LocaleManagerLocal implements LocaleManager
         {
             StringBuffer hql = new StringBuffer();
             hql.append(
-                    "select distinct lp.target from LocalePair lp, WorkflowTemplateInfo wf, ProjectImpl pj ")
-                    .append(" where lp.target=wf.targetLocale and wf.project=pj.id and lp.isActive ='Y' and wf.isActive='Y' and wf.sourceLocale.id = :sId and lp.source.id = :sId and pj.id= :pId");
+                    "select distinct wf.targetLocale from WorkflowTemplateInfo wf")
+                    .append(" where wf.project.id = :pId and wf.isActive='Y' and wf.sourceLocale.id = :sId");
 
             HashMap map = new HashMap();
             map.put("sId", p_sourceLocale.getIdAsLong());
@@ -1067,7 +1067,7 @@ public class LocaleManagerLocal implements LocaleManager
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
-                hql.append(" and lp.companyId = :companyId");
+                hql.append(" and wf.companyId = :companyId");
                 map.put("companyId", Long.parseLong(currentId));
             }
 

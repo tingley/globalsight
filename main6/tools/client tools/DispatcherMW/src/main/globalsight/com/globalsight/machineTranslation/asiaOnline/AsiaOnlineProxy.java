@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -163,18 +164,17 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
             resultPath.mkdirs();
         }
         // Generate the XLIFF file
-        HashMap paramMap = getMtParameterMap();
-        long sourcePageID = ((Long)paramMap.get(SOURCE_PAGE_ID)).longValue();
-        File originalFile = new File(originalPath, sourcePageID + "_1.xlf");
-        File resultFile = new File(resultPath, sourcePageID + "_1.xlf");
+        long randomLong = (new Date()).getTime();
+        File originalFile = new File(originalPath, randomLong + "_1.xlf");
+        File resultFile = new File(resultPath, randomLong + "_1.xlf");
         // If this has been existed, this should be the second time to translate
         // full text values, so ensure the files won't be overridden.
         if (originalFile.exists())
         {
-            originalFile = new File(originalPath, sourcePageID + "_2.xlf");
-            resultFile = new File(resultPath, sourcePageID + "_2.xlf");
+            originalFile = new File(originalPath, randomLong + "_2.xlf");
+            resultFile = new File(resultPath, randomLong + "_2.xlf");
         }
-		
+
         try 
         {
             FileOutputStream fos = new FileOutputStream(originalFile);

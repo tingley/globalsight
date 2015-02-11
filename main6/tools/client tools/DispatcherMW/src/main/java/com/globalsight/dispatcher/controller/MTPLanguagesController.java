@@ -17,20 +17,15 @@
 package com.globalsight.dispatcher.controller;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -141,39 +136,6 @@ public class MTPLanguagesController implements AppConstants
 
         logger.info("Remove MTProfile:" + mtpLangIDStr + " BY " + p_req.getRemoteHost());
         return "redirect:main.htm";
-    }
-    
-    @RequestMapping(value = "/getLanguagesByAccountName")
-    public void getLanguage(HttpServletRequest p_request, HttpServletResponse p_response) throws JSONException, IOException
-    {
-        JSONArray jsonArray = new JSONArray();
-        String accountName = p_request.getParameter(JSONPN_ACCOUNT_NAME); 
-        Set<MTPLanguage> langs = mtpLangDAO.getMTPLanguageByAccount(accountName);
-        for(MTPLanguage lang : langs)
-        {
-            jsonArray.put(getJSONObjec(lang));
-        }
-        
-        p_response.getWriter().write(jsonArray.toString());
-    }
-    
-    public JSONObject getJSONObjec(MTPLanguage p_lang)
-    {
-        JSONObject obj = new JSONObject();
-        try
-        {
-            obj.put("id", p_lang.getId());
-            obj.put("name", p_lang.getName());
-            obj.put("accountName", p_lang.getAccountName());
-            obj.put("sourceLocale", p_lang.getSrcLocale());
-            obj.put("targetLocale", p_lang.getTrgLocale());
-            obj.put("MTProfileName", p_lang.getMtProfile().getMtProfileName());            
-        }
-        catch (Exception e)
-        {
-        }
-        
-        return obj;
     }
     
     // Check whether the MTPLanguage Name already exist.

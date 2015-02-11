@@ -22,6 +22,7 @@
   <book name="File Profiles" >
     <item name="File Profiles Main Screen" url="Data_Sources/File_Profiles/File_Profiles_Main_Screen.htm" />
     <item name="Create/Edit File Profile" url="Data_Sources/File_Profiles/Create_Modify_File_Profile.htm" />
+    <item name="Filter Configuration Import Screen" url="Data_Sources/File_Profiles/Filter_Configuration_Import_Screen.htm" />
   </book>
   <book name="File Extensions" >
     <item name="File Extensions Main Screen" url="Data_Sources/File_Extensions/File_Extensions_Main_Screen.htm" />

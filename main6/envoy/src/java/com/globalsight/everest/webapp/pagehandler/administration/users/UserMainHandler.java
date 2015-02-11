@@ -74,7 +74,9 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
 
@@ -311,6 +313,8 @@ public class UserMainHandler extends PageHandler
     private void exportUsers(HttpServletRequest request,
             HttpServletResponse response, SessionManager sessionMgr)
     {
+        FileOutputStream outStream = null;
+        File exportedXmlFile = null;
         try
         {
             Element root = new Element("UserInfo");
@@ -323,6 +327,8 @@ public class UserMainHandler extends PageHandler
                 Element userNode = new Element("User");
                 // ==========================basic info=======================
                 Element basicInfoNode = new Element("BasicInfo");
+                basicInfoNode.addContent(new Element("UserID").setText(user
+                        .getUserId()));
                 basicInfoNode.addContent(new Element("UserName").setText(user
                         .getUserName()));
                 basicInfoNode.addContent(new Element("FirstName").setText(user
@@ -370,15 +376,16 @@ public class UserMainHandler extends PageHandler
                         .getDefaultRolesByUser(userId);
                 if (defaultRoles != null && defaultRoles.size() > 0)
                 {
+                    HashMap<Long, String> allLocalesMap =  getAllLocales();
                     Element defaultRolesNode = new Element("DefaultRoles");
                     for (UserDefaultRole userDefaultRole : defaultRoles)
                     {
                         Element defaultRoleNode = new Element("DefaultRole");
                         defaultRoleNode.addContent(new Element("SourceLocale")
-                                .setText(String.valueOf(userDefaultRole
+                                .setText(allLocalesMap.get(userDefaultRole
                                         .getSourceLocaleId())));
                         defaultRoleNode.addContent(new Element("TargetLocale")
-                                .setText(String.valueOf(userDefaultRole
+                                .setText(allLocalesMap.get(userDefaultRole
                                         .getTargetLocaleId())));
 
                         Set activitys = userDefaultRole.getActivities();
@@ -546,22 +553,53 @@ public class UserMainHandler extends PageHandler
                 root.addContent(userNode);
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             String fileName = "User_information_" + sdf.format(new Date())
                     + ".xml";
             XMLOutputter XMLOut = new XMLOutputter();
             String filePath = AmbFileStoragePathUtils.getFileStorageDirPath()
                     + File.separator + "tmp";
-            File file = new File(filePath, fileName);
-            file.getParentFile().mkdirs();
-            XMLOut.output(Doc, new FileOutputStream(file));
+            exportedXmlFile = new File(filePath, fileName);
+            exportedXmlFile.getParentFile().mkdirs();
+            outStream = new FileOutputStream(exportedXmlFile);
+            XMLOut.output(Doc, outStream);
 
-            ExportUtil.writeToResponse(response, file, fileName);
+            ExportUtil.writeToResponse(response, exportedXmlFile, fileName);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
         }
+        finally
+        {
+            try
+            {
+                if (outStream != null)
+                    outStream.close();
+            }
+            catch (IOException e)
+            {
+
+            }
+
+            FileUtil.deleteFile(exportedXmlFile);
+        }
+    }
+
+    /**
+     * Get a locale ID to LANG_COUNTRY code map for performance purpose.
+     */
+    private HashMap<Long, String> getAllLocales() throws Exception
+    {
+        HashMap<Long, String> result = new HashMap<Long, String>();
+        Vector allLocales = ServerProxy.getLocaleManager()
+                .getAvailableLocales();
+        for (Iterator it = allLocales.iterator(); it.hasNext();)
+        {
+            GlobalSightLocale gsl = (GlobalSightLocale) it.next();
+            result.put(gsl.getIdAsLong(), gsl.toString());
+        }
+        return result;
     }
 
     /**
@@ -1045,8 +1083,6 @@ public class UserMainHandler extends PageHandler
                 : uProjectFilter);
         sessionMgr.setAttribute("uPermissionFilter",
                 uPermissionFilter == null ? "" : uPermissionFilter);
-
-
     }
 
 }

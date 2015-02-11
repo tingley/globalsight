@@ -402,27 +402,26 @@ public class GxmlElement
         String bptI = "-1";
         for (int i = 0; i < m_childElements.size(); i++)
         {
-            
-            GxmlElement child = (GxmlElement)m_childElements.get(i);
+            GxmlElement child = (GxmlElement) m_childElements.get(i);
             if (!inInternal && BPT == child.getType())
             {
                 inInternal = "yes".equals(child.getAttribute("internal"));
-                
+
                 if (inInternal)
                 {
                     bptI = child.getAttribute("i");
                 }
             }
-            
+
             if (!inInternal && TEXT_NODE == child.getType())
             {
                 someChildElmts.add(child);
             }
-            
+
             if (inInternal && EPT == child.getType())
             {
                 String eptI = child.getAttribute("i");
-                if (bptI.equals(eptI))
+                if (bptI != null && bptI.equals(eptI))
                 {
                     inInternal = false;
                 }

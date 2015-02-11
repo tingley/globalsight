@@ -45,8 +45,23 @@
 ResourceBundle bundle = PageHandler.getBundle(session);
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
+  
+String uiLocale = (String) sessionMgr.getAttribute("uiLocale");
 
+String tbCompanyFilter = (String) sessionMgr.getAttribute("tbCompanyFilter");
+if (tbCompanyFilter == null || tbCompanyFilter.trim().length() == 0)
+{
+    tbCompanyFilter = "";
+}
+String tbNameFilter = (String) sessionMgr.getAttribute("tbNameFilter");
+if (tbNameFilter == null || tbNameFilter.trim().length() == 0)
+{
+    tbNameFilter = "";
+}
 
+PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+
+String urlSelf=self.getPageURL();
 String urlDefinition = definition.getPageURL();
 String urlDelete = delete.getPageURL();
 String urlImport = _import.getPageURL();
@@ -90,6 +105,7 @@ if(sessionMgr.getAttribute("projectsByTermbaseDepended") != null) {
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <script src="/globalsight/includes/xmlextras.js"></script>
 <SCRIPT src="/globalsight/envoy/terminology/management/protocol.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -125,6 +141,18 @@ function enableButtons()
     if (termbaseForm.usersBtn)
     	termbaseForm.usersBtn.disabled = false;
 }
+function buttonManagement()
+{
+    var count = $("input[name='radioBtn']:checked").length;
+    if (count == 1)
+    {
+        $("#idRemove").attr("disabled", false);
+    }
+    else
+    {
+        $("#idRemove").attr("disabled", true);
+    }
+}
 
 function findSelectedRadioButton()
 {
@@ -157,11 +185,23 @@ function findSelectedRadioButton()
            }
        }
    }
-
    return id;
 }
 
+function handleSelectAll()
+{
+    var ch = $("#selectAll").attr("checked");
+    if (ch == "checked")
+    {
+        $("[name='radioBtn']").attr("checked", true);
+    }
+    else
+    {
+        $("[name='radioBtn']").attr("checked", false);
+    }
 
+    buttonManagement();
+}
 function newTermbase()
 {
     window.location.href = '<%=urlDefinition +
@@ -178,20 +218,13 @@ function modifyUsers()
     termbaseForm.submit();
 }
 
-function modifyTermbase()
+function modifyTermbase(termbaseId)
 {
-  var id = findSelectedRadioButton();
-  if (!id)
-  {
-    alert("<%=EditUtil.toJavascript(bundle.getString("lb_terminology_select_termbase_to_edit"))%>");
-  }
-  else
-  {
-	  termbaseForm.action = '<%=urlDefinition +
-	      "&" + WebAppConstants.TERMBASE_ACTION +
-	      "=" + WebAppConstants.TERMBASE_ACTION_MODIFY%>';
+    termbaseForm.action = '<%=urlDefinition + 
+            "&" + WebAppConstants.TERMBASE_ACTION + 
+            "=" + WebAppConstants.TERMBASE_ACTION_MODIFY + 
+            "&radioBtn="%>' + termbaseId;
       termbaseForm.submit();
-  }
 }
 
 function cloneTermbase()
@@ -209,7 +242,7 @@ function cloneTermbase()
       termbaseForm.submit();
   }
 }
-
+     
 function removeTermbase()
 {
   var id = findSelectedRadioButton();
@@ -365,6 +398,17 @@ function doLoad()
   loadGuides();
 
 }
+
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+        termbaseForm.action = "<%=urlSelf%>";
+        termbaseForm.submit();
+    }
+}
 //York added on 2009-03-19
 function searchTerms(){
 	var url = '<%=urlTermSearch +
@@ -391,7 +435,7 @@ function searchTerms(){
 <P>
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
   <TR>
-    <TD WIDTH=538><div>
+    <TD WIDTH=100%><div>
         <%
         if(deps != null&&deps.length()>0) {
             out.println(deps);
@@ -405,7 +449,7 @@ function searchTerms(){
   </TR>
 </TABLE>
 <FORM NAME=termbaseForm method="post">
-        <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+        <table cellpadding=0 cellspacing=0 border=0 width="100%" class="standardText">
         <tr valign="top">
           <td align="right">
             <amb:tableNav bean="namelist" key="<%=WebAppConstants.TERMBASE_TB_KEY%>"
@@ -416,19 +460,24 @@ function searchTerms(){
           <td>
           <amb:table bean="namelist" id="tb" key="<%=WebAppConstants.TERMBASE_TB_KEY%>"
                  dataClass="com.globalsight.terminology.TermbaseInfo" pageUrl="self"
-                 emptyTableMsg="msg_no_termbases" >
-            <amb:column label="" width="20px">
-                <input type="radio" name="radioBtn" value="<%=tb.getTermbaseId()%>"
-                    onclick="enableButtons()">
-            </amb:column>
-            <amb:column label="lb_name" sortBy="<%=TermbaseInfoComparator.NAME%>">
-                <%=tb.getName()%>
-            </amb:column>
+                 emptyTableMsg="msg_no_termbases" hasFilter="true">                
+            <amb:column label="checkbox"  width="20px">
+                <input type="checkbox" name="radioBtn" value="<%=tb.getTermbaseId()%>"
+                    onclick="enableButtons();buttonManagement()">
+            </amb:column>     
+            <amb:column label="lb_name" sortBy="<%=TermbaseInfoComparator.NAME%>" filter="tbNameFilter"  filterValue="<%=tbNameFilter%>" width="10%">  
+            <%
+                    if (userPermissions.getPermissionFor(Permission.TERMINOLOGY_EDIT)) { %>        
+            <a href='javascript:void(0);' title="<%=bundle.getString("helper_text_tb_modify_termbase")%>"  ID="idModify" onclick="modifyTermbase('<%=tb.getTermbaseId()%>')"><%=tb.getName()%></a>
+            <%  } else { %>
+                    <%=tb.getName()%>
+                <% } %>
+            </amb:column>       
             <amb:column label="lb_description" sortBy="<%=TermbaseInfoComparator.DESC%>">
                 <%=tb.getDescription()%>
             </amb:column>
             <% if (isSuperAdmin) { %>
-            <amb:column label="lb_company_name" sortBy="<%=TermbaseInfoComparator.ASC_COMPANY%>">
+            <amb:column label="lb_company_name" sortBy="<%=TermbaseInfoComparator.ASC_COMPANY%>" filter="tbCompanyFilter" filterValue="<%=tbCompanyFilter%>">
                 <%=CompanyWrapper.getCompanyNameById(tb.getCompanyId())%>
             </amb:column>
             <% } %>
@@ -436,13 +485,18 @@ function searchTerms(){
 
     </TD>
     </TR>
+    <tr valign="top">
+          <td align="right">
+            <amb:tableNav bean="namelist" key="<%=WebAppConstants.TERMBASE_TB_KEY%>" pageUrl="self"  scope="10,20,50,All" showTotalCount="false"/>
+          </td>
+        </tr>
     </DIV>
     <TR><TD>&nbsp;</TD></TR>
 
     <TR>
     <TD>
 
-    <DIV ALIGN="RIGHT">
+    <DIV ALIGN="left">
     <amb:permission name="<%=Permission.TERMINOLOGY_STATS%>" >
     <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_statistics")%>"
      ID="idStatistics" onclick="showStatistics()" name="statBtn" disabled
@@ -463,16 +517,10 @@ function searchTerms(){
      ID="idClone" onclick="cloneTermbase()" name="dupBtn" disabled
      TITLE="<%=bundle.getString("helper_text_tb_clone_termbase")%>">
     </amb:permission>
-    <amb:permission name="<%=Permission.TERMINOLOGY_EDIT%>" >
-    <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit1")%>"
-     ID="idModify" onclick="modifyTermbase()" name="editBtn" disabled
-     TITLE="<%=bundle.getString("helper_text_tb_modify_termbase")%>">
-    </amb:permission>
     <amb:permission name="<%=Permission.TERMINOLOGY_NEW%>" >
     <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new1")%>"
      ID="idNew" onclick="newTermbase()"
      TITLE="<%=bundle.getString("helper_text_tb_new_termbase")%>">
-    <BR>
     </amb:permission>
     <amb:permission name="<%=Permission.TERMINOLOGY_BROWSE%>" >
     <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_browse1")%>"

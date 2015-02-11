@@ -31,19 +31,19 @@ public class XLIFFStandardUtil
 
     public static final String GS_SEPARATOR = "_GS_";
 
-    private static final String att_posClose = "pos=\"close\"";
+    private static final String att_posClose = " pos=\"close\"";
 
-    private static final String att_posEnd = "pos=\"end\"";
+    private static final String att_posEnd = " pos=\"end\"";
 
-    private static final String att_posBegin = "pos=\"begin\"";
+    private static final String att_posBegin = " pos=\"begin\"";
 
-    private static final String att_posOpen = "pos=\"open\"";
+    private static final String att_posOpen = " pos=\"open\"";
 
-    private static final String att_ctype = "ctype=\"";
+    private static final String att_ctype = " ctype=\"";
 
-    private static final String att_type = "type=\"";
+    private static final String att_type = " type=\"";
 
-    private static final String att_id = "id=\"";
+    private static final String att_id = " id=\"";
 
     private static final String bpt_start = "<bpt ";
 
@@ -61,11 +61,13 @@ public class XLIFFStandardUtil
 
     private static final String ph_end = ">";
 
-    private static final String att_i = "i=\"";
+    private static final String att_i = " i=\"";
 
-    private static final String att_rid = "rid=\"";
+    private static final String att_rid = " rid=\"";
 
-    private static final String att_x = "x=\"";
+    private static final String att_x = " x=\"";
+
+    private static final String att_xid = " xid=\"";
 
     private static final String att_end = "\"";
 
@@ -82,22 +84,25 @@ public class XLIFFStandardUtil
             return segment;
         }
 
+        // bpt
         segment = replaceAtts(segment, bpt_start, bpt_end, true, att_i, att_id,
-                att_type, att_ctype);
+                att_type, att_ctype, att_x, att_xid);
 
+        // ept
         segment = replaceAtts(segment, ept_start, ept_end, true, att_i, att_id);
 
-        segment = replaceAtts(segment, it_start, it_end, true, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype);
-
-        segment = replaceAtts(segment, ph_start, ph_end, true, att_type,
-                att_ctype);
-
+        // it : add "id" by "x" first, then replace "x" to "xid" etc.
         segment = addAtts(segment, it_start, it_end, att_x, att_id,
                 p_osd.getDisplaySegmentID());
+        segment = replaceAtts(segment, it_start, it_end, true, att_posBegin,
+                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
+                att_x, att_xid);
 
+        // ph : add "id" by "x" first, then replace "x" to "xid" etc.
         segment = addAtts(segment, ph_start, ph_end, att_x, att_id,
                 p_osd.getDisplaySegmentID());
+        segment = replaceAtts(segment, ph_start, ph_end, true, att_type,
+                att_ctype, att_x, att_xid);
 
         return segment;
     }
@@ -114,21 +119,24 @@ public class XLIFFStandardUtil
             return segment;
         }
 
-        segment = replaceAtts(segment, bpt_start, bpt_end, false, att_i,
-                att_rid, att_i, att_id, att_type, att_ctype);
+        // bpt
+        segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
+                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype);
 
+        // ept
         segment = replaceAtts(segment, ept_start, ept_end, false, att_i,
                 att_rid, att_i, att_id);
 
-        segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype);
-
-        segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
-                att_ctype);
-
+        // it
         segment = removeAtts(segment, it_start, it_end, att_id);
+        segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
+                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
+                att_x, att_xid);
 
+        // ph
         segment = removeAtts(segment, ph_start, ph_end, att_id);
+        segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
+                att_ctype, att_x, att_xid);
 
         return segment;
     }

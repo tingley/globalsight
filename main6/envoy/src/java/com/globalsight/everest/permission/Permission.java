@@ -368,6 +368,7 @@ public class Permission
     static public final String REPORTS_COMMENTS_ANALYSIS = "reports.comments.analysis";
     static public final String REPORTS_TRANSLATIONS_EDIT = "reports.translations.edit";
     static public final String REPORTS_LANGUAGE_SIGN_OFF = "reports.language.sign.off";
+    static public final String REPORTS_LANGUAGE_SIGN_OFF_SIMPLE = "reports.language.sign.off.simple";
     static public final String REPORTS_CHARACTER_COUNT = "reports.character.count";
 
     static public final String REPORTS_TRANSLATION_PROGRESS = "reports.translation.progress";
@@ -472,6 +473,8 @@ public class Permission
     static public final String FILTER_CONFIGURATION_REMOVE_FILTERS = "filter.configuration.remove.filters";
     static public final String FILTER_CONFIGURATION_ADD_FILTER = "filter.configuration.add.filter";
     static public final String FILTER_CONFIGURATION_EDIT_FILTER = "filter.configuration.edit.filter";
+    static public final String FILTER_CONFIGURATION_EXPORT_FILTERS = "filter.configuration.export.filters";
+    static public final String FILTER_CONFIGURATION_IMPORT_FILTERS = "filter.configuration.import.filters";
 
     static public final String GSEDITION_VIEW = "gsedition.view";
     static public final String GSEDITION_REMOVE = "gsedition.remove";
@@ -521,8 +524,8 @@ public class Permission
             USERS_VIEW, CHANGE_OWN_EMAIL, ACTIVITIES_JOB_COMMENTS_VIEW,
             ACTIVITIES_JOB_COMMENTS_EDIT, ACTIVITIES_JOB_COMMENTS_NEW,
             ACTIVITIES_JOB_COMMENTS_DOWNLOAD, REPORTS_TRANSLATIONS_EDIT,
-            REPORTS_MAIN, REPORTS_LANGUAGE_SIGN_OFF, REPORTS_CHARACTER_COUNT,
-            REPORTS_DELL_FILE_LIST,
+            REPORTS_MAIN, REPORTS_LANGUAGE_SIGN_OFF, REPORTS_LANGUAGE_SIGN_OFF_SIMPLE,
+            REPORTS_CHARACTER_COUNT, REPORTS_DELL_FILE_LIST,
             ACTIVITY_DASHBOARD_VIEW, ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
             ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
@@ -1026,6 +1029,11 @@ public class Permission
         added = addPermission(393, CREATE_JOB_NO_APPLET) || added;
         // GBS-3389: recreate job in pending job list
         added = addPermission(394, JOBS_RECREATE) || added;
+        //GBS-3450: Export/Import filter configurations from server to server.
+        added = addPermission(395, FILTER_CONFIGURATION_EXPORT_FILTERS) || added;
+        added = addPermission(396, FILTER_CONFIGURATION_IMPORT_FILTERS) || added;
+        
+        added = addPermission(397, REPORTS_LANGUAGE_SIGN_OFF_SIMPLE) || added;
 
         return added;
     }

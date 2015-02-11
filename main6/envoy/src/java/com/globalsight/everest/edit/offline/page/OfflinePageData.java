@@ -56,6 +56,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.edit.offline.download.omegat.OmegaTConst;
 import com.globalsight.everest.edit.offline.rtf.ListViewOneWorkDocLoader;
 import com.globalsight.everest.edit.offline.rtf.ParaViewOneWorkDocLoader;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -2416,7 +2417,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     userId = "";
                 }
                 // Tm data maybe is created from MT.
-                if (changeCreationId && isCreatedFromMTEngine(userId))
+                if (changeCreationId && isCreatedFromMTEngine(match.getProjectTmIndex()))
                 {
                     userId = "MT!";
                 }
@@ -2652,7 +2653,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
 
                             if (isOmegaT)
                             {
@@ -2689,7 +2690,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                             "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
                                             match.getModifyDate());
                                     exactTuString = new StringBuffer(
-                                            TmxUtil.composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid()));
+                                            TmxUtil.composeTuWithoutTuCloseTag(
+                                                    srcTuvInfo, trgTuvInfo,
+                                                    p_tmxLevel, match.getSid(),
+                                                    isOmegaT, OmegaTConst.tu_type_100,
+                                                    osd.getDisplaySegmentID()));
                                     isAddTail = true;
                                 }
                                 else
@@ -2722,7 +2727,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
 
                             if (isOmegaT)
                             {
@@ -2925,7 +2930,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
-                            isCreatedFromMT = isCreatedFromMTEngine(userId);
+                            isCreatedFromMT = isCreatedFromMTEngine(match.getProjectTmIndex());
 
                             if (!isCreatedFromMT)
                             {
@@ -2978,7 +2983,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                         match.getCreationDate(),
                                         "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
                                         match.getModifyDate());
-                                String ttuString = TmxUtil.composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, match.getSid());
+                                String ttuString = TmxUtil.composeTu(
+                                        srcTuvInfo, trgTuvInfo, p_tmxLevel,
+                                        match.getSid(), isOmegaT,
+                                        OmegaTConst.tu_type_ice,
+                                        osd.getDisplaySegmentID());
                                 p_outputStream.write(ttuString.toString());
                             }
                         }
@@ -3540,6 +3549,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         }
 
         return isCreatedFromMTEngine;
+    }
+    
+    private boolean isCreatedFromMTEngine(int p_projectTmIndex)
+    {
+        
+        if(p_projectTmIndex == Leverager.MT_PRIORITY)
+        {
+        	return true;
+        }
+
+        return false;
     }
 
     public long getInContextMatchWordCount()

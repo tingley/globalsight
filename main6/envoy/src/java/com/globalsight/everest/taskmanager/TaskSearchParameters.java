@@ -54,6 +54,13 @@ public class TaskSearchParameters extends SearchCriteriaParameters
     public static final int COMPANY_NAME = 19;
     public static final int ID = 20;
     
+    public static final int ROW_START = 21;
+    public static final int ROW_PER_PAGE = 22;
+    public static final int SORT_COLUMN = 23;
+    public static final int SORT_TYPE = 24;
+    public static final int ACTIVITY_NAME_CONDITION = 25;
+    public static final int ASSIGNEES_NAME = 27;
+    
     /**
      *  Default constructor.
      */
@@ -240,5 +247,30 @@ public class TaskSearchParameters extends SearchCriteriaParameters
     {
         addElement(ID, p_ids);
     }
+    
+    public void setRowStart(int start) {
+        addElement(ROW_START, start);
+    }
+    
+    public void setRowPerPage(int perPage) {
+        addElement(ROW_PER_PAGE, perPage);
+    }
+    
+    public void setSortColumn(String column) {
+        addElement(SORT_COLUMN, column);
+    }
+    
+    public void setSortType(boolean isAscSort) {
+        addElement(SORT_TYPE, isAscSort);
+    }
+    
+    public void setActivityNameCondition(String p_endCondition) {
+    	 addElement(ACTIVITY_NAME_CONDITION, p_endCondition);
+    }
+    
+    public void setAssigneesName(String p_name) {
+     	 addElement(ASSIGNEES_NAME, p_name);
+    }
+    
 }
 

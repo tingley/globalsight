@@ -109,7 +109,7 @@ public class SafabaTranslateUtil
             final String[] textList, int waitTime)
             throws Exception
     {
-        if (MTHelper.isLogDetailedInfo())
+        if (MTHelper.isLogDetailedInfo(SafabaProxy.ENGINE_SAFABA))
         {
             for (int i = 0; i < textList.length; i++)
             {
@@ -149,7 +149,7 @@ public class SafabaTranslateUtil
             if (back != null)
             {
                 String[] result = new String[back.size()];
-                if (MTHelper.isLogDetailedInfo())
+                if (MTHelper.isLogDetailedInfo(SafabaProxy.ENGINE_SAFABA))
                 {
                     for (int i = 0; i < back.size(); i++)
                     {

@@ -323,9 +323,11 @@ function addDivForNewFile(paramArray) {
         else
         {
         	tempId = $.md5(fileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+        	tempZipId = $.md5(zipName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
 	       	runProgress(tempId,100,"normal",false);      
 	       	setTimeout(function(){
 	       		$("#bp" + tempId).remove();
+	       		$("#bp" + tempZipId).remove();
 	       		addFullDivElement(id, zipName, filePath, fileName, fileSize, false);
 	       		runProgress(id,100,"fast",false);},2000
 	       	);

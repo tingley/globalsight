@@ -63,6 +63,10 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
     // cleaned.
 
     private HashMap r_hashMap = null;
+    
+    private HashMap myactivities_hashMap = null;
+    
+    private HashMap myjobs_hashMap = null;
 
     /**
      * Constructor
@@ -72,6 +76,8 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
         m_uid = p_uid;
         m_hashMap = new HashMap(6);
         r_hashMap = new HashMap(7); // Seven reports in all.
+        myjobs_hashMap = new HashMap(6);
+        myactivities_hashMap = new HashMap(1);
     }
 
     //
@@ -234,6 +240,108 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
         return super.toString() + " [m_hashMap="
                 + (m_hashMap != null ? m_hashMap.toString() : "null")
                 + " m_uid=" + (m_uid != null ? m_uid.toString() : "null") + "]";
+    }
+    
+    /**
+     * Just used by activities search part Store the search filters.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object. This key is
+     *            predefined based for each module.
+     * @param p_value
+     *            - The object that preserves the state.
+     */
+    public void setMyactivitiesAttribute(String p_key, Object p_value)
+    {
+        myactivities_hashMap.put(p_key, p_value);
+        if (CATEGORY.isDebugEnabled())
+        {
+            logSessionObjects(myactivities_hashMap);            
+        }
+    }
+    
+    /**
+     * Just used by activities part Get a state preservation object based on a
+     * particular key.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object.
+     * @return The requested object if it exists, otherwise return null;
+     */
+    public Object getMyactivitiesAttribute(String p_key)
+    {
+        return myactivities_hashMap.get(p_key);
+    }
+    
+    /**
+     * Just used by activities part Clears the hashtable so that it contains no
+     * keys.
+     */
+    public void clearMyactivitiesMap()
+    {
+    	myactivities_hashMap.clear();
+    }
+    
+    /**
+     * Just used by activities part Remove a particular object based on the key.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object.
+     */
+    public void removeElementOfMyactivitiesMap(String p_key)
+    {
+    	myactivities_hashMap.remove(p_key);
+    }
+    
+    /**
+     * Just used by activities search part Store the search filters.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object. This key is
+     *            predefined based for each module.
+     * @param p_value
+     *            - The object that preserves the state.
+     */
+    public void setMyjobsAttribute(String p_key, Object p_value)
+    {
+        myjobs_hashMap.put(p_key, p_value);
+        if (CATEGORY.isDebugEnabled())
+        {
+            logSessionObjects(myjobs_hashMap);            
+        }
+    }
+    
+    /**
+     * Just used by jobs part Get a state preservation object based on a
+     * particular key.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object.
+     * @return The requested object if it exists, otherwise return null;
+     */
+    public Object getMyjobsAttribute(String p_key)
+    {
+        return myjobs_hashMap.get(p_key);
+    }
+    
+    /**
+     * Just used by jobs part Clears the hashtable so that it contains no
+     * keys.
+     */
+    public void clearMyjobsMap()
+    {
+    	myjobs_hashMap.clear();
+    }
+    
+    /**
+     * Just used by jobs part Remove a particular object based on the key.
+     * 
+     * @param p_key
+     *            - The key used as an alias name for the object.
+     */
+    public void removeElementOfMyjobsMap(String p_key)
+    {
+    	myjobs_hashMap.remove(p_key);
     }
 
     /**

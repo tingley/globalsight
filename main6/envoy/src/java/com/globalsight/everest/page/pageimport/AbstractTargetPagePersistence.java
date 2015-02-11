@@ -80,7 +80,8 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
-import com.globalsight.machineTranslation.AbstractTranslator;
+import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -222,6 +223,7 @@ public abstract class AbstractTargetPagePersistence implements
      *      ExactMatchedSegments p_exactMatchedSegments)
      */
 
+    @SuppressWarnings("unchecked")
     public ArrayList<Tuv> getTargetTuvs(SourcePage p_sourcePage,
             HashMap<Tu, Tuv> p_sourceTuvMap, GlobalSightLocale p_targetLocale,
             TermLeverageResult p_termMatches, boolean p_useLeveragedTerms,
@@ -305,11 +307,16 @@ public abstract class AbstractTargetPagePersistence implements
             if (mtProfile != null && mtProfile.isActive())
             {
                 String mtEngine = mtProfile.getMtEngine();
-                machineTranslator = AbstractTranslator
-                        .initMachineTranslator(mtEngine);
+                machineTranslator = MTHelper.initMachineTranslator(mtEngine);
                 HashMap paramMap = mtProfile.getParamHM();
-                paramMap.put(machineTranslator.SOURCE_PAGE_ID,
-                        p_sourcePage.getId());
+//                paramMap.put(MachineTranslator.SOURCE_PAGE_ID,
+//                        p_sourcePage.getId());
+                boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
+                paramMap.put(
+                        MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS,
+                        isXlf ? "true" : "false");
+                paramMap.put(MachineTranslator.DATA_TYPE,
+                        MTHelper2.getDataType(p_sourcePage.getId()));
                 machineTranslator.setMtParameterMap(paramMap);
                 boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
                         sourceLocale, p_targetLocale);
@@ -1020,15 +1027,15 @@ public abstract class AbstractTargetPagePersistence implements
                 + p_targetLocale.getLocale().getLanguage() + ").");
         String[] translatedSegments = machineTranslator.translateBatchSegments(
                 p_sourceLocale.getLocale(), p_targetLocale.getLocale(),
-                p_segments, LeverageMatchType.CONTAINTAGS);
+                p_segments, LeverageMatchType.CONTAINTAGS, true);
 
         String[] translatedSegmentsWithoutTags = null;
-        if (AbstractTranslator.willHitTwice(machineTranslator.getEngineName()))
+        if (MTHelper.willHitTwice(machineTranslator.getEngineName()))
         {
             translatedSegmentsWithoutTags = machineTranslator
                     .translateBatchSegments(p_sourceLocale.getLocale(),
                             p_targetLocale.getLocale(), p_segmentsWithoutTags,
-                            LeverageMatchType.WITHOUTTAGS);
+                            LeverageMatchType.WITHOUTTAGS, false);
         }
         s_logger.info("End hit " + machineTranslator.getEngineName()
                 + "(SourcePageID:" + p_sourcePage.getIdAsLong()
@@ -1052,9 +1059,8 @@ public abstract class AbstractTargetPagePersistence implements
 
             boolean tagMatched = true;
             if (isGetMTResult
-                    && AbstractTranslator
-                            .needCheckMTTranslationTag(machineTranslator
-                                    .getEngineName()))
+                    && MTHelper.needCheckMTTranslationTag(machineTranslator
+                            .getEngineName()))
             {
                 tagMatched = SegmentUtil2.canBeModified(currentNewTuv,
                         machineTranslatedGxml, companyId);
@@ -1062,7 +1068,7 @@ public abstract class AbstractTargetPagePersistence implements
             // replace the content in target tuv with mt result
             if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
             {
-                currentNewTuv.setGxml(machineTranslatedGxml);
+                currentNewTuv.setGxml(MTHelper.fixMtTranslatedGxml(machineTranslatedGxml));
                 currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
                 currentNewTuv.setLastModifiedUser(machineTranslator
                         .getEngineName() + "_MT");
@@ -1100,7 +1106,7 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-                lm.setSid(sourceTuv.getSid());
+//                lm.setSid(sourceTuv.getSid());
                 lm.setCreationUser(machineTranslator.getEngineName());
                 lm.setCreationDate(sourceTuv.getLastModified());
                 lm.setModifyDate(sourceTuv.getLastModified());
@@ -1173,7 +1179,7 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setMtName(machineTranslator.getEngineName() + "_MT");
                     lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-                    lm.setSid(sourceTuv.getSid());
+//                    lm.setSid(sourceTuv.getSid());
                     lm.setCreationUser(machineTranslator.getEngineName());
                     lm.setCreationDate(sourceTuv.getLastModified());
                     lm.setModifyDate(sourceTuv.getLastModified());

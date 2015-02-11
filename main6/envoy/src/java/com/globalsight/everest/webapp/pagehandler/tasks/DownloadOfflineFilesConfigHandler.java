@@ -53,46 +53,67 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
     {
         try
         {
-            s_isParagraphEditorEnabled = EditHelper.isParagraphEditorInstalled();
-            
-            // NOTES:These constants must be added in sequence!!!!
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_FORMAT);//0
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITOR);//1
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_ENCODING);//2
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER);//3
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT);//4
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT);//5
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH);//6
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX);//7
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM);//8
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY);//9
-            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_100);//10
-            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);//11
-            DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);//12
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);//13
-            DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);//14
-            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);//15
+            s_isParagraphEditorEnabled = EditHelper
+                    .isParagraphEditorInstalled();
 
             // NOTES:These constants must be added in sequence!!!!
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);//0
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_EDITOR_DEFAULT);//1
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_ENCODING_DEFAULT);//2
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER_DEFAULT);//3
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT_DEFAULT);//4
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT_DEFAULT);//5
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH_DEFAULT);//6
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX_DEFAULT);//7
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT);//8
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT);//9
-            //populate 100
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");//10
-            //populate fuzzy target segments (only for bilingual RTF)
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");//11
-            //need consolidate output file (for XLF format)
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");//12
-            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);//13
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_FORMAT);// 0
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITOR);// 1
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_ENCODING);// 2
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER);// 3
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT);// 4
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT);// 5
+            DOWNLOAD_OPTIONS
+                    .add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH);// 6
+            DOWNLOAD_OPTIONS
+                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX);// 7
+            DOWNLOAD_OPTIONS
+                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM);// 8
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY);// 9
+            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_100);// 10
+            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);// 11
+            DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);// 12
+            DOWNLOAD_OPTIONS
+                    .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);// 13
+            DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);// 14
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
+            DOWNLOAD_OPTIONS
+                    .add(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES);// 16
+
+            // NOTES:These constants must be added in sequence!!!!
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);// 0
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_EDITOR_DEFAULT);// 1
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_ENCODING_DEFAULT);// 2
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER_DEFAULT);// 3
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT_DEFAULT);// 4
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT_DEFAULT);// 5
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH_DEFAULT);// 6
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX_DEFAULT);// 7
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT);// 8
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT);// 9
+            // populate 100
+            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 10
+            // populate fuzzy target segments (only for bilingual RTF)
+            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 11
+            // need consolidate output file (for XLF format)
+            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 12
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);// 13
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
-            DOWNLOAD_OPTIONS_DEFAULT.add(String.valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));//15  
+            DOWNLOAD_OPTIONS_DEFAULT
+                    .add(String
+                            .valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));// 15
+            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 16
         }
         catch (Throwable ignore)
         {
@@ -158,10 +179,12 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             if (exception != null)
             {
                 // string means show error message
-                p_request.setAttribute(USER_PARAMS_ERROR, exception
-                        .getTopLevelMessage()
-                        + "@@@@@"
-                        + GeneralException.getStackTraceString(exception));
+                p_request.setAttribute(
+                        USER_PARAMS_ERROR,
+                        exception.getTopLevelMessage()
+                                + "@@@@@"
+                                + GeneralException
+                                        .getStackTraceString(exception));
             }
         }
 
@@ -176,8 +199,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         {
             String downloadOption = DOWNLOAD_OPTIONS.get(i);
             optionsHash.put(downloadOption,
-                    PageHandler
-                    .getUserParameter(p_session, downloadOption).getValue());
+                    PageHandler.getUserParameter(p_session, downloadOption)
+                            .getValue());
         }
     }
 
@@ -188,7 +211,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         for (int i = 0; i < DOWNLOAD_OPTIONS.size(); i++)
         {
             String downloadOption = DOWNLOAD_OPTIONS.get(i);
-            String temp=request.getParameter(downloadOption);
+            String temp = request.getParameter(downloadOption);
             if (null == temp)
             {
                 optionsHash
@@ -205,23 +228,26 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         // String key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX;
         // optionsHash.put(key, request.getParameter(key) == null ? "no" :
         // "yes");
-        
+
         String key = UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.POPULATE_100;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.POPULATE_FUZZY;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.NEED_CONSOLIDATE;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
-        
+
         key = OfflineConstants.INCLUDE_REPETITIONS;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+
+        key = OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
     }
 

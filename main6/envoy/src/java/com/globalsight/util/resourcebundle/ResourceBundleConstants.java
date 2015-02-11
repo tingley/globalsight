@@ -35,6 +35,11 @@ public interface ResourceBundleConstants
             + "EmailMessageResource";
     public static final String EXCEPTION_RESOURCE_NAME = BUNDLE_LOCATION
             + "ExceptionResource";
+    
+    public static final String UPLOAD_BUNDLE_LOCATION = "com/globalsight/everest/edit/offline/upload/";
+
+    public static final String UPLOADAPI_BUNDLE_LOCATION = UPLOAD_BUNDLE_LOCATION
+            + "UploadApi";
 
     public static final int INITIAL_MAP_SIZE = 15;
     // English

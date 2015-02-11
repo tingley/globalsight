@@ -574,7 +574,7 @@ public class AutoPropagateThread implements Runnable
             api.reset();
         }
         SegmentNode sn = SegmentUtil2.extractSegment(api, result, "xlf",
-                p_sourceTuv.getGlobalSightLocale());
+                p_sourceTuv.getGlobalSightLocale().getLocale());
         if (sn != null)
         {
             result = sn.getSegment();

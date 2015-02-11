@@ -28,12 +28,11 @@ import com.globalsight.dispatcher.bo.Account;
 import com.globalsight.dispatcher.bo.AppConstants;
 import com.globalsight.dispatcher.bo.GlobalSightLocale;
 import com.globalsight.dispatcher.bo.MTPLanguage;
-import com.globalsight.dispatcher.bo.MachineTranslationProfile;
 import com.globalsight.dispatcher.dao.AccountDAO;
 import com.globalsight.dispatcher.dao.CommonDAO;
 import com.globalsight.dispatcher.dao.DispatcherDAOFactory;
 import com.globalsight.dispatcher.dao.MTPLanguagesDAO;
-import com.globalsight.machineTranslation.AbstractTranslator;
+import com.globalsight.dispatcher.util.TranslateUtil;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 
@@ -90,38 +89,36 @@ public class TranslateController implements AppConstants {
         GlobalSightLocale trgLocale = CommonDAO.getGlobalSightLocaleByShortName(p_targetLanguage);
         if (srcLocale == null || trgLocale == null)
         {
-            result.put(JSONPN_STATUS, STATUS_FAIl);
+            result.put(JSONPN_STATUS, STATUS_FAILED);
             result.put(JSONPN_ERROR_MESSAGE, ERROR_NO_LOCALE + p_sourceLanguage + ", " + p_targetLanguage);
             return result;
         }
         MTPLanguage mtpLang = mtpLangDAO.getMTPLanguage(srcLocale, trgLocale, p_account.getId());
         if (mtpLang == null)
         {
-            result.put(JSONPN_STATUS, STATUS_FAIl);
+            result.put(JSONPN_STATUS, STATUS_FAILED);
             result.put(JSONPN_ERROR_MESSAGE, ERROR_NO_MTPROFILE);
             return result;
         }
-
-        MachineTranslationProfile mtProfile = mtpLang.getMtProfile();
-        MachineTranslator translator = AbstractTranslator.initMachineTranslator(mtProfile.getMtEngine());
-        translator.setMtParameterMap(mtProfile.getParamHM());
+        
         try
         {
-            String target = translator.translate(srcLocale.getLocale(), trgLocale.getLocale(), p_srcText);
-            if (target == null || target.trim().length() == 0)
+            MachineTranslator translator = TranslateUtil.getMachineTranslator(mtpLang.getMtProfile());
+            String[] target = translator.translateBatchSegments(srcLocale.getLocale(), trgLocale.getLocale(), new String[]{p_srcText}, true, false);
+            if (target == null || target.length == 0 || target[0].trim().length() == 0)
             {
-                result.put(JSONPN_STATUS, STATUS_FAIl);
+                result.put(JSONPN_STATUS, STATUS_FAILED);
                 result.put(JSONPN_ERROR_MESSAGE, ERROR_NO_RESULT);
             }
             else
             {
                 result.put(JSONPN_STATUS, STATUS_SUCCESS);
-                result.put(JSONPN_TARGET_TEXT, target);
+                result.put(JSONPN_TARGET_TEXT, target[0]);
             }
         }
         catch (MachineTranslationException e)
         {
-            result.put(JSONPN_STATUS, STATUS_FAIl);
+            result.put(JSONPN_STATUS, STATUS_FAILED);
             result.put(JSONPN_ERROR_MESSAGE, ERROR_NO_RESULT);
         }
         

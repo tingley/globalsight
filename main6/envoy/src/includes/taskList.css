@@ -1,0 +1,30 @@
+.hide {display: none}
+.center {text-align: center}
+.left {text-align: left}
+.right {text-align: right}
+.tableHeadingBasic div {display:inline-block;}
+.selectAll {width:5px}
+.priorityItem {text-align:center;cursor:pointer}
+.priorityField {width:5px;text-align:center}
+.overdueItem {text-align:center}
+.overdueField {width:5px;text-align:center;}
+.jobIdItem {text-align:left;cursor:pointer}
+.jobIdField {width:50px}
+.jobNameItem {text-align:left;cursor:pointer}
+.jobNameField {text-align:left;font-weight:bold;word-break:break-all;}
+.sourceWordCountItem {text-align:left;cursor:pointer}
+.sourceWordCountField {text-align:center;font-weight:bold;}
+.translatedTextItem {text-align:left;}
+.taskDateItem {text-align:left;cursor:pointer}
+.sourceLocaleItem, .targetLocaleItem {text-align:left;cursor:pointer}
+.activityItem{text-align:left;cursor:pointer}
+.assigneeItem,.taskStatusItem,.companyItem {width:100px;text-align:left;}
+.ecdItem {text-align:left;}
+.list table {border:0px; color: #0c1476; }
+.smallCell {text-align: center; padding-left: 3px; padding-right: 3px}
+.rowOdd {background: #EEEEEE}
+.rowHover {background: #F5F5F5}
+.rowSelected {}
+.completed {color: black;font-weight:bold;}
+.uncompleted {color: red;font-weight:bold;}
+.gray {color: gray;}

@@ -39,7 +39,7 @@ import org.apache.http.util.EntityUtils;
 import com.globalsight.dispatcher.bo.AppConstants;
 
 /**
- * DispatcherMW client code, which is used for upload XLF file, and download the translated file.
+ * The client code of DispatcherMW, which is used for upload XLF file, and download the translated file.
  * 
  * The DispatcherMW Upload URL:
  * http://localhost:8888/dispatcherMW/translateXLF/upload/?securityCode={securityCode}
@@ -50,7 +50,7 @@ import com.globalsight.dispatcher.bo.AppConstants;
  * The DispatcherMW Download URL:
  * http://localhost:8888/dispatcherMW/translateXLF/download/?jobID={jobID}&securityCode={securityCode}
  * 
- * @author Joey
+ * @author Joey Jiang
  * @Date 2014-03-14
  *
  */
@@ -58,7 +58,8 @@ public class Main implements AppConstants
 {
     static String basicURL = "http://localhost:8888/dispatcherMW/translateXLF/";
     
-    static long waitTime = 1000 * 60 * 10;
+    static final long SLEEP_TIME = 1000 * 10;
+    static final long TOTAL_SLEEP_COUNT = 60;
     static final String TYPE_TRANSLATE = "translate";
     static final String TYPE_UPLOAD = "upload";
     static final String TYPE_CHECK_STATUS = "checkStatus";
@@ -97,7 +98,6 @@ public class Main implements AppConstants
             String securityCode = properties.getProperty(JSONPN_SECURITY_CODE);
             String filePath = properties.getProperty("filePath");
             String jobID = properties.getProperty(JSONPN_JOBID);
-            setWaitTime(properties.getProperty("waitTime"));
             if (TYPE_TRANSLATE.equalsIgnoreCase(type))
             {
                 doJob(securityCode, filePath);
@@ -138,14 +138,14 @@ public class Main implements AppConstants
             System.out.println("Upload File Error!");
             return;
         }
-        do
+        for (int i = 0; i < TOTAL_SLEEP_COUNT; i++)
         {
             String status = checkJobStaus(jobIdStr);
             System.out.println("The Status of job:" + jobIdStr + " is " + status);
 
             if (STATUS_QUEUED.equals(status) || STATUS_RUNNING.equals(status))
             {
-                Thread.sleep(waitTime);
+                Thread.sleep(SLEEP_TIME);
             }
             else if (STATUS_COMPLETED.equals(status))
             {
@@ -157,7 +157,7 @@ public class Main implements AppConstants
                 System.out.println("The job status is error. Break!");
                 return;
             }
-        } while (true);
+        }
     }
 
     // Upload XLF file to DispatcherMW for Machine Translation
@@ -183,8 +183,11 @@ public class Main implements AppConstants
             {
                 int startIndex = msg.indexOf("\"jobID\":\"");
                 jobID = msg.substring(startIndex + 9, msg.indexOf(",", startIndex) - 1);
+                System.out.println("Create Job: " + jobID + ", wtih file:" + p_fileName);
+                return jobID;
             }
-            System.out.println("Create Job: " + jobID + ", wtih file:" + p_fileName);
+
+            System.out.println(msg);
             return jobID;
         }
         catch (Exception e)
@@ -275,21 +278,6 @@ public class Main implements AppConstants
             p_url = p_url + "translateXLF/";
 
         basicURL = p_url;
-    }
-
-    private static void setWaitTime(String p_min)
-    {
-        if (p_min == null || p_min.trim().length() == 0)
-            return;
-
-        try
-        {
-            waitTime = Long.valueOf(p_min) * 1000 * 60;
-        }
-        catch (Exception e)
-        {
-
-        }
     }
     
     private static String getFunctinURL(String p_type, String p_securityCode, String p_jobId)

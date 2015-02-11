@@ -33,7 +33,7 @@
             java.io.File,
             java.text.NumberFormat,
             com.globalsight.machineTranslation.MachineTranslator,
-            com.globalsight.machineTranslation.MTHelper,
+            com.globalsight.machineTranslation.MTHelper2,
             com.globalsight.everest.tuv.Tuv,
             java.text.DecimalFormat"
     session="true"
@@ -50,7 +50,7 @@ String lb_target = bundle.getString("lb_target");
 
 // Get MT translation URL for dojo
 String mtTranslationURL = mtTranslation.getPageURL() 
-    + "&action=" + MTHelper.ACTION_GET_MT_TRANSLATION;
+    + "&action=" + MTHelper2.ACTION_GET_MT_TRANSLATION;
 
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
@@ -445,7 +445,7 @@ String str_stageSegments = stb_segments.toString();
 boolean show_in_editor = false;
 try 
 {
-    String showInEditor = (String) sessionMgr.getAttribute(MTHelper.SHOW_IN_EDITOR);
+    String showInEditor = (String) sessionMgr.getAttribute(MTHelper2.SHOW_IN_EDITOR);
     show_in_editor = (new Boolean(showInEditor)).booleanValue();
 } 
 catch (Exception e) { }
@@ -1667,7 +1667,7 @@ function copySelectionToEditor()
 
 function doClick()
 {
-	var dd = document.getElementById('<%=MTHelper.MT_TRANSLATION_DIV%>').innerHTML;
+	var dd = document.getElementById('<%=MTHelper2.MT_TRANSLATION_DIV%>').innerHTML;
 	copyToTarget(dd);
 }
 

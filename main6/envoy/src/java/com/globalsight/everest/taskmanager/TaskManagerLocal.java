@@ -59,6 +59,7 @@ import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.Vendor;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.EnvoyWorkItem;
 import com.globalsight.everest.workflow.EventNotificationHelper;
@@ -295,7 +296,18 @@ public class TaskManagerLocal implements TaskManager
             String p_destinationArrow, String skipping) throws RemoteException,
             TaskException
     {
-        validateStateOfPages(p_task);
+        // Justify whether the task can been completed.
+        if (!TaskHelper.canCompleteTask(p_task))
+        {
+            String hql = "update TaskImpl t set t.stateStr = :state where t.id = :taskId";
+            Map map = new HashMap();
+            map.put("state", Task.STATE_ACCEPTED_STR);
+            map.put("taskId", p_task.getId());
+            HibernateUtil.excute(hql, map);
+            return;
+        }
+        
+        validateStateOfPages(p_task);        
         try
         {
             m_workflowManager.setTaskCompletion(p_userId, p_task,

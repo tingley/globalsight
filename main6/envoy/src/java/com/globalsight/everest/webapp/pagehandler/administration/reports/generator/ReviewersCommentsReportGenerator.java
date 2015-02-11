@@ -55,6 +55,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -72,6 +73,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.Repo
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -515,16 +517,17 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
      *            the segment row in sheet
      * @throws Exception
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
             GlobalSightLocale p_targetLocale, int p_row) throws Exception
     {
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
         TranslationMemoryProfile tmp = p_job.getL10nProfile()
                 .getTranslationMemoryProfile();
-        List<String> excludItems = null;
+        Vector<String> excludItems = null;
         if (tmp != null)
         {
-            excludItems = new ArrayList<String>(tmp.getJobExcludeTuTypes());
+            excludItems = tmp.getJobExcludeTuTypes();
         }
 
         long companyId = p_job.getCompanyId();
@@ -547,7 +550,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
         if (!targetPages.isEmpty())
         {
-            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
+            LeverageMatchLingManager lmLingManager = LingServerProxy
                     .getLeverageMatchLingManager();
             TermLeverageManager termLeverageManager = ServerProxy
                     .getTermLeverageManager();
@@ -579,15 +582,17 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
                 TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
+
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
-                Map exactMatches = leverageMatchLingManager.getExactMatches(
-                        sourcePage.getIdAsLong(),
-                        new Long(targetPage.getLocaleId()));
-                Map leverageMatcheMap = leverageMatchLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
-                                targetPage.getLocaleId()));
+
+                MatchTypeStatistics tuvMatchTypes = lmLingManager
+                        .getMatchTypesForStatistics(sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId(),
+                                p_job.getLeverageMatchThreshold());
+                Map fuzzyLeverageMatchMap = lmLingManager.getFuzzyMatches(
+                        sourcePage.getIdAsLong(), targetPage.getLocaleId());
 
                 boolean m_rtlSourceLocale = EditUtil
                         .isRTLLocale(sourcePageLocale.toString());
@@ -639,9 +644,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                             .getTextValue();
 
                     // TM Match
-                    StringBuilder matches = getMatches(exactMatches,
-                    		leverageMatcheMap, targetTuv, sourceTuv);
-                    
+                    StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                            sourceTuv, targetTuv, companyId);
+
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
                     String targetTerms = "";
@@ -1137,38 +1143,42 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     /**
      * Get TM matches.
      */
-    private StringBuilder getMatches(Map exactMatches, Map leverageMatcheMap,
-    		Tuv targetTuv, Tuv sourceTuv)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
+            MatchTypeStatistics tuvMatchTypes,
+            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
+            Tuv sourceTuv, Tuv targetTuv, long companyId)
     {
-    	StringBuilder matches = new StringBuilder();
-        Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
-                .getIdAsLong());
+        StringBuilder matches = new StringBuilder();
 
-        if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
+        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
+                .getIdAsLong());
+        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
+                tuvMatchTypes, excludedItemTypes, companyId))
+        {
+            matches.append(m_bundle.getString("lb_in_context_match"));
+        }
+        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
         {
             matches.append(StringUtil.formatPCT(100));
         }
-        else if (leverageMatches != null)
+        else if (fuzzyLeverageMatches != null)
         {
             int count = 0;
-            for (Iterator ite = leverageMatches.iterator(); ite
-                    .hasNext();)
+            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
             {
-                LeverageMatch leverageMatch = (LeverageMatch) ite
-                        .next();
-                if ((leverageMatches.size() > 1))
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
+                if ((fuzzyLeverageMatches.size() > 1))
                 {
                     matches.append(++count)
                             .append(", ")
-                            .append(StringUtil
-                                    .formatPCT(leverageMatch
-                                            .getScoreNum()))
-                            .append("\r\n");
+                            .append(StringUtil.formatPCT(leverageMatch
+                                    .getScoreNum())).append("\r\n");
                 }
                 else
                 {
-                    matches.append(StringUtil
-                            .formatPCT(leverageMatch.getScoreNum()));
+                    matches.append(StringUtil.formatPCT(leverageMatch
+                            .getScoreNum()));
                     break;
                 }
             }
@@ -1177,6 +1187,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
         {
             matches.append(m_bundle.getString("lb_no_match_report"));
         }
+
         if (targetTuv.isRepeated())
         {
             matches.append("\r\n")
@@ -1189,7 +1200,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     .append(m_bundle
                             .getString("jobinfo.tradosmatches.invoice.repetition"));
         }
-        
+
         return matches;
     }
 

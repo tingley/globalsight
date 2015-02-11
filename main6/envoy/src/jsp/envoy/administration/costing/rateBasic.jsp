@@ -262,10 +262,15 @@ function confirmForm()
         rateForm.rateName.focus();
         return false;
     }
+     if (hasSpecialChars(buf))
+    {
+        alert("<%= bundle.getString("lb_name") %>" +" <%= bundle.getString("msg_invalid_entry") %>");
+        return false;
+    }
     
     var nameMaxLen=document.getElementById("rateName").getAttribute("maxlength"); 
     var subNameLen=12;
-    //alert("nameMaxLen:"+nameMaxLen+"\nbuf.length:"+buf.length);
+    //alert("nameMaxLen:"+nameMaxLen+"\nbuf.length:"+buf.length); 
     if (buf.length > nameMaxLen) {
         alert(" <%= bundle.getString("jsmsg_rate_name_invalid_length") %>");
         rateForm.rateName.focus();
@@ -297,7 +302,7 @@ function confirmForm()
 						allErrorLocalePair=allErrorLocalePair+tempLocalePair+"\n";
 					}		
 				}
-    	    }
+    	    } 
             else if ("<%=rateName2%>".toLowerCase() == buf.toLowerCase() && (!"<%=edit%>" || "<%=rateName2%>" != "<%=rateName%>"))
             {
                 alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_rate_error"))%>");
@@ -343,7 +348,7 @@ function confirmForm()
         {
             alert("<%=bundle.getString("lb_rate")%>" + "<%= bundle.getString("jsmsg_numeric") %>");
             return false;
-        }
+        }   
     }
     else if (rateForm.rateType.selectedIndex == 1)
     {

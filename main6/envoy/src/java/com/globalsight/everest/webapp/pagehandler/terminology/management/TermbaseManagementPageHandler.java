@@ -54,23 +54,23 @@ import com.globalsight.terminology.TermbaseInfo;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
  * PageHandler is responsible creating, deleting and modifying termbases.
  * </p>
  */
-
 public class TermbaseManagementPageHandler extends PageHandler implements
         WebAppConstants
 {
     private static final Logger CATEGORY = Logger
             .getLogger(TermbaseManagementPageHandler.class.getName());
-
     //
     // Static Members
     //
     static private ITermbaseManager s_manager = null;
+    static private int NUM_PER_PAGE = 10;
 
     //
     // Constructor
@@ -92,22 +92,22 @@ public class TermbaseManagementPageHandler extends PageHandler implements
         }
     }
 
-    //
-    // Interface Methods: PageHandler
-    //
+	//
+	// Interface Methods: PageHandler
+	//
 
-    /**
-     * Invoke this PageHandler.
-     * 
-     * @param p_pageDescriptor
-     *            the page desciptor
-     * @param p_request
-     *            the original request sent from the browser
-     * @param p_response
-     *            the original response object
-     * @param p_context
-     *            context the Servlet context
-     */
+	/**
+	 * Invoke this PageHandler.
+	 * 
+	 * @param p_pageDescriptor
+	 *            the page desciptor
+	 * @param p_request
+	 *            the original request sent from the browser
+	 * @param p_response
+	 *            the original response object
+	 * @param p_context
+	 *            context the Servlet context
+	 */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
@@ -133,6 +133,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
         String tbId = (String) p_request.getParameter(RADIO_BUTTON);
         String name = null;
         String description = null;
+        setNumberOfPerPage(p_request);
 
         // Do some cleanup here for import/export etc.
         sessionMgr.removeElement(TERMBASE_EXPORTER);
@@ -140,7 +141,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
         sessionMgr.removeElement(TERMBASE_IMPORTER);
         sessionMgr.removeElement(TERMBASE_IMPORT_OPTIONS);
         sessionMgr.removeElement(TERMBASE_USERDATA);
-
+        
         try
         {
             if (tbId != null)
@@ -160,9 +161,10 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 sessionMgr.setAttribute("isAdmin", isAdmin);
                 sessionMgr.setAttribute("enableTBAccessControl",
                         enableTBAccessControl);
+
                 setTableNavigation(p_request, session,
-                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
-                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        getTBs(p_request, session, userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), NUM_PER_PAGE, TERMBASE_TB_NAMELIST,
                         TERMBASE_TB_KEY);
             }
             else if (action.equals(TERMBASE_ACTION_NEW))
@@ -300,8 +302,8 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 sessionMgr.setAttribute("enableTBAccessControl",
                         enableTBAccessControl);
                 setTableNavigation(p_request, session,
-                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
-                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        getTBs(p_request, session, userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), NUM_PER_PAGE, TERMBASE_TB_NAMELIST,
                         TERMBASE_TB_KEY);
             }
             else if (action.equals(TERMBASE_ACTION_SAVEUSERS))
@@ -316,8 +318,8 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 sessionMgr.setAttribute("enableTBAccessControl",
                         enableTBAccessControl);
                 setTableNavigation(p_request, session,
-                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
-                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        getTBs(p_request, session, userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), NUM_PER_PAGE, TERMBASE_TB_NAMELIST,
                         TERMBASE_TB_KEY);
             }
         }
@@ -326,25 +328,44 @@ public class TermbaseManagementPageHandler extends PageHandler implements
             // JSP needs to clear this.
             sessionMgr.setAttribute(TERMBASE_ERROR, ex.toString());
         }
-
+        
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
-
-    /**
-     * Get tbs for user
-     * 
-     * @param userId
-     * @param uiLocale
-     * @return
-     * @throws RemoteException
-     * 
-     * @author Leon Song
-     * @since 8.0
-     */
-    private List getTBs(String userId, Locale uiLocale) throws RemoteException
+   
+    private void setNumberOfPerPage(HttpServletRequest req)
     {
-        List tbs = new ArrayList();
+        String pageSize = (String) req.getParameter("numOfPageSize");
+
+        if (StringUtil.isNotEmpty(pageSize))
+        {
+            try
+            {
+                NUM_PER_PAGE = Integer.parseInt(pageSize);
+            }
+            catch (Exception e)
+            {
+                NUM_PER_PAGE = Integer.MAX_VALUE;
+            }
+        }
+    }
+
+	/**
+	 * Get tbs for user
+	 * 
+	 * @param userId
+	 * @param uiLocale
+	 * @return
+	 * @throws RemoteException
+	 * 
+	 * @author Leon Song
+	 * @since 8.0
+	 */
+    private List<TermbaseInfo> getTBs(HttpServletRequest p_request,
+			HttpSession session,String userId, Locale uiLocale)
+            throws RemoteException
+    {
+        List<TermbaseInfo> tbs = new ArrayList<TermbaseInfo>();
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company currentCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
@@ -371,7 +392,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
             if (isSuperLP)
             {
                 // Get all the companies the super translator worked for
-                List projectList = null;
+                List<Project> projectList = null;
                 try
                 {
                     projectList = ServerProxy.getProjectHandler()
@@ -381,7 +402,8 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 {
                     e.printStackTrace();
                 }
-                for (Iterator it = projectList.iterator(); it.hasNext();)
+                for (Iterator<Project> it = projectList.iterator(); it
+                        .hasNext();)
                 {
                     Project pj = (Project) it.next();
                     String companyId = String.valueOf(pj.getCompanyId());
@@ -453,7 +475,76 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 tbs = allTBs;
             }
         }
-        SortUtil.sort(tbs, new TermbaseInfoComparator(0, uiLocale));
+
+		filterTbByCompanyName(p_request, session, tbs);
+		filterTbByName(p_request, session, tbs);
+		
+		SortUtil.sort(tbs, new TermbaseInfoComparator(0, uiLocale));
+
         return tbs;
     }
+
+	private void filterTbByCompanyName(HttpServletRequest p_request,
+			HttpSession p_session, List<TermbaseInfo> tbList) 
+	{
+		SessionManager sessionMgr = (SessionManager) p_session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+		String tbCompanyFilter = (String) p_request.getParameter("tbCompanyFilter");
+		
+		if (tbCompanyFilter == null) 
+		{
+			tbCompanyFilter = (String) sessionMgr.getAttribute("tbCompanyFilter");
+		}
+		if (tbCompanyFilter == null) 
+		{
+			tbCompanyFilter = "";
+		}
+		sessionMgr.setAttribute("tbCompanyFilter", tbCompanyFilter.trim());
+		
+		if (StringUtil.isNotEmpty(tbCompanyFilter)) 
+		{
+			for (Iterator<TermbaseInfo> it = tbList.iterator(); it.hasNext();) 
+			{
+				TermbaseInfo tb = it.next();
+				String companyName = CompanyWrapper.getCompanyNameById(
+						tb.getCompanyId()).toLowerCase();
+				if (companyName.indexOf(tbCompanyFilter.toLowerCase().trim()) == -1) 
+				{
+					it.remove();
+				}
+			}
+		}
+
+	}
+
+    private void filterTbByName(HttpServletRequest p_request,
+            HttpSession p_session,List<TermbaseInfo> tbList)
+    {
+		SessionManager sessionMgr = (SessionManager) p_session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+		String tbNameFilter = (String) p_request.getParameter("tbNameFilter");
+
+		if (tbNameFilter == null) 
+		{
+			tbNameFilter = (String) sessionMgr.getAttribute("tbNameFilter");
+		}
+		if (tbNameFilter == null) 
+		{
+			tbNameFilter = "";
+		}
+		sessionMgr.setAttribute("tbNameFilter", tbNameFilter.trim());
+
+		 if (StringUtil.isNotEmpty(tbNameFilter))
+	        {
+	            for (Iterator<TermbaseInfo> it = tbList.iterator(); it.hasNext();)
+	            {
+	                TermbaseInfo tb = it.next();
+	                if (tb.getName().toLowerCase()
+	                        .indexOf(tbNameFilter.toLowerCase().trim()) == -1)
+	                {
+	                    it.remove();
+				}
+			}
+		}
+	}
 }

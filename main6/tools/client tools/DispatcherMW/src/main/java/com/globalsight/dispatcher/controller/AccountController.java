@@ -51,6 +51,7 @@ import com.globalsight.dispatcher.dao.MTPLanguagesDAO;
 public class AccountController implements AppConstants
 {
     private static final Logger logger = Logger.getLogger(AccountController.class);  
+    final int securityCodeLength = 20;
     AccountDAO accountDAO = DispatcherDAOFactory.getAccountDAO();
     MTPLanguagesDAO langDAO = DispatcherDAOFactory.getMTPLanguagesDAO();
     
@@ -65,13 +66,19 @@ public class AccountController implements AppConstants
     public String viewDetail(@RequestParam Map<String, String> p_reqMap, ModelMap p_model) 
             throws FileNotFoundException, JAXBException
     {
-        Account data = new Account();
+        Account data = null;
         String idStr = p_reqMap.get("selectedID");
         if (idStr != null)
         {
             long id = Long.valueOf(idStr);
             if (id >= 0)
                 data = accountDAO.getAccount(id);
+        }
+        
+        if (data == null)
+        {
+            data = new Account();
+            data.setSecurityCode(RandomStringUtils.randomAlphabetic(securityCodeLength));
         }
 
         p_model.put("account", data);
@@ -93,7 +100,7 @@ public class AccountController implements AppConstants
         }
         else
         {
-            account = accountDAO.getAccount(Long.valueOf(accountIDStr));
+            account = new Account(accountDAO.getAccount(Long.valueOf(accountIDStr)));
         }
         account.setAccountName(accountName);
         account.setDescription(description);
@@ -143,12 +150,10 @@ public class AccountController implements AppConstants
     @RequestMapping(value = "/getRandom", method = RequestMethod.GET)
     public void getRandom(HttpServletRequest p_request, HttpServletResponse p_response) throws IOException, JSONException
     { 
-        int length = 20;
         JSONObject obj = new JSONObject();
-        String securityCode = RandomStringUtils.randomAlphabetic(length);
-        
+        String securityCode = RandomStringUtils.randomAlphabetic(securityCodeLength);        
         obj.put("securityCode", securityCode);
-        obj.put("length", length);
+        obj.put("length", securityCodeLength);
         logger.info("Generate Security Code: " + obj.toString());
         p_response.getWriter().write(obj.toString());
     }

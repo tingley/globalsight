@@ -23,73 +23,7 @@ PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMI
 String type = (String)sessionMgr.getAttribute("destinationPage");
 String searchType = (String)request.getAttribute("searchType");
 String scriptlet = (String)request.getAttribute(JobManagementHandler.JOB_SCRIPTLET);
-Integer num = (Integer)request.getAttribute(JobManagementHandler.NUM_OF_JOBS);
-
-if (0 == num)
-{    
-    if (searchType != null && searchType.equals(JobSearchConstants.MINI_JOB_SEARCH_COOKIE))
-    {
-         request.setAttribute("noresults", "true");
-%>
-        <jsp:forward page="miniSearch.jsp"/>
-<%
-    } else {
-        if (searchType != null && searchType.equals("stateOnly"))
-        {
-            StringBuffer buf = new StringBuffer(bundle.getString("msg_job_search_no_state"));
-            buf.append(" ");
-            if (type.equals("pending")) {
-                buf.append(bundle.getString("lb_pending"));
-            } else if (type.equals("ready")) {
-                buf.append(bundle.getString("lb_ready"));
-            } else if (type.equals("inprogress")) {
-                buf.append(bundle.getString("lb_inprogress"));
-            } else if (type.equals("localized")) {
-                buf.append(bundle.getString("lb_localized"));
-            } else if (type.equals("dtpinprogress")) {
-                buf.append(bundle.getString("lb_dtpinprogress"));
-            } else if (type.equals("exported")) {
-                buf.append(bundle.getString("lb_exported"));
-            } else if (type.equals("archived")) {
-                buf.append(bundle.getString("lb_archived"));
-            } else if (type.equals("allStatus")) {
-            	buf.append(bundle.getString("lb_all_status"));
-            }
-            buf.append(".  ");
-            buf.append(bundle.getString("msg_job_search_try"));
-            request.setAttribute("noresults", buf.toString());
-        }
-        else
-             request.setAttribute("noresults", bundle.getString("msg_job_search_no_match"));
-        Locale uiLocale =
-            (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-        List srcLocales = WorkflowTemplateHandlerHelper.getAllSourceLocales(uiLocale);
-        request.setAttribute("srcLocales", srcLocales);
-        List targLocales = WorkflowTemplateHandlerHelper.getAllTargetLocales(uiLocale);
-        request.setAttribute("targLocales", targLocales);
-        String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
-        List projectInfos;
-
-        if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
-        {
-            projectInfos = WorkflowTemplateHandlerHelper.getAllProjectInfos(uiLocale);
-        }
-        else if (perms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
-        {
-            projectInfos = WorkflowTemplateHandlerHelper.getProjectInfosByUser(userName, uiLocale);
-        }
-        else
-        {
-            User user = UserHandlerHelper.getUser(userName);
-            projectInfos = WorkflowTemplateHandlerHelper.getAllProjectInfosForUser(user, uiLocale);
-        }
-        request.setAttribute("projects", projectInfos);
-
-%>
-        <jsp:forward page="jobSearch.jsp"/>
-<%
-    }
-} else {    
+   
     if (type.equals("pending"))
     {
 %>
@@ -138,5 +72,4 @@ if (0 == num)
         <jsp:forward page="jobControlAll.jsp"/>
 <%
     }
-}
 %>

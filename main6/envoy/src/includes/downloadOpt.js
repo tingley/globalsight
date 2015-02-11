@@ -227,6 +227,14 @@ function setClientDwnldOptions(formSent)
 			document.getElementById("includeRepetitions").checked = false;
 		}
 	}
+	
+	if (dwnldOpt.excludeFullyLeveragedFiles)
+	{
+		if(dwnldOpt.excludeFullyLeveragedFiles == 'false' || dwnldOpt.excludeFullyLeveragedFiles == 'no')
+		{
+			document.getElementById("excludeFullyLeveragedFiles").checked = false;
+		}
+	}
 }
 
 

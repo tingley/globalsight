@@ -26,10 +26,8 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoLocalizedSearcher;
-import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
 import javax.servlet.RequestDispatcher;
@@ -59,6 +57,14 @@ public class JobControlCompletedHandler extends JobManagementHandler
                                   ServletContext p_context)
     throws ServletException, IOException, RemoteException, EnvoyServletException
     {
+    	HttpSession session = p_request.getSession(false);
+    	SessionManager sessionMgr = (SessionManager) session
+    		.getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+		if(Job.LOCALIZED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+				stateMarch = true;
+		setJobSearchFilters(sessionMgr, p_request, stateMarch);
+    	
         m_exportBean = new NavigationBean(EXPORT_BEAN, 
                                           p_thePageDescriptor.getPageName());
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, 
@@ -68,6 +74,7 @@ public class JobControlCompletedHandler extends JobManagementHandler
         p_request.setAttribute("action", p_request.getParameter("action"));
         performAppropriateOperation(p_request);
 
+        sessionMgr.setMyjobsAttribute("lastState", Job.LOCALIZED);
         JobVoLocalizedSearcher searcher = new JobVoLocalizedSearcher();
         searcher.setJobVos(p_request);
 
@@ -84,9 +91,6 @@ public class JobControlCompletedHandler extends JobManagementHandler
                                              Job.LOCALIZED));
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-                (SessionManager)session.getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM, 
                 BASE_BEAN);
 
@@ -94,6 +98,7 @@ public class JobControlCompletedHandler extends JobManagementHandler
         //clear the session for download job from joblist page
         sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);
         sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache.  do both.  "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); //HTTP 1.0

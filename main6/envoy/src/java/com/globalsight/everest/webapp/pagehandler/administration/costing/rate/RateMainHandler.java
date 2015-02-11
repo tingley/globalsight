@@ -76,6 +76,8 @@ public class RateMainHandler extends PageHandler
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
         try
         {
@@ -102,7 +104,25 @@ public class RateMainHandler extends PageHandler
                 checkPreReqData(p_request, session);
             }
 
-            clearSessionExceptTableInfo(session, RateConstants.RATE_KEY);
+			String rateNameFilterValue = (String) sessionMgr
+					.getAttribute(RateConstants.FILTER_RATE_NAME);
+			String rateCompanyFilterValue = (String) sessionMgr
+					.getAttribute(RateConstants.FILTER_RATE_COMPANY);
+			String sourceLocaleValue = (String) sessionMgr
+					.getAttribute(RateConstants.FILTER_RATE_SOURCE_LOCALE);
+			String targetLocaleValue = (String) sessionMgr
+					.getAttribute(RateConstants.FILTER_RATE_TARGET_LOCALE);
+
+			clearSessionExceptTableInfo(session, RateConstants.RATE_KEY);
+
+			sessionMgr.setAttribute(RateConstants.FILTER_RATE_NAME,
+					rateNameFilterValue);
+			sessionMgr.setAttribute(RateConstants.FILTER_RATE_COMPANY,
+					rateCompanyFilterValue);
+			sessionMgr.setAttribute(RateConstants.FILTER_RATE_SOURCE_LOCALE,
+					sourceLocaleValue);
+			sessionMgr.setAttribute(RateConstants.FILTER_RATE_TARGET_LOCALE,
+					targetLocaleValue);
 
             dataForTable(p_request, session);
         }

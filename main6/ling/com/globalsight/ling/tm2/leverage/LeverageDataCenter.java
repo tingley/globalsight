@@ -68,6 +68,8 @@ public class LeverageDataCenter
     private GlobalSightLocale m_sourceLocale = null;
     private Collection m_targetLocales = null;
     private Job m_job = null;
+    private boolean m_dynLevStopSearch = false;
+    private ArrayList<String> m_dynLevExactMatchs = null;
 
     // mapping of a unique original source segment and a list of
     // identical segments to it.
@@ -144,95 +146,24 @@ public class LeverageDataCenter
         identicalSegments.add(p_tuv);
     }
     
-    public void removeOriginalSourceTuv(List<BaseTmTuv> p_tuvs)
+    public void setDynLevStopSearch(boolean stopSearch)
     {
-        if (p_tuvs == null || p_tuvs.size() == 0)
+        m_dynLevStopSearch = stopSearch;
+    }
+    
+    public void addDynLevExactMatch(String exactMatchKey)
+    {
+        if (!m_dynLevStopSearch)
         {
             return;
         }
-
-        for (BaseTmTuv p_tuv : p_tuvs)
+        
+        if (m_dynLevExactMatchs == null)
         {
-            // remove 1
-            if (m_uniqueOriginalSegments != null
-                    && m_uniqueOriginalSegments.size() > 0)
-            {
-                BaseTmTuv matchedTuv = null;
-                for (BaseTmTuv tuvkey : m_uniqueOriginalSegments.keySet())
-                {
-                    if (tuvkey.getId() == p_tuv.getId())
-                    {
-                        matchedTuv = tuvkey;
-                        break;
-                    }
-                }
-
-                if (matchedTuv != null)
-                {
-                    m_uniqueOriginalSegments.remove(matchedTuv);
-                }
-            }
-
-            // remove 2
-            if (m_uniqueSeparatedSegments != null
-                    && m_uniqueSeparatedSegments.size() > 0
-                    && m_uniqueSeparatedSegments.containsKey(p_tuv))
-            {
-                m_uniqueSeparatedSegments.remove(p_tuv);
-            }
-        }
-    }
-    
-    public Collection<BaseTmTuv> getOriginalSourceTuvs()
-    {
-        if (m_uniqueOriginalSegments == null)
-        {
-            return null;
+            m_dynLevExactMatchs = new ArrayList<String>();
         }
         
-        Collection<IdenticalSegments> values = m_uniqueOriginalSegments.values();
-        List<BaseTmTuv> result = new ArrayList<BaseTmTuv>();
-        
-        if (values != null && values.size() > 0)
-        {
-            for (IdenticalSegments identicalSegments : values)
-            {
-                result.addAll(identicalSegments.m_originalSourceTuvs);
-            }
-        }
-        
-        return result;
-    }
-    
-    public Set<BaseTmTuv> getOriginalSourceTuvKeys()
-    {
-        if (m_uniqueOriginalSegments == null)
-        {
-            return null;
-        }
-        
-        Set<BaseTmTuv> tuvs = m_uniqueOriginalSegments.keySet();
-        
-        return tuvs;
-    }
-    
-    public void resetForStopSearch(Collection locales, Collection<BaseTmTuv> tuvs)
-    {
-        m_targetLocales = locales;
-        if (m_uniqueOriginalSegments != null)
-        {
-            m_uniqueOriginalSegments.clear();
-        }
-        if (m_uniqueSeparatedSegments != null)
-        {
-            m_uniqueSeparatedSegments.clear();
-            m_uniqueSeparatedSegments = null;
-        }
-        
-        for (BaseTmTuv baseTmTuv : tuvs)
-        {
-            addOriginalSourceTuv(baseTmTuv);
-        }
+        m_dynLevExactMatchs.add(exactMatchKey);
     }
 
     /**
@@ -314,7 +245,29 @@ public class LeverageDataCenter
             }
         }
 
-        return m_uniqueSeparatedSegments.keySet();
+        Set<BaseTmTuv> segments = m_uniqueSeparatedSegments.keySet();
+        if (m_dynLevStopSearch && m_dynLevExactMatchs != null)
+        {
+            int size = segments.size() - m_dynLevExactMatchs.size();
+            Set<BaseTmTuv> result = new HashSet<BaseTmTuv>(size);
+
+            for (BaseTmTuv baseTmTuv : segments)
+            {
+                String key = baseTmTuv.getId() + ""
+                        + getSourceLocale().toString();
+
+                if (!m_dynLevExactMatchs.contains(key))
+                {
+                    result.add(baseTmTuv);
+                }
+            }
+
+            return result;
+        }
+        else
+        {
+            return segments;
+        }
     }
 
     /**

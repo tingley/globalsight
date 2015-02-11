@@ -1053,6 +1053,8 @@ public class OfflineSegmentData implements Serializable
         else if (!m_displayTargetText.toString().equals(
                 other.m_displayTargetText.toString()))
             return false;
+        if(m_matchScore != other.getMatchValue())
+        	return false;
         return true;
     }
 

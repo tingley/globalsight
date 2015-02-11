@@ -560,7 +560,7 @@
 							        // DoMT is only for internal usage for now(8.5.2).
 							        if ("domt".equalsIgnoreCase(_engine))
 							        {
-							            continue;
+//							            continue;
 							        }
 							        String isSelected = "";
 

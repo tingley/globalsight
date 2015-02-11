@@ -1081,77 +1081,6 @@ function getSelectedRadio(buttonGroup)
    return -1;
 }
 
-function submitForm(buttonClicked)
-{
-    if (buttonClicked == "wordcounts")
-    {
-        DetailsForm.action = "<%= wordCountUrl %>";
-        DetailsForm.submit();
-        return;
-    }
-    if(!validate())
-    {
-        return false;
-    }
-
-    if (document.layers)
-    {
-        theForm = document.contentLayer.document.DetailsForm;
-    }
-    else
-    {
-        theForm = document.all.DetailsForm;
-    }
-
-    theForm.action = "<%= saveUrl %>";
-    theForm.submit();
-}
-
-function validate()
-{
-    if(dirty)
-    {
-        // Check hours ( when present )
-        if (document.DetailsForm.<%= hoursParam %> != null)
-        {
-            if(document.DetailsForm.<%= hoursParam %>.value == "")
-            {
-               alert("<%=bundle.getString("jsmsg_invalid_activity_hours")%>");
-               return false;
-            }
-
-             if(isNaN(document.DetailsForm.<%= hoursParam %>.value))
-             {
-                 alert("<%=bundle.getString("jsmsg_invalid_activity_hours")%>");
-                 return false;
-             }
-        }
-        // Check Pages ( when present )
-        if (document.DetailsForm.<%= pagesParam %> != null)
-        {
-            if(document.DetailsForm.<%= pagesParam %>.value == "")
-            {
-               alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
-               return false;
-            }
-
-             if(isNaN(document.DetailsForm.<%= pagesParam %>.value))
-             {
-                 alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
-                 return false;
-             }
-
-             if(Math.round(document.DetailsForm.<%= pagesParam %>.value) !=
-                document.DetailsForm.<%= pagesParam %>.value)
-             {
-                 alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
-                 return false;
-             }
-        }
-    }
-    return true;
-}
-
 function doOnload()
 {
   ContextMenu.intializeContextMenu();
@@ -1409,7 +1338,7 @@ function doOnload()
 %>
 		<tr>
 		<td colspan=2>
-		<INPUT type=BUTTON style="float:left" onclick='submitForm("wordcounts");' value='<%= labelWordCounts %>...'>
+		<INPUT type=BUTTON style="float:left" onclick='submitHourOrPageForm("wordcounts");' value='<%= labelWordCounts %>...'>
 		</td>
 		<td colspan=2></td>
 		<td>

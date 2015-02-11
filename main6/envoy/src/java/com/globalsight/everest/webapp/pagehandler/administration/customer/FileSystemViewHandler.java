@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -245,8 +246,7 @@ public class FileSystemViewHandler extends PageHandler
                 DiskFileItemFactory factory = new DiskFileItemFactory();
                 factory.setSizeThreshold(1024000);
                 ServletFileUpload upload = new ServletFileUpload(factory);
-                @SuppressWarnings("unchecked")
-                List<DiskFileItem> items = upload.parseRequest(request);
+                List<FileItem> items = upload.parseRequest(request);
 
                 for (int i = 0; i < items.size(); i++)
                 {
@@ -285,8 +285,7 @@ public class FileSystemViewHandler extends PageHandler
                 DiskFileItemFactory factory = new DiskFileItemFactory();
                 factory.setSizeThreshold(1024000);
                 ServletFileUpload upload = new ServletFileUpload(factory);
-                @SuppressWarnings("unchecked")
-                List<DiskFileItem> items = upload.parseRequest(request);
+                List<FileItem> items = upload.parseRequest(request);
 
                 for (int i = 0; i < items.size(); i++)
                 {
@@ -433,8 +432,7 @@ public class FileSystemViewHandler extends PageHandler
                 DiskFileItemFactory factory = new DiskFileItemFactory();
                 factory.setSizeThreshold(1024000);
                 ServletFileUpload upload = new ServletFileUpload(factory);
-                @SuppressWarnings("unchecked")
-                List<DiskFileItem> items = upload.parseRequest(p_request);
+                List<FileItem> items = upload.parseRequest(p_request);
                 
                 List<String> files = null;
                 for (int i = 0; i < items.size(); i++)

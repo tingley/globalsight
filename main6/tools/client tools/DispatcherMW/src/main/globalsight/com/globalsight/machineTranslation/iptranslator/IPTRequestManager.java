@@ -17,36 +17,21 @@ import com.globalsight.machineTranslation.iptranslator.request.TranslationReques
 
 public class IPTRequestManager
 {
-    private static final int maxIdleTime = 1000 * 60 * 60;
-    // request encoding
     private static final String ENCODING = "UTF-8";
     // api accept type
     private static final String CONTENTTYPE = "application/json";
     // JSON mapper
     public static ObjectMapper mapper = new ObjectMapper();
-    private static final String[] TXT =
-    {
-            "Emulsifiers are therefore used to enhance the colloidal stability of emulsions.",
-            "Dispersions and emulsions are examples of colloidal systems." };
-
 
     public StringEntity checkTranslateParams(String key, String from,
-            String to,
-            boolean flag, String[] segment) throws IOException
+            String to, String[] segments) throws IOException
     {
         TranslationRequest translationRequest = new TranslationRequest();
+        translationRequest.setKey(key);
+        translationRequest.setInput(segments);
         translationRequest.setFrom(from);
         translationRequest.setTo(to);
-        translationRequest.setKey(key);
 
-        if (flag)
-        {
-            translationRequest.setXliff(segment);
-        }
-        else
-        {
-            translationRequest.setText(segment);
-        }
         return makeParams(translationRequest);
     }
 
@@ -59,8 +44,8 @@ public class IPTRequestManager
     }
 
     private StringEntity makeParams(Request request)
-            throws UnsupportedEncodingException, IOException,
-            JsonGenerationException, JsonMappingException
+            throws JsonGenerationException, JsonMappingException,
+            UnsupportedEncodingException, IOException
     {
         StringEntity params = new StringEntity(
                 mapper.writeValueAsString(request), ENCODING);

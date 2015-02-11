@@ -5999,13 +5999,26 @@ public class Ambassador extends AbstractWebService
 
     private String appendJobCondition(String p_jobName)
     {
-        String random = p_jobName.substring(p_jobName.lastIndexOf("_") + 1);
         String condition = "NAME=?";
 
-        if (StringUtils.isNumeric(random))
+        try
         {
-            condition = "(NAME=? OR NAME LIKE '%" + random + "')";
+            int index = p_jobName.lastIndexOf("_");
+            if (index > -1)
+            {
+                String random = p_jobName.substring(index + 1);
+                if (random != null && random.length() > 6
+                        && StringUtils.isNumeric(random))
+                {
+                    condition = "(NAME=? OR NAME LIKE '%" + random + "')";
+                }
+            }
         }
+        catch (Exception ignore)
+        {
+
+        }
+
         return condition;
     }
 
@@ -6346,7 +6359,11 @@ public class Ambassador extends AbstractWebService
         }
 
         Timestamp ts = new Timestamp(p_tz);
-        ts.setLocale(null);
+        // This will decide the returned date patten, we all use "en_IE" as our
+        // locale in API, the data sample is like
+        // "14/05/14 09:25:11 o'clock GMT-00:00".
+        Locale enIE = new Locale("en", "IE");
+        ts.setLocale(enIE);
         ts.setDate(p_date);
 
         return ts.toString();

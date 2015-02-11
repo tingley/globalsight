@@ -474,7 +474,7 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=jobsSearchUrl%>"><%=bundle.getString("lb_my_jobs")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.ACTIVITIES_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tasksSearchUrl%>"><%=bundle.getString("lb_my_activities")%></A><BR>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tasksSearchUrl%>&state=-10"><%=bundle.getString("lb_my_activities")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=simpleOfflineUploadUrl%>"><%=bundle.getString("lb_offline_upload")%></A><BR>

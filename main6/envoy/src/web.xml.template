@@ -160,6 +160,17 @@
     </init-param>
     <load-on-startup>0</load-on-startup>    
   </servlet>
+  
+  <servlet>
+    <servlet-name>TaskListServlet</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.TaskListServlet</servlet-class>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+    <load-on-startup>0</load-on-startup>    
+  </servlet>
+  
 
   <servlet>
     <servlet-name>CxeExportServlet</servlet-name>
@@ -764,6 +775,11 @@
   <servlet-mapping>
     <servlet-name>ControlServlet</servlet-name>
     <url-pattern>/ControlServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TaskListServlet</servlet-name>
+    <url-pattern>/TaskListServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

@@ -22,8 +22,10 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,9 +41,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -50,6 +52,7 @@ import org.dom4j.io.SAXReader;
 
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterImpl;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
@@ -60,11 +63,8 @@ import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.User.PhoneType;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.foundation.UserRoleImpl;
-import com.globalsight.everest.jobhandler.JobException;
-import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionSet;
@@ -81,9 +81,11 @@ import com.globalsight.everest.webapp.pagehandler.administration.calendars.Calen
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
 
 public class UserImportHandler extends PageHandler
 {
@@ -121,6 +123,13 @@ public class UserImportHandler extends PageHandler
             {
                 File uploadedFile = this.uploadFile(request);
                 session.setAttribute("uploading_user", uploadedFile);
+
+                int ignoreOrOverwriteFlag = 0;// ignore as default
+                if ("1".equals(request.getParameter("ifUserExistedFlag")))
+                {
+                    ignoreOrOverwriteFlag = 1;//overwrite
+                }
+                session.setAttribute("ignoreOrOverwriteFlag", ignoreOrOverwriteFlag);
             }
             else if (action.equals("doImport"))
             {
@@ -131,8 +140,10 @@ public class UserImportHandler extends PageHandler
                     File uploadedFile = (File) session
                             .getAttribute("uploading_user");
                     session.removeAttribute("uploading_user");
+                    int flag = (Integer) session
+                            .getAttribute("ignoreOrOverwriteFlag");
                     DoImport imp = new DoImport(sessionId, uploadedFile, user,
-                            CompanyThreadLocal.getInstance().getValue());
+                            CompanyThreadLocal.getInstance().getValue(), flag);
                     imp.start();
                 }
                 else
@@ -164,12 +175,13 @@ public class UserImportHandler extends PageHandler
         {
             String tmpDir = AmbFileStoragePathUtils.getFileStorageDirPath()
                     + File.separator + "GlobalSight" + File.separator + "tmp";
-            boolean isMultiPart = FileUpload.isMultipartContent(request);
+            boolean isMultiPart = ServletFileUpload.isMultipartContent(request);
             if (isMultiPart)
             {
-                DiskFileUpload upload = new DiskFileUpload();
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
                 List<?> items = upload.parseRequest(request);
-
                 for (int i = 0; i < items.size(); i++)
                 {
                     FileItem item = (FileItem) items.get(i);
@@ -282,18 +294,19 @@ public class UserImportHandler extends PageHandler
         private String sessionId;
         private File uploadedFile;
         private User operator;
+        private int ignoreOrOverwrite = 0;// ignore existed user default
         private String companyId;
-        private static final String SQL_INSERT_PERMISSIONGROUP_USER = "insert into "
-                + " PERMISSIONGROUP_USER values(?,?)";
+        private static final String SQL_INSERT_PERMISSIONGROUP_USER = "INSERT INTO permissiongroup_user (permissiongroup_id, user_id) VALUES (?, ?)";
         private Map<String, Company> companyMap = null;
 
         public DoImport(String sessionId, File uploadedFile, User operator,
-                String companyId)
+                String companyId, int ignoreOrOverwrite)
         {
             this.sessionId = sessionId;
             this.uploadedFile = uploadedFile;
             this.operator = operator;
             this.companyId = companyId;
+            this.ignoreOrOverwrite = ignoreOrOverwrite;
         }
 
         public void run()
@@ -306,6 +319,14 @@ public class UserImportHandler extends PageHandler
         {
             try
             {
+                String[] allUserNames = ServerProxy.getUserManager()
+                        .getUserNamesFromAllCompanies();
+                Set<String> allUserNameSet = new HashSet<String>();
+                if (allUserNames != null)
+                {
+                    allUserNameSet.addAll(Arrays.asList(allUserNames));
+                }
+
                 SAXReader saxReader = new SAXReader();
                 Document document = saxReader.read(uploadedFile);
 
@@ -316,54 +337,18 @@ public class UserImportHandler extends PageHandler
                 {
                     this.cachePercentage(i, size);
                     Element userNode = (Element) userNodes.get(i);
-                    if (validateData(userNode))
+                    if (validateData(userNode, allUserNameSet))
                     {
                         this.cachePercentage(i + 0.2, size);
-                        User user = new UserImpl();
-
-                        Element basicInfoNode = userNode.element("BasicInfo");
-                        String userName = basicInfoNode.element("UserName")
-                                .getText();
-                        String companyName = basicInfoNode.element(
-                                "CompanyName").getText();
-                        Company companyUserBelongTo = ServerProxy
-                                .getJobHandler().getCompany(companyName);
-                        CompanyThreadLocal.getInstance().setIdValue(
-                                String.valueOf(companyUserBelongTo.getId()));
-                        // basic info node
-                        initUserInfo(user, userNode, basicInfoNode, userName,
-                                companyName);
-                        this.cachePercentage(i + 0.3, size);
-                        // default role node
-                        ArrayList<UserDefaultRole> defaultRolesList = initDefaultUserRoles(
-                                userNode, userName);
-                        this.cachePercentage(i + 0.4, size);
-                        // role node
-                        List<UserRoleImpl> rolesList = initUserRoles(userNode,
-                                user);
-                        this.cachePercentage(i + 0.5, size);
-                        // project node
-                        List<Long> projectIds = initProjectIds(userNode, user);
-                        this.cachePercentage(i + 0.6, size);
-                        // security node
-                        UserFieldSecurity fs = initSecurity(userNode);
-                        this.cachePercentage(i + 0.7, size);
-                        // permission node
-                        List<String> permissionGroupIds = initPermissionGroups(userNode);
-                        this.cachePercentage(i + 0.8, size);
-                        // user parameters
-                        List<UserParameterImpl> userParameterList = initUserParameter(
-                                userNode, user.getUserId());
-                        this.cachePercentage(i + 0.9, size);
-                        // save user
-                        saveUserInfo(user, companyUserBelongTo, projectIds, fs,
-                                rolesList, permissionGroupIds,
-                                userParameterList);
-                        SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(),
-                                defaultRolesList);
-                        addMessage("<b>" + userName
-                                + "</b> is imported successfully.");
-                        addMessage("--------------------------");
+                        // overwrite
+                        if (isUserAlreadyExisted(userNode, allUserNameSet))
+                        {
+                            _updateExistedUser(userNode, allUserNameSet, i, size);
+                        }
+                        else // add new
+                        {
+                            _addNewUser(userNode, i, size);
+                        }
                     }
 
                     this.cachePercentage(i + 1, size);
@@ -384,6 +369,127 @@ public class UserImportHandler extends PageHandler
         }
 
         /**
+         * Add a new user into system.
+         * @param userNode
+         * @param i
+         * @param size
+         * @throws Exception
+         */
+        private void _addNewUser(Element userNode, int i, int size)
+                throws Exception
+        {
+            User user = new UserImpl();
+            Element basicInfoNode = userNode.element("BasicInfo");
+
+            String companyName = basicInfoNode.element("CompanyName").getText();
+            Company companyUserBelongTo = ServerProxy.getJobHandler()
+                    .getCompany(companyName);
+            CompanyThreadLocal.getInstance().setIdValue(
+                    companyUserBelongTo.getId());
+
+            // basic info node
+            String userName = basicInfoNode.element("UserName").getText();
+            String userID = UserUtil.newUserId(userName);
+            user.setUserId(userID);
+            user.setUserName(userName);
+            initUserInfo(userNode, user);
+            this.cachePercentage(i + 0.3, size);
+            // default role node
+            ArrayList<UserDefaultRole> defaultRolesList =
+                    initDefaultUserRoles(userNode, userID);
+            this.cachePercentage(i + 0.4, size);
+            // role node
+            List<UserRoleImpl> rolesList = initUserRoles(userNode, user);
+            this.cachePercentage(i + 0.5, size);
+            // project node
+            List<Long> projectIds = initProjectIds(userNode, user);
+            this.cachePercentage(i + 0.6, size);
+            // security node
+            UserFieldSecurity fs = initSecurity(userNode);
+            this.cachePercentage(i + 0.7, size);
+            // permission node
+            List<Long> permissionGroupIds = initPermissionGroups(userNode);
+            this.cachePercentage(i + 0.8, size);
+            // user parameters
+            List<UserParameterImpl> userParameterList = initUserParameter(
+                    userNode, user.getUserId());
+            this.cachePercentage(i + 0.9, size);
+            // save user
+            saveUserInfo(user, companyUserBelongTo, projectIds, fs, rolesList,
+                    permissionGroupIds, userParameterList);
+            SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(),
+                    defaultRolesList);
+            addMessage("<b>" + userName + "</b> is imported successfully.");
+            addMessage("--------------------------");
+        }
+
+        private void _updateExistedUser(Element userNode,
+                Set<String> allUserNameSet, int i, int size) throws Exception
+        {
+            Element basicInfoNode = userNode.element("BasicInfo");
+
+            String companyName = basicInfoNode.element("CompanyName").getText();
+            Company companyUserBelongTo = ServerProxy.getJobHandler()
+                    .getCompany(companyName);
+            CompanyThreadLocal.getInstance().setIdValue(
+                    companyUserBelongTo.getId());
+
+            String userName = basicInfoNode.element("UserName").getText();
+//            String userID = basicInfoNode.element("UserID").getText();
+            User user = UserUtil.getUserById(UserUtil.getUserIdByName(userName));
+            String userID = user.getUserId();
+            user.setUserName(userName);
+            // basic info node
+            initUserInfo(userNode, user);
+            this.cachePercentage(i + 0.3, size);
+
+            // default role node
+            ArrayList<UserDefaultRole> defaultRolesList = initDefaultUserRoles(
+                    userNode, userID);
+            ArrayList<UserDefaultRole> oldRoles = SetDefaultRoleUtil
+                    .getDefaultRolesByUser(userID);
+            mergeDefaultRole(defaultRolesList, oldRoles);
+            this.cachePercentage(i + 0.4, size);
+
+            // role node
+            List<UserRoleImpl> rolesList = initUserRoles(userNode, user);
+            addRolesUserAlreadyHave(rolesList, user);
+            this.cachePercentage(i + 0.5, size);
+
+            // project node
+            List<Long> projectIds = initProjectIds(userNode, user);
+            addProjectsUserAlreadyIn(projectIds, userID);
+            this.cachePercentage(i + 0.6, size);
+
+            // security node
+            UserFieldSecurity fs = initSecurity(userNode);
+
+            // save user
+            ServerProxy.getUserManager().modifyUser(operator, user, projectIds,
+                    fs, rolesList);
+            this.cachePercentage(i + 0.7, size);
+
+            HibernateUtil.delete(oldRoles);
+            SetDefaultRoleUtil.saveDefaultRoles(user.getUserId(),
+                    defaultRolesList);
+            this.cachePercentage(i + 0.8, size);
+
+            // permission node
+            List<Long> allPermGroupIds = initPermissionGroups(userNode);
+            List<Long> newlyAddedPermGroupIds = getNewlyAddedPermissionGroups(
+                    allPermGroupIds, userID);
+            saveNewPermissionGroupUser(newlyAddedPermGroupIds, userID);
+            this.cachePercentage(i + 0.9, size);
+
+            // user parameters
+            List<UserParameterImpl> userParameterList = initUserParameter(
+                    userNode, userID);
+            updateUserParameters(userParameterList, userID);
+            addMessage("<b>" + userName + "</b> is updated successfully.");
+            addMessage("--------------------------");
+        }
+
+        /**
          * Save data to database
          * 
          * @param user
@@ -397,13 +503,13 @@ public class UserImportHandler extends PageHandler
          */
         private void saveUserInfo(User user, Company company,
                 List<Long> projectIds, UserFieldSecurity fs,
-                List<UserRoleImpl> rolesList, List<String> permissionGroupIds,
+                List<UserRoleImpl> rolesList, List<Long> permissionGroupIds,
                 List<UserParameterImpl> userParameterList) throws Exception
         {
             String userId = user.getUserId();
             ServerProxy.getUserManager().addUser(operator, user, projectIds,
                     fs, rolesList, false);
-            savePermissionGroupUser(permissionGroupIds, userId);
+            saveNewPermissionGroupUser(permissionGroupIds, userId);
 
             FluxCalendar baseCal = CalendarHelper.getDefaultCalendar(String
                     .valueOf(company.getId()));
@@ -434,8 +540,7 @@ public class UserImportHandler extends PageHandler
                 Element up = (Element) userParameters.get(j);
                 String name = up.element("Name").getText();
                 String value = up.element("Value").getText();
-                UserParameterImpl upi = new UserParameterImpl(userId, name,
-                        value);
+                UserParameterImpl upi = new UserParameterImpl(userId, name, value);
                 userParameterList.add(upi);
             }
             return userParameterList;
@@ -447,9 +552,10 @@ public class UserImportHandler extends PageHandler
          * @param userNode
          * @return
          */
-        private List<String> initPermissionGroups(Element userNode)
+        @SuppressWarnings("rawtypes")
+        private List<Long> initPermissionGroups(Element userNode)
         {
-            List<String> permissionGroupIds = new ArrayList<String>();
+            List<Long> permissionGroupIds = new ArrayList<Long>();
             List<?> permissionGroups = userNode.element("PermissionGroups")
                     .elements("PermissionGroup");
             for (int j = 0; j < permissionGroups.size(); j++)
@@ -466,14 +572,14 @@ public class UserImportHandler extends PageHandler
                 }
 
                 final String hsql = "from PermissionGroupImpl as a where a.name =:pgName and a.companyId =:cId";
-                Map params = new HashMap();
+                Map<String, Object> params = new HashMap<String, Object>();
                 params.put("pgName", permissionGroupName);
                 params.put("cId", company.getId());
                 List res = HibernateUtil.search(hsql, params);
                 if (res != null && res.size() > 0)
                 {
                     PermissionGroup pg = (PermissionGroup) res.get(0);
-                    permissionGroupIds.add(String.valueOf(pg.getId()));
+                    permissionGroupIds.add(pg.getId());
                 }
                 else
                 {
@@ -587,12 +693,11 @@ public class UserImportHandler extends PageHandler
                     if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
                     {
                         Project project = null;
-                        for (Iterator iter = projects.iterator(); iter
+                        for (Iterator<Project> iter = projects.iterator(); iter
                                 .hasNext();)
                         {
                             project = (Project) iter.next();
-                            if (!String.valueOf(project.getCompanyId()).equals(
-                                    companyId))
+                            if (project.getCompanyId() != company.getId())
                             {
                                 iter.remove();
                             }
@@ -649,9 +754,7 @@ public class UserImportHandler extends PageHandler
         }
 
         private ArrayList<UserDefaultRole> initDefaultUserRoles(
-                Element userNode, String userName)
-                throws LocaleManagerException, NumberFormatException,
-                RemoteException, GeneralException
+                Element userNode, String userID) throws Exception
         {
             ArrayList<UserDefaultRole> list = new ArrayList<UserDefaultRole>();
             Element roleNode = userNode.element("DefaultRoles");
@@ -660,22 +763,35 @@ public class UserImportHandler extends PageHandler
                 List<?> defaultRoles = roleNode.elements("DefaultRole");
                 for (int i = 0; i < defaultRoles.size(); i++)
                 {
-                    UserDefaultRole role = new UserDefaultRole();
-
                     Element defaultRoleNode = (Element) defaultRoles.get(i);
-                    String sourceLocale = defaultRoleNode.element(
-                            "SourceLocale").getText();
-                    String targetLocale = defaultRoleNode.element(
-                            "TargetLocale").getText();
+                    String sourceLocale = defaultRoleNode.element("SourceLocale").getText();
+                    String targetLocale = defaultRoleNode.element("TargetLocale").getText();
+                    GlobalSightLocale srcLocale = null;
+                    GlobalSightLocale trgLocale = null;
+                    try {
+                        srcLocale = ServerProxy.getLocaleManager()
+                                .getLocaleByString(sourceLocale);
+                    } catch (Exception e) {
+                        this.addToError("Cannot find locale by '<b>"
+                                + sourceLocale + "</b>' in current system.");
+                        continue;
+                    }
+                    try {
+                        trgLocale = ServerProxy.getLocaleManager()
+                                .getLocaleByString(targetLocale);
+                    } catch (Exception e) {
+                        this.addToError("Cannot find locale by '<b>"
+                                + targetLocale + "</b>' in current system.");
+                        continue;
+                    }
 
-                    role.setUserId(userName);
-                    role.setSourceLocaleId(Long.parseLong(sourceLocale));
-                    role.setTargetLocaleId(Long.parseLong(targetLocale));
-                    role.setSourceLocaleObject(ServerProxy.getLocaleManager()
-                            .getLocaleById(Long.parseLong(sourceLocale)));
-                    role.setTargetLocaleObject(ServerProxy.getLocaleManager()
-                            .getLocaleById(Long.parseLong(targetLocale)));
-                    role.setStatus("A");
+                    UserDefaultRole role = new UserDefaultRole();
+                    role.setUserId(userID);
+                    role.setSourceLocaleId(srcLocale.getId());
+                    role.setTargetLocaleId(trgLocale.getId());
+                    role.setSourceLocaleObject(srcLocale);
+                    role.setTargetLocaleObject(trgLocale);
+                    role.setStatus(UserDefaultRole.ADD);
 
                     Set<UserDefaultActivity> activities = new HashSet<UserDefaultActivity>();
                     List<?> acNodes = defaultRoleNode.elements("ActivityName");
@@ -683,6 +799,9 @@ public class UserImportHandler extends PageHandler
                     {
                         Element acNode = (Element) acNodes.get(j);
                         UserDefaultActivity ac = new UserDefaultActivity();
+                        // In "user_default_activities" table, it does not care
+                        // company id. So if an activity does not exist in
+                        // system, it does not matter, no need to check here.
                         ac.setActivityName(acNode.getText());
                         ac.setDefaultRole(role);
                         activities.add(ac);
@@ -696,8 +815,7 @@ public class UserImportHandler extends PageHandler
         }
 
         private List<UserRoleImpl> initUserRoles(Element userNode, User user)
-                throws JobException, RemoteException, GeneralException,
-                NamingException
+                throws Exception
         {
             List<UserRoleImpl> rolesList = new ArrayList<UserRoleImpl>();
 
@@ -727,6 +845,10 @@ public class UserImportHandler extends PageHandler
                                     sourceLocale, targetLocale, company.getId());
                     if (lp == null)
                     {
+                        String lpName = sourceLocale + " TO " + targetLocale;
+                        this.addToError("Cannot find locale pair: <b>"
+                                + lpName + "</b> in Company: <b>"
+                                + companyName + "</b>.");
                         continue;
                     }
 
@@ -748,47 +870,50 @@ public class UserImportHandler extends PageHandler
                     ((Role) userRole).setTargetLocale(targetLocale);
                     userRole.setUser(user.getUserId());
                     userRole.setActivity(activity);
+                    userRole.setRate("-1");
 
-                    if (UserUtil.isJobCostingEnabled())
-                    {
-                        String rate = activityNode.element("Rate").getText();
-                        if (StringUtils.isEmpty(rate))
-                        {
-                            userRole.setRate("-1");
-                        }
-                        else
-                        {
-                            long expense = Long.parseLong(rate);
-                            Rate expenseRate = (Rate) ServerProxy
-                                    .getCostingEngine().getRate(expense);
-                            if (expenseRate != null)
-                            {
-                                userRole.setRate((new Long(expenseRate.getId()))
-                                        .toString());
-                            }
-                            else
-                            {
-                                userRole.setRate("-1");
-                            }
-                            ((Role) userRole).addRate(expenseRate);
-                        }
-                    }
+                    // This can not use at all, it is hard to import rate info
+                    // by ID.
+//                    if (UserUtil.isJobCostingEnabled())
+//                    {
+//                        String rate = activityNode.element("Rate").getText();
+//                        if (StringUtils.isEmpty(rate))
+//                        {
+//                            userRole.setRate("-1");
+//                        }
+//                        else
+//                        {
+//                            long expense = Long.parseLong(rate);
+//                            Rate expenseRate = (Rate) ServerProxy
+//                                    .getCostingEngine().getRate(expense);
+//                            if (expenseRate != null)
+//                            {
+//                                userRole.setRate((new Long(expenseRate.getId()))
+//                                        .toString());
+//                            }
+//                            else
+//                            {
+//                                userRole.setRate("-1");
+//                            }
+//                            ((Role) userRole).addRate(expenseRate);
+//                        }
+//                    }
                     rolesList.add(userRole);
                 }
             }
             return rolesList;
         }
 
-        private void initUserInfo(User user, Element userNode,
-                Element basicInfoNode, String userName, String companyName)
+        private void initUserInfo(Element userNode, User user)
         {
-            user.setUserId(UserUtil.newUserId(userName));
-            user.setUserName(userName);
+            Element basicInfoNode = userNode.element("BasicInfo");
+
             user.setFirstName(basicInfoNode.element("FirstName").getText());
             user.setLastName(basicInfoNode.element("LastName").getText());
             user.setPassword(basicInfoNode.element("Password").getText());
             user.setTitle(basicInfoNode.element("Title").getText());
-            user.setCompanyName(companyName);
+            user.setCompanyName(basicInfoNode.element("CompanyName").getText());
+
             // contact info node
             Element contactInfoNode = userNode.element("ContactInfo");
             user.setAddress(contactInfoNode.element("Address").getText());
@@ -798,14 +923,18 @@ public class UserImportHandler extends PageHandler
 			user.setFaxPhoneNumber(contactInfoNode.element("Fax").getText());
             user.setEmail(contactInfoNode.element("EmailAddress").getText());
             user.setCCEmail(contactInfoNode.element("CCEmailAddress").getText());
-            user.setBCCEmail(contactInfoNode.element("BCCEmailAddress")
-                    .getText());
-            user.setDefaultUILocale(contactInfoNode.element("EmailLanguage")
-                    .getText());
+            user.setBCCEmail(contactInfoNode.element("BCCEmailAddress").getText());
+            user.setDefaultUILocale(contactInfoNode.element("EmailLanguage").getText());
         }
 
-        private void savePermissionGroupUser(List<String> permissionGroupIds,
-                String userId)
+        /**
+         * Add new data into "permissiongroup_user" table.
+         * 
+         * @param permissionGroupIds
+         * @param userId
+         */
+        private synchronized void saveNewPermissionGroupUser(
+                List<Long> permissionGroupIds, String userId)
         {
             Connection c = null;
             PreparedStatement stmt = null;
@@ -814,9 +943,9 @@ public class UserImportHandler extends PageHandler
                 c = ConnectionPool.getConnection();
                 c.setAutoCommit(false);
                 stmt = c.prepareStatement(SQL_INSERT_PERMISSIONGROUP_USER);
-                for (String id : permissionGroupIds)
+                for (Long id : permissionGroupIds)
                 {
-                    stmt.setLong(1, Long.parseLong(id));
+                    stmt.setLong(1, id);
                     stmt.setString(2, userId);
                     stmt.addBatch();
                 }
@@ -835,22 +964,115 @@ public class UserImportHandler extends PageHandler
         }
 
         /**
+         * When save data from file into "project_user", to avoid user's mapped
+         * project is overwritten, add them in the list to ensure the map will
+         * not be lost.
+         * 
+         * @param projectIds
+         * @param userID
+         * @throws Exception
+         */
+        private void addProjectsUserAlreadyIn(List<Long> projectIds,
+                String userID) throws Exception
+        {
+            Set<Long> pids = new HashSet<Long>();
+            pids.addAll(projectIds);
+
+            List<Project> projectsUserAlreadyIn = ServerProxy
+                    .getProjectHandler().getProjectsByUser(userID);
+            for (Project project: projectsUserAlreadyIn)
+            {
+                pids.add(project.getId());
+            }
+
+            projectIds.clear();
+            projectIds.addAll(pids);
+        }
+
+        /**
+         * When save user role data from file into "user_role", need merge file
+         * data and DB data before save to avoid user's current data is
+         * overwritten.
+         * 
+         * @param rolesList
+         * @param user
+         * @throws Exception
+         */
+        @SuppressWarnings("rawtypes")
+        private void addRolesUserAlreadyHave(List<UserRoleImpl> rolesList,
+                User user) throws Exception
+        {
+            Map<String, UserRoleImpl> map = new HashMap<String, UserRoleImpl>();
+            for (UserRoleImpl newRole : rolesList)
+            {
+                map.put(getRoleCompareKey(newRole), newRole);
+            }
+
+            Collection oldRoles = ServerProxy.getUserManager().getUserRoles(user);
+            if (oldRoles != null)
+            {
+                for (Iterator it = oldRoles.iterator(); it.hasNext();)
+                {
+                    UserRoleImpl oldRole = (UserRoleImpl) it.next();
+                    String oldRoleKey = getRoleCompareKey(oldRole);
+                    UserRoleImpl newRole = map.get(oldRoleKey);
+                    if (newRole != null)
+                    {
+                        rolesList.remove(newRole);
+                        rolesList.add(oldRole);
+                    }
+                    else
+                    {
+                        rolesList.add(oldRole);
+                    }
+                }
+            }
+        }
+
+        private String getRoleCompareKey(UserRoleImpl role)
+        {
+            StringBuffer keyBuf = new StringBuffer();
+            keyBuf.append(role.getSourceLocale());
+            keyBuf.append("-").append(role.getTargetLocale());
+            keyBuf.append("-").append(role.getActivity().getId());
+            keyBuf.append("-").append(role.getUser());
+
+            return keyBuf.toString();
+        }
+
+        /**
          * Check data before import
          * 
          * @param userNode
          * @return
          */
-        private boolean validateData(Element userNode) throws Exception
+        private boolean validateData(Element userNode,
+                Set<String> allUserNameSet) throws Exception
         {
             // check user existence
             String userName = userNode.element("BasicInfo").element("UserName")
                     .getText();
-            String[] allUserNames = ServerProxy.getUserManager()
-                    .getUserNamesFromAllCompanies();
-            if (allUserNames != null)
+            String companyNameFromUserNode = userNode.element("BasicInfo")
+                    .element("CompanyName").getText();
+
+            // check company existence
+            Company company = ServerProxy.getJobHandler().getCompany(
+                    companyNameFromUserNode);
+            if (company == null)
             {
-                List<?> tmp = Arrays.asList(allUserNames);
-                if (tmp.contains(userName))
+                String msg = "Skipped importing user " + userName
+                        + ". Cannot find a company named <b>"
+                        + companyNameFromUserNode + "</b> in system.";
+                logger.warn(msg);
+                addToError(msg);
+                return false;
+            }
+
+            if (isUserAlreadyExisted(userNode, allUserNameSet))
+            {
+                String comNameUserBelongTo = ServerProxy.getUserManager()
+                        .getUserByName(userName).getCompanyName();
+                if (ignoreOrOverwrite == 0)
                 {
                     String msg = "Skipped importing user <b>" + userName
                             + "</b>. It already exists.";
@@ -858,24 +1080,22 @@ public class UserImportHandler extends PageHandler
                     addToError(msg);
                     return false;
                 }
+                else
+                {
+                    if (!comNameUserBelongTo.equalsIgnoreCase(companyNameFromUserNode))
+                    {
+                        String msg = "Skipped importing user <b>" + userName
+                                + "</b>. It already exists in another company.";
+                        logger.warn(msg);
+                        addToError(msg);
+                        return false;
+                    }
+                }
             }
-            // check company existence
-            String companyName = userNode.element("BasicInfo")
-                    .element("CompanyName").getText();
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    companyName);
-            if (company == null)
-            {
-                String msg = "Skipped importing user " + userName
-                        + ". Cannot find a company named <b>" + companyName
-                        + "</b> in system.";
-                logger.warn(msg);
-                addToError(msg);
-                return false;
-            }
+
             String operatorCompanyName = operator.getCompanyName();
             if (!CompanyWrapper.isSuperCompanyName(operatorCompanyName)
-                    && !operatorCompanyName.equalsIgnoreCase(companyName))
+                    && !operatorCompanyName.equalsIgnoreCase(companyNameFromUserNode))
             {
                 String msg = "Skipped importing user <b>" + userName
                         + "</b>. You cannot import user from other companies.";
@@ -884,6 +1104,19 @@ public class UserImportHandler extends PageHandler
                 return false;
             }
             return true;
+        }
+
+        private boolean isUserAlreadyExisted(Element userNode,
+                Set<String> allUserNameSet)
+        {
+            String userName = userNode.element("BasicInfo").element("UserName")
+                    .getText();
+            if (allUserNameSet != null && allUserNameSet.contains(userName))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void addToError(String msg)
@@ -934,6 +1167,110 @@ public class UserImportHandler extends PageHandler
                 {
                     logger.warn("Failed to find proper company.", e);
                     return null;
+                }
+            }
+        }
+
+        /**
+         * Get the permission group IDs that are newly added.
+         * @param allPermissionGroupIds
+         * @param userId
+         */
+        private List<Long> getNewlyAddedPermissionGroups(
+                List<Long> allPermissionGroupIds, String userId)
+        {
+            Connection conn = null;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            try
+            {
+                String sql = "SELECT permissiongroup_id FROM permissiongroup_user WHERE user_id = ?";
+                conn = DbUtil.getConnection();
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, userId);
+                rs = ps.executeQuery();
+                while (rs.next())
+                {
+                    Long existedPGId = rs.getLong(1);
+                    allPermissionGroupIds.remove(existedPGId);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                DbUtil.silentClose(rs);
+                DbUtil.silentClose(ps);
+                DbUtil.silentReturnConnection(conn);
+            }
+
+            List<Long> result = new ArrayList<Long>();
+            result.addAll(allPermissionGroupIds);
+            return result;
+        }
+
+        @SuppressWarnings("unchecked")
+        private void updateUserParameters(
+                List<UserParameterImpl> userParameterList, String userID)
+                throws Exception
+        {
+            if (userParameterList == null || userParameterList.size() == 0)
+                return;
+
+            HashMap<String, UserParameter> map = ServerProxy
+                    .getUserParameterManager().getUserParameterMap(userID);
+            List<UserParameter> list = new ArrayList<UserParameter>();
+            for (UserParameterImpl up : userParameterList)
+            {
+                UserParameter upInDb = map.get(up.getName());
+                if (upInDb != null)
+                {
+                    upInDb.setValue(up.getValue());
+                    list.add(upInDb);
+                }
+                else
+                {
+                    list.add(up);
+                }
+            }
+            HibernateUtil.saveOrUpdate(list);
+        }
+
+        private void mergeDefaultRole(
+                ArrayList<UserDefaultRole> defaultRolesList,
+                ArrayList<UserDefaultRole> oldRoles)
+        {
+            if (oldRoles.size() == 0)
+                return;
+
+            String key = null;
+            Map<String, UserDefaultRole> map = new HashMap<String, UserDefaultRole>();
+            for (UserDefaultRole defaultRole : defaultRolesList)
+            {
+                key = defaultRole.getSourceLocaleId() + "-"
+                        + defaultRole.getTargetLocaleId();
+                map.put(key, defaultRole);
+            }
+
+            for (UserDefaultRole oldRole : oldRoles)
+            {
+                UserDefaultRole cloneRole = oldRole.clone();
+                key = cloneRole.getSourceLocaleId() + "-"
+                        + cloneRole.getTargetLocaleId();
+                UserDefaultRole curRole = map.get(key);
+                if (curRole == null)
+                {
+                    defaultRolesList.add(cloneRole);
+                }
+                else
+                {
+                    for (UserDefaultActivity act : cloneRole.getActivities())
+                    {
+                        act.setDefaultRole(curRole);
+                    }
+                    curRole.getActivities().addAll(cloneRole.getActivities());
                 }
             }
         }

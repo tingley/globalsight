@@ -33,8 +33,6 @@
     String selfUrl = self.getPageURL();
     String saveUrl = jobDetails.getPageURL();
 
-    String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
-    saveUrl += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
     Object from = request.getAttribute("from");
 
     String title= bundle.getString("lb_edit") + " " + bundle.getString("lb_estimated_translate_completion_date");
@@ -54,6 +52,7 @@
     // Data for the page
     Collection wfs = (Collection)request.getAttribute(EstimatedTranslateCompletionDateHandler.LIST);
     Object[] workflows = wfs.toArray();
+    List<Job> jobs = (List<Job>) request.getAttribute("Jobs");
 
     // Paging Info
     int pageNum = ((Integer)request.getAttribute(EstimatedTranslateCompletionDateHandler.PAGE_NUM)).intValue();
@@ -77,6 +76,7 @@
     List yearList = new ArrayList();
     List hourList = new ArrayList();
     List minuteList = new ArrayList();
+    List<String> workflowIdList = new ArrayList<String>();
     boolean editable = false;
     for (int i=0; i < listSize; i++)
     {
@@ -95,6 +95,7 @@
            yearList.add(_yearField);
            hourList.add(_hourField);
            minuteList.add(_minuteField);
+           workflowIdList.add("" + wf.getId());
         }
     }
 
@@ -125,12 +126,15 @@ function save()
     var ts = "";
     for (var i = 0; i < ws.length; i++) 
     {
-        var w = ws[i];
-        var selects = $(w).find("select");
-        var t = $(selects[0]).val() + "/" + $(selects[1]).val() + "/" + $(selects[2]).val() +" " + $(selects[3]).val() + ":" + $(selects[4]).val() + ": 00";
-        ts += "|";
-        ts += t;
-         
+        var w = ws[i];       
+        var n = $(w).find("input:checkbox:checked").length;
+        if (n > 0)
+        {
+        	var selects = $(w).find("select");
+            var t = $(selects[0]).val() + "/" + $(selects[1]).val() + "/" + $(selects[2]).val() +" " + $(selects[3]).val() + ":" + $(selects[4]).val() + ": 00";
+            ts += "|";
+            ts += t;
+        }                
     }
 
     var obj = {time: ts};
@@ -212,25 +216,34 @@ function updateAll()
         minuteField = "<%=minuteList.get(k)%>";
 
         objMonth = eval("WFForm." + monthField);
+        objYear = eval("WFForm." + yearField);
+        objHour = eval("WFForm." + hourField);
+        objMinute = eval("WFForm." + minuteField);
+        objDay = eval("WFForm." + dayField);
 
-        if (objMonth.disabled == false)
+        if (objMonth.disabled == true)
         {
+        	objMonth.disabled = false;
+        	objYear.disabled = false;
+        	objHour.disabled = false;
+        	objMinute.disabled = false;
+        	objDay.disabled = false;
+        	wfidStr = "checkField_" + "<%=workflowIdList.get(k)%>";
+        	objCheckBox = eval("WFForm." + wfidStr);
+        	objCheckBox.checked = true;
+        }
             objMonth.options[monthIndex].selected = true;
             month = objMonth.options[monthIndex].value;
-
-            objYear = eval("WFForm." + yearField);
+            
             objYear.options[yearIndex].selected = true;
             year = objYear.options[yearIndex].value;
 
-            objHour = eval("WFForm." + hourField);
             objHour.options[hourIndex].selected = true;
             hour = objHour.options[hourIndex].value;
-            
-            objMinute = eval("WFForm." + minuteField);
+                        
             objMinute.options[minuteIndex].selected = true;
             minute = objMinute.options[minuteIndex].value;
 
-            objDay = eval("WFForm." + dayField);
             var date = new Date(year, parseInt(month), 0);
             var daysInMonth = date.getDate();
             for (var i = 1; i <= objDay.length; i++) {
@@ -247,7 +260,6 @@ function updateAll()
             {
                 objDay.options[daysInMonth-1].selected = true;
             }
-        }
 <%
       }
     }
@@ -308,16 +320,17 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
-    <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
+    <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px; max-height: 800px; overflow: auto ;">
     <div class="mainHeading" style="margin-bottom:8px">
-    <%=bundle.getString("lb_job")%>: ${Job.name}
+    <%=title%>
     </div>
     <span class="mainHeading">
-    <%=title%>
+    &nbsp;
     </span>
     <form name="WFForm" method="post">
+    <input type="hidden" id="jobIds" name="jobIds" value="<%=sessionMgr.getAttribute("jobIds")%>">
     <!-- All Workflows data table -->
-    <table border="0" cellspacing="0" cellpadding="5" class="list">
+    <table border="0" cellspacing="0" cellpadding="5" class="list" style="width: 700px">
         <tr class="tableHeadingBasic" valign="bottom" style="padding-bottom: 3px;">
           <td><%=targLocaleCol%></td>
           <td style="padding-left: 20px;" width="280px"><%=estimatedCol%></td>
@@ -422,90 +435,53 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
     <table cellpadding=0 cellspacing=0 border=0 class="standardText">
         <tr valign="top">
             <td align="right">
-        <%
-        // Make the Paging widget
-        if (listSize > 0)
-        {
-            Object[] args = {new Integer(workflowFrom), new Integer(workflowTo), new Integer(totalWorkflows)};
-
-            // "Displaying x to y of z"
-            out.println(MessageFormat.format(bundle.getString("lb_displaying_records"), args));
-
-            out.println("<br>");
-            out.println("&lt; ");
-
-            // The "Previous" link
-            if (pageNum == 1) {
-                // Don't hyperlink "Previous" if it's the first page
-                out.print(bundle.getString("lb_previous"));
-            }
-            else
-            {
-%>
-                <a href="<%=selfUrl%>&<%=EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=pageNum - 1%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=sortChoice%>"><%=bundle.getString("lb_previous")%></A>
-<%
-            }
-
-            out.print(" ");
-
-            // Print out the paging numbers
-            for (int i = 1; i <= numPages; i++)
-            {
-                // Don't hyperlink the page you're on
-                if (i == pageNum)
-                {
-                    out.print("<b>" + i + "</b>");
-                }
-                // Hyperlink the other pages
-                else
-                {
-%>
-                    <a href="<%=selfUrl%>&<%=EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=i%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=sortChoice%>"><%=i%></A>
-<%
-                }
-                out.print(" ");
-            }
-            // The "Next" link
-            if (workflowTo >= totalWorkflows) {
-                // Don't hyperlink "Next" if it's the last page
-                out.print(bundle.getString("lb_next"));
-            }
-            else
-            {
-%>
-                <a href="<%=selfUrl%>&<%=EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=pageNum + 1%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=sortChoice%>"><%=bundle.getString("lb_next")%></A>
-
-<%
-            }
-            out.println(" &gt;");
-        }
-%>
           </td>
         <tr>
           <td>
+<%
+StringBuffer editableWFS = new StringBuffer();
+for(int is = 0; is < jobs.size(); is++)
+{
+    Job job = jobs.get(is);
+%>
+<p>
+<div class="mainHeading" style="word-break:break-all; width: 650px">
+    <%=bundle.getString("lb_job") %> : <%=job.getJobName() %>
+    </div>
+    </p>
 
 <!-- Workflow data table -->
-  <table border="0" cellspacing="0" cellpadding="5" class="list">
+  <table border="0" cellspacing="0" cellpadding="5" class="list" style="width: 700px">
     <tr class="tableHeadingBasic" valign="bottom" style="padding-bottom: 3px;">
       <td>
         &nbsp;
       </td>
       <td>
-        <a class="sortHREFWhite" href="<%=selfUrl%>&<%= EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=pageNum%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=WorkflowComparator.TARG_LOCALE%>&doSort=true"> <%=targLocaleCol%></a>
+        <a class="sortHREFWhite"> <%=targLocaleCol%></a>
       </td>
       <td style="padding-left: 20px;" >
-        <a class="sortHREFWhite" href="<%=selfUrl%>&<%= EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=pageNum%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=WorkflowComparator.COMPLETE%>&doSort=true"> <%=completeCol%></a>
+        <a class="sortHREFWhite"> <%=completeCol%></a>
       </td>
       <td style="padding-left: 20px;" width="280px">
-        <a class="sortHREFWhite" href="<%=selfUrl%>&<%= EstimatedTranslateCompletionDateHandler.PAGE_NUM%>=<%=pageNum%>&<%=EstimatedTranslateCompletionDateHandler.SORTING%>=<%=WorkflowComparator.ESTIMATED_TRANSLATE_COMP_DATE%>&doSort=true"> <%=estimatedCol%></a>
+        <a class="sortHREFWhite"> <%=estimatedCol%></a>
       </td>
     </tr>
 <%
-              StringBuffer editableWFS = new StringBuffer();
+Collection jobWFS = job.getWorkflows();
+workflows = jobWFS.toArray();
+listSize = workflows.length;
+              
+			int icount = 0;
               for (int i=0; i < listSize; i++)
               {
-                String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
+                String color = (icount%2 == 0) ? "#FFFFFF" : "#EEEEEE";
                 Workflow wf = (Workflow)workflows[i];
+                
+               if(wf.getState().equals(Workflow.DISPATCHED)
+                || wf.getState().equals(
+                        Workflow.READY_TO_BE_DISPATCHED))
+               {
+               icount++;
                 boolean enableEdit = false;
                 boolean enableCheck = false;
 
@@ -514,10 +490,10 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
                     (wf.getEstimatedTranslateCompletionDate() != null))
                 {
                     enableCheck = true;
-                    if (wf.isEstimatedTranslateCompletionDateOverrided())
-                    {
-                        enableEdit = true;
-                    }
+                    //if (wf.isEstimatedTranslateCompletionDateOverrided())
+                    //{
+                     //   enableEdit = true;
+                    //}
                 }
 
                 String checkboxDisabled = enableCheck ? "" : "DISABLED";
@@ -619,10 +595,14 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
                 </tr>
 <%
             }
+              }
 %>
-            <input type="hidden" name="editableWFS" value="<%=editableWFS%>">
   </tbody>
   </table>
+  <%
+  }
+  %>
+  <input type="hidden" name="editableWFS" value="<%=editableWFS%>">
 <!-- End Data Table -->
 </TD>
 </TR>
@@ -641,5 +621,6 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
     <input type="hidden" name="from" value="<%=from%>" />
 <% } %>
 </FORM>
+</DIV>
 </BODY>
 </html>

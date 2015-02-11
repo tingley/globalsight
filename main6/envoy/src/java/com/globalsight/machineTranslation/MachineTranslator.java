@@ -62,8 +62,20 @@ public interface MachineTranslator
         
     // AO MT needs this to judge if support locale pair.
     public static final String MT_PROFILE_ID = "mtProfileID";
-    public static final String SOURCE_PAGE_ID = "sourcePageID";
+//    public static final String SOURCE_PAGE_ID = "sourcePageID";
     public static final String CONTAIN_TAGS = "containTags";
+    /**
+     * In GlobalSight, segments from XLF file are "wrapped" with "ph" again.
+     * So, before send such segments to MT engine, need revert them back; After
+     * get translations from MT engine, need wrap them again. So, if the segment
+     * is from GlobalSight and from XLF file, this should be set to TRUE; If not
+     * from GlobalSight or not from XLF file, this should be set to FALSE.
+     */
+    public static final String NEED_SPECAIL_PROCESSING_XLF_SEGS = "needSpecialProcessingXlfSegments";
+    /**
+     * The source file format such as "xlf", "docx" etc.
+     */
+    public static final String DATA_TYPE = "dataType";
 
     public static final String[] gsSupportedMTEngines =
     { ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE, ENGINE_SAFABA,
@@ -100,31 +112,23 @@ public interface MachineTranslator
             String p_string) throws MachineTranslationException;
 
     /**
-     * Machine translate the given GXML segment
-     *
-     * @param p_sourceLocale source locale
-     * @param p_targetLocale target locale
-     * @param p_gxml
-     * @return GXML segment XML snippet
-     * @exception MachineTranslationException
-     */
-    public String translateSegment(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_gxml)
-            throws MachineTranslationException;
-
-    /**
      * Machine translate the given GXML segments
-     *
-     * @param p_sourceLocale source locale
-     * @param p_targetLocale target locale
-     * @param p_segments
-     * @param p_batchSize
+     * 
+     * @param sourceLocale
+     *            source locale
+     * @param targetLocale
+     *            target locale
+     * @param segments
+     * @param containTags
+     * @param isHaveRootTag
+     * @param needSpecialProcessingXlfSegs
+     * 
      * @return GXML segment XML snippet
      * @exception MachineTranslationException
      */
-    public String[] translateBatchSegments(Locale p_sourceLocale,
-        Locale p_targetLocale, String[] p_segments, boolean containTags)
-        throws MachineTranslationException;
+    public String[] translateBatchSegments(Locale sourceLocale,
+            Locale targetLocale, String[] segments, boolean containTags,
+            boolean isHaveRootTag) throws MachineTranslationException;
 
     /**
      * Used to set necessary parameters into sub mt engine

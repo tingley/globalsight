@@ -14,7 +14,7 @@ public class MTPLanguagesDAOTest
     public static void main(String[] args)
     {
 //        mtpDAP = new MockMTProfilesDAO("E:/Data/temp/000/");
-        langDao = new MockMTPLanguagesDAO("E:/Data/temp/000/");
+//        langDao = new MockMTPLanguagesDAO("E:/Data/temp/000/");
 //        testGetAllGlobalSightLocale();
         testSaveOrUpdateLanguage();
     }

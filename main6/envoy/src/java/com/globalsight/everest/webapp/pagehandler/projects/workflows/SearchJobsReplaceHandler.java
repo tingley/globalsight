@@ -32,6 +32,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.tm.searchreplace.JobInfo;
+import com.globalsight.everest.tm.searchreplace.TaskInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -120,10 +121,21 @@ public class SearchJobsReplaceHandler extends PageHandler
                         tuvInfos.add(jobInfo.getTuvInfo());
                         if (companyId == null)
                         {
-                            companyId = String.valueOf(ServerProxy
-                                    .getJobHandler()
-                                    .getJobById(jobInfo.getJobId())
-                                    .getCompanyId());
+                        	if(jobInfo.getJobId() != 0)
+                        	{
+                        		companyId = String.valueOf(ServerProxy
+                                        .getJobHandler()
+                                        .getJobById(jobInfo.getJobId())
+                                        .getCompanyId());
+                        	}
+                        	else 
+                        	{
+                        		TaskInfo taskInfo = (TaskInfo) results.get(i);
+                        		companyId = String.valueOf(ServerProxy
+                        				.getTaskManager()
+                        				.getTask(taskInfo.getTaskId())
+                        				.getCompanyId());
+							}
                         }
                     }
                 }

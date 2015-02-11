@@ -3,7 +3,17 @@
 errorPage="/envoy/common/error.jsp"
 import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.util.resourcebundle.SystemResourceBundle,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationConstants,java.util.ArrayList,java.util.Locale,java.util.Hashtable,java.util.ResourceBundle"
 session="true" %>
-<jsp:useBean id="new1" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="edit" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="self" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="remove" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="fileprofiles" scope="request" class="java.util.ArrayList" /><jsp:useBean id="search" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="advsearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" /><jsp:useBean id="filterConfiguration" scope="request" class="java.util.ArrayList" /><%
+<jsp:useBean id="new1" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="edit" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="self" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="remove" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="fileprofiles" scope="request" class="java.util.ArrayList" />
+<jsp:useBean id="search" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="advsearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="filterConfiguration" scope="request" class="java.util.ArrayList" />
+<jsp:useBean id="export"  scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+<jsp:useBean id="imports"  scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+<%
 	ResourceBundle bundle = PageHandler.getBundle(session);
 	String title = bundle.getString("lb_filter_configuration");
 	String helperText = bundle
@@ -14,6 +24,8 @@ session="true" %>
 			.getPermissionFor(Permission.FILTER_CONFIGURATION_ADD_FILTER);
 	boolean hasEditFilter = perms
 			.getPermissionFor(Permission.FILTER_CONFIGURATION_EDIT_FILTER);
+	String exportUrl = export.getPageURL()+"&action=export";
+	String importsUrl = imports.getPageURL()+ "&action=importFilter";
 %>
 <HTML>
 <!-- This is envoy\administration\filterConfiguration\filterConfigurationMain.jsp -->
@@ -82,7 +94,8 @@ session="true" %>
             var helpFile = "<%=bundle.getString("help_file_profiles_main_screen")%>";
             var hasAddFilter = "<%=hasAddFilter%>";
             var hasEditFilter = "<%=hasEditFilter%>";
-            
+            var exportUrl = "<%=exportUrl%>";
+            var importsUrl = "<%=importsUrl%>";
         </SCRIPT>
     </HEAD>
     <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides();loadFilterConfigurations();">
@@ -96,7 +109,16 @@ session="true" %>
                     <div>
                         <amb:permission name="<%=Permission.FILTER_CONFIGURATION_REMOVE_FILTERS%>">
                             <input type='button' value='<%=bundle.getString("lb_remove")%>' onclick='removeCheckedFilters()'/>
-                        </amb:permission><input type='button' id='expandAllFilters' value='<%=bundle.getString("lb_expand_all")%>' onclick='expandAllSpecialFilters();'/><input type='button' id='collapseAllFilters' value='<%=bundle.getString("lb_collapse_all")%>' onclick='collapseAllSpecialFilters();'/>
+                        </amb:permission>
+                        <input type='button' id='expandAllFilters' value='<%=bundle.getString("lb_expand_all")%>' onclick='expandAllSpecialFilters();'/>
+                        <input type='button' id='collapseAllFilters' value='<%=bundle.getString("lb_collapse_all")%>' onclick='collapseAllSpecialFilters();'/>
+                        
+                        <amb:permission name="<%=Permission.FILTER_CONFIGURATION_EXPORT_FILTERS%>">
+                            <input type='button' value='<%=bundle.getString("lb_export")%>' onclick='exportFilters()'/>
+                        </amb:permission>
+                        <amb:permission name="<%=Permission.FILTER_CONFIGURATION_IMPORT_FILTERS%>">
+                            <input type='button' value='<%=bundle.getString("lb_import")%>' onclick='importFilters()'/>
+                        </amb:permission>
                     </div>
                 </div>
                 <p>

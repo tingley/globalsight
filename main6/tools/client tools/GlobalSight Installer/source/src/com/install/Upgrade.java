@@ -506,6 +506,7 @@ public class Upgrade
             ignoreFiles.add("jmx-console-roles.properties");
             ignoreFiles.add("web-console-users.properties");
             ignoreFiles.add("web-console-roles.properties");
+//            ignoreFiles.add("mt.config.properties");
             
             ignoreFiles.add("system.xml");
             ignoreFiles.add("jboss-service.xml");

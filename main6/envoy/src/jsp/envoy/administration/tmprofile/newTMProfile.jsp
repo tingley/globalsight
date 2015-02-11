@@ -1127,7 +1127,7 @@ function doOnLoad()
                                <INPUT TYPE="checkbox" NAME="<%=dynLevReference%>" VALUE="true"><%=lbDynLevReferenceTm%>
                             </TD>
                         </TR>
-                        <TR style="display:none"><TD>
+                        <TR><TD>
                                <INPUT TYPE="checkbox" NAME="<%=dynLevStopSearch%>" VALUE="true"><%=lbDynLevStopSearch%>
                         </TD></TR>
                     </TABLE>
@@ -1300,7 +1300,7 @@ function doOnLoad()
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" STYLE="vertical-align: left">
                             <%=lbchooseLatestMatch%></TD>
-                            <TD><INPUT TYPE="checkbox" NAME="<%=latestMatchForReimport%>" VALUE="true"></TD>
+                            <TD><INPUT TYPE="checkbox" NAME="<%=latestMatchForReimport%>" VALUE="true" checked></TD>
                         </TR>
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" STYLE="vertical-align: middle">

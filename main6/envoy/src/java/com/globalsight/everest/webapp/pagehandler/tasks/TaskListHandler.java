@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import javax.naming.NamingException;
@@ -45,6 +47,8 @@ import org.apache.log4j.Logger;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -106,6 +110,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -174,8 +179,66 @@ public class TaskListHandler extends PageHandler
         HttpSession sess = p_request.getSession();
         SessionManager sessionMgr = (SessionManager) sess
                 .getAttribute(SESSION_MANAGER);
-        User user = TaskHelper.getUser(sess);
         String action = p_request.getParameter(TASK_ACTION);
+        TaskListParams listParams = (TaskListParams) sessionMgr
+                .getMyactivitiesAttribute(TaskListConstants.TASK_LIST_PARAMS);
+        String stateString = p_request.getParameter("state");
+        int state = -10;
+        boolean getState = false;
+        if (StringUtil.isNotEmpty(stateString)
+                && !TASK_ACTION_FINISH.equals(action)
+                && !TASK_ACTION_REJECT.equals(action))
+        {
+            state = Integer.parseInt(stateString);
+            getState = true;
+        }
+        if (listParams == null)
+        {
+            listParams = new TaskListParams();
+            listParams.setUILocale((Locale) sess
+                    .getAttribute(WebAppConstants.UILOCALE));
+            listParams.setTimeZone((TimeZone) sess
+                    .getAttribute(WebAppConstants.USER_TIME_ZONE));
+
+            listParams.setTaskState(state);
+
+            PermissionSet perms = (PermissionSet) sess
+                    .getAttribute(WebAppConstants.PERMISSIONS);
+            listParams.setCanManageProjects(perms
+                    .getPermissionFor(Permission.PROJECTS_MANAGE));
+            listParams.setCanManageWorkflows(perms
+                    .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS));
+            listParams.setCanExportAll(perms
+                    .getPermissionFor(Permission.ACTIVITIES_EXPORT));
+            listParams.setCanExportInProgress(perms
+                    .getPermissionFor(Permission.ACTIVITIES_EXPORT_INPROGRESS));
+
+            listParams.setPerPageCount(20);
+            listParams.setPageNumber(1);
+        }
+        else
+        {
+            if (getState && state != listParams.getTaskState())
+            {
+                listParams.setFilters(new HashMap<String, String>());
+                listParams.setPageNumber(1);
+                listParams.setSortColumn("jobId");
+                listParams.setAscSort(false);
+                listParams.setTaskState(state);
+            }
+        }
+
+        User user = TaskHelper.getUser(sess);
+        listParams.setProjectManager(TaskSearchUtil.isProjectManager(user));
+        String userId = (String) sess.getAttribute(WebAppConstants.USER_NAME);
+        boolean isSuperPm = ServerProxy.getUserManager()
+                .containsPermissionGroup(userId, WebAppConstants.SUPER_PM_NAME);
+        listParams.setSuperUser(CompanyWrapper.getSuperCompanyName().equals(
+                user.getCompanyName())
+                && !isSuperPm);
+        sessionMgr.setMyactivitiesAttribute(TaskListConstants.TASK_LIST_PARAMS,
+                listParams);
+
         List<OEMProcessStatus> statusList = new ArrayList<OEMProcessStatus>();
         if (TAST_ACTION_DOWNLOADALL.equals(action))
         {
@@ -242,9 +305,10 @@ public class TaskListHandler extends PageHandler
         else if (TASK_ACTION_GETTASKSTATUS.equals(action)
                 || TASK_ACTION_GETTASKSTATUS_ALL.equals(action))
         {
-//            long taskId = ((Task) TaskHelper.retrieveObject(sess, WORK_OBJECT)).getId();
-        	 String taskIdParam = p_request.getParameter(TASK_ID);
-             long taskId = TaskHelper.getLong(taskIdParam);
+            // long taskId = ((Task) TaskHelper.retrieveObject(sess,
+            // WORK_OBJECT)).getId();
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
             TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
             String taskStatusJSON = getTaskStatusJSON(sess, task, action, user);
             p_response.getWriter().write(taskStatusJSON);
@@ -266,31 +330,35 @@ public class TaskListHandler extends PageHandler
             p_response.getWriter().write(result);
             return;
         }
-        else if(TASK_ACTION_TRANSLATED_TEXT_RETRIEVE.equals(action))
+        else if (TASK_ACTION_TRANSLATED_TEXT_RETRIEVE.equals(action))
         {
-        	String result = "";
+            String result = "";
             try
             {
                 List<Task> tasks = getTasks(p_request);
                 int percentage = 0;
-                StringBuffer buffer = new StringBuffer();
+                JSONArray jsonArray = new JSONArray();
+                JSONObject jsonObject = null;
                 for (Task task : tasks)
                 {
                     long taskId = task.getId();
                     percentage = SegmentTuvUtil
                             .getTranslatedPercentageForTask(task);
-                    buffer.append(taskId).append("_").append(percentage)
-                            .append(",");
+                    jsonObject = new JSONObject();
+                    jsonObject.put("taskId", taskId);
+                    jsonObject.put("percent", percentage);
+
+                    jsonArray.add(jsonObject);
                 }
-                result = "{\"progress\":\"" + buffer.toString() + "\"}";
+                result = jsonArray.toJSONString();
                 p_response.getWriter().write(result);
             }
-    		catch (Exception e) 
-    		{
+            catch (Exception e)
+            {
                 throw new TaskException(
                         TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT, null, e);
-			}
-        	return;
+            }
+            return;
         }
 
         try
@@ -301,7 +369,7 @@ public class TaskListHandler extends PageHandler
         {
             log.error(ne.getMessage(), ne);
         }
-        selectTasksForDisplay(p_request, sess, user);
+        // selectTasksForDisplay(p_request, sess, user);
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
@@ -324,11 +392,15 @@ public class TaskListHandler extends PageHandler
         List<Task> tasks = new ArrayList<Task>();
 
         String taskIds = p_request.getParameter("taskParam");
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         try
         {
-        	while (tokenizer.hasMoreTokens())
-        	{
+            while (tokenizer.hasMoreTokens())
+            {
                 String taskIdParam = tokenizer.nextToken();
                 long taskId = TaskHelper.getLong(taskIdParam);
                 Task task = null;
@@ -344,7 +416,7 @@ public class TaskListHandler extends PageHandler
                 }
                 tasks.add(task);
             }
-        } 
+        }
         catch (Exception e)
         {
             throw new TaskException(
@@ -443,15 +515,15 @@ public class TaskListHandler extends PageHandler
 
         if (TASK_ACTION_FINISH.equals(action))
         {
-        	// Get taskId parameter
+            // Get taskId parameter
             String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             String taskStateParam = p_request.getParameter(TASK_STATE);
             int taskState = TaskHelper.getInt(taskStateParam, -10);
             // Get task
-            final Task task = TaskHelper.getTask(userId, taskId,
-                    taskState);
-//           final Task task = (Task) TaskHelper.retrieveObject(p_session,WORK_OBJECT);]
+            final Task task = TaskHelper.getTask(userId, taskId, taskState);
+            // final Task task = (Task)
+            // TaskHelper.retrieveObject(p_session,WORK_OBJECT);]
             synchronized (LOCK)
             {
                 // force to close session in order to get the latest task from
@@ -489,16 +561,16 @@ public class TaskListHandler extends PageHandler
         }
         else if (RECREATE_EDITION_JOB.equals(action))
         {
-//            TaskImpl task = (TaskImpl) TaskHelper.retrieveObject(p_session,
-//                    WORK_OBJECT);
-        	String taskIdParam = p_request.getParameter(TASK_ID);
-        	long taskId = TaskHelper.getLong(taskIdParam);
+            // TaskImpl task = (TaskImpl) TaskHelper.retrieveObject(p_session,
+            // WORK_OBJECT);
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
 
-        	String taskStateParam = p_request.getParameter(TASK_STATE);
-        	int taskState = TaskHelper.getInt(taskStateParam, -10);
-        	
-        	TaskImpl task = (TaskImpl)TaskHelper.getTask(p_user.getUserId(),
-        			taskId,taskState);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);
+
+            TaskImpl task = (TaskImpl) TaskHelper.getTask(p_user.getUserId(),
+                    taskId, taskState);
 
             WorkflowManagerLocal wfm = new WorkflowManagerLocal();
             wfm.recreateGSEdtionJob(task);
@@ -539,7 +611,11 @@ public class TaskListHandler extends PageHandler
             synchronized (LOCK)
             {
                 boolean isDuplicateRequest = false;
-                StringTokenizer tokenizer = new StringTokenizer(taskIds);
+                StringTokenizer tokenizer;
+                if (taskIds.indexOf(",") > 0)
+                    tokenizer = new StringTokenizer(taskIds, ",");
+                else
+                    tokenizer = new StringTokenizer(taskIds);
                 // force to close session in order to get the latest task from
                 // database
                 HibernateUtil.closeSession();
@@ -620,6 +696,7 @@ public class TaskListHandler extends PageHandler
         // String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
+        String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         JobPackageZipper zipper = new JobPackageZipper();
@@ -780,6 +857,8 @@ public class TaskListHandler extends PageHandler
                 .equalsIgnoreCase(includeRepetitions));
         downloadParams.setChangeCreationIdForMTSegments("yes"
                 .equalsIgnoreCase(changeCreationIdForMt));
+        downloadParams.setExcludeFullyLeveragedFiles("yes"
+                .equalsIgnoreCase(excludeFullyLeveragedFiles));
         downloadParams.setZipper(zipper);
 
         try
@@ -840,6 +919,7 @@ public class TaskListHandler extends PageHandler
         String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
+        String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -942,6 +1022,8 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(includeRepetitions));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
+            downloadParams.setExcludeFullyLeveragedFiles("yes"
+                    .equalsIgnoreCase(excludeFullyLeveragedFiles));
 
             downloadParams.setZipper(zipper);
             try
@@ -1003,7 +1085,11 @@ public class TaskListHandler extends PageHandler
      */
     private void completeWorkflow(String taskIds, String userId)
     {
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         try
         {
             while (tokenizer.hasMoreTokens())
@@ -1254,7 +1340,11 @@ public class TaskListHandler extends PageHandler
             User p_user)
     {
         String taskIds = p_request.getParameter("taskParam");
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
         int percentage = 0;
@@ -1335,7 +1425,11 @@ public class TaskListHandler extends PageHandler
      */
     private void updateActivityToFinishing(String taskIds)
     {
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         while (tokenizer.hasMoreTokens())
         {
             String taskId = tokenizer.nextToken();
@@ -1351,7 +1445,11 @@ public class TaskListHandler extends PageHandler
      */
     private void completeActivity(String taskIds, String userId)
     {
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         try
         {
             while (tokenizer.hasMoreTokens())
@@ -1408,7 +1506,11 @@ public class TaskListHandler extends PageHandler
         params.setActivityState(new Integer(Task.STATE_ACTIVE));
 
         String taskIds = p_request.getParameter("taskParam");
-        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        StringTokenizer tokenizer;
+        if (taskIds.indexOf(",") > 0)
+            tokenizer = new StringTokenizer(taskIds, ",");
+        else
+            tokenizer = new StringTokenizer(taskIds);
         while (tokenizer.hasMoreTokens())
         {
             String taskId = tokenizer.nextToken();
@@ -1548,8 +1650,8 @@ public class TaskListHandler extends PageHandler
         // - and finally, this **IS** the same column and screen as before
         if (sortAsc != null && request_sortAsc != null
                 && !sortAsc.toString().equals(request_sortAsc)
-                && previousSortColumn != null
-                && isRefresh != 1 && isPaging == null
+                && previousSortColumn != null && isRefresh != 1
+                && isPaging == null
                 && sortColumn == previousSortColumn.intValue()
                 && taskState == previousTaskState.intValue())
         {
@@ -1760,42 +1862,42 @@ public class TaskListHandler extends PageHandler
 
     /* Select all tasks that should be displayed under the appropriate tab, */
     /* restricting to those which are part of non-archived workflows */
-    private void selectTasksForDisplay(HttpServletRequest p_request,
-            HttpSession p_session, User p_user) throws ServletException,
-            IOException, EnvoyServletException
-
-    {
-        String listType = (String) p_request.getParameter("listType");
-        if (listType == null)
-        {
-            String lastListType = (String) p_session.getAttribute("listType");
-            listType = lastListType;
-        }
-        String isPaging = (String) p_request
-                .getParameter(WebAppConstants.TASK_LIST_START);
-        String isSort = p_request
-                .getParameter(WebAppConstants.MYACT_COL_SORT_ID);
-        if (isPaging == null && isSort == null)
-        {
-            p_session.removeAttribute(TASK_SEARCH_RESULT);
-        }
-
-        if (p_request.getParameter("init") != null)
-        {
-            p_session.setAttribute("taskListStart", 0);
-        }
-
-        if ("stateOnly".equals(listType) || "miniSearch".equals(listType)
-                || "advSearch".equals(listType))
-        {
-            getTasks(p_request, p_session, p_user);
-            p_session.setAttribute("listType", listType);
-        }
-        else
-        {
-            getTasksForDisplay(p_request, p_session, p_user);
-        }
-    }
+    // private void selectTasksForDisplay(HttpServletRequest p_request,
+    // HttpSession p_session, User p_user) throws ServletException,
+    // IOException, EnvoyServletException
+    //
+    // {
+    // String listType = (String) p_request.getParameter("listType");
+    // if (listType == null)
+    // {
+    // String lastListType = (String) p_session.getAttribute("listType");
+    // listType = lastListType;
+    // }
+    // String isPaging = (String) p_request
+    // .getParameter(WebAppConstants.TASK_LIST_START);
+    // String isSort = p_request
+    // .getParameter(WebAppConstants.MYACT_COL_SORT_ID);
+    // if (isPaging == null && isSort == null)
+    // {
+    // p_session.removeAttribute(TASK_SEARCH_RESULT);
+    // }
+    //
+    // if (p_request.getParameter("init") != null)
+    // {
+    // p_session.setAttribute("taskListStart", 0);
+    // }
+    //
+    // if ("stateOnly".equals(listType) || "miniSearch".equals(listType)
+    // || "advSearch".equals(listType))
+    // {
+    // getTasks(p_request, p_session, p_user);
+    // p_session.setAttribute("listType", listType);
+    // }
+    // else
+    // {
+    // getTasksForDisplay(p_request, p_session, p_user);
+    // }
+    // }
 
     /* Mark the selected task as rejected by the current user; update the */
     /* database and insert a new comment explaining the reason */
@@ -1803,14 +1905,14 @@ public class TaskListHandler extends PageHandler
             HttpServletResponse p_response, HttpSession p_session, User p_user)
             throws ServletException, IOException, EnvoyServletException
     {
-    	String taskIdParam = p_request.getParameter(TASK_ID);
-    	long taskId = TaskHelper.getLong(taskIdParam);
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
 
-    	String taskStateParam = p_request.getParameter(TASK_STATE);
-    	int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+        String taskStateParam = p_request.getParameter(TASK_STATE);
+        int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
 
-    	Task task = TaskHelper.getTask(p_user.getUserId(), taskId,taskState);
-//        Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        Task task = TaskHelper.getTask(p_user.getUserId(), taskId, taskState);
+        // Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
         WorkflowTaskInstance wfti = ((TaskImpl) task).getWorkflowTask();
         task = HibernateUtil.get(TaskImpl.class, task.getId());
         if (task.getState() == Task.STATE_FINISHING)
@@ -2316,9 +2418,9 @@ public class TaskListHandler extends PageHandler
         }
 
         // turn off cache. do both. "pragma" for the older browsers.
-        p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0
-        p_response.setHeader("Cache-Control", "yes-cache"); // HTTP 1.1
-        p_response.addHeader("Cache-Control", "yes-store"); // tell proxy not to
+        p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
         // cache
         p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
 
@@ -2327,322 +2429,322 @@ public class TaskListHandler extends PageHandler
         dispatcher.forward(p_request, p_response);
     }
 
-    private void getTasksForDisplay(HttpServletRequest p_request,
-            HttpSession p_session, User p_user) throws ServletException,
-            IOException, EnvoyServletException
-    {
-        int taskState = 0;
-        boolean translatorLogin = false;
-        String listType = (String) p_request.getParameter("listType");
-        String taskStatus = (String) p_request.getParameter("taskStatus");
-        Integer previousTaskState = (Integer) p_session
-                .getAttribute(TASK_STATE);
-        if (previousTaskState == null)
-        {
-            previousTaskState = new Integer(Task.STATE_ACTIVE);
-            if (listType == null)
-            {
-                // Must be translator login.
-                translatorLogin = true;
-            }
-        }
-
-        // get request values
-        if (listType != null)
-        {
-            p_request.setAttribute("listType", listType);
-            if (listType.equals("stateOnly"))
-            {
-                taskState = Integer
-                        .parseInt(p_request.getParameter(TASK_STATE));
-            }
-            else if (listType.equals("advSearch")
-                    || listType.equals("miniSearch"))
-            {
-                taskState = extractIntegerValue(
-                        p_request
-                                .getParameter(JobSearchConstants.STATUS_OPTIONS),
-                        previousTaskState.intValue());
-            }
-            else if (listType.equals("lastSearch"))
-            {
-                Integer lastTaskSearch = (Integer) p_session
-                        .getAttribute("lastTaskSearchState");
-                taskState = lastTaskSearch.intValue();
-            }
-        }
-        else
-        {
-            // From anything but search, last search, state menu, or sort
-            taskState = previousTaskState.intValue();
-
-            // listType is not "all states".
-            if (taskState > 0 && taskStatus != null)
-            {
-
-                taskState = Integer.parseInt(taskStatus);
-                previousTaskState = new Integer(taskState);
-            }
-        }
-
-        int sortColumn = extractIntegerValue(
-                p_request.getParameter(MYACT_COL_SORT_ID), -1);
-
-        int isRefresh = extractIntegerValue(p_request.getParameter(IS_REFRESH),
-                0);
-
-        String isPaging = (String) p_request.getParameter(TASK_LIST_START);
-
-        // get session values - used to remember and switch sort directions
-        Integer previousSortColumn = (Integer) p_session
-                .getAttribute(MYACT_COL_SORT_ID);
-        Boolean sortAsc = (Boolean) p_session.getAttribute(MYACT_SORT_ASC);
-        String request_sortAsc = p_request.getParameter(MYACT_SORT_ASC);
-
-        // Toggle sort direction:
-        // The Sort direction is now ALWAYS present on the request.
-        // The sort arrow links built in the JSP submit the reverse sort order
-        // Toggle sort direction if:
-        // - NOT invoked from a navagation/menu selection (sortColumn = -1)
-        // - previous sort values ARE defined
-        // - NOT an auto-refresh request
-        // - NOT clicking on the paging widget
-        // - and finally, this **IS** the same column and screen as before
-        if (sortAsc != null && request_sortAsc != null
-                && !sortAsc.toString().equals(request_sortAsc)
-                && previousSortColumn != null
-                && isRefresh != 1 && isPaging == null
-                && sortColumn == previousSortColumn.intValue()
-                && taskState == previousTaskState.intValue())
-        {
-            sortAsc = new Boolean(!sortAsc.booleanValue());
-            // remember it across the session
-            p_session.setAttribute(MYACT_SORT_ASC, sortAsc);
-        }
-        else
-        // init or reset sort values
-        {
-            // task state - always reset
-            previousTaskState = new Integer(taskState);
-            p_session.setAttribute(TASK_STATE, previousTaskState);
-
-            // sort column
-            if (sortColumn == -1)
-            {
-                // create default sort column if not present
-                if (previousSortColumn == null)
-                {
-                    previousSortColumn = new Integer(
-                            WorkflowTaskDataComparator.JOB_ID);
-                    p_session.setAttribute(MYACT_COL_SORT_ID,
-                            previousSortColumn);
-                }
-                // if sortColumn == -1 then set sort col to previous
-                sortColumn = previousSortColumn.intValue();
-            }
-            else
-            {
-                // reset previous sort column
-                previousSortColumn = new Integer(sortColumn);
-                p_session.setAttribute(MYACT_COL_SORT_ID, previousSortColumn);
-            }
-
-            // session sort direction
-            // - only init if undefined
-            if (sortAsc == null)
-            {
-                sortAsc = new Boolean(false); // Ascending == true, Descending
-                // == false
-                p_session.setAttribute(MYACT_SORT_ASC, sortAsc);
-            }
-
-            // initial request sort direction
-            if (request_sortAsc == null)
-            {
-                request_sortAsc = sortAsc.toString();
-            }
-        }
-
-        String taskListStartStr = p_request.getParameter(TASK_LIST_START);
-        int taskListStart = extractIntegerValue(taskListStartStr, 0);
-        if (taskListStartStr != null
-                || WorkflowConstants.TASK_ALL_STATES != taskState)
-        {
-            p_session.setAttribute("taskListStart", taskListStart);
-        }
-
-        p_request.setAttribute("action", p_request.getParameter("action"));
-        List tasks = null;
-        if (listType == null)
-        {
-            String lastListType = (String) p_session.getAttribute("listType");
-            if (lastListType != null
-                    && (lastListType.equals("advSearch") || lastListType
-                            .equals("miniSearch")))
-            {
-                // Get search parameters from session
-                try
-                {
-                    TaskSearchParameters searchParams = getSessionSearchParams(
-                            p_request, p_session);
-
-                    // Checks state changed or not.
-                    Map params = searchParams.getParameters();
-                    Integer state = (Integer) params.get(new Integer(
-                            TaskSearchParameters.STATE));
-                    if (previousTaskState != state)
-                    {
-                        searchParams.setActivityState(previousTaskState);
-                    }
-                    tasks = (List) ServerProxy.getTaskManager().getTasks(
-                            searchParams);
-                }
-                catch (GeneralException e)
-                {
-                    throw new EnvoyServletException(e);
-                }
-            }
-            else
-            {
-                tasks = TaskHelper.getTasks(p_user.getUserId(), taskState);
-            }
-        }
-        else if (listType.equals("lastSearch"))
-        {
-            // Get search parameters from session
-            try
-            {
-                TaskSearchParameters searchParams = getSessionSearchParams(
-                        p_request, p_session);
-                tasks = (List) ServerProxy.getTaskManager().getTasks(
-                        searchParams);
-            }
-            catch (GeneralException e)
-            {
-                throw new EnvoyServletException(e);
-            }
-        }
-        else if (listType.equals("advSearch") || listType.equals("miniSearch"))
-        {
-            // Get search parameters from request
-            try
-            {
-                TaskSearchParameters searchParams = getRequestSearchParams(
-                        p_request, p_session, listType);
-                tasks = (List) ServerProxy.getTaskManager().getTasks(
-                        searchParams);
-            }
-            catch (GeneralException e)
-            {
-                throw new EnvoyServletException(e);
-            }
-            p_session.setAttribute("listType", listType);
-        }
-        else if (listType.equals("stateOnly"))
-        {
-            TaskSearchParameters sp = new TaskSearchParameters();
-            SessionManager sessionMgr = (SessionManager) p_session
-                    .getAttribute(SESSION_MANAGER);
-            User user = (User) sessionMgr.getAttribute(USER);
-            sp.setUser(user);
-            sp.setSessionId(p_session.getId());
-            sp.setActivityState(new Integer(taskState));
-            /*
-             * tasks = TaskHelper.getTasks(p_session.getId(),
-             * p_user.getUserId(), taskState);
-             */
-
-            tasks = (List) ServerProxy.getTaskManager().getTasks(sp);
-            p_session.setAttribute("listType", listType);
-            p_session.setAttribute("lastState", new Integer(taskState));
-        }
-
-        if (tasks == null)
-        {
-            tasks = new Vector();
-        }
-        else
-        {
-            removeSpecialTasks(tasks);
-        }
-
-        if (tasks.size() > 0)
-        {
-            Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
-            GlobalSightLocale gl = new GlobalSightLocale(
-                    uiLocale.getLanguage(), uiLocale.getCountry(), true);
-            Iterator it = tasks.iterator();
-            while (it.hasNext())
-            {
-                Task t = (Task) it.next();
-                Workflow wf = t.getWorkflow();
-
-                if (wf != null)
-                {
-                    String wfState = wf.getState();
-                    if ((Workflow.CANCELLED).equals(wfState)
-                            || (Workflow.ARCHIVED).equals(wfState))
-                    {
-                        it.remove();
-                    }
-                }
-            }
-
-            sortTasks(tasks, sortColumn, gl, sortAsc.booleanValue());
-        }
-        if (tasks.size() == 0)
-        {
-            ResourceBundle bundle = getBundle(p_session);
-            if (translatorLogin)
-            {
-                // Try In Progress as a 2nd choice
-                taskState = Task.STATE_ACCEPTED;
-                tasks = TaskHelper.getTasks(p_user.getUserId(), taskState);
-            }
-            else if (listType == null)
-            {
-                p_request.setAttribute("noresults",
-                        bundle.getString("msg_activity_search_no_available")
-                                + bundle.getString("msg_activity_search_try"));
-            }
-            else if (listType.equals("stateOnly"))
-            {
-                Integer stateI = (Integer) p_session.getAttribute(TASK_STATE);
-                int state = stateI.intValue();
-                String stateStr = null;
-                if (state == Task.STATE_ACTIVE)
-                    stateStr = bundle.getString("lb_available");
-                else if (state == Task.STATE_ACCEPTED)
-                    stateStr = bundle.getString("lb_inprogress");
-                else if (state == Task.STATE_COMPLETED)
-                    stateStr = bundle.getString("lb_finished");
-                else if (state == Task.STATE_REJECTED)
-                    stateStr = bundle.getString("lb_rejected");
-
-                p_request.setAttribute(
-                        "noresults",
-                        bundle.getString("msg_activity_search_no_state") + " '"
-                                + stateStr + "'.\n"
-                                + bundle.getString("msg_activity_search_try"));
-            }
-            else
-            {
-                p_request.setAttribute("noresults",
-                        bundle.getString("msg_activity_search_no_match"));
-            }
-        }
-        p_request.setAttribute(MYACT_COL_SORT_ID, new Integer(sortColumn));
-        p_request.setAttribute(MYACT_SORT_ASC, request_sortAsc);
-        SessionManager sessionMgr = (SessionManager) p_session
-                .getAttribute(SESSION_MANAGER);
-        sessionMgr.setAttribute(TASK_LIST, tasks);
-        p_request.setAttribute(TASK_STATE, new Integer(taskState));
-        p_request.setAttribute(
-                "taskListStart",
-                p_session.getAttribute("taskListStart") == null ? 0 : p_session
-                        .getAttribute("taskListStart"));
-        p_request.setAttribute("languageSet", getTaskLangs(tasks));
-    }
+    // private void getTasksForDisplay(HttpServletRequest p_request,
+    // HttpSession p_session, User p_user) throws ServletException,
+    // IOException, EnvoyServletException
+    // {
+    // int taskState = 0;
+    // boolean translatorLogin = false;
+    // String listType = (String) p_request.getParameter("listType");
+    // String taskStatus = (String) p_request.getParameter("taskStatus");
+    // Integer previousTaskState = (Integer) p_session
+    // .getAttribute(TASK_STATE);
+    // if (previousTaskState == null)
+    // {
+    // previousTaskState = new Integer(Task.STATE_ACTIVE);
+    // if (listType == null)
+    // {
+    // // Must be translator login.
+    // translatorLogin = true;
+    // }
+    // }
+    //
+    // // get request values
+    // if (listType != null)
+    // {
+    // p_request.setAttribute("listType", listType);
+    // if (listType.equals("stateOnly"))
+    // {
+    // taskState = Integer
+    // .parseInt(p_request.getParameter(TASK_STATE));
+    // }
+    // else if (listType.equals("advSearch")
+    // || listType.equals("miniSearch"))
+    // {
+    // taskState = extractIntegerValue(
+    // p_request
+    // .getParameter(JobSearchConstants.STATUS_OPTIONS),
+    // previousTaskState.intValue());
+    // }
+    // else if (listType.equals("lastSearch"))
+    // {
+    // Integer lastTaskSearch = (Integer) p_session
+    // .getAttribute("lastTaskSearchState");
+    // taskState = lastTaskSearch.intValue();
+    // }
+    // }
+    // else
+    // {
+    // // From anything but search, last search, state menu, or sort
+    // taskState = previousTaskState.intValue();
+    //
+    // // listType is not "all states".
+    // if (taskState > 0 && taskStatus != null)
+    // {
+    //
+    // taskState = Integer.parseInt(taskStatus);
+    // previousTaskState = new Integer(taskState);
+    // }
+    // }
+    //
+    // int sortColumn = extractIntegerValue(
+    // p_request.getParameter(MYACT_COL_SORT_ID), -1);
+    //
+    // int isRefresh = extractIntegerValue(p_request.getParameter(IS_REFRESH),
+    // 0);
+    //
+    // String isPaging = (String) p_request.getParameter(TASK_LIST_START);
+    //
+    // // get session values - used to remember and switch sort directions
+    // Integer previousSortColumn = (Integer) p_session
+    // .getAttribute(MYACT_COL_SORT_ID);
+    // Boolean sortAsc = (Boolean) p_session.getAttribute(MYACT_SORT_ASC);
+    // String request_sortAsc = p_request.getParameter(MYACT_SORT_ASC);
+    //
+    // // Toggle sort direction:
+    // // The Sort direction is now ALWAYS present on the request.
+    // // The sort arrow links built in the JSP submit the reverse sort order
+    // // Toggle sort direction if:
+    // // - NOT invoked from a navagation/menu selection (sortColumn = -1)
+    // // - previous sort values ARE defined
+    // // - NOT an auto-refresh request
+    // // - NOT clicking on the paging widget
+    // // - and finally, this **IS** the same column and screen as before
+    // if (sortAsc != null && request_sortAsc != null
+    // && !sortAsc.toString().equals(request_sortAsc)
+    // && previousSortColumn != null && isRefresh != 1
+    // && isPaging == null
+    // && sortColumn == previousSortColumn.intValue()
+    // && taskState == previousTaskState.intValue())
+    // {
+    // sortAsc = new Boolean(!sortAsc.booleanValue());
+    // // remember it across the session
+    // p_session.setAttribute(MYACT_SORT_ASC, sortAsc);
+    // }
+    // else
+    // // init or reset sort values
+    // {
+    // // task state - always reset
+    // previousTaskState = new Integer(taskState);
+    // p_session.setAttribute(TASK_STATE, previousTaskState);
+    //
+    // // sort column
+    // if (sortColumn == -1)
+    // {
+    // // create default sort column if not present
+    // if (previousSortColumn == null)
+    // {
+    // previousSortColumn = new Integer(
+    // WorkflowTaskDataComparator.JOB_ID);
+    // p_session.setAttribute(MYACT_COL_SORT_ID,
+    // previousSortColumn);
+    // }
+    // // if sortColumn == -1 then set sort col to previous
+    // sortColumn = previousSortColumn.intValue();
+    // }
+    // else
+    // {
+    // // reset previous sort column
+    // previousSortColumn = new Integer(sortColumn);
+    // p_session.setAttribute(MYACT_COL_SORT_ID, previousSortColumn);
+    // }
+    //
+    // // session sort direction
+    // // - only init if undefined
+    // if (sortAsc == null)
+    // {
+    // sortAsc = new Boolean(false); // Ascending == true, Descending
+    // // == false
+    // p_session.setAttribute(MYACT_SORT_ASC, sortAsc);
+    // }
+    //
+    // // initial request sort direction
+    // if (request_sortAsc == null)
+    // {
+    // request_sortAsc = sortAsc.toString();
+    // }
+    // }
+    //
+    // String taskListStartStr = p_request.getParameter(TASK_LIST_START);
+    // int taskListStart = extractIntegerValue(taskListStartStr, 0);
+    // if (taskListStartStr != null
+    // || WorkflowConstants.TASK_ALL_STATES != taskState)
+    // {
+    // p_session.setAttribute("taskListStart", taskListStart);
+    // }
+    //
+    // p_request.setAttribute("action", p_request.getParameter("action"));
+    // List tasks = null;
+    // if (listType == null)
+    // {
+    // String lastListType = (String) p_session.getAttribute("listType");
+    // if (lastListType != null
+    // && (lastListType.equals("advSearch") || lastListType
+    // .equals("miniSearch")))
+    // {
+    // // Get search parameters from session
+    // try
+    // {
+    // TaskSearchParameters searchParams = getSessionSearchParams(
+    // p_request, p_session);
+    //
+    // // Checks state changed or not.
+    // Map params = searchParams.getParameters();
+    // Integer state = (Integer) params.get(new Integer(
+    // TaskSearchParameters.STATE));
+    // if (previousTaskState != state)
+    // {
+    // searchParams.setActivityState(previousTaskState);
+    // }
+    // tasks = (List) ServerProxy.getTaskManager().getTasks(
+    // searchParams);
+    // }
+    // catch (GeneralException e)
+    // {
+    // throw new EnvoyServletException(e);
+    // }
+    // }
+    // else
+    // {
+    // tasks = TaskHelper.getTasks(p_user.getUserId(), taskState);
+    // }
+    // }
+    // else if (listType.equals("lastSearch"))
+    // {
+    // // Get search parameters from session
+    // try
+    // {
+    // TaskSearchParameters searchParams = getSessionSearchParams(
+    // p_request, p_session);
+    // tasks = (List) ServerProxy.getTaskManager().getTasks(
+    // searchParams);
+    // }
+    // catch (GeneralException e)
+    // {
+    // throw new EnvoyServletException(e);
+    // }
+    // }
+    // else if (listType.equals("advSearch") || listType.equals("miniSearch"))
+    // {
+    // // Get search parameters from request
+    // try
+    // {
+    // TaskSearchParameters searchParams = getRequestSearchParams(
+    // p_request, p_session, listType);
+    // tasks = (List) ServerProxy.getTaskManager().getTasks(
+    // searchParams);
+    // }
+    // catch (GeneralException e)
+    // {
+    // throw new EnvoyServletException(e);
+    // }
+    // p_session.setAttribute("listType", listType);
+    // }
+    // else if (listType.equals("stateOnly"))
+    // {
+    // TaskSearchParameters sp = new TaskSearchParameters();
+    // SessionManager sessionMgr = (SessionManager) p_session
+    // .getAttribute(SESSION_MANAGER);
+    // User user = (User) sessionMgr.getAttribute(USER);
+    // sp.setUser(user);
+    // sp.setSessionId(p_session.getId());
+    // sp.setActivityState(new Integer(taskState));
+    // /*
+    // * tasks = TaskHelper.getTasks(p_session.getId(),
+    // * p_user.getUserId(), taskState);
+    // */
+    //
+    // tasks = (List) ServerProxy.getTaskManager().getTasks(sp);
+    // p_session.setAttribute("listType", listType);
+    // p_session.setAttribute("lastState", new Integer(taskState));
+    // }
+    //
+    // if (tasks == null)
+    // {
+    // tasks = new Vector();
+    // }
+    // else
+    // {
+    // removeSpecialTasks(tasks);
+    // }
+    //
+    // if (tasks.size() > 0)
+    // {
+    // Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
+    // GlobalSightLocale gl = new GlobalSightLocale(
+    // uiLocale.getLanguage(), uiLocale.getCountry(), true);
+    // Iterator it = tasks.iterator();
+    // while (it.hasNext())
+    // {
+    // Task t = (Task) it.next();
+    // Workflow wf = t.getWorkflow();
+    //
+    // if (wf != null)
+    // {
+    // String wfState = wf.getState();
+    // if ((Workflow.CANCELLED).equals(wfState)
+    // || (Workflow.ARCHIVED).equals(wfState))
+    // {
+    // it.remove();
+    // }
+    // }
+    // }
+    //
+    // sortTasks(tasks, sortColumn, gl, sortAsc.booleanValue());
+    // }
+    // if (tasks.size() == 0)
+    // {
+    // ResourceBundle bundle = getBundle(p_session);
+    // if (translatorLogin)
+    // {
+    // // Try In Progress as a 2nd choice
+    // taskState = Task.STATE_ACCEPTED;
+    // tasks = TaskHelper.getTasks(p_user.getUserId(), taskState);
+    // }
+    // else if (listType == null)
+    // {
+    // p_request.setAttribute("noresults",
+    // bundle.getString("msg_activity_search_no_available")
+    // + bundle.getString("msg_activity_search_try"));
+    // }
+    // else if (listType.equals("stateOnly"))
+    // {
+    // Integer stateI = (Integer) p_session.getAttribute(TASK_STATE);
+    // int state = stateI.intValue();
+    // String stateStr = null;
+    // if (state == Task.STATE_ACTIVE)
+    // stateStr = bundle.getString("lb_available");
+    // else if (state == Task.STATE_ACCEPTED)
+    // stateStr = bundle.getString("lb_inprogress");
+    // else if (state == Task.STATE_COMPLETED)
+    // stateStr = bundle.getString("lb_finished");
+    // else if (state == Task.STATE_REJECTED)
+    // stateStr = bundle.getString("lb_rejected");
+    //
+    // p_request.setAttribute(
+    // "noresults",
+    // bundle.getString("msg_activity_search_no_state") + " '"
+    // + stateStr + "'.\n"
+    // + bundle.getString("msg_activity_search_try"));
+    // }
+    // else
+    // {
+    // p_request.setAttribute("noresults",
+    // bundle.getString("msg_activity_search_no_match"));
+    // }
+    // }
+    // p_request.setAttribute(MYACT_COL_SORT_ID, new Integer(sortColumn));
+    // p_request.setAttribute(MYACT_SORT_ASC, request_sortAsc);
+    // SessionManager sessionMgr = (SessionManager) p_session
+    // .getAttribute(SESSION_MANAGER);
+    // sessionMgr.setAttribute(TASK_LIST, tasks);
+    // p_request.setAttribute(TASK_STATE, new Integer(taskState));
+    // p_request.setAttribute(
+    // "taskListStart",
+    // p_session.getAttribute("taskListStart") == null ? 0 : p_session
+    // .getAttribute("taskListStart"));
+    // p_request.setAttribute("languageSet", getTaskLangs(tasks));
+    // }
 
     private List<Task> getTasks(User user, TaskSearchParameters searchParams,
             int start, int end, HttpServletRequest request, int state,
@@ -2671,8 +2773,6 @@ public class TaskListHandler extends PageHandler
         List<Task> tasks = new ArrayList<Task>(vos.size());
         Map<Long, GlobalSightLocale> locales = new HashMap<Long, GlobalSightLocale>();
 
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet perms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         boolean isProjectManager = TaskSearchUtil.isProjectManager(user);
@@ -2794,18 +2894,24 @@ public class TaskListHandler extends PageHandler
      * Get selected task ID List.
      * 
      * @param taskParam
-     *            -- selected task IDs in string like "1001 1002 1003".
+     *            -- selected task IDs in string like "1001,1002,1003".
      */
     private List<Long> getSelectedTaskIds(String taskParam)
     {
         List<Long> selectedTaskIds = new ArrayList<Long>();
         if (taskParam != null && !"".equals(taskParam))
         {
-            String taskId = "";
-            StringTokenizer tokenizer = new StringTokenizer(taskParam);
-            while (tokenizer.hasMoreTokens())
+            Set<String> taskIdSet = new HashSet<String>();
+            if (taskParam.indexOf(",") > 0)
             {
-                taskId = tokenizer.nextToken();
+                taskIdSet = StringUtil.split(taskParam, ",");
+            }
+            else
+            {
+                taskIdSet = StringUtil.split(taskParam, " ");
+            }
+            for (String taskId : taskIdSet)
+            {
                 selectedTaskIds.add(Long.parseLong(taskId));
             }
         }

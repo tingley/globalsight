@@ -1,63 +1,54 @@
 package com.globalsight.machineTranslation.iptranslator;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
+import com.globalsight.dispatcher.util.StringUtils;
+import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
-import com.globalsight.machineTranslation.iptranslator.response.TranslateResponse;
+import com.globalsight.machineTranslation.iptranslator.response.XliffTranslationResponse;
 
 public class IPTranslatorUtil
 {
-    // private static final TestLogger logger = new TestLogger();
-    private static final Logger logger = Logger
-            .getLogger(IPTranslatorUtil.class);
-    private static final String domain = "https://sadfapi.iptranslator.com/ipt/v2";
+    private static final Logger logger =
+            Logger.getLogger(IPTranslatorUtil.class);
 
     // translate function api URL
-    private static String TRANSLATE_URL = "/translate";
+    private static String TRANSLATE_XLIFF_URL = "/translate/xliff";
+    private static String TRANSLATE_TEXT_URL = "/translate/text";
+    private static String TRANSLATE_DOCUMENT_URL = "/translate/document";
     // monitor function api URL
     private static String MONITOR_URL = "/monitor";
-    // terminate function api URL
-    // private static final String TERMINATE_URL = "/terminate";
-    public static final List<String> supportLangs = Arrays.asList("fr", "de",
-            "pt", "es", "ja");
-    // a simple client
-    // private static DefaultHttpClient httpClient = new DefaultHttpClient();;
+
     // client connection timeout and socket timeout
     private static final int INFINITE = 0;
-    // request encoding
 
-    // maximum waiting time for translation engine to start
-    private static final long MAXIMUM_WAIT = 1000 * 60 * 10;
-    // sleep time between each translation engine status check
-    private static final long SLEEP_DURATION = 1000 * 10;
-    // expected status code for running translation engine
-    private static final Integer RUNNING_STATUS = 3;
-    // testing machine client testing key.
-    private static final String key = "ryHUToaQ2zPnLLCHMT8w";
-    // source language of requested translation engine
-    // whether the translation engine usage should be optimized
-    // private static final boolean optimized = false;
-    // whether the translation engine usage should be optimized
-    // private static HttpResponse response;
     private static IPTRequestManager ipTranslatorBean = new IPTRequestManager();
 
+    // Case sensitive !!!
+    // "En" must be "from" or "to".
+    public static final HashMap<String, String> supportLangs = new HashMap<String, String>();
+    static
+    {
+        supportLangs.put("en", "En");
+        supportLangs.put("fr", "Fr");
+        supportLangs.put("de", "De");
+        supportLangs.put("pt", "Pt");
+        supportLangs.put("es", "Es");
+        supportLangs.put("ja", "Ja");
+        supportLangs.put("zhcn", "ZhCn");
+        supportLangs.put("zhtw", "ZhTw");
+    }
 
     /**
      * Test IPTranslator host, only init it.
@@ -84,40 +75,11 @@ public class IPTranslatorUtil
                 httpClient);
 
         String theString = ipTranslatorBean.checkMonitorBack(response);
-        if (isBlank(theString) || theString.contains("Error"))
+        if (StringUtils.isBlank(theString) || theString.contains("Error"))
         {
             Exception e = new Exception("IPTranslator Init call failed.");
             throw e;
         }
-    }
-    
-    /**
-     * <p>Checks if a CharSequence is whitespace, empty ("") or null.</p>
-     *
-     * <pre>
-     * StringUtils.isBlank(null)      = true
-     * StringUtils.isBlank("")        = true
-     * StringUtils.isBlank(" ")       = true
-     * StringUtils.isBlank("bob")     = false
-     * StringUtils.isBlank("  bob  ") = false
-     * </pre>
-     *
-     * @param cs  the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is null, empty or whitespace
-     * @since 2.0
-     * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
-     */
-    public static boolean isBlank(CharSequence cs) {
-        int strLen;
-        if (cs == null || (strLen = cs.length()) == 0) {
-            return true;
-        }
-        for (int i = 0; i < strLen; i++) {
-            if (Character.isWhitespace(cs.charAt(i)) == false) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -132,12 +94,8 @@ public class IPTranslatorUtil
         return true;
     }
 
-    /**
-     * post params to url
-     */
     private static HttpResponse post(StringEntity params, String url,
-            DefaultHttpClient httpClient)
-            throws IOException
+            DefaultHttpClient httpClient) throws IOException
     {
         HttpPost postRequest = new HttpPost(url);
 
@@ -148,95 +106,103 @@ public class IPTranslatorUtil
         return response;
     }
 
-
-    private static int checkOutStatus(String moniUrl,
-            String engineId, StringEntity monitorParams,
-            DefaultHttpClient httpClient) throws ClientProtocolException,
-            IOException, JsonParseException, JsonMappingException,
-            JsonGenerationException
+    private static String[] translate(String transXliffUrl, String key,
+            String from, String to, String[] segments,
+            DefaultHttpClient httpClient, boolean isXlf) throws IOException
     {
-        int status = -1;
-        // make request and receive response
-        HttpResponse response = post(monitorParams, moniUrl, httpClient);
-
-        // check response
-        if (checkResponse(response))
+        //IPTranslator uses XLF specification, replace "i" to "id".
+        if (!isXlf)
         {
-
-            // decode response
-            HashMap<String, Integer> statusMap = IPTRequestManager.mapper
-                    .readValue(response.getEntity().getContent(), HashMap.class);
-            logger.info(IPTRequestManager.mapper.writeValueAsString(statusMap));
-            // extract translation engine status
-            if (statusMap.get(engineId) != null)
+            for (int i = 0; i < segments.length; i++)
             {
-                status = statusMap.get(engineId);
+                segments[i] = segments[i].replace(" i=", " id=");
             }
         }
 
-        // consume used response
-        HttpEntity entity = response.getEntity();
-        EntityUtils.consume(entity);
-
-        return status;
-    }
-
-    private static String[] translat(String tranUrl, String key, String from,
-            String to, boolean flag, String[] segments,
-            DefaultHttpClient httpClient) throws IOException
-    {
-        //IPTranslator uses XLF specification, replace "i" to "id".
-        for (int i = 0; i < segments.length; i++)
+        // Seems IPTranslator's "ZhCn" and "ZhTw" engines can not handle '@"
+        // well, remove it when send to IPTranslator.
+        // For "jp", it is fine.
+        if (to.toLowerCase().startsWith("zh"))
         {
-            segments[i] = segments[i].replace(" i=", " id=");
+            for (int i = 0; i < segments.length; i++)
+            {
+                segments[i] = segments[i].replace("@", "");
+            }
         }
 
-        // convert translationRequest to JSON string, then wrap it as a
-        // StringEntity with encoding utf-8, finally set the api accept type
+        if (MTHelper.isLogDetailedInfo(IPTranslatorProxy.ENGINE_IPTRANSLATOR))
+        {
+            for (int j = 0; j < segments.length; j++)
+            {
+                logger.info("All source segments in xliff :: " + segments[j]);
+            }
+        }
+
+        // Convert translationRequest to JSON string, then wrap it as a
+        // StringEntity with encoding UTF-8, finally set the API accept type.
         StringEntity translateParams = ipTranslatorBean.checkTranslateParams(
-                key, from, to, flag, segments);
+                key, from, to, segments);
 
         // make request and receive response
-        HttpResponse response = post(translateParams, tranUrl, httpClient);
+        HttpResponse response = post(translateParams, transXliffUrl, httpClient);
 
         // initial translate response object
-        TranslateResponse translateResponse = null;
+        XliffTranslationResponse translateResponse = null;
 
         // check translate response
         if (checkResponse(response))
         {
             // decode translation response
             translateResponse = IPTRequestManager.mapper.readValue(response
-                    .getEntity().getContent(), TranslateResponse.class);
+                    .getEntity().getContent(), XliffTranslationResponse.class);
+
             if (logger.isDebugEnabled())
             {
                 logger.debug(IPTRequestManager.mapper
-                        .writeValueAsString(translateResponse));                
+                        .writeValueAsString(translateResponse));
             }
+
             // consume used response
             HttpEntity entity = response.getEntity();
             EntityUtils.consume(entity);
             // print translation response
             if (translateResponse != null)
             {
-
-                int[] xliff_status = translateResponse.getXliff_status();
-                String[] str = flag ? translateResponse.getXliff() : translateResponse
-                        .getText();
-                if (null == xliff_status || xliff_status[0] != -1)
+                long wordCount = translateResponse.getWordCount();
+//                if (MTHelper.isLogDetailedInfo())
                 {
-                    // Change the "id" back to "i".
-                    for (int j = 0; j < str.length; j++)
+                    logger.info("Word count from IPTranslator : " + wordCount);
+                }
+                String[] translatedXlf = translateResponse.getXliff();
+                HashMap<Integer, HashMap<String, Integer>> xliff_status =
+                        translateResponse.getXliff_status();
+                if (isAllSegsTransSuccessful(xliff_status))
+                {
+                    if (!isXlf)
                     {
-                        str[j] = str[j].replace(" id=", " i=").replace(
-                                "trans-unit i=", "trans-unit id=");
+                        // Change the "id" back to "i".
+                        for (int j = 0; j < translatedXlf.length; j++)
+                        {
+                            translatedXlf[j] = translatedXlf[j].replace(" id=",
+                                    " i=").replace("trans-unit i=",
+                                    "trans-unit id=");
+                        }
                     }
-                    return str;
+
+                    if (MTHelper.isLogDetailedInfo(IPTranslatorProxy.ENGINE_IPTRANSLATOR))
+                    {
+                        for (int m = 0; m < translatedXlf.length; m++)
+                        {
+                            logger.info("All translated segments in xliff :: " + translatedXlf[m]);
+                        }
+                    }
+
+                    return translatedXlf;
                 }
                 else
                 {
-                    logger.warn("Translation failed: " + str[0] + ", status: "
-                            + xliff_status[0]);
+                    logger.warn("Translation failed: "
+                            + translateResponse.toString());
                 }
             }
         }
@@ -251,47 +217,6 @@ public class IPTranslatorUtil
         return new String[0];
     }
 
-    /**
-     * Add "id" attribute if current tag has "i" attribute, it will use the same
-     * value as "i". For example, change:
-     *     <bpt isTranslate="false" i="92" type="m:sSub" movable="no" x="2">
-     *     to:
-     *     <bpt isTranslate="false" i="92" id = "92" type="m:sSub" movable="no" x="2">
-     */
-    private static void addIdAttribute(String segment, StringBuilder buf)
-    {
-        if (segment == null || buf == null)
-        {
-            return;
-        }
-
-        int index = segment.indexOf(" i=");
-        if (index > -1)
-        {
-            buf.append(segment.substring(0, index + 3));
-
-            String str = segment.substring(index + 3);
-            index = Math.min(str.indexOf(" "), str.indexOf(">"));
-            if (index > -1)
-            {
-                String iValue = str.substring(0, index);
-                iValue = iValue.replace("\"", "").trim();
-                buf.append("\"").append(iValue).append("\"").append(" id=\"")
-                        .append(iValue).append("\"");
-                // handle left
-                addIdAttribute(str.substring(index), buf);
-            }
-            else
-            {
-                buf.append(str);
-            }
-        }
-        else
-        {
-            buf.append(segment);
-        }
-    }
-
     public static boolean supportsLocalePair(Locale sourcelocale,
             Locale targetlocale)
     {
@@ -301,114 +226,129 @@ public class IPTranslatorUtil
         }
 
         String srcLang = sourcelocale.getLanguage();
-        String trgLang = targetlocale.getLanguage();
-        if (srcLang.equals("zh"))
-        {
-            String srcCountry = sourcelocale.getCountry();
-            if (trgLang.equals("en")
-                    && (srcCountry.equalsIgnoreCase("CN") || srcCountry
-                            .equalsIgnoreCase("SG")))
-            {
-                return true;
-            }
-        }
-        if (trgLang.equals("zh"))
-        {
-            String trgCountry = targetlocale.getCountry();
-            if (srcLang.equals("en")
-                    && (trgCountry.equalsIgnoreCase("CN") || trgCountry
-                            .equalsIgnoreCase("SG")))
-            {
-                return true;
-            }
-        }
-        if ((srcLang.equals("en") && supportLangs.contains(trgLang))
-                || (supportLangs.contains(srcLang) && trgLang.equals("en")))
-        {
+        String srcCountry = sourcelocale.getCountry();
+        srcLang = checkLang(srcLang, srcCountry);
 
+        String trgLang = targetlocale.getLanguage();
+        String trgCountry = targetlocale.getCountry();
+        trgLang = checkLang(trgLang, trgCountry);
+
+        if (("en".equalsIgnoreCase(srcLang) && isLocaleSupported(trgLang))
+                || ("en".equalsIgnoreCase(trgLang) && isLocaleSupported(srcLang)))
+        {
             return true;
         }
+
         return false;
     }
 
+    private static boolean isLocaleSupported(String lang)
+    {
+        if (supportLangs.keySet().contains(lang)
+                || supportLangs.values().contains(lang))
+            return true;
+
+        return false;
+    }
+
+    public static String checkLang(String lang, String country)
+    {
+        String lowercaseLang = lang.toLowerCase();
+        if ("zh".equalsIgnoreCase(lang))
+        {
+            if ("CN".equalsIgnoreCase(country)
+                    || "SG".equalsIgnoreCase(country))
+            {
+                lowercaseLang = "zhcn";
+            }
+            else if ("TW".equalsIgnoreCase(country)
+                    || "HK".equalsIgnoreCase(country)
+                    || "MO".equalsIgnoreCase(country))
+            {
+                lowercaseLang = "zhtw";
+            }
+        }
+
+        return supportLangs.get(lowercaseLang);
+    }
+
     public static String[] doBatchTranslation(String url, String key,
-            String from, String to, String[] p_string, boolean containTags)
+            String from, String to, String[] p_string, boolean isXlf)
             throws MachineTranslationException
     {
         DefaultHttpClient httpClient = new DefaultHttpClient();
+
         // set client timeout
+        int maxWaitTime = getMaxWaitTime() * 1000;
         httpClient.getParams().setParameter(
-                CoreConnectionPNames.CONNECTION_TIMEOUT, INFINITE);
+                CoreConnectionPNames.CONNECTION_TIMEOUT, maxWaitTime/*INFINITE*/);
         httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,
-                INFINITE);
-        String tranUrl = url + TRANSLATE_URL;
+                maxWaitTime/*INFINITE*/);
+
+        String transXliffUrl = url + TRANSLATE_XLIFF_URL;
         logger.info("Start Translation");
-
-        /*************************************/
-        /** Step 1 initialise engine **/
-        /*************************************/
-
-        // create an init request using key, language pair and configuration
-        // parameters
-
-
-        String[] result =
-        { "" };
+        String[] result = { "" };
         try
         {
-            result = translat(tranUrl, key, from, to, containTags, p_string,
-                    httpClient);
+            result = translate(transXliffUrl, key, from, to, p_string,
+                    httpClient, isXlf);
         }
         catch (IOException e)
         {
-            logger.error(e.getMessage() + " from"
-                    + from + " to" + to);
+            logger.error(e.getMessage() + " from "
+                    + from + " to " + to);
             throw new MachineTranslationException(e.getMessage());
         }
+
         return result;
-        /***************************************/
-        /** end of translation **/
-        /***************************************/
-
-        /***************************************/
-        /** Step 4 mannual switch off engine **/
-        /***************************************/
-
-        // mannually switch off engine, otherwise, engine will be switched after
-        // maxIdleTime
-
-        // terminate(engineId, translateParams);
     }
 
-    public static void main(String[] args)
+    /**
+     * Check if all "trans-unit" are translated successfully.
+     * @param xliff_status
+     * @return
+     */
+    private static boolean isAllSegsTransSuccessful(
+            HashMap<Integer, HashMap<String, Integer>> xliff_status)
     {
-        String[] source =
-        { "asd" };
+        // If no "xliff_status", we take it as successful.
+        if (xliff_status == null)
+            return true;
+
+        // As we send all segments in ONE XLF file for translation, there will
+        // be only one key "0" in "xliff_status".
+        HashMap<String, Integer> statusMap = xliff_status.get(0);
+        if (statusMap == null)
+            return true;
+
+        boolean flag = true;
+        for (Integer status : statusMap.values())
+        {
+            // 0 means successful translation
+            if (status != 0)
+                flag = false;
+            break;
+        }
+
+        return flag;
+    }
+
+    private static int getMaxWaitTime()
+    {
+        // Default 15 minutes(900 seconds).
+        int maxWaitTime = 900;
         try
         {
-            testIPHost(domain, key, null, null);
-        }
-        catch (Exception e1)
-        {
-            e1.printStackTrace();
-        }
-        try
-        {
-            for (int i = 0; i < 2; i++)
+            String param = MTHelper.getMTConfig("iptranslator.max.wait.timeout");
+            if (param != null)
             {
-                String[] result = doBatchTranslation(
-                        "https://api.iptranslator.com/ipt/v2",
-                        "ryHUToaQ2zPnLLCHMT8w", "En", "Fr", source, false);
-                if (null == result || null == result[0])
-                {
-                    System.out.print(i);
-                }
-                System.out.print(result[0]);
+                maxWaitTime = Integer.parseInt(param);
             }
         }
-        catch (MachineTranslationException e)
+        catch (Exception ignore)
         {
-            e.printStackTrace();
+
         }
+        return maxWaitTime;
     }
 }

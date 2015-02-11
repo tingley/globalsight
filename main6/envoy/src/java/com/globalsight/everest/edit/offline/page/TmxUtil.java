@@ -35,6 +35,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import com.globalsight.everest.edit.offline.download.omegat.OmegaTConst;
 import com.globalsight.everest.localemgr.LocaleManagerLocal;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.exporter.ExportUtil;
@@ -153,14 +154,22 @@ public class TmxUtil
         result.setAdminLang(Tmx.DEFAULT_ADMINLANG);
         p_writer.write(result.getHeaderXml());
     }
-
+    
     public static String composeTuWithoutTuCloseTag(
             TmxUtil.TmxTuvInfo srcTuvInfo, TmxUtil.TmxTuvInfo trgTuvInfo,
-            int p_tmxLevel, String sid)
+            int p_tmxLevel, String sid, boolean isOmegaT, String matchType,
+            String tuId)
     {
         StringBuffer result = new StringBuffer();
 
         result.append("<tu>\r\n");
+
+        if (isOmegaT && tuId != null && matchType != null)
+        {
+            Prop prop = new Tmx.Prop(matchType, tuId);
+            result.append(prop.asXML());
+        }
+
         if (sid != null)
         {
             Prop prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, sid);
@@ -176,18 +185,34 @@ public class TmxUtil
         return result.toString();
     }
 
+    public static String composeTuWithoutTuCloseTag(
+            TmxUtil.TmxTuvInfo srcTuvInfo, TmxUtil.TmxTuvInfo trgTuvInfo,
+            int p_tmxLevel, String sid)
+    {
+        return composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo, p_tmxLevel,
+                sid, false, null, null);
+    }
+    
     public static String composeTu(TmxUtil.TmxTuvInfo srcTuvInfo,
-            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid)
+            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid,
+            boolean isOmegaT, String matchType, String tuId)
     {
         StringBuffer result = new StringBuffer();
 
         result.append(composeTuWithoutTuCloseTag(srcTuvInfo, trgTuvInfo,
-                p_tmxLevel, sid));
+                p_tmxLevel, sid, isOmegaT, matchType, tuId));
 
         // TU close tag
         result.append(TmxUtil.composeTuTail());
 
         return result.toString();
+    }
+
+    public static String composeTu(TmxUtil.TmxTuvInfo srcTuvInfo,
+            TmxUtil.TmxTuvInfo trgTuvInfo, int p_tmxLevel, String sid)
+    {
+        return composeTu(srcTuvInfo, trgTuvInfo, p_tmxLevel, sid, false, null,
+                null);
     }
 
     public static String composeTmTuv(TmxUtil.TmxTuvInfo tmxTuvInfo,

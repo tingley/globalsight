@@ -63,12 +63,17 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="recreateGS" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-  <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
+ <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="wordcountList" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     SessionManager sessionMgr = 
         (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     ResourceBundle bundle = PageHandler.getBundle(session);
+    PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+	boolean reviewCommentReport= perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF);
+	boolean reviewCommentSimpleReport= perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE);
     Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
     int state = task.getState();
     long task_id = task.getId();
@@ -133,7 +138,10 @@
     String workOfflineUrl = null;
     if (review_only)
     {
-       	reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
+    	if(reviewCommentSimpleReport)
+       		reportType = ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT;
+    	if(reviewCommentReport)
+       		reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
        	downloadInstruction = bundle.getString("helper_text_download_language_instruction");
        	downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_LSO"));
        	workOfflineUrl = downloadReportUrl;
@@ -159,6 +167,7 @@
     String lbDownloadReport = bundle.getString("lb_download_report");
     String lbUploadReport = bundle.getString("lb_upload_report");
     String lbStartDownload = bundle.getString("lb_download_start");
+    String labelSave = bundle.getString("lb_save");
 
     sessionMgr.setAttribute(WebAppConstants.TARGETVIEW_LOCALE, targetLanguage);
 
@@ -168,7 +177,6 @@
 <%
 	Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
 	String activityName = task.getTaskDisplayName();
-	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
 	boolean alreadyAccepted = false;
@@ -302,6 +310,21 @@
 							"=" + theTask.getId()+
 							"&" + WebAppConstants.TASK_STATE+
 							"=" + theTask.getState();
+    
+    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
+						//GBS-2913 Added to the url parameter taskId,state;
+					    "&"+WebAppConstants.TASK_ID+
+					    "="+theTask.getId()+
+					    "&"+WebAppConstants.TASK_STATE+
+					    "="+theTask.getState();
+	String saveUrl = detail.getPageURL() +
+						"&" + WebAppConstants.TASK_ACTION +
+						"=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
+						"&" + WebAppConstants.TASK_STATE +
+						"=" + state +
+						"&" + WebAppConstants.TASK_ID +
+						"=" + task_id;
+    
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
                                 "&firstEntry=true&fromTaskDetail=true");
@@ -487,11 +510,20 @@ function download()
 	var downloadButton = dojo.byId('downloadButton');
 	downloadButton.disabled = true;
 	showProgressBar();
+	var reportType = "<%=reportType%>";
+	
+	if($("input[name='reviewCommentsReportType']:checked").val())
+	{
+		reportType = $("input[name='reviewCommentsReportType']:checked").val();
+	}
+
+	$("#reportType").val(reportType);
 	
 	var obj = {
 			inputJobIDS : "<%=task.getJobId()%>",
 			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
-			reportType:"<%=reportType%>"
+			reportType:reportType,
+			random:Math.random()
 	}	
 	
     dojo.xhrPost(
@@ -551,11 +583,21 @@ function cancelReport()
 	msg = '<%=bundle.getString("helper_test_download_report_cancel")%>';
 	changeWait();
 	
+	var reportType = "<%=reportType%>";
+	
+	if($("input[name='reviewCommentsReportType']:checked").val())
+	{
+		reportType = $("input[name='reviewCommentsReportType']:checked").val();
+	}
+
+	$("#reportType").val(reportType);
+	
 	var obj = {
 			inputJobIDS : "<%=task.getJobId()%>",
 			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
-			reportType:"<%=reportType%>"
-		}
+			reportType:reportType,
+			random:Math.random()
+	}	
 
     dojo.xhrPost(
     {
@@ -594,7 +636,7 @@ $(document).ready(function(){
  ACTION="/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=getReport&taskId=">
 <input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=task.getJobId()%>">
 <input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=task.getTargetLocale().getId()%>">
-<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=reportType%>">
+<input type="hidden" id="<%=ReportConstants.REPORT_TYPE %>" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=reportType%>">
 </FORM>
 
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
@@ -658,6 +700,20 @@ if (!review_only)
     <TD></TD>
     <TD ><%=downloadInstruction%></TD>
   </TR>
+    <%if(review_only && reviewCommentSimpleReport && reviewCommentReport){ %>
+	  <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_REPORT %>" checked><%=bundle.getString("review_reviewers_comments")%>
+     	</TD>
+     </TR>
+	 <TR>
+    	<TD>&nbsp;</TD> 	
+    	<TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<INPUT onclick="checkSaveUnlSeg(this)" TYPE="radio" ID="reviewCommentsReportType" NAME="reviewCommentsReportType" value="<%=ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT %>"><%=bundle.getString("review_reviewers_comments_simple")%>
+     	</TD>
+     </TR>
+    <%} %>
     <TR>
     <TD>&nbsp;</TD>
     <TD></TD>

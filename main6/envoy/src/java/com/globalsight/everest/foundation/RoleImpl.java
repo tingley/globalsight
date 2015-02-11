@@ -176,9 +176,9 @@ public class RoleImpl extends PersistentObject implements Role
 
         // if source, target and activity are the same
         // then check the rates
-        if (getSourceLocale().toString().equals(
+        if (getSourceLocale().toString().equalsIgnoreCase(
                 role.getSourceLocale().toString())
-                && getTargetLocale().toString().equals(
+                && getTargetLocale().toString().equalsIgnoreCase(
                         role.getTargetLocale().toString())
                 && getActivity().getName().equals(role.getActivity().getName())
                 && getState() == role.getState())

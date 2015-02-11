@@ -65,7 +65,6 @@ function fnSaveOrUpdate(){
 }
 
 function fnGenerateSecurityCode(){
-	//alert("Hello World.\n" + new Date());
 	$.getJSON("../account/getRandom.json", function( data ) {
 		$("#securityCode").val(data.securityCode); 
 	});
@@ -98,17 +97,12 @@ function fnGenerateSecurityCode(){
 				  <input type="text" id="accountName" name="accountName" 
 				  	value="${account.accountName}" style="width:98%;">
 				</td>
-				<td></td>
 			</tr>
 			<tr>
 				<td class="standardText">Security Code<span class="asterisk">*</span>:</td>
 				<td>
 				  <input type="text" id="securityCode" name="securityCode" 
-				  	value="${account.securityCode}" style="width:98%;">
-				</td>
-				<td>
-				  <input type="image" src="../resources/images/generator.png" 
-				  	onClick="fnGenerateSecurityCode();" style="height:20px;">
+				  	value="${account.securityCode}" style="width:98%;" disabled>
 				</td>
 			</tr>
 			<tr>
@@ -116,7 +110,6 @@ function fnGenerateSecurityCode(){
 				<td>
 				  <textarea id=description name="description" style="width:97%;">${account.description}</textarea>
 				</td>
-				<td></td>
 			</tr>
 			
 			<tr><td colspan="2">&nbsp;</td></tr>

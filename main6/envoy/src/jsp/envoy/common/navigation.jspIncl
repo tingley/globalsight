@@ -183,8 +183,8 @@
    String xmlDtdsUrl = LinkHelper.getWebActivityURL(request, "xmldtds");
    String segmentationRulesUrl = LinkHelper.getWebActivityURL(request, "segmentationrules");
    String sgmlRulesUrl = LinkHelper.getWebActivityURL(request, "sgmlrules");
-   String jobsSearchUrl = LinkHelper.getWebActivityURL(request, "searchJob");
-   String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "searchTask");
+   String jobsSearchUrl = LinkHelper.getWebActivityURL(request, "jobsAll");
+   String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "myactivities");
    String tmProfilesUrl = LinkHelper.getWebActivityURL(request,"tmProfiles");
    String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");
    String tmSearchUrl = homeURL+"linkName=tmSearch&pageName=TM&action=tmSearchPage";

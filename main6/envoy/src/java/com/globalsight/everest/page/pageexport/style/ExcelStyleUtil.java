@@ -41,12 +41,14 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.globalsight.everest.page.pageexport.style.xlsx.AtStyleStyle;
 import com.globalsight.everest.page.pageexport.style.xlsx.BoldStyle;
 import com.globalsight.everest.page.pageexport.style.xlsx.ItalicStyle;
 import com.globalsight.everest.page.pageexport.style.xlsx.Style;
 import com.globalsight.everest.page.pageexport.style.xlsx.SubscriptStyle;
 import com.globalsight.everest.page.pageexport.style.xlsx.SuperscriptStyle;
 import com.globalsight.everest.page.pageexport.style.xlsx.UnderlineStyle;
+import com.globalsight.ling.docproc.extractor.msoffice2010.ExcelExtractor;
 import com.globalsight.util.FileUtil;
 
 /**
@@ -199,6 +201,7 @@ public class ExcelStyleUtil extends StyleUtil
         styles.add(new UnderlineStyle());
         styles.add(new SuperscriptStyle());
         styles.add(new SubscriptStyle());
+        styles.add(new AtStyleStyle());
         return styles;
     }
 
@@ -210,9 +213,22 @@ public class ExcelStyleUtil extends StyleUtil
     {
         try
         {
-        	repairAttributeValue(filePath);
-            forStylesInWt(filePath);
-            forStylesNotInWt(filePath);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)),"utf-8"));
+            Document document = db.parse(new InputSource(br));
+            String name = document.getFirstChild().getNodeName();
+            if (ExcelExtractor.usePptxStyle(name))
+            {
+                PptxStyleUtil u = new PptxStyleUtil();
+                u.updateBeforeExport(filePath);
+            }
+            else
+            {
+                repairAttributeValue(filePath);
+                forStylesInWt(filePath);
+                forStylesNotInWt(filePath);
+            }
         }
         catch (Exception e)
         {

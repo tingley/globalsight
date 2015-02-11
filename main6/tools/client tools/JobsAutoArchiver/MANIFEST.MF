@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: 1.6.0_37 (Sun Microsystems Inc.)
+Main-class: com.globalsight.jobsAutoArchiver.AutoArchiver
+Class-Path: lib/activation-1.1.1.jar lib/axis.jar lib/commons-discovery-0.2.jar lib/dom4j-1.6.1.jar lib/javax.wsdl_1.6.2.v201012040545.jar lib/jaxen-1.1-beta-6.jar lib/jaxrpc.jar lib/log4j-1.2.15.jar lib/mail-1.4.5.jar lib/org.apache.commons.logging_1.0.4.v201101211617.jar lib/saaj.ar

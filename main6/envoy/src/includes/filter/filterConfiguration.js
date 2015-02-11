@@ -413,6 +413,21 @@ function removeCheckedFilters()
 	deleteSpecialFiltersCallback.checkedSpecialFilters = checkedSpecialFilters;
 }
 
+function exportFilters(){
+	if(isChooseOne()){
+		var specialFiltersStr = buildExportSpecialFiltersStr();
+		fpForm.action = exportUrl +"&param="+specialFiltersStr;
+		fpForm.submit();
+	}else{
+		alert("Please select at least one filter!");
+	}
+}
+
+function importFilters(){
+	fpForm.action = importsUrl;
+	fpForm.submit();
+}
+
 function isChooseOne()
 {
 	for(var i = 0; i < checkedSpecialFilters.length; i++)
@@ -423,6 +438,25 @@ function isChooseOne()
 		}
 	}
 	return false;
+}
+
+function buildExportSpecialFiltersStr()
+{
+	var str = new StringBuffer(":");
+	for(var i = 0; i < checkedSpecialFilters.length; i++)
+	{
+		var specialFilter = checkedSpecialFilters[i];
+		if(specialFilter)
+		{
+			str.append(specialFilter.topFilterId);
+			str.append(",");
+			str.append(specialFilter.specialFilterId);
+			str.append(",");
+			str.append(specialFilter.filterTable);
+			str.append(":");
+		}
+	}
+	return str.toString();
 }
 
 function buildSpecialFiltersStr()

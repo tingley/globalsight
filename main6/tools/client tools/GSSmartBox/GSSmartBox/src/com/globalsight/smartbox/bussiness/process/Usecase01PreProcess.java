@@ -191,7 +191,7 @@ public class Usecase01PreProcess implements PreProcess
             FileProfile configFP = getConfigFP(customerFPName);
             if (configFP == null)
             {
-                String message = "Can't find the fileProfileNameMapping for." + customerFPName;
+                String message = "Can't find the fileProfileNameMapping for " + customerFPName;
                 LogUtil.info(message);
                 return ;
             }

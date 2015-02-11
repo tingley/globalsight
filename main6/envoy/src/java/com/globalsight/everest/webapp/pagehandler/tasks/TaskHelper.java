@@ -40,6 +40,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.CostingException;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
@@ -1002,5 +1003,51 @@ public class TaskHelper
         }
 
         return num;
+    }
+    
+    /**
+     * Justify whether the task can been completed.
+     * If the task is uploading, it can't been completed.
+     */
+    public static boolean canCompleteTask(Task p_task)
+    {
+        if (p_task != null && p_task.getIsUploading() == 'Y')
+            return false;
+
+        return true;
+    }
+    
+    // Update the task status in Database.
+    public static Task updateTaskStatus(long p_taskId, String p_status)
+    {
+        Task task = getTask(p_taskId);
+        return updateTaskStatus(task, p_status);
+    }
+    
+    /**
+     * Update the task status in Database.(GBS-3229/1939)
+     * 
+     * @param p_task
+     *            Task
+     * @param p_status
+     *            Task status(UPLOAD_IN_PROGRESS/UPLOAD_DONE)
+     */
+    public static Task updateTaskStatus(Task p_task, String p_status)
+    {
+        if (p_task == null)
+            return null;
+
+        if (AmbassadorDwUpConstants.UPLOAD_IN_PROGRESS.equals(p_status))
+        {
+            p_task.setIsUploading('Y');
+            HibernateUtil.update(p_task);
+        }
+        else if (AmbassadorDwUpConstants.UPLOAD_DONE.equals(p_status))
+        {
+            p_task.setIsUploading('N');
+            HibernateUtil.update(p_task);
+        }
+
+        return p_task;
     }
 }

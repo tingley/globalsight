@@ -24,7 +24,7 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
@@ -74,8 +74,7 @@ public class FileUploader
         DiskFileItemFactory factory = new DiskFileItemFactory();
         factory.setSizeThreshold(1024000);
         ServletFileUpload upload = new ServletFileUpload(factory);
-        @SuppressWarnings("unchecked")
-        List<DiskFileItem> fileItems = upload.parseRequest(request);
+        List<FileItem> fileItems = upload.parseRequest(request);
         outFile = saveTmpFile(fileItems);
 
         return outFile;
@@ -91,14 +90,14 @@ public class FileUploader
         return fields.get(p_fieldName);
     }
 
-    private File saveTmpFile(List<DiskFileItem> fileItems) throws Exception
+    private File saveTmpFile(List<FileItem> fileItems) throws Exception
     {
 
         File file = File.createTempFile("GSDTDUpload", null);
 
         // Set overall request size constraint
         long uploadTotalSize = 0;
-        for (DiskFileItem item : fileItems)
+        for (FileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -113,7 +112,7 @@ public class FileUploader
 
         log.debug("File size: " + uploadTotalSize);
 
-        for (DiskFileItem item : fileItems)
+        for (FileItem item : fileItems)
         {
             if (!item.isFormField())
             {

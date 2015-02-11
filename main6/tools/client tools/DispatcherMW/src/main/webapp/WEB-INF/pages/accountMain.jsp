@@ -64,6 +64,7 @@ function fnRemove(){
 		}
 	});
 }
+
 </script>
 </head>
 <body>
@@ -93,6 +94,7 @@ function fnRemove(){
 						<td>Name</td>
 						<td>Description</td>
 						<td>Security Code</td>
+						<td>Operations</td>
 					</tr>
 				</thead>
 				<tbody>
@@ -102,6 +104,7 @@ function fnRemove(){
 							<td><a onClick="fnView(${data.id});" href="javascript:void(0)">${data.accountName}</a></td>
 							<td>${data.description}</td>
 							<td>${data.securityCode}</td>
+							<td><a href="../fileManagement/main.htm?accountId=${data.id}" target="_blank">Manage Files</a></td>							
 						</tr>
 					</c:forEach>
 				</tbody>

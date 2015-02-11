@@ -33,35 +33,50 @@ import com.globalsight.util.FileUtil;
  */
 public abstract class StyleUtil
 {
-    static private final Logger s_logger = Logger
-            .getLogger(StyleUtil.class);
-    
+    static private final Logger s_logger = Logger.getLogger(StyleUtil.class);
+
     protected static List<Pattern> OFFICE_PATTERNS = new ArrayList<Pattern>();
     static
     {
-    	// b
-    	OFFICE_PATTERNS.add(Pattern.compile("<bpt i=\"[^\"]*\" type=\"bold\" erasable=\"yes\"\\s*>&lt;b&gt;</bpt>"));
-        OFFICE_PATTERNS.add(Pattern.compile("<ept i=\"[^\"]*\"\\s*>&lt;/b&gt;</ept>"));
+        // b
+        OFFICE_PATTERNS
+                .add(Pattern
+                        .compile("<bpt i=\"[^\"]*\" type=\"bold\" erasable=\"yes\"\\s*>&lt;b&gt;</bpt>"));
+        OFFICE_PATTERNS.add(Pattern
+                .compile("<ept i=\"[^\"]*\"\\s*>&lt;/b&gt;</ept>"));
 
         // i
-        OFFICE_PATTERNS.add(Pattern.compile("<bpt i=\"[^\"]*\" type=\"italic\" erasable=\"yes\"\\s*>&lt;i&gt;</bpt>"));
-        OFFICE_PATTERNS.add(Pattern.compile("<ept i=\"[^\"]*\"\\s*>&lt;/i&gt;</ept>"));
+        OFFICE_PATTERNS
+                .add(Pattern
+                        .compile("<bpt i=\"[^\"]*\" type=\"italic\" erasable=\"yes\"\\s*>&lt;i&gt;</bpt>"));
+        OFFICE_PATTERNS.add(Pattern
+                .compile("<ept i=\"[^\"]*\"\\s*>&lt;/i&gt;</ept>"));
 
         // u
-        OFFICE_PATTERNS.add(Pattern.compile("<bpt i=\"[^\"]*\" type=\"ulined\" erasable=\"yes\"\\s*>&lt;u&gt;</bpt>"));
-        OFFICE_PATTERNS.add(Pattern.compile("<ept i=\"[^\"]*\"\\s*>&lt;/u&gt;</ept>"));
+        OFFICE_PATTERNS
+                .add(Pattern
+                        .compile("<bpt i=\"[^\"]*\" type=\"ulined\" erasable=\"yes\"\\s*>&lt;u&gt;</bpt>"));
+        OFFICE_PATTERNS.add(Pattern
+                .compile("<ept i=\"[^\"]*\"\\s*>&lt;/u&gt;</ept>"));
 
         // sub
-        OFFICE_PATTERNS.add(Pattern.compile("<bpt i=\"[^\"]*\" type=\"office-sub\" erasable=\"yes\"\\s*>&lt;sub&gt;</bpt>"));
-        OFFICE_PATTERNS.add(Pattern.compile("<ept i=\"[^\"]*\"\\s*>&lt;/sub&gt;</ept>"));
+        OFFICE_PATTERNS
+                .add(Pattern
+                        .compile("<bpt i=\"[^\"]*\" type=\"office-sub\" erasable=\"yes\"\\s*>&lt;sub&gt;</bpt>"));
+        OFFICE_PATTERNS.add(Pattern
+                .compile("<ept i=\"[^\"]*\"\\s*>&lt;/sub&gt;</ept>"));
 
         // sup
-        OFFICE_PATTERNS.add(Pattern.compile("<bpt i=\"[^\"]*\" type=\"office-sup\" erasable=\"yes\"\\s*>&lt;sup&gt;</bpt>"));
-        OFFICE_PATTERNS.add(Pattern.compile("<ept i=\"[^\"]*\"\\s*>&lt;/sup&gt;</ept>"));
+        OFFICE_PATTERNS
+                .add(Pattern
+                        .compile("<bpt i=\"[^\"]*\" type=\"office-sup\" erasable=\"yes\"\\s*>&lt;sup&gt;</bpt>"));
+        OFFICE_PATTERNS.add(Pattern
+                .compile("<ept i=\"[^\"]*\"\\s*>&lt;/sup&gt;</ept>"));
     }
-	
-    protected static Pattern ATTRIBUTE_PATTERN = Pattern.compile("(<[^<]*=\")([^\"]*<[^\">]*>[^\"]*)(\"[^>]*>)");
-    
+
+    protected static Pattern ATTRIBUTE_PATTERN = Pattern
+            .compile("(<[^<>]*=\")([^\"]*<[^\"<>]*>[^\"]*)(\"[^<>]*>)");
+
     /**
      * Doing something before update segment value.
      * 
@@ -107,38 +122,38 @@ public abstract class StyleUtil
 
         return rs;
     }
-    
+
     /**
      * Remove tag in attribute.
+     * 
      * @param filePath
      */
     protected void repairAttributeValue(String filePath)
     {
-    	try
+        try
         {
-    		String s = FileUtil.readFile(new File(filePath), "utf-8");
-    		Matcher m = ATTRIBUTE_PATTERN.matcher(s);
-    		StringBuilder sb = new StringBuilder();
-    		int index = 0;
-    		while (m.find())
-    		{
-    			sb.append(s.substring(index, m.start()));
-    			index = m.end();
-    			sb.append(m.group(1));
-    			sb.append(m.group(2).replaceAll("<[^>]*>", ""));
-    			sb.append(m.group(3));
-    		}
-    		sb.append(s.substring(index));
-    		
-    		FileUtil.writeFile(new File(filePath), sb.toString(), "utf-8");
+            String s = FileUtil.readFile(new File(filePath), "utf-8");
+            Matcher m = ATTRIBUTE_PATTERN.matcher(s);
+            StringBuilder sb = new StringBuilder();
+            int index = 0;
+            while (m.find())
+            {
+                sb.append(s.substring(index, m.start()));
+                index = m.end();
+                sb.append(m.group(1));
+                sb.append(m.group(2).replaceAll("<[^>]*>", ""));
+                sb.append(m.group(3));
+            }
+            sb.append(s.substring(index));
+
+            FileUtil.writeFile(new File(filePath), sb.toString(), "utf-8");
         }
         catch (Exception e)
         {
             s_logger.error(e);
         }
-    }    
-    
-    
+    }
+
     /**
      * Gets all sub strings which match the provided regular expression.
      * 

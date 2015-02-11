@@ -33,5 +33,9 @@ public interface CurrencyConstants
     public static final String CANCEL = "cancel";
     public static final String CREATE = "create";
     public static final String EDIT = "edit";
+    
+    
+    public static final String FILTER_CURRENCY_NAME = "currencyNameFilter";
+    public static final String FILTER_CURRENCY_COMPANY = "currencyCompanyFilter";
 
 }

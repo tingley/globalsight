@@ -45,6 +45,12 @@ public class Account
         this.securityCode = p_securityCode;
     }
     
+    public Account(Account p_account)
+    {
+        this(p_account.getId(), p_account.getAccountName(), 
+                p_account.getDescription(), p_account.getSecurityCode());
+    }
+    
     public long getId()
     {
         return this.id;
@@ -84,5 +90,17 @@ public class Account
     public void setSecurityCode(String securityCode)
     {
         this.securityCode = securityCode;
+    }
+    
+    public String toJSON()
+    {
+        StringBuilder json = new StringBuilder();
+        json.append("{")
+            .append("\"id\":").append(id).append(", ")
+            .append("\"accountName\":\"").append(accountName).append("\", ")
+            .append("\"description\":\"").append(description).append("\"")
+            .append("}");
+        
+        return json.toString();
     }
 }

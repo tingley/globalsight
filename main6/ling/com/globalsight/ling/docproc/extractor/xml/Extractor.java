@@ -175,6 +175,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
     // for extractor switching
     private String m_switchExtractionBuffer = new String();
+    private String m_switchExtractionSid = null;
     private String m_otherFormat = null;
 
     // for xml converted from InDesign files.
@@ -236,6 +237,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         m_standalone = null;
         m_encoding = null;
         m_switchExtractionBuffer = new String();
+        m_switchExtractionSid = null;
         m_otherFormat = null;
         m_elementPostFormat = null;
         m_cdataPostFormat = null;
@@ -723,14 +725,13 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                 if (isFirst)
                                 {
                                     bptIndex = m_admin.incrementBptIndex();
-                                    stuff = "<bpt i=\""
-                                            + bptIndex
+                                    stuff = "<bpt i=\"" + bptIndex
                                             + "\" type=\"pi\" isTranslate=\""
                                             + isTranslatable + "\">";
                                     outputExtractedStuff(stuff, isTranslatable,
                                             false);
                                 }
-                                
+
                                 stuff = m_xmlEncoder.encodeStringBasic(s1);
                                 outputExtractedStuff(stuff, isTranslatable,
                                         false);
@@ -861,6 +862,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             if ((switchesExtraction || m_isElementPost) && !isXlsxHeaderFooter)
             {
                 m_switchExtractionBuffer += nodeValue;
+                String sid = Rule.getSid(m_ruleMap, p_node);
+                if (StringUtil.isNotEmpty(sid))
+                {
+                    m_switchExtractionSid = sid;
+                }
             }
             else
             {
@@ -1370,6 +1376,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private void cdataProcessor(Node p_node, boolean switchesExtraction,
             boolean isInExtraction, boolean isTranslatable)
     {
+        String nodeValue = p_node.getNodeValue();
+        String preservedTag = ATTRIBUTE_PRESERVE_CLOSED_TAG + "=\"\"";
+        if (nodeValue.contains(preservedTag))
+        {
+            nodeValue = StringUtil.replace(nodeValue, preservedTag, "");
+        }
         XmlFilterCDataTag tag = m_xmlFilterHelper.getRuleForCData(p_node);
         boolean isCdataTranslatable = (tag == null || tag.isTranslatable());
         // String cdata = "<![CDATA[" + p_node.getNodeValue() + "]]>";
@@ -1396,7 +1408,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             {
                 outputOtherFormat();
                 outputSkeleton("<![CDATA[");
-                m_switchExtractionBuffer += p_node.getNodeValue();
+                m_switchExtractionBuffer += nodeValue;
 
                 if (postFilter != null && otherFormat != null)
                 {
@@ -1416,7 +1428,6 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             else
             {
                 outputSkeleton("<![CDATA[");
-                String nodeValue = p_node.getNodeValue();
                 // handle internal text for cdata
                 if (m_internalTexts != null && m_internalTexts.size() > 0)
                 {
@@ -1456,7 +1467,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         }
         else
         {
-            outputSkeleton("<![CDATA[" + p_node.getNodeValue() + "]]>");
+            outputSkeleton("<![CDATA[" + nodeValue + "]]>");
         }
     }
 
@@ -1783,7 +1794,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         if (switchesExtraction || m_isElementPost)
         {
-            outputOtherFormat();
+            outputOtherFormat(this.m_switchExtractionSid);
         }
 
         int phConsolidationCount = 0;
@@ -2250,7 +2261,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         if (switchesExtraction || m_isElementPost)
         {
-            outputOtherFormat();
+            outputOtherFormat(this.m_switchExtractionSid);
         }
 
         // Close the element.
@@ -2310,6 +2321,60 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 }
             }
         }
+    }
+
+    /**
+     * special handle for TextVariableInstance tag from idml xml
+     */
+    private boolean handleIdmlTextVariable(Node p_node, String name,
+            String type, boolean isTranslatable, boolean extracts,
+            boolean isPreserveWS)
+    {
+        boolean handled = false;
+        if (extracts && m_isIdmlXml && name.equals("TextVariableInstance"))
+        {
+            String phTag = "<ph type=\"" + (type != null ? type : name)
+                    + "\" movable=\"no\">";
+
+            String stuff = phTag + "&lt;" + name;
+
+            NamedNodeMap attrs = p_node.getAttributes();
+            int length = attrs.getLength();
+            for (int i = 0; i < length; ++i)
+            {
+                Node att = attrs.item(i);
+                String attname = att.getNodeName();
+                if (ATTRIBUTE_PRESERVE_CLOSED_TAG.equals(attname))
+                {
+                    // ignore outputting ATTRIBUTE_PRESERVE_CLOSED_TAG attribute
+                    // to
+                    // GXML
+                    continue;
+                }
+
+                stuff += " " + attname + "=&quot;";
+                String nodeValue = att.getNodeValue();
+                if (attname.equals("ResultText"))
+                {
+                    stuff += "</ph>";
+                    stuff += m_xmlEncoder.encodeStringBasic(nodeValue);
+                    stuff += phTag;
+                }
+                else
+                {
+                    stuff += m_xmlEncoder.encodeStringBasic(m_xmlEncoder
+                            .encodeStringBasic(nodeValue));
+                }
+
+                stuff += "&quot;";
+            }
+
+            stuff += "/&gt;</ph>";
+
+            outputExtractedStuff(stuff, isTranslatable, isPreserveWS);
+            handled = true;
+        }
+        return handled;
     }
 
     /**
@@ -3097,7 +3162,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     : m_otherFormat;
             Filter otherFilter = (m_isElementPost) ? m_xmlFilterHelper
                     .getElementPostFilter() : null;
-            outputOtherFormat(otherFormat, otherFilter, false);
+            outputOtherFormat(otherFormat, otherFilter, false, null);
         }
         catch (Exception ex)
         {
@@ -3106,6 +3171,29 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     m_xmlEncoder.encodeStringBasic(m_switchExtractionBuffer),
                     false);
             m_switchExtractionBuffer = new String();
+            m_switchExtractionSid = null;
+        }
+    }
+
+    private void outputOtherFormat(String sid) throws ExtractorException
+    {
+        try
+        {
+            String otherFormat = (m_isElementPost) ? m_elementPostFormat
+                    : m_otherFormat;
+            Filter otherFilter = (m_isElementPost) ? m_xmlFilterHelper
+                    .getElementPostFilter() : null;
+            outputOtherFormat(otherFormat, otherFilter, false, sid);
+        }
+        catch (Exception ex)
+        {
+            CATEGORY.error("Output other format with error: ", ex);
+            outputTranslatable(
+                    m_xmlEncoder.encodeStringBasic(m_switchExtractionBuffer),
+                    false);
+            setSid(sid);
+            m_switchExtractionBuffer = new String();
+            m_switchExtractionSid = null;
         }
     }
 
@@ -3129,7 +3217,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 otherFilter = (p_otherFilter != null) ? p_otherFilter : null;
             }
 
-            outputOtherFormat(otherFormat, otherFilter, true);
+            outputOtherFormat(otherFormat, otherFilter, true, null);
         }
         catch (Exception ex)
         {
@@ -3138,6 +3226,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     m_xmlEncoder.encodeStringBasic(m_switchExtractionBuffer),
                     false);
             m_switchExtractionBuffer = new String();
+            m_switchExtractionSid = null;
         }
     }
 
@@ -3148,9 +3237,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
      * 
      * @param otherFormat
      * @param otherFilter
+     * @param isCdata
+     * @param sid
      */
     private void outputOtherFormat(String otherFormat, Filter otherFilter,
-            boolean isCdata) throws ExtractorException
+            boolean isCdata, String sid)
     {
         if (m_switchExtractionBuffer.length() == 0)
         {
@@ -3168,7 +3259,6 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 Output output = switchExtractor(m_switchExtractionBuffer,
                         otherFormat, otherFilter);
                 Iterator it = output.documentElementIterator();
-
                 while (it.hasNext())
                 {
                     DocumentElement element = (DocumentElement) it.next();
@@ -3180,7 +3270,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                             segmentableElement.setDataType(otherFormat);
                             fixEntitiesForOtherFormat(segmentableElement,
                                     (isCdata || m_isOriginalXmlNode));
-                            outputDocumentElement(element);
+                            outputDocumentElement(element, sid);
                             break;
 
                         case DocumentElement.SKELETON:
@@ -3200,10 +3290,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         m_xmlEncoder
                                 .encodeStringBasic(m_switchExtractionBuffer),
                         false);
+                setSid(sid);
             }
         }
 
         m_switchExtractionBuffer = new String();
+        m_switchExtractionSid = null;
         m_isOriginalXmlNode = false;
         // m_otherFormat = null;
     }

@@ -58,6 +58,14 @@ public class JobControlAllStatusHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+    	HttpSession session = p_request.getSession(false);
+    	SessionManager sessionMgr = (SessionManager) session
+    		.getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+    	if(Job.ALLSTATUS.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+			stateMarch = true;
+    	setJobSearchFilters(sessionMgr, p_request, stateMarch);
+
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
         p_request.setAttribute("searchType",
@@ -66,6 +74,7 @@ public class JobControlAllStatusHandler extends JobManagementHandler
         Vector jobStates = new Vector();
         jobStates.addAll(Job.ALLSTATUSLIST);
 
+        sessionMgr.setMyjobsAttribute("lastState", Job.ALLSTATUS);
         JobVoAllSearcher s = new JobVoAllSearcher();
         s.setJobVos(p_request);
 
@@ -77,12 +86,9 @@ public class JobControlAllStatusHandler extends JobManagementHandler
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         jobStates));
-        
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
 
         sessionMgr.setAttribute("destinationPage", "allStatus");
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0

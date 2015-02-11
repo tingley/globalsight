@@ -122,6 +122,11 @@ public class JobControlExportedHandler
         	//In fact,no exception will be caught here.
         	s_logger.error("Fail to re-export selected pages.", e);
         }
+        
+    	boolean stateMarch = false;
+		if(Job.EXPORTED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+				stateMarch = true;
+		setJobSearchFilters(sessionMgr, p_request, stateMarch);
 
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request, BASE_BEAN);
         p_request.setAttribute("searchType", p_request.getParameter("searchType"));
@@ -136,6 +141,7 @@ public class JobControlExportedHandler
         p_request.setAttribute(JobManagementHandler.EXPORT_URL_PARAM, ((NavigationBean)beanMap.get(EXPORT_BEAN)).getPageURL());
         p_request.setAttribute(JobManagementHandler.JOB_ID, JobManagementHandler.JOB_ID);
         
+        sessionMgr.setMyjobsAttribute("lastState", Job.EXPORTED);
         JobVoExportSearcher searcher = new JobVoExportSearcher();
         searcher.setJobVos(p_request);
         
@@ -153,7 +159,8 @@ public class JobControlExportedHandler
         sessionMgr.setAttribute("destinationPage", "exported");
         //clear the session for download job from joblist page
         sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);
-        sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);
+        sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);       
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache.  do both.  "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); //HTTP 1.0

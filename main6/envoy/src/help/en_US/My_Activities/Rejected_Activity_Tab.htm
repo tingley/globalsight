@@ -122,7 +122,8 @@ else
 <h1>Rejected Activities</h1>
 
 <p class="whs1">See also <a href="Available_Activity_Tab.htm">Available</a>, 
- <a href="In_Progress_Activity_Tab.htm">In Progress</a>, and <a href="Finished_Activity_Tab.htm">Finished</a>.</p>
+ <a href="In_Progress_Activity_Tab.htm">In Progress</a>, <a href="Finished_Activity_Tab.htm">Finished</a>,
+ and <a href="All_Status_Activity_Tab.htm">All Status</a>.</p>
 
 <p>&nbsp;</p>
 
@@ -135,15 +136,9 @@ else
 <td width="25.654%" class="whs6">
 <p class="whs7">Summary:</td>
 <td width="74.346%" class="whs8">
-<p class="whs9">Activities you have rejected 
- or un-accepted appear here, until these activities are accepted by another 
- localization participant.</p>
+<p class="whs9">Activities you have rejected appear here.</p>
 <ul type="square" class="whs10">
-	
 	<li class=kadov-p><p>No actions are possible from here.</p></li>
-	
-	<li class=kadov-p><p>Once the activity has been accepted by another 
- user the activity is removed from this list.</p></li>
 </ul></td></tr>
 
 <tr valign="top" class="whs5">
@@ -168,29 +163,8 @@ else
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p>Select an activity status (<span style="font-weight: bold;"><B>Available</B></span>, 
  <span style="font-weight: bold;"><B>In Progress</B></span>, <span style="font-weight: bold;"><B>Finished</B></span>, 
- <span style="font-weight: bold;"><B>Rejected</B></span>) to filter the jobs displayed 
- in the search results.</td></tr>
-
-<tr valign="top" class="whs13">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs15">Job Name: </td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p><span style="font-weight: bold;"><B>begins with:</B></span> Activities whose 
- job name begins with the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></p>
-<p><span style="font-weight: bold;"><B>ends with:</B></span> Activities whose 
- job name ends with the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></p>
-<p><span style="font-weight: bold;"><B>contains:</B></span> Activities whose job 
- name contains the text in the <span style="font-style: italic;"><I>blank 
- text field.</I></span></td></tr>
-
-<tr valign="top" class="whs13">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs15">(Blank Text Field)</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p>Search matches the text in this box to job names and filters the jobs 
- displayed in the search results.</td></tr>
+ <span style="font-weight: bold;"><B>Rejected</B></span>,<span style="font-weight: bold;"><B>All Status</B></span>) 
+ to filter the jobs displayed in the search results.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
@@ -198,7 +172,52 @@ else
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p class="whs18">Displays rejected activities. &nbsp;Click 
  a column header to sort the table based on data in that column; click 
- a second time to reverse the sort order.</td></tr>
+ a second time to reverse the sort order.Check the check box before each activity to select it or
+ check the check box in table header to select all rejected activities.</td></tr>
+ 
+<tr valign="top" class="whs18">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs17">Inputs</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>&nbsp;</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Job Id: </td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Select =,&gt; or &lt; and type job id to filter activities equal to, 
+greater than or less than specified value.</p></td></tr>
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Job Name</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in job name text filed.</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Activity</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in activity text filed.</td></tr>
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Assignees</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by specified text in assignees text filed.</td></tr>
+ 
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Source Locale</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by selected source locale.</td></tr>
+
+<tr valign="top" class="whs13">
+<td colspan="1" rowspan="1" width="25.654%" class="whs14">
+<p class="whs15">Target Locale</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs16">
+<p>Filter activities by selected target locale.</td></tr>
+ 
 
 <tr valign="top" class="whs19">
 <td colspan="1" rowspan="1" width="25.654%" class="whs14">
@@ -211,14 +230,6 @@ else
 <p class="whs7">Search</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs16">
 <p class="whs18">Searches based on the criteria entered.</td></tr>
-
-<tr valign="top" class="whs20">
-<td colspan="1" rowspan="1" width="25.654%" class="whs14">
-<p class="whs7">Advanced Search</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs16">
-<p class="whs18">Search for activities based on additional 
- criteria (see <a href="My_Activities_-_Search.htm">My Activities - Search</a>).</td></tr>
-</table>
 
 <script type="text/javascript" language="javascript1.2">
 <!--

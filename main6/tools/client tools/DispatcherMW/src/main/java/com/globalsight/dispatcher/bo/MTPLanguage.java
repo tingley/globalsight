@@ -39,6 +39,7 @@ public class MTPLanguage
     public MTPLanguage()
     {
         id = -1;
+        accountId = -1;
     }
     
     public MTPLanguage(String p_name, long p_accountId, GlobalSightLocale p_srcLocale, GlobalSightLocale p_trgLocale, MachineTranslationProfile p_mtProfile)

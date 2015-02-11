@@ -74,6 +74,8 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -953,8 +955,9 @@ public abstract class JobManagementHandler extends PageHandler
          * for the user. This is also why I subtract 1 from jobListEnd below, so
          * that jobListEnd will be an index value
          */
-        int jobListEnd = (jobListStart + s_jobsPerPage) > numOfJobs ? numOfJobs
-                : (jobListStart + s_jobsPerPage);
+        int numPerPage = (Integer)sessionMgr.getMyjobsAttribute("numPerPage");
+        int jobListEnd = (jobListStart + numPerPage) > numOfJobs ? numOfJobs
+                : (jobListStart + numPerPage);
         jobListEnd = jobListEnd - 1;
 
         StringBuffer sb = new StringBuffer();
@@ -1710,10 +1713,27 @@ public abstract class JobManagementHandler extends PageHandler
                 .intValue();
         int jobListStart = determineStartIndex(p_request, session, sessionMgr);
 
-        int numOfPages = numOfJobs / s_jobsPerPage;
-        if (numOfPages * s_jobsPerPage != numOfJobs)
+        int numPerPage = 20;
+        if(sessionMgr.getMyjobsAttribute("numPerPage") != null)
+        	numPerPage = (Integer)sessionMgr.getMyjobsAttribute("numPerPage");
+        int numOfPages = numOfJobs / numPerPage;
+        if (numOfPages * numPerPage != numOfJobs)
             numOfPages++;
-        int curPage = jobListStart / s_jobsPerPage + 1;
+        int jobListEnd = (jobListStart + numPerPage) > numOfJobs ? numOfJobs
+                : (jobListStart + numPerPage);
+        if(jobListStart > jobListEnd)
+        {
+        	jobListStart = jobListEnd/numPerPage * numPerPage;
+        	if(jobListEnd%numPerPage == 0)
+        	{
+        		jobListStart = jobListStart - numPerPage;
+        	}
+        }
+        else if (jobListStart == jobListEnd) 
+        {
+        	jobListStart = (jobListEnd/numPerPage - 1) * numPerPage;
+		}
+        int curPage = jobListStart / numPerPage + 1;
         int numOfPagesInGroup = WebAppConstants.NUMBER_OF_PAGES_IN_GROUP;
         int pagesOnLeftOrRight = numOfPagesInGroup / 2;
 
@@ -1723,8 +1743,6 @@ public abstract class JobManagementHandler extends PageHandler
          * for the user. This is also why I subtract 1 from jobListEnd below, so
          * that jobListEnd will be an index value
          */
-        int jobListEnd = (jobListStart + s_jobsPerPage) > numOfJobs ? numOfJobs
-                : (jobListStart + s_jobsPerPage);
         jobListEnd = jobListEnd - 1;
 
         StringBuffer sb = new StringBuffer();
@@ -1738,8 +1756,7 @@ public abstract class JobManagementHandler extends PageHandler
 
             // "Displaying 1 - 20 of 35"
             sb.append(MessageFormat.format(
-                    bundle.getString("lb_displaying_records"), args));
-            sb.append("<BR>");
+                    bundle.getString("lb_displaying_records"), args)).append("&nbsp");
 
             // The "First" link
             if (jobListStart == 0)
@@ -1750,7 +1767,7 @@ public abstract class JobManagementHandler extends PageHandler
             }
             else
             {
-                sb.append("<A CLASS=standardHREF HREF=" + p_baseURL
+                sb.append("<A CLASS=standardHREF onclick='return addFilters(this)' HREF=" + p_baseURL
                         + "&jobListStart=0>" + bundle.getString("lb_first")
                         + "</A> | ");
             }
@@ -1764,15 +1781,15 @@ public abstract class JobManagementHandler extends PageHandler
             }
             else
             {
-                sb.append("<A CLASS=standardHREF HREF=" + p_baseURL
-                        + "&jobListStart=" + (jobListStart - s_jobsPerPage)
+                sb.append("<A CLASS=standardHREF onclick='return addFilters(this)' HREF=" + p_baseURL
+                        + "&jobListStart=" + (jobListStart - numPerPage)
                         + ">" + bundle.getString("lb_previous") + "</A> | ");
             }
 
             // Show page numbers 1 2 3 4 5 etc...
             for (int i = 1; i <= numOfPages; i++)
             {
-                int topJob = (s_jobsPerPage * i) - s_jobsPerPage;
+                int topJob = (numPerPage * i) - numPerPage;
                 if (((curPage <= pagesOnLeftOrRight) && (i <= numOfPagesInGroup))
                         || (((numOfPages - curPage) <= pagesOnLeftOrRight) && (i > (numOfPages - numOfPagesInGroup)))
                         || ((i <= (curPage + pagesOnLeftOrRight)) && (i >= (curPage - pagesOnLeftOrRight))))
@@ -1785,7 +1802,7 @@ public abstract class JobManagementHandler extends PageHandler
                     }
                     else
                     {
-                        sb.append("<A CLASS=standardHREF HREF=" + p_baseURL
+                        sb.append("<A CLASS=standardHREF onclick='return addFilters(this)' HREF=" + p_baseURL
                                 + "&jobListStart=" + (topJob) + ">" + i
                                 + "</A>&nbsp");
                     }
@@ -1793,7 +1810,7 @@ public abstract class JobManagementHandler extends PageHandler
             }
 
             // The "Next" link
-            if ((jobListStart + s_jobsPerPage) >= numOfJobs)
+            if ((jobListStart + numPerPage) >= numOfJobs)
             {
                 // Don't hyperlink "Next" if it's the last page
                 sb.append("| &nbsp" + "<SPAN CLASS=standardTextGray>"
@@ -1801,16 +1818,16 @@ public abstract class JobManagementHandler extends PageHandler
             }
             else
             {
-                sb.append("| &nbsp" + "<A CLASS=standardHREF HREF=" + p_baseURL
-                        + "&jobListStart=" + (jobListStart + s_jobsPerPage)
+                sb.append("| &nbsp" + "<A CLASS=standardHREF onclick='return addFilters(this)' HREF=" + p_baseURL
+                        + "&jobListStart=" + (jobListStart + numPerPage)
                         + ">" + bundle.getString("lb_next") + "</A> | ");
             }
 
             // The "Last" link
             int lastJob = numOfJobs - 1; // Index of last job
-            int numJobsOnLastPage = numOfJobs % s_jobsPerPage == 0 ? s_jobsPerPage
-                    : numOfJobs % s_jobsPerPage;
-            if ((lastJob - jobListStart) < s_jobsPerPage)
+            int numJobsOnLastPage = numOfJobs % numPerPage == 0 ? numPerPage
+                    : numOfJobs % numPerPage;
+            if ((lastJob - jobListStart) < numPerPage)
             {
                 // Don't hyperlink "Last" if it's the Last page
                 sb.append("<SPAN CLASS=standardTextGray>"
@@ -1818,7 +1835,7 @@ public abstract class JobManagementHandler extends PageHandler
             }
             else
             {
-                sb.append("<A CLASS=standardHREF HREF=" + p_baseURL
+                sb.append("<A CLASS=standardHREF onclick='return addFilters(this)' HREF=" + p_baseURL
                         + "&jobListStart="
                         + (lastJob - (numJobsOnLastPage - 1)) + ">"
                         + bundle.getString("lb_last") + "</A>");
@@ -1830,6 +1847,103 @@ public abstract class JobManagementHandler extends PageHandler
         }
 
         return sb.toString();
+    }
+    
+    protected void setJobSearchFilters(SessionManager sessionMgr,
+    		HttpServletRequest p_request, boolean stateMarch)
+    {
+    	if(p_request.getParameter("fromRequest") != null && stateMarch)
+    	{		
+    		String jobIdFilter = p_request.getParameter("idf");
+    		if(jobIdFilter != null)
+    		{      	
+    			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
+    		}
+    		String jobIdOption = p_request.getParameter("io");
+    		if(jobIdOption != null)
+    		{      	
+    			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
+    		}
+    		String jobNameFilter = p_request.getParameter("nf");
+    		if(jobNameFilter != null)
+    		{       	
+    			sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
+    		}
+    		String jobProjectFilter = p_request.getParameter("po");
+    		if(jobProjectFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("jobProjectFilter", jobProjectFilter);
+    		}
+    		String sourceLocaleFilter = p_request.getParameter("sl");
+    		if(sourceLocaleFilter != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", sourceLocaleFilter);
+    		}
+    		String npp = p_request.getParameter("npp");
+    		boolean isNewNpp = false;
+    		if(npp != null)
+    		{
+    			if(sessionMgr.getMyjobsAttribute("numPerPage") != null)
+    			{
+    				int oldNpp = (Integer) sessionMgr.getMyjobsAttribute("numPerPage");
+    				if(oldNpp != Integer.valueOf(npp))
+    					isNewNpp = true;
+    			}
+    			sessionMgr.setMyjobsAttribute("numPerPage", Integer.valueOf(npp));
+    		}
+    		String jobListStart = p_request.getParameter("jobListStart");
+    		if(isNewNpp)
+    			jobListStart = "0";
+    		if(jobListStart != null)
+    		{
+    			sessionMgr.setMyjobsAttribute("jobListStart", jobListStart);
+    		}
+    	}
+    	else 
+    	{
+    		if(sessionMgr.getMyjobsAttribute("jobIdFilter") == null 
+    				|| !stateMarch)
+    		{
+    			sessionMgr.setMyjobsAttribute("jobIdOption", "EQ");
+    			sessionMgr.setMyjobsAttribute("jobIdFilter", "");
+    			sessionMgr.setMyjobsAttribute("jobNameFilter", "");
+    			sessionMgr.setMyjobsAttribute("jobProjectFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", "-1");
+    			sessionMgr.setMyjobsAttribute("jobListStart", "0");
+    		}
+		}
+    }
+    
+    protected void setJobProjectsLocales(SessionManager sessionMgr, HttpSession session)
+    {
+    	if(sessionMgr.getMyjobsAttribute("srcLocales") == null)
+        {       	
+        	String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+        	User user = UserHandlerHelper.getUser(userName);
+        	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+        	// Get locales 
+        	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+        	List srcLocales = WorkflowTemplateHandlerHelper.getAllSourceLocales(uiLocale);
+        	sessionMgr.setMyjobsAttribute("srcLocales", srcLocales);
+        	// Get only the projects for that user unless it's the admin
+        	List projectInfos = null;
+        	if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
+        	{
+        		projectInfos = WorkflowTemplateHandlerHelper
+        			.getAllProjectInfos(uiLocale);
+        	}
+        	else if (perms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
+        	{
+        		projectInfos = WorkflowTemplateHandlerHelper
+        			.getAllProjectInfosForUser(user, uiLocale);
+        	}
+        	else // for WFM and other VALID future access group (i.e. JobManager)
+        	{
+        		projectInfos = WorkflowTemplateHandlerHelper.getProjectInfosByUser(
+        				userName, uiLocale);
+        	}
+        	sessionMgr.setMyjobsAttribute("projects", projectInfos);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -2283,8 +2397,7 @@ public abstract class JobManagementHandler extends PageHandler
         int jobListStart;
         try
         {
-            String jobListStartStr = (String) p_request
-                    .getParameter(JOB_LIST_START);
+            String jobListStartStr = (String)p_sm.getMyjobsAttribute("jobListStart");
 
             jobListStart = Integer.parseInt(jobListStartStr);
             p_sm.setAttribute(JOB_LIST_START, new Integer(jobListStart));

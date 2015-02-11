@@ -7,14 +7,14 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.machineTranslation.MachineTranslator,
-            com.globalsight.machineTranslation.MTHelper"
+            com.globalsight.machineTranslation.MTHelper2"
     session="true"
 %>
 <jsp:useBean id="mtTranslation" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
 //Get MT translation URL for dojo
 String mtTranslationURL = mtTranslation.getPageURL()
-        + "&action=" + MTHelper.ACTION_GET_MT_TRANSLATION;
+        + "&action=" + MTHelper2.ACTION_GET_MT_TRANSLATION;
 
 // Get "state" and "view"
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
@@ -24,7 +24,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
 boolean show_in_editor = false;
 try 
 {
-    String showInEditor = (String) sessionMgr.getAttribute(MTHelper.SHOW_IN_EDITOR);
+    String showInEditor = (String) sessionMgr.getAttribute(MTHelper2.SHOW_IN_EDITOR);
     show_in_editor = (new Boolean(showInEditor)).booleanValue();
 } 
 catch (Exception e) { }
@@ -44,7 +44,7 @@ A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none; }
 <SCRIPT LANGUAGE="JavaScript">
 function doClick()
 {
-	var dd = document.getElementById('<%=MTHelper.MT_TRANSLATION_DIV%>').innerHTML;
+	var dd = document.getElementById('<%=MTHelper2.MT_TRANSLATION_DIV%>').innerHTML;
 	copyToTarget(dd);
 }
 

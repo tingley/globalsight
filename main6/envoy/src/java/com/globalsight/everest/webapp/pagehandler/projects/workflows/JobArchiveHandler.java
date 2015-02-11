@@ -60,6 +60,14 @@ public class JobArchiveHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+    	HttpSession session = p_request.getSession(false);
+    	SessionManager sessionMgr = (SessionManager) session
+    		.getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+		if(Job.ARCHIVED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+				stateMarch = true;
+		setJobSearchFilters(sessionMgr, p_request, stateMarch);
+    	
         p_request.setAttribute("action", p_request.getParameter("action"));
         HashMap beanMap = invokeJobControlPage(p_pageDescriptor, p_request,
                 BASE_BEAN);
@@ -70,6 +78,7 @@ public class JobArchiveHandler extends JobManagementHandler
                 .getPageName());
         performAppropriateOperation(p_request);
 
+        sessionMgr.setMyjobsAttribute("lastState", Job.ARCHIVED);
         JobVoArchivedSearcher searcher = new JobVoArchivedSearcher();
         searcher.setJobVos(p_request);
         
@@ -85,14 +94,11 @@ public class JobArchiveHandler extends JobManagementHandler
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
                 BASE_BEAN);
 
         sessionMgr.setAttribute("destinationPage", "archived");
-
+        setJobProjectsLocales(sessionMgr, session);
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0
         p_response.setHeader("Cache-Control", "yes-cache"); // HTTP 1.1

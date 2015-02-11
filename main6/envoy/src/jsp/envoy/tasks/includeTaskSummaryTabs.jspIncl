@@ -306,8 +306,88 @@ function doFinished(urlSent) {
     }
     return true;
  }
-</SCRIPT>
+ 
+ function submitHourOrPageForm(buttonClicked)
+{
+    if (buttonClicked == "wordcounts")
+    {
+        DetailsForm.action = "<%= wordCountUrl %>";
+        DetailsForm.target = "_self";
+        DetailsForm.submit();
+        return;
+    }
+    if(!validate())
+    {
+        return false;
+    }
 
+    if (document.layers)
+    {
+        theForm = document.contentLayer.document.DetailsForm;
+    }
+    else
+    {
+        theForm = document.all.DetailsForm;
+    }
+
+    theForm.action = "<%= saveUrl %>";
+    theForm.target = "hiddenFrame";
+    theForm.submit();
+    clearDirty();
+}
+
+function validate()
+{
+    if(dirty)
+    {
+        // Check hours ( when present )
+        if (document.DetailsForm.<%= hoursParam %> != null)
+        {
+            if(document.DetailsForm.<%= hoursParam %>.value == "")
+            {
+               alert("<%=bundle.getString("jsmsg_invalid_activity_hours")%>");
+               return false;
+            }
+
+             if(isNaN(document.DetailsForm.<%= hoursParam %>.value))
+             {
+                 alert("<%=bundle.getString("jsmsg_invalid_activity_hours")%>");
+                 return false;
+             }
+        }
+        // Check Pages ( when present )
+        if (document.DetailsForm.<%= pagesParam %> != null)
+        {
+            if(document.DetailsForm.<%= pagesParam %>.value == "")
+            {
+               alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
+               return false;
+            }
+
+             if(isNaN(document.DetailsForm.<%= pagesParam %>.value))
+             {
+                 alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
+                 return false;
+             }
+
+             if(Math.round(document.DetailsForm.<%= pagesParam %>.value) !=
+                document.DetailsForm.<%= pagesParam %>.value)
+             {
+                 alert("<%=bundle.getString("jsmsg_invalid_activity_pages")%>");
+                 return false;
+             }
+        }
+    }
+    return true;
+}
+</SCRIPT>
+<iframe style="width:0; height:0;display:none" name="hiddenFrame"></iframe>
+<form name="downloadTaskForm" style="width:0; height:0;display:none" method="post" action="/globalsight/ControlServlet?linkName=jobDownload&pageName=TK2&firstEntry=true&fromTaskDetail=true"">
+	<input type="hidden" name="<%=DownloadFileHandler.PARAM_JOB_ID%>" value="<%=jobId%>">
+	<input type="hidden" name="<%=DownloadFileHandler.PARAM_WORKFLOW_ID%>" value="<%=theTask.getWorkflow().getId()%>">
+	<input type="hidden" name="<%=DownloadFileHandler.TASK_ID%>" value="<%=theTask.getId()%>">
+	<input type="hidden" name="<%=DownloadFileHandler.TASK_STATE%>" value="<%=theTask.getState()%>">
+</form>
 <div class="mainHeading" style="margin-bottom:8px">
 	<%=bundle.getString("lb_job")%>: <%=jobName%>
 </div>
@@ -377,7 +457,7 @@ function doFinished(urlSent) {
         %>
         </div>
 	</amb:permission>
-	<FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST">
+	<FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST" target="hiddenFrame">
 	<% if(isHourlyJobCosting)
    {
         // Get current hourly value:
@@ -424,7 +504,6 @@ function doFinished(urlSent) {
         </TR>
 	</TABLE>
 <% } %>
-	
 </div>
 
 <div name="buttons" style="padding-bottom:8px;">
@@ -522,12 +601,16 @@ function doFinished(urlSent) {
 	    if (!disableButtons &&
 	       (perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD)) )
 	    {%>
-	          <INPUT TYPE=BUTTON NAME=DownloadButton VALUE="<%= bundle.getString("lb_download") %>..." ONCLICK="if(checkDownloadDelayTime()){location='<%= downloadLink.toString() %>'}">
+	          <INPUT TYPE=BUTTON NAME=DownloadButton VALUE="<%= bundle.getString("lb_download") %>..." ONCLICK="if(checkDownloadDelayTime()){downloadTaskForm.submit()}">
 	    <%}%>
 	<!-- End -->
 	<!-- For the issue of "add 'Back to Activities' button" -->
 	     <INPUT TYPE=BUTTON NAME="previous" VALUE="<%= bundle.getString("lb_back_to_activities") %>" ONCLICK="location.replace('<%= previousUrl %>')">
 	<!-- End -->
+	
+		<% if(isHourlyJobCosting || isPageBasedJobCosting) { %>
+	    <INPUT type=BUTTON onclick="submitHourOrPageForm('<%= labelSave %>');" value='<%= labelSave %>'>
+		<% } %>
 	</FORM>
 </div>
 <div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;padding-top:10px">
@@ -572,6 +655,8 @@ function doFinished(urlSent) {
 			<%
 	        perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	        boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
+	        boolean reviewCommentReportPermission = perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF) ||
+	        									 perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE);
 	        if (!isPageDetailOne)
 	        {
 	            if (!disableButtons && workoffline)
@@ -579,16 +664,16 @@ function doFinished(urlSent) {
 	                
 	                if (review_only)
 	                {
+	                	if(reviewCommentReportPermission)
+	                	{
 	                %>
-	                	 <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>" >
 	                	 <td WIDTH="2"></td>
 	                	 <td id="taskWorkOfflineTab" CLASS="tableHeadingListOff">
 		                	 <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
 		                	 <a CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"> <%=labelWorkoffline%></a>
 		                     <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
 		                 </td>
-	                	 </amb:permission>
-	                <%
+	                <%  }
 	                }
 	                else
 	                {%>

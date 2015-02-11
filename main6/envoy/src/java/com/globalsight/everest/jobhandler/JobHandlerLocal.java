@@ -782,18 +782,7 @@ public class JobHandlerLocal implements JobHandler
                 createDefaultFileExtension(companyId, session);
 
                 // Insert default permission groups
-                String sql = "select name from permission where id=300";
-                String cvsAdmin = (String) HibernateUtil.searchWithSql(sql,
-                        null).get(0);
-                if ("cvs.admin".equals(cvsAdmin))
-                {
-                    // cvs.admin is an deleted permission since 7.1.8.0
-                    createDefaultPermGroupsForOldServer(companyId, session);
-                }
-                else
-                {
-                    createDefaultPermGroups(companyId, session);
-                }
+                createDefaultPermGroups(companyId, session);
 
                 transaction.commit();
 
@@ -1031,36 +1020,25 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Administrator");
         permGroup.setDescription("Default Administrator Group");
-        permGroup
-                .setPermissionSet("|1|3|4|5|6|7|8|9|10|11|12|13|14|17|18|"
-                        + "19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|"
-                        + "39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|"
-                        + "59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|"
-                        + "80|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98|99|"
-                        + "100|101|102|103|104|117|118|119|120|121|123|124|125|126|127|"
-                        + "128|130|131|132|133|134|135|136|137|138|139|140|141|142|143|"
-                        + "144|145|146|147|148|149|150|151|152|153|154|155|156|157|158|"
-                        + "159|160|161|162|163|164|165|166|167|168|170|171|172|173|174|"
-                        + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
-                        + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
-                        + "266|267|268|270|292|293|294|295|296|297|298|299|306|361|367|388|389|390|");
+        permGroup.setPermissionSet("|3|4|5|6|7|8|9|13|14|17|18|19|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
+                        + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|74|75|76|77|78|79|80|82|83|84|86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|"
+                        + "101|102|103|104|117|118|119|120|121|123|124|125|126|127|128|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
+                        + "151|152|154|155|156|157|158|159|160|162|163|164|165|166|167|168|170|171|172|173|174|188|190|191|192|193|194|195|196|197|200|"
+                        + "201|202|203|204|205|206|208|209|210|212|213|214|215|216|217|218|219|220|221|223|224|227|228|229|230|235|244|247|"
+                        + "255|256|257|258|259|260|262|263|264|265|266|267|268|269|270|291|292|293|294|295|296|297|298|299|"
+                        + "321|322|330|362|365|367|368|369|371|375|378|379|380|381|382|383|385|388|389|390|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("ProjectManager");
         permGroup.setDescription("Default Project Manager Group");
-        permGroup
-                .setPermissionSet("|3|4|5|6|7|8|9|10|11|12|13|14|17|18|19|33|"
-                        + "34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|"
-                        + "55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|75|76|"
-                        + "77|78|79|80|82|83|89|90|91|92|104|127|128|129|130|131|132|133|"
-                        + "134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
-                        + "151|152|153|154|155|156|157|158|159|160|163|164|165|166|167|168|"
-                        + "169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
-                        + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
-                        + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
-                        + "248|249|252|253|254|255|256|259|261|270|361|367|385|388|389|390|");
+        permGroup.setPermissionSet("|13|14|17|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
+                + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|75|76|77|78|79|80|82|83|89|90|91|92|"
+                + "104|127|128|129|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
+                + "151|152|154|155|156|157|158|159|160|163|164|165|166|167|168|169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
+                + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|226|227|228|229|230|236|237|238|239|240|242|243|245|246|247|248|"
+                + "252|253|254|255|256|259|261|270|362|367|368|385|388|389|390|393|394|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1087,8 +1065,9 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
-        permGroup
-                .setPermissionSet("|163|164|167|169|170|171|172|173|174|199|225|226|254|283|285|291|363|");
+        permGroup.setPermissionSet("|163|164|165|166|167|168|169|170|171|172|173|174|195|199|200|"
+                + "201|225|226|245|246|253|254|261|273|283|285|291|"
+                + "324|325|326|327|361|362|363|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1096,9 +1075,9 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setName("Customer");
         permGroup.setDescription("Default Customer Group");
         permGroup.setPermissionSet("|14|37|38|40|128|130|131|132|133|134|135|"
-                + "136|137|138|139|140|141|142|143|144|145|146|147|148|"
-                + "149|150|151|153|154|155|156|157|158|159|160|161|162|"
-                + "174|188|192|193|199|205|367|");
+                + "136|137|138|139|140|142|143|144|145|146|147|148|"
+                + "149|150|151|154|155|156|157|158|159|160|162|"
+                + "174|188|192|193|199|205|368|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1124,6 +1103,41 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setPermissionSet("|178|181|184|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
+
+        permGroup = new PermissionGroupImpl();
+        permGroup.setName("EngineerDtp");
+        permGroup.setDescription("Default Engineer DTP Group");
+        permGroup.setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup.setCompanyId(companyId);
+        session.save(permGroup);
+        
+        permGroup = new PermissionGroupImpl();
+        permGroup.setName("Reviewer");
+        permGroup.setDescription("Default Reviewer Group");
+        permGroup.setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|258|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup.setCompanyId(companyId);
+        session.save(permGroup);
+
+        permGroup = new PermissionGroupImpl();
+        permGroup.setName("JobCreator");
+        permGroup.setDescription("Default Job Creator Group");
+        permGroup.setPermissionSet("||");
+        permGroup.setCompanyId(companyId);
+        session.save(permGroup);
+
+        permGroup = new PermissionGroupImpl();
+        permGroup.setName("TechnicalSupport");
+        permGroup.setDescription("Default Technical Support Group");
+        permGroup.setPermissionSet("||");
+        permGroup.setCompanyId(companyId);
+        session.save(permGroup);
+
+        permGroup = new PermissionGroupImpl();
+        permGroup.setName("ApiConnector");
+        permGroup.setDescription("Default API Connector Group");
+        permGroup.setPermissionSet("||");
+        permGroup.setCompanyId(companyId);
+        session.save(permGroup);
     }
 
     /**
@@ -1135,6 +1149,8 @@ public class JobHandlerLocal implements JobHandler
      * @param session
      * @throws PersistenceException
      * @throws Exception
+     * @deprecated -- Since version 8.2.3(05/24/2012), this is not necessary any
+     *             more.
      */
     private void createDefaultPermGroupsForOldServer(String p_companyId,
             Session session) throws PersistenceException, Exception

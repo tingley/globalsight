@@ -390,4 +390,7 @@ public interface AmbassadorDwUpConstants
     // Utility files
     /** MsWord Template name (AOR-Template.dot). */
     static public final String MSWORD_TEMPLATE_FNAME = "AOR-Template.dot";
+    
+    static public final String UPLOAD_IN_PROGRESS = "uploadInProgress";
+    static public final String UPLOAD_DONE = "uploadDone";
 }

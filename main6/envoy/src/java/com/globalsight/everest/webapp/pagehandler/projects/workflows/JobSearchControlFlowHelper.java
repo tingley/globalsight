@@ -21,20 +21,10 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.vendormanagement.VendorException;
-import com.globalsight.util.GeneralException;
-import java.io.IOException;
-import java.rmi.RemoteException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * Dispatches the user to the correct JSP.
@@ -77,9 +67,7 @@ class JobSearchControlFlowHelper
         {
             destinationPage = (String)m_request.getParameter("linkName");
         }
-        else if (fromRequest != null &&
-             (JobSearchConstants.JOB_SEARCH_COOKIE.equals(searchType) ||
-                 JobSearchConstants.MINI_JOB_SEARCH_COOKIE.equals(searchType)))
+        else if (fromRequest != null)
         {  
             String status = (String) m_request.getParameter(JobSearchConstants.STATUS_OPTIONS);
             if (Job.PENDING.equals(status))

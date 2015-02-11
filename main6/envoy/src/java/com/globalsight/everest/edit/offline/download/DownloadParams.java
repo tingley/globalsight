@@ -76,7 +76,8 @@ public class DownloadParams implements Serializable
     private boolean m_createZip = false;
     private int m_fileFormat = -1;
     private Vector m_excludeTypeNames = null;
-    //private int m_downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+    // private int m_downloadEditAll =
+    // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
     private List m_supportFiles = null;
     private int m_resourceOption = AmbassadorDwUpConstants.MAKE_RES_ATNS;
     private boolean m_isPrimaryFiles = false;
@@ -99,7 +100,7 @@ public class DownloadParams implements Serializable
     private List<Job> m_allJobs = null;
     private List<Long> m_allTaskIds = null;
     private ArrayList autoActionNodeEmail = null;
-    
+
     HashMap<Long, Long> allPSF_tasks = new HashMap<Long, Long>();
     HashMap<Long, Long> allSTF_tasks = new HashMap<Long, Long>();
     HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
@@ -113,12 +114,15 @@ public class DownloadParams implements Serializable
     private boolean needConsolidate = false;
     private boolean needCombined = false;
     private boolean includeRepetitions = false;
+    // GBS-3467
+    private boolean excludeFullyLeveragedFiles = false;
 
     private String activityType = "";
 
     private Map<String, String> uniqueFileNames = new HashMap<String, String>();
-    
-    private int TMEditType = 1; //Default is to allow edit of ICE and 100% segments
+
+    private int TMEditType = 1; // Default is to allow edit of ICE and 100%
+                                // segments
 
     //
     // Constructors
@@ -605,10 +609,10 @@ public class DownloadParams implements Serializable
      * @return a tri-state value indicating: Yes, No or Unauthorized.
      * @see AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_*
      */
-//    public int getDownloadEditAllState()
-//    {
-//        return m_downloadEditAll;
-//    }
+    // public int getDownloadEditAllState()
+    // {
+    // return m_downloadEditAll;
+    // }
 
     /**
      * Get the resource insertion option
@@ -929,8 +933,10 @@ public class DownloadParams implements Serializable
                 || (m_workflowID == null || m_workflowID.length() <= 0)
                 || ((m_taskID == null || m_taskID.length() <= 0) && (m_allTaskIds == null || m_allTaskIds
                         .size() == 0))
-                || (m_sourceLocale == null || m_sourceLocale.getDisplayName().length() <= 0)
-                || (m_targetLocale == null || m_targetLocale.getDisplayName().length() <= 0)
+                || (m_sourceLocale == null || m_sourceLocale.getDisplayName()
+                        .length() <= 0)
+                || (m_targetLocale == null || m_targetLocale.getDisplayName()
+                        .length() <= 0)
                 || ((m_createZip != true) && (m_createZip != false)))
         {
             result = false;
@@ -1101,18 +1107,18 @@ public class DownloadParams implements Serializable
     {
         this.m_job = p_job;
     }
-    
+
     public Job getRightJob()
     {
         if (m_job != null)
             return m_job;
-        
+
         if (m_allJobs != null && m_allJobs.size() > 0)
             return m_allJobs.get(0);
-        
+
         return null;
     }
-    
+
     public List<Job> getAllJob()
     {
         return m_allJobs;
@@ -1122,7 +1128,7 @@ public class DownloadParams implements Serializable
     {
         this.m_allJobs = p_jobs;
     }
-    
+
     public List<Long> getAllTaskIds()
     {
         return m_allTaskIds;
@@ -1189,7 +1195,7 @@ public class DownloadParams implements Serializable
         else
             this.needConsolidate = needConsolidate;
     }
-    
+
     public boolean isNeedCombined()
     {
         return needCombined;
@@ -1198,12 +1204,13 @@ public class DownloadParams implements Serializable
     public void setNeedCombined(boolean needCombined)
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
-                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED)
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
             this.needCombined = false;
         else
             this.needCombined = needCombined;
     }
-    
+
     public boolean isIncludeRepetitions()
     {
         return includeRepetitions;
@@ -1218,6 +1225,16 @@ public class DownloadParams implements Serializable
             this.includeRepetitions = false;
         else
             this.includeRepetitions = includeRepetitions;
+    }
+
+    public boolean excludeFullyLeveragedFiles()
+    {
+        return excludeFullyLeveragedFiles;
+    }
+
+    public void setExcludeFullyLeveragedFiles(boolean excludeFullyLeveragedFiles)
+    {
+        this.excludeFullyLeveragedFiles = excludeFullyLeveragedFiles;
     }
 
     public String getActivityType()

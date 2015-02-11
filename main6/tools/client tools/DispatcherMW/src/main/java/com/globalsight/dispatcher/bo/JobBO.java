@@ -32,7 +32,8 @@ public class JobBO implements AppConstants
     private String[] srcSegments;           // MT Source Text List
     private String[] trgSegments;           // MT Target Text List
     private File srcFile;                   // Source File, which contained source segments
-    private File trgFile;                   // Target File, which contained target segments    
+    private File trgFile;                   // Target File, which contained target segments   
+    private long mtpLanguageID;
     
     public JobBO(String jobID) 
     {
@@ -104,7 +105,14 @@ public class JobBO implements AppConstants
 
     public void setSourceSegments(List<String> p_srcSegments)
     {
-        srcSegments = p_srcSegments.toArray(new String[p_srcSegments.size()]);
+        if (p_srcSegments == null || p_srcSegments.size() == 0)
+        {
+            srcSegments = null;
+        }
+        else
+        {
+            srcSegments = p_srcSegments.toArray(new String[p_srcSegments.size()]);
+        }
     }
 
     public String[] getTargetSegments()
@@ -135,6 +143,16 @@ public class JobBO implements AppConstants
     public void setTrgFile(File trgFile)
     {
         this.trgFile = trgFile;
+    }
+
+    public long getMtpLanguageID()
+    {
+        return mtpLanguageID;
+    }
+
+    public void setMtpLanguageID(long mtpLanguageID)
+    {
+        this.mtpLanguageID = mtpLanguageID;
     }
     
 }

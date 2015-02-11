@@ -19,8 +19,11 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -95,17 +98,11 @@ public class EstimatedTranslateCompletionDateHandler extends PageHandler
                 request.setAttribute("from", "jobReady");
             }
         }
-        Job job = WorkflowHandlerHelper
-                .getJobById(getJobId(request, sessionMgr));
-        request.setAttribute("Job", job);
+        List<Job> jobs = getJobs(request, sessionMgr);
+        request.setAttribute("Jobs", jobs);
 
-        initWorkflowTable(
-                request,
-                session,
-                sessionMgr,
-                filterValidWorkflows(
-                        new ArrayList<Workflow>(job.getWorkflows()), request,
-                        sessionMgr));
+        initWorkflowTable(request, session, sessionMgr,
+                filterValidWorkflows(jobs, request, sessionMgr));
     }
 
     private void initWorkflowTable(HttpServletRequest request,
@@ -125,7 +122,7 @@ public class EstimatedTranslateCompletionDateHandler extends PageHandler
      * Filter valid workflows based on access group (a WFM can only see
      * workflows that they are responsible for).
      */
-    private List filterValidWorkflows(List p_workflows,
+    private List filterValidWorkflows(List<Job> p_jobs,
             HttpServletRequest p_request, SessionManager p_sessionMgr)
     {
         HttpSession session = p_request.getSession(false);
@@ -134,48 +131,72 @@ public class EstimatedTranslateCompletionDateHandler extends PageHandler
         User user = (User) p_sessionMgr.getAttribute(USER);
 
         List wfmList = new ArrayList();
-        int wfSize = p_workflows.size();
-        if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+        
+        for (Job job : p_jobs)
         {
-            for (int i = 0; i < wfSize; i++)
+            Collection p_workflows = job.getWorkflows();
+            if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
             {
-                Workflow curWF = (Workflow) p_workflows.get(i);
+                Iterator iter = p_workflows.iterator();
+                while(iter.hasNext())
+                {
+                    Workflow curWF = (Workflow) iter.next();
 
-                if (curWF.getState().equals(Workflow.DISPATCHED)
-                        || curWF.getState().equals(
-                                Workflow.READY_TO_BE_DISPATCHED))
-                {
-                    wfmList.add(curWF);
-                }
-                else
-                {
-                    continue;
+                    if (curWF.getState().equals(Workflow.DISPATCHED)
+                            || curWF.getState().equals(
+                                    Workflow.READY_TO_BE_DISPATCHED))
+                    {
+                        wfmList.add(curWF);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
             }
         }
-
+        
         return wfmList;
     }
 
     /**
      * Returns the id of the job that an action is being performed on.
      */
-    private long getJobId(HttpServletRequest request, SessionManager sessionMgr)
+    private List<Job> getJobs(HttpServletRequest request, SessionManager sessionMgr)
     {
-        long jobid = 0;
-        if (request.getParameter(JobManagementHandler.JOB_ID) == null)
+        List<Job> jobs = new ArrayList<Job>();
+
+        String jobids = "";
+        if (request.getParameter("checkedJobIds") == null)
         {
-            jobid = ((Long) sessionMgr
-                    .getAttribute(JobManagementHandler.JOB_ID)).longValue();
+            String jobid = "";
+            if (request.getParameter(JobManagementHandler.JOB_ID) != null)
+            {
+                jobid = request.getParameter(JobManagementHandler.JOB_ID);
+                jobids = jobid;
+                sessionMgr.setAttribute("jobIds", jobids);
+            }
+
+            jobids = (String) sessionMgr.getAttribute("jobIds");
         }
         else
         {
-            jobid = Long.parseLong(request
-                    .getParameter(JobManagementHandler.JOB_ID));
-            sessionMgr.setAttribute(JobManagementHandler.JOB_ID,
-                    new Long(jobid));
+            jobids = request.getParameter("checkedJobIds");
+            sessionMgr.setAttribute("jobIds", jobids);
         }
-        return jobid;
+
+        if (jobids != null && jobids.trim().length() > 0)
+        {
+            StringTokenizer st = new StringTokenizer(jobids);
+            while (st.hasMoreTokens())
+            {
+                String jid = st.nextToken();
+                Job job = WorkflowHandlerHelper.getJobById(Long.parseLong(jid));
+                jobs.add(job);
+            }
+        }
+
+        return jobs;
     }
 
     /**

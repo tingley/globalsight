@@ -48,7 +48,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
-import org.hibernate.Session;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -224,7 +223,8 @@ public class TaskDetailHandler extends PageHandler
         }
         else if (TASK_ACTION_RETRIEVE.equals(action))
         {
-        	getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId());
+        	if(!getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId()))
+	        	return;
         }
         // default case action==null but must also handle pagesearch action
         else if (action == null)
@@ -407,7 +407,7 @@ public class TaskDetailHandler extends PageHandler
  * @param PermissionSet
  * @param p_userId
  * **/
-	private void getTask(HttpServletRequest p_request, HttpSession p_session,
+	private boolean getTask(HttpServletRequest p_request, HttpSession p_session,
 			HttpServletResponse p_response, ServletContext p_context,
 			PermissionSet perms, String p_userId) throws ServletException,
 			IOException, EnvoyServletException 
@@ -451,10 +451,24 @@ public class TaskDetailHandler extends PageHandler
 
 			// forward to the jsp page.
 			TaskSearchHandler.setup(p_request);
-			RequestDispatcher dispatcher = p_context
-					.getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
-			dispatcher.forward(p_request, p_response);
-			return;
+			SessionManager sessionMgr = (SessionManager) p_session
+            		.getAttribute(PageHandler.SESSION_MANAGER);
+			sessionMgr.setMyactivitiesAttribute("badresults", MessageFormat.format(
+					bundle.getString("msg_bad_task"), args));
+			TaskListParams listParams = (TaskListParams) 
+        		sessionMgr.getMyactivitiesAttribute(TaskListConstants.TASK_LIST_PARAMS);
+			int targetState = listParams.getTaskState();
+	        if(targetState == 3)
+	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=3&listType=stateOnly&init=0");
+	        else if(targetState == 8)
+	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=8&listType=stateOnly&init=0");
+	        else if(targetState == -1)
+	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=-1&listType=stateOnly&init=0");
+	        else if(targetState == 6)
+	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=6&listType=stateOnly&init=0");
+	        else
+        		p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=-10&listType=stateOnly&init=0");
+			return false;
 		}
 
 		// store task state in the SessionManager
@@ -514,6 +528,7 @@ public class TaskDetailHandler extends PageHandler
 				new Integer(openSegmentCount).toString());
 		p_session.setAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS,
 				new Integer(closedSegmentCount).toString());
+		return true;
 
 	}
 	/**

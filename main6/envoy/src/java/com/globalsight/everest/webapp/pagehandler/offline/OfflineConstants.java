@@ -45,7 +45,7 @@ public interface OfflineConstants
     String EDITOR_SELECTOR = "editor";
     String ENCODING_SELECTOR = "encoding";
     String PTAG_SELECTOR = "placeholder";
-    //String EDIT_EXACT_SELECTOR = "editExact";
+    // String EDIT_EXACT_SELECTOR = "editExact";
     String TM_EDIT_TYPE = "TMEditType";
     String PAGE_CHECKBOXES = "pageCheckBoxes";
     String GLOSSARY_CHECKBOXES = "supportFileCheckBoxes";
@@ -116,7 +116,7 @@ public interface OfflineConstants
     // ttx names(only support Trados 7 TTX)
     String FORMAT_TTX_NAME = "Trados 7 TTX";
     String FORMAT_TTX_VALUE = "TTX";
-    
+
     String FORMAT_OMEGAT_NAME = "OmegaT";
     String FORMAT_OMEGAT_VALUE = "OmegaT";
 
@@ -134,6 +134,7 @@ public interface OfflineConstants
 
     String NEED_CONSOLIDATE = "needConsolidate";
     String INCLUDE_REPETITIONS = "includeRepetitions";
+    String EXCLUDE_FULLY_LEVERAGED_FILES = "excludeFullyLeveragedFiles";
 
     // If the task is TASK_UPLOADING_STATUS, can't complete the task.
     String TASK_UPLOADSTATUS_UPLOADING = "taskUploading";

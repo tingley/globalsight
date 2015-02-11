@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.page.pageexport.style.pptx;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -71,6 +72,9 @@ public class AtStyleStyle extends Style
 	@Override
 	public void handleStyleNode(Node bNode)
     {
+	    if (bNode == null)
+            return;
+	    
         Node wtNode = bNode.getParentNode();
         if (wtNode == null)
         	return;
@@ -104,9 +108,9 @@ public class AtStyleStyle extends Style
 	protected void updateStyle(Node cNode, Node cloneNode, Node wtNode,
 			Node wrNode, Node root)
     {
-    	if (cNode.getNodeName().equals(getNodeName()))
+	    if (cNode.getNodeName().equals(getNodeName()))
         {
-    		Element n = (Element) getChild(cloneNode, "a:rPr");
+            Element n = (Element) getChild(cloneNode, "a:rPr");
 
             if (n == null)
             {
@@ -118,85 +122,103 @@ public class AtStyleStyle extends Style
             Node c1 = cNode.getFirstChild();
             if (c1 != null && "atStyleChild".equals(c1.getNodeName()))
             {
-            	List<Node> ns = getChildNodes(c1);
-            	for (Node c : ns)
-            	{
-            	    Element e = (Element) c;
-            	    String p = e.getAttribute("gs-Previous");
-            	    String ne = e.getAttribute("gs-next");
-            	    
-            	    if ("null".equals(p))
-            	    {
-            	        n.insertBefore(c, n.getFirstChild());
-            	    } 
-            	    else if ("null".equals(ne))
-            	    {
-            	        n.appendChild(c);
-            	    }
-            	    else if (p != null && p.length() > 0)
-            	    {
-            	        List<Node> cc = getChildNodes(n);
-            	        Node f = null;
-            	        for (Node ccc : cc)
-            	        {
-            	            if (p.equals(ccc.getNodeName()))
-            	            {
-            	                f = ccc;
-            	                break;
-            	            }
-            	        }
-            	        
-            	        if (f == null)
-            	        {
-            	            n.appendChild(c);
-            	        }
-            	        else
-            	        {
-            	            n.insertBefore(c, f.getNextSibling());
-            	        }
-            	    }
-            	    else if (ne != null && ne.length() > 0)
-            	    {
-            	        List<Node> cc = getChildNodes(n);
-                        Node f = null;
-                        for (Node ccc : cc)
+                List<Node> ns = getChildNodes(c1);
+                List<Node> handledNode = new ArrayList<Node>();
+                
+                while (true)
+                {
+                    for (Node c : ns)
+                    {
+                        Element e = (Element) c;
+                        String p = e.getAttribute("gs-Previous");
+                        String ne = e.getAttribute("gs-next");
+                        
+                        boolean handle = false;
+                        
+                        if (p == null && ne == null) 
                         {
-                            if (ne.equals(ccc.getNodeName()))
+                            n.appendChild(c);
+                            handle = true;
+                            handledNode.add(n);
+                        }
+                        else if (p != null && p.length() > 0)
+                        {
+                            List<Node> cc = getChildNodes(n);
+                            Node f = null;
+                            for (Node ccc : cc)
                             {
-                                f = ccc;
-                                break;
+                                if (p.equals(ccc.getNodeName()))
+                                {
+                                    f = ccc;
+                                    break;
+                                }
+                            }
+                            
+                            if (f != null)
+                            {
+                                n.insertBefore(c, f.getNextSibling());
+                                handle = true;
+                                handledNode.add(c);
+                            }
+                        }
+                        else if (ne != null && ne.length() > 0)
+                        {
+                            List<Node> cc = getChildNodes(n);
+                            Node f = null;
+                            for (Node ccc : cc)
+                            {
+                                if (ne.equals(ccc.getNodeName()))
+                                {
+                                    f = ccc;
+                                    break;
+                                }
+                            }
+                            
+                            if (f != null)
+                            {
+                                n.insertBefore(c, f);
+                                handle = true;
+                                handledNode.add(c);
                             }
                         }
                         
-                        if (f == null)
+                        if (handle)
                         {
-                            n.appendChild(c);
+                            e.removeAttribute("gs-Previous");
+                            e.removeAttribute("gs-next");
                         }
-                        else
-                        {
-                            n.insertBefore(c, f);
-                        }
-            	    }
-            	    else
-            	    {
-            	        n.appendChild(c);
-            	    }
-            	    
-            	    e.removeAttribute("gs-Previous");
-            	    e.removeAttribute("gs-next");
-            	}
-            	
-            	cNode.removeChild(c1);
+                    }
+                    
+                    if (handledNode.size() == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        ns.removeAll(handledNode);
+                        handledNode.clear();
+                    }
+                }
+                
+                for (Node c : ns)
+                {
+                    Element e = (Element) c;
+                    e.removeAttribute("gs-Previous");
+                    e.removeAttribute("gs-next");
+                    n.appendChild(e);
+                }
+                
+                cNode.removeChild(c1);
             }
             
             List<Node> atts = getAttributes(cNode);
             for (Node att : atts)
             {
-            	String name = att.getNodeName();
-            	if (!"styleType".equals(name))
-            	{
-            		n.setAttribute(att.getNodeName(), att.getNodeValue());
-            	}
+                String name = att.getNodeName();
+                if (!"styleType".equals(name))
+                {
+                    n.setAttribute(att.getNodeName(), att.getNodeValue());
+                }
             }
         }
 

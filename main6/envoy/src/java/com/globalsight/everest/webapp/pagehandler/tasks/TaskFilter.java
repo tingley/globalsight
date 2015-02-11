@@ -246,15 +246,15 @@ public class TaskFilter
             return null;
         }
 
+        Job job = task.getWorkflow().getJob();
+        job = HibernateUtil.get(JobImpl.class, job.getId());
         List<String> assignees = WorkflowJbpmUtil.getAssignees(taskId);
-        assignees.add(task.getProjectManagerId());
+        assignees.add(job.getProject().getProjectManagerId());
         if (!assignees.contains(user.getUserId()))
         {
             return "msg_reassigned";
         }
         
-        Job job = task.getWorkflow().getJob();
-        job = HibernateUtil.get(JobImpl.class, job.getId());
         if (Job.ADD_FILE.equalsIgnoreCase(job.getState()) || Job.BATCHRESERVED.equalsIgnoreCase(job.getState()))
         {
             return "msg_add_file";

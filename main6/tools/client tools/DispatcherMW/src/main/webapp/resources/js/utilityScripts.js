@@ -60,7 +60,7 @@ function ATrim(str)
 
 
 function isEmptyString(theString) {
-   if (ATrim(theString) == "" || theString == null) return true;
+   if (theString == null || ATrim(theString) == "") return true;
    else return false;
 }
 

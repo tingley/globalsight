@@ -49,6 +49,8 @@ public class ReportGeneratorFactory
                 DetailedWordCountsByJobReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.REVIEWERS_COMMENTS_REPORT,
                 ReviewersCommentsReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT,
+                ReviewersCommentsSimpleReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.COMMENTS_ANALYSIS_REPORT,
                 CommentsAnalysisReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT, CharacterCountReportGenerator.class.getName());

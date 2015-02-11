@@ -20,7 +20,7 @@
       <WebPage pageName="LOG6" isDefault="false" jspName="/envoy/login/retrieveUsername.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.login.RetrieveUsernamesPassHandler"></WebPage>
       <WebPage pageName="retrieve" isDefault="false" jspName="/envoy/login/retrieveResult.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.login.RetrieveUsernamesPassHandler">
         <PageLink linkName="resetPass" destinationPageName="LOG5"></PageLink>
-        <PageLink linkName="retrieveUsername" destinationPageName="LOG6"></PageLink>	
+        <PageLink linkName="retrieveUsername" destinationPageName="LOG6"></PageLink>    
       </WebPage>
       <WebPage pageName="SSO" isDefault="false" jspName="/envoy/login/ssoLogon.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.login.SSOLogonHandler">
         <PageLink linkName="self" destinationPageName="SSO"></PageLink>
@@ -267,10 +267,10 @@
         <PageLink linkName="cancel" destinationPageName="TMP"></PageLink>
       </WebPage>
       <WebPage pageName="TDA" isDefault="false" jspName="/envoy/administration/tmprofile/TDAOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTDAOptionsHandler">
-      	<PageLink linkName="saveTDAOptions" destinationPageName="TDA"></PageLink>
-      	<PageLink linkName="cancelTDAOptions" destinationPageName="TMP"></PageLink>
-      	<PageLink linkName="self" destinationPageName="TDA"></PageLink>
-      	<PageLink linkName="main" destinationPageName="TMP"></PageLink>
+        <PageLink linkName="saveTDAOptions" destinationPageName="TDA"></PageLink>
+        <PageLink linkName="cancelTDAOptions" destinationPageName="TMP"></PageLink>
+        <PageLink linkName="self" destinationPageName="TDA"></PageLink>
+        <PageLink linkName="main" destinationPageName="TMP"></PageLink>
       </WebPage>
    </WebActivity>
   </WebModule>
@@ -278,7 +278,7 @@
   <WebModule webModuleName="mtProfiles">
     <WebActivity webActivityName="mtProfiles">
       <WebPage pageName="MTP" isDefault="true" jspName="/envoy/administration/mtprofiles/mtProfiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandler">
-      	<PageLink linkName="new1" destinationPageName="MTD"></PageLink>
+        <PageLink linkName="new1" destinationPageName="MTD"></PageLink>
         <PageLink linkName="modify" destinationPageName="MTD"></PageLink>
         <PageLink linkName="self" destinationPageName="MTP"></PageLink>
         <PageLink linkName="remove" destinationPageName="MTP"></PageLink>
@@ -286,9 +286,9 @@
       
       </WebPage>
       <WebPage pageName="MTD" isDefault="false" jspName="/envoy/administration/mtprofiles/mtDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTDetailHandler">  
-       	<PageLink linkName="cancelMTOptions" destinationPageName="MTP"></PageLink>
-      	<PageLink linkName="saveMTOptions" destinationPageName="MTD"></PageLink>
-      	 <PageLink linkName="self" destinationPageName="MTD"></PageLink>
+        <PageLink linkName="cancelMTOptions" destinationPageName="MTP"></PageLink>
+        <PageLink linkName="saveMTOptions" destinationPageName="MTD"></PageLink>
+         <PageLink linkName="self" destinationPageName="MTD"></PageLink>
       </WebPage>
    </WebActivity>
   </WebModule>
@@ -309,8 +309,8 @@
         <PageLink linkName="statistics" destinationPageName="TMS"></PageLink>
         <PageLink linkName="reindex" destinationPageName="TMR1"></PageLink>
         <PageLink linkName="convert" destinationPageName="TM"></PageLink>
-	    <PageLink linkName="users" destinationPageName="TMUSER"></PageLink>
-	    <PageLink linkName="tmSearch" destinationPageName="TMSEARCH"></PageLink>
+        <PageLink linkName="users" destinationPageName="TMUSER"></PageLink>
+        <PageLink linkName="tmSearch" destinationPageName="TMSEARCH"></PageLink>
       </WebPage>
       <WebPage pageName="TMUSER" isDefault="false" 
       jspName="/envoy/tm/management/tmUsers.jsp" 
@@ -618,6 +618,15 @@
      <WebActivity webActivityName="filterConfiguration">
       <WebPage pageName="FC1" isDefault="true" jspName="/envoy/administration/filterConfiguration/filterConfigurationMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationMainHandler">
         <PageLink linkName="self" destinationPageName="FC1"></PageLink>
+         <PageLink linkName="export" destinationPageName="FC1"></PageLink>
+         <PageLink linkName="imports" destinationPageName="FILTERIMPORT"></PageLink>
+      </WebPage>
+      <WebPage pageName="FILTERIMPORT" isDefault="false" jspName="/envoy/administration/filterConfiguration/import.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationImportHandler">
+        <PageLink linkName="startUpload" destinationPageName="FILTERIMPORT_PROGRESS"></PageLink>
+      </WebPage>
+      <WebPage pageName="FILTERIMPORT_PROGRESS" isDefault="false" jspName="/envoy/administration/filterConfiguration/import_progress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationImportHandler">
+        <PageLink linkName="refresh" destinationPageName="FILTERIMPORT_PROGRESS"/>
+        <PageLink linkName="done" destinationPageName="FC1"/>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="createJobs">
@@ -631,7 +640,7 @@
       <WebPage pageName="JA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.JobAttributeHandler">
       </WebPage>
       <WebPage pageName="SJA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.SetAttributeHandler">
-      	<PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
+        <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="createZipJobs">
@@ -645,7 +654,7 @@
       <WebPage pageName="JA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.JobAttributeHandler">
       </WebPage>
       <WebPage pageName="SJA" isDefault="false" jspName="/envoy/administration/createjob/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.createJobs.SetAttributeHandler">
-      	<PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
+        <PageLink linkName="ajax" destinationPageName="SJA"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="fileprofiles">
@@ -881,7 +890,7 @@
         <PageLink linkName="prevNoPM" destinationPageName="NEW1a"></PageLink>
         <PageLink linkName="addAnother" destinationPageName="NEW2"></PageLink>
         <PageLink linkName="setRate" destinationPageName="NEW2"></PageLink>
-		<PageLink linkName="setSource" destinationPageName="NEW2"></PageLink>
+        <PageLink linkName="setSource" destinationPageName="NEW2"></PageLink>
         <PageLink linkName="cancel" destinationPageName="USR"></PageLink>
         <PageLink linkName="next" destinationPageName="NEWUSERPROJ"></PageLink>
       </WebPage>
@@ -1058,8 +1067,8 @@
         <PageLink linkName="changeCurr" destinationPageName="CHANGECURR"></PageLink>
         <PageLink linkName="jobSearch" destinationPageName="SJ"></PageLink>
         <PageLink linkName="miniSearch" destinationPageName="SJ"></PageLink>
-		<PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
-		<PageLink linkName="plannedCompletionDate" destinationPageName="PDATE"></PageLink>
+        <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
+        <PageLink linkName="plannedCompletionDate" destinationPageName="PDATE"></PageLink>
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="jobsPending">
@@ -1259,7 +1268,7 @@
         <PageLink linkName="exported" destinationPageName="WF5"></PageLink>
         <PageLink linkName="progress" destinationPageName="WF3"></PageLink>
         <PageLink linkName="archived" destinationPageName="ARCH"></PageLink>
-        <PageLink linkName="tasks" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="tasks" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="taskDetails" destinationPageName="TK2"></PageLink>
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
       </WebPage>
@@ -1298,7 +1307,7 @@
         <PageLink linkName="jobDetailsPDFs" destinationPageName="JOBDETAILSPDFS"></PageLink>
       </WebPage>
       <WebPage pageName="SOURCEFILES" isDefault="false" jspName="/envoy/projects/workflows/jobSourceFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSourceFilesHandler">
-      	<PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
         <PageLink linkName="jobDetailsPDFs" destinationPageName="JOBDETAILSPDFS"></PageLink>
@@ -1410,7 +1419,7 @@
       <WebPage pageName="WORKFLOWCOM" isDefault="false" jspName="/envoy/projects/workflows/workflowComments.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowCommentsHandler"></WebPage>
       <WebPage pageName="WORKFLOWACT" isDefault="false" jspName="/envoy/projects/workflows/workflowActivities.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowActivitiesHandler">
         <PageLink linkName="self" destinationPageName="WORKFLOWACT"></PageLink>
-	    </WebPage>
+        </WebPage>
       <WebPage pageName="IMPERR" isDefault="false" jspName="/envoy/projects/workflows/importError.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.ImportErrorHandler">
         <PageLink linkName="pending" destinationPageName="WF1"></PageLink>
         <PageLink linkName="jobDetails" destinationPageName="SOURCEFILES"></PageLink>
@@ -1584,7 +1593,7 @@
         <PageLink linkName="bottomMenu" destinationPageName="SE3"></PageLink>
         <PageLink linkName="details" destinationPageName="SE9"></PageLink>
         <PageLink linkName="options" destinationPageName="SE11"></PageLink>
-	      <PageLink linkName="concordance" destinationPageName="CTMB"></PageLink>	
+          <PageLink linkName="concordance" destinationPageName="CTMB"></PageLink>   
       </WebPage>
       <WebPage pageName="SE2" isDefault="false" jspName="/envoy/edit/online/se_topMenu.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler">
         <PageLink linkName="save" destinationPageName="SE1"></PageLink>
@@ -1684,8 +1693,8 @@
       <WebPage pageName="EDN3" isDefault="false" 
       jspName="/envoy/edit/online2/tmwindow.jsp" 
       pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler"> 
-		<PageLink linkName="tminfo" destinationPageName="EDN3"/>
-	    <PageLink linkName="concordance" destinationPageName="CTMB"/>
+        <PageLink linkName="tminfo" destinationPageName="EDN3"/>
+        <PageLink linkName="concordance" destinationPageName="CTMB"/>
       </WebPage>
       <WebPage pageName="EDN4" isDefault="false" jspName="/envoy/edit/online2/options.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.OptionsPageHandler">
         <PageLink linkName="options" destinationPageName="EDN4"></PageLink>
@@ -1727,7 +1736,7 @@
     <WebActivity webActivityName="searchTask">
       <WebPage pageName="ST" isDefault="true" jspName="/envoy/tasks/taskSearch.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler">
         <PageLink linkName="taskSearch" destinationPageName="ST"></PageLink> 
-        <PageLink linkName="list" destinationPageName="TK1"></PageLink> 
+        <PageLink linkName="list" destinationPageName="TK1A"></PageLink> 
       </WebPage>
     </WebActivity>
     <WebActivity webActivityName="myactivities">
@@ -1769,8 +1778,8 @@
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
-        <PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-        <PageLink linkName="previous" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
@@ -1780,7 +1789,7 @@
         <PageLink linkName="pageSearch" destinationPageName="TK2"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
@@ -1796,8 +1805,8 @@
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
-        <PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-        <PageLink linkName="previous" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
@@ -1807,7 +1816,7 @@
         <PageLink linkName="pageSearch" destinationPageName="TK2"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
         <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
@@ -1823,7 +1832,7 @@
       </WebPage>
       <WebPage pageName="TK4" isDefault="false" jspName="/envoy/tasks/rejectTask.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.RejectTaskHandler">
         <PageLink linkName="cancel" destinationPageName="TK2"></PageLink>
-        <PageLink linkName="done" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="done" destinationPageName="TK1A"></PageLink>
       </WebPage>
       <WebPage pageName="TK5" isDefault="false" jspName="/envoy/administration/comment/taskComments.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler">
         <PageLink linkName="addcomment" destinationPageName="TK10"></PageLink>
@@ -1840,20 +1849,20 @@
         <PageLink linkName="segmentComments" destinationPageName="SEGCOMMENTS"></PageLink>
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="accept" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="reject" destinationPageName="TK4"></PageLink>
-		<PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
-		<PageLink linkName="export" destinationPageName="EJ"></PageLink>
-		<PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
-		<PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="previous" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
+        <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
+        <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
       
       <WebPage pageName="TK6" isDefault="false"
-	jspName="/envoy/edit/offline/download/download.jsp" 
-	pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler">
+    jspName="/envoy/edit/offline/download/download.jsp" 
+    pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler">
         <PageLink linkName="cancel" destinationPageName="TK2"/>
         <PageLink linkName="comment" destinationPageName="TK5"/>
         <PageLink linkName="detail" destinationPageName="TK2"/>
@@ -1864,20 +1873,20 @@
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"/>
         <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="accept" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="reject" destinationPageName="TK4"></PageLink>
-		<PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
-		<PageLink linkName="export" destinationPageName="EJ"></PageLink>
-		<PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
-		<PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="previous" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
+        <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
+        <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
       
         <WebPage pageName="TK6_downloadReport" isDefault="false" 
-	jspName="/envoy/edit/offline/download/downloadReport.jsp" 
-	pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler">
+    jspName="/envoy/edit/offline/download/downloadReport.jsp" 
+    pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler">
         <PageLink linkName="cancel" destinationPageName="TK2"/>
         <PageLink linkName="comment" destinationPageName="TK5"/>
         <PageLink linkName="detail" destinationPageName="TK2"/>
@@ -1886,15 +1895,15 @@
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"/>
         <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"/>
         <PageLink linkName="accept" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="reject" destinationPageName="TK4"></PageLink>
-		<PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
-		<PageLink linkName="export" destinationPageName="EJ"></PageLink>
-		<PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
-		<PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="previous" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
+        <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
+        <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
       
       <WebPage pageName="TK7" isDefault="false" 
@@ -1904,11 +1913,11 @@
         <PageLink linkName="back" destinationPageName="TK6"/>
         <PageLink linkName="refresh" destinationPageName="TK7_status"/>
         <PageLink linkName="done" destinationPageName="TK2"/>
-	<!-- Dummy target page, result is the zip file -->
+    <!-- Dummy target page, result is the zip file -->
         <PageLink linkName="senddownloadfile" destinationPageName="TK7"/>
       </WebPage>
       <WebPage pageName="TK7_status" isDefault="false" 
-	jspName="/envoy/edit/offline/download/getstatus.jsp" 
+    jspName="/envoy/edit/offline/download/getstatus.jsp" 
         pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHandler">
       </WebPage>
       <WebPage pageName="TK8" isDefault="false" 
@@ -1918,7 +1927,7 @@
         <PageLink linkName="comment" destinationPageName="TK5"></PageLink>
         <PageLink linkName="detail" destinationPageName="TK2"></PageLink>
         <PageLink linkName="download" destinationPageName="TK6"></PageLink>
-		<PageLink linkName="startupload" destinationPageName="TK8_progress" /> 
+        <PageLink linkName="startupload" destinationPageName="TK8_progress" /> 
         <PageLink linkName="errorPage" destinationPageName="TK9"></PageLink>
         <PageLink linkName="supportFiles" destinationPageName="GLO1"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TK8"></PageLink>
@@ -1927,15 +1936,15 @@
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"></PageLink>
         <PageLink linkName="accept" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="reject" destinationPageName="TK4"></PageLink>
-		<PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
-		<PageLink linkName="export" destinationPageName="EJ"></PageLink>
-		<PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
-		<PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="previous" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
+        <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
+        <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink>
       </WebPage>
       
       <WebPage pageName="TK8_uploadReport" isDefault="false"
@@ -1945,7 +1954,7 @@
         <PageLink linkName="comment" destinationPageName="TK5"></PageLink>
         <PageLink linkName="detail" destinationPageName="TK2"></PageLink>
         <PageLink linkName="download" destinationPageName="TK6"></PageLink>
-		<PageLink linkName="startupload" destinationPageName="TK8_progress_uploadReport" />
+        <PageLink linkName="startupload" destinationPageName="TK8_progress_uploadReport" />
         <PageLink linkName="errorPage" destinationPageName="TK9_uploadReport"></PageLink>
         <PageLink linkName="refresh" destinationPageName="TK8_uploadReport"></PageLink>
         <PageLink linkName="done" destinationPageName="TK8_uploadReport"></PageLink>
@@ -1953,15 +1962,15 @@
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="uploadreport" destinationPageName="TK8_uploadReport"></PageLink>
         <PageLink linkName="accept" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="reject" destinationPageName="TK4"></PageLink>
-		<PageLink linkName="finish" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
-		<PageLink linkName="export" destinationPageName="EJ"></PageLink>
-		<PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
-		<PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
-		<PageLink linkName="previous" destinationPageName="TK1"></PageLink>
-		<PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink> 
+        <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="export" destinationPageName="EJ"></PageLink>
+        <PageLink linkName="recreateGS" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="jobDownload" destinationPageName="CUST_FILE_Download"></PageLink>
+        <PageLink linkName="dtpDownload" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="previous" destinationPageName="TK1A"></PageLink>
+        <PageLink linkName="taskSecondaryTargetFiles" destinationPageName="TK2_secondary"></PageLink> 
       </WebPage>
       
       <WebPage pageName="TK8_progress" isDefault="false" 
@@ -1985,7 +1994,7 @@
       </WebPage>
 
       <WebPage pageName="TK8_status" isDefault="false" 
-	jspName="/envoy/edit/offline/upload/getstatus.jsp" 
+    jspName="/envoy/edit/offline/upload/getstatus.jsp" 
         pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.upload.UploadPageHandler">
       </WebPage>
       <WebPage pageName="TK9" isDefault="false" jspName="/envoy/edit/offline/upload/error.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
@@ -2036,27 +2045,27 @@
     </WebActivity>
 
     <WebActivity webActivityName="simpleofflineupload">
-	<WebPage pageName="SOU" isDefault="true"
-		jspName="/envoy/edit/offline/upload/upload.jsp"
-		pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.upload.SimpleUploadPageHandler">
-		<PageLink linkName="supportFiles" destinationPageName="GLO1"></PageLink>
-		<PageLink linkName="cancel" destinationPageName="HOME"></PageLink>
-		<PageLink linkName="startupload" destinationPageName="SOUP"></PageLink>
-		<PageLink linkName="errorPage" destinationPageName="SOUE"></PageLink>
-		<PageLink linkName="refresh" destinationPageName="SOU"></PageLink>
-		<PageLink linkName="done" destinationPageName="SOU"></PageLink>
-		<PageLink linkName="upload" destinationPageName="SOU"></PageLink>
-	</WebPage>
-	<WebPage pageName="SOUP" isDefault="false"
-		jspName="/envoy/edit/offline/upload/uploadProgress.jsp"
-		pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.upload.SimpleUploadPageHandler">
-		<PageLink linkName="cancel" destinationPageName="SOU"></PageLink>
-		<PageLink linkName="back" destinationPageName="SOU"></PageLink>
-		<PageLink linkName="errorPage" destinationPageName="SOUE"></PageLink>
-		<PageLink linkName="refresh" destinationPageName="SOUP"></PageLink>
-		<PageLink linkName="done" destinationPageName="SOU"></PageLink>
-	</WebPage>
-	<WebPage pageName="SOUE" isDefault="false" jspName="/envoy/edit/offline/upload/error.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
+    <WebPage pageName="SOU" isDefault="true"
+        jspName="/envoy/edit/offline/upload/upload.jsp"
+        pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.upload.SimpleUploadPageHandler">
+        <PageLink linkName="supportFiles" destinationPageName="GLO1"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="HOME"></PageLink>
+        <PageLink linkName="startupload" destinationPageName="SOUP"></PageLink>
+        <PageLink linkName="errorPage" destinationPageName="SOUE"></PageLink>
+        <PageLink linkName="refresh" destinationPageName="SOU"></PageLink>
+        <PageLink linkName="done" destinationPageName="SOU"></PageLink>
+        <PageLink linkName="upload" destinationPageName="SOU"></PageLink>
+    </WebPage>
+    <WebPage pageName="SOUP" isDefault="false"
+        jspName="/envoy/edit/offline/upload/uploadProgress.jsp"
+        pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.offline.upload.SimpleUploadPageHandler">
+        <PageLink linkName="cancel" destinationPageName="SOU"></PageLink>
+        <PageLink linkName="back" destinationPageName="SOU"></PageLink>
+        <PageLink linkName="errorPage" destinationPageName="SOUE"></PageLink>
+        <PageLink linkName="refresh" destinationPageName="SOUP"></PageLink>
+        <PageLink linkName="done" destinationPageName="SOU"></PageLink>
+    </WebPage>
+    <WebPage pageName="SOUE" isDefault="false" jspName="/envoy/edit/offline/upload/error.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.PageHandler">
         <PageLink linkName="previous" destinationPageName="SOU"></PageLink>
     </WebPage>
     </WebActivity>
@@ -2064,7 +2073,7 @@
     <WebActivity webActivityName="taskSearch">
       <WebPage pageName="TASKSEARCH" isDefault="false" jspName="/envoy/projects/workflows/searchContent.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchJobsHandler">
         <PageLink linkName="search" destinationPageName="TASKSEARCHRESULTS"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="TK1A"></PageLink>
       </WebPage>
       <WebPage pageName="TASKSEARCHRESULTS" isDefault="false" jspName="/envoy/projects/workflows/searchContentResults.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.SearchTasksResultsHandler">
         <PageLink linkName="replace" destinationPageName="TASKREPLACERESULTS"></PageLink>
@@ -2075,7 +2084,7 @@
       </WebPage>
       <WebPage pageName="TASKREPLACERESULTS" isDefault="false" jspName="/envoy/projects/workflows/replaceResults.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchJobsReplaceHandler">
         <PageLink linkName="search" destinationPageName="TASKSEARCH"></PageLink>
-        <PageLink linkName="save" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="save" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="self" destinationPageName="TASKREPLACERESULTS"></PageLink>
       </WebPage>
     </WebActivity>
@@ -2089,12 +2098,12 @@
         <PageLink linkName="_import" destinationPageName="TB3"></PageLink>
         <PageLink linkName="_export" destinationPageName="TB10"></PageLink>
         <PageLink linkName="browse" destinationPageName="TBVW1"></PageLink>
-		<PageLink linkName="statistics" destinationPageName="TBS"></PageLink>
-		<PageLink linkName="inputmodels" destinationPageName="TBIM1"></PageLink>
-		<PageLink linkName="indexes" destinationPageName="TBIN1"></PageLink>
-		<PageLink linkName="maintenance" destinationPageName="TBMT1"></PageLink>
-		<PageLink linkName="termSearch" destinationPageName="TBST1"></PageLink>
-		<PageLink linkName="users" destinationPageName="TBUSER"></PageLink>
+        <PageLink linkName="statistics" destinationPageName="TBS"></PageLink>
+        <PageLink linkName="inputmodels" destinationPageName="TBIM1"></PageLink>
+        <PageLink linkName="indexes" destinationPageName="TBIN1"></PageLink>
+        <PageLink linkName="maintenance" destinationPageName="TBMT1"></PageLink>
+        <PageLink linkName="termSearch" destinationPageName="TBST1"></PageLink>
+        <PageLink linkName="users" destinationPageName="TBUSER"></PageLink>
       </WebPage>
       <WebPage pageName="TB2" isDefault="false" jspName="/envoy/terminology/management/definition.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.management.TermbaseManagementPageHandler">
         <PageLink linkName="ok" destinationPageName="TB1"></PageLink>
@@ -2394,7 +2403,7 @@
     <WebActivity webActivityName="xlsReportJobStatus">
       <WebPage pageName="JOBSTATUS" isDefault="true" jspName="/envoy/administration/reports/jobStatusXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
-	<WebActivity webActivityName="xlsReportComment">
+    <WebActivity webActivityName="xlsReportComment">
       <WebPage pageName="REPORTCOMMENT" isDefault="true" jspName="/envoy/administration/reports/commentXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportOnlineRevStatus">
@@ -2427,10 +2436,13 @@
     <WebActivity webActivityName="xlsReportLanguageSignOff">
       <WebPage pageName="REVIEWERLISAQA" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
+    <WebActivity webActivityName="xlsReportLanguageSignOffSimple">
+      <WebPage pageName="REVIEWERLISAQASIMPLE" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffSimpleReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    </WebActivity>
     <WebActivity webActivityName="xlsReportCommentsAnalysis">
       <WebPage pageName="COMMENTSANALYSIS" isDefault="true" jspName="/envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
-	<WebActivity webActivityName="xlsReportTranslationsEdit">
+    <WebActivity webActivityName="xlsReportTranslationsEdit">
       <WebPage pageName="TRANSLATIONSEDIT" isDefault="true" jspName="/envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportTranslationProgress">
@@ -2684,7 +2696,7 @@
         <PageLink linkName="cancelEdit" destinationPageName="EDITVENDBASIC"></PageLink>
         <PageLink linkName="cancelNew" destinationPageName="VENDOR"></PageLink>
         <PageLink linkName="next" destinationPageName="VENDPERMS"></PageLink>
-        <PageLink linkName="nextNoCustom" destinationPageName="VENDPERMS"></PageLink>	
+        <PageLink linkName="nextNoCustom" destinationPageName="VENDPERMS"></PageLink>   
         <PageLink linkName="done" destinationPageName="EDITVENDBASIC"></PageLink>
         <PageLink linkName="create" destinationPageName="VENDOR"></PageLink>
         <PageLink linkName="prev" destinationPageName="EDITVENDCUSTOM"></PageLink>
@@ -2853,7 +2865,7 @@
         <PageLink linkName="done" destinationPageName="TK2"></PageLink>
       </WebPage>
       <WebPage pageName="CUST_Activity_DLOAD" isDefault="false" jspName="/envoy/administration/customer/download/downloadApplet.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler">
-        <PageLink linkName="done" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="done" destinationPageName="TK1A"></PageLink>
         <PageLink linkName="doneFromTask" destinationPageName="TK2"></PageLink>
       </WebPage>
     </WebActivity>
@@ -3038,14 +3050,14 @@
   <WebModule webModuleName="rssReader">
     <WebActivity webActivityName="rssReader">
       <WebPage pageName="RSSMAIN" isDefault="true" jspName="/envoy/rss/rssMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.rss.RssMainHandler">
-	    <PageLink linkName="subscribe" destinationPageName="RSSMAIN"></PageLink>
-	    <PageLink linkName="showInRight" destinationPageName="RSSMAIN"></PageLink>
-	    <PageLink linkName="showItems" destinationPageName="RSSITEM"></PageLink>
+        <PageLink linkName="subscribe" destinationPageName="RSSMAIN"></PageLink>
+        <PageLink linkName="showInRight" destinationPageName="RSSMAIN"></PageLink>
+        <PageLink linkName="showItems" destinationPageName="RSSITEM"></PageLink>
       </WebPage>
       <WebPage pageName="RSSITEM" isDefault="false" jspName="/envoy/rss/rssItem.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.rss.RSSItemMainHandler">
-	    <PageLink linkName="tosave" destinationPageName="RSSJOB"></PageLink>
-	    <PageLink linkName="refresh" destinationPageName="RSSITEM"></PageLink>
-	    <PageLink linkName="toback" destinationPageName="RSSMAIN"></PageLink>
+        <PageLink linkName="tosave" destinationPageName="RSSJOB"></PageLink>
+        <PageLink linkName="refresh" destinationPageName="RSSITEM"></PageLink>
+        <PageLink linkName="toback" destinationPageName="RSSMAIN"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

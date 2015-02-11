@@ -58,6 +58,9 @@ public class OmegaTConst
     public static String dictionary_foldername = "dictionary/";
     public static String target_foldername = "target/";
     public static String omegat_filterxml_file = "omegat/filters.xml";
+    
+    public static String tu_type_ice = "x-ice";
+    public static String tu_type_100 = "x-100pc";
             
     public static String filter_xml = "";
 

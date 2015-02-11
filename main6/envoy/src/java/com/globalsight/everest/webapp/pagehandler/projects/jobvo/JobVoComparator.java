@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.jobvo;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import com.globalsight.util.EnvoyDataComparator;
@@ -38,6 +40,7 @@ public class JobVoComparator extends EnvoyDataComparator
     public static final int PLANNED_DATE  = 10 ;
     public static final int JOB_STATUS  = 11 ;
     public static final int EST_TRANSLATE_COMPLETION_DATE = 12;
+    private static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
     
     //////////////////////////////////////////////////////////////////////
     //  Begin: Constructor
@@ -109,7 +112,9 @@ public class JobVoComparator extends EnvoyDataComparator
             case PRIORITY:
                 compareByPriority(p_objects, job1, job2);
                 break;
-
+            case EST_COMPLETION_DATE:
+                compareByCompletionDate(p_objects, job1, job2);
+                break;
             case PLANNED_DATE:
                 compareByPlannedDate(p_objects, job1, job2);
                 break;
@@ -156,8 +161,16 @@ public class JobVoComparator extends EnvoyDataComparator
 
     private void compareByCreationDate(Object[] p_objects, JobVo p_job1, JobVo p_job2)
     {
-        p_objects[0] = p_job1.getCreateDate();
-        p_objects[1] = p_job2.getCreateDate();
+        try
+        {
+			p_objects[0] = sdf.parse(p_job1.getCreateDate());
+			p_objects[1] = sdf.parse(p_job2.getCreateDate());
+		} 
+		catch (ParseException e)
+		{
+	        p_objects[0] = p_job1.getCreateDate();
+	        p_objects[1] = p_job2.getCreateDate();
+		}
     }
 
     private void compareByPriority(Object[] p_objects, JobVo p_job1, JobVo p_job2)
@@ -166,11 +179,33 @@ public class JobVoComparator extends EnvoyDataComparator
         p_objects[1] = new Integer(p_job2.getPriority());
     	
     }
+    
+    private void compareByCompletionDate(Object[] p_objects, JobVo p_job1, JobVo p_job2)
+    {
+    	try
+        {
+			p_objects[0] = sdf.parse(p_job1.getPlannedCompletionDate());
+			p_objects[1] = sdf.parse(p_job2.getPlannedCompletionDate());
+		} 
+		catch (ParseException e)
+		{
+			p_objects[0] = p_job1.getPlannedCompletionDate();
+	        p_objects[1] = p_job2.getPlannedCompletionDate();
+		}
+    }
 
     private void compareByPlannedDate(Object[] p_objects, JobVo p_job1, JobVo p_job2)
     {
-    	p_objects[0] = p_job1.getPlannedCompletionDate();
-        p_objects[1] = p_job2.getPlannedCompletionDate();
+    	try
+        {
+			p_objects[0] = sdf.parse(p_job1.getPlannedCompletionDate());
+			p_objects[1] = sdf.parse(p_job2.getPlannedCompletionDate());
+		} 
+		catch (ParseException e)
+		{
+			p_objects[0] = p_job1.getPlannedCompletionDate();
+	        p_objects[1] = p_job2.getPlannedCompletionDate();
+		}
     }
 
     
@@ -182,7 +217,15 @@ public class JobVoComparator extends EnvoyDataComparator
     
     private void compareByTranslateCompletionDate(Object[] p_objects, JobVo p_job1, JobVo p_job2)
     {
-        p_objects[0] = p_job1.getEstimatedTranslateCompletionDate();
-        p_objects[1] = p_job2.getEstimatedTranslateCompletionDate();
+    	try
+        {
+			p_objects[0] = sdf.parse(p_job1.getEstimatedTranslateCompletionDate());
+			p_objects[1] = sdf.parse(p_job2.getEstimatedTranslateCompletionDate());
+		} 
+		catch (ParseException e)
+		{
+			p_objects[0] = p_job1.getEstimatedTranslateCompletionDate();
+	        p_objects[1] = p_job2.getEstimatedTranslateCompletionDate();
+		}
     }
 }

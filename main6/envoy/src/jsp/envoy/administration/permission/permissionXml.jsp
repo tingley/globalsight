@@ -282,6 +282,8 @@
      <permission id="<%=Permission.FILTER_CONFIGURATION_REMOVE_FILTERS%>"/>
      <permission id="<%=Permission.FILTER_CONFIGURATION_ADD_FILTER%>"/>
      <permission id="<%=Permission.FILTER_CONFIGURATION_EDIT_FILTER%>"/>
+     <permission id="<%=Permission.FILTER_CONFIGURATION_EXPORT_FILTERS%>"/>
+     <permission id="<%=Permission.FILTER_CONFIGURATION_IMPORT_FILTERS%>"/>
   </permission>
   
   <permission id="<%=Permission.FILE_EXT_VIEW%>">
@@ -506,6 +508,7 @@
     <permission id="<%=Permission.REPORTS_TERM_AUDIT%>"/>
     <permission id="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>"/>
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>"/>
+    <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>"/>
     <permission id="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>"/>
     <permission id="<%=Permission.REPORTS_CHARACTER_COUNT%>"/>
     <permission id="<%=Permission.REPORTS_CUSTOMIZE%>"/>

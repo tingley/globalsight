@@ -775,10 +775,19 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // multiple TMs at a time can improve performance.
             if (isInSameCompany(projectTms))
             {
-                LOGGER.info("Leveraging against all " + projectTms.size()
-                        + " TM3 TMs for "
-                        + pLDC.getOriginalSeparatedSegments(companyId).size()
-                        + " segments.");
+                Set<BaseTmTuv> oriSegments = pLDC
+                        .getOriginalSeparatedSegments(companyId);
+                if (projectTms.size() == 1)
+                {
+                    LOGGER.info("Leveraging against TM3 TM: "
+                            + projectTms.get(0).getName() + " for "
+                            + oriSegments.size() + " segments.");
+                }
+                else
+                {
+                    LOGGER.info("Leveraging against all " + projectTms.size()
+                            + " TM3 TMs for " + oriSegments.size() + " segments.");
+                }
                 TM3Tm<GSTuvData> firstValidTm = null;
                 for (Tm projectTm : projectTms)
                 {
@@ -794,8 +803,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                         projectTms, firstValidTm, pLDC.getSourceLocale(),
                         leverageOptions, progress);
                 int segCounter = 0;
-                for (BaseTmTuv srcTuv : pLDC
-                        .getOriginalSeparatedSegments(companyId))
+                for (BaseTmTuv srcTuv : oriSegments)
                 {
                     segCounter++;
                     if (segCounter % 100 == 0)

@@ -31,6 +31,12 @@ $(document).ready(function(){
 			alert("<c:out value='${msg_alert_user_import}'/>");
 			return;
 		}
+		var isIgnore = $('input:radio[name="existedUserRadio"]:checked').val();
+	    if ("0" == isIgnore) {
+	    	document.userImportForm.action += "&ifUserExistedFlag=0";
+	    } else {
+	    	document.userImportForm.action += "&ifUserExistedFlag=1";
+	    }
 		$("#progressbar").show();
 		document.userImportForm.submit();
 	});
@@ -44,23 +50,28 @@ $(document).ready(function(){
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
 <span class='mainHeading'><c:out value="${lb_user_import}"/></span><p>
-<table cellspacing=0 cellpadding=0 border=0 class=standardText><tr><td width="600"><c:out value="${helper_text_users_import}"/></td></tr></table>
+<table cellspacing=0 cellpadding=0 border=0 class=standardText><tr><td width="100%"><c:out value="${helper_text_users_import}"/></td></tr></table>
 
 <form name="userImportForm" method="post" action="/globalsight/ControlServlet?pageName=USRIMPORT&linkName=startUpload&action=startUpload" ENCTYPE="multipart/form-data">
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
 	<tr>
-		<td><c:out value="${msg_file_none}"/>
-		</td>
+		<td colspan="2"><c:out value="${msg_file_none}"/></td>
 	</tr>
 	<tr>
-		<td><input type="file" calss="standardText" size="60" id="fileInput" name="fileInput">
-		</td>
+		<td colspan="2"><input type="file" calss="standardText" size="60" id="fileInput" name="fileInput"></td>
 	</tr>
-	<tr>
-		<td height="20px">&nbsp;</td>
-	</tr>
-	<tr>
-		<td><span id="progressbar" style="display:none"><img src="/globalsight/images/createjob/progressbar.gif" style="width:400px;height:20px"></img></span></td>
+	<tr><td  colspan="2" height="20px">&nbsp;</td></tr>
+    <tr>
+        <td>If user existed already: </td>
+        <td>
+            <input id="existedUserRadio1" type="radio" checked value="0" name="existedUserRadio">
+            <label for="existedUserRadio1">Ignore</label>
+            <input id="existedUserRadio2" type="radio" value="1" name="existedUserRadio">
+            <label for="existedUserRadio2">Merge/Overwrite</label>
+        </td>
+    </tr>
+    <tr>
+		<td colspan="2"><span id="progressbar" style="display:none"><img src="/globalsight/images/createjob/progressbar.gif" style="width:400px;height:20px"></img></span></td>
 	</tr>
 </TABLE>
 <br><br>

@@ -40,7 +40,7 @@ import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.Tmx2PseudoHandler;
-import com.globalsight.util.GlobalSightLocale;
+import java.util.Locale;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
@@ -228,8 +228,7 @@ public class SegmentUtil2
      * Extract segment to get translatable element.
      */
     public static SegmentNode extractSegment(DiplomatAPI p_api,
-            String p_segment, String p_datatype,
-            GlobalSightLocale p_sourceLocale)
+            String p_segment, String p_datatype, Locale p_sourceLocale)
     {
         if (p_segment == null || "null".equalsIgnoreCase(p_segment)
                 || "".equals(p_segment.trim()))
@@ -248,7 +247,7 @@ public class SegmentUtil2
             api = p_api;
         }
         api.setEncoding("UTF-8");
-        api.setLocale(p_sourceLocale.getLocale());
+        api.setLocale(p_sourceLocale);
         api.setInputFormat(p_datatype);
         api.setSentenceSegmentation(false);
         api.setSegmenterPreserveWhitespace(true);

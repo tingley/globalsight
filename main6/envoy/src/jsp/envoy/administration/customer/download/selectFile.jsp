@@ -166,12 +166,15 @@ function fnSelectAll(){
 function cancelButton(){
 	if (location.search.indexOf("redirectToWorkflow") > -1)
 	{
-		var jobId = location.search.split("&")[6].split("=")[1];
+		var jobId = location.search.split("&")[4].split("=")[1];
 		location.href = "/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=" + jobId;
 	}
 	else
 	{
-		history.go(-1);
+		if(document.referrer.length >0)
+			location.href = document.referrer;
+		else
+			history.go(-1);
 	}
 }
 </script>

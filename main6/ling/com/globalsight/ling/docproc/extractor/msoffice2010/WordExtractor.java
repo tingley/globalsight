@@ -97,6 +97,7 @@ public class WordExtractor extends AbstractExtractor
 		EXTRACT_NODE.add("w:t");
 		EXTRACT_NODE.add("a:t");
 		EXTRACT_NODE.add("w:delText");
+		EXTRACT_NODE.add("gs-numbering-added-for-translation");
 	}
 	
 	public static Set<String> NOT_EXTRACT_NODE = new HashSet<String>();
@@ -113,9 +114,8 @@ public class WordExtractor extends AbstractExtractor
 		DOCUMENT_ROOT.add("w:hdr");
 		DOCUMENT_ROOT.add("w:endnotes");
 		DOCUMENT_ROOT.add("w:footnotes");
+		DOCUMENT_ROOT.add("w:numbering");
 	}
-	
-	
 	
 	public static Map<String, String> TYPE = new HashMap<String, String>();
 	static
@@ -688,7 +688,7 @@ public class WordExtractor extends AbstractExtractor
 	            
 	            if (atts != null && atts.indexOf(attname) > -1)
 	            {
-	            	sb.append("<sub locType=\"translatable\" id=\"1\">");
+	            	sb.append("<sub locType=\"translatable\" >");
 	            	sb.append(escapeString(value)).append("</sub>");
 	            }
 	            else
@@ -825,7 +825,7 @@ public class WordExtractor extends AbstractExtractor
 			if (m.find())
 			{
 				sb.append(content.substring(0,m.start(1)));
-            	sb.append("<sub locType=\"translatable\" id=\"1\">");
+            	sb.append("<sub locType=\"translatable\" >");
             	sb.append(m.group(1)).append("</sub>");
 				
 				content = content.substring(m.end(1));
@@ -838,7 +838,7 @@ public class WordExtractor extends AbstractExtractor
 			if (m.find())
 			{
 				sb.append(content.substring(0,m.start(1)));
-            	sb.append("<sub locType=\"translatable\" id=\"2\">");
+            	sb.append("<sub locType=\"translatable\" >");
             	sb.append(m.group(1)).append("</sub>");
 				
 				content = content.substring(m.end(1));

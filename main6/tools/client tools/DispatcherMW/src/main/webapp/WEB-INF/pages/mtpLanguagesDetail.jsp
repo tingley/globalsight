@@ -106,7 +106,14 @@ function fnSaveOrUpdate(){
 				  <select id="account" class="standardText" style="width:99%;">
 					<option value="-1">&nbsp;</option>
 					<c:forEach items="${allAccounts}" var="data">
-						<option value="${data.id}">${data.accountName}</option>
+						<c:choose>
+							<c:when test="${data.id == mtpLanguage.accountId}">
+								<option value="${data.id}" selected>${data.accountName}</option>
+							</c:when>
+							<c:otherwise>
+								<option value="${data.id}">${data.accountName}</option>
+							</c:otherwise>
+						</c:choose>
 					</c:forEach>
 				  </select>
 				</td>

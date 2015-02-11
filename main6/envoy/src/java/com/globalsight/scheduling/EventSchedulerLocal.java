@@ -596,7 +596,7 @@ public class EventSchedulerLocal implements EventScheduler
 					initialDate = new Date(newms);
 					found = true;
 					if (initialDate.equals(begin)) {
-						initialDate = previousEndDate;
+						initialDate = previousEndDate == null ? end : previousEndDate;
 					}
 				}
 				previousEndDate = end;

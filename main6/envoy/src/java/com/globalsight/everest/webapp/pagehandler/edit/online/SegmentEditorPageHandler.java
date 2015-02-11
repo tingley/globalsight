@@ -47,6 +47,7 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.Preview
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -421,7 +422,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
                         p_state.getSourcePageId(), p_state.getTargetLocale());
         if (machineTranslationProfile != null)
         {
-            sessionMgr.setAttribute(MTHelper.SHOW_IN_EDITOR,
+            sessionMgr.setAttribute(MTHelper2.SHOW_IN_EDITOR,
                     String.valueOf(machineTranslationProfile.isShowInEditor()));
         }
     }

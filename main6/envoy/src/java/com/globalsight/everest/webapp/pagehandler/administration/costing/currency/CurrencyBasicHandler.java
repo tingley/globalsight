@@ -17,20 +17,16 @@
 package com.globalsight.everest.webapp.pagehandler.administration.costing.currency;
 
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.costing.Currency;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -71,8 +67,10 @@ public class CurrencyBasicHandler extends PageHandler
             else if (action.equals(CurrencyConstants.EDIT))
             {
                 // Fetch the currency to edit and store in session
-                String code = (String)p_request.getParameter("code");
-                Currency curr = CurrencyHandlerHelper.getCurrency(code);
+                String currenyID = (String) p_request
+                        .getParameter("currencyId");
+                Currency curr = HibernateUtil.get(Currency.class,
+                        Long.parseLong(currenyID));
                 SessionManager sessionMgr = (SessionManager)
                     session.getAttribute(WebAppConstants.SESSION_MANAGER);
                 sessionMgr.setAttribute(CurrencyConstants.CURRENCY, curr);

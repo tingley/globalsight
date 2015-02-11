@@ -16,29 +16,30 @@
  */
 package com.globalsight.machineTranslation;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.HashSet;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
-import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
-import com.globalsight.everest.page.ExtractedSourceFile;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.projecthandler.MachineTranslationProfile;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvManager;
-import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.everest.projecthandler.EngineEnum;
 import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.PropertiesFactory;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.edit.SegmentUtil2;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -49,112 +50,73 @@ public class MTHelper
 {
     private static final Logger CATEGORY = Logger.getLogger(MTHelper.class);
 
-    public static final String SHOW_IN_EDITOR = "SHOW_IN_EDITOR";
-    public static final String MT_TRANSLATION = "MT_TRANSLATION";
-    public static final String ENGINE_NAME = "ENGINE_NAME";
-    public static final String MT_TRANSLATION_DIV = "translatedString_replaced_div";
-    public static final String ACTION_GET_MT_TRANSLATION = "getMtTranslation";
-
     public static final String MT_EXTRA_CONFIGS = "/properties/mt.config.properties";
 
     /**
-     * If "show_in_editor" is checked on TM profile >> MT Options UI, get MT
-     * translation for current segment.
-     * 
-     * @param p_sessionMgr
-     * @param p_state
+     * Init machine translation engine
+     * @param engineName MT engine name
+     * @return MachineTranslator MT
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static Map getMtTranslationForSegEditor(SessionManager p_sessionMgr,
-            EditorState p_state)
+    public static MachineTranslator initMachineTranslator(String engineName)
     {
-        Map result = new HashMap();
-
-        long sourcePageId = p_state.getSourcePageId();
-        // MT: SHOW_IN_EDITOR
-        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
-                .getMtProfileBySourcePageId(sourcePageId,
-                        p_state.getTargetLocale());
-        boolean show_in_editor = false;
-        MachineTranslator mt = null;
-        if (mtProfile != null)
+        if (engineName == null || "".equals(engineName.trim()))
         {
-            show_in_editor = mtProfile.isShowInEditor();
-            if (show_in_editor)
-            {
-                String mtEngine = mtProfile.getMtEngine();
-                mt = AbstractTranslator.initMachineTranslator(mtEngine);
-                HashMap hashMap = mtProfile.getParamHM();
-                hashMap.put(MachineTranslator.SOURCE_PAGE_ID, sourcePageId);
-                mt.setMtParameterMap(hashMap);
-            }
+            return null;
         }
-        result.put(SHOW_IN_EDITOR, String.valueOf(show_in_editor));
 
-        // MT: get MT result
-        String mtString = null;
+        MachineTranslator mt = null;
+        EngineEnum e = EngineEnum.getEngine(engineName);
         try
         {
-            SourcePage sp = null;
-            try
-            {
-                sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
-            }
-            catch (Exception e)
-            {
-                CATEGORY.error("Could not get source page by source page ID : "
-                        + sourcePageId, e);
-            }
-            if (mt != null)
-            {
-                TuvManager tuvMananger = ServerProxy.getTuvManager();
-                Tuv sourceTuv = tuvMananger.getTuvForSegmentEditor(p_state
-                        .getTuId(), p_state.getSourceLocale().getIdAsLong(), sp
-                        .getCompanyId());
-
-                String sourceString = null;
-                long subId = p_state.getSubId();
-                if (OnlineEditorManagerLocal.DUMMY_SUBID.equals(String
-                        .valueOf(subId)))
-                {
-                    sourceString = sourceTuv.getGxmlElement().getTextValue();
-                }
-                else
-                {
-                    GxmlElement subEle = sourceTuv
-                            .getSubflowAsGxmlElement(String.valueOf(subId));
-                    sourceString = subEle.getTextValue();
-                }
-
-                // translate segment
-                if (sourceString != null && sourceString.trim().length() > 0)
-                {
-                    mtString = mt
-                            .translate(p_state.getSourceLocale().getLocale(),
-                                    p_state.getTargetLocale().getLocale(),
-                                    sourceString);
-                }
-
-                // if (sourceString.equals(mtString))
-                // {
-                // mtString = "";
-                // }
-                if (mtString != null && !"".equals(mtString))
-                {
-                    // Encode the translation before sent to web page.
-                    XmlEntities xe = new XmlEntities();
-                    mtString = xe.encodeStringBasic(mtString);
-                }
-                result.put(MT_TRANSLATION, mtString);
-            }
-
-            result.put(ENGINE_NAME, mt.getEngineName());
+            mt = e.getProxy();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            CATEGORY.error(
+                    "Could not initialize machine translation engine from class ",
+                    ex);
         }
 
-        return result;
+        return mt;
+    }
+
+    /**
+     * To get more accurate translations from MT engine, below engines will be
+     * hit twice, for one segment, one time WITH tag and one time WITHOUT tag.
+     * 
+     * @return boolean
+     */
+    public static boolean willHitTwice(String engineName)
+    {
+        if (MachineTranslator.ENGINE_ASIA_ONLINE.toLowerCase()
+                .equalsIgnoreCase(engineName))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Certain MT engines will lost tag in translations, need check tag before
+     * apply into target segments.
+     * 
+     * Safaba will lost sub segment(s) when a segment has more than one sub
+     * segments.
+     * 
+     * @param engineName
+     * @return boolean
+     */
+    public static boolean needCheckMTTranslationTag(String engineName)
+    {
+        if (MachineTranslator.ENGINE_IPTRANSLATOR.equalsIgnoreCase(engineName)
+                || MachineTranslator.ENGINE_DOMT.equalsIgnoreCase(engineName)
+                || MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(engineName))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -193,6 +155,66 @@ public class MTHelper
         }
 
         return result;
+    }
+
+    /**
+     * Check if the given gxml's all tags have "id" attribute. "id" attribute is
+     * required by most tags in XLIFF specification. If false, translate the
+     * GXML in pure text way.
+     * 
+     * @param gxml
+     * @return boolean
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean isAllTagsHaveIdAttr(String gxml)
+    {
+        if (gxml == null || gxml.trim().length() == 0)
+            return true;
+
+        String gxmlWithRoot = gxml;
+        // Remove root tag with all attributes in "<segment..>".
+        if (gxml.toLowerCase().endsWith("</segment>"))
+        {
+            gxmlWithRoot = GxmlUtil.stripRootTag(gxml);
+        }
+        gxmlWithRoot = "<segment>" + gxmlWithRoot + "</segment>";
+        gxmlWithRoot = gxmlWithRoot.replace(" i=", " id=");
+        GxmlElement gxmlRootWithID = MTHelper.getGxmlElement(gxmlWithRoot);
+
+        List<GxmlElement> result = new ArrayList<GxmlElement>();
+        result.addAll(gxmlRootWithID.getChildElements());
+        result.addAll(gxmlRootWithID.getDescendantElements(GxmlElement.SUB_TYPE));
+        Iterator<GxmlElement> it = result.iterator();
+        Set<String> tags = getTagsRequireID();
+        while (it.hasNext())
+        {
+            GxmlElement ele = it.next();
+            String tagName = ele.getName();
+            if (tags.contains(tagName))
+            {
+                String id = ele.getAttribute("id");
+                if (id == null)
+                {
+                    return false;
+                }                
+            }
+        }
+
+        return true;
+    }
+
+    private static Set<String> tagsRequireIDAttribute = new HashSet<String>();
+    private static Set<String> getTagsRequireID()
+    {
+        if (tagsRequireIDAttribute.size() == 0)
+        {
+            tagsRequireIDAttribute.add("bpt");
+            tagsRequireIDAttribute.add("ept");
+            tagsRequireIDAttribute.add("it");
+            tagsRequireIDAttribute.add("ph");
+        }
+
+        return tagsRequireIDAttribute;
     }
 
     /**
@@ -246,53 +268,45 @@ public class MTHelper
     }
 
     /**
-     * Retrieve source page by source page ID.
+     * In GlobalSight, segments from XLF file are "wrapped" with "ph" again. So,
+     * before send such segments to MT engine, need revert them back; After get
+     * translations from MT engine, need wrap them again.
      * 
-     * @return
-     */
-    public static SourcePage getSourcePage(Map paramMap)
-    {
-        Long sourcePageID = (Long) paramMap
-                .get(MachineTranslator.SOURCE_PAGE_ID);
-        SourcePage sp = null;
-        try
-        {
-            sp = ServerProxy.getPageManager().getSourcePage(sourcePageID);
-        }
-        catch (Exception e)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.error("Failed to get source page by pageID : "
-                        + sourcePageID + ";" + e.getMessage());
-            }
-        }
-
-        return sp;
-    }
-
-    /**
-     * If the source page data type is XLF,need revert the segment content.
+     * So, if the segment is from GlobalSight and from XLF file, this should be
+     * set to TRUE; If not from GlobalSight or not from XLF file, this should be
+     * set to FALSE.
      * 
      * @return boolean
      */
-    public static boolean needRevertXlfSegment(Map paramMap)
+    @SuppressWarnings("rawtypes")
+    public static boolean needSpecialProcessingXlfSegs(Map paramMap)
     {
         if (paramMap == null)
         {
             return false;
         }
-        SourcePage sp = getSourcePage(paramMap);
-        String spDataType = null;
-        if (sp != null)
+
+        String needSpecialProcessingXlfSegs = (String) paramMap
+                .get(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS);
+        if ("true".equalsIgnoreCase(needSpecialProcessingXlfSegs))
         {
-            ExtractedSourceFile esf = (ExtractedSourceFile) sp
-                    .getExtractedFile();
-            spDataType = esf.getDataType();
+            return true;
         }
-        if (spDataType != null
-                && ("xlf".equalsIgnoreCase(spDataType) || "xliff"
-                        .equalsIgnoreCase(spDataType)))
+
+        return false;
+    }
+
+    /**
+     * Check if the segments are from XLF source file.
+     * @param paramMap
+     * @return boolean 
+     */
+    @SuppressWarnings("rawtypes")
+    public static boolean isXlf(Map paramMap)
+    {
+        String spDataType = (String) paramMap.get(MachineTranslator.DATA_TYPE);
+        if ("xlf".equalsIgnoreCase(spDataType)
+                || "xliff".equalsIgnoreCase(spDataType))
         {
             return true;
         }
@@ -343,18 +357,6 @@ public class MTHelper
         }
 
         return result;
-    }
-
-    public static GlobalSightLocale getSourceLocale(Map paramMap)
-    {
-        SourcePage sp = MTHelper.getSourcePage(paramMap);
-        GlobalSightLocale sourceLocale = null;
-        if (sp != null)
-        {
-            sourceLocale = sp.getGlobalSightLocale();
-        }
-
-        return sourceLocale;
     }
 
     /**
@@ -443,13 +445,213 @@ public class MTHelper
      * 
      * @return boolean
      */
-    public static boolean isLogDetailedInfo()
+    public static boolean isLogDetailedInfo(String engineName)
     {
-        String logDetailedInfo = getMTConfig("mt.log.detailed.info");
+        if (engineName == null || engineName.trim().length() == 0)
+            return false;
+
+        String key = engineName.toLowerCase() + ".log.detailed.info";
+        String logDetailedInfo = getMTConfig(key);
         if ("true".equalsIgnoreCase(logDetailedInfo))
         {
             return true;
         }
         return false;
+    }
+
+    /**
+     * If XML attribute has "<" in it ,it will parse error. This method replaces
+     * the attribute "<" into "&lt;".
+     * 
+     * As PROMT can not support ">" in attribute value,also replace ">" to "_gt;_".
+     * 
+     * Note that this method should keep private!
+     */
+    public static String encodeLtGtInGxmlAttributeValue(String segement)
+    {
+        // this flag for recording the xml element begin.
+        boolean flagXML = false;
+        // this flag for recording the attribute begin, because if in "<  >",
+        // and begin as double quote, it will be a attribute.
+        boolean flagQuote = false;
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < segement.length(); i++)
+        {
+            char c = segement.charAt(i);
+
+            if (!flagXML && !flagQuote && c == '<')
+            {
+                flagXML = true;
+            }
+            else if (flagXML && !flagQuote && c == '"')
+            {
+                flagQuote = true;
+            }
+            else if (flagXML && !flagQuote && c == '>')
+            {
+                flagXML = false;
+            }
+            else if (flagXML && flagQuote && c == '"')
+            {
+                flagQuote = false;
+            }
+
+            if (flagXML && flagQuote && c == '<')
+            {
+                sb.append("&lt;");
+            }
+            else if (flagXML && flagQuote && c == '>')
+            {
+                sb.append("_gt;_");
+            }
+            else
+            {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * For segment from XLF file, after translation, put the "id" and "x" values
+     * back to ensure the re-wrapped translated segment has same "id" and "x"
+     * sequence as original.
+     * 
+     * @param p_segString
+     *            -- MT translated and re-wrapped segment, no root tag.
+     * @return
+     */
+    public static String resetIdAndXAttributesValues(String p_segString,
+            List<String> idList, List<String> xList)
+    {
+        if (p_segString == null || p_segString.trim().length() == 0)
+        {
+            return null;
+        }
+        
+        String result = null;
+        int count = 0;
+        try 
+        {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<segment>").append(p_segString).append("</segment>");
+            GxmlElement gxmlElement = SegmentUtil2.getGxmlElement(sb.toString());
+
+            resetIdAndXBack(gxmlElement, idList, xList, count);
+            
+            String gxml = gxmlElement.toGxml("xlf");
+            result = GxmlUtil.stripRootTag(gxml);
+        }
+        catch (Exception e)
+        {
+            result = p_segString;
+        }
+
+        return result;
+    }
+
+    private static void resetIdAndXBack(GxmlElement element,
+            List<String> idList, List<String> xList, int count)
+    {
+        if (element == null)
+        {
+            return;
+        }
+        
+        String id = element.getAttribute("id");
+        if (id != null)
+        {
+            String idValue = null;
+            if (idList != null && idList.size() > count)
+            {
+                idValue = (String) idList.get(count);
+            }
+            else
+            {
+                idValue  = String.valueOf(count + 1);
+            }
+            element.setAttribute("id", idValue);
+        }
+        
+        String x = element.getAttribute("x");        
+        if (x != null)
+        {
+            String xValue = null;
+            if (xList != null && xList.size() > count)
+            {
+                xValue = (String) xList.get(count);
+            }
+            else
+            {
+                xValue = String.valueOf(count + 1);
+            }
+            element.setAttribute("x", xValue);
+        }
+        
+        if (id != null || x != null)
+        {
+            count++;
+        }
+        
+        Iterator<?> childIt = element.getChildElements().iterator();
+        while (childIt.hasNext())
+        {
+            GxmlElement ele = (GxmlElement) childIt.next();
+            resetIdAndXBack(ele, idList, xList, count);
+        }
+    }
+
+    /**
+     * Transform an XML node object to XML string.
+     * @param node
+     * @return
+     * @throws TransformerException
+     */
+    public static String outputNode2Xml(Node node) throws TransformerException
+    {
+        StringWriter writer = new StringWriter();
+        Transformer transformer = TransformerFactory.newInstance()
+                .newTransformer();
+        transformer.transform(new DOMSource(node), new StreamResult(writer));
+
+        return writer.toString();
+    }
+
+    /**
+     * Office2010 requires a "good style" for "xml:space", "&quot;" is required.
+     * 
+     * @param machineTranslatedGxml
+     * @return String
+     */
+    public static String fixMtTranslatedGxml(String machineTranslatedGxml)
+    {
+        if (StringUtil.isEmpty(machineTranslatedGxml))
+            return machineTranslatedGxml;
+
+        String badStyle = "xml:space=\"preserve\"";
+        String goodStyle = "xml:space=&quot;preserve&quot;";
+
+        String tmp = machineTranslatedGxml.toLowerCase();
+        int index = tmp.indexOf(badStyle);
+        if (index == -1)
+        {
+            return machineTranslatedGxml;
+        }
+
+        StringBuffer sb = new StringBuffer();
+        String str1= "";
+        String str2 = machineTranslatedGxml;
+        while (index > -1)
+        {
+            str1 = str2.substring(0, index) + goodStyle;
+            sb.append(str1);
+            str2 = str2.substring(index + badStyle.length());
+            index = str2.indexOf(badStyle);
+        }
+        sb.append(str2);
+
+        return sb.toString();
     }
 }

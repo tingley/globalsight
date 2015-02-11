@@ -513,23 +513,35 @@ public class IdmlHelper
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         s.append(FileUtil.lineSeparator);
         s.append("<stories>");
+        
+        boolean addDesignMapXml = false;
+        // extract Text Variables
+        if (includeTextVariable(content))
+        {
+            addDesignMapXml = true;
+        }
 
-        if (isTranslateHyperlinks())
+        if (isTranslateHyperlinks() && !addDesignMapXml)
         {
             // GBS-3054
             setHyperlinkIds(content);
             if (hyperlinkIds.size() > 0)
             {
-                String c = content.replaceFirst("<\\?xml ", "<xml ");
-                c = c.replaceFirst("\"\\?>", "\"/>");
-
-                s.append(FileUtil.lineSeparator);
-                s.append("<story name=\"").append(DESIGNMAP).append("\">");
-                s.append(FileUtil.lineSeparator);
-                s.append(c);
-                s.append(FileUtil.lineSeparator);
-                s.append("</story>");
+                addDesignMapXml = true;
             }
+        }
+
+        if (addDesignMapXml)
+        {
+            String c = content.replaceFirst("<\\?xml ", "<xml ");
+            c = c.replaceFirst("\"\\?>", "\"/>");
+
+            s.append(FileUtil.lineSeparator);
+            s.append("<story name=\"").append(DESIGNMAP).append("\">");
+            s.append(FileUtil.lineSeparator);
+            s.append(c);
+            s.append(FileUtil.lineSeparator);
+            s.append("</story>");
         }
 
         if (isTranslateFileInfo())
@@ -692,6 +704,23 @@ public class IdmlHelper
         {
             hyperlinkIds.add(m.group(1));
         }
+    }
+    
+    private boolean includeTextVariable(String content)
+    {
+        Pattern p = Pattern
+                .compile("<TextVariable [^>]*>([\\s\\S]*?)</TextVariable>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            String ccc = m.group(1);
+            if (ccc.contains("<Contents type=\"string\">"))
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

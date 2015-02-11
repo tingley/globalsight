@@ -205,7 +205,7 @@ public class SendDownloadFileHelper implements WebAppConstants
                     {
                         CATEGORY.debug("Sent a download package "
                                 + downloadFileName + " to "
-                                + p_request.getRemoteHost());                        
+                                + p_request.getRemoteHost());
                     }
                 }
                 else
@@ -221,7 +221,7 @@ public class SendDownloadFileHelper implements WebAppConstants
                         CATEGORY.debug("Download was aborted. No package was produced for "
                                 + downloadFileName
                                 + " to "
-                                + p_request.getRemoteHost());                        
+                                + p_request.getRemoteHost());
                     }
                 }
             }
@@ -274,15 +274,19 @@ public class SendDownloadFileHelper implements WebAppConstants
         try
         {
             long taskId;
-            String taskIdParam= p_request.getParameter(WebAppConstants.TASK_ID);
-            if(taskIdParam != null && taskIdParam != ""){
-            	taskId = TaskHelper.getLong(taskIdParam);
-            	task = ServerProxy.getTaskManager().getTask(taskId);
-            }else{
-            	task  = getTask(p_request);
-            	task = ServerProxy.getTaskManager().getTask(task.getId());
+            String taskIdParam = p_request
+                    .getParameter(WebAppConstants.TASK_ID);
+            if (taskIdParam != null && taskIdParam != "")
+            {
+                taskId = TaskHelper.getLong(taskIdParam);
+                task = ServerProxy.getTaskManager().getTask(taskId);
             }
-            TaskHelper.storeObject(session,WORK_OBJECT, task);
+            else
+            {
+                task = getTask(p_request);
+                task = ServerProxy.getTaskManager().getTask(task.getId());
+            }
+            TaskHelper.storeObject(session, WORK_OBJECT, task);
         }
         catch (Exception e)
         {
@@ -378,6 +382,8 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.NEED_CONSOLIDATE) != null);
         params.setIncludeRepetitions(p_request
                 .getParameter(OfflineConstants.INCLUDE_REPETITIONS) != null);
+        params.setExcludeFullyLeveragedFiles(p_request
+                .getParameter(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES) != null);
         boolean changeCreationId = false;
         try
         {

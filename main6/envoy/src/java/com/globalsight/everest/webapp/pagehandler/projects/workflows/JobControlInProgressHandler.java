@@ -68,6 +68,14 @@ public class JobControlInProgressHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+    	HttpSession session = p_request.getSession(false);
+    	SessionManager sessionMgr = (SessionManager) session
+    		.getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+		if(Job.DISPATCHED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+				stateMarch = true;
+		setJobSearchFilters(sessionMgr, p_request, stateMarch);
+    	
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
         p_request.setAttribute("searchType",
@@ -85,6 +93,7 @@ public class JobControlInProgressHandler extends JobManagementHandler
 
         performAppropriateOperation(p_request);
         
+        sessionMgr.setMyjobsAttribute("lastState", Job.DISPATCHED);
         JobVoInProgressSearcher searcher = new JobVoInProgressSearcher();
         searcher.setJobVos(p_request, true);
         
@@ -100,9 +109,6 @@ public class JobControlInProgressHandler extends JobManagementHandler
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
                 BASE_BEAN);
 
@@ -110,6 +116,7 @@ public class JobControlInProgressHandler extends JobManagementHandler
         // clear the session for download job from joblist page
         sessionMgr.setAttribute(DownloadFileHandler.DOWNLOAD_JOB_LOCALES, null);
         sessionMgr.setAttribute(DownloadFileHandler.DESKTOP_FOLDER, null);
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0

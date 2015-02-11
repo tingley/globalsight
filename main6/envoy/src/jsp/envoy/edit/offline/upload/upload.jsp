@@ -68,6 +68,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
   <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+   <jsp:useBean id="wordcountList" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     SessionManager sessionMgr = 
         (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -92,6 +94,7 @@
     String lbStartUpload = bundle.getString("lb_upload_start");
     String lbLastError = bundle.getString("lb_last_error");
     String lb_refresh = bundle.getString("lb_refresh");
+    String labelSave = bundle.getString("lb_save");
     String lb_search_msg = "Please wait. Uploading files...";
     
     Task task = null;
@@ -385,6 +388,21 @@ $(document).ready(function(){
 							"=" + theTask.getId()+
 							"&" + WebAppConstants.TASK_STATE+
 							"=" + theTask.getState();
+    
+    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
+						//GBS-2913 Added to the url parameter taskId,state;
+					    "&"+WebAppConstants.TASK_ID+
+					    "="+theTask.getId()+
+					    "&"+WebAppConstants.TASK_STATE+
+					    "="+theTask.getState();
+	String saveUrl = detail.getPageURL() +
+						"&" + WebAppConstants.TASK_ACTION +
+						"=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
+						"&" + WebAppConstants.TASK_STATE +
+						"=" + state +
+						"&" + WebAppConstants.TASK_ID +
+						"=" + theTask.getId();
+    
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
                                 "&firstEntry=true&fromTaskDetail=true");

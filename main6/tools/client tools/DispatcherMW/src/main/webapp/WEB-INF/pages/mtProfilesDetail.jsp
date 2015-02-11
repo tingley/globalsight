@@ -430,11 +430,11 @@ function fnSaveOrUpdate() {
 							<select onchange="contorlMTOptionShowing(this.value)"
 								name="machineTranslation.engine" id="mtEngine"
 								class="standardText">
-									<option value="IPTranslator">IPTranslator</option>
-									<option value="ProMT">ProMT</option>
 									<option value="Asia_Online">Asia_Online</option>
-									<option value="Safaba">Safaba</option>
+									<option value="IPTranslator">IPTranslator</option>
 									<option value="MS_Translator">MS_Translator</option>
+									<option value="ProMT">ProMT</option>
+									<option value="Safaba">Safaba</option>															
 							</select>
 							</td>
 						</tr>

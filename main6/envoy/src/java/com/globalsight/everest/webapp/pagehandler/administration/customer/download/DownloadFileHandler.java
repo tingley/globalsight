@@ -157,6 +157,7 @@ public class DownloadFileHandler extends PageHandler
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         boolean canDownloadJob = userPerms.getPermissionFor(Permission.JOBS_DOWNLOAD);
+        boolean showAllJobsPerm = userPerms.getPermissionFor(Permission.JOB_SCOPE_ALL);
         if (!canDownloadJob && !userPerms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD))
         {
             logger.error("User doesn't have the permission to download files via this page.");
@@ -204,7 +205,7 @@ public class DownloadFileHandler extends PageHandler
             	}
         	}
         	List<DownloadFile> downloadFiles = getDownloadFiles(jobIdSet, wfIdSet, 
-        			sessionMgr, isTaskAssignees, canDownloadJob, user);
+        			sessionMgr, isTaskAssignees, canDownloadJob, showAllJobsPerm, user);
         	p_response.setContentType("text/html;charset=UTF-8");
         	p_response.getWriter().write(getJSON(downloadFiles));
         	return;
@@ -482,7 +483,8 @@ public class DownloadFileHandler extends PageHandler
     }
     
     private List<DownloadFile> getDownloadFiles(Set<Long> jobIdSet, Set<Long> wfIdSet, 
-    		SessionManager p_sessionMgr, boolean isTaskAssignees ,boolean canDownloadJob, User user)
+    		SessionManager p_sessionMgr, boolean isTaskAssignees ,boolean canDownloadJob,
+    		boolean showAllJobsPerm, User user)
     {
         List<DownloadFile> DownloadFiles = new ArrayList<DownloadFile>();
         Long companyId = (Long) p_sessionMgr.getAttribute(PARAM_JOB_COMPANY_ID);
@@ -523,11 +525,11 @@ public class DownloadFileHandler extends PageHandler
 				try
 				{
 					Job job = ServerProxy.getJobHandler().getJobById(jobId);
-					if(!job.getProject().getUserIds().contains(user.getUserId()) ||
-							!(isTaskAssignees || canDownloadJob))
-					{
-						continue;
-					}
+//					if(!isShowJob(companyId, showAllJobsPerm,job,user,
+//							isTaskAssignees, canDownloadJob))
+//					{
+//						continue;
+//					}
 					isContainLocale = false;
 					for (Workflow wf : job.getWorkflows())
 					{
@@ -579,6 +581,29 @@ public class DownloadFileHandler extends PageHandler
 
         return DownloadFiles;
     }
+     
+//    private boolean isShowJob(Long companyId, boolean showAllJobsPerm, Job job, User user,
+//    		boolean isTaskAssignees, boolean canDownloadJob)
+//    {
+//    	boolean isSuperCompany = CompanyWrapper.isSuperCompany(companyId.toString());
+//    	boolean showAlljobs = false;
+//		if(showAllJobsPerm)
+//		{
+//			if(isSuperCompany || job.getCompanyId() == companyId)
+//			{
+//				showAlljobs = true;
+//			}
+//		}
+//		
+//		if(!job.getProject().getUserIds().contains(user.getUserId()) ||
+//				!(isTaskAssignees || canDownloadJob))
+//		{
+//			if(!showAlljobs)
+//				return false;
+//		}
+//		
+//		return true;
+//    }
     
     private List<String> getDownloadLocaleList(Set<Long> jobIdSet,
 			Set<Long> wfIdSet) 

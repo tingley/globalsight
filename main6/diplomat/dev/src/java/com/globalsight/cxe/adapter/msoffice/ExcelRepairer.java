@@ -136,16 +136,6 @@ public class ExcelRepairer extends OfficeRepairer
 	
     private void updateStyle()
     {
-    	ExcelStylerEpairer r = new ExcelStylerEpairer(path);
-    	try 
-    	{
-			r.updateShareString();
-		} 
-    	catch (Exception e) 
-    	{
-			//e.printStackTrace();
-		}
-    	
         StyleUtil util = StyleFactory.getStyleUtil(StyleFactory.XLSX);
         List<File> fs = getAllFiles();
         
@@ -153,6 +143,16 @@ public class ExcelRepairer extends OfficeRepairer
         {
         	util.updateBeforeExport(f.getAbsolutePath());
         }
+        
+//        ExcelStylerEpairer r = new ExcelStylerEpairer(path);
+//        try 
+//        {
+//            r.updateShareString();
+//        } 
+//        catch (Exception e) 
+//        {
+//            //e.printStackTrace();
+//        }
     }
     
     

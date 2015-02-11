@@ -34,6 +34,9 @@ public interface ReportConstants
     public static final String REVIEWERS_COMMENTS_REPORT = "ReviewersCommentsReport";
     public static final String REVIEWERS_COMMENTS_REPORT_ABBREVIATION = "RCR";
     
+    public static final String REVIEWERS_COMMENTS_SIMPLE_REPORT = "ReviewersCommentsSimpleReport";
+    public static final String REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION = "RCSR";
+    
     public static final String COMMENTS_ANALYSIS_REPORT = "CommentsAnalysisReport";
     public static final String CHARACTER_COUNT_REPORT = "CharacterCountReport";
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
@@ -69,6 +72,8 @@ public interface ReportConstants
         {
             put(REVIEWERS_COMMENTS_REPORT,
                     REVIEWERS_COMMENTS_REPORT_ABBREVIATION);
+            put(REVIEWERS_COMMENTS_SIMPLE_REPORT,
+                    REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION);
             put(TRANSLATIONS_EDIT_REPORT,
             		TRANSLATIONS_EDIT_REPORT_ABBREVIATION);
         }

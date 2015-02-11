@@ -33,7 +33,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.util.edit.EditUtil;
 
 public class MTTranslationHandler extends PageActionHandler
@@ -41,7 +41,7 @@ public class MTTranslationHandler extends PageActionHandler
     static private final Logger logger = Logger
             .getLogger(MTTranslationHandler.class);
     
-    @ActionHandler(action = MTHelper.ACTION_GET_MT_TRANSLATION, formClass = "")
+    @ActionHandler(action = MTHelper2.ACTION_GET_MT_TRANSLATION, formClass = "")
     public void getMtTranslation(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
@@ -68,8 +68,7 @@ public class MTTranslationHandler extends PageActionHandler
         try
         {
             // Get translation from MT engine
-            Map mtTranslation = 
-                MTHelper.getMtTranslationForSegEditor(sessionMgr, state);
+            Map mtTranslation = MTHelper2.getMtTranslationForSegEditor(state);
 
             // MT result
             boolean show_in_editor = false;
@@ -79,7 +78,7 @@ public class MTTranslationHandler extends PageActionHandler
             if (mtTranslation != null)
             {
                 String strShowInEditor = 
-                    (String) mtTranslation.get(MTHelper.SHOW_IN_EDITOR);
+                    (String) mtTranslation.get(MTHelper2.SHOW_IN_EDITOR);
                 if (strShowInEditor != null
                         && "true".equalsIgnoreCase(strShowInEditor))
                 {
@@ -87,14 +86,14 @@ public class MTTranslationHandler extends PageActionHandler
                 }
 
                 translatedString = 
-                    (String) mtTranslation.get(MTHelper.MT_TRANSLATION);
+                    (String) mtTranslation.get(MTHelper2.MT_TRANSLATION);
                 
                 if (translatedString != null)
                 {
                     translatedString_replaced = translatedString.replaceAll("\n", "");
                 }
                 
-                engine_name = (String) mtTranslation.get(MTHelper.ENGINE_NAME);
+                engine_name = (String) mtTranslation.get(MTHelper2.ENGINE_NAME);
                 if (engine_name == null)
                 {
                     engine_name = "";
@@ -109,7 +108,7 @@ public class MTTranslationHandler extends PageActionHandler
             StringBuffer result = new StringBuffer();
             if (show_in_editor)
             {
-                result.append("<div id=\"").append(MTHelper.MT_TRANSLATION_DIV)
+                result.append("<div id=\"").append(MTHelper2.MT_TRANSLATION_DIV)
                         .append("\" style=\"display:none\">").append(
                                 translatedString_replaced).append("</div>");
                 // HR

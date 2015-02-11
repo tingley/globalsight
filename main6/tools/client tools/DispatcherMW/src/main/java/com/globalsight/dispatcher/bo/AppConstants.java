@@ -28,6 +28,7 @@ public interface AppConstants
     public final String JSONPN_TARGET_TEXT = "trg";
     public final String JSONPN_STATUS = "status";
     public final String JSONPN_JOBID = "jobID";
+    public final String JSONPN_JOBIDS = "jobIDS";
     public final String JSONPN_ACCOUNT_ID = "accountID";
     public final String JSONPN_ACCOUNT_NAME = "accountName";
     public final String JSONPN_ERROR_MESSAGE = "errorMsg";
@@ -45,7 +46,6 @@ public interface AppConstants
     
     // WebService Status & Error Message 
     public final String STATUS_SUCCESS = "success";
-    public final String STATUS_FAIl = "fail";
     public final String ERROR_NO_MTPROFILE = "No matched MT Profile is found.";
     public final String ERROR_NO_RESULT = "Can't get translated text.";
     public final String ERROR_NO_LOCALE = "Please check the input language:";

@@ -143,6 +143,10 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         m_outputStream.write("<ut DisplayText=\"GS:TaskID\">" + "Task ID: "
                 + m_page.getTaskId() + "</ut>");
         m_outputStream.write(m_strEOL);
+        //JobID
+        m_outputStream.write("<ut DisplayText=\"GS:JobID\">" + "Job ID: "
+                + m_page.getJobId() + "</ut>");
+        m_outputStream.write(m_strEOL);
         // ExactMatchWordCount
         m_outputStream.write("<ut DisplayText=\"GS:ExactMatchWordCount\">"
                 + "Exact Match word count: "

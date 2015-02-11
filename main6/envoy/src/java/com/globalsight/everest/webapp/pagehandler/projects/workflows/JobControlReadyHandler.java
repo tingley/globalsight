@@ -71,6 +71,14 @@ public class JobControlReadyHandler extends JobManagementHandler
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
+    	HttpSession session = p_request.getSession(false);
+    	SessionManager sessionMgr = (SessionManager) session
+    		.getAttribute(SESSION_MANAGER);
+    	boolean stateMarch = false;
+    	if(Job.READY_TO_BE_DISPATCHED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
+			stateMarch = true;
+    	setJobSearchFilters(sessionMgr, p_request, stateMarch);
+
         p_request.setAttribute("action", p_request.getParameter("action"));
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
@@ -113,7 +121,6 @@ public class JobControlReadyHandler extends JobManagementHandler
                 .equals(p_request.getParameter("action")))
         {
             String id = p_request.getParameter("jobId");
-            HttpSession session = p_request.getSession(false);
             Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
             StringBuffer jobName = new StringBuffer();
             JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
@@ -169,6 +176,7 @@ public class JobControlReadyHandler extends JobManagementHandler
             performAppropriateOperation(p_request);
         }
 
+        sessionMgr.setMyjobsAttribute("lastState", Job.READY_TO_BE_DISPATCHED);
         JobVoReadySearcher searcher = new JobVoReadySearcher();
         searcher.setJobVos(p_request, true);
         
@@ -180,10 +188,8 @@ public class JobControlReadyHandler extends JobManagementHandler
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         Job.READY_TO_BE_DISPATCHED));
 
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute("destinationPage", "ready");
+        setJobProjectsLocales(sessionMgr, session);
 
         // turn on cache. do both. "pragma" for the older browsers.
         p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0

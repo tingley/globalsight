@@ -373,15 +373,16 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                  */
 
                 result.append(wf.getTargetLocale().getId()).append(",");
-                if(result.length() > 0 && result.toString().endsWith(",")){
-                	result.deleteCharAt(result.length() - 1);
-                }
             }
         }
         catch (Exception e)
         {
             CATEGORY.error("Problem getting job from database ", e);
             throw new EnvoyServletException(e);
+        }
+        
+        if(result.length() > 0 && result.toString().endsWith(",")){
+        	result.deleteCharAt(result.length() - 1);
         }
 
         return result.toString();

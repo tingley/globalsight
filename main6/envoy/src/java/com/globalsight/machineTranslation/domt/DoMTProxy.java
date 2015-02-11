@@ -46,10 +46,12 @@ import com.globalsight.util.gxml.TextNode;
 public class DoMTProxy extends AbstractTranslator implements MachineTranslator
 {
     private static final Logger logger = Logger.getLogger(DoMTProxy.class);
-    
+
     public static final String DEFAULT_ENGINE_NAME = "translate-xliff";
     
     private static Object LOCK = new Object();
+
+    private static boolean useTagTranslation = true;
 
     public DoMTProxy() throws MachineTranslationException
     {
@@ -84,7 +86,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         try
         {
             String wrappedSegment = p_string;
-            if (!p_string.startsWith("<segment"))
+            if (!p_string.toLowerCase().startsWith("<segment"))
             {
                 wrappedSegment = "<segment>" + p_string + "</segment>";
             }
@@ -119,6 +121,148 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         }
 
         String[] results = new String[segments.length];
+        if (useTagTranslation)
+        {
+            results = translateWithTags(sourceLocale, targetLocale, segments);
+        }
+        else
+        {
+            results = translatePureText(sourceLocale, targetLocale, segments);
+        }
+
+        return results;
+    }
+
+    /**
+     * Send segments with tags to DOMT engine.
+     */
+    private String[] translateWithTags(Locale sourceLocale,
+            Locale targetLocale, String[] segments)
+    {
+        String[] results = new String[segments.length];
+
+        boolean isXlf = MTHelper.isXlf(this.getMtParameterMap());
+        try
+        {
+            // Ensure the sequence will be unchanged after translation.
+            HashMap<Integer, String> id2Segs = new HashMap<Integer, String>();
+            String[] heads = new String[segments.length];
+            for (int i = 0; i < segments.length; i++)
+            {
+                int index = segments[i].indexOf(">");
+                heads[i] = segments[i].substring(0, index + 1);
+
+                boolean hasInternalText = (segments[i].indexOf(" internal=\"yes\"") > -1);
+                GxmlElement gxmlRoot = MTHelper.getGxmlElement(segments[i]);
+                List subFlowList = gxmlRoot.getDescendantElements(GxmlElement.SUB_TYPE);
+                if ((subFlowList == null || subFlowList.size() == 0) && !hasInternalText)
+                {
+                    String segmentWithId = segments[i];
+                    if (!isXlf)
+                    {
+                        segmentWithId = segmentWithId.replace(" i=", " id=");
+                    }
+                    id2Segs.put(composeKey(i, 0), GxmlUtil.stripRootTag(segmentWithId));
+                }
+                else
+                {
+                    // If segment gxml HAS subs, send texts to MT then compose
+                    // back again.
+                    List items = MTHelper.getImmediateAndSubImmediateTextNodes(gxmlRoot);
+                    for (int subIndex = 0; subIndex < items.size(); subIndex++)
+                    {
+                        TextNode textNode = (TextNode) items.get(subIndex);
+                        id2Segs.put(composeKey(i, subIndex + 1), textNode.toGxml());
+                    }
+                }
+            }
+
+            if (id2Segs.size() > 0)
+            {
+                String srcXlf = getDoMtXliff(id2Segs, sourceLocale, targetLocale);
+                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                {
+                    logger.info("Segments in XLF sending to DoMT:" + srcXlf);
+                }
+
+                String translatedXlf = hitDoMt(sourceLocale, targetLocale, srcXlf);
+                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                {
+                    logger.info("Segments in XLF returned from DoMT:" + translatedXlf);
+                }
+
+                if (!isXlf && StringUtil.isNotEmpty(translatedXlf))
+                {
+                    translatedXlf = translatedXlf.replace(" id=", " i=")
+                            .replace("trans-unit i=", "trans-unit id=");
+                }
+
+                // id :: translated targets
+                HashMap<Integer, String> targets = extractDoMtReturning(translatedXlf);
+
+                HashMap<Integer, HashMap<Integer, String>> targetGroups = getTargetGroups(targets);
+
+                String translatedSegment = "";
+                for (int mainIndex = 0; mainIndex < segments.length; mainIndex++)
+                {
+                    translatedSegment = "";
+                    HashMap<Integer, String> subSet = targetGroups.get(mainIndex);
+                    if (subSet == null)
+                    {
+                        results[mainIndex] = heads[mainIndex] + "" + "</segment>";
+                        continue;
+                    }
+
+                    boolean hasInternalText = (segments[mainIndex].indexOf(" internal=\"yes\"") > -1);
+                    GxmlElement gxmlRoot = MTHelper.getGxmlElement(segments[mainIndex]);
+                    List subFlowList = gxmlRoot.getDescendantElements(GxmlElement.SUB_TYPE);
+                    if ((subFlowList == null || subFlowList.size() == 0) && !hasInternalText)
+                    {
+                        translatedSegment = subSet.get(0);
+                        // if DoMT fails to translate this, it returns -1.
+                        if (translatedSegment == null
+                                || "-1".equals(translatedSegment))
+                        {
+                            translatedSegment = "";
+                        }
+                    }
+                    else
+                    {
+                        List items = MTHelper.getImmediateAndSubImmediateTextNodes(gxmlRoot);
+                        if (items != null && items.size() > 0 && items.size() == subSet.size())
+                        {
+                            for (int subIndex = 0; subIndex < items.size(); subIndex++)
+                            {
+                                TextNode textNode = (TextNode) items.get(subIndex);
+                                String trans = subSet.get(subIndex + 1);
+                                if (trans == null || "-1".equals(trans))
+                                {
+                                    trans = "";
+                                }
+                                textNode.setTextBuffer(new StringBuffer(trans));
+                            }
+                            translatedSegment = GxmlUtil.stripRootTag(gxmlRoot.toGxml());
+                        }
+                    }
+                    results[mainIndex] = heads[mainIndex] + translatedSegment + "</segment>";
+                }
+            }
+        }
+        catch (MachineTranslationException e)
+        {
+            logger.error(e.getMessage());
+        }
+
+        return results;
+    }
+
+    /**
+     * Send pure texts to DoMT engine for translation.
+     */
+    private String[] translatePureText(Locale sourceLocale,
+            Locale targetLocale, String[] segments)
+    {
+        String[] results = new String[segments.length];
         try
         {
             // Ensure the sequence will be unchanged after translation.
@@ -144,8 +288,16 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
             if (id2Segs.size() > 0)
             {
                 String srcXlf = getDoMtXliff(id2Segs, sourceLocale, targetLocale);
+                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                {
+                    logger.info("Segments in XLF sending to DoMT:" + srcXlf);
+                }
 
                 String translatedXlf = hitDoMt(sourceLocale, targetLocale, srcXlf);
+                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                {
+                    logger.info("Segments in XLF returned from DoMT:" + translatedXlf);
+                }
 
                 // id :: translated targets
                 HashMap<Integer, String> targets = extractDoMtReturning(translatedXlf);
@@ -188,7 +340,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
 
         return results;
     }
-
+    
     @SuppressWarnings("rawtypes")
     private String hitDoMt(Locale p_sourceLocale, Locale p_targetLocale,
             String p_xlf) throws MachineTranslationException
@@ -205,8 +357,8 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
             Object[] returning = null;
             int runTimes = 0;
             // DoMT can't handle concurrent requests very well, if fail, recall
-            // it at most 10 times.
-            while (runTimes < 10)
+            // it at most 5 times.
+            while (runTimes < 5)
             {
                 runTimes++;
                 try
@@ -218,7 +370,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                         returning = (Object[]) client.execute("run", params);
                     }
 
-                    // if (logger.isDebugEnabled())
+                    if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
                     {
                         DoMTUtil.logRunInfo(returning);
                     }
@@ -246,8 +398,9 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                 statusParams[3] = new Boolean(false);// delete
 
                 HashMap status = null;
-                // Wait for 15 minutes at most (15 * 60 seconds)
-                while (statusTimes < 60)
+                int maxTimes = Math.round(getMaxWaitTime() / 15);
+                // Wait for "getMaxWaitTime()" seconds at most.
+                while (statusTimes < maxTimes)
                 {
                     statusTimes++;
                     try
@@ -259,7 +412,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                             status = (HashMap) client.execute("status", statusParams);
                         }
 
-//                        if (logger.isDebugEnabled())
+                        if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
                         {
                             DoMTUtil.logStatusInfo(status, jobId);
                         }
@@ -268,7 +421,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                         HashMap jobValues = (HashMap) status.get(jobId);
                         if (jobValues != null)
                         {
-                            jobStatus = (String) jobValues.get(DoMTUtil.KEY_STATUS);                        
+                            jobStatus = (String) jobValues.get(DoMTUtil.KEY_STATUS);
                         }
                         String subStatus = null;
                         HashMap serverValues = (HashMap) status.get(DoMTUtil.KEY_SERVER);
@@ -412,8 +565,14 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                             if ("target".equalsIgnoreCase(tuSubNode
                                     .getNodeName()))
                             {
-                                String target = tuSubNode.getFirstChild()
-                                        .getNodeValue();
+                                String target = MTHelper.outputNode2Xml(tuSubNode);
+                                if (StringUtil.isNotEmpty(target))
+                                {
+                                    int index = target.indexOf("<target ");
+                                    if (index > -1)
+                                        target = target.substring(index);
+                                }
+                                target = GxmlUtil.stripRootTag(target);
                                 targets.put(Integer.parseInt(id), target);
                                 break;
                             }
@@ -506,5 +665,24 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         }
 
         return null;
+    }
+
+    private static int getMaxWaitTime()
+    {
+        // Default 15 minutes.
+        int maxWaitTime = 900;
+        try
+        {
+            String param = MTHelper.getMTConfig("domt.max.wait.timeout");
+            if (param != null)
+            {
+                maxWaitTime = Integer.parseInt(param);
+            }
+        }
+        catch (Exception ignore)
+        {
+
+        }
+        return maxWaitTime;
     }
 }

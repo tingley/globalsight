@@ -31,23 +31,13 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
-import javax.naming.directory.InvalidAttributesException;
-import javax.naming.directory.ModificationItem;
-import javax.naming.directory.NoSuchAttributeException;
-import javax.naming.directory.SchemaViolationException;
-import javax.naming.directory.SearchControls;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 import com.globalsight.everest.company.CompanyThreadLocal;

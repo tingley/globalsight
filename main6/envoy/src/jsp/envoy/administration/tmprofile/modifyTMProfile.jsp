@@ -1547,7 +1547,7 @@ function doOnLoad()
                                <INPUT TYPE="checkbox" NAME="<%=dynLevReference%>" VALUE="true" <%=isDynLevReferenceChecked%> <%=isDynLevInProgressDisabled%>><%=lbDynLevReferenceTm%>
                             </TD>
                         </TR>
-                        <TR style="display:none"><TD>
+                        <TR><TD>
                                <INPUT TYPE="checkbox" NAME="<%=dynLevStopSearch%>" VALUE="true" <%=isDynLevStopSearchChecked%>><%=lbDynLevStopSearch%>
                         </TD></TR>
                    </TABLE>

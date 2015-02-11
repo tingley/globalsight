@@ -336,7 +336,7 @@ public class ReportHelper
     
     /**
      * Move the report to the user folder for download, the path will be 
-     * {FileStorage}/Reports/{userID}/{ReportType}/{dateRange}/{ReportName.xlsx}.
+     * {FileStorage}/Reports/{userID}/{ReportType}/{date}/{ReportName.xlsx}.
      * 
      * @param p_fileList
      *            The temp report file list.
@@ -347,30 +347,8 @@ public class ReportHelper
  {
         if (p_fileList == null || p_fileList.size() == 0)
             return new File[0];
-        
-//		String roleName = TaskThread.roleName;
-		String value = "yes";
-//		try {
-//			UserParameter userParam;
-//			if (roleName != null) {
-//				userParam = ServerProxy
-//						.getUserParameterManager()
-//						.getUserParameter(
-//								roleName,
-//								UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT);
-//			} else {
-//				userParam = ServerProxy
-//						.getUserParameterManager()
-//						.getUserParameter(
-//								p_userID,
-//								UserParamNames.EDITOR_ABBREVIATE_REPORT_NAME_SEGMENT);
-//			}
-//			if (userParam != null) {
-//				value = userParam.getValue();
-//			}
-//		} catch (Exception e) {
-//		}
 
+        String value = "yes";
 		File reports[] = new File[p_fileList.size()];
 		for (int i = 0; i < reports.length; i++)
 		{

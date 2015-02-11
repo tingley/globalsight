@@ -90,6 +90,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="recreateGS" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="wordcountList" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -193,6 +195,7 @@
     String lbCancel = bundle.getString("lb_cancel");
     String lb_refresh = bundle.getString("lb_refresh");
     String lb_downloading = bundle.getString("lb_downloading");
+    String labelSave = bundle.getString("lb_save");
     String lb_search_msg = "Please wait. Downloading files...";
     String subTitle = bundle.getString("lb_my_activities")
                       + bundle.getString("lb_colon") + " "
@@ -478,6 +481,21 @@
 							"=" + task_id+
 							"&" + WebAppConstants.TASK_STATE+
 							"=" + state;
+    
+    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
+						//GBS-2913 Added to the url parameter taskId,state;
+					    "&"+WebAppConstants.TASK_ID+
+					    "="+theTask.getId()+
+					    "&"+WebAppConstants.TASK_STATE+
+					    "="+theTask.getState();
+	String saveUrl = detail.getPageURL() +
+					"&" + WebAppConstants.TASK_ACTION +
+					"=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
+					"&" + WebAppConstants.TASK_STATE +
+					"=" + state +
+					"&" + WebAppConstants.TASK_ID +
+					"=" + task_id;
+
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
                                 "&firstEntry=true&fromTaskDetail=true");
@@ -1262,6 +1280,14 @@ $(document).ready(function(){
                 <TD>
                     <SPAN CLASS="standardText">
                       <input type="checkbox" id="includeRepetitions" name="includeRepetitions" value="true" checked="checked">
+                    </SPAN>
+                </TD>
+            </TR>
+            <TR id="excludeFullyLeveragedFilesBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_exclude_fully_leveraged_files") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="excludeFullyLeveragedFiles" name="excludeFullyLeveragedFiles" value="true" checked="checked"/>
                     </SPAN>
                 </TD>
             </TR>

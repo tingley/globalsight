@@ -12,90 +12,40 @@
     SessionManager sessionManager = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     String miniSearchURL = miniSearch.getPageURL() + "&searchType=" + JobSearchConstants.MINI_JOB_SEARCH_COOKIE + "&fromRequest=true";
     String jobSearchURL = jobSearch.getPageURL() + "&action=goToSearch";
+    String status = (String)sessionManager.getMyjobsAttribute("lastState");
     String type = (String)sessionManager.getAttribute("destinationPage");
     String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
     User user = UserHandlerHelper.getUser(userName);
     String userId = user.getUserId();
-    String cookieName = JobSearchConstants.MINI_JOB_SEARCH_COOKIE + userId.hashCode();
 
     // Fields
     String nameField = JobSearchConstants.NAME_FIELD;
     String nameOptions = JobSearchConstants.NAME_OPTIONS;
     String statusOptions = JobSearchConstants.STATUS_OPTIONS;
 
+    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+    List projects = (List)sessionManager.getMyjobsAttribute("projects");
+    List srcLocales = (List)sessionManager.getMyjobsAttribute("srcLocales");
+    String jobIdOption = (String)sessionManager.getMyjobsAttribute("jobIdOption");
+    String jobIdFilter = (String)sessionManager.getMyjobsAttribute("jobIdFilter");
+    String jobNameFilter = (String)sessionManager.getMyjobsAttribute("jobNameFilter");
+    String jobProjectFilter = (String)sessionManager.getMyjobsAttribute("jobProjectFilter");
+    String sourceLocaleFilter = (String)sessionManager.getMyjobsAttribute("sourceLocaleFilter");
+    int numPerPage = 20;
+    if(sessionManager.getMyjobsAttribute("numPerPage") != null)
+    	numPerPage = (Integer)sessionManager.getMyjobsAttribute("numPerPage");
 %>
 
 <p>
-<script>
-function submitSearch()
-{
-    if (getOption(searchForm.<%=statusOptions%>) == "none")
-    {
-        alert("<%=bundle.getString("jsmsg_select_status")%>");
-        return;
-    }
-    setSearchCookie();
-    searchForm.submit();
-}
 
-function setField(fieldname, field, searchCriteria, option)
-{
-    idx = searchCriteria.indexOf(fieldname);
-    if (idx > -1)
-    {
-        var len = fieldname.length + idx + 1;
-        var end = searchCriteria.indexOf(":", len);
-        var value = searchCriteria.substr(len, end-(len));
-        if (option == true)
-            setOption(field, value);
-        else
-            field.value = value;
-    }
-}
-
-function setOption(field, value)
-{
-    for (var i=0; i < field.length; i++)
-    {
-        if (field.options[i].value == value)
-        {
-            field.selectedIndex = i;
-            return;
-        }
-    }
-}
-
-
-function setSearchCookie()
-{
-    var buf = "<%=nameOptions%>=" + getOption(searchForm.<%=nameOptions%>) + ":" +
-              "<%=nameField%>=" + searchForm.<%=nameField%>.value + ":" +
-              "<%=statusOptions%>=" + getOption(searchForm.<%=statusOptions%>) + ":";
-              
-    document.cookie = "<%=cookieName%>=" + escape(buf);
-}
-
-function getOption(field)
-{
-    for (var i=0; i < field.length; i++)
-    {
-        if (field.options[i].selected)
-        {
-            return field.options[i].value;
-        }
-    }
-    return "";
-}
-
-</script>
-<form name="searchForm" method="post" action="<%=miniSearchURL%>">
+<form name="searchForm" method="post" action="<%=miniSearchURL%>" style="margin:0px;padding:0px" >
 <table>
     <tr>
         <td class="standardText" style="padding-bottom: 2px">
             <%=bundle.getString("lb_status")%>:
         </td>
         <td>
-            <select name="<%=statusOptions%>">
+            <select name="<%=statusOptions%>" id="<%=statusOptions%>">
                 <option value='<%=Job.PENDING%>'><%= bundle.getString("lb_pending") %></option>
                 <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
                 <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
@@ -105,72 +55,110 @@ function getOption(field)
                 <option value='<%=Job.ALLSTATUS%>'><%= bundle.getString("lb_all_status") %></option>
             </select>
         </td>
-        <td class="standardText" style="padding-bottom: 2px">
-            <%=bundle.getString("lb_job_name")%>:
-        </td>
-        <td>
-            <select name="<%=nameOptions%>">
-                <option value='<%=SearchCriteriaParameters.BEGINS_WITH%>'><%= bundle.getString("lb_begins_with") %></option>
-                <option value='<%=SearchCriteriaParameters.ENDS_WITH%>'><%= bundle.getString("lb_ends_with") %></option>
-                <option value='<%=SearchCriteriaParameters.CONTAINS%>'><%= bundle.getString("lb_contains") %></option>
-            </select>
-        </td>
-        <td>
-            <input type="text" size="25" name="<%=nameField%>" onkeypress=setSearchCookie()>
-        </td>
         <td>
             <input type="button" name="<%=bundle.getString("lb_search")%>"
                     value="<%=bundle.getString("lb_search")%>"
                     onclick='submitSearch()'>
         </td>
-        <td class="standardText" style="padding-bottom: 2px">
-            <a class="standardHREF" href="<%=jobSearchURL%>"><%= bundle.getString("lb_advanced_search") %></a>
-        </td>
     </tr>
 </table>
-<!-- fill in default values -->
-<script>
-<%
-    Cookie cookie = JobSearchHandlerHelper.getJobSearchCookie(session, request); 
-    String searchType = (String)session.getAttribute(
-                        JobSearchConstants.LAST_JOB_SEARCH_TYPE);
-    if (JobSearchConstants.MINI_JOB_SEARCH_COOKIE.equals(searchType) && cookie != null)
-    {
-%>
-var searchCriteria = "<%=cookie.getValue()%>";
-if (searchCriteria.length > 0)
-{
-    // job name option
-    setField("<%=nameOptions%>", searchForm.<%=nameOptions%>, searchCriteria, true);
-
-    // job name field
-    setField("<%=nameField%>", searchForm.<%=nameField%>, searchCriteria, false);
-
-    // status option
-    setField("<%=statusOptions%>", searchForm.<%=statusOptions%>, searchCriteria, true);
-}
-<% 
-}
-%>
-<%
-    // Always set the status no matter what
-    if (type.equals("pending")) {
-%>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.PENDING%>");
-<%  } else if (type.equals("ready")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.READY_TO_BE_DISPATCHED%>");
-<%  } else if (type.equals("inprogress")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.DISPATCHED%>");
-<%  } else if (type.equals("localized")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.LOCALIZED%>");
-<%  } else if (type.equals("dtpinprogress")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.DTPINPROGRESS%>");
-<%  } else if (type.equals("exported")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.EXPORTED%>");
-<%  } else if (type.equals("archived")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.ARCHIVED%>");
-<%  } else if (type.equals("allStatus")) { %>
-        setOption(searchForm.<%=statusOptions%>, "<%=Job.ALLSTATUS%>");        
-<%  } %>
-</script>
 </form>
+<script>
+$("#sto").val("<%=status%>");
+function submitSearch()
+{
+    if(checkFilters())
+    {
+    	searchJob();
+    }
+}
+
+$(function(){
+	$("#jobIdOption").val("<%=jobIdOption%>");
+	$("#jobProjectFilter").val(<%=jobProjectFilter%>);
+	$("#sourceLocaleFilter").val(<%=sourceLocaleFilter%>);
+	$("#numPerPage").val(<%=numPerPage%>);
+
+	$("#jobIdFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			if(checkFilters())
+			{
+				searchJob();
+			}
+		}
+	});
+
+	$("#jobNameFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			if(checkFilters())
+			{
+				searchJob();
+			}
+		}
+	});
+
+	$(".filterSelect").bind("change", function() {
+		if(checkFilters())
+		{
+			searchJob();
+		}
+		else
+		{
+			$("#numPerPage").val(<%=numPerPage%>);
+		}
+	});
+
+	$("#list tbody tr:odd").addClass("rowOdd");
+
+	$("#list tbody > tr").click(function() {
+        if ($(this).hasClass("rowSelected")) {
+            $(this).removeClass("rowSelected").find(":checkbox").attr("checked", false);
+			if ($("#selectAll").is(":checked"))
+				$("#selectAll").attr("checked", false);
+		}
+        else {
+            $(this).addClass("rowSelected").find(":checkbox").attr("checked", true);
+		}
+		setButtonState();
+    });
+
+	$("#selectAll").click(function() {
+		if (this.checked)
+			$("#list tbody > tr").addClass("rowSelected");
+		else 
+			$("#list tbody > tr").removeClass("rowSelected");
+	});
+
+	clearAll('JobForm');
+	setButtonState();
+});
+
+
+function addFilters(obj)
+{
+	if(!checkFilters())
+		return false;
+	obj.href += "&fromRequest=true&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
+		+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+		+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val();
+}
+
+function checkFilters()
+{
+	var tmp = ATrim($("#jobIdFilter").val());
+	if (tmp != "") {
+		if (!isAllDigits(tmp)) {
+			alert("Invalid job ID, only integer numbers are allowed.");
+			return false;
+		}
+	}
+
+	tmp = ATrim($("#jobNameFilter").val()); 
+	if (hasSpecialChars(tmp)) {
+		alert("Invalid text for job name, wildcard characters and reguler experssions are not supported.");
+		return false;
+	}
+	
+	return true;
+}
+</script>

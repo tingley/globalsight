@@ -1111,4 +1111,16 @@ public class LeverageMatches
     {
         this.job = job;
     }
+
+    public void removeTargetLocale(GlobalSightLocale gsl)
+    {
+        m_orderedMatchSegments = null;
+
+        for (Iterator it = m_leveragedTus.iterator(); it.hasNext();)
+        {
+            LeveragedTu tu = (LeveragedTu) it.next();
+            tu.removeTuvsForLocale(gsl);
+        }
+        
+    }
 }

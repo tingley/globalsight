@@ -23,6 +23,7 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoLocalizedSearcher;
 import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
 import java.util.HashMap;
@@ -62,14 +63,11 @@ public class JobControlCompletedHandler extends JobManagementHandler
         p_request.setAttribute("searchType", p_request.getParameter("searchType"));
         p_request.setAttribute("action", p_request.getParameter("action"));
         performAppropriateOperation(p_request);
-        p_request.setAttribute(JOB_SCRIPTLET,
-                               getJobText(p_request,
-                                          ((NavigationBean)beanMap.get(LOCALIZED_BEAN)).getPageURL(),
-                                          null,
-                                          ((NavigationBean)beanMap.get(DETAILS_BEAN)).getPageURL(),
-                                          ((NavigationBean)beanMap.get(PLANNED_COMPLETION_DATE_BEAN)).getPageURL(),
-                                          getExpJobListing(p_request),
-                                          Job.LOCALIZED, false));
+
+        JobVoLocalizedSearcher searcher = new JobVoLocalizedSearcher();
+        searcher.setJobVos(p_request);
+
+        
         p_request.setAttribute(EXPORT_URL_PARAM, 
                                m_exportBean.getPageURL());
         p_request.setAttribute(JOB_ID, 
@@ -80,7 +78,6 @@ public class JobControlCompletedHandler extends JobManagementHandler
                                getPagingText(p_request, 
                                              ((NavigationBean)beanMap.get(BASE_BEAN)).getPageURL(),
                                              Job.LOCALIZED));
-
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
         HttpSession session = p_request.getSession(false);

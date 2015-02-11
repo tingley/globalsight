@@ -18,16 +18,20 @@ package com.globalsight.ling.tm;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.ling.tm.LeverageSegment;
+import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -73,10 +77,12 @@ public interface LeverageMatchLingManager
      *            -- Can be null
      * @param p_companyId
      *            -- Can be null
+     * @param p_isJobDataMigrated
+     *            -- indicate if current job is data migrated
      */
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
             String p_subId, Long p_targetLocaleId, Long p_orderNum,
-            Long p_companyId);
+            Long p_companyId, boolean p_isJobDataMigrated);
 
     /**
      * Delete leverage matches for specified source page.
@@ -96,8 +102,8 @@ public interface LeverageMatchLingManager
      * @return HashMap of target Strings. Key - source Tuv Id, Value -
      *         LeverageSegment.
      */
-    HashMap getExactMatches(Long p_spLgId, Long p_targetLocaleId)
-            throws RemoteException, LingManagerException;
+    HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
+            Long p_targetLocaleId) throws RemoteException, LingManagerException;
 
     /**
      * This method returns all the fuzzy matches for the given sourceTuvIds. If
@@ -118,11 +124,12 @@ public interface LeverageMatchLingManager
      *         the length of the list of keys in the returned HashMap can be
      *         different.
      */
-    HashMap getFuzzyMatches(Long p_sourePageId, Long p_targetLocaleId)
-            throws RemoteException, LingManagerException;
+    HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(Long p_sourePageId,
+            Long p_targetLocaleId) throws RemoteException, LingManagerException;
 
-    HashMap getExactMatchesWithSetInside(Long p_sourcePageId,
-            Long p_targetLocaleId, int model, TranslationMemoryProfile tmProfile);
+    HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(
+            Long p_sourcePageId, Long p_targetLocaleId, int model,
+            TranslationMemoryProfile tmProfile);
 
     /**
      * This method returns all the fuzzy matches for the given sourceTuvId. If
@@ -140,8 +147,8 @@ public interface LeverageMatchLingManager
      */
     SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
             Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            String companyId, long... tmIds) throws RemoteException,
-            LingManagerException;
+            long companyId, boolean p_isJobDataMigrated, long... tmIds)
+            throws RemoteException, LingManagerException;
 
     /**
      * Returns match type of Tuvs. With the given source Tuv ids and a target
@@ -155,7 +162,6 @@ public interface LeverageMatchLingManager
      *            job level value.
      * @return MatchTypeStatistics object
      */
-
     MatchTypeStatistics getMatchTypesForStatistics(Long p_sourcePageId,
             Long p_targetLocaleId, int p_levMatchThreshold)
             throws RemoteException, LingManagerException;
@@ -170,13 +176,11 @@ public interface LeverageMatchLingManager
     boolean isMatchCopied(int p_lingManagerMatchType) throws RemoteException,
             LingManagerException;
 
-    public Map getExactMatchesForDownLoadTmx(Long pageId, Long idAsLong);
+    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
+            Long pageId, Long idAsLong);
 
-    public List getLeverageMatchesForOfflineDownLoad(Long p_sourcePageId,
-            Long p_targetLocaleId);
-
-    public void updateProjectTmIndex(long tmId, int projectTmIndex,
-            long tmProfileId);
+    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
+            Long p_sourcePageId, Long p_targetLocaleId);
 
     public boolean isIncludeMtMatches();
 
@@ -210,10 +214,12 @@ public interface LeverageMatchLingManager
      * @param p_leverageMatchList
      *            - a Collection of LeverageMatch.
      */
-    public void saveLeveragedMatches(Collection p_leverageMatchList)
+    public void saveLeveragedMatches(
+            Collection<LeverageMatch> p_leverageMatchList)
             throws RemoteException, LingManagerException;
 
-    public void saveLeveragedMatches(Collection p_leverageMatchList,
+    public void saveLeveragedMatches(
+            Collection<LeverageMatch> p_leverageMatchList,
             Connection p_connection) throws LingManagerException;
 
     /**
@@ -221,10 +227,5 @@ public interface LeverageMatchLingManager
      */
     public float getBestMatchScore(Connection p_connection,
             long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_companyId);
-
-    public int getMaxOrderNum(Connection p_connection,
-            long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_companyId);
-
+            long p_companyId, boolean p_isJobDataMigrated);
 }

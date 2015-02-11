@@ -86,46 +86,44 @@ public class DiplomatCtrlCharConverter
         Iterator it = m_output.documentElementIterator();
         while (it.hasNext())
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-            {
-                TranslatableElement elem = (TranslatableElement)de;
-
-                if (elem.hasSegments())
+                case DocumentElement.TRANSLATABLE:
                 {
-                    ArrayList segments = elem.getSegments();
+                    TranslatableElement elem = (TranslatableElement) de;
 
-                    for (int i = 0, max = segments.size(); i < max; i++)
+                    if (elem.hasSegments())
                     {
-                        SegmentNode node = (SegmentNode)segments.get(i);
+                        ArrayList segments = elem.getSegments();
 
-                        convertChars(node, node.getSegment());
+                        for (int i = 0, max = segments.size(); i < max; i++)
+                        {
+                            SegmentNode node = (SegmentNode) segments.get(i);
+
+                            convertChars(node, node.getSegment());
+                        }
                     }
-                }
-                else
-                {
-                    convertChars(elem, elem.getChunk());
-                }
+                    else
+                    {
+                        convertChars(elem, elem.getChunk());
+                    }
 
-                break;
-            }
-            case DocumentElement.LOCALIZABLE:
-            {
-                LocalizableElement elem = (LocalizableElement)de;
-                convertChars(elem, elem.getChunk());
-                break;
-            }
-            case DocumentElement.SKELETON:
-            {
-                SkeletonElement elem = (SkeletonElement)de;
-                convertChars(elem, elem.getSkeleton());
-            }
-            default:
-                // skip all others
-                break;
+                    break;
+                }
+                case DocumentElement.LOCALIZABLE:
+                {
+                    LocalizableElement elem = (LocalizableElement) de;
+                    convertChars(elem, elem.getChunk());
+                    break;
+                }
+                case DocumentElement.SKELETON:
+                {
+                    SkeletonElement elem = (SkeletonElement) de;
+                    convertChars(elem, elem.getSkeleton());
+                    break;
+                }
             }
         }
     }

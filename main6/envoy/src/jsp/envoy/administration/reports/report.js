@@ -64,6 +64,15 @@ function setDisableTR(trId, isDisabled) {
 	for ( var i = 0; i < elems.length; i++) {
 		elems[i].disabled = isDisabled;
 		elems[i].style.color = color;
+		
+		//for Chrome and IE9 display normal.
+		var elemsOption = trElem.getElementsByTagName("option");
+		for (var j = 0; j < elemsOption.length; j++) {
+			if( trElem.getElementsByTagName("option")[j].selected == true ) {
+				trElem.getElementsByTagName("option")[j].style.color = "#FFF";
+				trElem.getElementsByTagName("option")[j].style.backgroundColor = "#CCC";
+			}
+		}
 	}
 	
 	// Operate text elements
@@ -97,7 +106,7 @@ function addOption(selId, text, value) {
  * @param jobInfos 		jobInfo array.If need't check in jobInfos, then set Null.
  */
 function validateIDS(jobIDArr, jobInfos){	
-	if(jobIDArr == null || jobIDArr.length == 0){
+	if(!jobIDArr[0] || jobIDArr.length == 0){
 		return false;
 	}
 	

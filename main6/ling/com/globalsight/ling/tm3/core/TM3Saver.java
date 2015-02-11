@@ -25,6 +25,7 @@ import java.util.Map;
 public abstract class TM3Saver<T extends TM3Data> {
 
     List<Tu> tus = new ArrayList<Tu>();
+    private boolean fromTmImport = false;
     
     TM3Saver() {
     }
@@ -55,6 +56,16 @@ public abstract class TM3Saver<T extends TM3Data> {
      * @throws TM3Exception
      */
     public abstract List<TM3Tu<T>> save(TM3SaveMode mode) throws TM3Exception;
+    
+    public boolean isFromTmImport()
+    {
+        return fromTmImport;
+    }
+    
+    public void setFromTmImport(boolean pfromTmImport)
+    {
+        fromTmImport = pfromTmImport;
+    }
     
     /**
      * Representation of an unsaved TU, created by a call to 

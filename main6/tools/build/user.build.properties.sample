@@ -9,7 +9,7 @@
 #
 # Below is a sample,you should define your own for unit test.
 
-gs.home=Y:\\jboss\\jboss_server\\server\\default\\deploy\\globalsight.ear
+gs.home=Y:\\jboss\\server\\standalone\\deployments\\globalsight.ear
 
 # for unit test of InDesign CS5 converter
 test.idcs5.enable=false

@@ -65,7 +65,7 @@ public class JobAttributeReportHandler extends PageActionHandler
         {
             hql += " and p.companyId = :companyId";
             map = new HashMap();
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         hql += " order by p.name";
@@ -80,7 +80,7 @@ public class JobAttributeReportHandler extends PageActionHandler
         try
         {
             users = ServerProxy.getUserManager().getUsers();
-            for (int i = users.size() - 1; i >=0;i--)
+            for (int i = users.size() - 1; i >= 0; i--)
             {
                 if (UserUtil.isSuperAdmin(users.get(i).getUserId()))
                 {
@@ -105,7 +105,7 @@ public class JobAttributeReportHandler extends PageActionHandler
         {
             hql += " where j.job.companyId = :companyId";
             map = new HashMap();
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         List<JobAttribute> queryResult = (List<JobAttribute>) HibernateUtil
@@ -128,10 +128,10 @@ public class JobAttributeReportHandler extends PageActionHandler
             {
                 if (o1.isFromSuper() && !o2.isFromSuper())
                     return -1;
-                
+
                 if (o2.isFromSuper() && !o1.isFromSuper())
                     return 1;
-                
+
                 return o1.getName().compareTo(o2.getName());
             }
         });

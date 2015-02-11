@@ -70,7 +70,8 @@ public class JobTableModel extends AbstractTableModel
             "WORDCNT", "CREATE_DATE", "COST", "REVENUE" };
 
     private static final Object EMPTY = (Object) new String("");
-    private static final String MY_MESSAGES = "messages/jobTable";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "jobTable";
 
     /**
      * Creates a new JobTableModel holding the relevant data about a job
@@ -548,28 +549,40 @@ public class JobTableModel extends AbstractTableModel
             {
                 case ID:
                     id = (Long) o;
+                    break;
                 case PRIORITY:
                     priority = (Integer) o;
+                    break;
                 case PROJECT:
                     project = (String) o;
+                    break;
                 case PM:
                     pm = (String) o;
+                    break;
                 case JOBNAME:
                     jobName = (String) o;
+                    break;
                 case SRCLOCALE:
                     srcLocal = (String) o;
+                    break;
                 case DATASRC:
                     dataSrc = (String) o;
+                    break;
                 case WORDCNT:
                     wordCNT = (Integer) o;
+                    break;
                 case CREATE_DATE:
                     createData = (String) o;
+                    break;
                 case COST:
                     cost = o;
+                    break;
                 case REVENUE:
                     revenue = o;
+                    break;
                 case JOB_OBJECT:
                     job = (Job) o;
+                    break;
                 default:
                     return;
             }

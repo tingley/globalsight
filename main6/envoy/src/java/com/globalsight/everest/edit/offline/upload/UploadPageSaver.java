@@ -62,6 +62,7 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
+import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -449,18 +450,18 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             throws GeneralException, DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
-
+        
         boolean isRepeatedSegments = false;
         if (p_fileName != null
                 && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
         {
             isRepeatedSegments = true;
         }
-        
+
         Task task = TaskHelper
                 .getTask(Long.parseLong(p_uploadPage.getTaskId()));
-        String companyId = task != null ? task.getCompanyId() : CompanyWrapper
-                .getCurrentCompanyId();
+        long companyId = task != null ? task.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
 
         OfflineSegmentData refSegment = null;
         HashMap subsToBeSavedMap = new HashMap();
@@ -631,18 +632,18 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             User p_user, String p_fileName) throws GeneralException, DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
-        
+
         boolean isRepeatedSegments = false;
         if (p_fileName != null
                 && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
         {
             isRepeatedSegments = true;
         }
-
+        
         Task task = TaskHelper
                 .getTask(Long.parseLong(p_uploadPage.getTaskId()));
-        String companyId = task != null ? task.getCompanyId() : CompanyWrapper
-                .getCurrentCompanyId();
+        long companyId = task != null ? task.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
         OfflineSegmentData refSegment = null;
         HashMap subsToBeSavedMap = new HashMap();
         PageData refPageData = null;
@@ -714,14 +715,22 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                         uploadSegment.getTuIdAsLong()
                                                 .longValue(), m_targetLocale);
 
-                        // set the text
-                        segmentPair.getTargetTuv()
-                                .setGxmlExcludeTopTagsIgnoreSubflows(
-                                        uploadSegment.getDisplayTargetText(),
-                                        companyId);
+                        String srcGxml = segmentPair.getSourceTuv()
+                                .getGxmlExcludeTopTags();
+                        String tgtGxml = segmentPair.getTargetTuv()
+                                .getGxmlExcludeTopTags();
+                        if (!(InternalTextUtil.isInternalText(srcGxml)
+                                && InternalTextUtil.isInternalText(tgtGxml)))
+                        {
+                            // set the text
+                            segmentPair.getTargetTuv()
+                                    .setGxmlExcludeTopTagsIgnoreSubflows(
+                                            uploadSegment.getDisplayTargetText(),
+                                            companyId);
 
-                        // set the modified flag
-                        segmentPair.setModified();
+                            // set the modified flag
+                            segmentPair.setModified();
+                        }
                     }
                 }
                 else if (isRepeatedSegments)
@@ -752,6 +761,13 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                 .getPTagSourceString();
                         String newTgtPtag = TmxPseudo.tmx2Pseudo(newTgtGxml,
                                 newTgtPD).getPTagSourceString();
+                        
+                        String matchType = uploadSegment.getDisplayMatchType();
+                        if (matchType != null
+                                && matchType.contains("Context Exact Match"))
+                        {
+                            newTgtPtag = newTgtPtag.trim();
+                        }
 
                         if (!newTgtPtag.equals(tgtPtag))
                         {
@@ -789,10 +805,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                     .getPageSegments());
             List newComments = p_uploadPage.getUploadedNewIssues();
             Map replyComments = p_uploadPage.getUploadedReplyIssuesMap();
-            
+
             // filter comments here for consolidate RTF
             newComments = filterNewComment(newComments, ref_OPDSegmentMap);
-            replyComments = filterReplayComment(replyComments, ref_OPDSegmentMap);
+            replyComments = filterReplayComment(replyComments,
+                    ref_OPDSegmentMap);
 
             boolean isLastOne = (i == p_referencePages.size() - 1);
             save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
@@ -804,50 +821,50 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     private Map filterReplayComment(Map replyComments, HashMap ref_OPDSegmentMap)
     {
         Map result = new HashMap();
-        
+
         if (replyComments == null || replyComments.size() == 0)
         {
             return result;
         }
-        
+
         Iterator issueKeys = replyComments.keySet().iterator();
-        
-        while(issueKeys.hasNext())
+
+        while (issueKeys.hasNext())
         {
             Object issueKey = issueKeys.next();
             UploadIssue issue = (UploadIssue) replyComments.get(issueKey);
             String key = issue.getDisplayId();
-            
+
             if (ref_OPDSegmentMap.containsKey(key))
             {
                 result.put(issueKey, issue);
             }
         }
-        
+
         return result;
     }
 
     private List filterNewComment(List newComments, HashMap ref_OPDSegmentMap)
     {
         List result = new ArrayList();
-        
+
         if (newComments == null || newComments.size() == 0)
         {
             return result;
         }
-        
+
         for (int i = 0, max = newComments.size(); i < max; i++)
         {
             UploadIssue issue = (UploadIssue) newComments.get(i);
 
             String key = issue.getDisplayId();
-            
+
             if (ref_OPDSegmentMap.containsKey(key))
             {
                 result.add(issue);
             }
         }
-        
+
         return result;
     }
 
@@ -963,8 +980,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
     }
 
-    private void setSubsOnTargets(Map p_subsToBeSavedMap, ArrayList<PageData> p_referencePages)
-            throws GeneralException
+    private void setSubsOnTargets(Map p_subsToBeSavedMap,
+            ArrayList<PageData> p_referencePages) throws GeneralException
     {
         Map subflowOffsetMap = m_uploadPage.buildSubflowOffsetMap();
         Collection allSubsOfParent = p_subsToBeSavedMap.values();
@@ -990,19 +1007,21 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
 
                     if (pageData != null)
                     {
-						segmentPair = m_ref_PageData.getPageSegments()
-								.getSegmentPairByTuId(
-										subs.m_parentTuvId.longValue(),
-										m_targetLocale);
+                        segmentPair = m_ref_PageData.getPageSegments()
+                                .getSegmentPairByTuId(
+                                        subs.m_parentTuvId.longValue(),
+                                        m_targetLocale);
                     }
                     if (pageData == null && p_referencePages != null)
                     {
-                        for(int i = 0; i < p_referencePages.size(); i++)
+                        for (int i = 0; i < p_referencePages.size(); i++)
                         {
                             pageData = p_referencePages.get(i);
-                            segmentPair = pageData.getPageSegments().getSegmentPairByTuId(
-                                    subs.m_parentTuvId.longValue(), m_targetLocale);
-                            
+                            segmentPair = pageData.getPageSegments()
+                                    .getSegmentPairByTuId(
+                                            subs.m_parentTuvId.longValue(),
+                                            m_targetLocale);
+
                             if (segmentPair != null)
                             {
                                 break;

@@ -26,10 +26,8 @@ import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-
 
 public class PageImportQuery
 {
@@ -38,27 +36,26 @@ public class PageImportQuery
     private PreparedStatement m_psLGIds = null;
     // get the latest version of a particular source page
     // that is an EXTRACTED file
-    private static final String LATEST_SOURCE_PAGE_SQL =
-        " SELECT SP.* FROM SOURCE_PAGE SP, REQUEST R, L10N_PROFILE LP WHERE" +
-        " SP.EXTERNAL_PAGE_ID= ?" +
-        " AND DATA_TYPE is not null " +
-        " AND LP.SOURCE_LOCALE_ID = ?" +
-        " AND SP.COMPANY_ID = ?" +
-        " AND R.L10N_PROFILE_ID=LP.ID AND R.PAGE_ID=SP.ID " +
-        " AND SP.STATE != '" + PageState.IMPORT_FAIL + "' " +
-        " AND R.TYPE != 'REQUEST_WITH_IMPORT_ERROR' " +
-        " ORDER BY SP.ID DESC limit 1";
-    private static final String SOURCE_PAGE_BY_ID =
-        "select * from source_page where id = ? ";
-    private static final String LEVERAGE_GROUP_IDS =
-        "select * from source_page_leverage_group where SP_ID = ?";
+    private static final String LATEST_SOURCE_PAGE_SQL = " SELECT SP.* FROM SOURCE_PAGE SP, REQUEST R, L10N_PROFILE LP WHERE"
+            + " SP.EXTERNAL_PAGE_ID= ?"
+            + " AND DATA_TYPE is not null "
+            + " AND LP.SOURCE_LOCALE_ID = ?"
+            + " AND SP.COMPANY_ID = ?"
+            + " AND R.L10N_PROFILE_ID=LP.ID AND R.PAGE_ID=SP.ID "
+            + " AND SP.STATE != '"
+            + PageState.IMPORT_FAIL
+            + "' "
+            + " AND R.TYPE != 'REQUEST_WITH_IMPORT_ERROR' "
+            + " ORDER BY SP.ID DESC limit 1";
+    private static final String SOURCE_PAGE_BY_ID = "select * from source_page where id = ? ";
+    private static final String LEVERAGE_GROUP_IDS = "select * from source_page_leverage_group where SP_ID = ?";
 
     public PageImportQuery()
     {
     }
 
     public SourcePage getLatestVersionOfSourcePage(RequestImpl p_request)
-    throws PersistenceException
+            throws PersistenceException
     {
         Connection connection = null;
         SourcePage sourcePage = null;
@@ -66,13 +63,12 @@ public class PageImportQuery
         try
         {
             connection = DbUtil.getConnection();
-            m_psSourcePage = 
-                connection.prepareStatement(LATEST_SOURCE_PAGE_SQL);
-            m_psSourcePage.setString(1,p_request.getExternalPageId());
-            m_psSourcePage.
-                setLong(2,
-                        p_request.getL10nProfile().getSourceLocale().getId());
-            m_psSourcePage.setLong(3, new Long(p_request.getCompanyId()).longValue());
+            m_psSourcePage = connection
+                    .prepareStatement(LATEST_SOURCE_PAGE_SQL);
+            m_psSourcePage.setString(1, p_request.getExternalPageId());
+            m_psSourcePage.setLong(2, p_request.getL10nProfile()
+                    .getSourceLocale().getId());
+            m_psSourcePage.setLong(3, p_request.getCompanyId());
             rs = m_psSourcePage.executeQuery();
             sourcePage = processResultSet(rs);
         }
@@ -82,16 +78,15 @@ public class PageImportQuery
         }
         finally
         {
-        	DbUtil.silentClose(rs);
-        	DbUtil.silentClose(m_psSourcePage);
-        	DbUtil.silentReturnConnection(connection);
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(m_psSourcePage);
+            DbUtil.silentReturnConnection(connection);
         }
 
         return sourcePage;
     }
 
-    public SourcePage getSourcePageById(long p_id) 
-    throws PersistenceException
+    public SourcePage getSourcePageById(long p_id) throws PersistenceException
     {
         Connection connection = null;
         SourcePage sourcePage = null;
@@ -106,20 +101,20 @@ public class PageImportQuery
         }
         catch (Exception e)
         {
-            throw new PersistenceException(e);    
+            throw new PersistenceException(e);
         }
         finally
         {
-        	DbUtil.silentClose(rs);
-        	DbUtil.silentClose(m_psSourcePage1);
-        	DbUtil.silentReturnConnection(connection);
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(m_psSourcePage1);
+            DbUtil.silentReturnConnection(connection);
         }
 
         return sourcePage;
     }
 
-	public List<Long> getLeverageGroupIds(long p_sourcePageId)
-			throws PersistenceException
+    public List<Long> getLeverageGroupIds(long p_sourcePageId)
+            throws PersistenceException
     {
         Connection connection = null;
         ResultSet rs = null;
@@ -128,7 +123,7 @@ public class PageImportQuery
         {
             connection = DbUtil.getConnection();
             m_psLGIds = connection.prepareStatement(LEVERAGE_GROUP_IDS);
-            m_psLGIds.setLong(1,p_sourcePageId);
+            m_psLGIds.setLong(1, p_sourcePageId);
             rs = m_psLGIds.executeQuery();
             int i = 0;
             while (rs.next())
@@ -148,25 +143,24 @@ public class PageImportQuery
         }
         finally
         {
-        	DbUtil.silentClose(rs);
-        	DbUtil.silentClose(m_psLGIds);
-        	DbUtil.silentReturnConnection(connection);
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(m_psLGIds);
+            DbUtil.silentReturnConnection(connection);
         }
 
         return list;
     }
 
-	private SourcePage processResultSet(ResultSet p_resultSet) throws Exception
+    private SourcePage processResultSet(ResultSet p_resultSet) throws Exception
     {
         ResultSet rs = p_resultSet;
         SourcePage sourcePage = null;
         while (rs.next())
         {
             // tbd - assumes this is an extracted file
-            sourcePage = new SourcePage(
-                ExtractedSourceFile.EXTRACTED_FILE);
-            ExtractedSourceFile esf = 
-                (ExtractedSourceFile)sourcePage.getPrimaryFile();
+            sourcePage = new SourcePage(ExtractedSourceFile.EXTRACTED_FILE);
+            ExtractedSourceFile esf = (ExtractedSourceFile) sourcePage
+                    .getPrimaryFile();
             sourcePage.setId(rs.getLong(1));
             sourcePage.setExternalPageId(rs.getString(2));
             sourcePage.setWordCount(rs.getInt(3));
@@ -191,4 +185,3 @@ public class PageImportQuery
         return sourcePage;
     }
 }
-

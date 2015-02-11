@@ -16,124 +16,112 @@
  */
 package com.globalsight.ling.docproc.extractor.xml;
 
-// Xerces & Xalan
-import org.apache.xerces.framework.XMLDocumentScanner;
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.utils.ChunkyCharArray;
-import org.apache.xerces.validators.common.GrammarResolverImpl;
-import org.apache.xerces.validators.common.XMLValidator;
+import java.io.File;
+import java.io.InputStream;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.validation.Schema;
 
-public class GsDOMParser extends DOMParser
+import org.apache.xerces.impl.Constants;
+import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+
+public class GsDOMParser
 {
-    // XML declaration flags
-    private boolean  m_haveXMLDecl = false;
-    private String  m_version = null;
-    private String m_standalone = null;
-    private String encoding = null;
-    private boolean emptyCdate = false;
+    public static String FACTORY_CLASS = "org.apache.xerces.jaxp.GSDocumentBuilderFactoryImpl";
 
-    // Constructor
-    public GsDOMParser()
-        throws Exception
+    private DocumentBuilderFactory factory;
+
+    private DocumentBuilder builder;
+
+    public GsDOMParser() throws Exception
     {
-        super();
-        fEntityHandler = new GsXMLEntityHandler(fStringPool, fErrorReporter);
+        factory = DocumentBuilderFactory.newInstance(FACTORY_CLASS, null);
+        // setFeature - AbstractMethodError
+        // factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setExpandEntityReferences(true);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.UNPARSED_ENTITY_CHECKING_FEATURE, false);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CREATE_ENTITY_REF_NODES_FEATURE, true);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CREATE_CDATA_NODES_FEATURE, true);
 
-        // The following codes are copied from XMLParser(). It is
-        // necessary because they are dependent to fEntityHandler and
-        // each other.
-        fScanner = new XMLDocumentScanner(fStringPool, fErrorReporter,
-          fEntityHandler, new ChunkyCharArray(fStringPool));
-        fValidator = new XMLValidator(fStringPool, fErrorReporter,
-          fEntityHandler, fScanner);
-        fGrammarResolver = new GrammarResolverImpl();
-        fScanner.setGrammarResolver(fGrammarResolver);
-        fValidator.setGrammarResolver(fGrammarResolver);
-
-        // from DOMParser
-        initHandlers(false, this, this);
-
-        // make namespace aware
-        setNamespaces(true);
+        createBuilder();
     }
 
-    /**
-     * Overrides DOMPaeser#startDocument.
-     *
-     * This method stores XML version and standalone value.
-     */
-    public void xmlDecl(int versionIndex, int encodingIndex,
-      int standAloneIndex)
-        throws Exception
+    public GsDOMParser(String param) throws Exception
     {
-        m_haveXMLDecl = true;
-        m_version = null;
-        m_standalone = null;
-        encoding = null;
+        factory = DocumentBuilderFactory.newInstance(param, null);
+        factory.setNamespaceAware(true);
+        factory.setExpandEntityReferences(true);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.UNPARSED_ENTITY_CHECKING_FEATURE, false);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CREATE_ENTITY_REF_NODES_FEATURE, true);
+        factory.setFeature(Constants.XERCES_FEATURE_PREFIX
+                + Constants.CREATE_CDATA_NODES_FEATURE, true);
 
-        if (versionIndex != -1)
-        {
-            m_version = fStringPool.toString(versionIndex);
-        }
-
-        if (standAloneIndex != -1)
-        {
-            m_standalone = fStringPool.toString(standAloneIndex);
-        }
-        
-        if (encodingIndex != -1)
-        {
-        	encoding = fStringPool.toString(encodingIndex);
-        }
-
-        super.xmlDecl(versionIndex, encodingIndex, standAloneIndex);
+        createBuilder();
     }
 
-
-    public boolean getHaveXMLDecl()
+    private void createBuilder() throws Exception
     {
-        return m_haveXMLDecl;
+        builder = factory.newDocumentBuilder();
     }
 
-    public String getXMLVersion()
+    public Document parse(File file) throws Exception
     {
-        return m_version;
+        return builder.parse(file);
     }
 
-    public String getStandalone()
+    public Document parse(InputSource is) throws Exception
     {
-        return m_standalone;
-    }
-    
-    public String getEncoding()
-    {
-        return encoding;
+        return builder.parse(is);
     }
 
-    @Override
-    public void endCDATA() throws Exception
+    public Document parse(InputStream is) throws Exception
     {
-        if (emptyCdate)
-        {
-            characters("".toCharArray(), 0, 0);
-        }
-        
-        super.endCDATA();
+        return builder.parse(is);
     }
 
-    @Override
-    public void characters(int arg0) throws Exception
+    public Document parse(String uri) throws Exception
     {
-        emptyCdate = false;
-        super.characters(arg0);
+        return builder.parse(uri);
     }
 
-    @Override
-    public void startCDATA() throws Exception
+    public void setValidating(boolean validating) throws Exception
     {
-        emptyCdate = true;
-        super.startCDATA();
+        factory.setValidating(validating);
+        // refresh the builder
+        createBuilder();
     }
 
+    public void setAttribute(String name, Object value) throws Exception
+    {
+        factory.setAttribute(name, value);
+        // refresh the builder
+        createBuilder();
+    }
+
+    public void setSchema(Schema schema) throws Exception
+    {
+        factory.setSchema(schema);
+        // refresh the builder
+        createBuilder();
+    }
+
+    public void setEntityResolver(EntityResolver er)
+    {
+        builder.setEntityResolver(er);
+    }
+
+    public void setErrorHandler(ErrorHandler eh)
+    {
+        builder.setErrorHandler(eh);
+    }
 }

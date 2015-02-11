@@ -624,4 +624,9 @@ public interface WorkflowServer
      */
     public WorkflowTaskInstance nextNodeInstances(Task p_task,
             String p_arrowLabel, String p_skipToAcitivity) throws Exception;
+
+    public void advanceWorkFlowNotification(String key, String state);
+
+    public void sendJobActionEmailToUser(String p_fromUserId,
+            TaskEmailInfo p_emailInfo, int p_taskActionType);
 }

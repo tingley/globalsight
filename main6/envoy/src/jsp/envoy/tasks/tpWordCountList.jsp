@@ -2,7 +2,6 @@
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
-      com.globalsight.everest.costing.WordcountForCosting,
       com.globalsight.everest.taskmanager.Task,
       com.globalsight.everest.page.PageWordCounts,
       com.globalsight.everest.page.PrimaryFile,
@@ -226,7 +225,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
       </amb:column>
       <amb:column label="lb_no_match" width="50px"
       sortBy="<%=TPWordCountComparator.NO_MATCH%>">
-      <%=targetPage.getWordCount().getUnmatchedWordCount()%>
+      <%=targetPage.getWordCount().getNoMatchWordCount()%>
       </amb:column>
       <amb:column label="lb_repetition_word_cnt" width="70px"
        sortBy="<%=TPWordCountComparator.REPETITIONS%>">
@@ -312,15 +311,13 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
 	    <%=wf.getMedFuzzyMatchWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
-	    <%=wf.getSubLevMatchWordCount()%>
+	    <%=wf.getLowFuzzyMatchWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
 	    <%=wf.getNoMatchWordCount()%>
 	  </td>
 	  <td width="70px" class=standardText>
-	    <%=wf.getRepetitionWordCount() + wf.getHiFuzzyRepetitionWordCount() + 
-    	wf.getMedHiFuzzyRepetitionWordCount() + wf.getMedFuzzyRepetitionWordCount() + 
-    	wf.getSubLevRepetitionWordCount()%>
+	    <%=wf.getRepetitionWordCount()%>
 	  </td>
 	  
 	  <%
@@ -599,9 +596,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
 	    <%=wf.getThresholdNoMatchWordCount()%>
 	  </td>
 	  <td width="70px" class=standardText>
-	    <%=wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount() + 
-        wf.getHiFuzzyRepetitionWordCount() + wf.getMedHiFuzzyRepetitionWordCount() + 
-        wf.getMedFuzzyRepetitionWordCount()%>
+	    <%=wf.getRepetitionWordCount()%>
 	  </td>
       <% if (isInContextMatch) { %>
 	      <td width="50px" class=standardText>

@@ -32,6 +32,7 @@ public interface OfflineConstants
     String UPLOAD_FILE_NAME = "offline.upload.fileName";
     String DOWNLOAD_ENCODING_OPTIONS = "offline.download.encodings";
     String DOWNLOAD_EDIT_EXACT = "offline.download.editExact";
+    String DOWNLOAD_TM_EDIT_TYPE = "offline.download.TMEditType";
     String DOWNLOAD_JOB_NAME = "offline.download.jobName";
     String DOWNLOAD_ACCEPT_DOWNLOAD = "offline.download.acceptdownload";
     String DOWNLOAD_HAS_EXTRACTED_FILES = "offline.download.hasextractedfiles";
@@ -44,7 +45,8 @@ public interface OfflineConstants
     String EDITOR_SELECTOR = "editor";
     String ENCODING_SELECTOR = "encoding";
     String PTAG_SELECTOR = "placeholder";
-    String EDIT_EXACT_SELECTOR = "editExact";
+    //String EDIT_EXACT_SELECTOR = "editExact";
+    String TM_EDIT_TYPE = "TMEditType";
     String PAGE_CHECKBOXES = "pageCheckBoxes";
     String GLOSSARY_CHECKBOXES = "supportFileCheckBoxes";
     String STF_CHECKBOXES = "stfCheckBoxes";
@@ -66,6 +68,7 @@ public interface OfflineConstants
     String EDITOR_MAC98 = "MacWord98";
     String EDITOR_OTHER = "Other";
     String EDITOR_TRADOS_TAGEDITOR = "TradosTagEditor";
+    String EDITOR_OMEGAT = "OmegaT";
 
     // ptag format selector value
     String PTAG_COMPACT = "compact";
@@ -94,13 +97,14 @@ public interface OfflineConstants
     String TERM_NONE = "termNone";
     String TERM_HTML = "termHtml";
     String TERM_TBX = "tbx";
+    String TERM_TXT = "termTxt";
 
     // Cookie names
     String COOKIE_FILE_FORMAT = "DownloadFileFormat";
     String COOKIE_EDITOR = "DownloadEditor";
     String COOKIE_ENCODING = "DownloadEncoding";
     String COOKIE_PTAG_FORMAT = "DownloadPtagFormat";
-    String COOKIE_EDIT_EXACT = "DownloadEditExact";
+    String COOKIE_TM_EDIT_TYPE = "DownloadTMEditType";
     String COOKIE_RES_INS_MODE = "DownloadResInsMode";
 
     // xlf names
@@ -112,6 +116,9 @@ public interface OfflineConstants
     // ttx names(only support Trados 7 TTX)
     String FORMAT_TTX_NAME = "Trados 7 TTX";
     String FORMAT_TTX_VALUE = "TTX";
+    
+    String FORMAT_OMEGAT_NAME = "OmegaT";
+    String FORMAT_OMEGAT_VALUE = "OmegaT";
 
     String CONSOLIDATE_TMX = "consolidate";
     String CONSOLIDATE_TERM = "consolidateTerm";

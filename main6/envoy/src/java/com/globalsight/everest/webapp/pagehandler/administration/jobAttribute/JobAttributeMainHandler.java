@@ -40,6 +40,7 @@ import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.util.comparator.AttributeCloneComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -48,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeConstant;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.zip.ZipIt;
@@ -687,7 +689,7 @@ public class JobAttributeMainHandler extends PageActionHandler
     private void dataForTable(HttpServletRequest request)
             throws GeneralException
     {
-        JobImpl job = (JobImpl) request.getAttribute(JobAttributeConstant.JOB);
+        JobImpl job = (JobImpl) request.getAttribute("Job");
         HttpSession session = request.getSession(false);
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
@@ -710,11 +712,8 @@ public class JobAttributeMainHandler extends PageActionHandler
     public void beforeAction(HttpServletRequest request,
             HttpServletResponse response)
     {
-        String id = request.getParameter("jobId");
-        if (id != null)
-        {
-            JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
-            request.setAttribute(JobAttributeConstant.JOB, job);
-        }
+        JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+        Job job = jobSummaryHelper.getJobByRequest(request);
+        jobSummaryHelper.packJobSummaryInfoView(request, job);
     }
 }

@@ -80,6 +80,7 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.util.date.DateHelper;
 
@@ -89,7 +90,8 @@ import com.globalsight.util.date.DateHelper;
 public class CostingReplet extends GlobalSightReplet
 {
     private static final String MY_TEMPLATE = "/templates/basicFlowReport.srt";
-    private static final String MY_MESSAGES = "messages/costing";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "costing";
     // For "Cost reports crashing Amb06" issue
     private static final String DEFAULT_SYMPOL = "--";
     // Add JobID parameter for single report

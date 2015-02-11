@@ -45,12 +45,13 @@ public class TbStaticImpl implements ITbaseStatic
     {
         this.m_fuzzyIndexes = m_fuzzyIndexes;
     }
-    
-    private StatisticsInfo getStatisticsFromDatabase(long m_id) throws TermbaseException
+
+    private StatisticsInfo getStatisticsFromDatabase(long m_id)
+            throws TermbaseException
     {
         StatisticsInfo result = new StatisticsInfo();
         int count;
-        
+
         try
         {
             // Number of concepts
@@ -81,7 +82,7 @@ public class TbStaticImpl implements ITbaseStatic
             {
                 Object[] pair = (Object[]) it.next();
                 String language = (String) pair[0];
-                count = (Integer) pair[1];
+                count = ((Long) pair[1]).intValue();
                 result.addLanguageInfo(language, count);
             }
         }
@@ -89,10 +90,10 @@ public class TbStaticImpl implements ITbaseStatic
         {
             throw new TermbaseException(e);
         }
-        
+
         return result;
     }
-    
+
     public String getStatisticsNoIndex(long m_id) throws TermbaseException
     {
         return getStatisticsFromDatabase(m_id).asXML();
@@ -154,7 +155,7 @@ public class TbStaticImpl implements ITbaseStatic
 
             result.setFuzzyIndexedCount(idx.getName(), count);
         }
-        
+
         return result.asXML();
     }
 }

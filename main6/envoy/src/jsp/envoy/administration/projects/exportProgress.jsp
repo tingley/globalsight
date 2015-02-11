@@ -46,6 +46,7 @@ String str_projectName =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_NAME);
 String str_projectId =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_ID);
+String companyName = (String) sessionMgr.getAttribute(WebAppConstants.COMPANY_NAME);
 
 String urlOk = ok.getPageURL();
 String urlRefresh = refresh.getPageURL() +
@@ -99,7 +100,7 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
-var guideNode = "tm";
+var guideNode = "projects";
 var helpFile = "<%=bundle.getString("help_project_schedule_exporting")%>";
 var xmlExportOptions = "<%=xmlExportOptions.trim()%>";
 
@@ -177,7 +178,7 @@ function parseExportOptions()
   g_filename = node.selectSingleNode("fileName").text;
   
   document.getElementById("idExportfile").href = 
-	  "/globalsight/<%=IExportManager.EXPORT_DIRECTORY%>/" + g_filename;
+	  "/globalsight/<%=IExportManager.EXPORT_DIRECTORY%>/<%=companyName%>/" + g_filename;
 }
 
 function downloadFile()

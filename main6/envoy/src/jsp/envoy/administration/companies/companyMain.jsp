@@ -59,6 +59,8 @@
     }
     
     PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+    
+    
 %>
 <HTML>
 <HEAD>
@@ -73,6 +75,7 @@ var needWarning = false;
 var objectName = "";
 var guideNode = "companies";
 var helpFile = "<%=bundle.getString("help_companies_main_screen")%>";
+var isInDeleting = false;
 
 $(document).ready(function()
 {
@@ -154,7 +157,7 @@ function changeButtonState() {
 	}
 	// Only one company is selected
 	else if (count == 1) {
-		$("#removeBtn").attr("disabled", false);
+	    $("#removeBtn").attr("disabled", isInDeleting);
 		
 		var usingSeparatedTables = "";
 		var selectCompanyId = findSelectedCompanies();
@@ -173,7 +176,7 @@ function changeButtonState() {
 	}
 	// More than one companies are selected
 	else {
-		$("#removeBtn").attr("disabled", false);
+		$("#removeBtn").attr("disabled", true);
 		$("#migrateBtn").attr("disabled", true);
 	}
 }
@@ -275,6 +278,9 @@ function migrateCompany(){
       <% if (company.getState() != null && Company.STATE_DELETING.equals(company.getState())) {
       %> 
     	 disabled>
+    	 <script language="javascript">
+    	   isInDeleting = true;
+    	 </script>
       <%  isCompanyDeleting = true;
       } else {
     	  isCompanyDeleting = false;

@@ -45,6 +45,7 @@ public class ParamJobDetailPair extends ParamObjectPair
         this.countWorkCost(workflowData, p_workflow);
 
         L10nProfile l10nProfile = p_job.getL10nProfile();
+        String fProfileNames = p_job.getFProfileNames();
         Project project = l10nProfile.getProject();
 
         Param[] children = this.getParam().getChildParams();
@@ -97,6 +98,10 @@ public class ParamJobDetailPair extends ParamObjectPair
         if (children[11].getValue())
         {
             result.add(l10nProfile.getName());
+        }
+        if (children[12].getValue())
+        {
+             result.add(fProfileNames);
         }
 
         return result;
@@ -155,6 +160,10 @@ public class ParamJobDetailPair extends ParamObjectPair
         }
 
         if (children[11].getValue())
+        {
+            result.add(noneTotal);
+        }
+        if (children[12].getValue())
         {
             result.add(noneTotal);
         }

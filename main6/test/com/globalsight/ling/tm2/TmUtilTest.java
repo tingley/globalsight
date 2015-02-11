@@ -53,12 +53,12 @@ public class TmUtilTest
         tu.addTuv(tuv);
 
         SegmentTmTuv segmentTmTuv = (SegmentTmTuv) TmUtil.createTmSegment(tuv,
-                "0", "1000");
+                "0", 1000);
         assertTrue("Word count is wrong", segmentTmTuv.getWordCount() == 20);
         assertEquals("SID does not equals.", "sid", segmentTmTuv.getSid());
 
         SegmentTmTuv segmentTmTuv2 = (SegmentTmTuv) TmUtil.createTmSegment(tuv,
-                "1", "1000");
+                "1", 1000);
         assertNull(segmentTmTuv2);
     }
 

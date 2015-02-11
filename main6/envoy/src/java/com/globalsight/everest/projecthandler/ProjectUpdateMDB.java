@@ -22,13 +22,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.permission.Permission;
@@ -36,6 +44,7 @@ import com.globalsight.everest.persistence.l10nprofile.WorkflowTemplateInfoDescr
 import com.globalsight.everest.persistence.workflow.WorkflowDescriptorModifier;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WorkflowOwners;
@@ -56,6 +65,13 @@ import com.globalsight.util.mail.MailerConstants;
  * the update result. Note that a list of ids for both workflow templates and
  * instances that possibly failed to get updated would be part of the email.
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_PROJECT_UPDATE_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class ProjectUpdateMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 0L;
@@ -98,6 +114,7 @@ public class ProjectUpdateMDB extends GenericQueueMDB
      * @param p_message
      *            - The message to be passed.
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         ProjectUpdateMessage msg = null;
@@ -108,11 +125,10 @@ public class ProjectUpdateMDB extends GenericQueueMDB
 
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     msg.getProjectId().longValue());
-            m_companyIdStr = project.getCompanyId();
+            m_companyIdStr = String.valueOf(project.getCompanyId());
             CompanyThreadLocal.getInstance().setIdValue(m_companyIdStr);
 
             performUpdateProcess(msg);
-            p_message.acknowledge();
         }
         catch (Exception e)
         {

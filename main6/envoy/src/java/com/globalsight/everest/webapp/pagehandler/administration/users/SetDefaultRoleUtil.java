@@ -196,6 +196,10 @@ public class SetDefaultRoleUtil {
 			for (Iterator it = users.iterator(); it.hasNext();) {
 				userId = (String)it.next();
 				user = userManager.getUser(userId);
+				if (user == null)
+				    continue;
+				if (jobHandler.getCompany(user.getCompanyName()) == null)
+				    continue;
 				if (jobHandler.getCompany(user.getCompanyName()).getId() > 1)
 					continue;
 				//Get default roles of current user

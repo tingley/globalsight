@@ -111,7 +111,7 @@ public interface Tuv
      * 
      * @return Tuv DataType.
      */
-    public String getDataType(String companyId);
+    public String getDataType(long companyId);
 
     /**
      * Get Tuv Locale identifier.
@@ -232,7 +232,7 @@ public interface Tuv
      *            Gxml String.
      */
     public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
-            String companyId);
+            long companyId);
 
     /**
      * Set the text of the segment with a Gxml string. The string must be a
@@ -251,7 +251,7 @@ public interface Tuv
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml, String companyId);
+    public void setGxmlExcludeTopTags(String p_gxml, long companyId);
 
     /**
      * Set the text of the segment with a Gxml string. The string must be a
@@ -268,7 +268,7 @@ public interface Tuv
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu(String companyId);
+    public Tu getTu(long companyId);
 
     /**
      * Set the Tu that this tuv belongs to.
@@ -296,7 +296,7 @@ public interface Tuv
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized(String companyId);
+    public boolean isExactMatchLocalized(long companyId);
 
     /**
      * @return true if state the segment, including it's subflows, has not been
@@ -338,7 +338,7 @@ public interface Tuv
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable(String companyId);
+    public boolean isLocalizable(long companyId);
 
     /**
      * Get Tuv GlobalSightLocale.
@@ -381,4 +381,12 @@ public interface Tuv
     public void setSrcComment(String srcComment);
 
     public String getSrcComment();
+
+    public boolean isRepeated();
+
+    public void setRepeated(boolean repeated);
+
+    public long getRepetitionOfId();
+
+    public void setRepetitionOfId(long repetitionOfId);
 }

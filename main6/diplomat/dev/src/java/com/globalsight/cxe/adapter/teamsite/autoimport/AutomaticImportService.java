@@ -16,41 +16,48 @@
  */
 package com.globalsight.cxe.adapter.teamsite.autoimport;
 
-import java.io.*;
-import java.net.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-public class AutomaticImportService {
-    private static final Logger s_logger = Logger.getLogger("AutomaticImportService");
-    public AutomaticImportService() {
+public class AutomaticImportService
+{
+    private static final Logger s_logger = Logger
+            .getLogger(AutomaticImportService.class);
+
+    public AutomaticImportService()
+    {
         super();
-        s_logger.debug("AutomaticImportService: instance "+this.hashCode()+
-                           " created");
+        s_logger.debug("AutomaticImportService: instance " + this.hashCode()
+                + " created");
     }
 
-    protected void finalize() {
-        s_logger.debug("AutomaticImportService: instance "+this.hashCode()+
-                           " garbage collected");
+    protected void finalize()
+    {
+        s_logger.debug("AutomaticImportService: instance " + this.hashCode()
+                + " garbage collected");
     }
 
-    public static void main(String args[]) {
-	try {
-        int number=0;
-        s_logger.debug("AutomaticImportService: started acceptor loop");
-	AutomaticImportMonitor.initialize();
-	s_logger.debug("AutomaticImportService: Initialized monitor");
-	AutomaticImportMonitor aimonitor = AutomaticImportMonitor.getInstance();
-	aimonitor.startup();
-	s_logger.debug("AutomaticImportService: monitor started");
-        } catch (IOException e) {
-	    s_logger.debug("AutomaticImportService: Cannot start monitor" + e);
-        }catch (Exception ex) {
-	    s_logger.debug("AutomaticImportService: Cannot start monitor" + ex);
-	}
+    public static void main(String args[])
+    {
+        try
+        {
+            int number = 0;
+            s_logger.debug("AutomaticImportService: started acceptor loop");
+            AutomaticImportMonitor.initialize();
+            s_logger.debug("AutomaticImportService: Initialized monitor");
+            AutomaticImportMonitor aimonitor = AutomaticImportMonitor
+                    .getInstance();
+            aimonitor.startup();
+            s_logger.debug("AutomaticImportService: monitor started");
+        }
+        catch (IOException e)
+        {
+            s_logger.debug("AutomaticImportService: Cannot start monitor" + e);
+        }
+        catch (Exception ex)
+        {
+            s_logger.debug("AutomaticImportService: Cannot start monitor" + ex);
+        }
     }
 }

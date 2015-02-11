@@ -83,7 +83,7 @@ public interface FileProfile
      * 
      * @return file profile company id
      */
-    public String getCompanyId();
+    public long getCompanyId();
 
     /**
      * Return the character set of the file profile
@@ -138,9 +138,9 @@ public interface FileProfile
      * Sets the flag that determines whether the secondary target files should
      * be exported by default.
      * 
-     * @param p_byDefaultExportStf -
-     *            The boolean value to be set which will be used during an auto
-     *            export.
+     * @param p_byDefaultExportStf
+     *            - The boolean value to be set which will be used during an
+     *            auto export.
      */
     void byDefaultExportStf(boolean p_byDefaultExportStf);
 
@@ -179,7 +179,7 @@ public interface FileProfile
      * @param p_companyId
      *            The company id of the file profile
      */
-    public void setCompanyId(String p_companyId);
+    public void setCompanyId(long p_companyId);
 
     /**
      * Set the character set of the file profile
@@ -203,9 +203,9 @@ public interface FileProfile
     public void setUnicodeEscape(Boolean unicodeEscape);
 
     public boolean getEntityEscape();
-    
+
     public void setEntityEscape(Boolean entityEscape);
-    
+
     void setHeaderTranslate(Boolean headerTranslate);
 
     boolean getHeaderTranslate();
@@ -213,28 +213,35 @@ public interface FileProfile
     public String getJsFilterRegex();
 
     public void setJsFilterRegex(String jsFilterRegex);
-    
+
     public XmlDtdImpl getXmlDtd();
-    
+
     public void setXmlDtd(XmlDtdImpl xmlDtd);
-    
+
     public long getFilterId();
+
     public void setFilterId(long filterId);
 
     public void setFilterTableName(String filterTableName);
-    
+
     public String getFilterName();
-    
+
     public String getFilterTableName();
 
     public void setPreserveSpaces(Boolean p_preserveSpaces);
-    
+
     public boolean getPreserveSpaces();
-    
+
     public int getTerminologyApproval();
+
     public void setTerminologyApproval(int flag);
-    
+
+    public int getXlfSourceAsUnTranslatedTarget();
+
+    public void setXlfSourceAsUnTranslatedTarget(int flag);
+
     public long getReferenceFP();
+
     public void setReferenceFP(long p_referenceFP);
 
     public int getBOMType();

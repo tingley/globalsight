@@ -30,12 +30,13 @@ public class CreateLocalePairs extends BaseTestCase
 
         // Verify if there is at least one Locale Paris exists.
         Assert.assertEquals(
-                selenium.isElementPresent("//input[@name='radioBtn']"), true);
+                selenium.isElementPresent("//input[@name='checkboxBtn']"), true);
     }
 
     /**
      * 
      * Author Totti
+     * Modify Jack
      */
     @Test
     public void removeLocalPairs() throws Exception

@@ -24,12 +24,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -39,15 +47,23 @@ import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.applet.AddFileVo;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_ADD_SOURCE_FILE_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class AddSourceFileMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = -1029038975118629616L;
-    private static Logger logger = Logger
-            .getLogger(AddSourceFileMDB.class.getName());
+    private static Logger logger = Logger.getLogger(AddSourceFileMDB.class
+            .getName());
 
     public AddSourceFileMDB()
     {
@@ -55,6 +71,7 @@ public class AddSourceFileMDB extends GenericQueueMDB
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         try
@@ -76,13 +93,14 @@ public class AddSourceFileMDB extends GenericQueueMDB
                 logger.error(e1.getMessage(), e1);
                 return;
             }
-            
+
             jobId = vo.getJobId();
-            
+
             job = HibernateUtil.get(JobImpl.class, jobId);
             HibernateUtil.getSession().refresh(job);
-            
-            CompanyThreadLocal.getInstance().setIdValue(job.getCompanyId());
+
+            CompanyThreadLocal.getInstance().setIdValue(
+                    String.valueOf(job.getCompanyId()));
 
             StringBuffer allLocales = new StringBuffer();
             for (Workflow w : job.getWorkflows())
@@ -97,7 +115,8 @@ public class AddSourceFileMDB extends GenericQueueMDB
             List<Long> fpIds = vo.getFileProfileIds();
             for (Long id : fpIds)
             {
-                fileProfiles.add(HibernateUtil.get(FileProfileImpl.class, id, false));
+                fileProfiles.add(HibernateUtil.get(FileProfileImpl.class, id,
+                        false));
                 locales.add(allLocales.toString());
             }
 
@@ -107,7 +126,7 @@ public class AddSourceFileMDB extends GenericQueueMDB
             {
                 locale = job.getSourceLocale().toString();
             }
-            
+
             Boolean fromDi = null;
             File root = AmbFileStoragePathUtils.getCxeDocDir();
             for (String path : filePaths)
@@ -115,9 +134,9 @@ public class AddSourceFileMDB extends GenericQueueMDB
                 File targetFile = new File(root, path);
                 if (!targetFile.exists())
                 {
-                    String newPath = new StringBuffer(locale).append(
-                            File.separator).append(job.getName()).append(
-                            File.separator).append(path).toString();
+                    String newPath = new StringBuffer(locale)
+                            .append(File.separator).append(job.getName())
+                            .append(File.separator).append(path).toString();
                     targetFile = new File(root, newPath);
                 }
                 else if (fromDi == null)
@@ -132,7 +151,8 @@ public class AddSourceFileMDB extends GenericQueueMDB
 
             String username = job.getCreateUser().getUserName();
 
-            Vector result = FileSystemUtil.execScript(files, fileProfiles, locales);
+            Vector result = FileSystemUtil.execScript(files, fileProfiles,
+                    locales);
             Vector sFiles = (Vector) result.get(0);
             Vector exitValues = (Vector) result.get(3);
 
@@ -142,7 +162,8 @@ public class AddSourceFileMDB extends GenericQueueMDB
 
             List<Request> requests = new ArrayList<Request>();
             requests.addAll(job.getRequestSet());
-            Collections.sort(requests, new Comparator<Request>(){
+            Collections.sort(requests, new Comparator<Request>()
+            {
 
                 @Override
                 public int compare(Request o1, Request o2)
@@ -159,18 +180,18 @@ public class AddSourceFileMDB extends GenericQueueMDB
                     return 0;
                 }
             });
-            
+
             for (int i = 0; i < requests.size(); i++)
             {
                 Request request = requests.get(i);
                 BatchInfo info = request.getBatchInfo();
-                
+
                 info.setPageCount(addedCount + pageCount);
                 info.setPageNumber(i + 1);
                 info.setDocPageCount(1);
                 info.setDocPageNumber(1);
             }
-            
+
             String orgState = job.getState();
             job.setState(Job.ADD_FILE);
             job.setOrgState(orgState);
@@ -190,10 +211,10 @@ public class AddSourceFileMDB extends GenericQueueMDB
                     logger.info("Publishing import request to CXE for file "
                             + relativeName);
                     CxeProxy.importFromFileSystem(relativeName, jobName, job
-                            .getUuid(), jobName, "" + fileProfiles.get(i).getId(),
-                            new Integer(addedCount + pageCount), new Integer(
-                                    addedCount + i + 1), new Integer(1),
-                            new Integer(1), fromDi,
+                            .getUuid(), jobName, ""
+                            + fileProfiles.get(i).getId(), new Integer(
+                            addedCount + pageCount), new Integer(addedCount + i
+                            + 1), new Integer(1), new Integer(1), fromDi,
                             CxeProxy.IMPORT_TYPE_L10N, username,
                             (Integer) exitValues.get(i), "" + job.getPriority());
                 }

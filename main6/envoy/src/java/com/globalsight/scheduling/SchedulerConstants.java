@@ -17,73 +17,72 @@
 
 package com.globalsight.scheduling;
 
-import com.globalsight.calendar.ReservedTime;
-import com.globalsight.everest.workflow.WorkflowTask;
-import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.request.reimport.DelayedImportRequest;
-import com.globalsight.terminology.scheduler.TermbaseReindexExpression;
-
 import java.util.HashMap;
 
+import com.globalsight.calendar.ReservedTime;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.request.reimport.DelayedImportRequest;
+import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflow.WorkflowTask;
+import com.globalsight.terminology.scheduler.TermbaseReindexExpression;
 
 /**
  * String constants used in scheduling.
  */
 public class SchedulerConstants
 {
-	// Constants for Quartz
-	/**
-	 * Special Job data parameter name.
-	 */
-	public static final String KEY_PARAM = "key_param";
-	
-	/**
-	 * Default group name for Quartz Job and triggers.
-	 */
-	public static final String DEFAULT_GROUP = "globalsight";
-	
-	public static final String CALENDAR_TYPE_HOLIDAY = "holiday";
-	public static final String CALENDAR_TYPE_WORKINGHOUR = "working_hour";
-	public static final String CALENDAR_TYPE_RESERVEDTIME = "reserved_time";
-	public static final String CALENDAR_TYPE_PERSONALRESERVED = "personal_reserved";
-	public static final String CALENDAR_TYPE_OTHER = "other_calendar";
-	
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Event Types
-    //////////////////////////////////////////////////////////////////////
+    // Constants for Quartz
     /**
-     * Constant representing an Accept event type.  This type is used for
+     * Special Job data parameter name.
+     */
+    public static final String KEY_PARAM = "key_param";
+
+    /**
+     * Default group name for Quartz Job and triggers.
+     */
+    public static final String DEFAULT_GROUP = "globalsight";
+
+    public static final String CALENDAR_TYPE_HOLIDAY = "holiday";
+    public static final String CALENDAR_TYPE_WORKINGHOUR = "working_hour";
+    public static final String CALENDAR_TYPE_RESERVEDTIME = "reserved_time";
+    public static final String CALENDAR_TYPE_PERSONALRESERVED = "personal_reserved";
+    public static final String CALENDAR_TYPE_OTHER = "other_calendar";
+
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Event Types
+    // ////////////////////////////////////////////////////////////////////
+    /**
+     * Constant representing an Accept event type. This type is used for
      * activation (creation) or deactivation of an event based on a
      * "Accepted by" date.
      */
     public static final String ACCEPT_TYPE = WorkflowConstants.ACCEPT;
 
     /**
-     * Constant representing a Complete event type.  This type is used for
+     * Constant representing a Complete event type. This type is used for
      * activation (creation) or deactivation of an event based on a
      * "Completed by" date.
      */
     public static final String COMPLETE_TYPE = WorkflowConstants.COMPLETE;
 
     /**
-    * Constant for ReservedTime
-    */
+     * Constant for ReservedTime
+     */
     public static final String RESERVED_TIME_TYPE = "ReservedTime";
 
     /**
-    * The event type for export source
-    */
+     * The event type for export source
+     */
     public static final String EXPORT_SOURCE_TYPE = "ExportSource";
 
     /**
-    * The event type for delayed reimport
-    */
+     * The event type for delayed reimport
+     */
     public static final String DELAYED_REIMPORT_TYPE = "DelayedReimport";
 
     /**
-    * The event type for timed job dispatch
-    */
+     * The event type for timed job dispatch
+     */
     public static final String TIMED_JOB_DISPATCH_TYPE = "TimedJobDispatch";
 
     /**
@@ -91,20 +90,21 @@ public class SchedulerConstants
      */
     public static final String REINDEX_TERMBASE_TYPE = "reindex-termbase";
 
-    //////////////////////////////////////////////////////////////////////
-    //  End: Event Types
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Event Types
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Action Types
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Action Types
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Constant representing a "skip" action type (i.e. skipping an activity).
      */
     public static final int SKIP_ACTIVITY = 0;
-    
+
     /**
-     * Constant representing an "accept" action type (i.e. accepting an activity).
+     * Constant representing an "accept" action type (i.e. accepting an
+     * activity).
      */
     public static final int ACCEPT_ACTIVITY = 1;
 
@@ -119,7 +119,8 @@ public class SchedulerConstants
     public static final int DISPATCH_WORKFLOW = 3;
 
     /**
-     * Constant representing a "finish" action type (i.e. finishing an activity).
+     * Constant representing a "finish" action type (i.e. finishing an
+     * activity).
      */
     public static final int FINISH_ACTIVITY = 4;
 
@@ -133,16 +134,22 @@ public class SchedulerConstants
      * unaccepting/rejecting an "already accepted" activity).
      */
     public static final int UNACCEPT_ACTIVITY = 6;
-    //////////////////////////////////////////////////////////////////////
-    //  End: Action Types
-    //////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Variable Manager Keys associated with FlowChart (Job)
-    //////////////////////////////////////////////////////////////////////
     /**
-     * Constant used as a key for toggling between events occuring
-     * more than once.
+     * Constant representing a "skip" action type (i.e. skipping the last
+     * activity).
+     */
+    public static final int SKIP_FINISH_ACTIVITY = 7;
+    // ////////////////////////////////////////////////////////////////////
+    // End: Action Types
+    // ////////////////////////////////////////////////////////////////////
+
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Variable Manager Keys associated with FlowChart (Job)
+    // ////////////////////////////////////////////////////////////////////
+    /**
+     * Constant used as a key for toggling between events occuring more than
+     * once.
      */
     static final String EVENT_KEY = "EVENT_KEY";
 
@@ -153,32 +160,32 @@ public class SchedulerConstants
     public static final String NUM_OF_DAYS = "num_of_days";
 
     /**
-     * Constant used as a key for the start time (in hours) used for
-     * calendaring clean-up process.
+     * Constant used as a key for the start time (in hours) used for calendaring
+     * clean-up process.
      */
     public static final String START_TIME = "startTime";
 
     /**
-     * Constant used as a key for the recurrance expression used for
-     * calendaring clean-up process.
+     * Constant used as a key for the recurrance expression used for calendaring
+     * clean-up process.
      */
     public static final String RECURRANCE = "recurrance";
-    //////////////////////////////////////////////////////////////////////
-    //  End: Variable Manager Keys associated with FlowChart (Job)
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Variable Manager Keys associated with FlowChart (Job)
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: HashMap's values for scheduling/unscheduling
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: HashMap's values for scheduling/unscheduling
+    // ////////////////////////////////////////////////////////////////////
     /**
-     * Constant used as a value for an "Acceptance" event type.  This value
-     * is basically used as a prefix for email's subject and message body key.
+     * Constant used as a value for an "Acceptance" event type. This value is
+     * basically used as a prefix for email's subject and message body key.
      */
     public static final String ACCEPTANCE = "acceptance";
 
     /**
-     * Constant used as a value for an "Completion" event type.  This value
-     * is basically used as a prefix for email's subject and message body key.
+     * Constant used as a value for an "Completion" event type. This value is
+     * basically used as a prefix for email's subject and message body key.
      */
     public static final String COMPLETION = "completion";
 
@@ -203,16 +210,16 @@ public class SchedulerConstants
      * Constant used as a key for a TaskInfo object.
      */
     public static final String TASK_INFO = "taskInfo";
-    //////////////////////////////////////////////////////////////////////
-    //  End: HashMap's values for scheduling/unscheduling
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: HashMap's values for scheduling/unscheduling
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: HashMap's key for scheduling/unscheduling
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: HashMap's key for scheduling/unscheduling
+    // ////////////////////////////////////////////////////////////////////
     /**
-     * Constant used as a key which represents an action type
-     * (i.e. dispatch, accept, and etc.)
+     * Constant used as a key which represents an action type (i.e. dispatch,
+     * accept, and etc.)
      */
     public static final String ACTION_TYPE = "actionType";
 
@@ -227,7 +234,8 @@ public class SchedulerConstants
     public static final String CREATED_DATE = "createdDate";
 
     /**
-     * Constant used as a key for the deadline date (i.e. acceptance or completion)
+     * Constant used as a key for the deadline date (i.e. acceptance or
+     * completion)
      */
     public static final String DEADLINE_DATE = "deadlineDate";
 
@@ -236,28 +244,28 @@ public class SchedulerConstants
      * Constant used as a key for the deadline completion date.
      */
     public static final String DEADLINE_DATE_COMPLETION = "deadlineDateCompletion";
-    
+
     /**
      * Constant used as a key for the days that the task overdue to notify pm.
      */
     public static final String OVERDUE_PM = "overduePm";
-    
+
     /**
      * Constant used as a key for the days that the task overdue to notify user.
      */
-    public static final String OVERDUE_USER = "overdueUser"; 
-    
+    public static final String OVERDUE_USER = "overdueUser";
+
     /**
      * Constant used as a key for the task's assignees' names.
      */
     public static final String ASSIGNEES_NAME = "assigneesName";
-    
+
     /**
      * Constant used as a key for the flag for the overdue email.
      */
     public static final String OVERDUE = "overdue";
     // Ends the overdue issue
-    
+
     /**
      * Constant used as a key for the domain object's type.
      */
@@ -289,22 +297,26 @@ public class SchedulerConstants
     public static final String REPEAT_COUNT = "repeatCount";
 
     /**
-     * Constant used as a key for the domain object's id (for scheduling an event).
+     * Constant used as a key for the domain object's id (for scheduling an
+     * event).
      */
     public static final String SCHEDULE_DOMAIN_OBJ_ID = "scheduleDomainObjId";
 
     /**
-     * Constant used as a key for the scheduling event type (i.e. accept or complete).
+     * Constant used as a key for the scheduling event type (i.e. accept or
+     * complete).
      */
     public static final String SCHEDULE_EVENT_TYPE = "scheduleEventType";
 
     /**
-     * Constant used as a key for the domain object's id (for unscheduling an event).
+     * Constant used as a key for the domain object's id (for unscheduling an
+     * event).
      */
     public static final String UNSCHEDULE_DOMAIN_OBJ_ID = "unscheduleDomainObjId";
 
     /**
-     * Constant used as a key for the unscheduling event type (i.e. accept or complete).
+     * Constant used as a key for the unscheduling event type (i.e. accept or
+     * complete).
      */
     public static final String UNSCHEDULE_EVENT_TYPE = "unScheduleEventType";
 
@@ -312,14 +324,13 @@ public class SchedulerConstants
      * Constant used as a key for the warning threshold.
      */
     public static final String WARNING_THRESHOLD = "warningThreshold";
-    //////////////////////////////////////////////////////////////////////
-    //  End: HashMap's key for scheduling/unscheduling
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: HashMap's key for scheduling/unscheduling
+    // ////////////////////////////////////////////////////////////////////
 
-
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Email Info keys
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Email Info keys
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Constant used as a key for the project id.
      */
@@ -351,7 +362,8 @@ public class SchedulerConstants
     public static final String TARGET_LOCALE = "targetLocale";
 
     /**
-     * Constant used as a suffix for the "deadline approaching" email subject's key.
+     * Constant used as a suffix for the "deadline approaching" email subject's
+     * key.
      */
     public static final String DEADLINE_APPROACH_SUBJECT = "DeadlineApproachingSubject";
 
@@ -361,18 +373,21 @@ public class SchedulerConstants
     public static final String DEADLINE_PASSED_SUBJECT = "DeadlinePassedSubject";
 
     /**
-     * Constant used as a suffix for the "deadline approaching" email message-body's key.
+     * Constant used as a suffix for the "deadline approaching" email
+     * message-body's key.
      */
     public static final String DEADLINE_APPROACH_BODY = "DeadlineApproachingBody";
 
     /**
-     * Constant used as a suffix for the "deadline passed" email message-body's key.
+     * Constant used as a suffix for the "deadline passed" email message-body's
+     * key.
      */
     public static final String DEADLINE_PASSED_BODY = "DeadlinePassedBody";
 
     // From here is for the over due issue
     /**
-     * Constant used as a suffix for the "deadline approaching" email subject's key.
+     * Constant used as a suffix for the "deadline approaching" email subject's
+     * key.
      */
     public static final String NOTIFY_USER_OVERDUE_SUBJECT = "NotifyUserOverdueSubject";
 
@@ -382,50 +397,52 @@ public class SchedulerConstants
     public static final String NOTIFY_PM_OVERDUE_SUBJECT = "NotifyPmOverdueSubject";
 
     /**
-     * Constant used as a suffix for the "deadline approaching" email message-body's key.
+     * Constant used as a suffix for the "deadline approaching" email
+     * message-body's key.
      */
     public static final String NOTIFY_USER_OVERDUE_BODY = "NotifyUserOverdueBody";
 
     /**
-     * Constant used as a suffix for the "deadline passed" email message-body's key.
+     * Constant used as a suffix for the "deadline passed" email message-body's
+     * key.
      */
     public static final String NOTIFY_PM_OVERDUE_BODY = "NotifyPmOverdueBody";
-    
-    //end the over due
-    
+
+    // end the over due
+
     /**
      * Constant used as a suffix for the quotation email subject's key.
      */
     public static final String NOTIFY_QUOTE_PERSON_SUBJECT = "NotifyQuotePersonSubject";
-    
+
     /**
      * Constant used as a suffix for the quotation email message-body's key.
      */
     public static final String NOTIFY_QUOTE_PERSON_BODY = "NotifyQuotePersonBody";
-    
+
     /**
-     * Constant used as a suffix for the quotation email subject's key for 
+     * Constant used as a suffix for the quotation email subject's key for
      * quoting project manage the person entered a PO Number.
      */
     public static final String NOTIFY_PONUMBER_SUBJECT = "NotifyPONumberSubject";
-    
+
     /**
-     * Constant used as a suffix for the quotation email 
-     * message-body's keyConstant used as a suffix for quoting project manage 
-     * the person entered a PO Number.
+     * Constant used as a suffix for the quotation email message-body's
+     * keyConstant used as a suffix for quoting project manage the person
+     * entered a PO Number.
      */
     public static final String NOTIFY_PONUMBER_BODY = "NotifyPONumberBody";
-    
+
     /**
      * Constant used as a suffix for approving quote subject.
      */
     public static final String NOTIFY_QUOTEAPPROVED_SUBJECT = "NotifyQuoteApprovedSubject";
-    
+
     /**
-     * Constant used as a suffix for approving quote body. 
+     * Constant used as a suffix for approving quote body.
      */
     public static final String NOTIFY_QUOTEAPPROVED_BODY = "NotifyQuoteApprovedBody";
-    
+
     /**
      * Constant used as a key for scheduling failure email subject.
      */
@@ -435,51 +452,49 @@ public class SchedulerConstants
      * Constant used as a key for scheduling failure email message body.
      */
     public static final String SCHEDULING_FAILED_BODY = "schedulingFailedMessage";
-    //////////////////////////////////////////////////////////////////////
-    //  End: Email Info keys
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Email Info keys
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
     // NUM_OF_DAYS_INTERVAL and NUM_OF_DAYS_EXPRESSION should both
     // have the same value
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
     /**
-     * The constant used for getting interval ranges for a month.
-     * This is used for UI to make sure the ranges for a given
-     * month is returned.
+     * The constant used for getting interval ranges for a month. This is used
+     * for UI to make sure the ranges for a given month is returned.
      */
     public static final int NUM_OF_DAYS_INTERVAL = 32;
 
     /**
-     * The expression used as duration of a business interval range
-     * (to get the ranges for total of 32  days where the last day
-     * is excluded)
+     * The expression used as duration of a business interval range (to get the
+     * ranges for total of 32 days where the last day is excluded)
      */
     public static final String NUM_OF_DAYS_EXPRESSION = "+32d";
-    
-    /////////////////////////////////////////////////////////////////////
-    // Key for current company id. 
-    /////////////////////////////////////////////////////////////////////
-    public static final String CURRENT_COMPANY_ID = "current_company_id";
-    
 
-    //Temp values (should be populated from db).
+    // ///////////////////////////////////////////////////////////////////
+    // Key for current company id.
+    // ///////////////////////////////////////////////////////////////////
+    public static final String CURRENT_COMPANY_ID = "current_company_id";
+
+    // Temp values (should be populated from db).
     public static final HashMap s_objectTypes = new HashMap();
     public static final HashMap s_eventTypes = new HashMap();
     public static final HashMap s_eventKeys = new HashMap();
 
     /**
      * Keeps the event keys and event types maps in synch.
-     *
-     * @param p_type String type
-     * @param p_key Integer key
+     * 
+     * @param p_type
+     *            String type
+     * @param p_key
+     *            Integer key
      */
     static public void addToKeysAndTypes(String p_type, Integer p_key)
     {
         s_eventTypes.put(p_type, p_key);
         s_eventKeys.put(p_key, p_type);
     }
-
 
     static
     {
@@ -512,23 +527,23 @@ public class SchedulerConstants
 
     /**
      * Used to query the key value used for a given type String
-     *
+     * 
      * @param p_type
      * @return
      */
     static public Integer getKeyForType(String p_type)
     {
-        return (Integer)s_eventTypes.get(p_type);
+        return (Integer) s_eventTypes.get(p_type);
     }
 
     /**
      * Returns the object type key used for the given class
-     *
+     * 
      * @param p_class
      * @return
      */
     static public Integer getKeyForClass(Class p_class)
     {
-        return (Integer)s_objectTypes.get(p_class);
+        return (Integer) s_objectTypes.get(p_class);
     }
 }

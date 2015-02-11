@@ -40,11 +40,11 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
+import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
-import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.segmentationhelper.Segmentation;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.CodesetMapper;
@@ -160,6 +160,9 @@ import com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor;
  */
 public class DiplomatAPI implements IFormatNames
 {
+    private static final Logger logger =
+            Logger.getLogger(DiplomatAPI.class.getName());
+
     /**
      * Diplomat Extractor Options.
      */
@@ -1022,11 +1025,14 @@ public class DiplomatAPI implements IFormatNames
         AbstractExtractor extractor = createExtractor(m_inputFormat);
 
         m_output = new Output();
+        Filter mainFilter = getMainFilter();
         extractor.init(m_input, m_output);
-        extractor.setMainFilter(getMainFilter());
+        extractor.setMainFilter(mainFilter);
         extractor.loadRules();
         extractor.setSimplifySegments(m_options.m_extractorSimplify);
         extractor.setCanCallOtherExtractor(m_options.m_canCallOtherExtractor);
+        // # GBS-2894 : do segmentation before internal text
+        extractor.setDoSegBeforeInlText(true);
 
         // Is javascript
         if (m_inputFormat == 2)
@@ -1054,8 +1060,11 @@ public class DiplomatAPI implements IFormatNames
         {
             com.globalsight.ling.docproc.extractor.xml.Extractor xmlExtractor = 
                 (com.globalsight.ling.docproc.extractor.xml.Extractor) extractor;
-            xmlExtractor.setIsIdmlXml(IdmlHelper.isIdmlFileProfile(Long
-                    .parseLong(fileProfileId)));
+            if (fileProfileId != null)
+            {
+                xmlExtractor.setIsIdmlXml(IdmlHelper.isIdmlFileProfile(Long
+                        .parseLong(fileProfileId)));
+            }
         }
         
         extractor.extract();
@@ -1085,7 +1094,7 @@ public class DiplomatAPI implements IFormatNames
                 || IFormatNames.FORMAT_PASSOLO.equals(formatName);
         boolean isPO = IFormatNames.FORMAT_PO.equals(formatName);
         
-        // protect internal text for segmentation
+        // protect internal text / internal tag for segmentation
         List<String> internalTexts = InternalTextHelper.protectInternalTexts(m_output);
         
         if (m_options.m_sentenceSegmentation)
@@ -1155,7 +1164,25 @@ public class DiplomatAPI implements IFormatNames
         }
         
         // restore protected internal text
-        InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
+        if (internalTexts != null)
+        {
+            InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
+        }
+        // # GBS-2894 : do segmentation before internal text
+        if (extractor.isDoSegBeforeInlText())
+        {
+            boolean useBptTag = true;
+            
+            if (mainFilter != null && mainFilter instanceof JavaPropertiesFilter)
+            {
+                JavaPropertiesFilter jf = (JavaPropertiesFilter) mainFilter;
+                long scid = jf.getSecondFilterId();
+                String scTableName = jf.getSecondFilterTableName();
+                useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
+            }
+            
+            InternalTextHelper.handleOutput(m_output, mainFilter, useBptTag);
+        }
 
         if (m_debug)
         {
@@ -1170,7 +1197,7 @@ public class DiplomatAPI implements IFormatNames
         m_output = wc.getOutput();
         
         // call GC here to free some memory used in extracting
-        System.gc();
+//        System.gc();
         String gxml = "";
 
         //by walter, the xliff target content needn't be diplomate process

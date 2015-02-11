@@ -37,16 +37,15 @@ import com.globalsight.reports.datawrap.TermAuditReportDataWrap;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
 
-public class TermAuditReportHandler extends BasicReportHandler 
-{	
-    private static final String MY_MESSAGES = "messages/termAudit";
+public class TermAuditReportHandler extends BasicReportHandler
+{
+    private static final String MY_MESSAGES = BUNDLE_LOCATION + "termAudit";
     private static final long MILLISECONDS_IN_A_DAY = (long) (24 * 60 * 60 * 1000);
-    private static final String QUERY_TERM_AUDIT = 
-            "select event_date, username, termbase, target, languages, action, details " +
-            "from tb_audit_log " +
-            "where " +
-            "event_date between ? and ? " +
-            "and languages like ?";
+    private static final String QUERY_TERM_AUDIT = "select event_date, username, termbase, target, languages, action, details "
+            + "from tb_audit_log "
+            + "where "
+            + "event_date between ? and ? "
+            + "and languages like ?";
     private static final String QUERY_TERM_LANG = "select distinct(name) from tb_language order by name";
 
     private static final String SYMBOL = "%";
@@ -57,116 +56,112 @@ public class TermAuditReportHandler extends BasicReportHandler
     private static final int PAGESIZE = 22;
     protected ResourceBundle m_bundle = null;
     private TermAuditReportDataWrap reportDataWrap = null;
-    
-	/**
+
+    /**
      * Initializes the report and sets all the required parameters
      */
-    public void init() 
+    public void init()
     {
-    	try 
+        try
         {
-        	super.init(); //get the common parameters
+            super.init(); // get the common parameters
             m_bundle = ResourceBundle.getBundle(MY_MESSAGES, theUiLocale);
             this.reportKey = Constants.TERMAUDIT_REPORT_KEY;
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
-        	ReportsPackage.logError(e);
+            ReportsPackage.logError(e);
         }
     }
-    
-	/**
-	 * The entry of the handler. 
-     * This method will dispatch the HttpServletRequest to different page
-	 * based on the value of <code>Constants.REPORT_ACT</code>.
-	 * <code>Constants.REPORT_ACT_PREP</code> 
-     * means this is request for prepare the parameter data, then 
-	 * system will show the parameter page.
-	 * <code>Constants.REPORT_ACT_CREATE</code> 
-     * means create the real report based on the user input data, then
-	 * system will show the report page. 
-	 */
-	public void invokeHandler( HttpServletRequest req, HttpServletResponse res, 
-                               ServletContext p_context)
-    throws Exception 
+
+    /**
+     * The entry of the handler. This method will dispatch the
+     * HttpServletRequest to different page based on the value of
+     * <code>Constants.REPORT_ACT</code>. <code>Constants.REPORT_ACT_PREP</code>
+     * means this is request for prepare the parameter data, then system will
+     * show the parameter page. <code>Constants.REPORT_ACT_CREATE</code> means
+     * create the real report based on the user input data, then system will
+     * show the report page.
+     */
+    public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
+            ServletContext p_context) throws Exception
     {
-		super.invokeHandler(req,res,p_context);
-		String act = (String)req.getParameter(Constants.REPORT_ACT);
-        
-        if(Constants.REPORT_ACT_PREP.equalsIgnoreCase(act))
-        {           
-            addMoreReportParameters(req); //prepare data for parameter page
-        	dispatcherForward( ReportHandlerFactory.getTargetUrl(
-                                     reportKey + Constants.REPORT_ACT_PREP), 
-                               req, res, p_context );
-        } 
-        else if(Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
+        super.invokeHandler(req, res, p_context);
+        String act = (String) req.getParameter(Constants.REPORT_ACT);
+
+        if (Constants.REPORT_ACT_PREP.equalsIgnoreCase(act))
+        {
+            addMoreReportParameters(req); // prepare data for parameter page
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_PREP), req, res, p_context);
+        }
+        else if (Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
         {
             // just do this at the first time
             cleanSession(theSession);
             createReport(req);
-            setTableNavigation(req, theSession, PAGESIZE, 
-                           Constants.DATARESOURCE, reportKey, reportDataWrap );
-            dispatcherForward( ReportHandlerFactory.getTargetUrl(
-                                      reportKey + Constants.REPORT_ACT_CREATE), 
-                               req, res, p_context);
-        } 
-        else if(Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act)) 
-        {
-        	// get current page data
-        	TermAuditReportDataWrap sessionDataWrap = 
-                (TermAuditReportDataWrap)getSessionAttribute(
-                        theSession, reportKey + Constants.REPORT_DATA_WRAP );
-        	setTableNavigation(req, theSession, PAGESIZE, 
-                         Constants.DATARESOURCE, reportKey, sessionDataWrap);
-        	dispatcherForward( ReportHandlerFactory.getTargetUrl(
-                                    reportKey + Constants.REPORT_ACT_CREATE),
-                               req, res, p_context );
+            setTableNavigation(req, theSession, PAGESIZE,
+                    Constants.DATARESOURCE, reportKey, reportDataWrap);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
-	}
-	
-	/**
-     * Prepare the data for the parameter of report page
-     * <br>
+        else if (Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act))
+        {
+            // get current page data
+            TermAuditReportDataWrap sessionDataWrap = (TermAuditReportDataWrap) getSessionAttribute(
+                    theSession, reportKey + Constants.REPORT_DATA_WRAP);
+            setTableNavigation(req, theSession, PAGESIZE,
+                    Constants.DATARESOURCE, reportKey, sessionDataWrap);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
+        }
+    }
+
+    /**
+     * Prepare the data for the parameter of report page <br>
+     * 
      * @param HttpServletRequest
      * @throws Exception
      */
-	private void addMoreReportParameters(HttpServletRequest req) 
-    throws Exception 
+    private void addMoreReportParameters(HttpServletRequest req)
+            throws Exception
     {
-		addDateRangeParameters(req);
+        addDateRangeParameters(req);
         addLanguageParameter(req);
-	}
-	
-	/**
+    }
+
+    /**
      * Adds the termbase ids
      */
-	private void addDateRangeParameters(HttpServletRequest req) 
-    throws Exception 
+    private void addDateRangeParameters(HttpServletRequest req)
+            throws Exception
     {
-		Date now = new Date();
+        Date now = new Date();
         long yesterday = now.getTime() - MILLISECONDS_IN_A_DAY;
         Date start = new Date(yesterday);
         SimpleDateFormat dateForm = new SimpleDateFormat(DATEFORMAT);
         String txtDate = dateForm.format(start);
-        req.setAttribute(Constants.PARAM_STARTDATE_LABEL, 
-                ReportsPackage.getMessage(m_bundle,Constants.PARAM_STARTDATE));
+        req.setAttribute(Constants.PARAM_STARTDATE_LABEL,
+                ReportsPackage.getMessage(m_bundle, Constants.PARAM_STARTDATE));
         req.setAttribute(Constants.PARAM_STARTDATE, txtDate);
         txtDate = dateForm.format(now);
-        req.setAttribute(Constants.PARAM_ENDDATE_LABEL, 
-                ReportsPackage.getMessage(m_bundle,Constants.PARAM_ENDDATE));
+        req.setAttribute(Constants.PARAM_ENDDATE_LABEL,
+                ReportsPackage.getMessage(m_bundle, Constants.PARAM_ENDDATE));
         req.setAttribute(Constants.PARAM_ENDDATE, txtDate);
-	}
-	
-	/**
+    }
+
+    /**
      * Adds the termbase languages
      */
-	private void addLanguageParameter(HttpServletRequest req) throws Exception 
+    private void addLanguageParameter(HttpServletRequest req) throws Exception
     {
-		Connection c = null;
+        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        try 
+        try
         {
             ArrayList termbaseLangs = new ArrayList();
             ArrayList termbaseLangLables = new ArrayList();
@@ -175,7 +170,7 @@ public class TermAuditReportHandler extends BasicReportHandler
             c = ConnectionPool.getConnection();
             ps = c.prepareStatement(QUERY_TERM_LANG);
             rs = ps.executeQuery();
-            while (rs.next()) 
+            while (rs.next())
             {
                 termbaseLangs.add(rs.getString(1));
                 termbaseLangLables.add(rs.getString(1));
@@ -185,146 +180,155 @@ public class TermAuditReportHandler extends BasicReportHandler
             // this widget just does not work in the current inetsoft version
             // with the DHTML viewer (ok for java viewer)
             // So, we're stuck with giving the user one value to choose.
-            req.setAttribute(Constants.PARAM_LANGUAGE_LABEL, 
-                    ReportsPackage.getMessage(m_bundle,Constants.PARAM_LANGUAGE));
+            req.setAttribute(Constants.PARAM_LANGUAGE_LABEL, ReportsPackage
+                    .getMessage(m_bundle, Constants.PARAM_LANGUAGE));
             req.setAttribute(Constants.PARAM_LANGUAGE, termbaseLangs);
-            req.setAttribute(Constants.PARAM_LANGUAGE_LABELS, termbaseLangLables);
+            req.setAttribute(Constants.PARAM_LANGUAGE_LABELS,
+                    termbaseLangLables);
         }
-        finally 
+        finally
         {
             ConnectionPool.silentClose(rs);
             ConnectionPool.silentClose(ps);
             ConnectionPool.silentReturnConnection(c);
         }
-	}
-	
-	/**
-     * Creates the actual report and fills it with data and messages.
-     * Also determines the grouping styles.
-     * <br>
+    }
+
+    /**
+     * Creates the actual report and fills it with data and messages. Also
+     * determines the grouping styles. <br>
+     * 
      * @param HttpServletRequest
      * @throws Exception
      */
-	private void createReport(HttpServletRequest req) 
+    private void createReport(HttpServletRequest req)
     {
-		try 
+        try
         {
-			reportDataWrap = new TermAuditReportDataWrap();
+            reportDataWrap = new TermAuditReportDataWrap();
             bindMessages();
             bindData(req);
-            setSessionAttribute( theSession,reportKey + 
-                                 Constants.REPORT_DATA_WRAP, reportDataWrap);
-            
+            setSessionAttribute(theSession, reportKey
+                    + Constants.REPORT_DATA_WRAP, reportDataWrap);
+
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             ReportsPackage.logError(e);
         }
-	}
-	
-	/**
+    }
+
+    /**
      * Fills out the messages on the report
      */
-	private void bindMessages() throws Exception 
+    private void bindMessages() throws Exception
     {
-		reportDataWrap.setReportTitle(
-                ReportsPackage.getMessage(m_bundle,Constants.REPORT_TITLE) );
-        //set common messages for report, such as header ,footer 
+        reportDataWrap.setReportTitle(ReportsPackage.getMessage(m_bundle,
+                Constants.REPORT_TITLE));
+        // set common messages for report, such as header ,footer
         setCommonMessages(reportDataWrap);
-	}
-	
-	/**
-     * Gets the data from the DB and binds it to charts and tables
-     * <br>
+    }
+
+    /**
+     * Gets the data from the DB and binds it to charts and tables <br>
+     * 
      * @param HttpServletRequest
      * @throws Exception
      */
-	private void bindData(HttpServletRequest req) throws Exception 
+    private void bindData(HttpServletRequest req) throws Exception
     {
-		String selectedLang = req.getParameter(Constants.PARAM_SELECTEDLANG);
-		String txtDate = req.getParameter(Constants.PARAM_STARTDATE);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATEFORMAT);
-		Date startDate = null;
-		try 
+        String selectedLang = req.getParameter(Constants.PARAM_SELECTEDLANG);
+        String txtDate = req.getParameter(Constants.PARAM_STARTDATE);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATEFORMAT);
+        Date startDate = null;
+        try
         {
-			startDate = simpleDateFormat.parse(txtDate);
-		} 
-        catch(Exception ex) 
+            startDate = simpleDateFormat.parse(txtDate);
+        }
+        catch (Exception ex)
         {
-			startDate = new Date();
-		}
-		Timestamp startTS = new Timestamp();
-		startTS.setDateAndTime(startDate,startDate);
-		
-		txtDate = req.getParameter(Constants.PARAM_ENDDATE);
-		Date endDate = null;
-		try 
+            startDate = new Date();
+        }
+        Timestamp startTS = new Timestamp();
+        startTS.setDateAndTime(startDate, startDate);
+
+        txtDate = req.getParameter(Constants.PARAM_ENDDATE);
+        Date endDate = null;
+        try
         {
-			endDate = simpleDateFormat.parse(txtDate);
-		} catch(Exception ex) 
+            endDate = simpleDateFormat.parse(txtDate);
+        }
+        catch (Exception ex)
         {
-			endDate = new Date();
-		}
-		Timestamp endTS = new Timestamp();
-		endTS.setDateAndTime(endDate,endDate);
-		addCriteriaFormAtTop(startDate, endDate, selectedLang);
-		Connection c = null;
+            endDate = new Date();
+        }
+        Timestamp endTS = new Timestamp();
+        endTS.setDateAndTime(endDate, endDate);
+        addCriteriaFormAtTop(startDate, endDate, selectedLang);
+        Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        try 
+        try
         {
             c = ConnectionPool.getConnection();
             ps = c.prepareStatement(QUERY_TERM_AUDIT);
-            ps.setTimestamp(1, new java.sql.Timestamp(startTS.getDate().getTime()));
-            ps.setTimestamp(2, new java.sql.Timestamp(endTS.getDate().getTime()));
-            ps.setString(3,SYMBOL + selectedLang + SYMBOL);
+            ps.setTimestamp(1, new java.sql.Timestamp(startTS.getDate()
+                    .getTime()));
+            ps.setTimestamp(2,
+                    new java.sql.Timestamp(endTS.getDate().getTime()));
+            ps.setString(3, SYMBOL + selectedLang + SYMBOL);
             rs = ps.executeQuery();
-            //set table header
+            // set table header
             ResultSetMetaData rsMetaData = rs.getMetaData();
             ArrayList fieldnameList = new ArrayList();
-            for(int i=0; i< rsMetaData.getColumnCount(); i++) 
+            for (int i = 0; i < rsMetaData.getColumnCount(); i++)
             {
-                String name = rsMetaData.getColumnName(i+1);
-                name = ReportsPackage.getMessage(m_bundle,name.toLowerCase());
+                String name = rsMetaData.getColumnName(i + 1);
+                name = ReportsPackage.getMessage(m_bundle, name.toLowerCase());
                 fieldnameList.add(name);
             }
             reportDataWrap.setTableHeadList(fieldnameList);
-            //set table content
+            // set table content
             ArrayList allRowsDataList = new ArrayList();
-            while(rs.next()) 
+            while (rs.next())
             {
                 ArrayList singleRowDataList = new ArrayList();
-                for(int j = 0; j < rsMetaData.getColumnCount(); j++) {
+                for (int j = 0; j < rsMetaData.getColumnCount(); j++)
+                {
                     singleRowDataList.add(rs.getString(j + 1));
                 }
                 allRowsDataList.add(singleRowDataList);
             }
             reportDataWrap.setDataList(allRowsDataList);
         }
-        finally 
+        finally
         {
             ConnectionPool.silentClose(rs);
             ConnectionPool.silentClose(ps);
             ConnectionPool.silentReturnConnection(c);
         }
-	}
-	
-	/**
+    }
+
+    /**
      * Adds a form at the top of the report
      */
-	private void addCriteriaFormAtTop( Date m_startDate, Date m_endDate, 
-                                       String m_selectedLang ) 
+    private void addCriteriaFormAtTop(Date m_startDate, Date m_endDate,
+            String m_selectedLang)
     {
-	    if (ALL.equals(m_selectedLang))
-	    {
-	        m_selectedLang = m_bundle.getString("all");
-	    }
-		ArrayList temp = new ArrayList();
-		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, theUiLocale);
-		temp.add(ReportsPackage.getMessage(m_bundle,Constants.PERIODSTART) + BLANK + formatter.format(m_startDate));
-		temp.add(ReportsPackage.getMessage(m_bundle,Constants.PERIODEND) + BLANK + formatter.format(m_endDate));
-		temp.add(ReportsPackage.getMessage(m_bundle,Constants.LANG) + BLANK + m_selectedLang);
-		reportDataWrap.setCriteriaFormLabel(temp);
+        if (ALL.equals(m_selectedLang))
+        {
+            m_selectedLang = m_bundle.getString("all");
+        }
+        ArrayList temp = new ArrayList();
+        DateFormat formatter = DateFormat.getDateTimeInstance(
+                DateFormat.DEFAULT, DateFormat.DEFAULT, theUiLocale);
+        temp.add(ReportsPackage.getMessage(m_bundle, Constants.PERIODSTART)
+                + BLANK + formatter.format(m_startDate));
+        temp.add(ReportsPackage.getMessage(m_bundle, Constants.PERIODEND)
+                + BLANK + formatter.format(m_endDate));
+        temp.add(ReportsPackage.getMessage(m_bundle, Constants.LANG) + BLANK
+                + m_selectedLang);
+        reportDataWrap.setCriteriaFormLabel(temp);
     }
 
 }

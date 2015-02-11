@@ -66,20 +66,20 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 .link         { color: blue; cursor: hand; }
 .calendar     { width:16px; height:15px; cursor:pointer; vertical-align:middle; }
 </STYLE>
-<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT type="text/javascript" src="/globalsight/includes/report/calendar2.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript">
+<SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/includes/report/calendar.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT type="text/javascript">
 var needWarning = false;
 var objectName = "";
 var guideNode = "tm";
 var helpFile = "<%=bundle.getString("help_tm_export")%>";
-var xmlDefinition	 = "<%=xmlDefinition%>";
-var xmlExportOptions = "<%=xmlExportOptions%>";
-var xmlProject		 = "<%=xmlProject%>";
+var xmlProject = "<%=xmlProject.replace("\n","").replace("\r","").trim()%>";
+var xmlDefinition = "<%=xmlDefinition.replace("\n","").replace("\r","").trim()%>";
+var xmlExportOptions = "<%=xmlExportOptions.replace("\n","").replace("\r","").trim()%>";
 
 function Result(message, description, element, dom)
 {
@@ -92,36 +92,26 @@ function Result(message, description, element, dom)
 function parseExportOptions()
 {
   var form = document.oDummyForm;
-  var dom ;
-  var nodes, node;
+  var node;
   var createdAfter, createdBefore;
   var selectMode, selectLanguage, duplicateHandling, fileType, fileEncoding, selectChangeCreationId;
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
+  var $xml = $( $.parseXML( xmlExportOptions ) );
 
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
-  selectMode = node.selectSingleNode("selectMode").text;
+  node = $xml.find("exportOptions > selectOptions");
+  selectMode = node.find("selectMode").text();
 
-  selectFilter = node.selectSingleNode("selectFilter").text;
-  selectLanguage = node.selectSingleNode("selectLanguage").text;
-  //selectPropType = node.selectSingleNode("selectPropType").text;
-  selectChangeCreationId = node.selectSingleNode("selectChangeCreationId").text;
+  selectFilter = node.find("selectFilter").text();
+  selectLanguage = node.find("selectLanguage").text();
+  selectChangeCreationId = node.find("selectChangeCreationId").text();
   
-  node = dom.selectSingleNode("/exportOptions/filterOptions");
-  createdAfter = node.selectSingleNode("createdafter").text;
-  createdBefore = node.selectSingleNode("createdbefore").text;
+  node = $xml.find("exportOptions > filterOptions");
+  createdAfter = node.find("createdafter").text();
+  createdBefore = node.find("createdbefore").text();
 
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
-  fileType = node.selectSingleNode("fileType").text;
-  fileEncoding = node.selectSingleNode("fileEncoding").text;
+  node = $xml.find("exportOptions > fileOptions");
+  fileType = node.find("fileType").text();
+  fileEncoding = node.find("fileEncoding").text();
 
   if (selectMode == "<%=ExportOptions.SELECT_FILTERED%>")
   {
@@ -161,111 +151,85 @@ function buildExportOptions()
 {
   var result = new Result("", "", null, null);
   var form = document.oDummyForm;
-  var dom ;
   var node;
   var sel;
-
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
   
-  // SELECT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/selectOptions");
+  var $xml = $( $.parseXML( xmlExportOptions ) );
 
+  //SELECT OPTIONS
+  node = $xml.find("exportOptions > selectOptions");
   if (form.oEntries[0].checked)
   {
-     node.selectSingleNode("selectMode").text =
-       "<%=ExportOptions.SELECT_ALL%>";
+	  node.find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
   }
   else
   {
-    if(form.oEntries[1].checked){
-        node.selectSingleNode("selectMode").text =
-         "<%=ExportOptions.SELECT_FILTERED%>";
+    if(form.oEntries[1].checked)
+    {
+        node.find("selectMode").text("<%=ExportOptions.SELECT_FILTERED%>");
     }
     else
     {
-        node.selectSingleNode("selectMode").text =
-         "<%=ExportOptions.SELECT_FILTER_PROP_TYPE%>";
+    	node.find("selectMode").text("<%=ExportOptions.SELECT_FILTER_PROP_TYPE%>");
     }
   }
 
   sel = form.oEntryLang;
   if (sel.options.length > 0)
   {
-    node.selectSingleNode("selectLanguage").text =
-      sel.options[sel.selectedIndex].value;
+    node.find("selectLanguage").text(sel.options[sel.selectedIndex].value);
   }
   
   sel = form.oEntryPropType;
-  if(sel.options.length > 0){
-    node.selectSingleNode("selectPropType").text = "";
-    optionsList = selectMulti(sel);
-    
-    for(var i = 0; i < optionsList.length; i ++){
-        if(i == optionsList.length -1){
-            node.selectSingleNode("selectPropType").text += optionsList[i];
-        }else{
-            node.selectSingleNode("selectPropType").text += optionsList[i]+",";
-        }
-        
-    }
-    if(form.oEntries[2].checked && node.selectSingleNode("selectPropType").text == ""){
+  if(sel.options.length > 0)
+  {
+    optionsList = selectMulti(sel);    
+    if(form.oEntries[2].checked && optionsList.length == 0)
+    {
         alert("<%=bundle.getString("jsmsg_tm_export_select_project") %>")
         return "";
     }
-    //alert(node.selectSingleNode("selectPropType").text);
+    node.find("selectPropType").text(optionsList.toString());
   }
 
   sel = form.oChangeCreationId;
-  if (sel.checked) {
-	  node.selectSingleNode("selectChangeCreationId").text = "true";
-  } else {
-	  node.selectSingleNode("selectChangeCreationId").text = "false";
+  if (sel.checked) 
+  {
+	  node.find("selectChangeCreationId").text("true");
+  } 
+  else 
+  {
+	  node.find("selectChangeCreationId").text("false");
   }
 
   // FILTER OPTIONS
-  node = dom.selectSingleNode("/exportOptions/filterOptions");
-  node.selectSingleNode("createdafter").text = form.fltCreatedAfter.value;
-  node.selectSingleNode("createdbefore").text = form.fltCreatedBefore.value;
+  node = $xml.find("exportOptions > filterOptions");
+  node.find("createdafter").text(form.fltCreatedAfter.value);
+  node.find("createdbefore").text(form.fltCreatedBefore.value);
   
   // FILE OPTIONS
-  node = dom.selectSingleNode("/exportOptions/fileOptions");
-
+  node = $xml.find("exportOptions > fileOptions");
   if (form.oType[0].checked)
   {
-    node.selectSingleNode("fileType").text =
-       "<%=ExportOptions.TYPE_XML%>";
+    node.find("fileType").text("<%=ExportOptions.TYPE_XML%>");
   }
   else if (form.oType[1].checked)
   {
-    node.selectSingleNode("fileType").text =
-       "<%=ExportOptions.TYPE_TMX1%>";
+    node.find("fileType").text("<%=ExportOptions.TYPE_TMX1%>");
   }
   else if (form.oType[2].checked)
   {
-    node.selectSingleNode("fileType").text =
-       "<%=ExportOptions.TYPE_TMX2%>";
+    node.find("fileType").text("<%=ExportOptions.TYPE_TMX2%>");
   }
   else if (form.oType[3].checked)
   {
-    node.selectSingleNode("fileType").text =
-       "<%=ExportOptions.TYPE_TTMX%>";
+    node.find("fileType").text("<%=ExportOptions.TYPE_TTMX%>");
   }
 
   var sel = form.oEncoding;
-  node.selectSingleNode("fileEncoding").text =
-    sel.options[sel.selectedIndex].value;
+  node.find("fileEncoding").text(sel.options[sel.selectedIndex].value);
 
-  //alert("options = " + oExportOptions.xml);
-
-  result.dom = dom;
+  result.dom = $xml;
   return result;
 }
 
@@ -286,6 +250,19 @@ function selectMulti(selects){
 
 function doNext()
 {
+    var form = document.oDummyForm;
+    if (form.fltCreatedAfter.value != "") {
+        if (form.fltCreatedBefore.value == "") {
+            alert("Please select the end of creation date");
+            return;
+        }
+    } else {
+    	if (form.fltCreatedBefore.value != "") {
+            alert("Please select the start of creation date");
+            return;
+    	}
+    }
+
     var result = buildExportOptions();
     if(result == ""){
         return;
@@ -302,14 +279,7 @@ function doNext()
             "=" + WebAppConstants.TM_ACTION_ANALYZE_TM%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	oForm.exportoptions.value = oExportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }       
+        oForm.exportoptions.value = xmlObjToString(result.dom);
 
         oForm.submit();
     }
@@ -369,27 +339,11 @@ function selectValue(select, value)
 
 function fillLanguages()
 {
-  var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oDefinition.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlDefinition,"text/xml");
-  }
-  
-  var langs = dom.selectNodes("/statistics/languages/language");
-
-  for (var i = 0; i < langs.length; ++i)
-  {
-    var lang = langs[i];//var lang = langs.item(i);
-
-    var name = lang.selectSingleNode("name").text;
-    var locale = lang.selectSingleNode("locale").text;
-    
-    if (locale == "iw_IL")
+  var $xml = $( $.parseXML( xmlDefinition ) );
+  $xml.find("statistics > languages > language").each(function(){
+	var name   = $(this).find("name").text();
+	var locale = $(this).find("locale").text();
+	if (locale == "iw_IL")
     {
         locale = "he_IL";
     }
@@ -397,9 +351,9 @@ function fillLanguages()
     oOption.text = name;
     oOption.value = locale;
     document.oDummyForm.oEntryLang.add(oOption);
-  }
+  });
 
-  var tuCount = dom.selectSingleNode("/statistics/tus").text;
+  var tuCount = $xml.find("statistics > tus").text();
   if (parseInt(tuCount) == 0)
   {
     idWarning.style.display = '';
@@ -407,27 +361,13 @@ function fillLanguages()
 }
 
 function fillProjects(){
-    var dom ;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      dom = oProject.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlProject,"text/xml");
-    }
-    
-    var projects = dom.selectNodes("/statistics/projects/project");
-    
-    for(var i = 0; i < projects.length; i ++){
-        var project = projects[i];//var project = projects.item(i);
-        var name = project.selectSingleNode("name").text;
-        
-        opt = document.createElement("OPTION");
+    var $xml = $( $.parseXML( xmlProject ) );
+    $xml.find("statistics > projects > project").each(function(){
+    	var name   = $(this).find("name").text();
+    	opt = document.createElement("OPTION");
         opt.text = opt.value = name;
         oDummyForm.oEntryPropType.add(opt);
-    }
+    });
 }
 
 function fillEncodings()
@@ -477,19 +417,9 @@ function fillPropTypes(){
 }
 
 function checkEmptyTM()
-{
-  var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oDefinition.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlDefinition,"text/xml");
-  }
-  
-  var tuCount = dom.selectSingleNode("/statistics/tus").text;
+{ 
+  var $xml = $( $.parseXML( xmlDefinition ) );  
+  var tuCount = $xml.find("statistics > tus").text();
 
   if (parseInt(tuCount) == 0)
   {
@@ -528,12 +458,6 @@ function doOnLoad()
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-
-<DIV style="display:none;">
-<XML id="oDefinition"><%=xmlDefinition%></XML>
-<XML id="oExportOptions"><%=xmlExportOptions%></XML>
-<XML id="oProject"><%=xmlProject%></XML>
-</DIV>
 
 <FORM NAME="oForm" ACTION="" METHOD="post">
 <INPUT TYPE="hidden" NAME="exportoptions"
@@ -585,24 +509,24 @@ function doOnLoad()
 <div style="margin-bottom:10px">
  <%=bundle.getString("lb_tm_filter_entries_by") %>: <BR>
  <div style="margin-left: 40px">
- <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
- <thead>
+  <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
+   <thead>
     <col align="right" valign="baseline" class="standardText">
     <col align="left"  valign="baseline" class="standardText">
-  </thead>
- <tr>
- <td><%=bundle.getString("lb_creation_date") %>:</td>
+   </thead>
+   <tr>
+ 	<td><%=bundle.getString("lb_creation_date") %>:</td>
     <td>
-      <%=bundle.getString("lb_after").toLowerCase() %> <input name="fltCreatedAfter" id="idCos" type="text" size="10" readonly="true">
+      <%=bundle.getString("lb_after").toLowerCase() %> <input name="fltCreatedAfter" id="idCos" type="text" size="15" readonly="true">
       <img src="/globalsight/includes/Calendar.gif" class="calendar" title="<%=lb_calendar_title %>" onclick="showCalendar('idCos')"> &nbsp;
       <%=bundle.getString("lb_and_or") %>
-      <%=bundle.getString("lb_before").toLowerCase() %> <input name="fltCreatedBefore" id="idCoe" type="text" size="10" readonly="true">
+      <%=bundle.getString("lb_before").toLowerCase() %> <input name="fltCreatedBefore" id="idCoe" type="text" size="15" readonly="true">
       <img src="/globalsight/includes/Calendar.gif" class="calendar" title="<%=lb_calendar_title %>" onclick="showCalendar('idCoe')"> &nbsp;
-      <span class='info'>(DD/MM/YYYY)</span>
+      <span class='info'>(MM/DD/YYYY)</span>
     </td>
-    </tr>
-    </TABLE>
-   </div>
+   </tr>
+  </TABLE>
+ </div>
 </div>
 
 

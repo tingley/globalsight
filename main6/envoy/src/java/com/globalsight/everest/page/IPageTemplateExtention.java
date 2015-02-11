@@ -21,7 +21,8 @@ import com.globalsight.everest.tuv.Tuv;
 
 public interface IPageTemplateExtention
 {
-    public String processSkeleton(String skeletonStr, Tuv tuv, String companyId);
+    public String processSkeleton(String skeletonStr, Tuv tuv, long companyId);
 
-    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, String companyId);
+    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, long companyId,
+            boolean isJobDataMigrated);
 }

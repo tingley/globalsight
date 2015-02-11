@@ -15,30 +15,16 @@
  *  
  */
 package com.globalsight.cxe.entity.xmlrulefile;
-/*
- * Copyright (c) 2001 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
+
 import com.globalsight.everest.persistence.PersistentObject;
 
 /** Implements an XmlRuleFile */
-public class XmlRuleFileImpl
-    extends PersistentObject implements XmlRuleFile
+public class XmlRuleFileImpl extends PersistentObject implements XmlRuleFile
 {
     private static final long serialVersionUID = -873521866679410418L;
-    private String m_companyId;
+    private long m_companyId;
 
-    /** Default constructor for TOPLink*/
+    /** Default constructor for TOPLink */
     public XmlRuleFileImpl()
     {
         m_name = null;
@@ -46,9 +32,9 @@ public class XmlRuleFileImpl
         m_ruleText = null;
     }
 
-    /** Constructs an XmlRuleFileImpl with id, name, description, and ruleText**/
-    public XmlRuleFileImpl(String p_name,
-      String p_description, String p_ruleText)
+    /** Constructs an XmlRuleFileImpl with id, name, description, and ruleText **/
+    public XmlRuleFileImpl(String p_name, String p_description,
+            String p_ruleText)
     {
         m_name = p_name;
         m_description = p_description;
@@ -58,47 +44,58 @@ public class XmlRuleFileImpl
     /** Constructs an XmlRuleFileImpl from an XmlRuleFile **/
     public XmlRuleFileImpl(XmlRuleFile o)
     {
-        this (o.getName(), o.getDescription(), o.getRuleText());
+        this(o.getName(), o.getDescription(), o.getRuleText());
     }
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
 
     /**
      ** Return the name of the XML Rule File
-     ** @return XML Rule File name
+     ** 
+     * @return XML Rule File name
      **/
     public String getName()
-    {return m_name;}
+    {
+        return m_name;
+    }
 
     /**
      ** Return the description of the XML Rule File
-     ** @return XML Rule File description
+     ** 
+     * @return XML Rule File description
      **/
     public String getDescription()
-    {return m_description;}
+    {
+        return m_description;
+    }
 
     /**
      ** Return the body of the XML Rule File
-     ** @return XML Rule File
+     ** 
+     * @return XML Rule File
      **/
     public String getRuleText()
-    {return m_ruleText;}
+    {
+        return m_ruleText;
+    }
 
     /**
      ** Sets the name of the XML Rule File
@@ -124,15 +121,14 @@ public class XmlRuleFileImpl
         m_ruleText = p_ruleText;
     }
 
-    /** Returns a string representation of the object*/
+    /** Returns a string representation of the object */
     public String toString()
     {
         return m_name;
     }
 
-    //PRIVATE MEMBERS
+    // PRIVATE MEMBERS
     private String m_name;
     private String m_description;
     private String m_ruleText;
 }
-

@@ -16,41 +16,29 @@
  */
 package com.globalsight.cxe.adapter.cap;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.DataInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
 
 import org.apache.xerces.parsers.DOMParser;
-import org.apache.xml.serialize.XMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
-import org.xml.sax.InputSource;
+import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
-import com.globalsight.diplomat.util.Logger;
-import com.globalsight.diplomat.util.XmlUtil;
-import com.globalsight.everest.page.pageexport.ExportConstants;
-import com.globalsight.everest.page.pageexport.ExportBatchInfo;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.diplomat.util.Logger;
+import com.globalsight.diplomat.util.XmlUtil;
+import com.globalsight.everest.page.pageexport.ExportBatchInfo;
+import com.globalsight.everest.page.pageexport.ExportConstants;
 
 /**
- * Helper class for the CapAdapter, does work related to preparing a
- * file for export.
+ * Helper class for the CapAdapter, does work related to preparing a file for
+ * export.
  */
 class Mapper
 {
@@ -80,19 +68,18 @@ class Mapper
     private org.apache.log4j.Logger m_logger;
     private CxeMessage m_cxeMessage;
 
-
     //
     // Constructor
     //
 
-
     /**
      * Creates a Mapper object.
-     *
-     * @param p_cxeMessage incoming CxeMessage
+     * 
+     * @param p_cxeMessage
+     *            incoming CxeMessage
      * @param p_logger
      */
-    Mapper (CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
+    Mapper(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;
@@ -101,41 +88,39 @@ class Mapper
         m_bufferSize = m_eventFlowXml.length();
 
         HashMap params = p_cxeMessage.getParameters();
-        m_targetLocale = (String)params.get("TargetLocale");
-        m_targetCharset = (String)params.get("TargetCharset");
-        m_cxeRequestType = (String)params.get("CxeRequestType");
-        m_messageId = (String)params.get("MessageId");
-        m_exportLocation = (String)params.get("ExportLocation");
-        m_localeSubDir = (String)params.get("LocaleSubDir");
+        m_targetLocale = (String) params.get("TargetLocale");
+        m_targetCharset = (String) params.get("TargetCharset");
+        m_cxeRequestType = (String) params.get("CxeRequestType");
+        m_messageId = (String) params.get("MessageId");
+        m_exportLocation = (String) params.get("ExportLocation");
+        m_localeSubDir = (String) params.get("LocaleSubDir");
 
-        String exportBatchId = (String)params.get("ExportBatchId");
-        Integer pageCount = (Integer)params.get("PageCount");
-        Integer pageNum = (Integer)params.get("PageNum");
-        Integer docPageCount = (Integer)params.get("DocPageCount");
-        Integer docPageNum = (Integer)params.get("DocPageNum");
-        m_targetFileName = (String)params.get("TargetFileName");
+        String exportBatchId = (String) params.get("ExportBatchId");
+        Integer pageCount = (Integer) params.get("PageCount");
+        Integer pageNum = (Integer) params.get("PageNum");
+        Integer docPageCount = (Integer) params.get("DocPageCount");
+        Integer docPageNum = (Integer) params.get("DocPageNum");
+        m_targetFileName = (String) params.get("TargetFileName");
 
-        m_exportBatchInfo = new ExportBatchInfo(exportBatchId,
-            pageCount, pageNum, docPageCount, docPageNum);
+        m_exportBatchInfo = new ExportBatchInfo(exportBatchId, pageCount,
+                pageNum, docPageCount, docPageNum);
     }
-
 
     //
     // Package Private Methods
     //
 
-
     /**
-     * Modifies the event flow xml for the return trip
-     * through CXE. Returns a CxeMessage where the event type
-     * is either the pre-merge or post-merge event.
-     *
-     * @param eventType PRE_MERGE_EVENT or POST_MERGE_EVENT
+     * Modifies the event flow xml for the return trip through CXE. Returns a
+     * CxeMessage where the event type is either the pre-merge or post-merge
+     * event.
+     * 
+     * @param eventType
+     *            PRE_MERGE_EVENT or POST_MERGE_EVENT
      * @return CxeMessage
      * @exception CapAdapterException
      */
-    CxeMessage map(int eventType)
-        throws CapAdapterException
+    CxeMessage map(int eventType) throws CapAdapterException
     {
         Logger.writeDebugFile("csa_ef.xml", m_eventFlowXml);
 
@@ -151,8 +136,8 @@ class Mapper
         }
         else
         {
-            CxeMessageType catalystLoc = CxeMessageType.getCxeMessageType(
-                CxeMessageType.CATALYST_LOCALIZED_EVENT);
+            CxeMessageType catalystLoc = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.CATALYST_LOCALIZED_EVENT);
 
             if (m_preMergeEvent.equals(catalystLoc.getName()))
             {
@@ -163,7 +148,6 @@ class Mapper
                 type = CxeMessageType.getCxeMessageType(m_postMergeEvent);
             }
         }
-
 
         CxeMessage newMsg = new CxeMessage(type);
         newMsg.setEventFlowXml(m_eventFlowXml);
@@ -191,8 +175,7 @@ class Mapper
     //
 
     /** Uses DOM to parse the EventFlowXml. */
-    private void parseEventFlowXml()
-        throws CapAdapterException
+    private void parseEventFlowXml() throws CapAdapterException
     {
         try
         {
@@ -221,11 +204,10 @@ class Mapper
     }
 
     /**
-     * Inserts the targetLocale, targetCharset, exportLocation,
-     * targetfilename and capMessageId into the EventFlowXml.
+     * Inserts the targetLocale, targetCharset, exportLocation, targetfilename
+     * and capMessageId into the EventFlowXml.
      */
-    private void modifyEventFlowXml()
-        throws CapAdapterException
+    private void modifyEventFlowXml() throws CapAdapterException
     {
         try
         {
@@ -244,13 +226,13 @@ class Mapper
                 targetElem.setAttribute("previewUrl", "false");
             }
 
-            //now fill in the targetLocale and targetCharset
+            // now fill in the targetLocale and targetCharset
             nl = targetElem.getElementsByTagName("locale");
             Element localeElem = (Element) nl.item(0);
             localeElem.getFirstChild().setNodeValue(m_targetLocale);
 
-            m_logger.info("Processing: " + m_targetFileName +
-                ", locale: " + m_targetLocale);
+            m_logger.info("Processing: " + m_targetFileName + ", locale: "
+                    + m_targetLocale);
 
             nl = targetElem.getElementsByTagName("charset");
             Element charsetElem = (Element) nl.item(0);
@@ -258,31 +240,33 @@ class Mapper
 
             Element targetFileNameElem = null;
 
-            //now fill in the export directory if this is for the filesystem
-            if (targetElem.getAttribute("name").equals("FileSystemTargetAdapter"))
+            // now fill in the export directory if this is for the filesystem
+            if (targetElem.getAttribute("name").equals(
+                    "FileSystemTargetAdapter"))
             {
                 nl = targetElem.getElementsByTagName("da");
                 Element daElement;
                 Element dvElement;
                 NodeList nl2;
                 boolean foundExportLoc = false;
-                boolean foundLocaleSubDir=false;
+                boolean foundLocaleSubDir = false;
 
                 for (int i = 0; i < nl.getLength(); i++)
                 {
-                    daElement = (Element)nl.item(i);
+                    daElement = (Element) nl.item(i);
                     if (daElement.getAttribute("name").equals("ExportLocation"))
                     {
                         nl2 = daElement.getElementsByTagName("dv");
-                        dvElement = (Element)nl2.item(0);
-                        dvElement.getFirstChild().setNodeValue(m_exportLocation);
-                        foundExportLoc =true;
+                        dvElement = (Element) nl2.item(0);
+                        dvElement.getFirstChild()
+                                .setNodeValue(m_exportLocation);
+                        foundExportLoc = true;
                     }
 
                     if (daElement.getAttribute("name").equals("LocaleSubDir"))
                     {
                         nl2 = daElement.getElementsByTagName("dv");
-                        dvElement = (Element)nl2.item(0);
+                        dvElement = (Element) nl2.item(0);
                         dvElement.getFirstChild().setNodeValue(m_localeSubDir);
                         foundLocaleSubDir = true;
                     }
@@ -290,12 +274,12 @@ class Mapper
                     if (daElement.getAttribute("name").equals("Filename"))
                     {
                         nl2 = daElement.getElementsByTagName("dv");
-                        targetFileNameElem = (Element)nl2.item(0);
+                        targetFileNameElem = (Element) nl2.item(0);
                     }
 
                     // if all have been found then break out of the rest
-                    if (foundLocaleSubDir && foundLocaleSubDir &&
-                        targetFileNameElem != null)
+                    if (foundLocaleSubDir && foundLocaleSubDir
+                            && targetFileNameElem != null)
                     {
                         break;
                     }
@@ -315,23 +299,27 @@ class Mapper
                 // so add it to the xml to be modified by the Adapters
                 // if necessary.
 
-                // If it wasn't found already in the XML then add a new attribute.
+                // If it wasn't found already in the XML then add a new
+                // attribute.
                 if (targetFileNameElem == null)
                 {
-                    Element src = (Element)m_rootElement.getElementsByTagName("source").item(0);
+                    Element src = (Element) m_rootElement.getElementsByTagName(
+                            "source").item(0);
                     String[] values = null;
                     NodeList nlS = src.getElementsByTagName("da");
                     Element srcFileNameElement = null;
-                    for (int i = 0; srcFileNameElement == null && i < nlS.getLength(); i++)
+                    for (int i = 0; srcFileNameElement == null
+                            && i < nlS.getLength(); i++)
                     {
                         Element daElementS = (Element) nlS.item(i);
                         if (daElementS.getAttribute("name").equals("Filename"))
                         {
-                            NodeList dvs = daElementS.getElementsByTagName("dv");
-                            values = new String [dvs.getLength()];
+                            NodeList dvs = daElementS
+                                    .getElementsByTagName("dv");
+                            values = new String[dvs.getLength()];
                             for (int j = 0; j < values.length; j++)
                             {
-                                Element dv = (Element)dvs.item(j);
+                                Element dv = (Element) dvs.item(j);
                                 values[j] = dv.getFirstChild().getNodeValue();
                             }
                             srcFileNameElement = daElementS;
@@ -339,7 +327,8 @@ class Mapper
                     }
 
                     // make a copy of the source node
-                    Element newda = (Element) srcFileNameElement.cloneNode(true);
+                    Element newda = (Element) srcFileNameElement
+                            .cloneNode(true);
                     NodeList nlT = newda.getElementsByTagName("dv");
                     Element dvElementT = (Element) nlT.item(0);
                     dvElementT.getFirstChild().setNodeValue(m_targetFileName);
@@ -348,31 +337,35 @@ class Mapper
                 else
                 {
                     // just modify the one that is already part of the XML
-                    targetFileNameElem.getFirstChild().setNodeValue(m_targetFileName);
+                    targetFileNameElem.getFirstChild().setNodeValue(
+                            m_targetFileName);
                 }
             }
 
-            //now add in the capMessageId
+            // now add in the capMessageId
             NodeList nodes = m_rootElement.getElementsByTagName("capMessageId");
             for (int i = 0; i < nodes.getLength(); i++)
             {
                 m_rootElement.removeChild(nodes.item(i));
             }
             Element capMessageIdElem = m_document.createElement("capMessageId");
-            capMessageIdElem.appendChild(m_document.createTextNode(m_messageId));
+            capMessageIdElem
+                    .appendChild(m_document.createTextNode(m_messageId));
             m_rootElement.appendChild(capMessageIdElem);
 
-            //add in the cxe request type
+            // add in the cxe request type
             nodes = m_rootElement.getElementsByTagName("cxeRequestType");
             for (int i = 0; i < nodes.getLength(); i++)
             {
                 m_rootElement.removeChild(nodes.item(i));
             }
-            Element cxeRequestTypeElem = m_document.createElement("cxeRequestType");
-            cxeRequestTypeElem.appendChild(m_document.createTextNode(m_cxeRequestType));
+            Element cxeRequestTypeElem = m_document
+                    .createElement("cxeRequestType");
+            cxeRequestTypeElem.appendChild(m_document
+                    .createTextNode(m_cxeRequestType));
             m_rootElement.appendChild(cxeRequestTypeElem);
 
-            //add in the Export Batch Info, but remove any existing ones first
+            // add in the Export Batch Info, but remove any existing ones first
             nodes = m_rootElement.getElementsByTagName("exportBatchInfo");
             for (int i = 0; i < nodes.getLength(); i++)
             {
@@ -381,26 +374,31 @@ class Mapper
 
             Element ebi = m_document.createElement("exportBatchInfo");
             Element elem = m_document.createElement("exportBatchId");
-            elem.appendChild(m_document.createTextNode(m_exportBatchInfo.exportBatchId));
+            elem.appendChild(m_document
+                    .createTextNode(m_exportBatchInfo.exportBatchId));
             ebi.appendChild(elem);
             elem = m_document.createElement("exportBatchPageCount");
-            elem.appendChild(m_document.createTextNode(m_exportBatchInfo.pageCount.toString()));
+            elem.appendChild(m_document
+                    .createTextNode(m_exportBatchInfo.pageCount.toString()));
             ebi.appendChild(elem);
             elem = m_document.createElement("exportBatchPageNum");
-            elem.appendChild(m_document.createTextNode(m_exportBatchInfo.pageNum.toString()));
+            elem.appendChild(m_document
+                    .createTextNode(m_exportBatchInfo.pageNum.toString()));
             ebi.appendChild(elem);
             elem = m_document.createElement("exportBatchDocPageCount");
-            elem.appendChild(m_document.createTextNode(m_exportBatchInfo.docPageCount.toString()));
+            elem.appendChild(m_document
+                    .createTextNode(m_exportBatchInfo.docPageCount.toString()));
             ebi.appendChild(elem);
             elem = m_document.createElement("exportBatchDocPageNum");
-            elem.appendChild(m_document.createTextNode(m_exportBatchInfo.docPageNum.toString()));
+            elem.appendChild(m_document
+                    .createTextNode(m_exportBatchInfo.docPageNum.toString()));
             ebi.appendChild(elem);
             m_rootElement.appendChild(ebi);
 
             m_rootElement.appendChild(cxeRequestTypeElem);
 
-            //now recreate the EventFlowXml String
-            OutputFormat oformat = new OutputFormat(m_document, "UTF8", true);
+            // now recreate the EventFlowXml String
+            OutputFormat oformat = new OutputFormat(m_document, "UTF-8", true);
             oformat.setOmitDocumentType(true);
             oformat.setOmitComments(false);
             oformat.setOmitXMLDeclaration(true);
@@ -409,7 +407,7 @@ class Mapper
 
             XMLSerializer xmlSerializer = new XMLSerializer(oformat);
             StringWriter stringWriter = new StringWriter(m_bufferSize);
-            //restore the DTD
+            // restore the DTD
             stringWriter.write(XmlUtil.formattedEventFlowXmlDtd());
             xmlSerializer.setOutputCharStream(stringWriter);
             xmlSerializer.serialize(m_document);
@@ -425,17 +423,16 @@ class Mapper
     }
 
     /**
-     * Pre 4.3 EventFlowXml did not have the ExportLocation
-     * and LocaleSubDir attributes. ExportDirectory was used as
-     * the locale specific subdir. This migrates to the
-     * new format by replacing "ExportDirectory" with "ExportLocation"
-     * and adding the LocaleSubDir attribute
-     *
+     * Pre 4.3 EventFlowXml did not have the ExportLocation and LocaleSubDir
+     * attributes. ExportDirectory was used as the locale specific subdir. This
+     * migrates to the new format by replacing "ExportDirectory" with
+     * "ExportLocation" and adding the LocaleSubDir attribute
+     * 
      * @param p_targetElem
      */
     private void migrateEventFlowXml(Element p_targetElem)
     {
-        //first replace the ExportDirectory with ExportLocation
+        // first replace the ExportDirectory with ExportLocation
         NodeList nl = p_targetElem.getElementsByTagName("da");
         NodeList nl2 = null;
         Element daElement = null;
@@ -443,19 +440,19 @@ class Mapper
 
         for (int i = 0; i < nl.getLength(); i++)
         {
-            daElement = (Element)nl.item(i);
+            daElement = (Element) nl.item(i);
             if (daElement.getAttribute("name").equals("ExportDirectory"))
             {
-                daElement.setAttribute("name","ExportLocation");
+                daElement.setAttribute("name", "ExportLocation");
                 nl2 = daElement.getElementsByTagName("dv");
                 dvElement = (Element) nl2.item(0);
                 dvElement.getFirstChild().setNodeValue(m_exportLocation);
             }
         }
 
-        //add a new attribute
+        // add a new attribute
         Element newda = (Element) daElement.cloneNode(true);
-        newda.setAttribute("name","LocaleSubDir");
+        newda.setAttribute("name", "LocaleSubDir");
         nl2 = newda.getElementsByTagName("dv");
         dvElement = (Element) nl2.item(0);
         dvElement.getFirstChild().setNodeValue(m_localeSubDir);

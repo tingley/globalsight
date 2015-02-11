@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
@@ -50,14 +49,11 @@ import org.jdom.output.XMLOutputter;
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.config.UserParameterImpl;
-import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SSOUserUtil;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.User.PhoneType;
 import com.globalsight.everest.foundation.UserRoleImpl;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionManager;
@@ -77,6 +73,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.permission.Perm
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
@@ -93,8 +90,6 @@ public class UserMainHandler extends PageHandler
     public static final String MODIFY_USER_WRAPPER = "modifyUserWrapper";
     public static final String ADD_ANOTHER = "addAnother";
     public static final String SEARCH_PARAMS = "searchParams";
-
-    private Map<Long, Company> companyMap = null;
 
     private static int NUM_PER_PAGE = 10;
 
@@ -118,14 +113,21 @@ public class UserMainHandler extends PageHandler
             if (action.equals(USER_ACTION_CREATE_USER))
             {
                 createUser(request);
+                response.sendRedirect("/globalsight/ControlServlet?activityName=users");
+                return;
             }
             else if (action.equals(USER_ACTION_MODIFY_USER))
             {
                 modifyUser(request, false);
+                response.sendRedirect("/globalsight/ControlServlet?activityName=users");
+                return;
             }
             else if (action.equals(USER_ACTION_MODIFY2_USER))
             {
                 modifyUser(request, true);
+                response.sendRedirect("/globalsight/ControlServlet?activityName=users");
+                return;
+
             }
             else if (action.equals("remove"))
             {
@@ -338,21 +340,18 @@ public class UserMainHandler extends PageHandler
                 Element contactInfoNode = new Element("ContactInfo");
                 contactInfoNode.addContent(new Element("Address").setText(user
                         .getAddress() == null ? "" : user.getAddress()));
-                contactInfoNode
-                        .addContent(new Element("HomePhone").setText(user
-                                .getPhoneNumber(PhoneType.HOME) == null ? ""
-                                : user.getPhoneNumber(PhoneType.HOME)));
-                contactInfoNode
-                        .addContent(new Element("WorkPhone").setText(user
-                                .getPhoneNumber(PhoneType.OFFICE) == null ? ""
-                                : user.getPhoneNumber(PhoneType.OFFICE)));
-                contactInfoNode
-                        .addContent(new Element("CellPhone").setText(user
-                                .getPhoneNumber(PhoneType.CELL) == null ? ""
-                                : user.getPhoneNumber(PhoneType.CELL)));
-                contactInfoNode.addContent(new Element("Fax").setText(user
-                        .getPhoneNumber(PhoneType.FAX) == null ? "" : user
-                        .getPhoneNumber(PhoneType.FAX)));
+				contactInfoNode.addContent(new Element("HomePhone")
+						.setText(user.getHomePhoneNumber() == null ? "" : user
+								.getHomePhoneNumber()));
+				contactInfoNode.addContent(new Element("WorkPhone")
+						.setText(user.getOfficePhoneNumber() == null ? ""
+								: user.getOfficePhoneNumber()));
+				contactInfoNode.addContent(new Element("CellPhone")
+						.setText(user.getCellPhoneNumber() == null ? "" : user
+								.getCellPhoneNumber()));
+				contactInfoNode.addContent(new Element("Fax").setText(user
+						.getFaxPhoneNumber() == null ? "" : user
+						.getFaxPhoneNumber()));
                 contactInfoNode
                         .addContent(new Element("EmailAddress").setText(user
                                 .getEmail() == null ? "" : user.getEmail()));
@@ -551,33 +550,17 @@ public class UserMainHandler extends PageHandler
             String fileName = "User_information_" + sdf.format(new Date())
                     + ".xml";
             XMLOutputter XMLOut = new XMLOutputter();
-            XMLOut.output(Doc, new FileOutputStream(fileName));
+            String filePath = AmbFileStoragePathUtils.getFileStorageDirPath()
+                    + File.separator + "tmp";
+            File file = new File(filePath, fileName);
+            file.getParentFile().mkdirs();
+            XMLOut.output(Doc, new FileOutputStream(file));
 
-            ExportUtil.writeToResponse(response, new File(fileName), fileName);
+            ExportUtil.writeToResponse(response, file, fileName);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
-        }
-    }
-
-    private Company getCompanyById(long companyId) throws JobException,
-            RemoteException, GeneralException, NamingException
-    {
-        if (companyMap == null)
-        {
-            companyMap = new HashMap<Long, Company>();
-        }
-        if (companyMap.get(companyId) != null)
-        {
-            return (Company) companyMap.get(companyId);
-        }
-        else
-        {
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    companyId);
-            companyMap.put(companyId, company);
-            return company;
         }
     }
 
@@ -646,6 +629,20 @@ public class UserMainHandler extends PageHandler
                 {
                     CATEGORY.error("Failed to remove user parameters.", e);
                 }
+                
+                try 
+                {
+        			String hql = "from UserRoleImpl a where a.user=:userId";
+        			HashMap map = new HashMap();
+        			map.put("userId", userId);
+        			List roles = HibernateUtil.search(hql, map);
+        			HibernateUtil.delete(roles);
+        			roles = new ArrayList(HibernateUtil.search(hql, map));
+        		} 
+                catch (Exception e) 
+                {
+        			CATEGORY.error(e.getMessage(), e);
+        		}
             }
             else
             {
@@ -736,12 +733,24 @@ public class UserMainHandler extends PageHandler
             HttpSession p_session, UserSearchParams params)
             throws RemoteException, NamingException, GeneralException
     {
-
-        Vector users = UserUtil.getUsersForSearchParams(params);
-
-        filtrateSuperAdmin(p_session, params, users);
         SessionManager sessionMgr = (SessionManager) p_session
                 .getAttribute(SESSION_MANAGER);
+        StringBuffer condition = new StringBuffer();
+        String[][] array = new String[][] {{"uNameFilter","u.userName"},
+        { "ufNameFilter", "u.firstName" },
+        { "ulNameFilter", "u.lastName" },
+        { "uEmailFilter", "u.email" } };
+               
+        for (int i = 0; i < array.length; i++)
+        {
+            makeCondition(sessionMgr, condition, array[i][0], array[i][1]);
+        }
+        
+        Vector users = ServerProxy.getUserManager().getUsers(
+                condition.toString());
+
+        filtrateSuperAdmin(p_session, params, users);
+
         filtrateUsers(users, sessionMgr);
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
@@ -817,6 +826,18 @@ public class UserMainHandler extends PageHandler
                     iter.remove();
                 }
             }
+        }
+    }
+
+    private void makeCondition(SessionManager sessionMgr,
+            StringBuffer condition, String par, String sqlparam)
+    {
+        String uNameFilter = (String) sessionMgr.getAttribute(par);
+        if (StringUtils.isNotBlank(uNameFilter))
+        {
+            condition.append(" and  " + sqlparam + " LIKE '%"
+                    + StringUtil.transactSQLInjection(uNameFilter.trim())
+                    + "%'");
         }
     }
 
@@ -1005,18 +1026,27 @@ public class UserMainHandler extends PageHandler
         // sessionMgr.setAttribute("tmNameFilter", name == null ? "" : name);
         // sessionMgr.setAttribute("tmCompanyFilter", company == null ? "" :
         // company);
-        sessionMgr.setAttribute("uNameFilter", uNameFilter);
+        sessionMgr.setAttribute("uNameFilter", uNameFilter == null ? ""
+                : uNameFilter);
         params.setIdName(uNameFilter);
-        sessionMgr.setAttribute("ufNameFilter", ufNameFilter);
+        sessionMgr.setAttribute("ufNameFilter", ufNameFilter == null ? ""
+                : ufNameFilter);
         params.setFirstName(ufNameFilter);
-        sessionMgr.setAttribute("ulNameFilter", ulNameFilter);
+        sessionMgr.setAttribute("ulNameFilter", ulNameFilter == null ? ""
+                : ulNameFilter);
         params.setLastName(ulNameFilter);
-        sessionMgr.setAttribute("uEmailFilter", uEmailFilter);
+        sessionMgr.setAttribute("uEmailFilter", uEmailFilter == null ? ""
+                : uEmailFilter);
         params.setEmail(uEmailFilter);
-        sessionMgr.setAttribute("uCompanyFilter", uCompanyFilter);
+        sessionMgr.setAttribute("uCompanyFilter", uCompanyFilter == null ? ""
+                : uCompanyFilter);
         // params.setCompany((uCompanyFilter));
-        sessionMgr.setAttribute("uProjectFilter", uProjectFilter);
-        sessionMgr.setAttribute("uPermissionFilter", uPermissionFilter);
+        sessionMgr.setAttribute("uProjectFilter", uProjectFilter == null ? ""
+                : uProjectFilter);
+        sessionMgr.setAttribute("uPermissionFilter",
+                uPermissionFilter == null ? "" : uPermissionFilter);
+
+
     }
 
 }

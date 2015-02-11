@@ -91,7 +91,7 @@ public class TMFuncs extends BasicFuncs {
                     return;
                 }
                 Thread.sleep(15000);
-                clickAndWait(selenium,"idImport");
+                clickAndWait(selenium,"//input[@value='Import...']");
                 
             } else if (iFieldName.equals("import_file")) {
                 

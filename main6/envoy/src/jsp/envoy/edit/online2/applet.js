@@ -158,6 +158,12 @@ function ptagStringToHtml(result)
     result = result.replace(/<SPAN [^>]*>\[\/u(nderline)?\]<\/SPAN>/gi, "</U>");
 
     result = result.replace(/<SPAN [^>]*>\[br(eak)?\]<\/SPAN>/gi, "<BR>");
+    
+    result = result.replace(/<SPAN [^>]*>\[sub(script)?\]<\/SPAN>/gi, "<sub>");
+    result = result.replace(/<SPAN [^>]*>\[\/sub(script)?\]<\/SPAN>/gi, "</sub>");
+    
+    result = result.replace(/<SPAN [^>]*>\[sup(erscript)?\]<\/SPAN>/gi, "<sup>");
+    result = result.replace(/<SPAN [^>]*>\[\/sup(erscript)?\]<\/SPAN>/gi, "</sup>");
 
     // For HTML display, this is not strictly necessary since the
     // Unicode chars alone cause IE to display the segment correctly.
@@ -245,6 +251,12 @@ function DisplayHtmlToPTagString(html)
 
     result = result.replace(/<U>/gi, "[u]");
     result = result.replace(/<\/U>/gi, "[/u]");
+    
+    result = result.replace(/<SUB>/gi, "[sub]");
+    result = result.replace(/<\/SUB>/gi, "[/sub]");
+    
+    result = result.replace(/<SUP>/gi, "[sup]");
+    result = result.replace(/<\/SUP>/gi, "[/sup]");
     
     if(isMF)		//Mozilla Firefox 
     {

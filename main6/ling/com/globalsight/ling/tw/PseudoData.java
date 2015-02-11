@@ -64,6 +64,7 @@ public class PseudoData
     static private Properties m_hPseudoOverrideMap;
     // Tags that may be added by the user for some formats.
     static private Hashtable m_hAddableTagMap;
+    static private Hashtable<String, String> m_hAddableOffice2010TagMap;
     // default resource
     static private ResourceBundle m_defaultResource;
 
@@ -80,6 +81,8 @@ public class PseudoData
 
             // must set m_hAddableTagMap second
             m_hAddableTagMap = mapAddableTags(m_hPseudoOverrideMap);
+            
+            m_hAddableOffice2010TagMap = mapAddable2010Tags();
         }
         catch (Exception e)
         {
@@ -477,6 +480,35 @@ public class PseudoData
         B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</b>");
         B_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
+        
+        //subscript
+        String strSub = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUB);
+
+        Hashtable sub_Data = new Hashtable();
+        sub_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
+        sub_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strSub);
+        sub_Data.put(PseudoConstants.ADDABLE_TMX_ENDPAIRTAG, "ept");
+        sub_Data.put(PseudoConstants.ADDABLE_ATTR_ERASABLE, erasableVal);
+        // B_Data.put(PseudoConstants.ADDABLE_ATTR_MOVABLE, movableVal);
+        // Note: enter raw native content - caller must encode as needed
+        sub_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "<sub>");
+        sub_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</sub>");
+        sub_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
+        sub_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
+        
+        //subscript
+        String strSup = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUP);
+        Hashtable sup_Data = new Hashtable();
+        sup_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
+        sup_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strSup);
+        sup_Data.put(PseudoConstants.ADDABLE_TMX_ENDPAIRTAG, "ept");
+        sup_Data.put(PseudoConstants.ADDABLE_ATTR_ERASABLE, erasableVal);
+        // B_Data.put(PseudoConstants.ADDABLE_ATTR_MOVABLE, movableVal);
+        // Note: enter raw native content - caller must encode as needed
+        sup_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "<sup>");
+        sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</sup>");
+        sup_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
+        sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // BOLD
         String cStrB = TmxTagGenerator
@@ -709,7 +741,7 @@ public class PseudoData
                 .getInlineTypeName(TmxTagGenerator.OFFICE_ITALIC);
         String officeUnderline = TmxTagGenerator
                 .getInlineTypeName(TmxTagGenerator.OFFICE_UNDERLINE);
-
+        
         // =============================================================
         //
         // Note: A Tmx type listed in the following hash will always explicitly
@@ -829,10 +861,32 @@ public class PseudoData
                 "italic", "italic", true, null));
         p.put(officeUnderline, new PseudoOverrideMapItem(officeUnderline, true,
                 "underline", "underline", true, null));
+        
+        p.put(strSub, new PseudoOverrideMapItem(strSub, true,
+                "subscript", "sub", false, sub_Data));
+        p.put(strSup, new PseudoOverrideMapItem(strSup, true,
+                "superscript", "sup", false, sup_Data));
 
         return p;
     }
 
+    private static Hashtable mapAddable2010Tags()
+    {
+        Hashtable map = new Hashtable();
+        map.put("i", "italic");
+        map.put("italic", "italic");
+        map.put("b", "bold");
+        map.put("bold", "bold");
+        map.put("u", "ulined");
+        map.put("underline", "ulined");
+        map.put("sub", "office-sub");
+        map.put("subscript", "office-sub");
+        map.put("sup", "office-sup");
+        map.put("superscript", "office-sup");
+        
+        return map;
+    }
+    
     /*
      * Builds Pseudo-to-Tmx tag mapping for valid addable pseudo tags.
      * 
@@ -913,6 +967,12 @@ public class PseudoData
             {
                 p_strTagName = p_strTagName.toUpperCase();
             }
+        }
+        
+        if (m_nAddablesMode == PseudoConstants.ADDABLES_AS_OFFICE_2010 || m_nAddablesMode == PseudoConstants.ADDABLES_AS_MIF)
+        {
+        	p_strTagName = p_strTagName.toLowerCase();
+        	return m_hAddableOffice2010TagMap.get(p_strTagName);
         }
 
         return (String) m_hAddableTagMap.get(p_strTagName);
@@ -1098,6 +1158,14 @@ public class PseudoData
         else if (p_format.equalsIgnoreCase("xlf"))
         {
             m_nAddablesMode = PseudoConstants.ADDABLES_AS_XLF;
+        }
+        else if (p_format.equalsIgnoreCase("office-xml"))
+        {
+        	m_nAddablesMode = PseudoConstants.ADDABLES_AS_OFFICE_2010;
+        }
+        else if (p_format.equalsIgnoreCase("mif"))
+        {
+        	m_nAddablesMode = PseudoConstants.ADDABLES_AS_MIF;
         }
         else
         {

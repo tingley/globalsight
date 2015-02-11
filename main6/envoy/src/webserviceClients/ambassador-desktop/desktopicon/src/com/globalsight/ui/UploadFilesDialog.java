@@ -238,7 +238,7 @@ public class UploadFilesDialog extends JDialog
             public void run()
             {
                 // copy all files to ArrayList
-                List fileList = new ArrayList();
+                List<File> fileList = new ArrayList<File>();
                 Enumeration files = m_files.elements();
                 double totalFileSize = 0;
                 while (files != null && files.hasMoreElements())
@@ -249,7 +249,7 @@ public class UploadFilesDialog extends JDialog
                 }
 
                 // copy all file profiles to ArrayList
-                List fpList = new ArrayList();
+                List<FileProfile> fpList = new ArrayList<FileProfile>();
                 Enumeration fps = m_fps.elements();
                 while (fps != null && fps.hasMoreElements())
                 {
@@ -442,9 +442,9 @@ public class UploadFilesDialog extends JDialog
                 // Set default values.
                 boolean isOK = true;
                 CreateJobAction createJobAction = new CreateJobAction();
-                Vector filePaths = new Vector();
-                Vector fileProfileIds = new Vector();
-                Vector targetLocales = new Vector();
+                Vector<String> filePaths = new Vector<String>();
+                Vector<String> fileProfileIds = new Vector<String>();
+                Vector<String> targetLocales = new Vector<String>();
                 HashMap<String, String> moduleMappingIds = new HashMap<String, String>();
                 String jobId = null;
 
@@ -495,7 +495,6 @@ public class UploadFilesDialog extends JDialog
                     // Save the comment to a temporay file named as job_name.txt
                     // in CXE folder, And upload the attached file to the folder
                     // named with the job name in the same folder
-                    boolean isAddCommentOk = true;
                     if (comment.length() > 0 || m_attachFile.length() > 0)
                     {
                         try
@@ -517,7 +516,6 @@ public class UploadFilesDialog extends JDialog
                         }
                         catch (Exception e)
                         {
-                            isAddCommentOk = false;
                             isJobCommentAddedOK = false;
 
                             addMsg("Added comment unsuccessfully.");
@@ -527,7 +525,7 @@ public class UploadFilesDialog extends JDialog
                     }
 
                     // Creates the job.
-                    HashMap map = new HashMap();
+                    HashMap<String, Object> map = new HashMap<String, Object>();
                     map.put("jobId", jobId);
                     map.put("comment", comment);
                     map.put("filePaths", filePaths);
@@ -546,27 +544,20 @@ public class UploadFilesDialog extends JDialog
                     isJobCreateOK = false;
 
                     addMsg("Can't create job  with Exception " + e);
-                    log.error("Can't create job  with Exception " + e);
+                    log.error("Can't create job  with Exception " + e, e);
                 }
 
                 // back up job
                 if (isOK)
                 {
-                    String files_info = "";
-                    for (int i = 0; i < m_files.size(); i++)
-                    {
-                        File file = (File) m_files.get(i);
-                        FileProfile fp = (FileProfile) m_fps.get(i);
-                        files_info += ("    File " + (i + 1) + ": "
-                                + file.getAbsolutePath() + " (" + fp.getName()
-                                + " " + getTargetLocales(fp) + ")\n\r");
-                    }
-                    log.info("Job \"" + jobName + "\" information: \n\r"
-                            + files_info);
                     if (!m_isCVSJob)
+                    {
                         backupJob(jobName);
+                    }
                     else
+                    {
                         backupCVSJob(jobName);
+                    }
 
                     jProgressBar.setValue(jProgressBar.getMaximum());
                 }
@@ -629,7 +620,7 @@ public class UploadFilesDialog extends JDialog
         try
         {
             User u = CacheUtil.getInstance().getCurrentUser();
-            List flist = new ArrayList();
+            List<FileMapped> flist = new ArrayList<FileMapped>();
             for (int i = 0; i < m_files.size(); i++)
             {
                 File file = (File) m_files.get(i);
@@ -652,7 +643,7 @@ public class UploadFilesDialog extends JDialog
         try
         {
             User u = CacheUtil.getInstance().getCurrentUser();
-            List flist = new ArrayList();
+            List<FileMapped> flist = new ArrayList<FileMapped>();
             for (int i = 0; i < m_files.size(); i++)
             {
                 File file = (File) m_files.get(i);

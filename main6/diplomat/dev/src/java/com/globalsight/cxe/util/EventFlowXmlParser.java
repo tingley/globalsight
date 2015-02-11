@@ -314,7 +314,7 @@ public class EventFlowXmlParser
      */
     public void reconstructEventFlowXmlStringFromDOM() throws IOException
     {
-        OutputFormat oformat = new OutputFormat(m_document, "UTF8", true);
+        OutputFormat oformat = new OutputFormat(m_document, "UTF-8", true);
 
         oformat.setOmitDocumentType(true);
         oformat.setOmitComments(false);

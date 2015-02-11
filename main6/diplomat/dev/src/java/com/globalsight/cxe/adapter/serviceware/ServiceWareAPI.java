@@ -15,37 +15,33 @@
  *  
  */
 package com.globalsight.cxe.adapter.serviceware;
-import org.apache.log4j.Logger;
-import com.globalsight.util.edit.EditUtil;
-import java.util.Properties;
-import java.util.Locale;
-import java.net.URL;
-import java.io.FileInputStream;
-import com.globalsight.ling.common.URLEncoder;
-import java.io.File;
+
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
 
-//DOM4J
-import org.dom4j.*;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-import com.globalsight.util.XmlParser;
-import com.globalsight.diplomat.util.XmlUtil;
-import com.globalsight.everest.servlet.util.ServerProxy;
+import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Node;
+
+import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.GlobalSightLocale;
-
+import com.globalsight.util.XmlParser;
 
 /**
  * Wraps calls to the ServiceWare HTTP API
  */
 public class ServiceWareAPI
 {
-    static private Logger s_logger = Logger.getLogger("ServiceWare");
+    static private Logger s_logger = Logger.getLogger(ServiceWareAPI.class);
     private static String s_apiUrl = null;
     private static String s_username = null;
     private static String s_password = null;
@@ -54,7 +50,8 @@ public class ServiceWareAPI
 
     static
     {
-        try {
+        try
+        {
             URL url = ServiceWareAPI.class.getResource(PROPERTY_FILE);
             Properties props = new Properties();
             File f = new File(url.toURI().getPath());
@@ -62,18 +59,18 @@ public class ServiceWareAPI
             s_apiUrl = props.getProperty("apiUrl");
             s_username = props.getProperty("username");
             s_password = props.getProperty("password");
-            s_KArea= props.getProperty("KArea");
+            s_KArea = props.getProperty("KArea");
         }
         catch (Exception e)
         {
-            s_logger.error("Cannot use the ServiceWare API since properties are not set.",e);
+            s_logger.error(
+                    "Cannot use the ServiceWare API since properties are not set.",
+                    e);
         }
     }
 
-
     /**
-     * Tries to connect to serviceware, and returns
-     * the sessionID.
+     * Tries to connect to serviceware, and returns the sessionID.
      * 
      * @return String
      * @exception Exception
@@ -90,12 +87,13 @@ public class ServiceWareAPI
         s_logger.debug("URL=" + url.toString());
         String xml = readXml(url.toString());
         s_logger.debug("XML is: " + xml);
-        //now parse the XML to get the sessionId
+        // now parse the XML to get the sessionId
         XmlParser xmlp = XmlParser.hire();
         Document d = xmlp.parseXml(xml);
         Element root = d.getRootElement();
-        List nodes = root.selectNodes("/CreateSessionResponse/return/SessionID");
-        Node node = (Node)nodes.get(0);
+        List nodes = root
+                .selectNodes("/CreateSessionResponse/return/SessionID");
+        Node node = (Node) nodes.get(0);
         String sessionId = node.getText();
         XmlParser.fire(xmlp);
         return sessionId;
@@ -116,12 +114,12 @@ public class ServiceWareAPI
         s_logger.debug("Disconnect result is: " + xml);
     }
 
-
     /**
      * Invokes the URL to use the API and returns the resultant XML document
      * 
-     * @param p_url  ServiceWare call
-     * @return 
+     * @param p_url
+     *            ServiceWare call
+     * @return
      * @exception Exception
      */
     private static String readXml(String p_url) throws Exception
@@ -129,28 +127,26 @@ public class ServiceWareAPI
         URL u = new URL(p_url);
         StringBuffer xml = new StringBuffer();
         InputStream is = u.openStream();
-        BufferedReader br = new BufferedReader (new InputStreamReader(is));
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String s;
-        while (null != (s=br.readLine()))
+        while (null != (s = br.readLine()))
         {
             xml.append(s);
-            xml.append("\r\n"); //replace the lost newline
+            xml.append("\r\n"); // replace the lost newline
         }
         return xml.toString();
     }
-
 
     /**
      * Gets the specified Knowledge Object
      * 
      * @param p_sessionId
      * @param p_koid
-     * @return 
+     * @return
      * @exception Exception
      */
-    public static String getKnowledgeObjectXml(String p_sessionId,
-                                               String p_koid)
-    throws Exception
+    public static String getKnowledgeObjectXml(String p_sessionId, String p_koid)
+            throws Exception
     {
         StringBuffer url = new StringBuffer(s_apiUrl);
         url.append("?Action=GetKOs&SessionID=");
@@ -168,12 +164,11 @@ public class ServiceWareAPI
      * 
      * @param p_sessionId
      * @param p_conceptId
-     * @return 
+     * @return
      * @exception Exception
      */
     public static String getConceptObjectXml(String p_sessionId,
-                                             String p_conceptId)
-    throws Exception
+            String p_conceptId) throws Exception
     {
         StringBuffer url = new StringBuffer(s_apiUrl);
         url.append("?Action=GetConcepts&SessionID=");
@@ -187,13 +182,15 @@ public class ServiceWareAPI
     }
 
     /**
-     * Returns a Hashtable containing all the Knowledge Object Ids and their names
+     * Returns a Hashtable containing all the Knowledge Object Ids and their
+     * names
      * 
      * @param p_sessionId
-     * @return 
+     * @return
      * @exception Exception
      */
-    public static Hashtable getKnowledgeObjects(String p_sessionId) throws Exception
+    public static Hashtable getKnowledgeObjects(String p_sessionId)
+            throws Exception
     {
         Hashtable ht = new Hashtable();
         StringBuffer url = new StringBuffer(s_apiUrl);
@@ -206,37 +203,36 @@ public class ServiceWareAPI
         XmlParser xmlp = XmlParser.hire();
         Document d = xmlp.parseXml(xml);
         Element root = d.getRootElement();
-        List idnodes = root.selectNodes("/GetKOsResponse/return/SessionKOs/KO/KOID");
-        List namenodes = root.selectNodes("/GetKOsResponse/return/SessionKOs/KO/Name");
-        for (int i=0; i < idnodes.size(); i++)
+        List idnodes = root
+                .selectNodes("/GetKOsResponse/return/SessionKOs/KO/KOID");
+        List namenodes = root
+                .selectNodes("/GetKOsResponse/return/SessionKOs/KO/Name");
+        for (int i = 0; i < idnodes.size(); i++)
         {
             Node id = (Node) idnodes.get(i);
             Node name = (Node) namenodes.get(i);
-            s_logger.debug("Inserting: " + id.getText() + ","
-                               + name.getText());
-            ht.put(id.getText(),name.getText());
+            s_logger.debug("Inserting: " + id.getText() + "," + name.getText());
+            ht.put(id.getText(), name.getText());
         }
         XmlParser.fire(xmlp);
         return ht;
     }
 
     /**
-     * Updates the given knowledge object with the new name and short description
+     * Updates the given knowledge object with the new name and short
+     * description
      * 
      * @param p_sessionId
      * @param p_KOID
      * @param p_newName
      * @param p_newShortDesc
      * @param p_targetLocale
-     * @return 
+     * @return
      * @exception Exception
      */
     public static String updateKnowledgeObject(String p_sessionId,
-                                               String p_KOID,
-                                               String p_newName,
-                                               String p_newShortDesc,
-                                               String p_targetLocale)
-    throws Exception
+            String p_KOID, String p_newName, String p_newShortDesc,
+            String p_targetLocale) throws Exception
     {
         StringBuffer url = new StringBuffer(s_apiUrl);
         url.append("?Action=UpdateKO&SessionID=");
@@ -248,8 +244,8 @@ public class ServiceWareAPI
         url.append("&ShortDescription=");
         url.append(URLEncoder.encode(p_newShortDesc));
         url.append("&Language=");
-        Locale targetLocale= GlobalSightLocale.makeLocaleFromString(
-            p_targetLocale);
+        Locale targetLocale = GlobalSightLocale
+                .makeLocaleFromString(p_targetLocale);
         String swLanguageName = getServiceWareLanguageName(targetLocale);
         url.append(URLEncoder.encode(swLanguageName));
         url.append("&UpdateOption=OverwriteAll");
@@ -268,15 +264,12 @@ public class ServiceWareAPI
      * @param p_newName
      * @param p_newShortDesc
      * @param p_targetLocale
-     * @return 
+     * @return
      * @exception Exception
      */
     public static String updateConceptObject(String p_sessionId,
-                                             String p_conceptId,
-                                             String p_newName,
-                                             String p_newShortDesc,
-                                             String p_targetLocale)
-    throws Exception
+            String p_conceptId, String p_newName, String p_newShortDesc,
+            String p_targetLocale) throws Exception
     {
         StringBuffer url = new StringBuffer(s_apiUrl);
         url.append("?Action=UpdateConcept&SessionID=");
@@ -288,8 +281,8 @@ public class ServiceWareAPI
         url.append("&ShortDescription=");
         url.append(URLEncoder.encode(p_newShortDesc));
         url.append("&Language=");
-        Locale targetLocale= GlobalSightLocale.makeLocaleFromString(
-            p_targetLocale);
+        Locale targetLocale = GlobalSightLocale
+                .makeLocaleFromString(p_targetLocale);
         String swLanguageName = getServiceWareLanguageName(targetLocale);
         url.append(URLEncoder.encode(swLanguageName));
         url.append("&UpdateOption=OverwriteAll");
@@ -302,7 +295,7 @@ public class ServiceWareAPI
 
     public static String getServiceWareLanguageName(Locale p_locale)
     {
-        //Japanese, Japan (ja_JP)
+        // Japanese, Japan (ja_JP)
         StringBuffer sb = new StringBuffer(p_locale.getDisplayLanguage());
         sb.append(", ");
         sb.append(p_locale.getDisplayCountry());
@@ -313,46 +306,49 @@ public class ServiceWareAPI
     }
 
     /**
-     * Takes in a serviceware xml and gets all IDs, names,
-     * and short descriptions from it for updating
-     * ServiceWare
+     * Takes in a serviceware xml and gets all IDs, names, and short
+     * descriptions from it for updating ServiceWare
      * 
      * @param p_sessionId
      * @param p_serviceWareXml
-     * @return 
+     * @return
      */
-    public static void updateKnowledgeAndConceptObjects(
-        String p_sessionId, String p_serviceWareXml, String p_targetLocale)
-    throws Exception
+    public static void updateKnowledgeAndConceptObjects(String p_sessionId,
+            String p_serviceWareXml, String p_targetLocale) throws Exception
     {
         XmlParser xmlp = XmlParser.hire();
         Document d = xmlp.parseXml(p_serviceWareXml);
         Element root = d.getRootElement();
-        String koID = root.selectSingleNode("/serviceWareXml/knowledgeObj/@id").getText();
-        String koName = root.selectSingleNode("/serviceWareXml/knowledgeObj/knowledgeObjName").getText();
-        String koShortDesc = root.selectSingleNode("/serviceWareXml/knowledgeObj/knowledgeObjShortDesc").getText();
-        ServiceWareAPI.updateKnowledgeObject(
-            p_sessionId,koID,koName,koShortDesc,p_targetLocale);
+        String koID = root.selectSingleNode("/serviceWareXml/knowledgeObj/@id")
+                .getText();
+        String koName = root.selectSingleNode(
+                "/serviceWareXml/knowledgeObj/knowledgeObjName").getText();
+        String koShortDesc = root.selectSingleNode(
+                "/serviceWareXml/knowledgeObj/knowledgeObjShortDesc").getText();
+        ServiceWareAPI.updateKnowledgeObject(p_sessionId, koID, koName,
+                koShortDesc, p_targetLocale);
 
-        //now update the concepts
-        List conceptNodes = root.selectNodes("/serviceWareXml/knowledgeObj/concept");
-        for (int i=0; i < conceptNodes.size(); i++)
+        // now update the concepts
+        List conceptNodes = root
+                .selectNodes("/serviceWareXml/knowledgeObj/concept");
+        for (int i = 0; i < conceptNodes.size(); i++)
         {
             Node conceptNode = (Node) conceptNodes.get(i);
             String conceptId = conceptNode.selectSingleNode("@id").getText();
-            String conceptName = conceptNode.selectSingleNode("conceptName").getText();
-            String conceptShortDesc = conceptNode.selectSingleNode("conceptShortDesc").getText();
-            ServiceWareAPI.updateConceptObject(
-                p_sessionId, conceptId, conceptName, conceptShortDesc, p_targetLocale);
+            String conceptName = conceptNode.selectSingleNode("conceptName")
+                    .getText();
+            String conceptShortDesc = conceptNode.selectSingleNode(
+                    "conceptShortDesc").getText();
+            ServiceWareAPI.updateConceptObject(p_sessionId, conceptId,
+                    conceptName, conceptShortDesc, p_targetLocale);
         }
         XmlParser.fire(xmlp);
     }
 
     public static String makeIsoSafe(String s) throws Exception
     {
-        return new String (s.getBytes("UTF8"),"ISO8859_1");
+        return new String(s.getBytes("UTF8"), "ISO8859_1");
     }
-
 
     /**
      * Is the ServiceWareIntegration installed?
@@ -364,4 +360,3 @@ public class ServiceWareAPI
         return new Boolean(ServiceWareAdapter.isInstalled());
     }
 }
-

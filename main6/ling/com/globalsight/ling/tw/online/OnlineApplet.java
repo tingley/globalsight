@@ -72,6 +72,7 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
     private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
+    private String m_internalErrMsg = "";
 
     /**
      * Cleans up whatever resources are being held. If the applet is active it
@@ -147,7 +148,9 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         if (m_bPTagResourcesInitialized)
         {
             m_withPtags.setPTagTargetString(p_target);
-            return m_errChecker.check(m_withPtags);
+            String errors = m_errChecker.check(m_withPtags);
+            m_internalErrMsg = m_errChecker.geStrInternalErrMsg();
+            return errors;
         }
         else
         {
@@ -545,9 +548,11 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
             // compact/verbose mode.
             m_withPtags.setPTagTargetString(p_target);
 
-            return m_errChecker.check(m_withPtags, p_sourceWithSubContent,
+            String errors = m_errChecker.check(m_withPtags, p_sourceWithSubContent,
                     p_gxmlMaxLen, p_gxmlStorageEncoding, p_nativeContentMaxLen,
                     p_nativeStorageEncoding);
+            m_internalErrMsg = m_errChecker.geStrInternalErrMsg();
+            return errors;
         }
         else
         {
@@ -562,6 +567,23 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         {
             m_errChecker.setStyles(styles);
         }
+    }
+
+    public String getInternalErrMsg()
+    {
+        if (m_internalErrMsg != null && m_internalErrMsg.contains("&"))
+        {
+            return m_xmlCodec.decodeString(m_internalErrMsg);
+        }
+        else
+        {
+            return m_internalErrMsg;
+        }
+    }
+
+    public void setInternalErrMsg(String internalErrMsg)
+    {
+        this.m_internalErrMsg = internalErrMsg;
     }
 
     public static void main(String[] args)
@@ -589,8 +611,8 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         	    + "&lt;FTag `&apos;&gt;"
         	    + "&lt;FLocked No&gt;"
         	    + "&gt; # end of Font"
-        	    + "&lt;String `</ph> µL";
-        String target = "1 L = 10[superscript1]3[x2] mL = 10[superscript3]6[x4] µL--Changed";
+        	    + "&lt;String `</ph> ï¿½L";
+        String target = "1 L = 10[superscript1]3[x2] mL = 10[superscript3]6[x4] ï¿½L--Changed";
 //      String diplomat = "1g = 10<bpt isTranslate=\"true\" i=\"3\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"2\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>3<ept i=\"3\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>mg = 10<bpt isTranslate=\"true\" i=\"5\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"4\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>6<ept i=\"5\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>ug ";
 //      String target = "1g = 10[superscript2]3[/superscript2]mg = 10[superscript4]6[/superscript4]ug===";
         

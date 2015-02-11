@@ -361,6 +361,18 @@ function initRichEdit(el)
                 getPTag(this.verbosePTags ? "[bold]"  : "[b]"),
                 getPTag(this.verbosePTags ? "[/bold]" : "[/b]"));
         }
+        
+        el.makeSub = function () {
+            this.surroundSelection(
+                getPTag(this.verbosePTags ? "[subscript]"  : "[sub]"),
+                getPTag(this.verbosePTags ? "[/subscript]" : "[/sub]"));
+        }
+        
+        el.makeSup = function () {
+            this.surroundSelection(
+                getPTag(this.verbosePTags ? "[superscript]"  : "[sup]"),
+                getPTag(this.verbosePTags ? "[/superscript]" : "[/sup]"));
+        }
 
         el.makeItalic = function () {
             this.surroundSelection(
@@ -380,6 +392,14 @@ function initRichEdit(el)
 
         el.addBrackets = function () {
             this.surroundSelection(getPTag("[["),getPTag("]"));
+        }
+        
+        el.setSub = function () {
+            return this.execCommand("subscript");
+        }
+        
+        el.setSup = function () {
+        	return this.execCommand("superscript");
         }
 
         el.setBold = function () {

@@ -47,6 +47,8 @@ public class ExportParameters implements java.io.Serializable
     private String m_exportLocation = null;
     private String m_localeSubDir = null;
     private int m_bomType = 0;
+    private int m_xlfSrcAsTrg = -1;
+
     // For documentum Job
     private long m_workflowId = 0;
     private String m_newObjId = null;
@@ -69,8 +71,8 @@ public class ExportParameters implements java.io.Serializable
     /**
      * Constructor used for automatic export.
      * 
-     * @param p_workflow -
-     *            The workflow which the selected pages to be exported belong
+     * @param p_workflow
+     *            - The workflow which the selected pages to be exported belong
      *            to.
      */
     public ExportParameters(Workflow p_workflow) throws PageException
@@ -83,30 +85,30 @@ public class ExportParameters implements java.io.Serializable
      * Constructor used for manual export since a target charset and export
      * directory could be defined.
      * 
-     * @param p_workflow -
-     *            The workflow where the selected pages to be exported belong
+     * @param p_workflow
+     *            - The workflow where the selected pages to be exported belong
      *            to.
-     * @param p_exportCodeset -
-     *            The target locale's charset.
-     * @param p_exportLocation -
-     *            The export location for the target pages
-     * @param p_localeSubdir --
-     *            locale or language
+     * @param p_exportCodeset
+     *            - The target locale's charset.
+     * @param p_exportLocation
+     *            - The export location for the target pages
+     * @param p_localeSubDir
+     *            - locale or language
+     * @param p_bomType
+     *            - UTF-8 Byte Order Mark
      */
     public ExportParameters(Workflow p_workflow, String p_exportCodeset,
             String p_exportLocation, String p_localeSubDir, int p_bomType)
             throws PageException
     {
         this(p_workflow, p_exportCodeset, p_exportLocation, p_localeSubDir,
-                p_bomType,
-                ExportConstants.MANUAL_EXPORT);
+                p_bomType, ExportConstants.MANUAL_EXPORT);
     }
 
     // internal constructor used for setting the export parameters
     public ExportParameters(Workflow p_workflow, String p_exportCodeset,
             String p_exportLocation, String p_localeSubDir, int p_bomType,
-            String p_type)
-            throws PageException
+            String p_type) throws PageException
     {
         try
         {
@@ -115,10 +117,12 @@ public class ExportParameters implements java.io.Serializable
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_workflow.getId()) };
+            String[] args =
+            { String.valueOf(p_workflow.getId()) };
 
-            s_category.debug("ExportParameters :: setExportParameters -- "
-                    + e.getMessage(), e);
+            s_category.debug(
+                    "ExportParameters :: setExportParameters -- "
+                            + e.getMessage(), e);
 
             throw new PageException(
                     PageException.MSG_FAILED_TO_SET_EXPORT_PARAMETER, args, e);
@@ -172,10 +176,10 @@ public class ExportParameters implements java.io.Serializable
     {
         return m_exportLocation;
     }
-    
+
     public void setExportLocation(String p_exportLocation)
     {
-    	this.m_exportLocation = p_exportLocation;
+        this.m_exportLocation = p_exportLocation;
     }
 
     /**
@@ -278,12 +282,11 @@ public class ExportParameters implements java.io.Serializable
             {
                 m_isJobDone = true;
             }
-            companyId = p_workflow.getJob().getCompanyId();
+            companyId = String.valueOf(p_workflow.getJob().getCompanyId());
         }
 
         m_localeSubDir = p_localeSubDir == null ? getLocaleSubDirType(p_workflow
-                .getTargetLocale().toString())
-                : p_localeSubDir;
+                .getTargetLocale().toString()) : p_localeSubDir;
         m_exportLocation = p_exportLocation == null ? lookupDefaultExportLocation(companyId)
                 : p_exportLocation;
         m_bomType = p_bomType;
@@ -356,7 +359,8 @@ public class ExportParameters implements java.io.Serializable
      * 
      * @return the default export location (may be CXE docs dir)
      */
-    private String lookupDefaultExportLocation(String companyId) throws Exception
+    private String lookupDefaultExportLocation(String companyId)
+            throws Exception
     {
         // Modify this code to return the user's default preference
         // just return the CXE docs dir for now
@@ -388,5 +392,15 @@ public class ExportParameters implements java.io.Serializable
     public int getBOMType()
     {
         return m_bomType;
+    }
+
+    public void setXlfSrcAsTrg(int p_value)
+    {
+        this.m_xlfSrcAsTrg = p_value;
+    }
+
+    public int getXlfSrcAsTrg()
+    {
+        return this.m_xlfSrcAsTrg;
     }
 }

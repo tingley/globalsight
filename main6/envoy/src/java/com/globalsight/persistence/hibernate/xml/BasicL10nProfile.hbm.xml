@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
     <class name="com.globalsight.everest.foundation.BasicL10nProfile"
@@ -30,10 +28,12 @@
             length="1" not-null="true" />
         <property name="isExactMatchEditing"
             column="IS_EXACT_MATCH_EDIT" type="yes_no" not-null="false" />
+        <property name="TMEditType" column="TM_EDIT_TYPE" type="int"
+            length="1" not-null="true" />
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" />
-        <property name="companyId" column="COMPANYID" type="string"
-            not-null="true" />
+        <property name="companyId" length="20" column="COMPANYID"
+			type="long" not-null="true" />
 
         <property name="tuTypes" column="JOB_EXCLUDE_TU_TYPES"
                 type="string" length="2000" not-null="false" />

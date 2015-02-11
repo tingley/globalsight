@@ -1,0 +1,33 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class
+		name="com.globalsight.everest.foundation.ContainerRoleImpl"
+		table="CONTAINER_ROLE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="sourceLocale" column="SOURCE_LOCALE" type="string"
+			not-null="true" unique="false" />
+		<property name="targetLocale" column="TARGET_LOCALE" type="string"
+			not-null="true" unique="false" />
+		<property name="name" column="NAME" type="string" />
+		<property name="state" column="STATE" type="int" />
+
+		<many-to-one name="activity" column="ACTIVITY_ID"
+			class="com.globalsight.everest.workflow.Activity" />
+
+		<bag name="userIds" table="CONTAINER_ROLE_USER_IDS">
+			<key column="ROLE_ID" />
+			<element column="USER_ID" type="string" />
+		</bag>
+
+		<bag name="rateSet" table="CONTAINER_ROLE_RATE" cascade="save-update">
+			<key column="ROLE_ID" />
+			<many-to-many class="com.globalsight.everest.costing.Rate"
+				column="RATE_ID" />
+		</bag>
+	</class>
+
+</hibernate-mapping>

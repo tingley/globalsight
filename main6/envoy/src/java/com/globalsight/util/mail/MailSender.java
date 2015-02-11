@@ -17,33 +17,25 @@
 
 package com.globalsight.util.mail;
 
-
 //JDK
 import java.io.File;
 import java.io.FileOutputStream;
-import java.rmi.RemoteException;
-import java.text.MessageFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.ResourceBundle;
 
-// JavaMail
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.Authenticator;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.AddressException;
+import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
-import javax.activation.DataHandler;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -51,33 +43,16 @@ import javax.net.ssl.SSLException;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.permission.Permission;
-
-// GlobalSight
-import com.globalsight.config.UserParameter;
-import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.foundation.EmailInformation;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.usermgr.UserManagerWLRemote;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.workflow.EventNotificationHelper;
-import com.globalsight.util.resourcebundle.LocaleWrapper;
-
 
 /**
-* This class actually wrap the javax.mail stuff to send emails.
-*/
+ * This class actually wrap the javax.mail stuff to send emails.
+ */
 
 public class MailSender
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            MailSender.class.getName());
+    private static Logger s_logger = Logger.getLogger(MailSender.class
+            .getName());
 
     private static MailSender s_instance = null;
     private static String lock = new String("lock");
@@ -89,117 +64,103 @@ public class MailSender
     private static String MAIL_SERVER = "mailserver";
     private static String CHARSET_UTF8 = "UTF-8";
     private static String MAIL_SMTP = "smtp";
-    
+
     // setttings
     private String m_transportProtocol = "";
     private String m_mailServer = "";
     private String m_mailUser = "";
     private String m_mailPwd = "";
-    
-    //////////////////////////////////////////////////////////////////////////////////
-    //  Begin:  Constructor
-    //////////////////////////////////////////////////////////////////////////////////
+
+    // ////////////////////////////////////////////////////////////////////////////////
+    // Begin: Constructor
+    // ////////////////////////////////////////////////////////////////////////////////
     /**
-    * Construct a MailSender for sending email.
-    * @exception MailerException - wraps a ConfigException, and GeneralException.
-    */
+     * Construct a MailSender for sending email.
+     * 
+     * @exception MailerException
+     *                - wraps a ConfigException, and GeneralException.
+     */
     private MailSender() throws MailerException
     {
-        setupSession();        
+        setupSession();
     }
-    //////////////////////////////////////////////////////////////////////////////////
-    //  End:  Constructor
-    //////////////////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //  Begin:  Local Methods
-    //////////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////////
+    // End: Constructor
+    // ////////////////////////////////////////////////////////////////////////////////
+
+    // ////////////////////////////////////////////////////////////////////////////////
+    // Begin: Local Methods
+    // ////////////////////////////////////////////////////////////////////////////////
 
     static public MailSender getInstance() throws MailerException
     {
-	synchronized (lock)
-	{
-	    if (s_instance==null)
-		s_instance = new MailSender();
-	}
-	return s_instance;
+        synchronized (lock)
+        {
+            if (s_instance == null)
+                s_instance = new MailSender();
+        }
+        return s_instance;
     }
-
 
     // basic setup - getting mail server used for the JavaMail Session.
     private void setupSession() throws MailerException
     {
-//        Properties mailProps = new Properties();
-//        String smtpServer = getSMTPServer();
-//        mailProps.put(HOST,smtpServer);
-//        String authEnabled = "false";
-//        try
-//        {
-//            SystemConfiguration sc = SystemConfiguration.getInstance();
-//            authEnabled = sc.getStringParameter(
-//                sc.EMAIL_AUTHENTICATION_ENABLED);            
-//        }
-//        catch (Exception ce)
-//        {
-//            s_logger.error(
-//                "Error getting email authentication parameters", ce);
-//        }        
-//        mailProps.put(SMTP_AUTH, authEnabled); 
-//        m_session = Session.getInstance(mailProps, getAuthenticator(
-//            Boolean.valueOf(authEnabled).booleanValue()));
-        
         Context initCtx;
         try
         {
             initCtx = new InitialContext();
             try
             {
-                m_session = (Session) initCtx.lookup("java:/Mail");
+                m_session = (Session) initCtx.lookup("java:jboss/mail/Default");
             }
             catch (NamingException e)
             {
-                throw new MailerException(MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM,
+                throw new MailerException(
+                        MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM,
                         null, e);
             }
 
             if (m_session != null)
             {
-                m_transportProtocol = m_session.getProperty("mail.transport.protocol");
+                m_transportProtocol = m_session
+                        .getProperty("mail.transport.protocol");
                 m_mailServer = m_session.getProperty("mail.smtp.host");
                 m_mailUser = m_session.getProperty("mail.smtp.user");
                 SystemConfiguration sc = SystemConfiguration.getInstance();
-                m_mailPwd = sc.getStringParameter("mailserver.account.password");
+                m_mailPwd = sc
+                        .getStringParameter("mailserver.account.password");
             }
         }
         catch (NamingException e)
         {
-            throw new MailerException(MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM, null, e);
+            throw new MailerException(
+                    MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM, null,
+                    e);
         }
         catch (Exception ce)
         {
             s_logger.error("Error getting email authentication parameters", ce);
-            throw new MailerException(MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM, null, ce);
+            throw new MailerException(
+                    MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM, null,
+                    ce);
         }
     }
 
-
     // perform authentication if it's required.
     private Authenticator getAuthenticator(boolean authEnabled)
-    {        
+    {
         return authEnabled ? new EmailAuthenticator() : null;
     }
 
-
-    /* 
-     * Add the attachments to the message.
-     * Convert the string attachments to files for
-     * attachment to the email message.
+    /*
+     * Add the attachments to the message. Convert the string attachments to
+     * files for attachment to the email message.
      */
-    private void addAttachments(Multipart p_msgPart,
-                                String[] p_attachments)
-        throws Exception
-    {  
-        for (int i=0 ; i < p_attachments.length ; i++)
+    private void addAttachments(Multipart p_msgPart, String[] p_attachments)
+            throws Exception
+    {
+        for (int i = 0; i < p_attachments.length; i++)
         {
             // Add each attachment
             MimeBodyPart messageBodyPart = new MimeBodyPart();
@@ -207,17 +168,17 @@ public class MailSender
             File file = new File(p_attachments[i]);
             String fileName = "Attachment" + i;
             DataSource source = null;
-            if(!file.exists())
+            if (!file.exists())
             {
-                //create the file and write out the string
-                File temp = File.createTempFile("GS"+fileName,"xml");
+                // create the file and write out the string
+                File temp = File.createTempFile("GS" + fileName, "xml");
                 FileOutputStream streamOut = new FileOutputStream(temp);
                 streamOut.write(p_attachments[i].getBytes());
                 source = new FileDataSource(temp);
             }
             else
             {
-                //add the file to the email
+                // add the file to the email
                 fileName = file.getName();
                 source = new FileDataSource(file.getAbsoluteFile());
             }
@@ -225,9 +186,8 @@ public class MailSender
             messageBodyPart.setDataHandler(new DataHandler(source));
             messageBodyPart.setFileName(fileName);
             p_msgPart.addBodyPart(messageBodyPart);
-        }        
+        }
     }
-
 
     // get the SMTP mail server from the property file.
     private String getSMTPServer() throws MailerException
@@ -236,81 +196,92 @@ public class MailSender
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            smtpServer = sc.getStringParameter(MAIL_SERVER);            
+            smtpServer = sc.getStringParameter(MAIL_SERVER);
         }
-        catch (Exception ce) //ConfigException and GeneralException
+        catch (Exception ce) // ConfigException and GeneralException
         {
             throw new MailerException(
-                MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM,
-                null, ce);
-        }        
+                    MailerException.MSG_FAILED_TO_RETRIEVE_CONFIG_PARAM, null,
+                    ce);
+        }
 
         return smtpServer;
     }
 
-    // Parse the given comma separated sequence of addresses into InternetAddress objects. 
+    // Parse the given comma separated sequence of addresses into
+    // InternetAddress objects.
     // Addresses must follow RFC822
-    private InternetAddress[] parse(String p_addresslist) 
+    private InternetAddress[] parse(String p_addresslist)
     {
         try
         {
-        	return InternetAddress.parse(p_addresslist);
+            return InternetAddress.parse(p_addresslist);
         }
         catch (AddressException ae)
         {
-        	return new InternetAddress[0];
+            return new InternetAddress[0];
         }
     }
 
     /*
-    * Send the specified message to the person(s) specified.
-    * @param  p_sendFrom - The email address of the sender.
-    * @param  p_sendTo - The email address(es) where the message will be sent to.
-    * @param  p_sendCc - The email address(es) of the "carbon copy" recipient(s).
-    * @param  p_sendBcc - The email address(es) of "blind carbon copy" recipient(s).
-    * @param  p_subject - The subject of this email.
-    * @param  p_message - The text that is the message's content.
-    * @param  p_attachments - Attachments to add to the email.  They are
-    *                         strings that are turned into files for attaching.
-    *                         This can be null if no attachments.
-    * @exception MailerException - wraps JavaMail's MessagingException.
-    */
-    public void sendMail(String p_sendFrom, String p_sendTo, 
-                          String p_sendCc, String p_sendBcc, 
-                          String p_subject, String p_message,
-                          String[] p_attachments) 
-    throws MailerException
+     * Send the specified message to the person(s) specified.
+     * 
+     * @param p_sendFrom - The email address of the sender.
+     * 
+     * @param p_sendTo - The email address(es) where the message will be sent
+     * to.
+     * 
+     * @param p_sendCc - The email address(es) of the "carbon copy"
+     * recipient(s).
+     * 
+     * @param p_sendBcc - The email address(es) of "blind carbon copy"
+     * recipient(s).
+     * 
+     * @param p_subject - The subject of this email.
+     * 
+     * @param p_message - The text that is the message's content.
+     * 
+     * @param p_attachments - Attachments to add to the email. They are strings
+     * that are turned into files for attaching. This can be null if no
+     * attachments.
+     * 
+     * @exception MailerException - wraps JavaMail's MessagingException.
+     */
+    public void sendMail(String p_sendFrom, String p_sendTo, String p_sendCc,
+            String p_sendBcc, String p_subject, String p_message,
+            String[] p_attachments) throws MailerException
     {
         try
         {
             // create a MIME style email message.
             MimeMessage msg = new MimeMessage(m_session);
-			try 
-			{
-				// sender's address (from...)
-				msg.setFrom(new InternetAddress(p_sendFrom));
-			} catch (Exception e) 
-			{
-				s_logger.warn("Unable to send to mail from " + p_sendFrom
-						+ "; FROM email was invalid");
-				return;
-			}
-            // set the "To" recepients
-            if (!setRecipients(p_sendTo, msg, Message.RecipientType.TO)) 
+            try
             {
-            	s_logger.warn("Unable to send to mail from " + p_sendFrom +
-            			" to " + p_sendTo + "; TO email was invalid");
-            	return;
+                // sender's address (from...)
+                msg.setFrom(new InternetAddress(p_sendFrom));
+            }
+            catch (Exception e)
+            {
+                s_logger.warn("Unable to send to mail from " + p_sendFrom
+                        + "; FROM email was invalid");
+                return;
+            }
+            // set the "To" recepients
+            if (!setRecipients(p_sendTo, msg, Message.RecipientType.TO))
+            {
+                s_logger.warn("Unable to send to mail from " + p_sendFrom
+                        + " to " + p_sendTo + "; TO email was invalid");
+                return;
             }
             // set the "CC" recepients
-			if (p_sendCc != null && !"".equals(p_sendCc)
-					&& !"null".equalsIgnoreCase(p_sendCc))
-				setRecipients(p_sendCc, msg, Message.RecipientType.CC);
-			// set the "BCC" recepients
-			if (p_sendBcc != null && !"".equals(p_sendBcc)
-					&& !"null".equalsIgnoreCase(p_sendBcc))
-				setRecipients(p_sendBcc, msg, Message.RecipientType.BCC);
-            
+            if (p_sendCc != null && !"".equals(p_sendCc)
+                    && !"null".equalsIgnoreCase(p_sendCc))
+                setRecipients(p_sendCc, msg, Message.RecipientType.CC);
+            // set the "BCC" recepients
+            if (p_sendBcc != null && !"".equals(p_sendBcc)
+                    && !"null".equalsIgnoreCase(p_sendBcc))
+                setRecipients(p_sendBcc, msg, Message.RecipientType.BCC);
+
             // set the subject and date
             msg.setSubject(p_subject, CHARSET_UTF8);
             msg.setSentDate(new Date());
@@ -319,9 +290,10 @@ public class MailSender
             MimeMultipart multipart = new MimeMultipart("alternative");
             MimeBodyPart textPart = new MimeBodyPart();
             MimeBodyPart htmlPart = new MimeBodyPart();
-            textPart.setText(MailerHelper.getTextContext(p_message), CHARSET_UTF8);
-            htmlPart.setDataHandler(new DataHandler(MailerHelper.getHTMLContext(p_message), 
-                                                    "text/html;charset=\"UTF-8\""));
+            textPart.setText(MailerHelper.getTextContext(p_message),
+                    CHARSET_UTF8);
+            htmlPart.setDataHandler(new DataHandler(MailerHelper
+                    .getHTMLContext(p_message), "text/html;charset=\"UTF-8\""));
             multipart.addBodyPart(textPart);
             multipart.addBodyPart(htmlPart);
 
@@ -333,9 +305,9 @@ public class MailSender
 
             // Put parts in message
             msg.setContent(multipart);
-            
+
             // now send the message...
-            //Transport.send(msg);
+            // Transport.send(msg);
             Transport tr = null;
             try
             {
@@ -347,8 +319,8 @@ public class MailSender
                 String mark = "plaintext connection";
                 Throwable cause = e.getCause();
                 String emsg = e.getMessage() == null ? "" : e.getMessage();
-                String causeMsg = (cause == null || cause.getMessage() == null) ? "" : cause
-                        .getMessage();
+                String causeMsg = (cause == null || cause.getMessage() == null) ? ""
+                        : cause.getMessage();
                 if ((e instanceof SSLException || cause instanceof SSLException)
                         && (emsg.contains(mark) || causeMsg.contains(mark)))
                 {
@@ -367,62 +339,56 @@ public class MailSender
         }
         catch (Exception e)
         {
-        	String[] args = new String[3];
-        	args[0] = p_sendFrom;
-        	String sendTo = p_sendTo;
-			if ((p_sendCc != null) && (!p_sendCc.equals(""))
-					&& !"null".equalsIgnoreCase(p_sendCc)) {
-				sendTo = sendTo + " and Cc to: " + p_sendCc;
-			}
-			if ((p_sendBcc != null) && (!p_sendBcc.equals(""))
-					&& !"null".equalsIgnoreCase(p_sendBcc)) {
-				sendTo = sendTo + " and Bcc to: " + p_sendBcc;
-			}
-        	args[1] = sendTo;        	
-        	args[2] = p_subject;
-            throw new MailerException(MailerException
-                                      .MSG_FAILED_TO_SEND_EMAIL,
-                                      args, e);
-         
+            String[] args = new String[3];
+            args[0] = p_sendFrom;
+            String sendTo = p_sendTo;
+            if ((p_sendCc != null) && (!p_sendCc.equals(""))
+                    && !"null".equalsIgnoreCase(p_sendCc))
+            {
+                sendTo = sendTo + " and Cc to: " + p_sendCc;
+            }
+            if ((p_sendBcc != null) && (!p_sendBcc.equals(""))
+                    && !"null".equalsIgnoreCase(p_sendBcc))
+            {
+                sendTo = sendTo + " and Bcc to: " + p_sendBcc;
+            }
+            args[1] = sendTo;
+            args[2] = p_subject;
+            throw new MailerException(MailerException.MSG_FAILED_TO_SEND_EMAIL,
+                    args, e);
+
         }
     }
 
-
     // set the recipients of the email (To, CC, or BCC)
-	private boolean setRecipients(String p_recipients, MimeMessage p_mimeMsg,
-			Message.RecipientType p_type) throws MessagingException
+    private boolean setRecipients(String p_recipients, MimeMessage p_mimeMsg,
+            Message.RecipientType p_type) throws MessagingException
     {
-    	InternetAddress[] recipients  = parse(p_recipients);
-    	if (recipients.length > 0) 
-    	{
-    		 p_mimeMsg.setRecipients(p_type, recipients);
-    	}
-    	else 
-    	{
-    		// Parsing failures a fine unless we don't have anybody to 
-    		// send the message to
-    		s_logger.debug("Unable to parse recipients of type " + p_type +
-    				 ": " + p_recipients);
-    		if (p_type == Message.RecipientType.TO) 
-    		{
-    			return false;
-    		}
-    	}
-    	return true;
+        InternetAddress[] recipients = parse(p_recipients);
+        if (recipients.length > 0)
+        {
+            p_mimeMsg.setRecipients(p_type, recipients);
+        }
+        else
+        {
+            // Parsing failures a fine unless we don't have anybody to
+            // send the message to
+            s_logger.debug("Unable to parse recipients of type " + p_type
+                    + ": " + p_recipients);
+            if (p_type == Message.RecipientType.TO)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
-/*
-    // for testing only...
-    public static void main(String args[]) throws Exception
-    {
-        String from = "dragade@transware.com";
-        String to = "dhananjay.ragade@transware.com";
-        String cc = "";
-        String subject = "Test";
-        String text = "Hello World";
-	MailSender ms = MailSender.getInstance();
-	ms.sendMail(from,to,cc, null, subject, text, null);
-    }
-*/    
+    /*
+     * // for testing only... public static void main(String args[]) throws
+     * Exception { String from = "dragade@transware.com"; String to =
+     * "dhananjay.ragade@transware.com"; String cc = ""; String subject =
+     * "Test"; String text = "Hello World"; MailSender ms =
+     * MailSender.getInstance(); ms.sendMail(from,to,cc, null, subject, text,
+     * null); }
+     */
 }
-

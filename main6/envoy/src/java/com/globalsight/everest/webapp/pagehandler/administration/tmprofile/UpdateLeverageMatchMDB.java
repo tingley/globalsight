@@ -22,36 +22,50 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
  * @deprecated
- * @since 8.3 
- * When save TM profile and reference TMs order is changed, system will 
- * synchronize "project_tm_index" of leverage match DB store, there is 
- * performance problem when there are large data in leverage match DB store. 
- * So change to abandon the "synchronize" execution.
+ * @since 8.3 When save TM profile and reference TMs order is changed, system
+ *        will synchronize "project_tm_index" of leverage match DB store, there
+ *        is performance problem when there are large data in leverage match DB
+ *        store. So change to abandon the "synchronize" execution.
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_UPDATE_lEVERAGE_MATCH_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
         TuvQueryConstants
 {
     private static final long serialVersionUID = 1L;
     private static Logger CATEGORY = Logger
             .getLogger(UpdateLeverageMatchMDB.class.getName());
-    
-    private static final String SQL = "update "
-            + LM_TABLE_PLACEHOLDER + " "
+
+    private static final String SQL = "update " + LM_TABLE_PLACEHOLDER + " "
             + "set project_tm_index = ? where tm_id = ? and tm_profile_id=?";
 
     public UpdateLeverageMatchMDB()
@@ -60,6 +74,7 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         try
@@ -73,7 +88,8 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
             ArrayList<?> msg = (ArrayList<?>) ((ObjectMessage) p_message)
                     .getObject();
             @SuppressWarnings("unchecked")
-            Vector<LeverageProjectTM> tms = (Vector<LeverageProjectTM>) msg.get(0);
+            Vector<LeverageProjectTM> tms = (Vector<LeverageProjectTM>) msg
+                    .get(0);
             Long tmprofileId = Long.parseLong((String) msg.get(1));
             String currentCompanyId = (String) msg.get(2);
 
@@ -82,8 +98,11 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
             try
             {
                 connection = DbUtil.getConnection();
+                connection.setAutoCommit(false);
+
+                // update "working" table "leverage_match" or "leverage_match_[companyID]".
                 String lmTableName = SegmentTuTuvCacheManager
-                        .getLeverageMatchTableName(currentCompanyId);
+                        .getLeverageMatchWorkingTableName(currentCompanyId);
                 String sql = SQL.replace(LM_TABLE_PLACEHOLDER, lmTableName);
                 ps = connection.prepareStatement(sql);
 
@@ -96,6 +115,7 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
                 }
 
                 ps.executeBatch();
+                connection.commit();
             }
             catch (Exception ex)
             {

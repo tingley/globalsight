@@ -125,7 +125,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
      *            -- If Tu is changed, true; if no change, false.
      */
     public static void setTuIntoCache(final TuImpl p_tu,
-            boolean p_synchronizeCachedTuv, String companyId)
+            boolean p_synchronizeCachedTuv, long companyId)
     {
     	ConcurrentHashMap<Long, TuvImpl> tuvCache = getTuvCache();
     	ConcurrentHashMap<Long, TuImpl> tuCache = getTuCache();
@@ -149,7 +149,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
                     tuvCache.put(tuv.getIdAsLong(), tuv);
                     if (String.valueOf(tuvCache.size()).endsWith("0000"))
                     {
-                        logger.debug("Cached TUV object number is "
+                        logger.debug("Cached TUV object number is approaching "
                                 + tuvCache.size());
                     }
                 }
@@ -329,12 +329,12 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
     	getTuvExtarDataCache().clear();
     }
 
-    public static String getTuTableName(String p_companyId)
+    public static String getTuWorkingTableName(String p_companyId)
     {
-        return getTuTableName(Long.parseLong(p_companyId));
+        return getTuWorkingTableName(Long.parseLong(p_companyId));
     }
 
-    public static String getTuTableName(long p_companyId)
+    public static String getTuWorkingTableName(long p_companyId)
     {
         if (isUsingSeparatedLmTuTuvTables(p_companyId))
         {
@@ -344,12 +344,12 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
         return TRANSLATION_UNIT_TABLE;
     }
 
-    public static String getTuvTableName(String p_companyId)
+    public static String getTuvWorkingTableName(String p_companyId)
     {
-        return getTuvTableName(Long.parseLong(p_companyId));
+        return getTuvWorkingTableName(Long.parseLong(p_companyId));
     }
 
-    public static String getTuvTableName(long p_companyId)
+    public static String getTuvWorkingTableName(long p_companyId)
     {
         if (isUsingSeparatedLmTuTuvTables(p_companyId))
         {
@@ -359,12 +359,12 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
         return TRANSLATION_UNIT_VARIANT_TABLE;
     }
 
-    public static String getLeverageMatchTableName(String p_companyId)
+    public static String getLeverageMatchWorkingTableName(String p_companyId)
     {
-        return getLeverageMatchTableName(Long.parseLong(p_companyId));
+        return getLeverageMatchWorkingTableName(Long.parseLong(p_companyId));
     }
 
-    public static String getLeverageMatchTableName(long p_companyId)
+    public static String getLeverageMatchWorkingTableName(long p_companyId)
     {
         if (isUsingSeparatedLmTuTuvTables(p_companyId))
         {
@@ -372,6 +372,301 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
         }
 
         return LEVERAGE_MATCH_TABLE;
+    }
+
+    /**
+     * Get the TU archive table name for specified company ID.
+     * 
+     * <p>
+     * If it is using "translation_unit", its archived table is
+     * "translation_unit_archived".
+     * </p>
+     * <p>
+     * If it is using "translation_unit_xxxx", its archived table is
+     * "translation_unit_xxxx_archived".
+     * </p>
+     * 
+     * @param p_companyId
+     */
+    public static String getTuArchiveTableName(long p_companyId)
+    {
+        return getTuWorkingTableName(p_companyId) + "_ARCHIVED";
+    }
+
+    /**
+     * Get the TUV archive table name for specified company ID.
+     * 
+     * <p>
+     * If it is using "translation_unit_variant", its archived table is
+     * "translation_unit_variant_archived".
+     * </p>
+     * <p>
+     * If it is using "translation_unit_variant_xxxx", its archived table is
+     * "translation_unit_variant_xxxx_archived".
+     * </p>
+     * 
+     * @param p_companyId
+     */
+
+    public static String getTuvArchiveTableName(long p_companyId)
+    {
+        return getTuvWorkingTableName(p_companyId) + "_ARCHIVED";
+    }
+
+    /**
+     * Get the leverage match archive table name for specified company ID.
+     * <p>
+     * If it is using "leverage_match", its archived table is
+     * "leverage_match_archived".
+     * </p>
+     * <p>
+     * If it is using "leverage_match_xxxx", its archived table is
+     * "leverage_match_xxxx_archived".
+     * </p>
+     * 
+     * @param p_companyId
+     */
+    public static String getLeverageMatchArchiveTableName(long p_companyId)
+    {
+        return getLeverageMatchWorkingTableName(p_companyId) + "_ARCHIVED";
+    }
+
+    /**
+     * Return a fixed "template_part_archived" table name.
+     */
+    public static String getTemplatePartArchiveTableName()
+    {
+        return "TEMPLATE_PART_ARCHIVED";
+    }
+
+    /**
+     * Get the leverage match table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "leverage_match_[companyID]", otherwise working table is
+     * "leverage_match". Based on working table, if job has been archived
+     * (migrated), return "[working table]_archived", otherwise return working
+     * table name.
+     * </p>
+     * 
+     * @param companyId
+     *            in long
+     * @param isJobDataMigrated
+     *            boolean
+     * @return leverage match table name in String.
+     */
+    public static String getLMTableNameJobDataIn(long companyId,
+            boolean isJobDataMigrated)
+    {
+        // "leverage_match" or "leverage_match_[companyID]".
+        String workingTableName = SegmentTuTuvCacheManager
+                .getLeverageMatchWorkingTableName(companyId);
+        if (isJobDataMigrated)
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+    
+    /**
+     * Get the leverage match table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "leverage_match_[companyID]", otherwise working table is
+     * "leverage_match". Based on working table, if job has been archived
+     * (migrated), return "[working table]_archived", otherwise return working
+     * table name.
+     * </p>
+     * 
+     * @param p_sourcePageId in long.
+     * @throws Exception 
+     */
+    public static String getLMTableNameJobDataIn(long p_sourcePageId)
+            throws Exception
+    {
+        long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
+        // "leverage_match" or "leverage_match_[companyID]".
+        String workingTableName = SegmentTuTuvCacheManager
+                .getLeverageMatchWorkingTableName(companyId);
+
+        if (isJobDataMigrated(p_sourcePageId))
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+
+    /**
+     * Get the TU table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "translation_unit_[companyID]", otherwise working table is
+     * "translation_unit". Based on working table, if job has been archived
+     * (migrated), return "[working table]_archived", otherwise return working
+     * table name.
+     * </p>
+     * 
+     * @param p_sourcePageId in long
+     * @return TU table name in String
+     * @throws Exception
+     */
+    public static String getTuTableNameJobDataIn(long p_sourcePageId) throws Exception
+    {
+        long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
+        String workingTableName = SegmentTuTuvCacheManager
+                .getTuWorkingTableName(companyId);
+
+        if (isJobDataMigrated(p_sourcePageId))
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+
+    /**
+     * Get the TU table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "translation_unit_[companyID]", otherwise working table is
+     * "translation_unit". Based on working table, if job has been archived
+     * (migrated), return "[working table]_archived", otherwise return working
+     * table name.
+     * </p>
+     * 
+     * @param companyId in long
+     * @param p_isJobDataMigrated boolean
+     * @return String
+     */
+    public static String getTuTableNameJobDataIn(long companyId,
+            boolean p_isJobDataMigrated)
+    {
+        String workingTableName = SegmentTuTuvCacheManager
+                .getTuWorkingTableName(companyId);
+
+        if (p_isJobDataMigrated)
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+
+    /**
+     * Get the TUV table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "translation_unit_variant_[companyID]", otherwise working table is
+     * "translation_unit_variant". Based on working table, if job has been
+     * archived (migrated), return "[working table]_archived", otherwise return
+     * working table name.
+     * </p>
+     * 
+     * @param p_sourcePageId
+     *            in long
+     * @return TUV table name in String
+     * @throws Exception
+     */
+    public static String getTuvTableNameJobDataIn(long p_sourcePageId) throws Exception
+    {
+        long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
+        String workingTableName = SegmentTuTuvCacheManager
+                .getTuvWorkingTableName(companyId);
+        
+        if (isJobDataMigrated(p_sourcePageId))
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+
+    /**
+     * Get the TUV table name that job data is in.
+     * 
+     * <p>
+     * If company has been migrated, its working table is
+     * "translation_unit_variant_[companyID]", otherwise working table is
+     * "translation_unit_variant". Based on working table, if job has been
+     * archived (migrated), return "[working table]_archived", otherwise return
+     * working table name.
+     * </p>
+     *  
+     * @param companyId in long
+     * @param p_isJobDataMigrated boolean
+     * @return String
+     */
+    public static String getTuvTableNameJobDataIn(long companyId,
+            boolean p_isJobDataMigrated)
+    {
+        String workingTableName = SegmentTuTuvCacheManager
+                .getTuvWorkingTableName(companyId);
+
+        if (p_isJobDataMigrated)
+        {
+            workingTableName += "_ARCHIVED";
+        }
+
+        return workingTableName;
+    }
+
+
+    /**
+     * Get companyId by source page ID.
+     * 
+     * @param p_sourcePageId in long
+     * @return companyID in long
+     * @throws Exception
+     */
+    public static long getCompanyIdBySourcePageId(long p_sourcePageId)
+            throws Exception
+    {
+        long result = -1;
+
+        try
+        {
+            result = ServerProxy.getPageManager().getSourcePage(p_sourcePageId)
+                    .getCompanyId();
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to get companyId by sourcePageId "
+                    + p_sourcePageId);
+            throw e;
+        }
+
+        return result;
+    }
+
+    /**
+     * For "archived" jobs, there is requirement to migrate data of
+     * TU/TUV/LM/TEMPLATE_PART tables to cloned tables for performance purpose.
+     * 
+     * @throws Exception 
+     */
+    public static boolean isJobDataMigrated(long p_sourcePageId)
+            throws Exception
+    {
+        boolean isMigrated = false;
+        try
+        {
+            isMigrated = ServerProxy.getPageManager()
+                    .getSourcePage(p_sourcePageId).getRequest().getJob()
+                    .isMigrated();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        return isMigrated;
     }
 
     private static boolean isUsingSeparatedLmTuTuvTables(long p_companyId)
@@ -449,7 +744,6 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
             DbUtil.silentReturnConnection(connection);
         }
     }
-
     // All TU table columns
     // public static Set<String> TU_TABLE_COLUMNS = new HashSet<String>();
     // static

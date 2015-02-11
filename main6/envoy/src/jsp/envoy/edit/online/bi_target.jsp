@@ -239,6 +239,14 @@ function CanClose()
 <nobr>&nbsp;Debug&nbsp;</nobr>
 </td>
 --%>
+      <td class="coolButton" id="idSup"
+	    onclick="o_textbox.makeSup(); o_textbox.frameWindow.focus();">
+	    &nbsp;[superscript<sup>2</sup>]&nbsp;
+	  </td>
+      <td class="coolButton" id="idSub"
+	    onclick="o_textbox.makeSub(); o_textbox.frameWindow.focus();">
+	    &nbsp;[subscript<sub>2</sub>]&nbsp;
+	  </td>
 	  <td class="coolButton" id="idBold"
 	    onclick="o_textbox.makeBold(); o_textbox.frameWindow.focus();">
 	    &nbsp;<B>[bold]</B>&nbsp;

@@ -42,34 +42,31 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 String urlNext   = next.getPageURL();
 String urlPrev   = prev.getPageURL();
 String urlCancel = cancel.getPageURL();
-
 String lb_title = bundle.getString("lb_tm_output_options");
 %>
 <HTML XMLNS:gs>
+<!-- This is envoy/tm/management/exportOutputOptions.jsp -->
 <HEAD>
 <TITLE><%=lb_title%></TITLE>
 <STYLE>
 { font: Tahoma Verdana Arial 10pt; }
 INPUT, SELECT { font: Tahoma Verdana Arial 10pt; }
-
 LEGEND        { font-size: smaller; font-weight: bold; }
 .link         { color: blue; cursor: hand; }
 </STYLE>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript">
+<SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT type="text/javascript">
 var needWarning = false;
 var objectName = "";
 var guideNode = "tm";
 var helpFile = "<%=bundle.getString("help_tm_exportoptions")%>";
-var xmlDefinition	 = "<%=xmlDefinition%>";
-var xmlExportOptions = "<%=xmlExportOptions%>";
-</SCRIPT>
-<SCRIPT language="Javascript">
+var xmlDefinition = "<%=xmlDefinition.replace("\n","").replace("\r","").trim()%>";
+var xmlExportOptions = "<%=xmlExportOptions.replace("\n","").replace("\r","").trim()%>";
 eval("<%=errorScript%>");
 
 function Result(message, description, element, dom)
@@ -84,59 +81,32 @@ function buildExportOptions()
 {
   var result = new Result("", "", null, null);
   var form = document.oDummyForm;
-  var dom ;
-  var node;
-  var check;
-
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
-
-  // OUTPUT OPTIONS
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
+  var $xml = $( $.parseXML( xmlExportOptions ) );
   if (form.oSystemFields.checked)
   {
-     node.selectSingleNode("systemFields").text = "true";
+     $xml.find("exportOptions > outputOptions > systemFields").text("true");
   }
   else
   {
-     node.selectSingleNode("systemFields").text = "false";
+	 $xml.find("exportOptions > outputOptions > systemFields").text("false");
   }
 
-  result.dom=dom;
+  result.dom = $xml;
   return result;
 }
 
 function parseExportOptions()
 {
   var form = document.oDummyForm;
-  var dom;
-  var nodes, node;
   var systemFields;
+  var $xml = $( $.parseXML( xmlExportOptions ) );
 
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
-
-  node = dom.selectSingleNode("/exportOptions/outputOptions");
-  systemFields = node.selectSingleNode("systemFields").text;
+  systemFields = $xml.find("exportOptions > outputOptions > systemFields").text();
 
   checkValue(form.oSystemFields, systemFields);
 
-  var count = dom.selectSingleNode("/exportOptions/fileOptions/entryCount").text;
-  document.getElementById("idEntryCount").innerText = count;//idEntryCount.innerText = count;
+  var count = $xml.find("exportOptions > fileOptions > entryCount").text();
+  $("#idEntryCount").text(count);
 
   if (parseInt(count) == 0)
   {
@@ -158,7 +128,7 @@ function checkValue(check, value)
 
 function doCancel()
 {
-    window.navigate("<%=urlCancel%>");
+    window.location.href = "<%=urlCancel%>";
 }
 
 function doPrevious()
@@ -172,14 +142,7 @@ function doPrevious()
         "=<%=WebAppConstants.TM_ACTION_SET_EXPORT_OPTIONS%>";
 
     oForm.action = url;
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    	oForm.exportoptions.value = oExportOptions.xml;
-    }
-    else if(window.DOMParser)
-    { 
-    	oForm.exportoptions.value = XML.getDomString(result.dom);
-    }  
+    oForm.exportoptions.value = xmlObjToString(result.dom); 
     oForm.submit();
 }
 
@@ -202,21 +165,13 @@ function doNext()
             "=<%=WebAppConstants.TM_ACTION_START_EXPORT%>";
 
         oForm.action = url;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	oForm.exportoptions.value = oExportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-        	oForm.exportoptions.value = XML.getDomString(result.dom);
-        }  
+        oForm.exportoptions.value = xmlObjToString(result.dom);   
         oForm.submit();
     }
 }
 
 function doOnLoad()
 {
-
    // Load the Guides
    loadGuides();
 
@@ -229,9 +184,6 @@ function doOnLoad()
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-
-<XML id="oDefinition"><%=xmlDefinition%></XML>
-<XML id="oExportOptions"><%=xmlExportOptions%></XML>
 
 <FORM NAME="oForm" ACTION="" METHOD="post">
 <INPUT TYPE="hidden" NAME="exportoptions"

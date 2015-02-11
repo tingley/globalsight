@@ -51,7 +51,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class TmReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/tmReport";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION + "tmReport";
 
     private static final String NO_CONTENT_STRING = "&nbsp";
 
@@ -83,7 +83,7 @@ public class TmReportHandler extends BasicReportHandler
     private StringBuffer m_jobSelect = null;
 
     private boolean useContextMatch = false;
-    
+
     private boolean isDefaultContextMatch = false;
 
     private ArrayList<ArrayList<Object>> useInContextInfos = new ArrayList<ArrayList<Object>>();
@@ -149,8 +149,9 @@ public class TmReportHandler extends BasicReportHandler
                 Constants.TM_REPORT_CURRENT_PAGE_LIST, this.reportKey,
                 reportDataWrap);
 
-        dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                + Constants.REPORT_ACT_CREATE), req, res, p_context);
+        dispatcherForward(
+                ReportHandlerFactory.getTargetUrl(reportKey
+                        + Constants.REPORT_ACT_CREATE), req, res, p_context);
     }
 
     /**
@@ -247,14 +248,18 @@ public class TmReportHandler extends BasicReportHandler
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "100"));
         if (useContextMatch)
         {
-            fieldnameList.add(ReportsPackage.getMessage(m_bundle, "in_context_match"));
+            fieldnameList.add(ReportsPackage.getMessage(m_bundle,
+                    "in_context_match"));
         }
-        if(isDefaultContextMatch){
-            fieldnameList.add(ReportsPackage.getMessage(m_bundle, "context_match"));
+        if (isDefaultContextMatch)
+        {
+            fieldnameList.add(ReportsPackage.getMessage(m_bundle,
+                    "context_match"));
         }
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "no_match"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "repitition"));
-        fieldnameList.add(ReportsPackage.getMessage(m_bundle, "total_word_count"));
+        fieldnameList.add(ReportsPackage.getMessage(m_bundle,
+                "total_word_count"));
 
         // get the each row's data of the result set.
         ArrayList<ArrayList<String>> allRowsDataList = new ArrayList<ArrayList<String>>();
@@ -306,7 +311,8 @@ public class TmReportHandler extends BasicReportHandler
         groupIndexList.add(new Integer(allRowsDataList.size()));
 
         // group by locale(0) and summarize columns 4,5,6,7
-        double[] grandTotal = new double[] { 0.0, 0.0, 0.0, 0.0 };
+        double[] grandTotal = new double[]
+        { 0.0, 0.0, 0.0, 0.0 };
 
         ArrayList<ArrayList<String>> allDataForJsp = new ArrayList<ArrayList<String>>();
 
@@ -324,7 +330,8 @@ public class TmReportHandler extends BasicReportHandler
             }
             allDataForJsp.add(rowLocale);
 
-            double[] subTotal = new double[] { 0.0, 0.0, 0.0, 0.0 };
+            double[] subTotal = new double[]
+            { 0.0, 0.0, 0.0, 0.0 };
 
             int groupStartIndex = groupIndexList.get(i);
             int groupEndIndex = groupIndexList.get(i + 1);
@@ -345,45 +352,75 @@ public class TmReportHandler extends BasicReportHandler
                 Long jobId = Long.parseLong(curRowList.get(1));
                 if (!useInContexts.get(jobId))
                 {
-                    if(! useDefaultContexts.get(jobId))
+                    if (!useDefaultContexts.get(jobId))
                     {
                         curRowList.set(8, curRowList.get(8) == null ? null
                                 : noUseExactMatchValues.get(jobId).toString());
                     }
                     else
                     {
-                        if(useContextMatch && isDefaultContextMatch)
+                        if (useContextMatch && isDefaultContextMatch)
                         {
-                            curRowList.set(8, curRowList.get(8) == null ? null
-                                    :  "" + (Integer.parseInt(noUseExactMatchValues.get(jobId).toString()) - Integer.parseInt(curRowList.get(10))));
-                        } else if(isDefaultContextMatch)
+                            curRowList
+                                    .set(8,
+                                            curRowList.get(8) == null ? null
+                                                    : ""
+                                                            + (Integer
+                                                                    .parseInt(noUseExactMatchValues
+                                                                            .get(jobId)
+                                                                            .toString()) - Integer
+                                                                    .parseInt(curRowList
+                                                                            .get(10))));
+                        }
+                        else if (isDefaultContextMatch)
                         {
-                            curRowList.set(8, curRowList.get(8) == null ? null
-                                    :  "" + (Integer.parseInt(noUseExactMatchValues.get(jobId).toString()) - Integer.parseInt(curRowList.get(9))));
+                            curRowList
+                                    .set(8,
+                                            curRowList.get(8) == null ? null
+                                                    : ""
+                                                            + (Integer
+                                                                    .parseInt(noUseExactMatchValues
+                                                                            .get(jobId)
+                                                                            .toString()) - Integer
+                                                                    .parseInt(curRowList
+                                                                            .get(9))));
                         }
                     }
                 }
-                else if(useDefaultContexts.get(jobId))
+                else if (useDefaultContexts.get(jobId))
                 {
-                    if(useContextMatch && isDefaultContextMatch)
+                    if (useContextMatch && isDefaultContextMatch)
                     {
-                        curRowList.set(8, curRowList.get(8) == null ? null
-                                :  "" + (Integer.parseInt(curRowList.get(8)) - Integer.parseInt(curRowList.get(10))));
-                    } else if(isDefaultContextMatch)
+                        curRowList.set(
+                                8,
+                                curRowList.get(8) == null ? null
+                                        : ""
+                                                + (Integer.parseInt(curRowList
+                                                        .get(8)) - Integer
+                                                        .parseInt(curRowList
+                                                                .get(10))));
+                    }
+                    else if (isDefaultContextMatch)
                     {
-                        curRowList.set(8, curRowList.get(8) == null ? null
-                                :  "" + (Integer.parseInt(curRowList.get(8)) - Integer.parseInt(curRowList.get(9))));
+                        curRowList.set(
+                                8,
+                                curRowList.get(8) == null ? null
+                                        : ""
+                                                + (Integer.parseInt(curRowList
+                                                        .get(8)) - Integer
+                                                        .parseInt(curRowList
+                                                                .get(9))));
                     }
                 }
-                
+
                 if (useContextMatch && !useInContexts.get(jobId))
                 {
                     curRowList.set(9, noUseInContextValues.get(jobId)
                             .toString());
                 }
-                if(isDefaultContextMatch && ! useDefaultContexts.get(jobId))
+                if (isDefaultContextMatch && !useDefaultContexts.get(jobId))
                 {
-                    if(useContextMatch)
+                    if (useContextMatch)
                     {
                         curRowList.set(10, "0");
                     }
@@ -451,8 +488,7 @@ public class TmReportHandler extends BasicReportHandler
         m_select.append("SELECT");
 
         // 0
-        m_select
-                .append(" concat(locale.ISO_COUNTRY_CODE,'_',locale.ISO_LANG_CODE) as \"Locale\",");
+        m_select.append(" concat(locale.ISO_COUNTRY_CODE,'_',locale.ISO_LANG_CODE) as \"Locale\",");
         // 1
         m_select.append(" job.id as \"JobId\",");
         // 2
@@ -469,8 +505,8 @@ public class TmReportHandler extends BasicReportHandler
                 .append("\",");
         // 6
         String medhi = this.commonBundle.getString("lb_85");
-        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"").append(
-                medhi).append("\",");
+        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"")
+                .append(medhi).append("\",");
         // 7
         String hi = this.commonBundle.getString("lb_95");
         m_select.append(" target_page.FUZZY_HI_WORD_COUNT as \"").append(hi)
@@ -487,22 +523,21 @@ public class TmReportHandler extends BasicReportHandler
             m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"")
                     .append(inContextTm).append("\",");
         }
-        if(isDefaultContextMatch)
+        if (isDefaultContextMatch)
         {
             m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"Context Match\", ");
         }
         // 9 | 10
         String nomatch = this.commonBundle.getString("lb_no_match");
-        m_select.append(" target_page.NO_MATCH_WORD_COUNT as \"").append(
-                nomatch).append("\",");
+        m_select.append(" target_page.NO_MATCH_WORD_COUNT as \"")
+                .append(nomatch).append("\",");
         // 10 | 11
         String repet = this.commonBundle.getString("lb_repetition");
-        m_select.append(" target_page.REPETITION_WORD_COUNT as \"").append(
-                repet).append("\",");
+        m_select.append(" target_page.REPETITION_WORD_COUNT as \"")
+                .append(repet).append("\",");
         // 11 | 12
-        m_select
-                .append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\" ");
-        
+        m_select.append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\" ");
+
     }
 
     private void makeFromClause()
@@ -524,8 +559,7 @@ public class TmReportHandler extends BasicReportHandler
         }
 
         m_where.append(" AND workflow.target_locale_id = locale.id");
-        m_where
-                .append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
+        m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
         m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
         m_where.append(" AND workflow.state != 'CANCELLED'");
     }
@@ -591,12 +625,13 @@ public class TmReportHandler extends BasicReportHandler
 
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
 
-//            Boolean isContextMatch = job.getL10nProfile()
-//                    .getTranslationMemoryProfile()
-//                    .getIsContextMatchLeveraging();
+            // Boolean isContextMatch = job.getL10nProfile()
+            // .getTranslationMemoryProfile()
+            // .getIsContextMatchLeveraging();
             boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean defaultContextMatch = PageHandler.isDefaultContextMatch(job);
-            
+            boolean defaultContextMatch = PageHandler
+                    .isDefaultContextMatch(job);
+
             singleRowDataList.add(isInContextMatch);
             // TOTAL_EXACT_MATCH_WORD_COUNT
             singleRowDataList.add(noUseExactMatchWordCount);
@@ -609,19 +644,20 @@ public class TmReportHandler extends BasicReportHandler
             }
             else
             {
-                if(defaultContextMatch)
+                if (defaultContextMatch)
                 {
                     isDefaultContextMatch = true;
                 }
                 else
                 {
-                    noUseDefaultExactMatchValues.put(jobId, noUseExactMatchWordCount);
+                    noUseDefaultExactMatchValues.put(jobId,
+                            noUseExactMatchWordCount);
                     noUseContextValues.put(jobId, "N/A");
                 }
                 noUseExactMatchValues.put(jobId, noUseExactMatchWordCount);
                 noUseInContextValues.put(jobId, "N/A");
             }
-            
+
             useDefaultContexts.put(jobId, defaultContextMatch);
             useInContexts.put(jobId, isInContextMatch);
         }
@@ -632,15 +668,18 @@ public class TmReportHandler extends BasicReportHandler
         m_jobSelect = new StringBuffer();
         m_jobSelect.append("SELECT");
         m_jobSelect.append(" job.id as \"JobId\",");
-        m_jobSelect.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"")
-                .append("NOUSEEXACT").append("\", ").append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"CONTEXT\" ");
+        m_jobSelect
+                .append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"")
+                .append("NOUSEEXACT")
+                .append("\", ")
+                .append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"CONTEXT\" ");
     }
 
     private void makeJobQuery()
     {
         m_jobQuery = new StringBuffer();
-        m_jobQuery.append(m_jobSelect).append(m_from).append(m_where).append(
-                m_order);
+        m_jobQuery.append(m_jobSelect).append(m_from).append(m_where)
+                .append(m_order);
     }
 
     private void cleanData()

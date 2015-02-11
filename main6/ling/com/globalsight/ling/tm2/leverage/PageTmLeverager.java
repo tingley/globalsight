@@ -61,7 +61,8 @@ class PageTmLeverager
             Collection trSegments = new ArrayList();
             Collection loSegments = new ArrayList();
             Iterator itOriginalSegment = p_leverageDataCenter
-                    .getOriginalWholeSegments(p_sourcePage.getCompanyId())
+                    .getOriginalWholeSegments(
+                            String.valueOf(p_sourcePage.getCompanyId()))
                     .iterator();
             while (itOriginalSegment.hasNext())
             {

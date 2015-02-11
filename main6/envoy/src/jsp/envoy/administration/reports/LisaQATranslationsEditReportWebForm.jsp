@@ -52,7 +52,14 @@
 <script type="text/javascript">
 function doSubmit()
 {
-	document.getElementById("inputJobIDS").value = lisaQAForm.jobId.value;
+	var jobID = lisaQAForm.jobId.value;
+	if(jobID == "*")
+	{
+		alert('<%=bundle.getString("msg_invalid_jobName")%>');
+		return;
+	}
+	
+	document.getElementById("inputJobIDS").value = jobID;
 	lisaQAForm.submit();
 }
 </script>

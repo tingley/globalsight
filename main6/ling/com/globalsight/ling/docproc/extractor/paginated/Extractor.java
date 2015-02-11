@@ -22,9 +22,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import org.apache.xerces.framework.XMLAttrList;
 import org.apache.xerces.parsers.SAXParser;
-import org.apache.xerces.utils.QName;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
 import org.xml.sax.AttributeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -44,14 +48,11 @@ import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
-
 /**
- *  PaginatedResultSetXml Extractor.
+ * PaginatedResultSetXml Extractor.
  */
 
-public class Extractor
-    extends AbstractExtractor
-    implements EntityResolver
+public class Extractor extends AbstractExtractor implements EntityResolver
 {
     // storage of PaginatedResultSetXml
     private StringBuffer m_content = null;
@@ -70,7 +71,7 @@ public class Extractor
      * Set data type of the document
      */
     public void init(EFInputData p_Input, Output p_Output)
-        throws ExtractorException
+            throws ExtractorException
     {
         super.init(p_Input, p_Output);
         // getOutput().setDataFormat(ExtractorRegistry.FORMAT_XML);
@@ -78,12 +79,10 @@ public class Extractor
         m_content = new StringBuffer();
     }
 
-
     /**
      * Parse the file and insert Diplomat XML inside PaginatedResultSetXml
      */
-    public void extract()
-        throws ExtractorException
+    public void extract() throws ExtractorException
     {
         GsSAXParser parser = new GsSAXParser();
 
@@ -100,7 +99,6 @@ public class Extractor
             // Shouldn't get here
         }
 
-
         // parse PaginatedResultSetXml
         try
         {
@@ -112,21 +110,19 @@ public class Extractor
         }
         catch (Exception e)
         {
-            throw new ExtractorException (
-                ExtractorExceptionConstants.PAGINATED_PARSE_ERROR,
-                e.toString());
+            throw new ExtractorException(
+                    ExtractorExceptionConstants.PAGINATED_PARSE_ERROR,
+                    e.toString());
         }
     }
 
-
     /**
-     * This method is invoked by AbstractExractor framework.
-     * No rules for PaginatedResultSetXml
+     * This method is invoked by AbstractExractor framework. No rules for
+     * PaginatedResultSetXml
      */
     public void loadRules() throws ExtractorException
     {
     }
-
 
     /**
      * Returns the result of Extraction.
@@ -136,26 +132,23 @@ public class Extractor
         return m_content.toString();
     }
 
-
     /**
      * Override EntityResolver#resolveEntity.
-     *
-     * The purpose of this method is to read PaginatedResultSetXml.dtd
-     * from resource and feed it to the validating parser.
+     * 
+     * The purpose of this method is to read PaginatedResultSetXml.dtd from
+     * resource and feed it to the validating parser.
      */
     public InputSource resolveEntity(String publicId, String systemId)
-        throws SAXException, IOException
+            throws SAXException, IOException
     {
-        return new InputSource
-            (getClass().getResourceAsStream(ExtractorConstants.DTD_NAME));
+        return new InputSource(getClass().getResourceAsStream(
+                ExtractorConstants.DTD_NAME));
     }
-
 
     /**
      * Inner class to handle SAX events.
      */
-    private class GsSAXParser
-        extends SAXParser implements ExtractorConstants
+    private class GsSAXParser extends SAXParser implements ExtractorConstants
     {
         // for extractor switching
         private StringBuffer m_switchExtractionBuffer = null;
@@ -177,8 +170,7 @@ public class Extractor
             super();
         }
 
-
-        public void reset() throws java.lang.Exception
+        public void reset() throws XNIException
         {
             super.reset();
 
@@ -186,27 +178,22 @@ public class Extractor
             m_doExtracts = null;
         }
 
-
         /** startDocument */
-        public void startDocument()
-            throws Exception
+        public void startDocument() throws XNIException
         {
             m_content.append("<?xml version=\"1.0\"?>\n");
 
-            super.startDocument();
+            super.startDocument(null, null, null, null);
         }
 
-
         /** Start element */
-        public void startElement(QName element,
-            XMLAttrList attrList, int attrListIndex)
-            throws Exception
+        public void startElement(QName element, XMLAttributes attributes,
+                Augmentations augs) throws XNIException
         {
-            String elementName = fStringPool.toString(element.rawname);
-            AttributeList attrs = attrList.getAttributeList(attrListIndex);
+            String elementName = element.rawname;
 
             // set the extracts flag (default = true)
-            if(elementName.equals(NODE_COLUMN))
+            if (elementName.equals(NODE_COLUMN))
             {
                 m_extracts = true;
                 m_format = DEFAULT_DATA_FORMAT;
@@ -214,15 +201,15 @@ public class Extractor
 
             // output tag
             m_content.append("<" + elementName);
-            int len = attrs.getLength();
+            int len = attributes.getLength();
             for (int i = 0; i < len; i++)
             {
-                String name  = attrs.getName(i);
-                String value = attrs.getValue(i);
+                String name = attributes.getLocalName(i);
+                String value = attributes.getValue(i);
 
                 // set extracts flags
-                if (name.equals(ATT_CONTENT_MODE) &&
-                    value.equals(ATT_VALUE_INVISIBLE))
+                if (name.equals(ATT_CONTENT_MODE)
+                        && value.equals(ATT_VALUE_INVISIBLE))
                 {
                     m_extracts = false;
                     m_format = null;
@@ -236,8 +223,8 @@ public class Extractor
                     m_ruleId = value;
                 }
 
-                m_content.append(" " + name + "=\"" +
-                    m_xmlEncoder.encodeStringBasic(value) + "\"");
+                m_content.append(" " + name + "=\""
+                        + m_xmlEncoder.encodeStringBasic(value) + "\"");
             }
             m_content.append(">");
 
@@ -248,40 +235,38 @@ public class Extractor
                 m_switchExtractionBuffer = new StringBuffer();
             }
 
-            super.startElement(element, attrList, attrListIndex);
+            super.startElement(element, attributes, augs);
         }
 
-
         /** Characters. */
-        public void characters(char ch[], int start, int length)
-            throws Exception
+        public void characters(XMLString text, Augmentations augs)
+                throws XNIException
         {
             if (m_doExtracts != null)
             {
-                m_switchExtractionBuffer.append(ch, start, length);
+                m_switchExtractionBuffer.append(text.ch, text.offset,
+                        text.length);
             }
             else
             {
-                String stuff = new String(ch, start, length);
+                String stuff = new String(text.ch, text.offset, text.length);
                 m_content.append(m_xmlEncoder.encodeStringBasic(stuff));
             }
 
-            super.characters(ch, start, length);
+            super.characters(text, augs);
         }
-
 
         /** Ignorable whitespace. */
-        public void ignorableWhitespace(char ch[], int start, int length)
-            throws Exception
+        public void ignorableWhitespace(XMLString text, Augmentations augs)
+                throws XNIException
         {
-            m_content.append(ch, start, length);
-            super.ignorableWhitespace(ch, start, length);
+            m_content.append(text.ch, text.offset, text.length);
+            super.ignorableWhitespace(text, augs);
         }
 
-
         /** End element. */
-        public void endElement(QName element)
-            throws Exception
+        public void endElement(QName element, Augmentations augs)
+                throws XNIException
         {
             if (m_doExtracts != null)
             {
@@ -291,12 +276,13 @@ public class Extractor
                 {
                     String rules = getRulesString(m_ruleId);
                     extracted = switchExtractor(
-                        m_switchExtractionBuffer.toString(), m_format, rules);
+                            m_switchExtractionBuffer.toString(), m_format,
+                            rules);
                     m_ruleId = null;
                 }
-                catch (ExtractorException e)
+                catch (Exception e)
                 {
-                    throw new SAXException(e);
+                    throw new XNIException(e);
                 }
 
                 m_content.append(extracted);
@@ -305,7 +291,7 @@ public class Extractor
                 m_doExtracts = null;
             }
 
-            String name = fStringPool.toString(element.rawname);
+            String name = element.rawname;
             m_content.append("</" + name + ">");
 
             if (name.equals(NODE_COLUMN))
@@ -313,64 +299,52 @@ public class Extractor
                 m_extracts = false;
             }
 
-            super.endElement(element);
+            super.endElement(element, augs);
         }
 
-        public void comment(int dataIndex)
-            throws Exception
+        public void comment(XMLString text, Augmentations augs)
+                throws XNIException
         {
-            m_content.append("<!--" + fStringPool.toString(dataIndex) +
-                "-->\n");
-            super.comment(dataIndex);
+            m_content.append("<!--" + text.toString() + "-->\n");
+            super.comment(text, augs);
         }
 
-
-        public void startDTD(QName rootElement, int publicId, int systemId)
-            throws Exception
+        public void startDTD(XMLLocator locator, Augmentations augs)
+                throws XNIException
         {
             // strings
-            String name = fStringPool.toString(rootElement.rawname);
-            String pubid = fStringPool.toString(publicId);
-            String sysid = fStringPool.toString(systemId);
+            // String name = rootElement.name;
+            // String pubid = locator.getPublicId();
+            // String sysid = locator.getExpandedSystemId();
+            //
+            // m_content.append("<!DOCTYPE " + name + " ");
+            //
+            // String externalId = null;
+            // if (sysid != null && pubid != null)
+            // {
+            // externalId = "PUBLIC \"" + pubid + "\" \"" + sysid + "\"";
+            // }
+            // else if (sysid != null)
+            // {
+            // externalId = "SYSTEM \"" + sysid + "\"";
+            // }
+            //
+            // if (externalId != null)
+            // {
+            // m_content.append(externalId);
+            // }
 
-            m_content.append("<!DOCTYPE " + name + " ");
-
-            String externalId = null;
-            if (sysid != null && pubid != null)
-            {
-                externalId = "PUBLIC \"" + pubid + "\" \"" + sysid + "\"";
-            }
-            else if (sysid != null)
-            {
-                externalId = "SYSTEM \"" + sysid + "\"";
-            }
-
-            if (externalId != null)
-            {
-                m_content.append(externalId);
-            }
-
-            super.startDTD(rootElement, publicId, systemId);
+            super.startDTD(locator, augs);
         }
 
-
-        public void internalSubset(int internalSubset)
+        public void endDTD(Augmentations augs) throws XNIException
         {
-            m_content.append("[" + fStringPool.toString(internalSubset) + "]");
+            // m_content.append(">\n");
 
-            super.internalSubset(internalSubset);
+            super.endDTD(augs);
         }
 
-        public void endDTD() throws Exception
-        {
-            m_content.append(">\n");
-
-            super.endDTD();
-        }
-
-
-        private String getRulesString(String ruleId)
-            throws Exception
+        private String getRulesString(String ruleId) throws Exception
         {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -380,7 +354,8 @@ public class Extractor
                 return null;
             }
 
-            try {
+            try
+            {
                 int ruleIdInt = Integer.parseInt(ruleId);
                 String sql = "SELECT RULE_TEXT FROM XML_RULE WHERE ID = ?";
                 stmt = m_dbConnection.prepareStatement(sql);
@@ -388,7 +363,7 @@ public class Extractor
                 rs = stmt.executeQuery();
                 if (rs.next())
                 {
-                	rules = rs.getString(1);
+                    rules = rs.getString(1);
                 }
             }
             finally
@@ -400,13 +375,11 @@ public class Extractor
             return rules;
         }
 
-
-        private String switchExtractor(String to_translate,
-            String dataFormat, String rules)
-            throws ExtractorException
+        private String switchExtractor(String to_translate, String dataFormat,
+                String rules) throws ExtractorException
         {
-            Output out = Extractor.this.switchExtractor(
-                to_translate, dataFormat, rules);
+            Output out = Extractor.this.switchExtractor(to_translate,
+                    dataFormat, rules);
 
             // Segment
             DiplomatSegmenter segmenter = new DiplomatSegmenter();
@@ -414,7 +387,7 @@ public class Extractor
             {
                 segmenter.segment(out);
             }
-            catch(DiplomatSegmenterException e)
+            catch (DiplomatSegmenterException e)
             {
                 throw new ExtractorException(e.getExceptionId(), e.toString());
             }
@@ -427,8 +400,7 @@ public class Extractor
             }
             catch (DiplomatWordCounterException ee)
             {
-                throw new ExtractorException(ee.getExceptionId(),
-                    ee.toString());
+                throw new ExtractorException(ee.getExceptionId(), ee.toString());
             }
 
             // Postprocess to add x attributes
@@ -449,7 +421,7 @@ public class Extractor
             if (result.length() > 0 && result.charAt(0) == '\n')
             {
                 result = new String(result.toCharArray(), 1,
-                    result.length() - 1);
+                        result.length() - 1);
             }
 
             return result;

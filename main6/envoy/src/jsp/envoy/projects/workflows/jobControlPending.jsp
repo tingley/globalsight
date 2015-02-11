@@ -1,4 +1,5 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -88,6 +89,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<%@ include file="/envoy/projects/workflows/myJobContextMenu.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
@@ -109,6 +111,8 @@ function loadPage()
    }
    // Load the Guide
    loadGuides();
+   
+   ContextMenu.intializeContextMenu();
 }
 
 function dtpSelectedIndex()
@@ -379,6 +383,7 @@ is defined in header.jspIncl which must be included in the body.
 
 <DIV ID="PagingLayer" ALIGN="RIGHT" CLASS=standardText>
 <%=request.getAttribute(JobManagementHandler.PAGING_SCRIPTLET)%>   
+
 </DIV>
 </TD></TR>
 
@@ -411,7 +416,30 @@ is defined in header.jspIncl which must be included in the body.
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=pendingURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.DATE_CREATED%>"><%=bundle.getString("lb_date_created")%></A><%=jobDateSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=pendingURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PLANNED_DATE%>"><%=bundle.getString("lb_planned_completion_date")%></A><%=jobPlannedDateSortArrow%></TD>
 </TR>
-<%=request.getAttribute(JobManagementHandler.JOB_SCRIPTLET)%>  
+<c:forEach items="${jobVos}" var="jobVo" varStatus="i">
+    <TR VALIGN=TOP STYLE="padding-top: 5px; padding-bottom: 5px;" BGCOLOR="#FFFFFF" CLASS=standardText>
+    <TD><INPUT onclick="setButtonState()" TYPE=checkbox NAME=transCheckbox VALUE="jobId=${jobVo.id}&jobState=${jobVo.statues}"></TD>
+	<TD CLASS=standardText >${jobVo.priority}</TD>
+	<TD CLASS=standardText >${jobVo.id}</TD>
+	<TD CLASS=standardText width="210px" style="word-wrap:break-word;word-break:break-all" >	
+	    <SCRIPT language="javascript">
+	    if (navigator.userAgent.indexOf('Firefox') >= 0){
+		    document.write("<DIV style='width:200px'>");
+		    }</SCRIPT>
+		    <c:choose>
+		    <c:when  test="${jobVo.hasDetail}">
+		<B><A CLASS="${jobVo.textType.replace("Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=jobDetails&pageName=ALLS&jobId=${jobVo.id}&fromJobs=true" oncontextmenu="contextForTab('${jobVo.id}',event)">${jobVo.name}</A></B>
+		    </c:when >
+		    <c:otherwise>${jobVo.name}</c:otherwise>
+		    </c:choose>
+		<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT></TD>	 
+	<TD CLASS=${jobVo.textType} >${jobVo.project}</TD>
+	<TD CLASS=${jobVo.textType} >${jobVo.sourceLocale}</TD>
+	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.wordcount}</TD>
+	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.createDate}</TD>
+	<TD STYLE="padding-right: 10px;" CLASS=${jobVo.textType} >${jobVo.plannedCompletionDate}</TD>
+    </TR>
+</c:forEach>
 </TABLE>
 <!-- End Data Table  -->             
          

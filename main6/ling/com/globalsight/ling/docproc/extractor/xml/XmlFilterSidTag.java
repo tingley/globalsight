@@ -3,19 +3,10 @@ package com.globalsight.ling.docproc.extractor.xml;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPath;
-
-import org.apache.xalan.xpath.MutableNodeListImpl;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class XmlFilterSidTag
 {

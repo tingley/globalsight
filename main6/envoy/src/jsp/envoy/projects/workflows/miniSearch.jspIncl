@@ -71,9 +71,8 @@ function setSearchCookie()
     var buf = "<%=nameOptions%>=" + getOption(searchForm.<%=nameOptions%>) + ":" +
               "<%=nameField%>=" + searchForm.<%=nameField%>.value + ":" +
               "<%=statusOptions%>=" + getOption(searchForm.<%=statusOptions%>) + ":";
-    var today = new Date();
-    var expires = new Date(today.getTime() + (365 * 86400000));
-    document.cookie = "<%=cookieName%>=" + buf + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+              
+    document.cookie = "<%=cookieName%>=" + escape(buf);
 }
 
 function getOption(field)

@@ -150,7 +150,7 @@ public class ResourcePageWriter extends DownloadWriter implements
     public void processOfflinePageData(OfflinePageData p_page)
             throws AmbassadorDwUpException
     {
-        String companyId = p_page.getCompanyId() + "";
+        long companyId = p_page.getCompanyId();
         setPageLocales(p_page.getSourceLocaleName(),
                 p_page.getTargetLocaleName());
         m_rtlSourceLocale = EditUtil.isRTLLocale(m_sourceLocale);
@@ -248,18 +248,18 @@ public class ResourcePageWriter extends DownloadWriter implements
      * @return java.lang.String[]
      */
     private String[] makeParamList(OfflineSegmentData p_segment,
-            String companyId) throws AmbassadorDwUpException
+            long companyId) throws AmbassadorDwUpException
     {
         StringBuffer sb = new StringBuffer();
         boolean needTitle = false;
         Object[] args =
         { "-", "-", "-", "-", "-" };
         String[] params = new String[SEG_PARAM_COUNT];
-
+        String id = "";
         try
         {
             // source text
-            String id = p_segment.getDisplaySegmentID();
+            id = p_segment.getDisplaySegmentID();
 
             params[1] = id;
             params[2] = id;
@@ -277,7 +277,7 @@ public class ResourcePageWriter extends DownloadWriter implements
                         .equals(IFormatNames.FORMAT_XLIFF))
                 {
                     sourceStr = EditUtil.encodeHtmlEntities(SegmentUtil
-                            .restoreSegment(p_segment.getDisplaySourceText(),
+                            .restoreSegment(sourceStr,
                                     m_sourceLocale.getLocaleCode()));
                 }
             }

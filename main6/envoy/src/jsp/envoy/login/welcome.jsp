@@ -261,9 +261,10 @@ function openWizardWindow(url)
         <%
         	if (userPerms.getPermissionFor(Permission.USERS_VIEW)
         				&& (userPerms.getPermissionFor(Permission.USERS_EDIT)
-        						|| userPerms
-        								.getPermissionFor(Permission.USERS_REMOVE) || userPerms
-        						.getPermissionFor(Permission.USERS_NEW))) {
+        						|| userPerms.getPermissionFor(Permission.USERS_REMOVE)
+        						|| userPerms.getPermissionFor(Permission.USERS_NEW)
+        						|| userPerms.getPermissionFor(Permission.USERS_IMPORT)
+                                || userPerms.getPermissionFor(Permission.USERS_EXPORT))) {
         %>
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=usersUrl%>"><%=bundle.getString("lb_users")%></A><BR>
         <%

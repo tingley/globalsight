@@ -96,7 +96,7 @@
    String companyId = null; 
    if (tssi != null)
    {
-       companyId = tssi.getCompanyId();
+       companyId = String.valueOf(tssi.getCompanyId());
    }
    else
    {

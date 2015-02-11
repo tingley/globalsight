@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>My Jobs</title>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	</head>
+
+	<body>
+		<div id="listJob" data-role="page" data-dom-cache="true" >
+			<div data-role="header" data-theme="b" data-position="fixed">
+				<a class="tools" id="Dispatch" name="Dispatch" data-role="button">Dispatch</a>
+				<h1>My Jobs</h1>
+				<a class="tools" id="Discard" name="Discard" data-role="button">Discard</a>
+			</div>
+
+			<div data-role="content">
+				<div data-role="navbar" class="statetabbar" style="width: 100%" >
+					<div data-role="controlgroup" data-type="horizontal">
+						<a href="#" name="ready" class="ui-btn-active"><span style="font-size:12.5px;">Ready</span></a>
+						<a href="#" name="dispatched"><span style="font-size:12.5px">In Progress</span></a>
+						<a href="#" name="exported"><span style="font-size:12.5px">Exported</span></a>
+						<a href="#" name="pending"><span style="font-size:12.5px">Pending</span></a>
+					</div>
+				</div>
+
+				<div id="wrapperJob"  class="LM-wrapper">
+					<div id="scroller" class="LM-scroller" >
+						<ul data-role="listview" id="thelist" data-split-theme="d">
+							<li style="display:none;padding-top:0px;" class="listli">
+								<div class="ui-grid-a">
+									<div class="ui-block-a" style="float: left; width: 10%;">
+										<div style="float: left;padding-top: 7px;" align="center" >
+											<img class="unselected" src="img/unselected.png" />
+											<img class="selected" style="display:none"  src="img/selected.png" />
+										</div>
+									</div>
+									<a href="#" name="detailJob" style="text-decoration : none;">
+										<div class="ui-block-b" style="float: left;padding-left:8px;">
+											<label class="jobName" style="font-size: 15px; font-weight: bold; display: block; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;padding-top: 5px;padding-bottom:0px;width:230px;"></label>
+											<label style="font-size:12px;font-weight:normal;">Job ID: </label><label class="jobId" style="font-size:12px;font-weight: normal;"></label>
+											<label style="font-size:12px;font-weight:normal;">|</label>
+											<label style="font-size:12px;font-weight:normal;">Word Counts: </label><label class="jobWC" style="font-size:12px;font-weight: normal;"></label>
+											<label class="dateCreated" style="font-size:12px;font-weight:normal;display:none;"></label>
+										</div>
+									</a>
+								</div>
+								<a href="#" name="detailJob" style="float:right;"><span class="ui-icon"></span></a>
+							</li>
+						</ul>
+						<div id="pullDown">
+							<span class="pullDownIcon"></span><span class="pullDownLabel">Pull up to load more </span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="footer" class="LM-footer" data-theme="a" data-role="footer" data-id="main-tabbar" data-position="fixed">
+				<div data-role="navbar">
+					<ul>
+						<li><a class="ui-btn-active buttomTools" name="jobs">My Jobs</a></li>
+						<li><a class="buttomTools" name="activities">My Activities</a></li>
+						<li><a class="buttomTools" name="logout" data-transition="flip" data-role="button">Logoff</a> </li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -104,7 +104,7 @@ class SharedStorageTables {
         stmt.append("PRIMARY KEY (id)");
         stmt.append(") ENGINE=InnoDB");
         SQLUtil.exec(conn, stmt.toString());
-
+        
         // Now create the TUV table.  Note the denormalized tmId
         // (to avoid an extra join during fuzzy lookup)
         String tuvTableName = getTuvTableName(poolId);

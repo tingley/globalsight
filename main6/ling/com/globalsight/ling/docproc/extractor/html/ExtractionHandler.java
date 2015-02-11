@@ -2104,6 +2104,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
     private List<InternalText> getInternalTexts()
     {
+        // GBS-2894 : do segmentation before internal text
+        if (m_extractor.isDoSegBeforeInlText())
+        {
+            return null;
+        }
+        
         if (m_extractor.getMainBaseFilter() != null)
         {
             try
@@ -3278,7 +3284,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         // For GBS-2073, handle tags in the embedded contents
                         tags = helper.handleTagsInContent(tags);
                     }
-                    if (m_rules.useInternalTextFilter())
+                    if (m_rules.useInternalTextFilter()
+                            && !m_extractor.isDoSegBeforeInlText())
                     {
                         // For GBS-2073, handle internal text in embedded
                         // contents

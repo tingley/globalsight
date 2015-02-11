@@ -73,7 +73,8 @@ public class JobTableModel2 extends AbstractTableModel
             "ACTUAL_REVENUE", "TOTAL_REVENUE" };
 
     private static final Object EMPTY = (Object) new String("");
-    private static final String MY_MESSAGES = "messages/jobTable";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "jobTable";
 
     /**
      * Creates a new JobTableModel2 holding the relevant data about a job

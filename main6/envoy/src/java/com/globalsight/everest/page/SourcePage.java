@@ -70,7 +70,7 @@ public class SourcePage extends Page
     private Request m_request = null;
 
     // id of the company which this activity belong to
-    private String m_companyId;
+    private long m_companyId;
     private Set<TargetPage> targetPages = null;
 
     private int BOMType = 0;
@@ -80,7 +80,7 @@ public class SourcePage extends Page
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -90,7 +90,7 @@ public class SourcePage extends Page
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
@@ -483,8 +483,8 @@ public class SourcePage extends Page
 
     public File getFile()
     {
-        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this
-                .getCompanyId())
+        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(String
+                .valueOf(this.getCompanyId()))
                 + File.separator
                 + filtSpecialFile(getExternalPageId());
         File file = new File(filePath);
@@ -514,8 +514,8 @@ public class SourcePage extends Page
             {
                 String name = getPassoloFileName();
                 String href = getExtractedFile().getExternalBaseHref();
-                filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this
-                        .getCompanyId())
+                filePath = AmbFileStoragePathUtils.getCxeDocDirPath(String
+                        .valueOf(this.getCompanyId()))
                         + File.separator
                         + href
                         + File.separator + name;
@@ -537,8 +537,10 @@ public class SourcePage extends Page
 
     public File getFileByPageCompanyId()
     {
-        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(m_companyId)
-                + File.separator + filtSpecialFile(getExternalPageId());
+        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(String
+                .valueOf(m_companyId))
+                + File.separator
+                + filtSpecialFile(getExternalPageId());
         File file = new File(filePath);
         if (!file.exists())
         {
@@ -597,17 +599,22 @@ public class SourcePage extends Page
     {
         return targetPages;
     }
-    
+
     public TargetPage getTargetPageByLocaleId(long p_targetLocaleId)
     {
         TargetPage targetPage = null;
-        for (TargetPage tp : targetPages){
-            if (tp.getLocaleId() == p_targetLocaleId){
-                targetPage = tp;
-                break;
-            }
+        if (targetPages != null && targetPages.size() > 0)
+        {
+            for (TargetPage tp : targetPages)
+            {
+                if (tp.getLocaleId() == p_targetLocaleId)
+                {
+                    targetPage = tp;
+                    break;
+                }
+            }            
         }
-        
+
         return targetPage;
     }
 

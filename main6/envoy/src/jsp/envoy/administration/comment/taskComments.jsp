@@ -573,7 +573,7 @@ path = URLEncoder.encodeUrlStr(path);
     </td>
   </tr>
   <tr>
-  	 <td align="right" >
+  	 <td align="right" style="padding-top:6px">
 		 <%--for gbs-2599
 		 amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_DOWNLOAD%>" >
 		          <A CLASS="standardHREF" HREF="#"
@@ -718,9 +718,8 @@ path = URLEncoder.encodeUrlStr(path);
       <!-- End Data Table -->
     </td>
   </tr>
-  <tr><td>&nbsp;</td></tr>
   <TR>
-    <TD align=right>
+    <TD align="right" style="padding-top:6px">
       <P>
       <%--for gbs-2599
 	  amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >

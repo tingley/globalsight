@@ -39,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -57,8 +56,7 @@ import com.globalsight.util.progress.TmProcessStatus;
  */
 public class ImportUtil
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(ImportUtil.class);
+    private static final Logger CATEGORY = Logger.getLogger(ImportUtil.class);
 
     //
     // Public Constants
@@ -242,8 +240,8 @@ public class ImportUtil
      * A cache from printed locale representation as found in TMX files to
      * GlobalSightLocale.
      * 
-     * @param p_locale:
-     *            a locale string in form "xx_yy"; use normalizeLocale() to
+     * @param p_locale
+     *            : a locale string in form "xx_yy"; use normalizeLocale() to
      *            normalize any other string formats like "xx-yy" and "xx".
      */
     static public GlobalSightLocale getLocaleByName(String p_locale)
@@ -314,18 +312,18 @@ public class ImportUtil
 
             switch (c)
             {
-            case '<':
-                res.append("&lt;");
-                break;
-            case '>':
-                res.append("&gt;");
-                break;
-            case '&':
-                res.append("&amp;");
-                break;
-            default:
-                res.append(c);
-                break;
+                case '<':
+                    res.append("&lt;");
+                    break;
+                case '>':
+                    res.append("&gt;");
+                    break;
+                case '&':
+                    res.append("&amp;");
+                    break;
+                default:
+                    res.append(c);
+                    break;
             }
         }
 
@@ -406,7 +404,7 @@ public class ImportUtil
         {
             if (file.exists())
             {
-                CATEGORY.info("Begin validating TM file: "
+                CATEGORY.info("Validating TM file: "
                         + newFile.getAbsolutePath());
 
                 Date startTime = new Date();
@@ -445,9 +443,8 @@ public class ImportUtil
                 status.addSize(s.getBytes(encoding).length);
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY
-                            .debug("The content of in.readLine for encoding is "
-                                    + s);
+                    CATEGORY.debug("The content of in.readLine for encoding is "
+                            + s);
                 }
                 sb.append(s);
                 sb.append(strLine);
@@ -485,7 +482,7 @@ public class ImportUtil
                 {
                     if (status.isCanceled())
                     {
-                        CATEGORY.info("Validation is canceled.");
+                        CATEGORY.info("Cancelled validating");
                         break;
                     }
                     status.addSize(s.getBytes(encoding).length);
@@ -607,9 +604,7 @@ public class ImportUtil
 
                 out.close();
 
-                CATEGORY.info("Validation finished.");
-                CATEGORY.info("Error: " + errorCount);
-                CATEGORY.info("Total: " + totalCount);
+                CATEGORY.info("Done validating");
 
                 log.write(SPLIT_LINE + SPLIT_LINE + strLine + strLine);
                 log.write("Error: " + errorCount + strLine);
@@ -626,9 +621,6 @@ public class ImportUtil
                 StringBuffer time = new StringBuffer("Cost time: ");
                 time.append(h).append(" h ").append(m).append(" m ").append(se)
                         .append(" s ");
-
-                CATEGORY.info(time.toString());
-                CATEGORY.info("The line number of the file is " + lineCounter);
 
                 // Recodes some sample informations.
                 String msg = "Error: " + errorCount + strLine;
@@ -649,9 +641,8 @@ public class ImportUtil
 
                 if (lineCounter > 10000)
                 {
-                    CATEGORY
-                            .debug("suggests jvm to perform gc when the line count reaches 10000. line count: "
-                                    + lineCounter);
+                    CATEGORY.debug("forces jvm to perform gc when the line count reaches 10000. line count: "
+                            + lineCounter);
                     System.gc();
                 }
             }
@@ -674,7 +665,7 @@ public class ImportUtil
         status.setErrorTus(Integer.toString(errorCount));
         status.setTotalTus(Integer.toString(totalCount));
     }
-    
+
     /**
      * Saves a TM file with sample validation.
      * 
@@ -687,7 +678,8 @@ public class ImportUtil
      * @param fileName
      * @throws Exception
      */
-    public void saveTmFileWithValidation(File file, File newFile) throws Exception
+    public void saveTmFileWithValidation(File file, File newFile)
+            throws Exception
     {
         String encoding = "UTF-8";
         String outEncoding = "UTF-8";
@@ -704,7 +696,8 @@ public class ImportUtil
         {
             if (file.exists())
             {
-                CATEGORY.info("Begin validating TM file: " + newFile.getAbsolutePath());
+                CATEGORY.info("Validating TM file: "
+                        + newFile.getAbsolutePath());
 
                 Date startTime = new Date();
 
@@ -717,15 +710,20 @@ public class ImportUtil
 
                 // Initialize IO.
                 FileInputStream fIn = new FileInputStream(file);
-                BufferedReader in = new BufferedReader(new InputStreamReader(fIn, encoding));
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        fIn, encoding));
                 FileOutputStream fOut = new FileOutputStream(newFile);
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fOut, outEncoding));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                        fOut, outEncoding));
                 FileOutputStream fError = new FileOutputStream(errorFile);
-                OutputStreamWriter error = new OutputStreamWriter(fError, logEncoding);
+                OutputStreamWriter error = new OutputStreamWriter(fError,
+                        logEncoding);
                 FileOutputStream fInfo = new FileOutputStream(infoFile);
-                BufferedWriter info = new BufferedWriter(new OutputStreamWriter(fInfo, logEncoding));
+                BufferedWriter info = new BufferedWriter(
+                        new OutputStreamWriter(fInfo, logEncoding));
                 FileOutputStream fLog = new FileOutputStream(logFile);
-                OutputStreamWriter log = new OutputStreamWriter(fLog, logEncoding);
+                OutputStreamWriter log = new OutputStreamWriter(fLog,
+                        logEncoding);
 
                 writeHead(error);
                 writeHead(log);
@@ -734,23 +732,28 @@ public class ImportUtil
 
                 // It must be <?xml ...
                 s = in.readLine();
-                if (CATEGORY.isDebugEnabled()) {
-                    CATEGORY.debug("The content of in.readLine for encoding is " + s);
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug("The content of in.readLine for encoding is "
+                            + s);
                 }
                 sb.append(s);
                 sb.append(strLine);
 
                 // If the second line is define dtd
                 s = in.readLine();
-                if (CATEGORY.isDebugEnabled()) {
-                    CATEGORY.debug("The content of in.readLine for doctype is " + s);
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug("The content of in.readLine for doctype is "
+                            + s);
                 }
                 if (s != null && s.indexOf("<!DOCTYPE") > -1)
                 {
                     sb.append(s);
                     sb.append(strLine);
                     s = in.readLine();
-                    if (CATEGORY.isDebugEnabled()) {
+                    if (CATEGORY.isDebugEnabled())
+                    {
                         CATEGORY.debug("The content of in.readLine is " + s);
                     }
                 }
@@ -881,9 +884,7 @@ public class ImportUtil
 
                 out.close();
 
-                CATEGORY.info("Validation finished.");
-                CATEGORY.info("Error: " + errorCount);
-                CATEGORY.info("Total: " + totalCount);
+                CATEGORY.info("Done validating");
 
                 log.write(SPLIT_LINE + SPLIT_LINE + strLine + strLine);
                 log.write("Error: " + errorCount + strLine);
@@ -900,9 +901,6 @@ public class ImportUtil
                 StringBuffer time = new StringBuffer("Cost time: ");
                 time.append(h).append(" h ").append(m).append(" m ").append(se)
                         .append(" s ");
-
-                CATEGORY.info(time.toString());
-                CATEGORY.info("The line number of the file is " + lineCounter);
 
                 // Recodes some sample informations.
                 String msg = "Error: " + errorCount + strLine;
@@ -924,7 +922,7 @@ public class ImportUtil
                 if (lineCounter > 10000)
                 {
                     CATEGORY.debug("suggests jvm to perform gc when the line count reaches 10000. line count: "
-                                    + lineCounter);
+                            + lineCounter);
                     System.gc();
                 }
             }
@@ -1084,10 +1082,11 @@ public class ImportUtil
                     {
                         originalEncode = FileUtil.getEncodingOfXml(preFile);
                     }
-                    
+
                     if (!"UTF-8".equalsIgnoreCase(originalEncode))
                     {
-                        saveFileAsUTF8(preFile.getAbsolutePath(), originalEncode);
+                        saveFileAsUTF8(preFile.getAbsolutePath(),
+                                originalEncode);
                     }
                 }
             }
@@ -1237,8 +1236,6 @@ public class ImportUtil
                     CATEGORY.debug("Read content: " + s);
                 }
 
-                CATEGORY.info("Used encoding: " + encoding);
-
                 break;
             }
         }
@@ -1257,8 +1254,7 @@ public class ImportUtil
                 strLine);
         head.append("</head>").append(strLine);
         head.append("<body>").append(strLine);
-        head
-                .append("<TEXTAREA warp=\"off\" STYLE=\"overflow:visible; width:100%;\" READONLY=\"true\">");
+        head.append("<TEXTAREA warp=\"off\" STYLE=\"overflow:visible; width:100%;\" READONLY=\"true\">");
         head.append(strLine);
         writer.write(head.toString());
     }

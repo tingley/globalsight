@@ -228,7 +228,7 @@ function submitForm(selectedButton)
                         }
                         out.print(buf);
                     }
-                    out.print(rt.getSubject());
+                    out.print(rt.getDisplaySubject());
                     if (rt.getTaskId() != null)
                     {
                         out.print("</a>");

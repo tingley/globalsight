@@ -28,11 +28,11 @@ public class JarManager
 {
     private static Logger log = Logger.getLogger(JarManager.class);
 
-    private static String DEFAULT = CvsUtil.SERVER_NAME
-            + "/jboss/jboss_server/server/default";
-    private static String LIB = DEFAULT + "/deploy/globalsight.ear/lib/";
-    private static String APPLET_LIB = DEFAULT + "/deploy/globalsight.ear/"
-            + "globalsight-web.war/applet/lib/";
+//    private static String DEFAULT = CvsUtil.SERVER_NAME
+//            + "/jboss/jboss_server/server/default";
+    private static String EAR = CvsUtil.SERVER_NAME + "/jboss/server/standalone/deployments/globalsight.ear";
+    private static String LIB = EAR + "/lib/";
+    private static String APPLET_LIB = EAR + "/globalsight-web.war/applet/lib/";
     private static String SERVER_LIB = CvsUtil.SERVER_NAME
             + "/jboss/jboss_server/lib/";
 
@@ -72,7 +72,7 @@ public class JarManager
 
     private static String MAIL_JAR_PATH = BuildUtil.ROOT
             + "/main6/tools/j2eeVendor/jboss/jboss_server/server/default/lib/mail.jar";
-    private static String MAIL_JAR_NEW_PATH = DEFAULT + "/lib/mail.jar";
+    private static String MAIL_JAR_NEW_PATH = EAR + "/lib/mail.jar";
 
     private static String ADD_SOURCE_JAR_PATH = BuildUtil.ROOT
             + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/SelectFilesApplet.jar";

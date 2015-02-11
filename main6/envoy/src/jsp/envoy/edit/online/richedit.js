@@ -364,6 +364,18 @@ function initRichEdit(el)
                 getPTag(this.verbosePTags ? "[bold]"  : "[b]"),
                 getPTag(this.verbosePTags ? "[/bold]" : "[/b]"));
         }
+        
+        el.makeSub = function () {
+            this.surroundSelection(
+                getPTag(this.verbosePTags ? "[subscript]"  : "[sub]"),
+                getPTag(this.verbosePTags ? "[/subscript]" : "[/sub]"));
+        }
+        
+        el.makeSup = function () {
+            this.surroundSelection(
+                getPTag(this.verbosePTags ? "[superscript]"  : "[sup]"),
+                getPTag(this.verbosePTags ? "[/superscript]" : "[/sup]"));
+        }
 
         el.makeItalic = function () {
             this.surroundSelection(
@@ -452,6 +464,20 @@ function initRichEdit(el)
                 if (el.formattingKeys) el.makeUnderline();
                 return;
               }
+              else if (key == 56) // "8"
+              {
+            	  event.cancelBubble = true;
+                  event.returnValue = false;
+                  el.makeSub();
+                  return;
+              }
+              else if (key == 57) // "9"
+              {
+            	  event.cancelBubble = true;
+                  event.returnValue = false;
+                  el.makeSup();            	
+              	  return;
+              }
             }
 
             // keys with ctrl modifier
@@ -539,6 +565,20 @@ function initRichEdit(el)
                 event.preventDefault();
                 if (el.formattingKeys) el.makeUnderline();
                 return;
+              }
+              else if (key == 56) // "8"
+              {
+            	  event.stopPropagation();
+                  event.preventDefault();
+                  el.makeSub();
+                  return;
+              }
+              else if (key == 57) // "9"
+              {
+            	  event.stopPropagation();
+                  event.preventDefault();
+                  el.makeSup();            	
+              	  return;
               }
             }
 
@@ -646,7 +686,7 @@ function initRichEdit(el)
 		}
     }
 }
-function getEvent(){     //Í¬Ê±¼æÈÝieºÍffµÄÐ´·¨
+function getEvent(){     //Í¬Ê±ï¿½ï¿½ï¿½ï¿½ieï¿½ï¿½ffï¿½ï¿½Ð´ï¿½ï¿½
          if(document.all)    return window.event;        
          func=getEvent.caller;            
          while(func!=null){    

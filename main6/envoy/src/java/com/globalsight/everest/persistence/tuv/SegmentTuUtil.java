@@ -27,13 +27,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
@@ -52,7 +51,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "tu.ID, tu.ORDER_NUM, tu.TM_ID, tu.DATA_TYPE, tu.TU_TYPE, "
             + "tu.LOCALIZE_TYPE, tu.LEVERAGE_GROUP_ID, tu.PID, tu.SOURCE_TM_NAME, tu.XLIFF_TRANSLATION_TYPE, "
             + "tu.XLIFF_LOCKED, tu.IWS_SCORE, tu.XLIFF_TARGET_SEGMENT, tu.XLIFF_TARGET_LANGUAGE, tu.GENERATE_FROM, "
-            + "tu.SOURCE_CONTENT, tu.PASSOLO_STATE, tu.TRANSLATE, tu.REPETITION_OF_ID, tu.IS_REPEATED FROM ";
+            + "tu.SOURCE_CONTENT, tu.PASSOLO_STATE, tu.TRANSLATE FROM ";
 
     private static final String GET_TU_BY_ID_SQL = SELECT_COLUMNS
             + TU_TABLE_PLACEHOLDER + " tu" + " " + "WHERE tu.ID = ? ";
@@ -66,17 +65,6 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "WHERE tu.leverage_group_id = splg.lg_id "
             + "AND splg.sp_id = ? " + "ORDER BY tu.order_num asc ";
 
-    private static final String GET_REP_TUS_BY_SOURCE_PAGE_ID_SQL = SELECT_COLUMNS
-            + TU_TABLE_PLACEHOLDER
-            + " tu, "
-            + "source_page_leverage_group splg "
-            + "WHERE (tu.is_repeated = 'Y' or tu.repetition_of_id > 0) "
-            + "AND tu.leverage_group_id = splg.lg_id " + "AND splg.sp_id = ? ";
-
-    private static final String GET_REP_TUS_BY_TU_ID_SQL = SELECT_COLUMNS
-            + TU_TABLE_PLACEHOLDER + " tu " + "WHERE tu.ID = ? "
-            + "OR tu.repetition_of_id = ?";
-
     private static final String IS_WORLD_SERVER_XLF_FILE = "SELECT COUNT(*) FROM "
             + TU_TABLE_PLACEHOLDER
             + " tu, "
@@ -88,24 +76,25 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "AND splg.sp_id = ? ";
 
     public static void saveTus(Connection conn, Collection<Tu> p_tus,
-            String companyId) throws Exception
+            long companyId) throws Exception
     {
         PreparedStatement ps = null;
 
         try
         {
+            // Update the TU sequence first despite below succeeding or failure.
             SegmentTuTuvIndexUtil.updateTuSequence(conn);
 
             StringBuilder strBuilder = new StringBuilder();
             strBuilder = strBuilder
                     .append("insert into ")
-                    .append(getTuTableName(companyId))
+                    .append(getTuWorkingTableName(companyId))
                     .append(" (")
                     .append("id, order_num, tm_id, data_type, tu_type, ")
                     .append("localize_type, leverage_group_id, pid, source_tm_name, xliff_translation_type, ")
                     .append("xliff_locked, iws_score, xliff_target_segment, xliff_target_language, generate_from, ")
-                    .append("source_content, passolo_state, translate, repetition_of_id, is_repeated) ")
-                    .append("values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    .append("source_content, passolo_state, translate) ")
+                    .append("values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             ps = conn.prepareStatement(strBuilder.toString());
 
             // Cache the TUs for large pages when create job.
@@ -114,7 +103,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             {
                 ifCacheTus = true;
             }
-            for (Iterator it = p_tus.iterator(); it.hasNext();)
+            for (Iterator<Tu> it = p_tus.iterator(); it.hasNext();)
             {
                 TuImpl tu = (TuImpl) it.next();
                 if (ifCacheTus)
@@ -144,8 +133,6 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
                 ps.setString(16, tu.getSourceContent());
                 ps.setString(17, tu.getPassoloState());
                 ps.setString(18, tu.getTranslate());
-                ps.setLong(19, tu.getRepetitionOfId());
-                ps.setString(20, tu.isRepeated() ? "Y" : "N");
 
                 ps.addBatch();
             }
@@ -155,7 +142,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         catch (Exception e)
         {
             logger.error("Error when save TUs" + e.getMessage(), e);
-            for (Iterator it = p_tus.iterator(); it.hasNext();)
+            for (Iterator<Tu> it = p_tus.iterator(); it.hasNext();)
             {
                 TuImpl tu = (TuImpl) it.next();
                 removeTuFromCache(tu.getId());
@@ -168,7 +155,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
     }
 
-    public static TuImpl getTuById(long p_tuId, String companyId)
+    public static TuImpl getTuById(long p_tuId, long companyId)
             throws Exception
     {
         TuImpl tu = getTuFromCache(p_tuId);
@@ -177,10 +164,10 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             return tu;
         }
 
-        Session session = TmUtil.getStableSession();
+        Connection conn = DbUtil.getConnection();
         try
         {
-            tu = getTuById(session.connection(), p_tuId, companyId);
+            tu = getTuById(conn, p_tuId, companyId);
         }
         catch (Exception e)
         {
@@ -188,14 +175,14 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
         finally
         {
-            TmUtil.closeStableSession(session);
+            DbUtil.silentReturnConnection(conn);
         }
 
         return tu;
     }
 
     public static TuImpl getTuById(Connection connection, long p_tuId,
-            String companyId) throws Exception
+            long companyId) throws Exception
     {
         TuImpl tu = getTuFromCache(p_tuId);
         if (tu != null)
@@ -208,7 +195,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         try
         {
             String sql = GET_TU_BY_ID_SQL.replace(TU_TABLE_PLACEHOLDER,
-                    getTuTableName(companyId));
+                    getTuWorkingTableName(companyId));
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_tuId);
             rs = ps.executeQuery();
@@ -216,6 +203,23 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             if (result != null && result.size() > 0)
             {
                 tu = result.get(0);
+            }
+            else
+            {
+                JobDataMigration.checkArchiveTables(connection, companyId);
+
+                // If can't get TU from working table, maybe its job has been
+                // migrated, try its "archived" table.
+                sql = GET_TU_BY_ID_SQL.replace(TU_TABLE_PLACEHOLDER,
+                        getTuArchiveTableName(companyId));
+                ps = connection.prepareStatement(sql);
+                ps.setLong(1, p_tuId);
+                rs = ps.executeQuery();
+                result = convertResultSetToTuImpl(rs, true, companyId);
+                if (result != null && result.size() > 0)
+                {
+                    tu = result.get(0);
+                }
             }
         }
         catch (Exception e)
@@ -236,11 +240,10 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
     {
         List<TuImpl> result = new ArrayList<TuImpl>();
 
-        Session session = TmUtil.getStableSession();
+        Connection conn = DbUtil.getConnection();
         try
         {
-            result = getTusByLeverageGroupId(session.connection(),
-                    p_leverageGroupId);
+            result = getTusByLeverageGroupId(conn, p_leverageGroupId);
         }
         catch (Exception e)
         {
@@ -248,7 +251,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
         finally
         {
-            TmUtil.closeStableSession(session);
+            DbUtil.silentReturnConnection(conn);
         }
 
         return result;
@@ -273,17 +276,21 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         {
             SourcePage sp = ServerProxy.getPageManager()
                     .getSourcePageByLeverageGroupId(p_leverageGroupId);
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableNameJobDataIn(sp.getId());
             String sql = GET_TUS_BY_LEVERAGE_GROUP_ID_SQL.replace(
-                    TU_TABLE_PLACEHOLDER, getTuTableName(sp.getCompanyId()));
+                    TU_TABLE_PLACEHOLDER, tuTableName);
 
             ps = p_connection.prepareStatement(sql);
             ps.setLong(1, p_leverageGroupId);
             rs = ps.executeQuery();
 
-            result = convertResultSetToTuImpl(rs, false, sp.getCompanyId());
+            long companyId = SegmentTuTuvCacheManager
+                    .getCompanyIdBySourcePageId(sp.getId());
+            result = convertResultSetToTuImpl(rs, false, companyId);
             // Load "removed tags" info in page level to improve performance.
-            RemovedTagsUtil.loadAllRemovedTagsForTus(result, sp.getCompanyId(),
-                    sp.getId());
+            RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
+                    sp.getId(), tuTableName);
         }
         catch (SQLException e)
         {
@@ -305,10 +312,10 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
     {
         List<TuImpl> result = new ArrayList<TuImpl>();
 
-        Session session = TmUtil.getStableSession();
+        Connection conn = DbUtil.getConnection();
         try
         {
-            result = getTusBySourcePageId(session.connection(), p_sourcePageId);
+            result = getTusBySourcePageId(conn, p_sourcePageId);
         }
         catch (Exception e)
         {
@@ -316,7 +323,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
         finally
         {
-            TmUtil.closeStableSession(session);
+            DbUtil.silentReturnConnection(conn);
         }
 
         return result;
@@ -331,19 +338,21 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         ResultSet rs = null;
         try
         {
-            String companyId = ServerProxy.getPageManager()
-                    .getSourcePage(p_sourcePageId).getCompanyId();
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableNameJobDataIn(p_sourcePageId);
             String sql = GET_TUS_BY_SPID_SQL.replace(TU_TABLE_PLACEHOLDER,
-                    getTuTableName(companyId));
+                    tuTableName);
 
             ps = p_connection.prepareStatement(sql);
             ps.setLong(1, p_sourcePageId);
             rs = ps.executeQuery();
 
+            long companyId = SegmentTuTuvCacheManager
+                    .getCompanyIdBySourcePageId(p_sourcePageId);
             result = convertResultSetToTuImpl(rs, false, companyId);
             // Load "removed tags" info in page level to improve performance.
             RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
-                    p_sourcePageId);
+                    p_sourcePageId, tuTableName);
         }
         catch (Exception e)
         {
@@ -359,141 +368,19 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         return result;
     }
 
-    public static List<TuImpl> getRepTusBySourcePageId(long p_sourcePageId)
+    public static void updateTus(Collection<TuImpl> p_tus, long p_companyId)
             throws Exception
-    {
-        List<TuImpl> result = new ArrayList<TuImpl>();
-
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            result = getRepTusBySourcePageId(session.connection(),
-                    p_sourcePageId);
-        }
-        catch (Exception e)
-        {
-            throw e;
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
-        }
-
-        return result;
-    }
-
-    /**
-     * Get all repetition TUs in specified source page.
-     * 
-     * @param p_connection
-     * @param p_sourcePageId
-     * @return
-     * @throws Exception
-     */
-    public static List<TuImpl> getRepTusBySourcePageId(Connection p_connection,
-            long p_sourcePageId) throws Exception
-    {
-        List<TuImpl> result = new ArrayList<TuImpl>();
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            String companyId = ServerProxy.getPageManager()
-                    .getSourcePage(p_sourcePageId).getCompanyId();
-            String sql = GET_REP_TUS_BY_SOURCE_PAGE_ID_SQL.replace(
-                    TU_TABLE_PLACEHOLDER, getTuTableName(companyId));
-
-            ps = p_connection.prepareStatement(sql);
-            ps.setLong(1, p_sourcePageId);
-            rs = ps.executeQuery();
-
-            result = convertResultSetToTuImpl(rs, false, companyId);
-            // Load "removed tags" in page level to improve performance.
-            RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
-                    p_sourcePageId);
-        }
-        catch (Exception e)
-        {
-            logger.error(
-                    "Error when getRepTusBySourcePageId() for sourcePageId "
-                            + p_sourcePageId, e);
-            throw e;
-        }
-        finally
-        {
-            releaseRsPsConnection(rs, ps, null);
-        }
-
-        return result;
-    }
-
-    public static List<TuImpl> getRepTusByTuId(String companyId, long p_repTuId)
-            throws Exception
-    {
-        List<TuImpl> result = new ArrayList<TuImpl>();
-
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            result = getRepTusByTuId(session.connection(), companyId, p_repTuId);
-        }
-        catch (Exception e)
-        {
-            throw e;
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
-        }
-
-        return result;
-    }
-
-    public static List<TuImpl> getRepTusByTuId(Connection p_connection,
-            String companyId, long p_repTuId) throws Exception
-    {
-        List<TuImpl> result = new ArrayList<TuImpl>();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            String sql = GET_REP_TUS_BY_TU_ID_SQL.replace(TU_TABLE_PLACEHOLDER,
-                    getTuTableName(companyId));
-
-            ps = p_connection.prepareStatement(sql);
-            ps.setLong(1, p_repTuId);
-            ps.setLong(2, p_repTuId);
-            rs = ps.executeQuery();
-
-            result = convertResultSetToTuImpl(rs, true, companyId);
-        }
-        catch (Exception e)
-        {
-            logger.error("Error when getRepTusByTuId() for p_repTuId "
-                    + p_repTuId, e);
-            throw e;
-        }
-        finally
-        {
-            releaseRsPsConnection(rs, ps, null);
-        }
-
-        return result;
-    }
-
-	public static void updateTus(Collection<TuImpl> p_tus, long p_companyId)
-			throws Exception
     {
         if (p_tus == null || p_tus.size() == 0)
             return;
 
-        Session session = TmUtil.getStableSession();
+        Connection conn = DbUtil.getConnection();
+        conn.setAutoCommit(false);
         try
         {
             StringBuilder sql = new StringBuilder();
-			sql.append("update ").append(getTuTableName(p_companyId))
-					.append(" set ");
+            sql.append("update ").append(getTuWorkingTableName(p_companyId))
+                    .append(" set ");
             sql.append("order_num = ?, ");// 1
             sql.append("tm_id = ?, ");// 2
             sql.append("data_type = ?, ");// 3
@@ -510,42 +397,39 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             sql.append("generate_from = ?, ");// 14
             sql.append("source_content = ?, ");// 15
             sql.append("passolo_state = ?, ");// 16
-            sql.append("translate = ?, ");// 17
-            sql.append("repetition_of_id = ?, ");// 18
-            sql.append("is_repeated = ? where id = ?");// 19 20
+            sql.append("translate = ? where id = ?");// 17 18
 
-            PreparedStatement tuUpdateStmt = session.connection()
-                    .prepareStatement(sql.toString());
+            PreparedStatement tuUpdateStmt = conn.prepareStatement(sql
+                    .toString());
 
             // addBatch counters
             int batchUpdate = 0;
 
             for (TuImpl tu : p_tus)
             {
-            	tuUpdateStmt.setLong(1, tu.getOrder());
-            	tuUpdateStmt.setLong(2, tu.getTmId());
-            	tuUpdateStmt.setString(3, tu.getDataType());
-            	tuUpdateStmt.setString(4, tu.getTuType());
-            	tuUpdateStmt.setString(5, String.valueOf(tu.getLocalizableType()));
-            	tuUpdateStmt.setLong(6, tu.getLeverageGroupId());
-            	tuUpdateStmt.setLong(7, tu.getPid());
-            	tuUpdateStmt.setString(8, tu.getSourceTmName());
-            	tuUpdateStmt.setString(9, tu.getXliffTranslationType());
-            	tuUpdateStmt.setString(10, tu.isXliffLocked() ? "Y" : "N");
-            	tuUpdateStmt.setString(11, tu.getIwsScore());
-            	tuUpdateStmt.setString(12, tu.getXliffTarget());
-            	tuUpdateStmt.setString(13, tu.getXliffTargetLanguage());
-            	tuUpdateStmt.setString(14, tu.getGenerateFrom());
-            	tuUpdateStmt.setString(15, tu.getSourceContent());
-            	tuUpdateStmt.setString(16, tu.getPassoloState());
-            	tuUpdateStmt.setString(17, tu.getTranslate());
-            	tuUpdateStmt.setLong(18, tu.getRepetitionOfId());
-            	tuUpdateStmt.setString(19, tu.isRepeated() ? "Y" : "N");
-            	tuUpdateStmt.setLong(20, tu.getIdAsLong());
+                tuUpdateStmt.setLong(1, tu.getOrder());
+                tuUpdateStmt.setLong(2, tu.getTmId());
+                tuUpdateStmt.setString(3, tu.getDataType());
+                tuUpdateStmt.setString(4, tu.getTuType());
+                tuUpdateStmt.setString(5,
+                        String.valueOf(tu.getLocalizableType()));
+                tuUpdateStmt.setLong(6, tu.getLeverageGroupId());
+                tuUpdateStmt.setLong(7, tu.getPid());
+                tuUpdateStmt.setString(8, tu.getSourceTmName());
+                tuUpdateStmt.setString(9, tu.getXliffTranslationType());
+                tuUpdateStmt.setString(10, tu.isXliffLocked() ? "Y" : "N");
+                tuUpdateStmt.setString(11, tu.getIwsScore());
+                tuUpdateStmt.setString(12, tu.getXliffTarget());
+                tuUpdateStmt.setString(13, tu.getXliffTargetLanguage());
+                tuUpdateStmt.setString(14, tu.getGenerateFrom());
+                tuUpdateStmt.setString(15, tu.getSourceContent());
+                tuUpdateStmt.setString(16, tu.getPassoloState());
+                tuUpdateStmt.setString(17, tu.getTranslate());
+                tuUpdateStmt.setLong(18, tu.getIdAsLong());
 
-            	tuUpdateStmt.addBatch();
+                tuUpdateStmt.addBatch();
 
-            	batchUpdate++;
+                batchUpdate++;
 
                 if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
                 {
@@ -560,11 +444,12 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
                 tuUpdateStmt.executeBatch();
             }
 
+            conn.commit();
             tuUpdateStmt.close();
         }
         finally
         {
-            TmUtil.closeStableSession(session);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -585,10 +470,10 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         ResultSet rs = null;
         try
         {
-            String companyId = ServerProxy.getPageManager()
-                    .getSourcePage(p_sourcePageId).getCompanyId();
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableNameJobDataIn(p_sourcePageId);
             String sql = IS_WORLD_SERVER_XLF_FILE.replace(TU_TABLE_PLACEHOLDER,
-                    getTuTableName(companyId));
+                    tuTableName);
             connection = DbUtil.getConnection();
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_sourcePageId);
@@ -629,7 +514,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
      * @throws SQLException
      */
     private static List<TuImpl> convertResultSetToTuImpl(ResultSet rs,
-            boolean p_loadExtraData, String companyId) throws SQLException
+            boolean p_loadExtraData, long companyId) throws SQLException
     {
         List<TuImpl> result = new ArrayList<TuImpl>();
         if (rs == null)
@@ -676,9 +561,6 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             tu.setSourceContent(rs.getString(16));
             tu.setPassoloState(rs.getString(17));
             tu.setTranslate(rs.getString(18));
-            tu.setRepetitionOfId(rs.getLong(19));
-            tu.setRepeated("Y".equalsIgnoreCase(rs.getString(20)) ? true
-                    : false);
 
             if (p_loadExtraData)
             {

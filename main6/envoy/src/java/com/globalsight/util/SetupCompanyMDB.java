@@ -28,8 +28,15 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.naming.NamingException;
 
@@ -37,6 +44,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.ContainerRole;
 import com.globalsight.everest.foundation.LeverageLocales;
@@ -56,6 +64,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.CreateUserWrapper;
@@ -75,7 +84,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  * This class is used to create default items for a new company.
  * 
  * <p>
- * These items will be created as follows.
+ * These items will be created by default.
  * <ul>
  * <li>Locale pairs</li>
  * <li>Activities</li>
@@ -84,6 +93,13 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  * <li>Workflows</li>
  * </ul>
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_NEW_COMPANY_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class SetupCompanyMDB extends GenericQueueMDB
 {
     private static Logger CATEGORY = Logger.getLogger(SetupCompanyMDB.class
@@ -415,7 +431,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
                 try
                 {
                     LocalePair lp = new LocalePair(srcLocale, targLocale,
-                            Long.toString(companyId));
+                            companyId);
                     HibernateUtil.saveOrUpdate(lp);
                     localePairs.add(lp);
                 }
@@ -476,7 +492,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
             act.setDescription(DEFAULT_DECCRIPTION);
             act.setType(Activity.TYPE_TRANSLATE);
             act.setIsEditable(true);
-            act.setCompanyId(Long.toString(companyId));
+            act.setCompanyId(companyId);
             act.setUseType(Activity.USE_TYPE_TRANS);
             createActivity(act);
             activities.add(act);
@@ -489,7 +505,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
             act.setDescription(DEFAULT_DECCRIPTION);
             act.setType(Activity.TYPE_REVIEW);
             act.setIsEditable(false);
-            act.setCompanyId(Long.toString(companyId));
+            act.setCompanyId(companyId);
             act.setUseType(Activity.USE_TYPE_TRANS);
             createActivity(act);
             activities.add(act);
@@ -775,7 +791,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
         wfti.setWorkflowType(WorkflowTypeConstants.TYPE_TRANSLATION);
 
         // Sets company.
-        wfti.setCompanyId(Long.toString(companyId));
+        wfti.setCompanyId(companyId);
 
         leverageLocale.setBackPointer(wfti);
 
@@ -1054,7 +1070,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
         }
 
         Project project = ProjectHandlerHelper.createProject();
-        project.setCompanyId(Long.toString(this.companyId));
+        project.setCompanyId(this.companyId);
         project.setDescription("");
         project.setTermbaseName("");
         project.setName(DEFAULT_PROJECT_NAME);
@@ -1129,6 +1145,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
      * 
      * @param message
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message message)
     {
         try

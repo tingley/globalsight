@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.junit.experimental.categories.Categories;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.BasicL10nProfile;
@@ -54,54 +53,59 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 
-
 /**
- * LocProfileMainHandler, A page handler to produce the entry
- * page(index.jsp) for L10nProfile management.
+ * LocProfileMainHandler, A page handler to produce the entry page(index.jsp)
+ * for L10nProfile management.
  */
-public class LocProfileMainHandler
-    extends PageHandler
-    implements LocProfileStateConstants
+public class LocProfileMainHandler extends PageHandler implements
+        LocProfileStateConstants
 {
 
     private static int numPerPage = 20;
     // Category for log4j logging.
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            LocProfileMainHandler.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(LocProfileMainHandler.class.getName());
 
     /**
      * Invokes this PageHandler
      * <p>
-     * @param p_pageDescriptor the page descriptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page descriptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
         if ("save".equals(action))
         {
             createOrModifyL10nProfile(p_request);
-            p_response.sendRedirect("/globalsight/ControlServlet?activityName=locprofiles");
+            p_response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=locprofiles");
             return;
         }
         else if ("saveDup".equals(action))
         {
             duplicateProfile(p_request);
-            p_response.sendRedirect("/globalsight/ControlServlet?activityName=locprofiles");
+            p_response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=locprofiles");
             return;
         }
         else if ("remove".equals(action))
         {
             doRemove(p_request, session);
         }
-        else if ("ajax".equals(action)) {
+        else if ("ajax".equals(action))
+        {
             String message = checkPreReqData(p_request, session);
             p_response.setContentType("text/html;charset=UTF-8");
             p_response.getWriter().write(message);
@@ -113,41 +117,47 @@ public class LocProfileMainHandler
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
 
-        //Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        // Call parent invokePageHandler() to set link beans and invoke JSP
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
-
 
     private void createOrModifyL10nProfile(HttpServletRequest p_request)
             throws IOException
     {
-        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) return;
-        
-        if(p_request.getParameter("Edit")!=null){
+        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+            return;
+
+        if (p_request.getParameter("Edit") != null)
+        {
             modifyL10nProfile(p_request, getBasicL10NProfiles(p_request));
-        } 
-        else{//new L10nProfiles
+        }
+        else
+        {// new L10nProfiles
             createL10nProfile(getBasicL10NProfiles(p_request));
         }
     }
-    
+
     private void duplicateProfile(HttpServletRequest p_request)
             throws EnvoyServletException
     {
-        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) return;
-        
+        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+            return;
+
         HttpSession session = p_request.getSession();
         String lpId = (String) p_request.getParameter("DupLocProfile");
         String list = (String) p_request.getParameter("localePairs");
@@ -172,26 +182,27 @@ public class LocProfileMainHandler
             throw new EnvoyServletException(e);
         }
     }
-    
+
     private void doRemove(HttpServletRequest p_request, HttpSession p_session)
-        throws EnvoyServletException, IOException
+            throws EnvoyServletException, IOException
     {
-        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) return;
-        try 
+        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+            return;
+        try
         {
-            String id = (String)p_request.getParameter(RADIO_BUTTON);
-            BasicL10nProfile locprofile = (BasicL10nProfile)
-                    LocProfileHandlerHelper.getL10nProfile(Long.parseLong(id));
+            String id = (String) p_request.getParameter(RADIO_BUTTON);
+            BasicL10nProfile locprofile = (BasicL10nProfile) LocProfileHandlerHelper
+                    .getL10nProfile(Long.parseLong(id));
             String deps = LocProfileHandlerHelper.checkForDependencies(
-                                locprofile, PageHandler.getBundle(p_session));
+                    locprofile, PageHandler.getBundle(p_session));
             if (deps == null)
             {
                 LocProfileHandlerHelper.removeL10nProfile(locprofile);
             }
             else
             {
-                SessionManager sessionMgr = (SessionManager)
-                    p_session.getAttribute(WebAppConstants.SESSION_MANAGER);
+                SessionManager sessionMgr = (SessionManager) p_session
+                        .getAttribute(WebAppConstants.SESSION_MANAGER);
                 sessionMgr.setAttribute(DEPENDENCIES, deps);
             }
         }
@@ -200,51 +211,47 @@ public class LocProfileMainHandler
             throw new EnvoyServletException(e);
         }
     }
-    
 
     private BasicL10nProfile getBasicL10NProfiles(HttpServletRequest p_request)
-        throws EnvoyServletException, IOException
+            throws EnvoyServletException, IOException
     {
         String value;
-        String name = (String)p_request.getParameter("LocProfileName");
-        value = (String)p_request.getParameter("LocProfileProjectId");
+        String name = (String) p_request.getParameter("LocProfileName");
+        value = (String) p_request.getParameter("LocProfileProjectId");
         long projectId = Long.parseLong(value);
 
-        value = (String)p_request.getParameter("locTMProfileId");
+        value = (String) p_request.getParameter("locTMProfileId");
         long tmProfileId = Long.parseLong(value);
-      
-        value = (String)p_request.getParameter("JobPriority");
+
+        value = (String) p_request.getParameter("JobPriority");
         int priority = Integer.parseInt(value);
 
-        value = (String)p_request.getParameter("SourceLocaleId");
+        value = (String) p_request.getParameter("SourceLocaleId");
         long sourceLocaleId = Long.parseLong(value);
 
         int TMChoice = -1;
-        boolean exactMatch = false;
-        value = (String)p_request.getParameter("LocProfileTMUsageId");
-        int TMUsageId = Integer.parseInt(value);
-        if (TMUsageId == NO_TM_USAGE)
+        value = (String) p_request.getParameter("LocProfileTMUsageId");
+        int TMEditType = Integer.parseInt(value);
+        switch (TMEditType)
         {
-            TMChoice = L10nProfile.NO_TM;
-            exactMatch = false;
-        }
-        if (TMUsageId == DENY_EDIT_TM_USAGE)
-        {
-            TMChoice = L10nProfile.REGULAR_TM_WITH_PAGE_TM;
-            exactMatch = false;
-        }
-        if (TMUsageId == ALLOW_EDIT_TM_USAGE)
-        {
-            TMChoice = L10nProfile.REGULAR_TM_WITH_PAGE_TM;
-            exactMatch = true;
+            case 0: //Use TM -- No
+                TMChoice = L10nProfile.NO_TM;
+                break;
+            case 1: //Use TM -- Deny edit of ICE and 100% lock segments
+            case 2: //Use TM -- Allow edit of ICE and 100% lock segments
+                TMChoice = L10nProfile.REGULAR_TM_WITH_PAGE_TM;
+                break;
+            default:
+                break;
         }
 
         boolean automaticDispatch = false;
-        value = (String)p_request.getParameter("AutomaticDispatch");        
+        value = (String) p_request.getParameter("AutomaticDispatch");
         automaticDispatch = Boolean.parseBoolean(value);
 
         // load the fields that do not need a value
-        String description = (String)p_request.getParameter("LocProfileDescription");
+        String description = (String) p_request
+                .getParameter("LocProfileDescription");
 
         boolean runSQLScript;
         String SQLScript = null;
@@ -255,7 +262,7 @@ public class LocProfileMainHandler
         else
         {
             runSQLScript = true;
-            SQLScript = (String)p_request.getParameter("LocProfileSQLScript");
+            SQLScript = (String) p_request.getParameter("LocProfileSQLScript");
             if (SQLScript.length() == 0)
             {
                 runSQLScript = false;
@@ -265,36 +272,42 @@ public class LocProfileMainHandler
         // determine whether to create or modify BasicL10nProfile
         BasicL10nProfile locprofile = new BasicL10nProfile(name);
         // fill in user inputs
-        locprofile.setSourceLocale(LocProfileHandlerHelper.getLocaleById(sourceLocaleId));
+        locprofile.setSourceLocale(LocProfileHandlerHelper
+                .getLocaleById(sourceLocaleId));
         locprofile.setDescription(description);
-        locprofile.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        locprofile.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
         Project project = null;
         try
         {
             // set the project - in case it was changed.
             // the id will be set too.
             project = ServerProxy.getProjectHandler().getProjectById(projectId);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            CATEGORY.error("Failed to find the project associated with " + projectId);
+            CATEGORY.error("Failed to find the project associated with "
+                    + projectId);
         }
         locprofile.setProject(project);
         locprofile.setAutomaticDispatch(automaticDispatch);
         locprofile.setRunScriptAtJobCreation(runSQLScript);
         locprofile.setJobCreationScriptName(SQLScript);
         locprofile.setTmChoice(TMChoice);
-        locprofile.setExactMatchEditing(exactMatch);
+        locprofile.setTMEditType(TMEditType);
         locprofile.setPriority(priority);
         ArrayList<String> workflowIds = readyWorkflowIds(p_request);
-		try
+        try
         {
-            for (String workflow : workflowIds) {
-                locprofile.addWorkflowTemplateInfo(ServerProxy.getProjectHandler()
-                        .getWorkflowTemplateInfoById(Long.parseLong(workflow)));
+            for (String workflow : workflowIds)
+            {
+                locprofile.addWorkflowTemplateInfo(ServerProxy
+                        .getProjectHandler().getWorkflowTemplateInfoById(
+                                Long.parseLong(workflow)));
             }
 
-            TranslationMemoryProfile tmProfile =
-                 ServerProxy.getProjectHandler().getTMProfileById(tmProfileId, false);
+            TranslationMemoryProfile tmProfile = ServerProxy
+                    .getProjectHandler().getTMProfileById(tmProfileId, false);
             locprofile.addTMProfile(tmProfile);
         }
         catch (Exception e)
@@ -309,79 +322,95 @@ public class LocProfileMainHandler
     {
         Enumeration parameterNames = p_request.getParameterNames();
         ArrayList<String> workflowIds = new ArrayList<String>();
-        while(parameterNames.hasMoreElements()){
+        while (parameterNames.hasMoreElements())
+        {
             String workflowId;
             String parameterName = (String) parameterNames.nextElement();
-            if(parameterName.trim().startsWith("TargetLocaleId_") && !p_request.getParameter(parameterName).equals("-1")){
+            if (parameterName.trim().startsWith("TargetLocaleId_")
+                    && !p_request.getParameter(parameterName).equals("-1"))
+            {
                 workflowId = p_request.getParameter(parameterName);
                 workflowIds.add(workflowId);
             }
         }
         return workflowIds;
     }
-    
+
     private Vector<WorkflowInfos> getWorkflowInfos(HttpServletRequest p_request)
     {
         Vector<WorkflowInfos> workflowInfos = new Vector<WorkflowInfos>();
         Enumeration parameterNames = p_request.getParameterNames();
-        while(parameterNames.hasMoreElements()){
+        while (parameterNames.hasMoreElements())
+        {
             String workflowId;
             String targetLocaleId;
             GlobalSightLocale target = null;
             String parameterName = (String) parameterNames.nextElement();
-            long locProfileId = Long.parseLong(p_request.getParameter("EditLocProfileId"));
-            if(parameterName.trim().startsWith("TargetLocaleId_") && !p_request.getParameter(parameterName).equals("-1")){
+            long locProfileId = Long.parseLong(p_request
+                    .getParameter("EditLocProfileId"));
+            if (parameterName.trim().startsWith("TargetLocaleId_")
+                    && !p_request.getParameter(parameterName).equals("-1"))
+            {
                 workflowId = p_request.getParameter(parameterName);
                 targetLocaleId = parameterName.substring(15);
-                target = (GlobalSightLocale)LocProfileHandlerHelper.getLocaleById(Long.parseLong(targetLocaleId));
-                workflowInfos.add(new WorkflowInfos(locProfileId, Long.parseLong(workflowId), true, target));
+                target = (GlobalSightLocale) LocProfileHandlerHelper
+                        .getLocaleById(Long.parseLong(targetLocaleId));
+                workflowInfos.add(new WorkflowInfos(locProfileId, Long
+                        .parseLong(workflowId), true, target));
             }
         }
         return workflowInfos;
     }
-    
-    private void modifyL10nProfile(HttpServletRequest p_request,BasicL10nProfile locprofile){
-        long originalLocId = Long.parseLong(p_request.getParameter("EditLocProfileId"));
-        LocProfileHandlerHelper.modifyL10nProfile(locprofile, getWorkflowInfos(p_request), originalLocId);
+
+    private void modifyL10nProfile(HttpServletRequest p_request,
+            BasicL10nProfile locprofile)
+    {
+        long originalLocId = Long.parseLong(p_request
+                .getParameter("EditLocProfileId"));
+        LocProfileHandlerHelper.modifyL10nProfile(locprofile,
+                getWorkflowInfos(p_request), originalLocId);
     }
 
     private void createL10nProfile(BasicL10nProfile locprofile)
     {
         LocProfileHandlerHelper.addL10nProfile(locprofile);
     }
-    
 
-	/**
-     * Before being able to create a Rate, certain objects must exist.
-     * Check that here.
+    /**
+     * Before being able to create a Rate, certain objects must exist. Check
+     * that here.
      */
-    private String checkPreReqData(HttpServletRequest p_request, HttpSession p_session)
-        throws EnvoyServletException
+    private String checkPreReqData(HttpServletRequest p_request,
+            HttpSession p_session) throws EnvoyServletException
     {
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
 
-        SessionManager sessMgr = (SessionManager) p_request.getSession().getAttribute(SESSION_MANAGER);
-        User user = (User)sessMgr.getAttribute(WebAppConstants.USER);
-        List allProjects = LocProfileHandlerHelper.getAllProjectNamesForManagedUser(user);
-        List allSrcLocales = LocProfileHandlerHelper.getAllSourceLocales(uiLocale);
+        SessionManager sessMgr = (SessionManager) p_request.getSession()
+                .getAttribute(SESSION_MANAGER);
+        User user = (User) sessMgr.getAttribute(WebAppConstants.USER);
+        List allProjects = LocProfileHandlerHelper
+                .getAllProjectNamesForManagedUser(user);
+        List allSrcLocales = LocProfileHandlerHelper
+                .getAllSourceLocales(uiLocale);
 
         if (allProjects == null || allProjects.size() < 1
-            || allSrcLocales == null || allSrcLocales.size() < 1)
+                || allSrcLocales == null || allSrcLocales.size() < 1)
         {
             ResourceBundle bundle = getBundle(p_session);
             StringBuffer message = new StringBuffer();
             boolean addcomma = false;
             message.append(bundle.getString("msg_prereq_warning_1"));
             message.append(":  ");
-            if(allProjects == null || allProjects.size() < 1)
+            if (allProjects == null || allProjects.size() < 1)
             {
                 message.append(bundle.getString("lb_projects"));
                 addcomma = true;
             }
-            if(allSrcLocales == null || allSrcLocales.size() < 1)
+            if (allSrcLocales == null || allSrcLocales.size() < 1)
             {
-                if (addcomma) message.append(", ");
+                if (addcomma)
+                    message.append(", ");
                 message.append(bundle.getString("lb_currency"));
             }
             message.append(".  ");
@@ -389,32 +418,35 @@ public class LocProfileMainHandler
 
             return message.toString();
         }
-        else 
+        else
             return "nomessage";
     }
 
     /**
      * Get list of all profiles, sorted appropriately
      */
-    private void dataForTable(HttpServletRequest p_request, HttpSession p_session)
-        throws RemoteException, NamingException, GeneralException
+    private void dataForTable(HttpServletRequest p_request,
+            HttpSession p_session) throws RemoteException, NamingException,
+            GeneralException
     {
-        
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                WebAppConstants.UILOCALE);
-        Vector locprofiles = LocProfileHandlerHelper.getAllL10nProfilesForGUI(getFilterParameters(p_request), uiLocale);
+
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
+        Vector locprofiles = LocProfileHandlerHelper.getAllL10nProfilesForGUI(
+                getFilterParameters(p_request), uiLocale);
         setNumberPerPage(p_request);
-        
+
         setTableNavigation(p_request, p_session, locprofiles,
-                       new LocProfileComparator(uiLocale),
-                       numPerPage,
-                       LocProfileStateConstants.LOCPROFILE_LIST,
-                       LocProfileStateConstants.LOCPROFILE_KEY);
+                new LocProfileComparator(uiLocale), numPerPage,
+                LocProfileStateConstants.LOCPROFILE_LIST,
+                LocProfileStateConstants.LOCPROFILE_KEY);
     }
-    
-    private void setNumberPerPage(HttpServletRequest req) {
+
+    private void setNumberPerPage(HttpServletRequest req)
+    {
         String pageSize = (String) req.getParameter("numOfPageSize");
-        if (!StringUtil.isEmpty(pageSize)) {
+        if (!StringUtil.isEmpty(pageSize))
+        {
             try
             {
                 numPerPage = Integer.parseInt(pageSize);
@@ -425,25 +457,35 @@ public class LocProfileMainHandler
             }
         }
     }
-    
-    private String[] getFilterParameters(HttpServletRequest p_request){
+
+    private String[] getFilterParameters(HttpServletRequest p_request)
+    {
         String action = p_request.getParameter("action");
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
         String name = p_request.getParameter("L10nProfilesNameFilter");
-        String company = p_request.getParameter("L10nProfilesCompanyNameFilter");
+        String company = p_request
+                .getParameter("L10nProfilesCompanyNameFilter");
         String tmp = p_request.getParameter("L10nProfilesTMPFilter");
         String project = p_request.getParameter("L10nProfilesProjectFilter");
 
-        if (!FILTER_SEARCH.equals(action) || p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET)) {
+        if (!FILTER_SEARCH.equals(action)
+                || p_request.getMethod().equalsIgnoreCase(
+                        WebAppConstants.REQUEST_METHOD_GET))
+        {
             name = (String) sessionMgr.getAttribute("L10nProfilesNameFilter");
-            company = (String) sessionMgr.getAttribute("L10nProfilesCompanyNameFilter");
+            company = (String) sessionMgr
+                    .getAttribute("L10nProfilesCompanyNameFilter");
             tmp = (String) sessionMgr.getAttribute("L10nProfilesTMPFilter");
-            project = (String) sessionMgr.getAttribute("L10nProfilesProjectFilter");
+            project = (String) sessionMgr
+                    .getAttribute("L10nProfilesProjectFilter");
         }
-        if (FILTER_SEARCH.equals(action)) {
-            //Go to page #1 if current action is filter searching.
-            sessionMgr.setAttribute(LOCPROFILE_KEY + TableConstants.LAST_PAGE_NUM, Integer.valueOf(1));
+        if (FILTER_SEARCH.equals(action))
+        {
+            // Go to page #1 if current action is filter searching.
+            sessionMgr.setAttribute(LOCPROFILE_KEY
+                    + TableConstants.LAST_PAGE_NUM, Integer.valueOf(1));
         }
         name = name == null ? "" : name;
         company = company == null ? "" : company;
@@ -453,8 +495,8 @@ public class LocProfileMainHandler
         sessionMgr.setAttribute("L10nProfilesCompanyNameFilter", company);
         sessionMgr.setAttribute("L10nProfilesTMPFilter", tmp);
         sessionMgr.setAttribute("L10nProfilesProjectFilter", project);
-        String[] filterParam = {name, company, tmp, project};
+        String[] filterParam =
+        { name, company, tmp, project };
         return filterParam;
     }
 }
-

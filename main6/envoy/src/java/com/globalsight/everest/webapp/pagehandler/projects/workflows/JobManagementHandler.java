@@ -78,6 +78,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.date.DateHelper;
@@ -114,6 +115,8 @@ public abstract class JobManagementHandler extends PageHandler
     public static final String EXPORT_WF_LOCALE_SUBDIR_PARAM = "exportWFLocaleSubDir";
 
     public static final String EXPORT_WF_BOM_PARAM = "bomType";
+
+    public static final String EXPORT_WF_XLF_SRC_AS_TRG_PARAM = "xlfSrcAsTrg";
 
     public static final String EXPORT_PAGE_SEL_ID_PARAM = "exportPageSel";
 
@@ -223,7 +226,7 @@ public abstract class JobManagementHandler extends PageHandler
     public static final String JOB_ID = WebAppConstants.JOB_ID;
 
     public static final String WF_ID = "wfId";
-    
+
     public static final String WF_PREVIOUS_ACTION = "wfPreviousAction";
 
     public static final String JOB_STATE = "state";
@@ -470,30 +473,13 @@ public abstract class JobManagementHandler extends PageHandler
 
     private static int s_semCount = 0;
 
-    private static int s_semMax;
-    static
-    {
-        // read Envoy.properties and get value from maxMyJobsThreads
-        try
-        {
-            SystemConfiguration config = SystemConfiguration.getInstance();
-            s_semMax = config.getIntParameter("maxMyJobsThreads");
-            CATEGORY.info("Maximum number of My Jobs threads: " + s_semMax);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Error when trying to read max my jobs threads: ", e);
-            CATEGORY.error("Using default value of 3");
-            s_semMax = 3;
-        }
-    }
-
     /** Returns true if the execution of the My Jobs tab can start */
     protected boolean startExecution()
     {
+        int maxMyJobsThreads = getMaxMyJobsThreads();
         synchronized (s_semaphore)
         {
-            if (s_semCount < s_semMax)
+            if (s_semCount < maxMyJobsThreads)
             {
                 s_semCount++;
                 CATEGORY.debug("up count is now: " + s_semCount);
@@ -505,6 +491,25 @@ public abstract class JobManagementHandler extends PageHandler
                 return false;
             }
         }
+    }
+
+    private int getMaxMyJobsThreads()
+    {
+        String value = SystemConfiguration
+                .getParameter(SystemConfigParamNames.MAX_MY_JOBS_THREADS);
+        int maxMyJobsThreads = 5;
+        if (value != null)
+        {
+            try
+            {
+                maxMyJobsThreads = Integer.parseInt(value);
+            }
+            catch (NumberFormatException nfe)
+            {
+                // use default 5 if meeting format error
+            }
+        }
+        return maxMyJobsThreads;
     }
 
     /** Decrements the count * */
@@ -519,7 +524,7 @@ public abstract class JobManagementHandler extends PageHandler
     }
 
     // Get the Records Per Page param
-    private static int s_jobsPerPage = 20;
+    public static int s_jobsPerPage = 20;
     static
     {
         try
@@ -617,7 +622,9 @@ public abstract class JobManagementHandler extends PageHandler
         HttpSession session = p_request.getSession();
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
-
+        // for Job contextMenu Cost permission
+        p_request.setAttribute("jobCostsTabPermission",
+                getJobCostsTabPermission(session));
         if (s_jobCosting)
         {
             session.setAttribute(JobManagementHandler.CURRENCY_XML,
@@ -691,6 +698,25 @@ public abstract class JobManagementHandler extends PageHandler
         }
 
         return beanMap;
+    }
+
+    private boolean getJobCostsTabPermission(HttpSession session)
+    {
+        PermissionSet perms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        boolean jobCostingView = perms
+                .getPermissionFor(Permission.JOB_COSTING_VIEW);
+        boolean jobQuoteSend = perms
+                .getPermissionFor(Permission.JOB_QUOTE_SEND);
+        boolean jobQuotePonumberView = perms
+                .getPermissionFor(Permission.JOB_QUOTE_PONUMBER_VIEW);
+        boolean jobQuoteApprove = perms
+                .getPermissionFor(Permission.JOB_QUOTE_APPROVE);
+        boolean jobQuoteStatusView = perms
+                .getPermissionFor(Permission.JOB_QUOTE_STATUS_VIEW);
+
+        return jobCostingView || jobQuoteSend || jobQuotePonumberView
+                || jobQuoteApprove || jobQuoteStatusView;
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -1087,7 +1113,8 @@ public abstract class JobManagementHandler extends PageHandler
             }
 
             if ((p_stateList != null)
-                    && (p_stateList.contains(Job.READY_TO_BE_DISPATCHED)
+                    && (p_stateList.contains(Job.PENDING)
+                            || p_stateList.contains(Job.READY_TO_BE_DISPATCHED)
                             || p_stateList.contains(Job.DISPATCHED)
                             || p_stateList.contains(Job.LOCALIZED)
                             || p_stateList.contains(Job.EXPORTED) || p_stateList
@@ -2001,7 +2028,11 @@ public abstract class JobManagementHandler extends PageHandler
             sb.append("=");
             sb.append(p_job.getJobId());
             sb.append("&fromJobs=true");
-            sb.append("\">");
+            sb.append("\" ");
+            sb.append("oncontextmenu=\"contextForTab('");
+            sb.append(p_job.getJobId());
+            sb.append("',event)\"");
+            sb.append(">");
             sb.append(p_job.getJobName());
             sb.append("</A></B>");
         }
@@ -2342,16 +2373,18 @@ public abstract class JobManagementHandler extends PageHandler
             }
             else
             {
-                list.add(status);
                 if (status.equals(Job.PENDING))
                 {
-                    list.add(Job.BATCHRESERVED);
-                    list.add(Job.IMPORTFAILED);
-                    list.add(Job.ADD_FILE);
+                    list.addAll(Job.PENDING_STATUS_LIST);
                 }
                 else if (status.equals(Job.EXPORTED))
                 {
+                    list.add(Job.EXPORTED);
                     list.add(Job.EXPORT_FAIL);
+                }
+                else
+                {
+                    list.add(status);
                 }
             }
             sp.setJobState(list);
@@ -2502,7 +2535,7 @@ public abstract class JobManagementHandler extends PageHandler
                         + "=" + buf);
                 jobSearch.append(":");
             }
-            
+
             // Creation Date start num and condition
             buf = (String) request
                     .getParameter(JobSearchConstants.EXPORT_DATE_START);
@@ -2511,7 +2544,8 @@ public abstract class JobManagementHandler extends PageHandler
                 sp.setExportDateStart(new Integer(buf));
                 sp.setExportDateStartOptions(request
                         .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_START + "=" + buf);
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_START + "="
+                        + buf);
                 jobSearch.append(":");
                 jobSearch
                         .append(JobSearchConstants.EXPORT_DATE_START_OPTIONS
@@ -2527,7 +2561,8 @@ public abstract class JobManagementHandler extends PageHandler
             if (buf.trim().length() != 0)
             {
                 sp.setExportDateEnd(new Integer(buf));
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_END + "=" + buf);
+                jobSearch
+                        .append(JobSearchConstants.EXPORT_DATE_END + "=" + buf);
                 jobSearch.append(":");
             }
 
@@ -2537,8 +2572,8 @@ public abstract class JobManagementHandler extends PageHandler
             if (!buf.equals("-1"))
             {
                 sp.setExportDateEndOptions(buf);
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_END_OPTIONS + "="
-                        + buf);
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_END_OPTIONS
+                        + "=" + buf);
                 jobSearch.append(":");
             }
 
@@ -2567,13 +2602,23 @@ public abstract class JobManagementHandler extends PageHandler
             if (cookie == null)
                 return sp;
 
-            StringTokenizer strtok = new StringTokenizer(cookie.getValue(), ":");
+            String cookieValue = URLDecoder.decode(cookie.getValue());
+            StringTokenizer strtok = new StringTokenizer(cookieValue, ":");
             while (strtok.hasMoreTokens())
             {
-                String tok = strtok.nextToken();
-                int idx = tok.indexOf("=");
-                String key = tok.substring(0, idx);
-                String value = tok.substring(idx + 1);
+                String key = "";
+                String value = "";
+                try
+                {
+                    String tok = strtok.nextToken();
+                    int idx = tok.indexOf("=");
+                    key = tok.substring(0, idx);
+                    value = tok.substring(idx + 1);
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
                 if (key.equals(JobSearchConstants.NAME_FIELD))
                 {
                     if (!value.equals(""))
@@ -2602,16 +2647,17 @@ public abstract class JobManagementHandler extends PageHandler
                     }
                     else
                     {
-                        list.add(value);
                         if (value.equals(Job.PENDING))
                         {
-                            list.add(Job.BATCHRESERVED);
-                            list.add(Job.IMPORTFAILED);
-                            list.add(Job.ADD_FILE);
+                            list.addAll(Job.PENDING_STATUS_LIST);
                         }
                         else if (value.equals(Job.EXPORTED))
                         {
                             list.add(Job.EXPORT_FAIL);
+                        }
+                        else
+                        {
+                            list.add(value);
                         }
                     }
                     sp.setJobState(list);
@@ -2685,7 +2731,8 @@ public abstract class JobManagementHandler extends PageHandler
                     if (!value.equals(""))
                         sp.setExportDateStart(new Integer(value));
                 }
-                else if (key.equals(JobSearchConstants.EXPORT_DATE_START_OPTIONS))
+                else if (key
+                        .equals(JobSearchConstants.EXPORT_DATE_START_OPTIONS))
                 {
                     if (!value.equals("-1"))
                         sp.setExportDateStartOptions(value);

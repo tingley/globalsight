@@ -30,11 +30,8 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
 public class JBossWrapper extends AppServerWrapper
 {
-
     private static final Logger s_logger = Logger
             .getLogger(AppServerWrapper.class.getName());
-
-    private static final String NAMING_SERVICE_PORT = "10999";
 
     public static final String USER_TRANSACTION = "UserTransaction";
 
@@ -58,75 +55,50 @@ public class JBossWrapper extends AppServerWrapper
     {
         try
         {
-            System.out.println("Initiating shutdown of jboss server.");
+            s_logger.info("Shutting down jboss server.");
 
-            // first find out if the server is running from the command line
-            // or as an NT service
-            // String startupType = System.getProperty("globalsight.startup");
-            // String command;
-            // if ("NTservice".equals(startupType))
-            // {
-            // //user net stop GlobalSight to shut it down
-            // command = "net stop \"GlobalSight\"";
-            // }
-            // else
-            // {
-            // running from command line so use shutdown to shut it down
             String os = System.getProperty("os.name");
             boolean isWindows = os.startsWith("Win");
-            SystemConfiguration config = SystemConfiguration.getInstance();
-            String ambHome = config
-                    .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
-            StringBuffer c = new StringBuffer();
-            if (!isWindows)
-                c.append("/bin/sh ");
-            c.append(ambHome.replace('/', File.separatorChar));
-            c.append(File.separator);
-            c.append("jboss");
-            c.append(File.separator);
-            c.append("jboss_server");
-            c.append(File.separator);
-            c.append("bin");
-            c.append(File.separator);
-
-            if (os.startsWith("Linux"))
-                c.append("shutdown.sh");
+            StringBuilder c = new StringBuilder();
+            if (isWindows)
+            {
+                c.append("jboss-cli.bat");
+            }
             else
-                c.append("shutdown.bat");
+            {
+                c.append("jboss-cli.sh");
+            }
+            c.append(" --connect command=:shutdown");
 
-            c.append(" -S --server=localhost:");
-            c.append(NAMING_SERVICE_PORT);
-            String command = c.toString();
-            // }
+            SystemConfiguration config = SystemConfiguration.getInstance();
+            String gsHome = config
+                    .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+            StringBuilder bin = new StringBuilder();
+            bin.append(gsHome.replace('/', File.separatorChar));
+            bin.append(File.separator);
+            bin.append("jboss");
+            bin.append(File.separator);
+            bin.append("server");
+            bin.append(File.separator);
+            bin.append("bin");
+            bin.append(File.separator);
+
+            String command = bin.toString() + c.toString();
             s_logger.info("Executing command:" + command);
             ProcessRunner pr = new ProcessRunner(command, System.out,
                     System.err);
             Thread t = new Thread(pr);
             t.start();
-            s_logger.info("Thread to stop jboss started.");
         }
         catch (Exception e)
         {
             s_logger.error("Failed to execute script to shutdown jboss server",
                     e);
         }
-
-        // s_logger.info("Start to shut down JBoss server.");
-        // String[] parameters = { "-S",
-        // "--server=localhost:" + NAMING_SERVICE_PORT };
-        // try
-        // {
-        // Shutdown.main(parameters);
-        // }
-        // catch (Exception e)
-        // {
-        // s_logger.error("Shut down JBoss failed.", e);
-        // }
     }
 
     public ServerRegistry getServerRegistry() throws GeneralException
     {
-
         return JBossServerRegistry.getInstance();
     }
 }

@@ -204,15 +204,8 @@ public class ParamTmMatchesPair extends ParamObjectPair
     {
         TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
 
-        //get the word count used for costing which incorporates the LMT
-//        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
-        //add the sublev rep count to the total rep count
-        p_workflowData.setTmInternalRepsWordCount(
-                p_workflow.getRepetitionWordCount()
-                + p_workflow.getSubLevRepetitionWordCount()
-                + p_workflow.getHiFuzzyRepetitionWordCount()
-                + p_workflow.getMedHiFuzzyRepetitionWordCount()
-                + p_workflow.getMedFuzzyRepetitionWordCount());
+        p_workflowData.setTmInternalRepsWordCount(p_workflow
+                .getRepetitionWordCount());
 
         p_workflowData.setLowFuzzyMatchWordCount(p_workflow.getThresholdLowFuzzyWordCount());
         p_workflowData.setMedFuzzyMatchWordCount(p_workflow.getThresholdMedFuzzyWordCount());
@@ -228,8 +221,7 @@ public class ParamTmMatchesPair extends ParamObjectPair
                    
         long tmNewWordsWordCount = 
             p_workflow.getNoMatchWordCount() + 
-            p_workflowData.getLowFuzzyMatchWordCount() + 
-            p_workflow.getSubLevMatchWordCount();
+            p_workflowData.getLowFuzzyMatchWordCount();
         p_workflowData.setTmNewWordsWordCount(tmNewWordsWordCount);
 
         p_workflowData.setTmExactMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());

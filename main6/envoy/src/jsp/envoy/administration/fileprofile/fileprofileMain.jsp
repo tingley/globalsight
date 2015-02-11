@@ -1,4 +1,3 @@
-
 <%@page import="com.globalsight.everest.cvsconfig.CVSFileProfile"%><%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -9,11 +8,13 @@
          com.globalsight.everest.webapp.pagehandler.PageHandler, 
          com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileConstants,
          com.globalsight.everest.util.comparator.FileProfileComparator,
+         com.globalsight.everest.servlet.util.SessionManager,
+         com.globalsight.everest.webapp.WebAppConstants,
          com.globalsight.everest.foundation.SearchCriteriaParameters,
          com.globalsight.everest.company.CompanyWrapper,
          com.globalsight.cxe.entity.xmldtd.XmlDtdImpl,
          java.util.ArrayList,
-         java.util.Locale, java.util.Hashtable, java.util.ResourceBundle,
+         java.util.Locale, java.util.HashMap, java.util.ResourceBundle,
          com.globalsight.everest.projecthandler.FileProfileSearchParameters"
          session="true" %>
 <jsp:useBean id="new1" scope="request"
@@ -34,7 +35,7 @@
 
 <%
   ResourceBundle bundle = PageHandler.getBundle(session);
-  SessionManager sessionManager =
+  SessionManager sessionMgr =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER); 
   String newURL = new1.getPageURL() + "&action=" + FileProfileConstants.CREATE;
   String editURL = edit.getPageURL() + "&action=" + FileProfileConstants.EDIT;
@@ -47,27 +48,37 @@
   String searchButton = bundle.getString("lb_search");
 
   //Urls of the links on this page
-  String advsearchUrl = advsearch.getPageURL() + "&" + action + "=" + FileProfileConstants.ADV_SEARCH_ACTION;
+  //String advsearchUrl = advsearch.getPageURL() + "&" + action + "=" + FileProfileConstants.ADV_SEARCH_ACTION;
   String searchUrl = search.getPageURL() + "&" + action + "=" + FileProfileConstants.SEARCH_ACTION;
     
   String confirmRemove = bundle.getString("msg_confirm_file_profile_removal");
-  String preReqData = (String)request.getAttribute("preReqData");
-  Hashtable l10nprofiles = (Hashtable) request.getAttribute("l10nprofiles");
+ // String preReqData = (String)request.getAttribute("preReqData");
+  //Hashtable l10nprofiles = (Hashtable) request.getAttribute("l10nprofiles");
+  HashMap<Long,String> idViewExtensions = (HashMap<Long,String>) request.getAttribute("idViewExtensions");
   ArrayList<CVSFileProfile> existCVSFPs = (ArrayList<CVSFileProfile>) request.getAttribute("existCVSFPs");
 
   boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
-  
- 
+  	
+  String uNameFilter = (String) sessionMgr.getAttribute("uNameFilter");
+  String uLPFilter = (String) sessionMgr.getAttribute("uLPFilter");
+  String uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
+  String uSourceFileFormatFilter = (String) sessionMgr.getAttribute("uSourceFileFormatFilter");
+  String uCompanyFilter = (String) sessionMgr.getAttribute("uCompanyFilter");
+  uNameFilter = uNameFilter == null ? "" : uNameFilter;
+  uLPFilter = uLPFilter == null ? "" : uLPFilter;
+  uFNFilter = uFNFilter == null ? "" : uFNFilter;
+  uSourceFileFormatFilter = uSourceFileFormatFilter == null ? "" : uSourceFileFormatFilter;
+  uCompanyFilter = uCompanyFilter == null ? "" : uCompanyFilter;
   
   // messages                           
-    String removeWarning = bundle.getString("jsmsg_wf_template_remove");    
-    FileProfileSearchParameters fromSearch =
-      (FileProfileSearchParameters)sessionManager.getAttribute("fromSearch");
-    String emptyMsg = "msg_no_file_profiles";
-    if (fromSearch != null)
-    {
-        emptyMsg = "msg_no_file_profiles";
-    }
+  String removeWarning = bundle.getString("jsmsg_wf_template_remove");    
+  FileProfileSearchParameters fromSearch =
+      (FileProfileSearchParameters)sessionMgr.getAttribute("fromSearch");
+  String emptyMsg = "msg_no_file_profiles";
+  if (fromSearch != null)
+  {
+	  emptyMsg = "msg_no_file_profiles";
+  }
 %>
 <HTML>
 <HEAD>
@@ -75,6 +86,7 @@
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -83,25 +95,30 @@ var objectName = "";
 var guideNode = "fileProfiles";
 var helpFile = "<%=bundle.getString("help_file_profiles_main_screen")%>";
 
+$(
+		function(){
+			$("#fpForm").keydown(function(e){
+				if(e.keyCode==13)
+				
+				{
+					submitForm("search")
+				
+				}
+				
+				});
+		}		
+	)
+
 function submitForm(button)
 {
    if (button == "New")
 	    {
-<%
-	        if (preReqData != null)
-	        {
-%>	            
-				alert("<%=preReqData%>");
-	            return;
-<%	
-	        }
-%>	       	
 	        fpForm.action = "<%=newURL%>";
 	    }
-      else if (button == "Search") 
-	        {
-	       	 	fpForm.action = "<%=searchUrl%>"
-	        }
+   else if (button == "search")
+   {
+       fpForm.action = "<%=searchUrl%>";
+   }
 	  else if(fpForm.radioBtn != null) 
 	        {
 	        	var radio = document.getElementsByName("radioBtn");
@@ -109,11 +126,7 @@ function submitForm(button)
 		        {
 		        	 value = getRadioValue(fpForm.radioBtn);
 		        	 varray = value.split(",");
-		        	 if (button == "Edit")
-				        {
-				           fpForm.action = "<%=editURL%>";
-				        }
-			        else if (button == "Remove") 
+		        	 if (button == "Remove") 
 			        {
 				        if (varray[1] == "1") {
 					        alert('The file profile is referred by CVS file profile. Please remove referred CVS file profile first.');
@@ -133,13 +146,40 @@ function submitForm(button)
 
 }
 
-function enableButtons()
-{
-    if (fpForm.removeBtn)
-        fpForm.removeBtn.disabled = false;
-    if (fpForm.editBtn)
-        fpForm.editBtn.disabled = false;
+function modifyuser(name){
+	
+	var url = "<%=editURL%>&&radioBtn=" + name;
+
+	fpForm.action = url;
+
+	fpForm.submit();
+				  
+			
 }
+function handleSelectAll() {
+	var ch = $("#selectAll").attr("checked");
+	if (ch == "checked") {
+		$("[name='radioBtn']").attr("checked", true);
+	} else {
+		$("[name='radioBtn']").attr("checked", false);
+	}
+	buttonManagement();
+}
+function buttonManagement()
+{
+	var count = $("input[name='radioBtn']:checked").length;
+	if (count > 0) {
+		
+	    if (count == 1) {
+	    	$("#removeBtn").attr("disabled", false);
+		} else {
+			$("#removeBtn").attr("disabled", true);
+		}
+	} else {
+        $("#removeBtn").attr("disabled", true);
+	}
+}
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0"
@@ -151,37 +191,9 @@ function enableButtons()
  STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 
-<form name="fpForm" method="post">
+<form name="fpForm" id="fpForm" method="post">
 
- <table border="0" class="standardText" cellpadding="2">
-  <tr>
-    <td class="standardText">
-      <%=bundle.getString("lb_name")%>:
-    </td>
-    <td class="standardText">
-      <select name="nameOptions">
-	<option value='<%=SearchCriteriaParameters.BEGINS_WITH%>'>
-	  <%= bundle.getString("lb_begins_with") %>
-	</option>
-	<option value='<%=SearchCriteriaParameters.ENDS_WITH%>'>
-	  <%= bundle.getString("lb_ends_with") %>
-	</option>
-	<option value='<%=SearchCriteriaParameters.CONTAINS%>'>
-	  <%= bundle.getString("lb_contains") %>
-	</option>
-      </select>
-      <input type="text" size="30" name="nameField" value=""/>
-    </td>
-    <td>
-      <input type="button" value="<%=searchButton%>..." onclick="submitForm('Search');"/>
-    </td>
-    <td class="standardText" style="padding-bottom: 2px">
-      <a class="standardHREF" href="<%=advsearchUrl%>"><%=bundle.getString("lb_advanced_search") %></a>
-    </td>
-  </tr>
- </table>
- <p>
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table  cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px;">
         <tr valign="top">
           <td align="right">
             <amb:tableNav bean="fileprofiles" key="<%=FileProfileConstants.FILEPROFILE_KEY%>"
@@ -190,67 +202,84 @@ function enableButtons()
         </tr>
         <tr>
           <td>
-              <amb:table bean="fileprofiles" id="fp"
+              <amb:table bean="fileprofiles" id="fp" hasFilter="true"
                      key="<%=FileProfileConstants.FILEPROFILE_KEY%>"
-                     dataClass="com.globalsight.cxe.entity.fileprofile.FileProfileImpl"
+                     dataClass="com.globalsight.cxe.entity.fileprofile.FileprofileVo"
                      pageUrl="self"
                      emptyTableMsg="<%=emptyMsg%>" >
-                <amb:column label="">
-                    <input type="radio" id="radioBtn" name="radioBtn" value="<%=fp.getId()%>,<%=existCVSFPs.contains(String.valueOf(fp.getId())) ? "1" : "0" %>"
-                        onclick="enableButtons()">
+                <amb:column label="checkbox"  width="2%">
+                	<input type="checkbox" name="radioBtn" id="<%=fp.getId()%>" 
+                	value="<%=fp.getId()%>,<%=existCVSFPs.contains(String.valueOf(fp.getId())) ? "1" : "0" %>" onclick="buttonManagement()">
                 </amb:column>
-                <amb:column label="lb_name" sortBy="<%=FileProfileComparator.NAME%>"
-                    width="150px">
+                <amb:column label="lb_name" sortBy="<%=FileProfileComparator.NAME%>"  filter="uNameFilter" filterValue="<%=uNameFilter%>"  width="150px">
+                    <amb:permission name="<%=Permission.FILE_PROFILES_EDIT%>" ><a href='javascript:void(0)' title='Edit FileProfile' onclick="modifyuser('<%= fp.getId() %>')"></amb:permission>
                     <%= fp.getName() %>
+                    <amb:permission name="<%=Permission.FILE_PROFILES_EDIT%>" ></a></amb:permission>
                 </amb:column>
                 <amb:column label="lb_description" sortBy="<%=FileProfileComparator.DESC%>"
                     width="260px">
                      <% out.print(fp.getDescription() == null ?
                          "" : fp.getDescription()); %>
                 </amb:column>
-                <amb:column label="lb_loc_profile" sortBy="<%=FileProfileComparator.LP%>" width="120px">
+                <amb:column label="lb_loc_profile" sortBy="<%=FileProfileComparator.LP%>"  filter="uLPFilter" filterValue="<%=uLPFilter%>" width="20%">
                      <% 
-                        long id = fp.getL10nProfileId();
-                        out.print(l10nprofiles.get(new Long(id)));
+                        out.print(fp.getLocName());
                      %> 
                 </amb:column>
-                <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" width="120px">
+                  <amb:column label="lb_source_file_format" sortBy="<%=FileProfileComparator.FORMATTYPES_NAME%>" filter="uSourceFileFormatFilter" filterValue="<%=uSourceFileFormatFilter%>" width="120px">
+                     <% 
+                        String formatTypesName = fp.getFormatName();
+                        out.print(formatTypesName);
+                     %> 
+                </amb:column>
+                 <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" filter="uFNFilter" filterValue="<%=uFNFilter%>" width="120px">
                      <% 
                         String filterName = fp.getFilterName();
                         out.print(filterName);
                      %> 
                 </amb:column>
-                <amb:column label="lb_loc_xml_dtd_name" width="120px">
+                <amb:column label="lb_source_file_encoding" sortBy="<%=FileProfileComparator.CODE_NAME%>" width="120px">
                      <% 
-                        XmlDtdImpl xmlDtd = fp.getXmlDtd();
-                        if (xmlDtd != null)
-                        {
-                    	    out.print(xmlDtd.getName());
-                        }
+                        String codeName = fp.getCodeSet();
+                        out.print(codeName);
+                     %> 
+                </amb:column>
+                <amb:column label="lb_file_extensions" sortBy="<%=FileProfileComparator.EXTENSIONS_NAME%>" width="120px">
+                     <% 
+                     String extensionsName =idViewExtensions.get(fp.getId());
+                     extensionsName =extensionsName==null?"all":extensionsName;
+                     out.print(extensionsName);
                      %> 
                 </amb:column>
                 <% if (isSuperAdmin) { %>
-                <amb:column label="lb_company_name" sortBy="<%=FileProfileComparator.ASC_COMPANY%>">
-                    <%=CompanyWrapper.getCompanyNameById(fp.getCompanyId())%>
+                <amb:column label="lb_company_name" sortBy="<%=FileProfileComparator.ASC_COMPANY%>"  filter="uCompanyFilter" filterValue="<%=uCompanyFilter%>">
+                    <%=fp.getCompanyName()%>
                 </amb:column>
                 <% } %>
               </amb:table>
             </td>
          </tr>
          <tr>
-    <td style="padding-top:5px" align="right">
+         
+         </TR>
+		    <td>
+		      <amb:tableNav  bean="fileprofiles" key="<%=FileProfileConstants.FILEPROFILE_KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>
+		    </td>
+		  <TR>
+		</DIV>
+		<TR><TD>&nbsp;</TD></TR>
+		
+		<TR>
+    <td style="padding-top:5px" align="left">
     <amb:permission name="<%=Permission.FILE_PROFILES_REMOVE%>" >
         <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-            name="removeBtn" disabled onClick="submitForm('Remove');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.FILE_PROFILES_EDIT%>" >
-        <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
-            name="editBtn" disabled onClick="submitForm('Edit');">
+            name="removeBtn" id="removeBtn" disabled onClick="submitForm('Remove');">
     </amb:permission>
     <amb:permission name="<%=Permission.FILE_PROFILES_NEW%>" >
-        <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
+            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
              onClick="submitForm('New');">
     </amb:permission> 
+   
     </td>
 </TR>
 </TABLE>

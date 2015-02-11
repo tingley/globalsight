@@ -23,9 +23,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,8 +54,10 @@ import com.globalsight.cxe.entity.customAttribute.DateCondition;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -82,6 +86,9 @@ public class JobAttributeReportHelper
     private int row = 4;
 
     private List<JobImpl> jobAttributes;
+    
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
 
     public JobAttributeReportHelper(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -446,8 +453,8 @@ public class JobAttributeReportHelper
             sheet.addCell(new Number(col++, row, job.getWorkflows().size()));
 
             // Submitter
-            sheet.addCell(new Label(col++, row, UserUtil.getUserNameById(job
-                    .getCreateUserId()), format));
+            sheet.addCell(new Label(col++, row, UserHandlerHelper.getUser(job
+                    .getCreateUserId()).getUserName(), format));
 
             // Project
             sheet.addCell(new Label(col++, row, job.getL10nProfile()
@@ -621,8 +628,12 @@ public class JobAttributeReportHelper
 
     private void end() throws Exception
     {
-        workbook.write();
-        workbook.close();
+        if (workbook != null)
+        {
+            workbook.write();
+            workbook.close();
+            response.getOutputStream().close();
+        }
     }
 
     private void addTotalCell(int x, int y)
@@ -644,10 +655,31 @@ public class JobAttributeReportHelper
      */
     public void generateReport() throws Exception
     {
+        String userId = (String) request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
+        
         init();
+        
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(new ArrayList(jobAttributes));
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            workbook = null;
+            response.sendError(response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
+
         addHeader();
         writeData();
         writeTotal();
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                        null, 100, ReportsData.STATUS_FINISHED);
         end();
     }
 }

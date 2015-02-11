@@ -163,7 +163,7 @@ public class JobSearchCriteria
                 case JobSearchParameters.EXPORT_DATE_END:
                     exportEndExpression(keys[i], criteria);
                     break;
-                        
+
                 default:
                     break;
             }
@@ -311,7 +311,7 @@ public class JobSearchCriteria
             return;
         }
 
-        hql.append(" and j.companyId = " + currentId.trim());
+        hql.append(" and j.companyId = " + Long.parseLong(currentId.trim()));
     }
 
     /*
@@ -371,7 +371,7 @@ public class JobSearchCriteria
             hql.append(" and j.priority = :priority ");
         }
 
-        params.put("priority", priority);
+        params.put("priority", Integer.parseInt(priority));
     }
 
     /*
@@ -408,7 +408,7 @@ public class JobSearchCriteria
             projectIds = (List<Long>) keyCriteria;
         }
 
-        hql.append(" and r.l10nProfile.project in (")
+        hql.append(" and r.l10nProfile.project.id in (")
                 .append(convertList(projectIds)).append(") ");
     }
 
@@ -418,7 +418,7 @@ public class JobSearchCriteria
     private void sourceLocaleExpression(Object p_key, Map<?, ?> criteria)
     {
         GlobalSightLocale srcLocale = (GlobalSightLocale) criteria.get(p_key);
-        hql.append(" and r.l10nProfile.sourceLocale = :srcLocale ");
+        hql.append(" and r.l10nProfile.sourceLocale.id = :srcLocale ");
         params.put("srcLocale", srcLocale.getIdAsLong());
     }
 
@@ -429,7 +429,7 @@ public class JobSearchCriteria
     private void targetLocaleExpression(Object p_key, Map<?, ?> criteria)
     {
         GlobalSightLocale trgLocale = (GlobalSightLocale) criteria.get(p_key);
-        hql.append(" and w.targetLocale = :trgLocale ");
+        hql.append(" and w.targetLocale.id = :trgLocale ");
         hql.append(" and w.state <> :cancelled ");
         params.put("trgLocale", trgLocale.getIdAsLong());
         params.put("cancelled", WorkflowImpl.CANCELLED);

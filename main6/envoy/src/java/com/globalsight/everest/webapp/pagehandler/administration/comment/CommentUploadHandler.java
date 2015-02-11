@@ -125,7 +125,7 @@ public class CommentUploadHandler extends PageHandler implements
         String wId = "";
         if (wo != null)
         {
-            String companyId = null;
+            long companyId = -1;
             if (wo instanceof Task)
             {
                 Task task = (Task) wo;
@@ -148,7 +148,8 @@ public class CommentUploadHandler extends PageHandler implements
                 companyId = ((Workflow) wo).getCompanyId();
             }
 
-            CompanyThreadLocal.getInstance().setIdValue(companyId);
+            CompanyThreadLocal.getInstance().setIdValue(
+                    String.valueOf(companyId));
         }
         String tmpDir = WebAppConstants.COMMENT_REFERENCE_TEMP_DIR + wId
                 + userId;
@@ -166,8 +167,7 @@ public class CommentUploadHandler extends PageHandler implements
             }
 
             if (valueSet.equals(WebAppConstants.COMMENT_REFERENCE_NO_DELETE)
-                    || value
-                            .equals(WebAppConstants.COMMENT_REFERENCE_NO_DELETE))
+                    || value.equals(WebAppConstants.COMMENT_REFERENCE_NO_DELETE))
             {
                 CommentUpload uploader = new CommentUpload();
 
@@ -185,8 +185,7 @@ public class CommentUploadHandler extends PageHandler implements
             {
                 if (FormUtil.isNotDuplicateSubmisson(p_request,
                         FormUtil.Forms.EDIT_COMMENT)
-                        && value
-                                .equals(WebAppConstants.COMMENT_REFERENCE_DELETE))
+                        && value.equals(WebAppConstants.COMMENT_REFERENCE_DELETE))
                 {
                     editCommentReferences(
                             p_request
@@ -227,8 +226,8 @@ public class CommentUploadHandler extends PageHandler implements
 
             if (comment != null)
             {
-                ArrayList more = mgr.getCommentReferences(Long.toString(comment
-                        .getId()),
+                ArrayList more = mgr.getCommentReferences(
+                        Long.toString(comment.getId()),
                         WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS,
                         true);
                 // loop through the existing list and see if any were deleted.
@@ -335,8 +334,7 @@ public class CommentUploadHandler extends PageHandler implements
             // If we couldn't delete it it'll show up again in the list.
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY
-                        .debug("Could not delete Comment Reference file: " + ex);
+                CATEGORY.debug("Could not delete Comment Reference file: " + ex);
             }
         }
     }
@@ -370,8 +368,7 @@ public class CommentUploadHandler extends PageHandler implements
             // If we couldn't delete it it'll show up again in the list.
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY
-                        .debug("Could not delete Comment Reference file: " + ex);
+                CATEGORY.debug("Could not delete Comment Reference file: " + ex);
             }
         }
     }

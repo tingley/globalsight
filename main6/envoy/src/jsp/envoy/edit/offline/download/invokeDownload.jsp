@@ -53,7 +53,7 @@
     String requestParamEditor = OfflineConstants.EDITOR_SELECTOR;
     String requestParamEncoding = OfflineConstants.ENCODING_SELECTOR;
     String requestParamPtagFormat = OfflineConstants.PTAG_SELECTOR;
-    String requestParamEditExact = OfflineConstants.EDIT_EXACT_SELECTOR;
+    String requestParamEditExact = OfflineConstants.TM_EDIT_TYPE;
     String requestParamResInsMode = OfflineConstants.RES_INS_SELECTOR;
     String requestParamAcceptDownloadRequest = OfflineConstants.DOWNLOAD_ACCEPT_DOWNLOAD;
     String requestParamDownloadAction = WebAppConstants.DOWNLOAD_ACTION;

@@ -322,6 +322,7 @@ TR.trodd {
                 <TD><%=bundle.getString("log_activity_file") %></TD>
                 <TD><%=bundle.getString("log_activity")%></TD>
             </TR>
+<!-- 
             <TR>
                 <td>
                   <input type="checkbox" id="jboss" name="jboss" value="JBoss_GlobalSight.log" />
@@ -329,7 +330,6 @@ TR.trodd {
                 <TD><%=bundle.getString("log_jboss_wrapper_file") %></TD>
                 <TD><%=bundle.getString("log_jboss_wrapper")%></TD>
             </TR>
-<!-- 
 			<% if (AppServerWrapperFactory.WEBLOGIC.equals(j2eeVendor)) { %>
 			<TR>
                 <td>

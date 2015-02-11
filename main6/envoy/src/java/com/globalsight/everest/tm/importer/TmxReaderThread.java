@@ -993,7 +993,7 @@ public class TmxReaderThread
                 attr = elem.attributeValue("type");
                 if (attr == null || attr.length() == 0)
                 {
-                    elem.addAttribute("type", DEFAULT_TYPE);
+                    //elem.addAttribute("type", DEFAULT_TYPE);
                 }
             }
             else if (name.equals("ept"))

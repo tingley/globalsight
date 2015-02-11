@@ -5,7 +5,7 @@ public class FilterConfiguration implements BasePage
 
     // Filter Configuration
     public static final String CHECK_ALL_CHECKBOX = "//input[@type='checkbox']";
-    public static final String EXPAND_ALL_BUTTON = "expandAllFilters";
+    public static final String EXPAND_ALL_BUTTON = "//input[@id='expandAllFilters']";
     public static final String COLLAPSE_ALL_BUTTON = "collapseAllFilters";
     
     public static final String FILTER_TABLE="//span[@id='filterConfigurationTable']/table/tbody";
@@ -85,6 +85,7 @@ public class FilterConfiguration implements BasePage
     public static final String BASE_FILTER_ADD_CONTENT_BUTTON = "//input[@value='Add...']";
     public static final String BASE_FILTER_CONTENT_SAVE_BUTTON = "//input[@value='Save' and @type='button' and @onclick='baseFilter.saveInternalText()']";
     public static final String BASE_FILTER_CONTENT_NAME_TEXT = "baseFilter_InternalText";
+    public static final String BASE_FILTER_PRIORITY = "baseFilter_InternalText_priority";
     public static final String BASE_FILTER_CONTENT_RE_CHECKBOX = "baseFilter_InternalText_isRE";
     public static final String BASE_FILTER_CHECK_ALL_CHECKBOX = "checkAllBaseFilter";
     

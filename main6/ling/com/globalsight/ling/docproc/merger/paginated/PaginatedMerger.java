@@ -40,12 +40,15 @@ import org.xml.sax.AttributeList;
 
 // Xerces & Xalan
 import org.apache.xerces.parsers.SAXParser;
-import org.apache.xerces.utils.QName;
-import org.apache.xerces.framework.XMLAttrList;
-
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
 
 /**
- *  PaginatedResultSetXml Extractor. 
+ * PaginatedResultSetXml Extractor.
  */
 
 public class PaginatedMerger implements EntityResolver
@@ -56,8 +59,7 @@ public class PaginatedMerger implements EntityResolver
     // character encoding
     private String m_IANAEncoding = null;
     private String m_JavaEncoding = null;
-    
-    
+
     /**
      * Extractor constructor comment.
      */
@@ -65,40 +67,37 @@ public class PaginatedMerger implements EntityResolver
     {
     }
 
-
     /**
-     *
-     * Parse the input file and get the original format from
-     * <diplomat> portion
+     * 
+     * Parse the input file and get the original format from <diplomat> portion
      * 
      */
     public byte[] merge(String input, String encoding)
-        throws ExtractorException
+            throws ExtractorException
     {
         m_output = new StringBuffer();
         m_IANAEncoding = encoding;
         m_JavaEncoding = CodesetMapper.getJavaEncoding(encoding);
-        if(m_JavaEncoding == null)
+        if (m_JavaEncoding == null)
         {
             m_JavaEncoding = encoding;
         }
-        
+
         GsSAXParser parser = new GsSAXParser();
 
         // don't read DTD
         parser.setEntityResolver(this);
 
-//          // validating parser
-//          try
-//          {
-//              parser.setFeature("http://xml.org/sax/features/validation",
-//                                  true);
-//          }
-//          catch(Exception e)
-//          {
-//              // Shouldn't get here
-//          }
-
+        // // validating parser
+        // try
+        // {
+        // parser.setFeature("http://xml.org/sax/features/validation",
+        // true);
+        // }
+        // catch(Exception e)
+        // {
+        // // Shouldn't get here
+        // }
 
         // parse PaginatedResultSetXml
         byte[] merged = null;
@@ -107,53 +106,50 @@ public class PaginatedMerger implements EntityResolver
             parser.parse(new InputSource(new StringReader(input)));
             merged = m_output.toString().getBytes(m_JavaEncoding);
         }
-        catch(UnsupportedEncodingException e)
+        catch (UnsupportedEncodingException e)
         {
-            throw new ExtractorException
-                (ExtractorExceptionConstants.INVALID_ENCODING,
-                 e.toString());
+            throw new ExtractorException(
+                    ExtractorExceptionConstants.INVALID_ENCODING, e.toString());
         }
-        catch(Exception ee)
+        catch (Exception ee)
         {
-            throw new ExtractorException
-                (ExtractorExceptionConstants.PAGINATED_PARSE_ERROR,
-                 ee.toString());
+            throw new ExtractorException(
+                    ExtractorExceptionConstants.PAGINATED_PARSE_ERROR,
+                    ee.toString());
         }
 
         return merged;
 
     }
 
-
     /**
      * Override EntityResolver#resolveEntity.
-     *
-     * The purpose of this method is to avoid the parser trying to
-     * read the external DTD 
+     * 
+     * The purpose of this method is to avoid the parser trying to read the
+     * external DTD
      */
     public InputSource resolveEntity(String publicId, String systemId)
-        throws SAXException, IOException
+            throws SAXException, IOException
     {
         return new InputSource(new StringReader(""));
     }
 
-
     /**
      * Inner class to handle SAX events
-     *
+     * 
      */
-    private class GsSAXParser
-        extends SAXParser implements PaginatedMergerConstants
+    private class GsSAXParser extends SAXParser implements
+            PaginatedMergerConstants
     {
         // for extractor switching
         private StringBuffer m_mergingContent = null;
-        
+
         // XML encoder
         private XmlEntities m_xmlEncoder = new XmlEntities();
 
         // administrative flags
         private boolean m_merges = false;
-        
+
         /**
          * Constructor
          */
@@ -161,60 +157,52 @@ public class PaginatedMerger implements EntityResolver
         {
             super();
         }
-        
 
-        public void reset() throws java.lang.Exception
+        public void reset() throws XNIException
         {
             super.reset();
-            
+
             m_mergingContent = null;
             m_merges = false;
         }
-        
 
         /** startDocument */
-        public void startDocument()
-            throws Exception
+        public void startDocument() throws XNIException
         {
-            m_output.append("<?xml version=\"1.0\" encoding=\"" 
-                            + m_IANAEncoding + "\"?>\n");
+            m_output.append("<?xml version=\"1.0\" encoding=\""
+                    + m_IANAEncoding + "\"?>\n");
 
-            super.startDocument();
+            super.startDocument(null, null, null, null);
         }
 
-
         /** Start element */
-        public void startElement(QName element, 
-                                 XMLAttrList attrList, int attrListIndex)
-            throws Exception
+        public void startElement(QName element, XMLAttributes attributes,
+                Augmentations augs) throws XNIException
         {
-            String elementName = fStringPool.toString(element.rawname);
-            AttributeList attrs = attrList.getAttributeList(attrListIndex);
+            String elementName = element.rawname;
 
             // set the merge flag
-            if(elementName.equals(NODE_DIPLOMAT))
+            if (elementName.equals(NODE_DIPLOMAT))
             {
                 m_merges = true;
                 m_mergingContent = new StringBuffer();
             }
-            
+
             StringBuffer startTag = new StringBuffer();
             // output tag
             startTag.append("<" + elementName);
-            int len = attrs.getLength();
+            int len = attributes.getLength();
             for (int i = 0; i < len; i++)
             {
-                String name  = attrs.getName(i);
-                String value = attrs.getValue(i);
-                
-                
-                startTag.append(" " + name + "=\"" 
-                                + m_xmlEncoder.encodeStringBasic(value)
-                                + "\"");
+                String name = attributes.getLocalName(i);
+                String value = attributes.getValue(i);
+
+                startTag.append(" " + name + "=\""
+                        + m_xmlEncoder.encodeStringBasic(value) + "\"");
             }
             startTag.append(">");
 
-            if(m_merges)
+            if (m_merges)
             {
                 m_mergingContent.append(startTag.toString());
             }
@@ -222,19 +210,16 @@ public class PaginatedMerger implements EntityResolver
             {
                 m_output.append(startTag.toString());
             }
-            
 
-            super.startElement(element, attrList, attrListIndex);
-            
+            super.startElement(element, attributes, augs);
         }
 
-
         /** Characters. */
-        public void characters(char ch[], int start, int length)
-            throws Exception
+        public void characters(XMLString text, Augmentations augs)
+                throws XNIException
         {
-            String stuff = new String(ch, start, length);
-            if(m_merges)
+            String stuff = new String(text.ch, text.offset, text.length);
+            if (m_merges)
             {
                 m_mergingContent.append(m_xmlEncoder.encodeStringBasic(stuff));
             }
@@ -242,34 +227,32 @@ public class PaginatedMerger implements EntityResolver
             {
                 m_output.append(m_xmlEncoder.encodeStringBasic(stuff));
             }
-            super.characters(ch, start, length);
-            
-        }
 
+            super.characters(text, augs);
+        }
 
         /** Ignorable whitespace. */
-        public void ignorableWhitespace(char ch[], int start, int length)
-            throws Exception
+        public void ignorableWhitespace(XMLString text, Augmentations augs)
+                throws XNIException
         {
-            characters(ch, start, length);
-            //super.ignorableWhitespace(ch, start, length);
-            
+            characters(text, augs);
+            // super.ignorableWhitespace(ch, start, length);
+
         }
 
-
         /** End element. */
-        public void endElement(QName element)
-            throws Exception
+        public void endElement(QName element, Augmentations augs)
+                throws XNIException
         {
-            String elementName = fStringPool.toString(element.rawname);
+            String elementName = element.rawname;
             StringBuffer endTag = new StringBuffer();
             endTag.append("</" + elementName + ">");
 
-            if(m_merges)
+            if (m_merges)
             {
                 m_mergingContent.append(endTag.toString());
 
-                if(elementName.equals(NODE_DIPLOMAT))
+                if (elementName.equals(NODE_DIPLOMAT))
                 {
                     // Do merge
                     String merged = null;
@@ -277,9 +260,9 @@ public class PaginatedMerger implements EntityResolver
                     {
                         merged = mergeDiplomat(m_mergingContent.toString());
                     }
-                    catch(DiplomatMergerException e)
+                    catch (DiplomatMergerException e)
                     {
-                        throw new SAXException(e);
+                        throw new XNIException(e);
                     }
                     m_output.append(m_xmlEncoder.encodeStringBasic(merged));
 
@@ -292,75 +275,63 @@ public class PaginatedMerger implements EntityResolver
                 m_output.append(endTag.toString());
             }
 
-            super.endElement(element);
+            super.endElement(element, augs);
 
         }
 
-        public void comment(int dataIndex)
-            throws Exception
+        public void comment(XMLString text, Augmentations augs)
+                throws XNIException
         {
-            m_output.append("<!--" + fStringPool.toString(dataIndex) 
-                             + "-->\n");
-            super.comment(dataIndex);
+            m_output.append("<!--" + text.toString() + "-->\n");
+            super.comment(text, augs);
         }
 
-
-        public void startDTD(QName rootElement, int publicId, int systemId)
-            throws Exception 
+        public void startDTD(XMLLocator locator, Augmentations augs)
+                throws XNIException
         {
             // strings
-            String name = fStringPool.toString(rootElement.rawname);
-            String pubid = fStringPool.toString(publicId);
-            String sysid = fStringPool.toString(systemId);
+            // String name = fStringPool.toString(rootElement.rawname);
+            // String pubid = fStringPool.toString(publicId);
+            // String sysid = fStringPool.toString(systemId);
+            //
+            // m_output.append("<!DOCTYPE " + name + " ");
+            //
+            // String externalId = null;
+            // if (sysid != null && pubid != null)
+            // {
+            // externalId = "PUBLIC \"" + pubid + "\" \"" + sysid + "\"";
+            // }
+            // else if (sysid != null)
+            // {
+            // externalId = "SYSTEM \"" + sysid + "\"";
+            // }
+            // if (externalId != null)
+            // {
+            // m_output.append(externalId);
+            // }
 
-            m_output.append("<!DOCTYPE " + name + " ");
-
-            String externalId = null;
-            if(sysid != null && pubid != null)
-            {
-                externalId = "PUBLIC \"" + pubid + "\" \"" + sysid + "\"";
-            }
-            else if(sysid != null)
-            {
-                externalId = "SYSTEM \"" + sysid + "\"";
-            }
-            if(externalId != null)
-            {
-                m_output.append(externalId);
-            }
-
-            super.startDTD(rootElement, publicId, systemId);
+            super.startDTD(locator, augs);
         }
-        
 
-        public void internalSubset(int internalSubset)
+        public void endDTD(Augmentations augs) throws XNIException
         {
-            m_output.append("[" 
-                             + fStringPool.toString(internalSubset) + "]");
+            // m_output.append(">\n");
 
-            super.internalSubset(internalSubset);
+            super.endDTD(augs);
         }
 
-        public void endDTD() throws Exception
-        {
-            m_output.append(">\n");
-
-            super.endDTD();
-        }
-            
-        
         private String mergeDiplomat(String diplomat)
-            throws DiplomatMergerException
+                throws DiplomatMergerException
         {
             DiplomatMerger diplomatMerger = new DiplomatMerger();
             L10nContent l10ncontent = new L10nContent();
-            
+
             diplomatMerger.init(diplomat, l10ncontent);
             diplomatMerger.setTargetEncoding(m_JavaEncoding);
             diplomatMerger.merge();
-            
+
             return l10ncontent.getL10nContent();
         }
-        
+
     }
 }

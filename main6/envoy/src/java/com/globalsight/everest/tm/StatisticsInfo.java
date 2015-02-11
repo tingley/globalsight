@@ -67,7 +67,14 @@ public class StatisticsInfo
 
             result.append("<language>");
             result.append("<locale>");
-            result.append(m_locale.toString());
+			if ("in_id".equalsIgnoreCase(m_locale.toString()))
+			{
+				result.append("id_id");
+			}
+			else
+			{
+				result.append(m_locale.toString());
+			}
             result.append("</locale>");
             result.append("<name>");
             result.append(m_language);

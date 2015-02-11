@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
@@ -90,6 +89,7 @@ public class TaskInterimPersistenceAccessor
         try
         {
             cnn = ConnectionPool.getConnection();
+            cnn.setAutoCommit(false);
             ps = cnn.prepareStatement(SQL_UPDATE_ACTIVITY);
             ps.setLong(1, taskId);
             ps.setString(2, actor);
@@ -102,6 +102,7 @@ public class TaskInterimPersistenceAccessor
             // delete the activities with 'ACTIVE' state from other users
             // (excluding the pm)
             deleteAvailableActivity(cnn, taskId, actor, pm);
+            cnn.commit();
         }
         catch (Exception e)
         {
@@ -134,9 +135,9 @@ public class TaskInterimPersistenceAccessor
                 {
                     try
                     {
-						skipInterimActivity(
-								((WorkflowTaskInstance) task).getTaskId(),
-								connection);
+                        skipInterimActivity(
+                                ((WorkflowTaskInstance) task).getTaskId(),
+                                connection);
                     }
                     catch (Exception e)
                     {
@@ -148,12 +149,13 @@ public class TaskInterimPersistenceAccessor
         }
         catch (ConnectionPoolException e)
         {
-        	CATEGORY.error("Fail to get connection in cancelInterimActivities.", e);
-		}
+            CATEGORY.error(
+                    "Fail to get connection in cancelInterimActivities.", e);
+        }
         finally
         {
-			if (connection != null)
-				ConnectionPool.silentReturnConnection(connection);
+            if (connection != null)
+                ConnectionPool.silentReturnConnection(connection);
         }
 
     }
@@ -202,6 +204,7 @@ public class TaskInterimPersistenceAccessor
         try
         {
             cnn = ConnectionPool.getConnection();
+            cnn.setAutoCommit(false);
             ps = cnn.prepareStatement(SQL_INSERT_ACTIVITY);
             ps.setLong(1, taskId);
             ps.setString(2, activityName);
@@ -229,6 +232,7 @@ public class TaskInterimPersistenceAccessor
                             + " to TASK_INTERIM table.");
                 }
             }
+            cnn.commit();
         }
         catch (Exception e)
         {
@@ -259,11 +263,13 @@ public class TaskInterimPersistenceAccessor
         try
         {
             cnn = ConnectionPool.getConnection();
+            cnn.setAutoCommit(false);
             ps = cnn.prepareStatement(SQL_DELETE_ACCEPTED_ACTIVITY);
             ps.setLong(1, taskId);
             ps.setString(2, actor);
             ps.setString(3, pm);
             ps.executeUpdate();
+            cnn.commit();
         }
         catch (Exception e)
         {
@@ -517,7 +523,7 @@ public class TaskInterimPersistenceAccessor
         try
         {
             connection = ConnectionPool.getConnection();
-            
+
             // skip the activities by the task id first
             long taskId = taskInstance.getTask().getTaskNode().getId();
             skipInterimActivity(taskId, connection);
@@ -547,23 +553,28 @@ public class TaskInterimPersistenceAccessor
         boolean returnInternalConnection = false;
         try
         {
-            if (connection == null) {
+            if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
                 returnInternalConnection = true;
             }
+            connection.setAutoCommit(false);
             ps = connection.prepareStatement(SQL_DELETE_TRASHED_ACTIVITY);
             ps.setLong(1, taskId);
             ps.executeUpdate();
+            connection.commit();
         }
         catch (Exception e)
         {
-			CATEGORY.error("Failed to delete activity with TASK_ID " + taskId, e);
+            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId,
+                    e);
         }
         finally
         {
             ConnectionPool.silentClose(ps);
-            if (returnInternalConnection) {
-            	ConnectionPool.silentReturnConnection(connection);
+            if (returnInternalConnection)
+            {
+                ConnectionPool.silentReturnConnection(connection);
             }
         }
     }

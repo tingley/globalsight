@@ -1,0 +1,3 @@
+<jboss-web>
+   <context-root>globalsight/spellchecker</context-root>
+</jboss-web>

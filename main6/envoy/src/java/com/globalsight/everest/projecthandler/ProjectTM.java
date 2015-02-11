@@ -29,16 +29,14 @@ import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 
-public class ProjectTM
-    extends PersistentObject
-    implements Tm
+public class ProjectTM extends PersistentObject implements Tm
 {
     private String m_name = "";
     // id of the company which this activity belong to
-    private String m_companyId; 
+    private long m_companyId;
     private String m_organization = "";
-    private String m_description = "";   
-    private Date   m_creationDate;
+    private String m_description = "";
+    private Date m_creationDate;
     private String m_domain = "";
     private String m_creationUser = "";
     private boolean m_isRemoteTm = false;
@@ -50,6 +48,8 @@ public class ProjectTM
     private long m_lastTUId = -1;
     private long m_convertedTM3Id = -1;
     private String m_status = "";
+    
+    private boolean isFirstImporting = false;
 
     public String getStatus()
     {
@@ -64,7 +64,7 @@ public class ProjectTM
     public ProjectTM()
     {
     }
-    
+
     public void setName(String p_name)
     {
         m_name = p_name;
@@ -72,22 +72,24 @@ public class ProjectTM
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
-    
+
     public void setOrganization(String p_organization)
     {
         m_organization = p_organization;
@@ -120,7 +122,7 @@ public class ProjectTM
 
     public String getDescription()
     {
-        return m_description == null ? "" : m_description ;
+        return m_description == null ? "" : m_description;
     }
 
     public String getCreationUser()
@@ -142,67 +144,71 @@ public class ProjectTM
     {
         return m_domain == null ? "" : m_domain;
     }
-    
+
     public void setIsRemoteTm(boolean p_isRemoteTm)
     {
-    	this.m_isRemoteTm = p_isRemoteTm;
-    }
-    
-    @Override
-    public boolean getIsRemoteTm()
-    {
-    	return this.m_isRemoteTm;
-    }
-    
-    public void setGsEditionId(long p_gsEditionId)
-    {
-    	this.m_gsEditionId = p_gsEditionId;
-    }
-    
-    public long getGsEditionId()
-    {
-    	return this.m_gsEditionId;
-    }
-    
-    public void setRemoteTmProfileId(long p_remoteTmProfileId)
-    {
-    	this.m_remoteTmProfileId = p_remoteTmProfileId;
-    }
-    
-    public long getRemoteTmProfileId()
-    {
-    	return this.m_remoteTmProfileId;
-    }
-    
-    public void setRemoteTmProfileName(String p_remoteTmProfileName)
-    {
-    	this.m_remoteTmProfileName = p_remoteTmProfileName;
-    }
-    
-    public String getRemoteTmProfileName()
-    {
-    	return this.m_remoteTmProfileName;
+        this.m_isRemoteTm = p_isRemoteTm;
     }
 
     @Override
-    public SegmentTmInfo getSegmentTmInfo() {
-        if (getTm3Id() != null) {
+    public boolean getIsRemoteTm()
+    {
+        return this.m_isRemoteTm;
+    }
+
+    public void setGsEditionId(long p_gsEditionId)
+    {
+        this.m_gsEditionId = p_gsEditionId;
+    }
+
+    public long getGsEditionId()
+    {
+        return this.m_gsEditionId;
+    }
+
+    public void setRemoteTmProfileId(long p_remoteTmProfileId)
+    {
+        this.m_remoteTmProfileId = p_remoteTmProfileId;
+    }
+
+    public long getRemoteTmProfileId()
+    {
+        return this.m_remoteTmProfileId;
+    }
+
+    public void setRemoteTmProfileName(String p_remoteTmProfileName)
+    {
+        this.m_remoteTmProfileName = p_remoteTmProfileName;
+    }
+
+    public String getRemoteTmProfileName()
+    {
+        return this.m_remoteTmProfileName;
+    }
+
+    @Override
+    public SegmentTmInfo getSegmentTmInfo()
+    {
+        if (getTm3Id() != null)
+        {
             return new Tm3SegmentTmInfo();
         }
         return new Tm2SegmentTmInfo();
     }
-    
+
     @Override
-    public Long getTm3Id() {
+    public Long getTm3Id()
+    {
         return m_tm3Id;
     }
-    
-    public void setTm3Id(Long tm3Id) {
+
+    public void setTm3Id(Long tm3Id)
+    {
         this.m_tm3Id = tm3Id;
     }
-    
+
     private Set<TMAttribute> attributes;
-    
+
     public List<TMAttribute> getAllTMAttributes()
     {
         List<TMAttribute> atts = new ArrayList<TMAttribute>();
@@ -214,7 +220,7 @@ public class ProjectTM
 
         return atts;
     }
-    
+
     public List<String> getAllTMAttributenames()
     {
         List<String> atts = new ArrayList<String>();
@@ -222,7 +228,7 @@ public class ProjectTM
         if (tmAtts != null)
         {
             Iterator<TMAttribute> it = tmAtts.iterator();
-            while(it.hasNext())
+            while (it.hasNext())
             {
                 TMAttribute tma = it.next();
                 atts.add(tma.getAttributename());
@@ -231,7 +237,7 @@ public class ProjectTM
 
         return atts;
     }
-    
+
     public Set<TMAttribute> getAttributes()
     {
         return attributes;
@@ -270,5 +276,17 @@ public class ProjectTM
     public void setConvertedTM3Id(long m_convertedTM3Id)
     {
         this.m_convertedTM3Id = m_convertedTM3Id;
+    }
+
+    @Override
+    public void setFirstImporting(boolean isFirstImporting)
+    {
+        this.isFirstImporting = isFirstImporting;
+    }
+
+    @Override
+    public boolean isFirstImporting()
+    {
+        return this.isFirstImporting;
     }
 }

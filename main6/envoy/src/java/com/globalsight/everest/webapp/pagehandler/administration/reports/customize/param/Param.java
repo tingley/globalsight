@@ -40,6 +40,7 @@ public interface Param {
     static public final String ESTIMATED_COST = "jobinfo.jobdetail.estimatedcost";
     static public final String ESTIMATED_BILLING_CHARGES = "jobinfo.jobdetail.estimatedbillingcharges";
     static public final String LOCALIZATION_PROFILE = "jobinfo.jobdetail.localizationprofile";
+    static public final String FILE_PROFILE = "jobinfo.jobdetail.fileprofile";
     static public final String STATUS = "jobinfo.status";
     static public final String JOB_STATUS = "jobinfo.status.jobstatus";
     static public final String WORKFLOW_STATUS = "jobinfo.status.workflowstatus";
@@ -104,6 +105,7 @@ public interface Param {
         ESTIMATED_COST,
         ESTIMATED_BILLING_CHARGES,
         LOCALIZATION_PROFILE,
+        FILE_PROFILE,
         STATUS,
         JOB_STATUS,
         WORKFLOW_STATUS,

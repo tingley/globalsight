@@ -19,7 +19,9 @@ package com.globalsight.everest.usermgr;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -45,6 +47,7 @@ import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * UserLdapHelper, a LDAP Helper class that helps convert data for LDAP
@@ -259,25 +262,25 @@ public class UserLdapHelper extends LdapHelper
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL,
                     user.getBCCEmail()));
         }
-        if (isStringValid(user.getPhoneNumber(User.PhoneType.HOME)))
+        if (isStringValid(user.getHomePhoneNumber()))
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_HOME_PHONE,
-                    user.getPhoneNumber(User.PhoneType.HOME)));
+            		user.getHomePhoneNumber()));
         }
-        if (isStringValid(user.getPhoneNumber(User.PhoneType.OFFICE)))
+        if (isStringValid(user.getOfficePhoneNumber()))
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE,
-                    user.getPhoneNumber(User.PhoneType.OFFICE)));
+            		user.getOfficePhoneNumber()));
         }
-        if (isStringValid(user.getPhoneNumber(User.PhoneType.FAX)))
+        if (isStringValid(user.getFaxPhoneNumber()))
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER,
-                    user.getPhoneNumber(User.PhoneType.FAX)));
+            		user.getFaxPhoneNumber()));
         }
-        if (isStringValid(user.getPhoneNumber(User.PhoneType.CELL)))
+        if (isStringValid(user.getCellPhoneNumber()))
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER,
-                    user.getPhoneNumber(User.PhoneType.CELL)));
+                    user.getCellPhoneNumber()));
         }
         if (isStringValid(user.getDefaultUILocale()))
         {
@@ -422,44 +425,44 @@ public class UserLdapHelper extends LdapHelper
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL, "null")));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.HOME)))
+        if (isStringValid(p_user.getHomePhoneNumber()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_HOME_PHONE,
-                            p_user.getPhoneNumber(User.PhoneType.HOME))));
+                            p_user.getHomePhoneNumber())));
         }
         else
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_HOME_PHONE, "null")));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.OFFICE)))
+        if (isStringValid(p_user.getOfficePhoneNumber()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE,
-                            p_user.getPhoneNumber(User.PhoneType.OFFICE))));
+                            p_user.getOfficePhoneNumber())));
         }
         else
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE, "null")));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.CELL)))
+        if (isStringValid(p_user.getCellPhoneNumber()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER,
-                            p_user.getPhoneNumber(User.PhoneType.CELL))));
+                            p_user.getCellPhoneNumber())));
         }
         else
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER, "null")));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.FAX)))
+        if (isStringValid(p_user.getFaxPhoneNumber()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER,
-                            p_user.getPhoneNumber(User.PhoneType.FAX))));
+                            p_user.getFaxPhoneNumber())));
         }
         else
         {
@@ -1152,17 +1155,16 @@ public class UserLdapHelper extends LdapHelper
         user.setBCCEmail(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_HOME_PHONE);
-        user.setPhoneNumber(User.PhoneType.HOME, getSingleAttributeValue(attr));
+        user.setHomePhoneNumber(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_OFFICE_PHONE);
-        user.setPhoneNumber(User.PhoneType.OFFICE,
-                getSingleAttributeValue(attr));
+        user.setOfficePhoneNumber(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_FAX_NUMBER);
-        user.setPhoneNumber(User.PhoneType.FAX, getSingleAttributeValue(attr));
+        user.setFaxPhoneNumber(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_CELL_NUMBER);
-        user.setPhoneNumber(User.PhoneType.CELL, getSingleAttributeValue(attr));
+        user.setCellPhoneNumber(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_DEFAULT_UI_LOCALE);
         user.setDefaultUILocale(getSingleAttributeValue(attr));

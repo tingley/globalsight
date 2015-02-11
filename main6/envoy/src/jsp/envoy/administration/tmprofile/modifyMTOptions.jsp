@@ -918,7 +918,7 @@
 	</tr>
 
 	<tr>
-		<td ALIGN="LEFT"><%=bundle.getString("lb_tm_safaba_mt_companyname")%><font color="red">*</font>:</td>
+		<td ALIGN="LEFT"><%=bundle.getString("lb_tm_safaba_mt_username")%><font color="red">*</font>:</td>
 		<td><INPUT CLASS="standardText" ID="idSafaMtCompanyName"
 			NAME="<%=TMProfileConstants.MT_SAFA_COMPANY_NAME%>"
 			value="<c:out value='${safa_mt_company_name}'/>"
@@ -936,7 +936,7 @@
 	</tr>
 
 	<tr>
-		<td ALIGN="LEFT"><%=bundle.getString("lb_tm_safaba_mt_safaba_client")%><font color="red">*</font>:</td>
+		<td ALIGN="LEFT"><%=bundle.getString("lb_tm_safaba_mt_account_name")%><font color="red">*</font>:</td>
 		<td><INPUT CLASS="standardText" ID="idSafaMtClient"
 			NAME="<%=TMProfileConstants.MT_SAFA_CLIENT%>"
 			value="<c:out value='${safaba_client}'/>"

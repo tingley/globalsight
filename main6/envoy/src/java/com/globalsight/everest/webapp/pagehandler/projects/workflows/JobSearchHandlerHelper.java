@@ -111,11 +111,11 @@ public class JobSearchHandlerHelper
             searchType = (String)session.getAttribute(JobSearchConstants.LAST_JOB_SEARCH_TYPE);
         }
             
-        String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+        String userId = (String)session.getAttribute(WebAppConstants.USER_NAME);
         User user = null;
         try
         {
-            user = UserHandlerHelper.getUser(userName);
+            user = UserHandlerHelper.getUser(userId);
         }
         catch (EnvoyServletException e)
         {

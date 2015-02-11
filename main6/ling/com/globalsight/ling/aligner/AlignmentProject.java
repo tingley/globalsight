@@ -42,6 +42,7 @@ import com.globalsight.everest.aligner.AlignerExtractorResult;
 import com.globalsight.everest.aligner.AlignmentStatus;
 import com.globalsight.everest.corpus.CorpusDoc;
 import com.globalsight.everest.corpus.CorpusManager;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
@@ -50,6 +51,7 @@ import com.globalsight.ling.aligner.io.AlignmentProjectFileAccessor;
 import com.globalsight.ling.aligner.io.GapReader;
 import com.globalsight.ling.aligner.io.GapWriter;
 import com.globalsight.ling.aligner.io.GxmlReader;
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
@@ -99,6 +101,7 @@ public class AlignmentProject
     // List of AlignmentUnit objects
     private List m_alignmentUnits;
 
+    private User m_uploadUser = null;
 
     private static final String GAP_FILE_NAME = "PackageDescriptor.gap";
 
@@ -549,6 +552,8 @@ public class AlignmentProject
         AlignmentResult p_alignmentResult)
         throws Exception
     {
+        String userid = m_uploadUser == null ? "system" : m_uploadUser
+                .getUserId();
         List tus = new ArrayList();
 
         Iterator it = p_alignmentResult.getAlignedSegments().iterator();
@@ -556,6 +561,21 @@ public class AlignmentProject
         {
             AlignedSegments alignedSegments = (AlignedSegments)it.next();
             SegmentTmTu tu = alignedSegments.getAlignedSegment();
+            List<BaseTmTuv> tuvs = tu.getTuvs();
+            if (tuvs != null)
+            {
+                for (BaseTmTuv tuv : tuvs)
+                {
+                    if (tuv.getCreationUser() == null)
+                    {
+                        tuv.setCreationUser(userid);
+                    }
+                    if (tuv.getModifyUser() == null)
+                    {
+                        tuv.setModifyUser(userid);
+                    }
+                }
+            }
             
             tus.add(tu);
         }
@@ -748,6 +768,12 @@ public class AlignmentProject
             new String(gxml, "UTF-8"), p_corpusMappings);
         ServerProxy.getNativeFileManager().save(newGxml, "UTF8",
             p_corpusDoc.getGxmlPath());
+    }
+
+
+    public void setUploadUser(User user)
+    {
+        m_uploadUser = user;
     }
     
     

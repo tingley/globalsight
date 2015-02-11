@@ -36,14 +36,15 @@
             + bundle.getString("lb_colon") + " " + title;
     int rowNum = 0;
     Locale theUiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
-
-    boolean hasAtLeastOneReport = false;
+	//well if the user not have the permission of REPORTS_MAIN,he can not come in ,so the flag will be removed
+    //boolean hasAtLeastOneReport = false;
 %>
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -51,13 +52,14 @@
     var objectName = "";
     var guideNode = "reports";
     var helpFile = "<%=bundle.getString("help_reports_main_screen")%>";
-
+    var companyJson = "<%=request.getAttribute("companyJson")%>";
     var windownum = 1;
+    var oSheng;
     function popup(url, target)
     {
        target = target + parent.windx + windownum++;
        parent.windx++;
-       var newurl = url+'&target=' + target; 
+       var newurl = url+'&target=' + target+"&companyName="+oSheng.val(); 
        window.open(newurl,target,
        'height=500,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     };
@@ -66,7 +68,7 @@
     {
        target = target + parent.windx + windownum++;
        parent.windx++;
-       var newurl = url+'&target=' + target; 
+       var newurl = url+'&target=' + target+"&companyName="+oSheng.val(); 
        window.open(newurl,target,
        'height=880,width=800,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     };
@@ -75,9 +77,24 @@
     {
        target = target + parent.windx + windownum++;
        parent.windx++;
-       window.open(url,target,
-       'height=700,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
+       var newurl=url+"&companyName="+oSheng.val();
+       window.open(newurl,target,
+       'height=710,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
     }
+    $(function(){
+   		oSheng=$("#sheng");
+    	if(companyJson&&companyJson!="null"){
+	    	var array=companyJson.split(",");
+	    	for(var i=0;i<array.length;i++){
+	    		var opt=$("<option value='" + array[i] + "'>" + array[i] + "</option>");
+	    		oSheng.append(opt);
+	        }
+	    	$("#shengC").show();
+    	}
+    })
+    
+   
+    	
 </SCRIPT>
 
 <STYLE>
@@ -99,9 +116,13 @@ TR.standardText
 <P>
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
 <TR><TD WIDTH=538><%=bundle.getString("helper_text_reports")%></TD></TR>
+<TR><TD WIDTH=538>&nbsp</TD></TR>
+<TR id="shengC" style="display:none"><TD>
+<%=bundle.getString("lb_current_company")%>&nbsp<select id='sheng' ><option value=' '>ALL</option></select>
+</TD></TR>
 </TABLE>
 <P>
-    <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH=600 CLASS="standardText">
+    <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" WIDTH=600 CLASS="standardText" id="contentTable">
     <% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN)) {%>
         <TR>
             <TD CLASS="tableHeadingBasic"><%=bundle.getString("reportName")%></TD>
@@ -109,7 +130,6 @@ TR.standardText
         </TR>
 
     <% if (userPerms.getPermissionFor(Permission.REPORTS_TM)) {
-        hasAtLeastOneReport=true;
     %>
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
@@ -121,7 +141,6 @@ TR.standardText
         </TR>
         <% } %>
     <% if (userPerms.getPermissionFor(Permission.REPORTS_WF_STATUS)) { 
-        hasAtLeastOneReport=true;
     %>        
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD NOWRAP>
@@ -133,7 +152,6 @@ TR.standardText
         </TR>
         <% } %>
     <% if (userPerms.getPermissionFor(Permission.REPORTS_JOB_DETAILS)) { 
-        hasAtLeastOneReport=true;
     %>                
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
@@ -144,7 +162,6 @@ TR.standardText
         </TR>
         <% } %>
     <% if (userPerms.getPermissionFor(Permission.REPORTS_AVG_PER_COMP)) { 
-        hasAtLeastOneReport=true;
     %>                        
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
@@ -156,7 +173,6 @@ TR.standardText
         </TR>
         <% } %>        
     <% if (userPerms.getPermissionFor(Permission.REPORTS_MISSING_TERMS)) { 
-        hasAtLeastOneReport=true;
     %> 
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
@@ -168,7 +184,6 @@ TR.standardText
         </TR>
         <% } %>        
     <% if (userPerms.getPermissionFor(Permission.REPORTS_TERM_AUDIT)) { 
-        hasAtLeastOneReport=true;
     %>                                        
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
             <TD>
@@ -188,7 +203,6 @@ TR.standardText
 %>
 
 <% if (userPerms.getPermissionFor(Permission.REPORTS_COMMENT)) {
-        hasAtLeastOneReport=true;
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportComment";
         reportWindowName="CommentsReport";
 %>
@@ -206,7 +220,6 @@ TR.standardText
         //new added for word count report
         if (userPerms.getPermissionFor(Permission.REPORTS_WORD_COUNT)) {
 
-        hasAtLeastOneReport=true;
         reportUrl="/globalsight/ControlServlet?activityName=xlsWordCount";
         reportWindowName= "WordCount";
         %>
@@ -222,7 +235,6 @@ TR.standardText
 
     <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_JOB_STATUS)) {
     
-        hasAtLeastOneReport=true;
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportJobStatus";
         reportName= EMEA + bundle.getString("job_status");
         reportWindowName= "JobStatus";
@@ -238,7 +250,6 @@ TR.standardText
         <% } %>      
         
     <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ACT_DUR)) {
-        hasAtLeastOneReport=true;
     %>
 <%
             reportUrl="/globalsight/ControlServlet?activityName=xlsReportActivityDuration";
@@ -255,7 +266,6 @@ TR.standardText
         </TR>
         <% } %>        
     <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_JOBS)) {
-        hasAtLeastOneReport=true;
     %>
 <%
             reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineJobs";
@@ -274,7 +284,6 @@ TR.standardText
 
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_REVIEW_STATUS))
     {
-        hasAtLeastOneReport=true;
 
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineRevStatus";
         reportName=EMEA + bundle.getString("online_review_status");
@@ -294,7 +303,6 @@ TR.standardText
     // GBS-576, add "File List" report
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_FILE_LIST))
     {
-        hasAtLeastOneReport=true;
 
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportFileList";
         reportName=EMEA + bundle.getString("file_list_report");
@@ -312,7 +320,6 @@ TR.standardText
 <% }
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_VENDOR_PO))
     {
-        hasAtLeastOneReport=true;
 
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportVendorPO";
         reportName=EMEA + bundle.getString("vendor_po");
@@ -333,7 +340,6 @@ TR.standardText
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_REVIEWER_VENDOR_PO) 
             && REPORTS_ACTIVITY != null && REPORTS_ACTIVITY.trim().length() > 1)
     {
-        hasAtLeastOneReport=true;
 
         reportUrl="/globalsight/ControlServlet?activityName=xlsReportReviewerVendorPO";
         reportName=EMEA + bundle.getString("reviewer_vendor_po");
@@ -421,7 +427,6 @@ TR.standardText
                 
 
     <% if (userPerms.getPermissionFor(Permission.REPORTS_SLA)) {
-        hasAtLeastOneReport=true;
     %>
 <%
             reportUrl="/globalsight/ControlServlet?activityName=xlsReportSlaPerformance";
@@ -439,7 +444,6 @@ TR.standardText
         
 <!--  Customize Reports -->
     <% if (userPerms.getPermissionFor(Permission.REPORTS_CUSTOMIZE)) {
-        hasAtLeastOneReport=true;
     %>
 <%
         String customizeReportUrl="/globalsight/ControlServlet?activityName=customizeReports";
@@ -479,7 +483,6 @@ TR.standardText
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.REPORTS_CUSTOM)) {
-        hasAtLeastOneReport=true;
 %>
         <TR>
             <TD CLASS="tableHeadingBasic"><%=bundle.getString("customReportName")%></TD>
@@ -511,7 +514,6 @@ ArrayList customExternalReports = (ArrayList) request.getAttribute(
 
 if (customExternalReports.size() > 0)
 {
-    hasAtLeastOneReport=true;
 %>
         <TR>
             <TD CLASS="tableHeadingBasic"><%=bundle.getString("customExternalReportName")%></TD>
@@ -541,9 +543,6 @@ if (customExternalReports.size() > 0)
 </TABLE>
 <% }%>
 
-<% if (hasAtLeastOneReport==false) { %>
-    <EM><%=bundle.getString("no_reports_permissions")%></EM>
-<% } %>
 
 </DIV>
 </BODY>

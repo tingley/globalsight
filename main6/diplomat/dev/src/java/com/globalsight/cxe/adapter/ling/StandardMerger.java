@@ -36,7 +36,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlRepairer;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -52,8 +51,9 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.page.pageexport.style.MifStyleUtil;
 import com.globalsight.everest.projecthandler.exporter.ExportUtil;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -64,7 +64,6 @@ import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -217,6 +216,12 @@ public class StandardMerger implements IFormatNames
                     && FilterConstants.XMLRULE_TABLENAME.equals(filterTableName))
             {
                 s = XmlFilterHelper.saveNonAsciiAs(s, filterId, filterTableName);
+            }
+            
+            if (FORMAT_MIF.equals(m_formatType))
+            {
+            	MifStyleUtil util = new MifStyleUtil();
+            	s = util.updateStringBeforExport(s);
             }
             
             return fixGxml(s);
@@ -459,7 +464,7 @@ public class StandardMerger implements IFormatNames
                     e);
             mergeResult = diplomat.merge(p_gxml, m_keepGsTags).getBytes();
         }
-
+        
         mergeResult = postProcessResult(mergeResult);
 
         return mergeResult;
@@ -554,7 +559,7 @@ public class StandardMerger implements IFormatNames
                     e);
             result = p_mergeResult; // just return the original merge result
         }
-        Runtime.getRuntime().gc();
+//        Runtime.getRuntime().gc();
         return result;
     }
 

@@ -21,73 +21,37 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_STATISTICS);
 
 %>
 <html>
+<!-- This is envoy\src\jsp\envoy\terminology\management\statistics.jsp -->
 <head>
 <title><%=bundle.getString("lb_tb_statistics")%></title>
 <META HTTP-EQUIV="EXPIRES" CONTENT="0">
-<STYLE></STYLE>
-<%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT language="Javascript">
-function parseStatistics(dom)
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript">
+function parseStatistics()
 {
-  var tbody = idTableBody;
-
-  for (var i = tbody.rows.length; i > 0; --i)
-  {
-     tbody.deleteRow(i-1);
-  }
-
-  var row, cell;
-
-  var nodes, node;
-  var termbase, entries, terms, language, number;
-
-  termbase = dom.selectSingleNode('/statistics/termbase').text;
-  entries  = dom.selectSingleNode('/statistics/concepts').text;
-  terms    = dom.selectSingleNode('/statistics/terms').text;
-
-  idTermbaseName.innerHTML = termbase;//idTermbaseName.innerText = termbase;
-  idTermbaseEntries.innerHTML = entries;
-  idTermbaseTerms.innerHTML = terms;
-
-  nodes = dom.selectNodes('/statistics/indexes/index');
-  for (var i = 0; i < nodes.length; ++i)
-  {
-    node = nodes[i];
-
-    row = tbody.insertRow(i);
-    var j=0;
-
-    language = node.selectSingleNode('language').text;
-    number = node.selectSingleNode('terms').text;
-
-    cell = row.insertCell(j++);
-    cell.innerHTML = language;
-
-    cell = row.insertCell(j++);
-    cell.colSpan = 2;
-    cell.align = 'right';
-    cell.innerHTML = number;
-  }
+  var xmlStr = "<%=xmlStatistics.replace("\n","").replace("\r","").trim()%>";
+  var $xml = $( $.parseXML( xmlStr ) );
+  
+  var language, number; 
+  $("#idTermbaseName").html($xml.find("statistics > termbase").text()); 
+  $("#idTermbaseEntries").html($xml.find("statistics > concepts").text()); 
+  $("#idTermbaseTerms").html($xml.find("statistics > terms").text()); 
+  
+  $("#idTableBody").html("");
+  $xml.find("statistics > indexes > index").each(function(){
+	  language = $(this).find("language").text();
+	  number = $(this).find("terms").text();
+	  html = "<tr><td>" + language + "</td><td align='right' colspan=2>" 
+	  		 + number + "</td></tr>";
+	  $("#idTableBody").append(html);
+  });
 }
 
 function init()
 {
-  var dom;
-  var xmlStatisticsStr	= 
-	  "<%=xmlStatistics.replace("\n","").replace("\r","").trim()%>";
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-	dom = xmlStatistics.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-	var parser = new DOMParser();
-	dom = parser.parseFromString(xmlStatisticsStr,"text/xml");
-  }
-
-  parseStatistics(dom);
+  parseStatistics();
   idOk.focus();
 }
 
@@ -119,7 +83,6 @@ function doLoad()
 </head>
 
 <body onload="doLoad()" onkeypress="doKeypress()">
-<XML id="xmlStatistics" style="display:none"><%=xmlStatistics%></XML>
 
 <DIV ID="contentLayer"
   STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;width:96%">

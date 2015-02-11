@@ -1,14 +1,16 @@
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app id="union" version="2.4"
-xmlns="http://java.sun.com/xml/ns/j2ee"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<web-app version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
 
+<jsp-config>
 <jsp-property-group>
   <url-pattern>*.jsp</url-pattern>
   <el-ignored>false</el-ignored>
 </jsp-property-group>
+</jsp-config>
 
 <!-- For http & https access --> 
 <!-- %%ssl_comments_end%%
@@ -112,7 +114,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 <!-- Begin: Axis servlets -->          
   <servlet>
     <servlet-name>AxisServlet</servlet-name>
-    <display-name>Apache-Axis Servlet</display-name>
     <servlet-class>
         org.apache.axis.transport.http.AxisServlet
     </servlet-class>
@@ -121,7 +122,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 <!-- Commented out for security reasons
 *  <servlet>
 *    <servlet-name>AdminServlet</servlet-name>
-*    <display-name>Axis Admin Servlet</display-name>
 *    <servlet-class>
 *        org.apache.axis.transport.http.AdminServlet
 *    </servlet-class>
@@ -131,7 +131,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 
   <servlet>
     <servlet-name>SOAPMonitorService</servlet-name>
-    <display-name>SOAPMonitorService</display-name>
     <servlet-class>
         org.apache.axis.monitor.SOAPMonitorService
     </servlet-class>
@@ -144,72 +143,8 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 <!-- End: Axis servlets -->
    
   <servlet>
-    <servlet-name>AdminCaptureRootCA</servlet-name>
-    <servlet-class>admin.AdminCaptureRootCA</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminClients</servlet-name>
-    <servlet-class>admin.AdminClients</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminConnections</servlet-name>
-    <servlet-class>admin.AdminConnections</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminEvents</servlet-name>
-    <servlet-class>admin.AdminEvents</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminJDBC</servlet-name>
-    <servlet-class>admin.AdminJDBC</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminLicense</servlet-name>
-    <servlet-class>admin.AdminLicense</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminMain</servlet-name>
-    <servlet-class>admin.AdminMain</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminProps</servlet-name>
-    <servlet-class>admin.AdminProps</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminRealm</servlet-name>
-    <servlet-class>admin.AdminRealm</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminThreads</servlet-name>
-    <servlet-class>admin.AdminThreads</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>AdminVersion</servlet-name>
-    <servlet-class>admin.AdminVersion</servlet-class>
-  </servlet>
-
-  <servlet>
     <servlet-name>CapExportServlet</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.CapExportServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>CapImportServlet</servlet-name>
-    <servlet-class>com.globalsight.everest.servlet.L10nRequesterServlet</servlet-class>
     <init-param>
       <param-name>wl-dispatch-policy</param-name>
       <param-value>ServletExecuteQueue</param-value>
@@ -256,15 +191,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <servlet>
     <servlet-name>ImageReplace</servlet-name>
     <servlet-class>com.globalsight.cxe.servlet.imagereplace.ImageReplace</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>L10nServiceServlet</servlet-name>
-    <servlet-class>com.globalsight.dotNet.L10nServiceServlet</servlet-class>
     <init-param>
       <param-name>wl-dispatch-policy</param-name>
       <param-value>ServletExecuteQueue</param-value>
@@ -364,6 +290,21 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 </servlet-mapping>
 <!-- end ajax service configuration-->
 
+
+<!-- end InetSoft Reports Configuration -->
+
+<!-- start mobile service configuration-->
+<servlet>
+    <servlet-name>MobileService</servlet-name>
+    <servlet-class>com.globalsight.everest.util.mobile.MobileService</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>MobileService</servlet-name>
+    <url-pattern>/MobileService</url-pattern>
+</servlet-mapping>
+<!-- end mobile service configuration-->
+
   <servlet>
     <servlet-name>AppletService</servlet-name>
     <servlet-class>com.globalsight.everest.util.applet.AppletService</servlet-class>
@@ -411,11 +352,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet>
 
   <servlet>
-    <servlet-name>T3AdminMain</servlet-name>
-    <servlet-class>admin.AdminMain</servlet-class>
-  </servlet>
-
-  <servlet>
     <servlet-name>TSPreviewServlet</servlet-name>
     <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TSPreviewServlet</servlet-class>
     <init-param>
@@ -436,15 +372,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <servlet>
     <servlet-name>TerminologyServlet</servlet-name>
     <servlet-class>com.globalsight.terminology.servlet.TerminologyServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>UserdataServlet</servlet-name>
-    <servlet-class>com.globalsight.terminology.servlet.UserdataServlet</servlet-class>
     <init-param>
       <param-name>wl-dispatch-policy</param-name>
       <param-value>ServletExecuteQueue</param-value>
@@ -745,18 +672,8 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>AdminRealm</servlet-name>
-    <url-pattern>/AdminRealm/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>system4_dir</servlet-name>
     <url-pattern>/system4_dir/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminMain</servlet-name>
-    <url-pattern>/AdminMain/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
@@ -765,28 +682,13 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>AdminCaptureRootCA</servlet-name>
-    <url-pattern>/AdminCaptureRootCA/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>CxeExportServlet</servlet-name>
     <url-pattern>/CxeExportServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>AdminProps</servlet-name>
-    <url-pattern>/AdminProps/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>tb</servlet-name>
     <url-pattern>/tb/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminJDBC</servlet-name>
-    <url-pattern>/AdminJDBC/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
@@ -797,11 +699,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <servlet-mapping>
     <servlet-name>classes</servlet-name>
     <url-pattern>/classes/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>CapImportServlet</servlet-name>
-    <url-pattern>/CapImportServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
@@ -825,11 +722,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>UserdataServlet</servlet-name>
-    <url-pattern>/UserdataServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>ShowUrlServlet</servlet-name>
     <url-pattern>/ShowUrlServlet/*</url-pattern>
   </servlet-mapping>
@@ -837,11 +729,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <servlet-mapping>
     <servlet-name>VignetteImportServlet</servlet-name>
     <url-pattern>/VignetteImportServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminVersion</servlet-name>
-    <url-pattern>/AdminVersion/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
@@ -854,11 +741,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <url-pattern>/wl/*</url-pattern>
   </servlet-mapping>
   
-  <servlet-mapping>
-    <servlet-name>AdminConnections</servlet-name>
-    <url-pattern>/AdminConnections/*</url-pattern>
-  </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>TranslateServlet</servlet-name>
     <url-pattern>/TranslateServlet/*</url-pattern>
@@ -881,43 +763,13 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>L10nServiceServlet</servlet-name>
-    <url-pattern>/L10nServiceServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>ControlServlet</servlet-name>
     <url-pattern>/ControlServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>AdminThreads</servlet-name>
-    <url-pattern>/AdminThreads/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminEvents</servlet-name>
-    <url-pattern>/AdminEvents/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminClients</servlet-name>
-    <url-pattern>/AdminClients/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>T3AdminMain</servlet-name>
-    <url-pattern>/T3AdminMain/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>DynamicPreviewProxyServlet</servlet-name>
     <url-pattern>/DynamicPreviewProxyServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>AdminLicense</servlet-name>
-    <url-pattern>/AdminLicense/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

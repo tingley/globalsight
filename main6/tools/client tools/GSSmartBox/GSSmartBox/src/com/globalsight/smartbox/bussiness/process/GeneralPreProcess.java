@@ -18,16 +18,21 @@ package com.globalsight.smartbox.bussiness.process;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+
+import org.dom4j.Document;
+import org.dom4j.Element;
 
 import com.globalsight.smartbox.bo.CompanyConfiguration;
 import com.globalsight.smartbox.bo.FileProfile;
 import com.globalsight.smartbox.bo.JobInfo;
 import com.globalsight.smartbox.util.LogUtil;
 import com.globalsight.smartbox.util.WebClientHelper;
+import com.globalsight.smartbox.util.XlfParser;
 import com.globalsight.smartbox.util.ZipUtil;
 
 /**
@@ -38,18 +43,54 @@ import com.globalsight.smartbox.util.ZipUtil;
  */
 public class GeneralPreProcess implements PreProcess
 {
-
     private JobInfo jobInfo = new JobInfo();
-
+    HashMap<String, String> sourceMap = new HashMap<String, String>();
+    
     @Override
     public JobInfo process(String originFilePath, CompanyConfiguration cpConfig)
     {
-
         jobInfo.setOriginFile(originFilePath);
-        File originFile = new File(originFilePath);
+        File originFile = new File(originFilePath);       
         String originFileName = originFile.getName();
         String sourceLocale = cpConfig.getSourceLocale();
         String targetLocale = cpConfig.getTargetLocale();
+        File xlzDir = new File(cpConfig.getJobCreatingBox4XLZ());
+        if (xlzDir != null && originFilePath.contains(xlzDir.getPath()))
+        {
+            String xlfFile = originFilePath;
+            try
+            {
+                XlfParser p = new XlfParser();
+                if (originFilePath.endsWith(".xlz"))
+                {
+                    List<String> fileList = ZipUtil.unpackZipPackage(
+                            originFilePath, cpConfig.getTempBox());
+                    for (String str : fileList)
+                    {
+                        if (str.endsWith(".xlf"))
+                        {
+                            xlfFile = cpConfig.getTempBox() + File.separator + str;
+                            break;
+                        }
+                    }
+                }
+                if (xlfFile.endsWith(".xlf"))
+                {
+                    File xfile = new File(xlfFile);
+                    Document doc = p.getDocument(xfile);
+                    Element xFile = p.getXFile(doc);
+                    sourceLocale = p.getSourceLanguage(xFile).replace("-", "_");
+                    targetLocale = p.getTargetLanguage(xFile).replace("-", "_");
+                }
+            }
+            catch (Exception e)
+            {
+                String message = "File parser error: " + originFileName;
+                LogUtil.fail(message, e);
+                return null;
+            }
+        }
+        
         String jobName = determineJobName(originFileName);
         if (jobName == null)
         {
@@ -60,39 +101,39 @@ public class GeneralPreProcess implements PreProcess
         if (originFilePath.endsWith(".zip"))
         {
             // temp directory used for saving converted file
-            String tempDirPath = originFilePath.substring(0,
-                    originFilePath.indexOf(".zip"));
+            String tempDirPath = originFilePath.substring(0, originFilePath.indexOf(".zip"));
             File tempDir = new File(tempDirPath);
             tempDir.mkdir();
             jobInfo.setTempFile(tempDirPath);
+            jobInfo.setOriginFile(tempDirPath);
         }
 
         Vector<String> tls = new Vector<String>();
         Vector<String> sfs = fileHanding(originFile);
-        if (sfs == null)
+        if (sfs == null || sfs.size() == 0)
         {
             jobInfo.setFailedFlag(true);
             return jobInfo;
         }
-        Vector<String> fps = determineFileProfileIds(sfs, sourceLocale,
-                cpConfig.getExtension2fp());
-        if (fps == null)
-        {
+        
+        Vector<String> fps = determineFileProfileIds(sfs, sourceLocale, cpConfig.getExtension2fp());        
+        if (fps == null || fps.size() == 0)
+        {           
             jobInfo.setFailedFlag(true);
             return jobInfo;
         }
-
-        for (int i = 0; i < sfs.size(); i++)
+        for (int i = 0; i < sourceMap.entrySet().size(); i++)
         {
             tls.add(targetLocale);
         }
-
+        
+        jobInfo.setSourceMap(sourceMap);
         jobInfo.setJobName(jobName);
         jobInfo.setSourceFiles(sfs);
         jobInfo.setTargetLocales(tls);
         jobInfo.setFileProfileIds(fps);
         jobInfo.setOtherInfo("infomation");
-
+        
         return jobInfo;
     }
 
@@ -151,7 +192,7 @@ public class GeneralPreProcess implements PreProcess
                 String message = "No file profile config for this extension(."
                         + extension + ") in GSSmartBox.conf : " + sf;
                 LogUtil.FAILEDLOG.error(message);
-                return null;
+                continue;
             }
             boolean findNoFileProfile = true;
             for (FileProfile fp : fileProfileInfo)
@@ -167,7 +208,7 @@ public class GeneralPreProcess implements PreProcess
                                 + sourceLocale + ") in GlobalSight Server: "
                                 + sf;
                         LogUtil.FAILEDLOG.error(message);
-                        return null;
+                        break;
                     }
                     if (!extensions.contains(extension))
                     {
@@ -175,8 +216,9 @@ public class GeneralPreProcess implements PreProcess
                                 + ") does not have the file extension(."
                                 + extension + ") in GlobalSight Server: " + sf;
                         LogUtil.FAILEDLOG.error(message);
-                        return null;
+                        break;
                     }
+                    sourceMap.put(sf, fp.getId());
                     fpIds.add(fp.getId());
                     findNoFileProfile = false;
                     break;
@@ -187,7 +229,7 @@ public class GeneralPreProcess implements PreProcess
                 String message = "No file profile found in GlobalSight Server for ."
                         + extension + " format: " + sf;
                 LogUtil.FAILEDLOG.error(message);
-                return null;
+                continue;
             }
         }
         return fpIds;
@@ -210,8 +252,7 @@ public class GeneralPreProcess implements PreProcess
             List<String> fileList = new ArrayList<String>();
             try
             {
-                fileList = ZipUtil.unpackZipPackage(originFile.getPath(),
-                        tempDir);
+                fileList = ZipUtil.unpackZipPackage(originFile.getPath(),tempDir);
             }
             catch (Exception e)
             {
@@ -232,6 +273,7 @@ public class GeneralPreProcess implements PreProcess
                 LogUtil.FAILEDLOG.error(message);
                 return null;
             }
+            originFile.delete();
         }
         else
         {

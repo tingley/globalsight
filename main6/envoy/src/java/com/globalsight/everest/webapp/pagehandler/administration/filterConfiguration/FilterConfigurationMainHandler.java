@@ -53,113 +53,131 @@ public class FilterConfigurationMainHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        String[] filters = { "MS Office Doc Filter", 
-                             "XML Filter",
-                             "HTML Filter", 
-                             "JSP Filter", 
-                             "MS Office Excel Filter", 
-                             "Java Properties Filter", 
-                             "Java Script Filter",
-                             "InDesign Filter",
-                             "OpenOffice Filter",
-                             "MS Office PowerPoint Filter",
-                             "MS Office 2010 Filter",
-                             "Portable Object Filter",
-                             "Internal Text Filter", 
-                             "Frame Maker 9 Filter"};
-        
+        String[] filters =
+        { "MS Office Doc Filter", "XML Filter", "HTML Filter", "JSP Filter",
+                "MS Office Excel Filter", "Java Properties Filter",
+                "Java Script Filter", "InDesign Filter", "OpenOffice Filter",
+                "MS Office PowerPoint Filter", "MS Office 2010 Filter",
+                "Portable Object Filter", "Internal Text Filter",
+                "Frame Maker 9 Filter", "Plain Text Filter"};
+
         String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";
         String currentId = CompanyThreadLocal.getInstance().getValue();
+        long companyId = Long.parseLong(currentId);
         Map map = new HashMap();
-        map.put("companyId", currentId);
+        map.put("companyId", companyId);
         List itList = HibernateUtil.search(hql2, map);
-        
+
         ArrayList exCol = new ArrayList();
-        
-        for(int i = 0; i < filters.length; i++) {
-            if(!itList.contains(filters[i])) {
+
+        for (int i = 0; i < filters.length; i++)
+        {
+            if (!itList.contains(filters[i]))
+            {
                 FilterConfiguration fc = new FilterConfiguration();
-                fc.setCompanyId(Long.parseLong(currentId));
+                fc.setCompanyId(companyId);
                 fc.setName(filters[i]);
-                
-                if(i == 0) {
+
+                if (i == 0)
+                {
                     fc.setKnownFormatId("|14|33|");
                     fc.setFilterTableName("ms_office_doc_filter");
                     fc.setFilterDescription("The filter for MS office doc files.");
                 }
-                else if(i == 1) {
+                else if (i == 1)
+                {
                     fc.setKnownFormatId("|7|15|16|17|25|");
                     fc.setFilterTableName("xml_rule_filter");
                     fc.setFilterDescription("The filter for XML files.");
                 }
-                else if(i == 2) {
+                else if (i == 2)
+                {
                     fc.setKnownFormatId("|1|");
                     fc.setFilterTableName("html_filter");
                     fc.setFilterDescription("The filter for HTML files.");
                 }
-                else if(i == 3) {
+                else if (i == 3)
+                {
                     fc.setKnownFormatId("|13|");
                     fc.setFilterTableName("jsp_filter");
                     fc.setFilterDescription("The filter for JSP files.");
                 }
-                else if(i == 4) {
+                else if (i == 4)
+                {
                     fc.setKnownFormatId("|19|34|");
                     fc.setFilterTableName("ms_office_excel_filter");
                     fc.setFilterDescription("The filter for MS excel files.");
                 }
-                else if(i == 5) {
+                else if (i == 5)
+                {
                     fc.setKnownFormatId("|4|10|11|");
                     fc.setFilterTableName("java_properties_filter");
                     fc.setFilterDescription("The filter for java properties files.");
                 }
-                else if(i == 6) {
+                else if (i == 6)
+                {
                     fc.setKnownFormatId("|5|");
                     fc.setFilterTableName("java_script_filter");
                     fc.setFilterDescription("The filter for java script files.");
                 }
-                else if(i == 7) {
+                else if (i == 7)
+                {
                     fc.setKnownFormatId("|31|36|37|38|40|");
                     fc.setFilterTableName("indd_filter");
                     fc.setFilterDescription("The filter for InDesign files.");
                 }
-                else if(i == 8) {
+                else if (i == 8)
+                {
                     fc.setKnownFormatId("|41|");
                     fc.setFilterTableName("openoffice_filter");
                     fc.setFilterDescription("The filter for OpenOffice files.");
                 }
-                else if(i == 9) {
+                else if (i == 9)
+                {
                     fc.setKnownFormatId("|20|35|");
                     fc.setFilterTableName("ms_office_ppt_filter");
                     fc.setFilterDescription("The filter for MS PowerPoint files.");
                 }
-                else if (i == 10){
+                else if (i == 10)
+                {
                     fc.setKnownFormatId("|43|");
                     fc.setFilterTableName("office2010_filter");
                     fc.setFilterDescription("The filter for MS Office 2010 files.");
                 }
-                else if (i == 11){
+                else if (i == 11)
+                {
                     fc.setKnownFormatId("|42|");
                     fc.setFilterTableName("po_filter");
                     fc.setFilterDescription("The filter for Portable Object files.");
                 }
-                else if (i == 12){
-                    fc.setKnownFormatId("|6|");
+                else if (i == 12)
+                {
+                    fc.setKnownFormatId("|0|");
                     fc.setFilterTableName("base_filter");
                     fc.setFilterDescription("The filter to handle internal text.");
                 }
-                else if (i == 13) 
+                else if (i == 13)
                 {
                     fc.setKnownFormatId("|49|50|");
                     fc.setFilterTableName("frame_maker_filter");
                     fc.setFilterDescription("The filter to handle Frame Maker 9 files.");
                 }
-                
+                else if (i == 14)
+                {
+                    fc.setKnownFormatId("|6|");
+                    fc.setFilterTableName("plain_text_filter");
+                    fc.setFilterDescription("The filter for Plain Text files.");
+                }
+
                 exCol.add(fc);
-                
-                try {
+
+                try
+                {
                     HibernateUtil.save(exCol);
                 }
-                catch(Exception e) {};
+                catch (Exception e)
+                {
+                }
             }
         }
 

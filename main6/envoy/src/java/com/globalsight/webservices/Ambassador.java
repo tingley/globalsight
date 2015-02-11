@@ -56,6 +56,7 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -102,6 +103,7 @@ import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
+import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.BasicL10nProfileInfo;
@@ -111,7 +113,6 @@ import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.User.PhoneType;
 import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -318,16 +319,16 @@ public class Ambassador extends AbstractWebService
     public static final String GET_JOBS_BY_TIME_RANGE = "getJobsByTimeRange";
 
     public static final String GET_WORKFLOW_PATH = "getWorkflowPath";
-    
+
     public static final String DOWNLOAD_XLIFF_OFFLINE_FILE = "downloadXliffOfflineFile";
-    
+
     public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
-    
+
     public static final String GET_JOB_EXPORT_WORKFLOW_FILES = "getJobExportWorkflowFiles";
-    
+
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
 
-    private static final Logger logger = Logger.getLogger("WebService");
+    private static final Logger logger = Logger.getLogger(Ambassador.class);
 
     private static String capLoginUrl = null;
 
@@ -384,6 +385,8 @@ public class Ambassador extends AbstractWebService
      */
     // Whether the web service is installed
     private static boolean isWebServiceInstalled = false;
+
+    private Hashtable<String, String> importingStatus = null;
 
     /**
      * Check if the installation key for the WebService is correct
@@ -792,28 +795,28 @@ public class Ambassador extends AbstractWebService
             xml.append("\t\t<address>").append(address)
                     .append("</address>\r\n");
         }
-        String homePhone = user.getPhoneNumber(PhoneType.HOME);
+        String homePhone = user.getHomePhoneNumber();
         if (homePhone != null && homePhone.trim().length() > 0
                 && "null".equalsIgnoreCase(homePhone) == false)
         {
             xml.append("\t\t<homePhone>").append(homePhone)
                     .append("</homePhone>\r\n");
         }
-        String workPhone = user.getPhoneNumber(PhoneType.OFFICE);
+        String workPhone = user.getOfficePhoneNumber();
         if (workPhone != null && workPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(workPhone) == false)
         {
             xml.append("\t\t<workPhone>").append(workPhone)
                     .append("</workPhone>\r\n");
         }
-        String cellPhone = user.getPhoneNumber(PhoneType.CELL);
+        String cellPhone = user.getCellPhoneNumber();
         if (cellPhone != null && cellPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(cellPhone) == false)
         {
             xml.append("\t\t<cellPhone>").append(cellPhone)
                     .append("</cellPhone>\r\n");
         }
-        String faxPhone = user.getPhoneNumber(PhoneType.FAX);
+        String faxPhone = user.getFaxPhoneNumber();
         if (faxPhone != null && faxPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(faxPhone) == false)
         {
@@ -855,7 +858,7 @@ public class Ambassador extends AbstractWebService
                         .append("</projectName>\r\n");
                 try
                 {
-                    long companyId = Long.parseLong(project.getCompanyId());
+                    long companyId = project.getCompanyId();
                     String companyName = ServerProxy.getJobHandler()
                             .getCompanyById(companyId).getCompanyName();
                     xml.append("\t\t\t<projectCompanyId>").append(companyName)
@@ -1667,201 +1670,43 @@ public class Ambassador extends AbstractWebService
         String jobName = (String) args.get("jobName");
         if (!validateJobName(jobName))
         {
-            throw new WebServiceException(makeErrorXml(
-                    "createJob", ERROR_JOB_NAME));
+            throw new WebServiceException(makeErrorXml("createJob",
+                    ERROR_JOB_NAME));
         }
 
-        String jobUuid = jobName;
-        String comment = (String) args.get("comment");
-        Vector filePaths = (Vector) args.get("filePaths");
-        Vector fileProfileIds = (Vector) args.get("fileProfileIds");
-        Vector targetLocales = (Vector) args.get("targetLocales");
-        String priority = (String) args.get("priority");
-        String attributesXml = (String) args.get("attributes");
-
-        FileProfilePersistenceManager fppm = null;
-        String fpId = "";
-        long iFpId = 0l;
-        String filename = "", realFilename = "", tmpFilename = "";
-        String zipDir = "";
-        String vTargetLocale = "";
-        FileProfile fp = null, referenceFP = null;
-        File file = null, tmpFile = null;
-        Vector fileProfiles = new Vector();
-        Vector files = new Vector();
-        Vector afterTargetLocales = new Vector();
-        ArrayList<String> zipFiles = null;
-        long referenceFPId = 0l;
-
+        Job job = null;
         try
         {
-            fppm = ServerProxy.getFileProfilePersistenceManager();
-
-            for (int i = 0; i < filePaths.size(); i++)
+            job = ServerProxy.getJobHandler().getJobByJobName(jobName);
+            if (job == null)
             {
-                vTargetLocale = (String) targetLocales.get(i);
+                String userName = getUsernameFromSession(accessToken);
+                String userId = UserUtil.getUserIdByName(userName);
+                String priority = (String) args.get("priority");
+                Vector fileProfileIds = (Vector) args.get("fileProfileIds");
+                if (fileProfileIds != null && fileProfileIds.size() > 0)
+                {
+                    String fpId = (String) fileProfileIds.get(0);
+                    long iFpId = Long.parseLong(fpId);
+                    FileProfile fp = ServerProxy
+                            .getFileProfilePersistenceManager()
+                            .readFileProfile(iFpId);
+                    long l10nProfileId = fp.getL10nProfileId();
 
-                fpId = (String) fileProfileIds.get(i);
-                iFpId = Long.parseLong(fpId);
-                fp = fppm.readFileProfile(iFpId);
-                referenceFPId = fp.getReferenceFP();
-                referenceFP = fppm.readFileProfile(referenceFPId);
-
-                filename = (String) filePaths.get(i);
-                filename = FileUtil.commonSeparator(filename);
-                String srcLocale = findSrcLocale(fpId);
-                filename = getRealPath(jobName, filename, srcLocale);
-                realFilename = AmbFileStoragePathUtils.getCxeDocDir()
-                        + File.separator + filename;
-                file = new File(realFilename);
-                if (file.getAbsolutePath().endsWith(".xml"))
-                {
-                    saveFileAsUTF8(file);
-                }
-                // indicates this is an "XLZ" format file profile
-                if (XliffFileUtil.KNOWN_FILE_FORMAT_XLZ == fp
-                        .getKnownFormatTypeId())
-                {
-                    /**
-                     * Process XLZ file If file extension is 'xlz', then do
-                     * below steps, 1. Unpack the file to folder named with xlz
-                     * file name For Example, ..\testXLZFile.xlz will be
-                     * unpacked to ..\testXLZFile\xlzFile01.xlf
-                     * ..\testXLZFile\xlzFile02.txb
-                     * 
-                     * 2. add new file profiles according with reference file
-                     * profile with current xlz file to all xliff files unpacked
-                     * from xlz
-                     * 
-                     * 3. add target locales according with reference target
-                     * locale with current xlz file to all xliff files unpacked
-                     * from xlz
-                     * 
-                     * NOTE: We just process xliff files for now, ignore any
-                     * other types of files.
-                     */
-                    zipDir = realFilename.substring(0,
-                            realFilename.lastIndexOf("."));
-                    zipFiles = ZipIt.unpackZipPackage(realFilename, zipDir);
-                    String relativePath = filename.substring(0,
-                            filename.lastIndexOf("."));
-                    String tmp = "";
-
-                    for (String f : zipFiles)
-                    {
-                        tmpFilename = zipDir + File.separator + f;
-                        tmpFile = new File(tmpFilename);
-                        if (XliffFileUtil.isXliffFile(f))
-                        {
-                            tmp = relativePath + File.separator + f;
-                            changeFileListByXliff(tmp, vTargetLocale,
-                                    referenceFP, fileProfiles, files,
-                                    afterTargetLocales);
-                        }
-                    }
-                }
-                else if (XliffFileUtil.KNOWN_FILE_FORMAT_XLIFF == fp
-                        .getKnownFormatTypeId())
-                {
-                    changeFileListByXliff(filename, vTargetLocale, referenceFP,
-                            fileProfiles, files, afterTargetLocales);
-                }
-                else
-                {
-                    fileProfiles.add(fp);
-                    files.add(file);
-                    afterTargetLocales.add(vTargetLocale);
+                    job = JobCreationMonitor.initializeJob(jobName, userId,
+                            fp.getL10nProfileId(), priority, Job.PROCESSING);
                 }
             }
+
+            args.put("jobId", String.valueOf(job.getId()));
+
+            createJobOnInitial(args);
         }
         catch (Exception e)
         {
-            logger.error("Get file profile failed with exception "
-                    + e.getMessage());
-            throw new WebServiceException(
-                    "Get file profile failed with exception " + e.getMessage());
+            throw new WebServiceException(makeErrorXml("createJob",
+                    "Cannot create a job because " + e.getMessage()));
         }
-
-        // Calls script if has.
-        // Vector result = FileSystemUtil.execScript(files, fileProfiles,
-        // targetLocales);
-        Vector result = FileSystemUtil.execScript(files, fileProfiles,
-                afterTargetLocales);
-        Vector sFiles = (Vector) result.get(0);
-        Vector sProFiles = (Vector) result.get(1);
-        Vector stargetLocales = (Vector) result.get(2);
-        Vector exitValues = (Vector) result.get(3);
-
-        // cache job attributes
-        List<JobAttributeVo> atts = null;
-        String companyId = null;
-
-        try
-        {
-            if (attributesXml != null && attributesXml.length() > 0)
-            {
-                Attributes attributes = com.globalsight.cxe.util.XmlUtil
-                        .string2Object(Attributes.class, attributesXml);
-                atts = (List<JobAttributeVo>) attributes.getAttributes();
-                companyId = CompanyThreadLocal.getInstance().getValue();
-
-                List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
-                for (JobAttributeVo jobAttributeVo : atts)
-                {
-                    jobatts.add(AttributeUtil
-                            .createJobAttribute(jobAttributeVo));
-                }
-
-                RuntimeCache.addJobAtttibutesCache(jobUuid, jobatts);
-            }
-        }
-        catch (Exception e)
-        {
-            // log this exception to avoid break job creation
-            logger.error("Get JobAttribute failed with exception.", e);
-        }
-
-        // Sends events to cxe.
-        int pageCount = sFiles.size();
-        for (int i = 0; i < pageCount; i++)
-        {
-            File realFile = (File) sFiles.get(i);
-            FileProfile realProfile = (FileProfile) sProFiles.get(i);
-            String targetLocale = (String) stargetLocales.get(i);
-            String path = realFile.getPath();
-            String relativeName = path.substring(AmbFileStoragePathUtils
-                    .getCxeDocDir().getPath().length() + 1);
-            String userName = getUsernameFromSession(accessToken);
-            String userId = UserUtil.getUserIdByName(userName);
-
-            try
-            {
-                publishEventToCxe(jobName, jobUuid, jobName, i + 1, pageCount,
-                        1, 1, relativeName, Long.toString(realProfile.getId()),
-                        userId, targetLocale, (Integer) exitValues.get(i),
-                        priority);
-            }
-            catch (Exception e)
-            {
-                logger.error("Create job(" + jobName
-                        + ") failed with exception " + e.getMessage());
-                throw new WebServiceException("Create job(" + jobName
-                        + ") failed with exception " + e.getMessage());
-            }
-        }
-
-        // set job attribute
-        if (atts != null)
-        {
-            AddJobAttributeThread thread = new AddJobAttributeThread(jobUuid,
-                    companyId);
-            thread.setJobAttributeVos(atts);
-            thread.createJobAttributes();
-        }
-
-        // Send email at the end.
-        sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken,
-                jobName, comment, new Date());
     }
 
     private void changeFileListByXliff(String p_filename,
@@ -1943,7 +1788,7 @@ public class Ambassador extends AbstractWebService
                 filename = (String) filePaths.get(i);
                 filename = filename.replace('\\', File.separatorChar);
                 String srcLocale = findSrcLocale(fpId);
-                filename = getRealPath(jobName, filename, srcLocale);
+                filename = getRealPath(jobId, filename, srcLocale);
                 realFilename = AmbFileStoragePathUtils.getCxeDocDir()
                         + File.separator + filename;
                 file = new File(realFilename);
@@ -2082,7 +1927,7 @@ public class Ambassador extends AbstractWebService
         }
 
         // set job attribute
-        if (atts != null)
+        if (atts != null && atts.size() > 0)
         {
             AddJobAttributeThread thread = new AddJobAttributeThread(uuId,
                     companyId);
@@ -2135,8 +1980,8 @@ public class Ambassador extends AbstractWebService
         String jobName = (String) args.get("jobName");
         if (!validateJobName(jobName))
         {
-            throw new WebServiceException(makeErrorXml(
-                    "createEditionJob", ERROR_JOB_NAME));
+            throw new WebServiceException(makeErrorXml("createEditionJob",
+                    ERROR_JOB_NAME));
         }
 
         // String comment = null;//no need here
@@ -2298,7 +2143,7 @@ public class Ambassador extends AbstractWebService
     {
         if (StringUtil.isEmpty(p_jobname) || p_jobname.trim().length() > 120)
             return false;
-        
+
         return p_jobname.matches("[^\\\\/:;*?|\"<>&%]*");
     }
 
@@ -2397,49 +2242,14 @@ public class Ambassador extends AbstractWebService
      */
     public void uploadFile(HashMap args) throws WebServiceException
     {
-        // Checks authority.
-        String accessToken = (String) args.get("accessToken");
-        checkAccess(accessToken, UPLOAD_FILE);
-
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        // Reads parameters.
         try
         {
-            String jobName = (String) args.get("jobName");
-            if (!validateJobName(jobName))
-            {
-                throw new WebServiceException(makeErrorXml(
-                        "uploadFile", ERROR_JOB_NAME));
-            }
-            String filePath = (String) args.get("filePath");
-            String fileProfileId = (String) args.get("fileProfileId");
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .readFileProfile(Long.parseLong(fileProfileId));
-            String userName = getUsernameFromSession(accessToken);
-            String userId = UserUtil.getUserIdByName(userName);
-            if (!isInSameCompany(userName, fp.getCompanyId())
-                    && !UserUtil.isSuperPM(userId))
-            {
-                String message = makeErrorXml(
-                        "uploadFile",
-                        "Current user cannot upload file with the file profile which is in other company.");
-                throw new WebServiceException(message);
-            }
-
-            byte[] bytes = (byte[]) args.get("bytes");
-
-            // change the '\' in the file path to get used to the Linux env.
-            filePath = filePath.replace('\\', File.separatorChar);
-            // Save file.
-            String srcLocale = findSrcLocale(fileProfileId);
-            String path = getRealPath(jobName, filePath, srcLocale);
-            writeFile(path, bytes);
+            uploadFileForInitial(args);
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
+            throw new WebServiceException(makeErrorXml("uploadFile", e.getMessage()));
         }
     }
 
@@ -2467,9 +2277,9 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(makeErrorXml(
                         "uploadFileForInitial", ERROR_JOB_NAME));
             }
+            
             String userName = getUsernameFromSession(accessToken);
             String userId = UserUtil.getUserIdByName(userName);
-            jobId = (String) args.get("jobId");
             String filePath = (String) args.get("filePath");
             String fileProfileId = (String) args.get("fileProfileId");
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
@@ -2482,12 +2292,21 @@ public class Ambassador extends AbstractWebService
                         BasicL10nProfile.class, l10nProfileId);
                 priority = String.valueOf(blp.getPriority());
             }
-            if (jobId == null)
+            
+            jobId = (String) args.get("jobId");
+            // validate if there is job with current job name
+            if (StringUtil.isEmpty(jobId))
             {
-                // for GBS-2137, initialize the job with "UPLOADING" state
-                job = JobCreationMonitor.initializeJob(jobName, userId,
-                        fp.getL10nProfileId(), priority, Job.UPLOADING);
-                jobId = String.valueOf(job.getId());
+                job = ServerProxy.getJobHandler().getJobByJobName(jobName);
+                if (job != null)
+                    jobId = String.valueOf(job.getId());
+                else
+                {
+                    // for GBS-2137, initialize the job with "UPLOADING" state
+                    job = JobCreationMonitor.initializeJob(jobName, userId,
+                            fp.getL10nProfileId(), priority, Job.UPLOADING);
+                    jobId = String.valueOf(job.getId());
+                }
             }
             if (!isInSameCompany(userName, fp.getCompanyId())
                     && !UserUtil.isSuperPM(userId))
@@ -2504,8 +2323,8 @@ public class Ambassador extends AbstractWebService
             filePath = filePath.replace('\\', File.separatorChar);
             // Save file.
             String srcLocale = findSrcLocale(fileProfileId);
-            String path = getRealPath(jobName, filePath, srcLocale);
-            writeFile(path, bytes);
+            String path = getRealPath(jobId, filePath, srcLocale);
+            writeFile(path, bytes, fp.getCompanyId());
         }
         catch (Exception e)
         {
@@ -2537,6 +2356,7 @@ public class Ambassador extends AbstractWebService
     public void uploadFile(String accessToken, String jobName, String filePath,
             String fileProfileId, String content) throws WebServiceException
     {
+        
         try
         {
             Assert.assertNotEmpty(accessToken, "Access token");
@@ -2551,47 +2371,25 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(makeErrorXml("uploadFile",
                     e.getMessage()));
         }
-        if (!validateJobName(jobName))
-        {
-            throw new WebServiceException(makeErrorXml(
-                    "uploadFile", ERROR_JOB_NAME));
-        }
-
-        // Checks authority.
-        checkAccess(accessToken, UPLOAD_FILE);
-
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        // Reads parameters.
+        
         byte[] bytes;
         try
         {
             bytes = content.getBytes("utf-8");
-
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .readFileProfile(Long.parseLong(fileProfileId));
-            String userName = getUsernameFromSession(accessToken);
-            String userId = UserUtil.getUserIdByName(userName);
-            if (!isInSameCompany(userId, fp.getCompanyId())
-                    && !UserUtil.isSuperPM(userId))
-            {
-                String message = makeErrorXml(
-                        "uploadFile",
-                        "Current user cannot upload file with the file profile which is in other company.");
-                throw new WebServiceException(message);
-            }
+            
+            HashMap args = new HashMap();
+            args.put("accessToken", accessToken);
+            args.put("jobName", jobName);
+            args.put("filePath", filePath);
+            args.put("fileProfileId", fileProfileId);
+            args.put("bytes", bytes);
+            
+            uploadFileForInitial(args);
         }
         catch (Exception e)
         {
             throw new WebServiceException(e.getMessage());
         }
-
-        // change the '\' in the file path to get used to the Linux env.
-        filePath = filePath.replace('\\', File.separatorChar);
-        // Save file.
-        String srcLocale = findSrcLocale(fileProfileId);
-        String path = getRealPath(jobName, filePath, srcLocale);
-        writeFile(path, bytes);
     }
 
     /**
@@ -2611,57 +2409,14 @@ public class Ambassador extends AbstractWebService
     public void uploadFile(String accessToken, String jobName, String filePath,
             String fileProfileId, byte[] content) throws WebServiceException
     {
-        try
-        {
-            Assert.assertNotEmpty(accessToken, "Access token");
-            Assert.assertNotEmpty(jobName, "Job name");
-            Assert.assertNotEmpty(filePath, "File path");
-            Assert.assertNotEmpty(fileProfileId, "File profile Id");
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("uploadFile",
-                    e.getMessage()));
-        }
-        if (!validateJobName(jobName))
-        {
-            throw new WebServiceException(makeErrorXml(
-                    "uploadFile", ERROR_JOB_NAME));
-        }
-
-        // Checks authority.
-        checkAccess(accessToken, UPLOAD_FILE);
-
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        try
-        {
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .readFileProfile(Long.parseLong(fileProfileId));
-            String userName = getUsernameFromSession(accessToken);
-            String userId = UserUtil.getUserIdByName(userName);
-            if (!isInSameCompany(userName, fp.getCompanyId())
-                    && !UserUtil.isSuperPM(userId))
-            {
-                String message = makeErrorXml(
-                        "uploadFile",
-                        "Current user cannot upload file with the file profile which is in other company.");
-                throw new WebServiceException(message);
-            }
-
-            // change the '\' in the file path to get used to the Linux env.
-            filePath = filePath.replace('\\', File.separatorChar);
-            // Save file.
-            String srcLocale = findSrcLocale(fileProfileId);
-            String path = getRealPath(jobName, filePath, srcLocale);
-            writeFile(path, content);
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
-        }
+        HashMap args = new HashMap();
+        args.put("accessToken", accessToken);
+        args.put("jobName", jobName);
+        args.put("filePath", filePath);
+        args.put("fileProfileId", fileProfileId);
+        args.put("bytes", content);
+        
+        uploadFileForInitial(args);
     }
 
     /**
@@ -2791,7 +2546,9 @@ public class Ambassador extends AbstractWebService
             String userId = UserUtil.getUserIdByName(userName);
             User user = ServerProxy.getUserManager().getUser(userId);
             Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
-            Assert.assertFalse(!isInSameCompany(userName, job.getCompanyId()),
+            Assert.assertFalse(
+                    !isInSameCompany(userName,
+                            String.valueOf(job.getCompanyId())),
                     "Cannot access the job which is not in the same company with current user");
 
             String status = job.getState();
@@ -2934,12 +2691,6 @@ public class Ambassador extends AbstractWebService
                 xml.append("\t\t\t<isInContextMatch>")
                         .append(tmp.getIsContextMatchLeveraging())
                         .append("</isInContextMatch>\r\n");
-                xml.append("\t\t\t<subLevRepetition>")
-                        .append(w.getSubLevRepetitionWordCount())
-                        .append("</subLevRepetition>\r\n");
-                xml.append("\t\t\t<subLevMatch>")
-                        .append(w.getSubLevMatchWordCount())
-                        .append("</subLevMatch>\r\n");
                 xml.append("\t\t\t<percentageComplete>")
                         .append(w.getPercentageCompletion())
                         .append("</percentageComplete>\r\n");
@@ -3098,7 +2849,7 @@ public class Ambassador extends AbstractWebService
 
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
-        String jobCompanyId = job.getCompanyId();
+        String jobCompanyId = String.valueOf(job.getCompanyId());
         if (!isInSameCompany(getUsernameFromSession(p_accessToken),
                 jobCompanyId))
             throw new WebServiceException(
@@ -3134,7 +2885,7 @@ public class Ambassador extends AbstractWebService
         FileProfile fp = null;
         FileProfilePersistenceManager fpManager = null;
         boolean isXLZFile = false;
-        
+
         try
         {
             fpManager = ServerProxy.getFileProfilePersistenceManager();
@@ -3154,7 +2905,7 @@ public class Ambassador extends AbstractWebService
                         || Workflow.EXPORT_FAILED.equals(w.getState())
                         || Workflow.IMPORT_FAILED.equals(w.getState()))
                     continue;
-                
+
                 ArrayList<String> fileList = new ArrayList<String>();
                 for (TargetPage page : w.getTargetPages())
                 {
@@ -3178,13 +2929,13 @@ public class Ambassador extends AbstractWebService
                     fp = fpManager.getFileProfileById(fileProfileId, false);
                     if (fpManager.isXlzReferenceXlfFileProfile(fp.getName()))
                         isXLZFile = true;
-                    
+
                     String path = page.getExternalPageId();
                     path = path.replace("\\", "/");
                     int index = path.indexOf("/");
                     path = path.substring(index);
                     path = getRealFilePathForXliff(path, isXLZFile);
-                    
+
                     if (fileList.contains(path))
                         continue;
                     else
@@ -3202,7 +2953,7 @@ public class Ambassador extends AbstractWebService
                         }
                     }
                     jobFiles.addPath(allPath.toString());
-                    
+
                     isXLZFile = false;
                 }
             }
@@ -3215,7 +2966,8 @@ public class Ambassador extends AbstractWebService
                 {
                     if (s.length() > 0)
                     {
-                        allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                        allPath.append("/").append(
+                                URLEncoder.encode(s, "utf-8"));
                     }
                 }
                 jobFiles.addPath(allPath.toString());
@@ -3234,18 +2986,20 @@ public class Ambassador extends AbstractWebService
     {
         if (StringUtil.isEmpty(path))
             return path;
-        
+
         int index = -1;
         index = path.lastIndexOf(".sub/");
-        if (index > 0) {
-            //one big xliff file is split to some sub-files
+        if (index > 0)
+        {
+            // one big xliff file is split to some sub-files
             path = path.substring(0, index);
         }
-        if (isXLZFile) {
+        if (isXLZFile)
+        {
             path = path.substring(0, path.lastIndexOf("/"));
             path += ".xlz";
         }
-        
+
         return path;
     }
 
@@ -3273,7 +3027,7 @@ public class Ambassador extends AbstractWebService
 
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
-        String jobCompanyId = job.getCompanyId();
+        String jobCompanyId = String.valueOf(job.getCompanyId());
         if (!isInSameCompany(getUsernameFromSession(p_accessToken),
                 jobCompanyId))
             throw new WebServiceException(
@@ -3290,7 +3044,7 @@ public class Ambassador extends AbstractWebService
         FileProfile fp = null;
         FileProfilePersistenceManager fpManager = null;
         boolean isXLZFile = false;
-        
+
         try
         {
             fpManager = ServerProxy.getFileProfilePersistenceManager();
@@ -3397,7 +3151,8 @@ public class Ambassador extends AbstractWebService
                 {
                     if (s.length() > 0)
                     {
-                        allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                        allPath.append("/").append(
+                                URLEncoder.encode(s, "utf-8"));
                     }
                 }
                 jobFiles.addPath(allPath.toString());
@@ -4884,8 +4639,8 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, ADD_COMMENT);
         if (!validateJobName(p_jobName))
         {
-            throw new WebServiceException(makeErrorXml(
-                    "addJobComment", ERROR_JOB_NAME));
+            throw new WebServiceException(makeErrorXml("addJobComment",
+                    ERROR_JOB_NAME));
         }
 
         StringBuffer errMessage = new StringBuffer(
@@ -5186,8 +4941,8 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, CREATE_DTCMJOB);
         if (!validateJobName(jobName))
         {
-            throw new WebServiceException(makeErrorXml(
-                    "createDocumentumJob", ERROR_JOB_NAME));
+            throw new WebServiceException(makeErrorXml("createDocumentumJob",
+                    ERROR_JOB_NAME));
         }
 
         StringBuffer errorMessage = new StringBuffer();
@@ -5360,10 +5115,10 @@ public class Ambassador extends AbstractWebService
                             "Invalid xml content in parameter p_msg. "
                                     + e.getMessage()));
         }
-        
+
         try
         {
-            
+
             Element root = doc.getRootElement();
             List jobList = root.elements();
             if (jobList.size() > 0)
@@ -5377,16 +5132,16 @@ public class Ambassador extends AbstractWebService
                     fileNamesSB.append(files[i].getName()).append("/");
                 }
                 String fileNames = fileNamesSB.toString();
+                Job job = null;
+                String status = "unknown";
+                
                 for (Iterator iter = jobList.iterator(); iter.hasNext();)
                 {
                     Element jobElement = (Element) iter.next();
                     String jobName = jobElement.element("name").getText();
-                    String status = "unknown";
-                    if (fileNames.indexOf(jobName) != -1)
-                    {
+                    job = ServerProxy.getJobHandler().getJobByJobName(jobName);
+                    if (job != null && fileNames.indexOf(String.valueOf(job.getJobId())) != -1)
                         status = "downloadable";
-                        // (new File(diExportedDir, jobName)).delete();
-                    }
                     jobElement.element("status").setText(status);
                 }
             }
@@ -5782,7 +5537,7 @@ public class Ambassador extends AbstractWebService
     /**
      * Gets the path of the file in service.
      * 
-     * @param jobName
+     * @param jobId
      *            The name of job
      * @param filePath
      *            File path
@@ -5790,10 +5545,10 @@ public class Ambassador extends AbstractWebService
      *            Source locale
      * @return
      */
-    private String getRealPath(String jobName, String filePath, String srcLocale)
+    private String getRealPath(String jobId, String filePath, String srcLocale)
     {
         String newPath = new StringBuffer(srcLocale).append(File.separator)
-                .append("webservice").append(File.separator).append(jobName)
+                .append("webservice").append(File.separator).append(jobId)
                 .append(File.separator).append(filePath).toString();
 
         return newPath;
@@ -5815,10 +5570,11 @@ public class Ambassador extends AbstractWebService
      * @param bytes
      * @throws WebServiceException
      */
-    private void writeFile(String path, byte[] bytes)
+    private void writeFile(String path, byte[] bytes, long companyId)
             throws WebServiceException
     {
-        File newFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), path);
+        File newFile = new File(
+                AmbFileStoragePathUtils.getCxeDocDir(companyId), path);
         newFile.getParentFile().mkdirs();
         FileOutputStream fos = null;
 
@@ -5840,7 +5596,8 @@ public class Ambassador extends AbstractWebService
         {
             try
             {
-                fos.close();
+                if (fos != null)
+                    fos.close();
             }
             catch (IOException e)
             {
@@ -6464,7 +6221,8 @@ public class Ambassador extends AbstractWebService
             User user = getUser(getUsernameFromSession(p_accessToken));
             Object[] projects = getProjectsFromFPIds(p_fpIds);
             int projectsLength = projects.length;
-            String companyIdStr = ((Project) projects[0]).getCompanyId();
+            String companyIdStr = String.valueOf(((Project) projects[0])
+                    .getCompanyId());
 
             String[] messageArguments = new String[7];
             messageArguments[1] = p_jobName;
@@ -7332,7 +7090,7 @@ public class Ambassador extends AbstractWebService
             }
             ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
                     tmp.getProjectTmIdForSave(), false);
-            String companyId = ptm.getCompanyId();
+            String companyId = String.valueOf(ptm.getCompanyId());
 
             Set tmNamesOverride = new HashSet();
             Vector<LeverageProjectTM> tms = tmp.getProjectTMsToLeverageFrom();
@@ -7645,7 +7403,7 @@ public class Ambassador extends AbstractWebService
 
             ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
                     tmp.getProjectTmIdForSave(), false);
-            String companyId = ptm.getCompanyId();
+            String companyId = String.valueOf(ptm.getCompanyId());
             // tmIdsOverride
             Set tmIdsOverride = new HashSet();
             Vector<LeverageProjectTM> tms = tmp.getProjectTMsToLeverageFrom();
@@ -9258,11 +9016,16 @@ public class Ambassador extends AbstractWebService
         ResultSet results = null;
         long cid = -1;
 
+        boolean needCloseConnection = false;
         try
         {
             if (connection == null)
+            {
                 connection = ConnectionPool.getConnection();
+                needCloseConnection = true;
+            }
 
+            connection.setAutoCommit(false);
             String sourceLangName = "";
             String targetLangName = "";
             if (getLangNameByLocale(p_sourceLocale, tb, connection).size() > 0)
@@ -9321,6 +9084,7 @@ public class Ambassador extends AbstractWebService
                 String msg = "no matched term found.";
                 throw new WebServiceException(msg);
             }
+            connection.commit();
         }
         catch (ConnectionPoolException cpe)
         {
@@ -9346,6 +9110,10 @@ public class Ambassador extends AbstractWebService
         {
             ConnectionPool.silentClose(results);
             ConnectionPool.silentClose(query);
+            if (needCloseConnection)
+            {
+                ConnectionPool.silentReturnConnection(connection);
+            }
         }
     }
 
@@ -9386,6 +9154,7 @@ public class Ambassador extends AbstractWebService
         try
         {
             connection = ConnectionPool.getConnection();
+            connection.setAutoCommit(false);
 
             // get termbase object
             Termbase tb = getTermbase(p_termbaseName);
@@ -9518,6 +9287,7 @@ public class Ambassador extends AbstractWebService
                 query = connection.prepareStatement(sql5);
                 query.execute();
             }
+            connection.commit();
         }
         catch (Exception e)
         {
@@ -10741,7 +10511,7 @@ public class Ambassador extends AbstractWebService
                     + p_jobId);
             Assert.assertFalse(
                     !isInSameCompany(getUsernameFromSession(p_accessToken),
-                            job.getCompanyId()),
+                            String.valueOf(job.getCompanyId())),
                     "Cannot access the job which is not in the same company with current user");
 
             List<JobAttribute> jobAttributes = job.getAllJobAttributes();
@@ -10803,7 +10573,7 @@ public class Ambassador extends AbstractWebService
 
             String userName = getUsernameFromSession(accessToken);
             String userId = UserUtil.getUserIdByName(userName);
-            if (!isInSameCompany(userName, job.getCompanyId()))
+            if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
             {
                 String message = "Current user is not in the same company with the job.";
                 throw new WebServiceException(makeErrorXml("setJobAttribute",
@@ -10863,7 +10633,7 @@ public class Ambassador extends AbstractWebService
             Assert.assertFalse(job == null, "Can not find job by id: " + jobId);
             Assert.assertFalse(
                     !isInSameCompany(getUsernameFromSession(accessToken),
-                            job.getCompanyId()),
+                            String.valueOf(job.getCompanyId())),
                     "Cannot access the job which is not in the same company with current user");
 
             List<JobAttribute> jobAttributes = job.getAllJobAttributes();
@@ -10920,7 +10690,8 @@ public class Ambassador extends AbstractWebService
             String userName = getUsernameFromSession(p_accessToken);
 
             Assert.assertFalse(
-                    !isInSameCompany(userName, project.getCompanyId()),
+                    !isInSameCompany(userName,
+                            String.valueOf(project.getCompanyId())),
                     "Cannot access the project which is not in the same company with current user");
 
             AttributeSet attributeSet = project.getAttributeSet();
@@ -11270,41 +11041,56 @@ public class Ambassador extends AbstractWebService
      * @param args
      * @throws WebServiceException
      */
-    public void uploadOriginalSourceFile(HashMap args)
+    public String uploadOriginalSourceFile(HashMap args)
             throws WebServiceException
     {
-        // Checks authority.
-        String accessToken = (String) args.get("accessToken");
-        checkAccess(accessToken, "uploadOriginalSourceFile");
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        // Reads parameters.
-        String jobName = (String) args.get("jobName");
-        if (!validateJobName(jobName))
+        try
         {
-            throw new WebServiceException(makeErrorXml(
-                    "uploadOriginalSourceFile", ERROR_JOB_NAME));
+            // Checks authority.
+            String accessToken = (String) args.get("accessToken");
+            checkAccess(accessToken, "uploadOriginalSourceFile");
+            checkPermission(accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+
+            // Reads parameters.
+            String jobName = (String) args.get("jobName");
+            if (!validateJobName(jobName))
+            {
+                throw new WebServiceException(makeErrorXml(
+                        "uploadOriginalSourceFile", ERROR_JOB_NAME));
+            }
+
+            String targetLocale = (String) args.get("targetLocale");// like
+                                                                    // "fr_FR"
+            String filePath = (String) args.get("filePath");// with file name in
+                                                            // it
+            byte[] bytes = (byte[]) args.get("bytes");
+
+            // Save file.
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                    .getInstance().getStringParameter(
+                            SystemConfigParamNames.FILE_STORAGE_DIR));
+
+            // The full path is like this:
+            // Welocalize\FileStorage\qa\GlobalSight\OriginalSourceFile\<target_locale>\<file_name_with_extension>
+            fileStorageRoot = fileStorageRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator)
+                    .append(WebAppConstants.ORIGINAL_SORUCE_FILE)
+                    .append(File.separator).append(jobName)
+                    .append(File.separator).append(targetLocale)
+                    .append(File.separator).append(filePath);
+
+            writeFileToLocale(fileStorageRoot.toString(), bytes);
+
+            return null;
         }
-
-        String targetLocale = (String) args.get("targetLocale");// like "fr_FR"
-        String filePath = (String) args.get("filePath");// with file name in it
-        byte[] bytes = (byte[]) args.get("bytes");
-
-        // Save file.
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
-
-        // The full path is like this:
-        // Welocalize\FileStorage\qa\GlobalSight\OriginalSourceFile\<target_locale>\<file_name_with_extension>
-        fileStorageRoot = fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator)
-                .append(WebAppConstants.ORIGINAL_SORUCE_FILE)
-                .append(File.separator).append(jobName).append(File.separator)
-                .append(targetLocale).append(File.separator).append(filePath);
-
-        writeFileToLocale(fileStorageRoot.toString(), bytes);
+        catch (Exception e)
+        {
+            String message = makeErrorXml("uploadOriginalSourceFile",
+                    e.getMessage());
+            return message;
+        }
     }
 
     /**
@@ -11314,64 +11100,75 @@ public class Ambassador extends AbstractWebService
      *            Collections of files information
      * @throws WebServiceException
      */
-    public void uploadCommentReferenceFiles(HashMap p_args)
+    public String uploadCommentReferenceFiles(HashMap p_args)
             throws WebServiceException
     {
-        String accessToken = (String) p_args.get("accessToken");
-        checkAccess(accessToken, "uploadCommentReferenceFiles");
-        checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        String fileName = (String) p_args.get("fileName");
-        String originalTaskId = (String) p_args.get("originalTaskId");
-        String wsdlUrl = (String) p_args.get("wsdlUrl");
-        byte[] bytes = (byte[]) p_args.get("bytes");
-        String access = (String) p_args.get("access");
-        if (access == null
-                || (!access.equals(CommentUpload.GENERAL) && !access
-                        .equals(CommentUpload.RESTRICTED)))
+        try
         {
-            access = CommentUpload.GENERAL;
-        }
+            String accessToken = (String) p_args.get("accessToken");
+            checkAccess(accessToken, "uploadCommentReferenceFiles");
+            checkPermission(accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-        // search comment id
-        long commentId = 0;
-        if (originalTaskId != null && wsdlUrl != null)
-        {
-            StringBuffer hql = new StringBuffer();
-            hql.append("from CommentImpl");
-            List newCommentList = HibernateUtil.search(hql.toString());
-            if (newCommentList != null && newCommentList.size() > 0)
+            String fileName = (String) p_args.get("fileName");
+            String originalTaskId = (String) p_args.get("originalTaskId");
+            String wsdlUrl = (String) p_args.get("wsdlUrl");
+            byte[] bytes = (byte[]) p_args.get("bytes");
+            String access = (String) p_args.get("access");
+            if (access == null
+                    || (!access.equals(CommentUpload.GENERAL) && !access
+                            .equals(CommentUpload.RESTRICTED)))
             {
-                Iterator iter = newCommentList.iterator();
-                while (iter.hasNext())
+                access = CommentUpload.GENERAL;
+            }
+
+            // search comment id
+            long commentId = 0;
+            if (originalTaskId != null && wsdlUrl != null)
+            {
+                StringBuffer hql = new StringBuffer();
+                hql.append("from CommentImpl");
+                List newCommentList = HibernateUtil.search(hql.toString());
+                if (newCommentList != null && newCommentList.size() > 0)
                 {
-                    Comment comment = (Comment) iter.next();
-                    String _originalId = comment.getOriginalId();
-                    String _originalWsdlUrl = comment.getOriginalWsdlUrl();
-                    if (originalTaskId.equals(_originalId)
-                            && wsdlUrl.equals(_originalWsdlUrl))
+                    Iterator iter = newCommentList.iterator();
+                    while (iter.hasNext())
                     {
-                        commentId = comment.getId();
+                        Comment comment = (Comment) iter.next();
+                        String _originalId = comment.getOriginalId();
+                        String _originalWsdlUrl = comment.getOriginalWsdlUrl();
+                        if (originalTaskId.equals(_originalId)
+                                && wsdlUrl.equals(_originalWsdlUrl))
+                        {
+                            commentId = comment.getId();
+                        }
                     }
                 }
             }
+
+            // Save file to comment reference path
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                    .getInstance().getStringParameter(
+                            SystemConfigParamNames.FILE_STORAGE_DIR));
+
+            // The full path is like this:
+            // Welocalize\FileStorage\qa\GlobalSight\CommentReference\<comment_id>\<access>\<file_name_with_extension>
+            fileStorageRoot = fileStorageRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("CommentReference")
+                    .append(File.separator).append(commentId)
+                    .append(File.separator).append(access)
+                    .append(File.separator).append(fileName);
+
+            writeFileToLocale(fileStorageRoot.toString(), bytes);
+
+            return null;
         }
-
-        // Save file to comment reference path
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
-
-        // The full path is like this:
-        // Welocalize\FileStorage\qa\GlobalSight\CommentReference\<comment_id>\<access>\<file_name_with_extension>
-        fileStorageRoot = fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator).append("CommentReference")
-                .append(File.separator).append(commentId)
-                .append(File.separator).append(access).append(File.separator)
-                .append(fileName);
-
-        writeFileToLocale(fileStorageRoot.toString(), bytes);
+        catch (Exception e)
+        {
+            logger.error("Error found in uploadCommentReferenceFiles", e);
+            return makeErrorXml("uploadCommentReferenceFiles", e.getMessage());
+        }
     }
 
     /**
@@ -11402,7 +11199,6 @@ public class Ambassador extends AbstractWebService
                     e);
             String message = "Could not copy uploaded file to the specified directory."
                     + e.getMessage();
-            message = makeErrorXml("writeFileToLocale", message);
             throw new WebServiceException(message);
         }
         finally
@@ -11416,7 +11212,6 @@ public class Ambassador extends AbstractWebService
                 logger.error("Fail to close FileOutPutSteam.", e);
                 String message = "Fail to close FileOutPutSteam."
                         + e.getMessage();
-                message = makeErrorXml("writeFileToLocale", message);
                 throw new WebServiceException(message);
             }
         }
@@ -11491,35 +11286,45 @@ public class Ambassador extends AbstractWebService
      *            The contents in bytes to be uploaded.
      * @throws WebServiceException
      */
-    public void uploadEditionFileBack(String p_accessToken,
+    public String uploadEditionFileBack(String p_accessToken,
             String p_originalTaskId, String p_fileName, byte[] p_bytes)
             throws WebServiceException
     {
-        checkAccess(p_accessToken, "uploadEditionFileBack");
-        checkPermission(p_accessToken,
-                Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        // Save file to comment reference path
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
-
-        // The full path is like this:
-        // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>\<file_name_with_extension>
-        fileStorageRoot = fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator).append("tmp").append(File.separator)
-                .append(p_originalTaskId).append(File.separator)
-                .append(p_fileName);
-
-        File newFile = new File(fileStorageRoot.toString());
-
-        if (newFile.exists())
+        try
         {
-            newFile.delete();
-        }
+            checkAccess(p_accessToken, "uploadEditionFileBack");
+            checkPermission(p_accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-        writeFileToLocale(fileStorageRoot.toString(), p_bytes);
+            // Save file to comment reference path
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                    .getInstance().getStringParameter(
+                            SystemConfigParamNames.FILE_STORAGE_DIR));
+
+            // The full path is like this:
+            // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>\<file_name_with_extension>
+            fileStorageRoot = fileStorageRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("tmp")
+                    .append(File.separator).append(p_originalTaskId)
+                    .append(File.separator).append(p_fileName);
+
+            File newFile = new File(fileStorageRoot.toString());
+
+            if (newFile.exists())
+            {
+                newFile.delete();
+            }
+
+            writeFileToLocale(fileStorageRoot.toString(), p_bytes);
+
+            return null;
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found in uploadEditionFileBack", e);
+            return makeErrorXml("uploadEditionFileBack", e.getMessage());
+        }
     }
 
     /**
@@ -11531,36 +11336,33 @@ public class Ambassador extends AbstractWebService
      * @param p_accessToken
      * @param p_originalTaskId
      *            Task ID
-     * 
+     * @return String If the method works fine, then it will return null.
+     *         Otherwise it will return error message.
      * @throws WebServiceException
      */
-    public void importOfflineTargetFiles(String p_accessToken,
+    public String importOfflineTargetFiles(String p_accessToken,
             String p_originalTaskId) throws WebServiceException
     {
-        checkAccess(p_accessToken, "importOfflineTargetFiles");
-
-        // User object
-        String userName = this.getUsernameFromSession(p_accessToken);
-        User userObj = this.getUser(userName);
-
-        // Task object
-        TaskManager taskManager = ServerProxy.getTaskManager();
+        String userName = null;
+        User userObj = null;
         Task task = null;
         try
         {
+            checkAccess(p_accessToken, "importOfflineTargetFiles");
+
+            // User object
+            userName = this.getUsernameFromSession(p_accessToken);
+            userObj = this.getUser(userName);
+
+            // Task object
+            TaskManager taskManager = ServerProxy.getTaskManager();
             task = taskManager.getTask(Long.parseLong(p_originalTaskId));
-        }
-        catch (RemoteException re)
-        {
-            String msg = "Fail to get task object by taskId : "
-                    + p_originalTaskId;
-            logger.error(msg, re);
-            msg = makeErrorXml("importOfflineTargetFiles", msg);
-            throw new WebServiceException(msg);
         }
         catch (Exception ex)
         {
             logger.error(ex.getMessage(), ex);
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot get Task info. " + ex.getMessage());
         }
 
         // OfflineEditManager
@@ -11572,11 +11374,14 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            String msg = "Fail to get OfflineEditManager";
-            logger.error(msg, e);
-            msg = makeErrorXml("importOfflineTargetFiles", msg);
-            throw new WebServiceException(msg);
+            logger.error("importOfflineTargetFiles", e);
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot get OfflineEditManager instancee " + e.getMessage());
         }
+
+        OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
+
+        StringBuilder errorMessage = new StringBuilder(XML_HEAD);
 
         // uploaded files path
         StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
@@ -11591,63 +11396,278 @@ public class Ambassador extends AbstractWebService
 
         File parentFilePath = new File(fileStorageRoot.toString());
         File[] files = parentFilePath.listFiles();
+        File file = null;
+        String fileName = null;
         if (files != null && files.length > 0)
         {
             for (int i = 0; i < files.length; i++)
             {
-                File file = files[i];
-                String fileName = file.getName();
+                file = files[i];
+                fileName = file.getName();
                 try
                 {
                     OEM.processUploadPage(file, userObj, task, fileName);
                 }
                 catch (Exception e)
                 {
-                    String msg = "Failed to process offline file : " + fileName
-                            + " for taskId : " + p_originalTaskId;
-                    logger.error(msg, e);
-                    msg = makeErrorXml("processUploadPage", msg);
-                    throw new WebServiceException(msg);
+                    logger.error("Cannot handle file " + fileName, e);
+                    status.addFileState(Long.valueOf(p_originalTaskId),
+                            fileName, "Failed");
+                    errorMessage.append("<file>\r\n");
+                    errorMessage.append("\t<name>\r\n");
+                    errorMessage.append("\t\t").append(fileName)
+                            .append("</name>\r\n");
+                    errorMessage.append("\t<error>\r\n");
+                    errorMessage.append("\t\t").append(e.getMessage())
+                            .append("</error>\r\n");
                 }
             }
+
+            // If there is error in handling files, then return message and
+            // do not need to change workflow as below
+            if (!errorMessage.toString().equals(XML_HEAD))
+            {
+                return errorMessage.toString();
+            }
+
+            // if current task/activity has no "condition",advance to next
+            // activity
+            // automatically.(GBS-1244)
+            String destinationArrow = null;
+            String availableUserId = null;
+            try
+            {
+                // Find the user to complete task.
+                WorkflowTaskInstance wfTask = ServerProxy
+                        .getWorkflowServer()
+                        .getWorkflowTaskInstance(
+                                UserUtil.getUserIdByName(userName),
+                                task.getId(), WorkflowConstants.TASK_ALL_STATES);
+                task.setWorkflowTask(wfTask);
+                List allAssignees = task.getAllAssignees();
+                if (allAssignees != null && allAssignees.size() > 0)
+                {
+                    availableUserId = (String) allAssignees.get(0);
+                }
+                else
+                {
+                    availableUserId = UserUtil.getUserIdByName(userName);
+                }
+
+                List condNodeInfo = task.getConditionNodeTargetInfos();
+                if (condNodeInfo == null
+                        || (condNodeInfo != null && condNodeInfo.size() < 1))
+                {
+                    ServerProxy.getTaskManager().completeTask(availableUserId,
+                            task, destinationArrow, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return makeErrorXml("importOfflineTargetFiles",
+                        "Cannot change workflow status. " + ex.getMessage());
+            }
+        }
+        else
+        {
+            logger.info("There is no any files in upload path.");
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot find any files in uploading path");
         }
 
-        // if current task/activity has no "condition",advance to next activity
-        // automatically.(GBS-1244)
-        String destinationArrow = null;
-        String availableUserId = null;
+        return null;
+    }
+
+    /**
+     * Offline uploading support.
+     * 
+     * Before invoking this, uploadEditionFileBack() API should be invoked.
+     * After invoking this, sendSegmentCommentBack() API should be invoked.
+     * 
+     * @param p_accessToken
+     * @param p_originalTaskId
+     *            Task ID
+     * @return String If the method works fine, then it will return null.
+     *         Otherwise it will return error message.
+     * @throws WebServiceException
+     */
+    public String importOfflineKitFiles(String p_accessToken,
+            String p_originalTaskId) throws WebServiceException
+    {
+        String userName = null;
+        User userObj = null;
+        Task task = null;
         try
         {
-            // Find the user to complete task.
-            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
-                    .getWorkflowTaskInstance(
-                            UserUtil.getUserIdByName(userName), task.getId(),
-                            WorkflowConstants.TASK_ALL_STATES);
-            task.setWorkflowTask(wfTask);
-            List allAssignees = task.getAllAssignees();
-            if (allAssignees != null && allAssignees.size() > 0)
-            {
-                availableUserId = (String) allAssignees.get(0);
-            }
-            else
-            {
-                availableUserId = UserUtil.getUserIdByName(userName);
-            }
+            checkAccess(p_accessToken, "importOfflineTargetFiles");
 
-            List condNodeInfo = task.getConditionNodeTargetInfos();
-            if (condNodeInfo == null
-                    || (condNodeInfo != null && condNodeInfo.size() < 1))
-            {
-                ServerProxy.getTaskManager().completeTask(availableUserId,
-                        task, destinationArrow, null);
-            }
+            // User object
+            userName = this.getUsernameFromSession(p_accessToken);
+            userObj = this.getUser(userName);
+
+            // Task object
+            TaskManager taskManager = ServerProxy.getTaskManager();
+            task = taskManager.getTask(Long.parseLong(p_originalTaskId));
         }
         catch (Exception ex)
         {
-            logger.error(
-                    "Fail to advance edition task to next activity automatically.",
-                    ex);
+            logger.error(ex.getMessage(), ex);
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot get Task info. " + ex.getMessage());
         }
+
+        // OfflineEditManager
+        OfflineEditManager OEM = null;
+        try
+        {
+            OEM = ServerProxy.getOfflineEditManager();
+            OEM.attachListener(new OEMProcessStatus());
+        }
+        catch (Exception e)
+        {
+            logger.error("importOfflineTargetFiles", e);
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot get OfflineEditManager instancee " + e.getMessage());
+        }
+
+        OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
+
+        StringBuilder errorMessage = new StringBuilder(XML_HEAD);
+
+        // uploaded files path
+        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
+                .getInstance().getStringParameter(
+                        SystemConfigParamNames.FILE_STORAGE_DIR));
+        // The full path is like this:
+        // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>
+        fileStorageRoot = fileStorageRoot.append(File.separator)
+                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                .append(File.separator).append("tmp").append(File.separator)
+                .append(p_originalTaskId);
+
+        File parentFilePath = new File(fileStorageRoot.toString());
+        File[] files = parentFilePath.listFiles();
+        File file = null, tmpFile = null;
+        String fileName = null, tmp = "";
+        if (files != null && files.length > 0)
+        {
+            for (int i = 0; i < files.length; i++)
+            {
+                file = files[i];
+                tmp = file.getAbsolutePath();
+                tmp = tmp.substring(tmp.lastIndexOf("."));
+                try
+                {
+                    tmpFile = File.createTempFile(p_originalTaskId, tmp);
+                    FileUtils.copyFile(file, tmpFile);
+                }
+                catch (IOException e1)
+                {
+                    logger.error("File access error. ", e1);
+                }
+                fileName = tmpFile.getName();
+                status.addFilenameAlias(file.getName(), fileName);
+                try
+                {
+                    OEM.processUploadPage(tmpFile, userObj, task, fileName);
+                    file.delete();
+                    if (file.exists()) {
+                        logger.error("File " + file.getAbsolutePath() + " cannot be deleted.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.error("Cannot handle file " + fileName, e);
+                    status.addFileState(Long.valueOf(p_originalTaskId),
+                            fileName, "Failed");
+                    errorMessage.append("<file>\r\n");
+                    errorMessage.append("\t<name>\r\n");
+                    errorMessage.append("\t\t").append(fileName)
+                            .append("</name>\r\n");
+                    errorMessage.append("\t<error>\r\n");
+                    errorMessage.append("\t\t").append(e.getMessage())
+                            .append("</error>\r\n");
+                }
+            }
+        }
+        else
+        {
+            logger.info("There is no any files in upload path.");
+            return makeErrorXml("importOfflineTargetFiles",
+                    "Cannot find any files in uploading path");
+        }
+
+        if (!errorMessage.toString().equals(XML_HEAD))
+            return makeErrorXml("importOfflineKitFiles", errorMessage.toString());
+        else
+            return null;
+    }
+
+    /**
+     * Get file handling process status when uploading offline kit
+     * 
+     * @param accessToken
+     *            Access token
+     * @param taskId
+     *            Task id
+     * @param filename
+     *            Filename of uploading offline kit
+     * @return String File handling status with XML format
+     * @throws WebServiceException
+     */
+    public String getOfflineFileUploadStatus(String accessToken, String taskId,
+            String filename) throws WebServiceException
+    {
+        checkAccess(accessToken, "getOfflineFileUploadStatus");
+
+        OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
+        StringBuilder xml = new StringBuilder(XML_HEAD);
+        Long lTaskId = Long.valueOf(taskId);
+        HashMap<String, String> fileStates = status.getFileStates(lTaskId);
+        // if (fileStates == null) {
+        // fileStates = status.getFileStates(Long.valueOf(-1));
+        // }
+
+        ArrayList<String> files = new ArrayList<String>();
+
+        if (fileStates != null)
+        {
+            if (!StringUtil.isEmpty(filename))
+            {
+                String[] fileArray = filename.split(",");
+                for (String file : fileArray)
+                {
+                    if (StringUtil.isEmpty(file))
+                        continue;
+                    files.add(file);
+                }
+                if (files.size() > 0)
+                {
+                    xml.append("<fileStatus>\r\n");
+                    for (String file : files)
+                    {
+                        xml.append("\t<file>").append(file)
+                                .append("</file>\r\n");
+                        xml.append("\t<status>")
+                                .append(EditUtil.encodeHtmlEntities(fileStates
+                                        .get(file))).append("</status>\r\n");
+                    }
+                    xml.append("</fileStatus>");
+                }
+            }
+            // else
+            // {
+            // // Get all files in task
+            // for (Iterator<String> iterator = fileStates.keySet().iterator();
+            // iterator
+            // .hasNext();)
+            // {
+            // files.add(iterator.next());
+            // }
+            // }
+
+        }
+        return xml.toString();
     }
 
     /**
@@ -11698,7 +11718,7 @@ public class Ambassador extends AbstractWebService
             try
             {
                 localeTuv = tuvManager.getTuvForSegmentEditor(tuId, localeId,
-                        companyId);
+                        Long.parseLong(companyId));
                 tuvId = localeTuv.getId();
             }
             catch (Exception e)
@@ -11870,8 +11890,10 @@ public class Ambassador extends AbstractWebService
                             long lg_id = -1;
                             try
                             {
-                                lg_id = ServerProxy.getTuvManager()
-                                        .getTuForSegmentEditor(tuId, companyId)
+                                lg_id = ServerProxy
+                                        .getTuvManager()
+                                        .getTuForSegmentEditor(tuId,
+                                                Long.parseLong(companyId))
                                         .getLeverageGroupId();
                                 long sourcePageId = -1;
                                 sourcePageId = ServerProxy.getPageManager()
@@ -12174,7 +12196,7 @@ public class Ambassador extends AbstractWebService
                 while (allJobsIter.hasNext())
                 {
                     Job job = (Job) allJobsIter.next();
-                    long comId = Long.parseLong(job.getCompanyId());
+                    long comId = job.getCompanyId();
                     String jobComName = ServerProxy.getJobHandler()
                             .getCompanyById(comId).getCompanyName();
                     if (loggedComName != null && jobComName != null
@@ -12507,7 +12529,8 @@ public class Ambassador extends AbstractWebService
                     if (job == null)
                         continue;
 
-                    if (!isInSameCompany(loggedUserName, job.getCompanyId()))
+                    if (!isInSameCompany(loggedUserName,
+                            String.valueOf(job.getCompanyId())))
                     {
                         if (!UserUtil.isSuperAdmin(loggedUserName)
                                 && !UserUtil.isSuperPM(loggedUserName))
@@ -12795,7 +12818,7 @@ public class Ambassador extends AbstractWebService
                         + p_workflowId;
                 throw new Exception(msg);
             }
-            // WordcountForCosting wfc = new WordcountForCosting(wf);
+
             Job job = wf.getJob();
             long l10nProfileId = wf.getJob().getFileProfile()
                     .getL10nProfileId();
@@ -12909,11 +12932,7 @@ public class Ambassador extends AbstractWebService
                     .append("</noMatch>\r\n");
             // Repetitions
             xml.append("\t\t<repetitions>")
-                    .append(wf.getRepetitionWordCount()
-                            + wf.getSubLevRepetitionWordCount()
-                            + wf.getHiFuzzyRepetitionWordCount()
-                            + wf.getMedHiFuzzyRepetitionWordCount()
-                            + wf.getMedFuzzyRepetitionWordCount())
+                    .append(wf.getRepetitionWordCount())
                     .append("</repetitions>\r\n");
             // In Context Matches
             if (isInContextMatch)
@@ -13117,7 +13136,8 @@ public class Ambassador extends AbstractWebService
                 if (job == null)
                     continue;
 
-                if (!isInSameCompany(userName, job.getCompanyId()))
+                if (!isInSameCompany(userName,
+                        String.valueOf(job.getCompanyId())))
                 {
                     if (!UserUtil.isSuperAdmin(userId)
                             && !UserUtil.isSuperPM(userId))
@@ -13302,11 +13322,7 @@ public class Ambassador extends AbstractWebService
         // Repetitions
         xml.append(tab)
                 .append("\t<repetitions>")
-                .append(workflow.getRepetitionWordCount()
-                        + workflow.getSubLevRepetitionWordCount()
-                        + workflow.getHiFuzzyRepetitionWordCount()
-                        + workflow.getMedHiFuzzyRepetitionWordCount()
-                        + workflow.getMedFuzzyRepetitionWordCount())
+                .append(workflow.getRepetitionWordCount())
                 .append("</repetitions>\r\n");
         // In Context Matches
         if (isInContextMatch)
@@ -13475,7 +13491,7 @@ public class Ambassador extends AbstractWebService
                 {
                     subXML.append("\t\t\t\t<jobCommentFile>\r\n");
                     subXML.append("\t\t\t\t\t<jobCommentFileName>")
-                            .append(file.getName())
+                            .append(XmlUtil.escapeString(file.getName()))
                             .append("</jobCommentFileName>\r\n");
                     subXML.append("\t\t\t\t\t<jobCommentAccess>")
                             .append(p_access).append("</jobCommentAccess>\r\n");
@@ -13509,7 +13525,7 @@ public class Ambassador extends AbstractWebService
                 {
                     subXML.append("\t\t\t\t<taskCommentFile>\r\n");
                     subXML.append("\t\t\t\t\t<taskCommentFileName>")
-                            .append(file.getName())
+                            .append(XmlUtil.escapeString(file.getName()))
                             .append("</taskCommentFileName>\r\n");
                     subXML.append("\t\t\t\t\t<taskCommentAccess>")
                             .append(p_access)
@@ -13590,7 +13606,8 @@ public class Ambassador extends AbstractWebService
                             subXml.append(File.separator).append(trgLocale)
                                     .append(File.separator).append(extPageId);
                             xml.append("\t\t<fileUrl>")
-                                    .append(EditUtil.encodeXmlEntities(subXml.toString()))
+                                    .append(EditUtil.encodeXmlEntities(subXml
+                                            .toString()))
                                     .append("</fileUrl>\r\n");
                             // downloadable
                             String cxeDocPath = AmbFileStoragePathUtils
@@ -13902,7 +13919,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public void uploadTmxFile(String p_accessToken, String p_fileName,
+    public String uploadTmxFile(String p_accessToken, String p_fileName,
             String p_tmName, byte[] p_contentsInBytes)
             throws WebServiceException
     {
@@ -13911,24 +13928,26 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_accessToken, "access token");
             Assert.assertNotEmpty(p_accessToken, "file name");
             Assert.assertNotEmpty(p_accessToken, "tm name");
+
+            checkAccess(p_accessToken, "uploadTmxFile");
+            checkPermission(p_accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+
+            StringBuffer realPathName = new StringBuffer(webServerDocRoot);
+            realPathName.append("_Imports_").append(File.separator)
+                    .append("TMX").append(File.separator)
+                    .append(p_tmName.trim()).append(File.separator)
+                    .append("tmp").append(File.separator).append(p_fileName);
+
+            writeFileToLocale(realPathName.toString(), p_contentsInBytes);
+
+            return null;
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
+            return makeErrorXml("uploadTmxFile", e.getMessage());
         }
-
-        checkAccess(p_accessToken, "uploadTmxFile");
-        checkPermission(p_accessToken,
-                Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
-
-        StringBuffer realPathName = new StringBuffer(webServerDocRoot);
-        realPathName.append("_Imports_").append(File.separator).append("TMX")
-                .append(File.separator).append(p_tmName.trim())
-                .append(File.separator).append("tmp").append(File.separator)
-                .append(p_fileName);
-
-        this.writeFileToLocale(realPathName.toString(), p_contentsInBytes);
     }
 
     /**
@@ -14073,7 +14092,7 @@ public class Ambassador extends AbstractWebService
             if (wf == null
                     || (!UserUtil.isInProject(userId,
                             String.valueOf(wf.getJob().getProjectId())) && !isInSameCompany(
-                            userName, wf.getCompanyId())))
+                            userName, String.valueOf(wf.getCompanyId()))))
             {
                 returnMsg = makeErrorXml("jobsSkipActivity",
                         "Current user are not in the same company or in project with the job.");
@@ -14177,8 +14196,9 @@ public class Ambassador extends AbstractWebService
             {
                 task = (Task) keys.nextElement();
                 taskId = String.valueOf(task.getId());
-                activity = ServerProxy.getJobHandler().getActivityByCompanyId(
-                        task.getTaskName(), task.getCompanyId());
+                activity = ServerProxy.getJobHandler()
+                        .getActivityByCompanyId(task.getTaskName(),
+                                String.valueOf(task.getCompanyId()));
                 containerRole = ServerProxy.getUserManager().getContainerRole(
                         activity, srcLocale, targLocale);
 
@@ -14502,14 +14522,7 @@ public class Ambassador extends AbstractWebService
                         L10nProfile l10nProfile = task.getWorkflow().getJob()
                                 .getL10nProfile();
 
-                        if (l10nProfile.isExactMatchEditing())
-                        {
-                            downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-                        }
-                        else
-                        {
-                            downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-                        }
+                        downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
 
                         excludeTypes = l10nProfile
                                 .getTranslationMemoryProfile()
@@ -14705,6 +14718,11 @@ public class Ambassador extends AbstractWebService
         {
             return false;
         }
+    }
+
+    private boolean isInSameCompany(String p_userName, long p_companyId)
+    {
+        return isInSameCompany(p_userName, String.valueOf(p_companyId));
     }
 
     /**
@@ -15051,7 +15069,8 @@ public class Ambassador extends AbstractWebService
                     if (projectId > 0 && projectId != job.getProjectId())
                         continue;
 
-                    if (!isInSameCompany(user.getUserName(), job.getCompanyId())
+                    if (!isInSameCompany(user.getUserName(),
+                            String.valueOf(job.getCompanyId()))
                             && !UserUtil.isSuperAdmin(user.getUserId())
                             && !UserUtil.isSuperPM(user.getUserId()))
                         continue;
@@ -15368,11 +15387,7 @@ public class Ambassador extends AbstractWebService
         // Repetitions
         xml.append(tab)
                 .append("\t\t<repetitions>")
-                .append(workflow.getRepetitionWordCount()
-                        + workflow.getSubLevRepetitionWordCount()
-                        + workflow.getHiFuzzyRepetitionWordCount()
-                        + workflow.getMedHiFuzzyRepetitionWordCount()
-                        + workflow.getMedFuzzyRepetitionWordCount())
+                .append(workflow.getRepetitionWordCount())
                 .append("</repetitions>\r\n");
         // In Context Matches
         if (isInContextMatch)
@@ -15563,7 +15578,7 @@ public class Ambassador extends AbstractWebService
                     "Invaild workflow which is not exist.");
         }
 
-        if (!isInSameCompany(userName, wf.getCompanyId()))
+        if (!isInSameCompany(userName, String.valueOf(wf.getCompanyId())))
         {
             if (!UserUtil.isSuperAdmin(userId) && !UserUtil.isSuperPM(userId))
             {
@@ -15619,13 +15634,16 @@ public class Ambassador extends AbstractWebService
         xml.append("</workflow>");
         return xml.toString();
     }
-    
+
     /**
      * Download offline file with xliff format
      * 
-     * @param accessToken Access token
-     * @param taskId Task ID
-     * @return String file name of generated offline file, it typical is package file 
+     * @param accessToken
+     *            Access token
+     * @param taskId
+     *            Task ID
+     * @return String file name of generated offline file, it typical is package
+     *         file
      * @throws WebServiceException
      * @throws RemoteException
      * @throws NamingException
@@ -15651,7 +15669,7 @@ public class Ambassador extends AbstractWebService
         if (task == null || !user.equals(task.getAcceptor()))
             return makeErrorXml("downloadXliffOfflineFile",
                     "Current user is not the acceptor of this task.");
-                
+
         long jobId = task.getJobId();
         Job job = ServerProxy.getJobHandler().getJobById(jobId);
 
@@ -15685,7 +15703,8 @@ public class Ambassador extends AbstractWebService
 
             returnXml.append("\t").append(urlPrefix).append("/")
                     .append(AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR)
-                    .append("/").append(EditUtil.encodeXmlEntities(filename)).append("\r\n");
+                    .append("/").append(EditUtil.encodeXmlEntities(filename))
+                    .append("\r\n");
             returnXml.append("</offlineFiles>\r\n");
         }
         catch (Exception e)

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	<class name="com.globalsight.cxe.entity.customAttribute.AttributeSet"
 		table="ATTRIBUTE_SET">
@@ -11,8 +11,8 @@
 			not-null="true" unique="false" />
 		<property name="description" length="4000" column="DESCRIPTION"
 			type="string" not-null="false" unique="false" />
-		<property name="companyId" column="COMPANY_ID" type="string"
-			not-null="true" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" />
 
 		<set name="projects" inverse="true" cascade="save-update">
 			<key column="ATTRIBUTE_SET_ID" />

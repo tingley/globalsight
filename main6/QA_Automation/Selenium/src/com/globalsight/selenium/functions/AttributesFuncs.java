@@ -62,10 +62,14 @@ public class AttributesFuncs extends BasicFuncs
             }
         }
         selenium.click(Attributes.SAVE_BUTTON);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        
+        selenium.click("link=" + displayName);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         if (selenium.isElementPresent(Attributes.INTERAL_NAME_TEXT))
         {
-            selenium.getAlert();
+            //selenium.getAlert();
             selenium.click(Attributes.CANCEL_BUTTON);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         }
@@ -124,7 +128,6 @@ public class AttributesFuncs extends BasicFuncs
             {
                 selenium.getConfirmation();
             }
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         }
         else
         {

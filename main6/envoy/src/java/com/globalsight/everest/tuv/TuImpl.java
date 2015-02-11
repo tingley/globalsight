@@ -67,8 +67,6 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     private String xliffTranslationType = null;
     private boolean xliffLocked = false;
     private String iwsScore = null;
-    private Long m_repetitionOfId = new Long(0);
-    private boolean m_repeated = false;
 
     private LeverageGroup m_leverageGroup;
     private long leverageGroupId = 0;
@@ -117,8 +115,6 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         m_sourceTmName = tu.getSourceTmName();
         m_order = tu.getOrder();
         m_pid = tu.getPid();
-        m_repeated = tu.isRepeated();
-        m_repetitionOfId = tu.getRepetitionOfId();
     }
 
     public TuImpl(TuImpl tu)
@@ -148,8 +144,6 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         this.sourceContent = tu.getSourceContent();
         this.passoloState = tu.getPassoloState();
         this.translate = tu.getTranslate();
-        this.m_repetitionOfId = tu.getRepetitionOfId();
-        this.m_repeated = tu.isRepeated();
     }
 
     //
@@ -206,7 +200,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId, String companyId)
+    public Tuv getTuv(long p_localeId, long companyId)
     {
         return getTuv(p_localeId, true, companyId);
     }
@@ -218,7 +212,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * "p_needLoadTuvsManually" should be false.
      */
     public Tuv getTuv(long p_localeId, boolean p_needLoadTuvsManually,
-            String companyId)
+            long companyId)
     {
         Tuv tuv = (Tuv) m_tuvs.get(new Long(p_localeId));
         if (tuv != null && "OUT_OF_DATE".equals(tuv.getState().getName()))
@@ -240,7 +234,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * 
      * @return A collection of Tuvs of this Tu.
      */
-    public Collection getTuvs(boolean p_needLoadTuvsManually, String companyId)
+    public Collection getTuvs(boolean p_needLoadTuvsManually, long companyId)
     {
         if (p_needLoadTuvsManually)
         {
@@ -251,7 +245,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         return m_tuvs.values();
     }
 
-    public Map getTuvAsSet(boolean p_needLoadTuvsManually, String companyId)
+    public Map getTuvAsSet(boolean p_needLoadTuvsManually, long companyId)
     {
         if (p_needLoadTuvsManually)
         {
@@ -669,36 +663,6 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         this.passoloState = passoloState;
     }
 
-    public boolean isRepeated()
-    {
-        return m_repeated;
-    }
-
-    public void setRepeated(boolean repeated)
-    {
-        this.m_repeated = repeated;
-    }
-
-    public long getRepetitionOfId()
-    {
-        return m_repetitionOfId == null ? 0 : m_repetitionOfId.longValue();
-    }
-
-    public void setRepetitionOfId(long repetitionOfId)
-    {
-        this.m_repetitionOfId = new Long(repetitionOfId);
-    }
-
-    public Long getRepetitionOfIdAsLong()
-    {
-        return m_repetitionOfId;
-    }
-
-    public void setRepetitionOfIdAsLong(Long repetitionOfIdAsLong)
-    {
-        this.m_repetitionOfId = repetitionOfIdAsLong;
-    }
-
     public String getTranslate()
     {
         return translate;
@@ -709,7 +673,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         this.translate = translate;
     }
 
-    private void loadTuvs(String companyId)
+    private void loadTuvs(long companyId)
     {
         try
         {

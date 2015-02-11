@@ -20,7 +20,7 @@ public class JobDetails {
     public static final String UPLOADDIALOG_BUTTON = "dijit_form_Button_2";
     public static final String DELETEFILES_BUTTON = "//input[@name='remove Files']";
 
-	public static final String WORKFLOWS_TABLE="//form[@id='workflowForm']/table/tbody/tr[2]/td/table/tbody";
+	public static final String WORKFLOWS_TABLE="//div[@id='workflowBlock']/table/tbody";
 	public static final String Reassign_BUTTON="ReAssign";
 	public static final String DISCARD_BUTTON="Discard";
 	public static final String ViewError_BUTTON="ViewError";

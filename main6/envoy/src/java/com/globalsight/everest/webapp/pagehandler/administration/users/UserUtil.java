@@ -27,6 +27,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -391,38 +392,38 @@ public class UserUtil
 
         if (homePhone != null)
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.HOME, homePhone);
+            p_wrapper.setHomePhoneNumber(homePhone);
         }
         else
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.HOME, "");
+            p_wrapper.setHomePhoneNumber("");
         }
 
         if (workPhone != null)
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.OFFICE, workPhone);
+            p_wrapper.setOfficePhoneNumber(workPhone);
         }
         else
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.OFFICE, "");
+            p_wrapper.setOfficePhoneNumber("");
         }
 
         if (cellPhone != null)
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.CELL, cellPhone);
+            p_wrapper.setCellPhoneNumber(cellPhone);
         }
         else
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.CELL, "");
+            p_wrapper.setCellPhoneNumber("");
         }
 
         if (fax != null)
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.FAX, fax);
+            p_wrapper.setFaxPhoneNumber(fax);
         }
         else
         {
-            p_wrapper.setPhoneNumber(User.PhoneType.FAX, "");
+            p_wrapper.setFaxPhoneNumber("");
         }
 
         if (uiLocale != null)
@@ -761,8 +762,7 @@ public class UserUtil
         {
             try
             {
-                retVal = userMgr.getUsers(p_searchParams.getNameAttributes(),
-                        p_searchParams.getRoleAttributes(), null);
+                retVal = userMgr.getUsers(p_searchParams, null);
 
                 // filter out the users not in the specified perm group
                 String permGroupName = p_searchParams.getPermissionGroupParam();
@@ -1539,29 +1539,28 @@ public class UserUtil
         }
 
         String companyName = null;
-        if (session == null)
+        try
         {
-            try
-            {
-                String companyId = p_request
-                        .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
-                if (companyId == null)
-                    throw new NumberFormatException();
-                Integer.parseInt(companyId);
-                companyName = CompanyWrapper.getCompanyNameById(companyId);
-            }
-            catch (NumberFormatException ne)
+            String companyId = p_request
+                    .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
+            if (companyId == null)
+                throw new NumberFormatException();
+            Integer.parseInt(companyId);
+            companyName = CompanyWrapper.getCompanyNameById(companyId);
+        }
+        catch (NumberFormatException ne)
+        {
+            companyName = p_request
+                    .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
+            if (companyName == null)
             {
                 companyName = p_request
-                        .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
-                if (companyName == null)
-                {
-                    companyName = p_request
-                            .getParameter(UserLdapHelper.LDAP_ATTR_COMPANY);
-                }
+                        .getParameter(UserLdapHelper.LDAP_ATTR_COMPANY);
             }
         }
-        else
+
+        if ( (companyName == null || "".equals(companyName.trim()))
+                && session != null)
         {
             companyName = (String) session
                     .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
@@ -1660,13 +1659,13 @@ public class UserUtil
                 + "</OPTION>");
         if ((p_sourceLocale != null) && (p_targetLocale != null))
         {
-            ArrayList activityRates = null;
+            List activityRates = null;
             try
             {
                 GlobalSightLocale sourceLocale = getLocale(p_sourceLocale);
                 GlobalSightLocale targetLocale = getLocale(p_targetLocale);
-                activityRates = (ArrayList) ServerProxy.getCostingEngine()
-                        .getRates(p_activity, sourceLocale, targetLocale);
+                activityRates = (List) ServerProxy.getCostingEngine().getRates(
+                        p_activity, sourceLocale, targetLocale);
                 Collections.sort(activityRates, new RateComparator(
                         RateComparator.NAME, Locale.getDefault()));
                 Iterator it = activityRates.iterator();
@@ -1859,7 +1858,7 @@ public class UserUtil
             String userCompanyId = CompanyWrapper.getCompanyIdByName(user
                     .getCompanyName());
 
-            if (!project.getCompanyId().equals(userCompanyId))
+            if (!String.valueOf(project.getCompanyId()).equals(userCompanyId))
             {
                 // Current user is not in the company of project
                 if (!isSuperAdmin(userId) && !isSuperLP(userId)
@@ -2001,6 +2000,7 @@ public class UserUtil
         // update user id and name mapping
         String oldName = getUserNameById(userId);
         userNameIdMap.remove(oldName);
+        userNameIdMap.remove(oldName.trim().toLowerCase());
         userNameIdMap.put(userName.trim().toLowerCase(), userId);
         userIdNameMap.put(userId.trim().toLowerCase(), userName);
 
@@ -2041,7 +2041,11 @@ public class UserUtil
         String userName = p_userName.trim().toLowerCase();
         if (!userNameIdMap.containsKey(userName))
         {
-            userNameIdMap.put(userName, getUserIdByNameFromMapping(userName));
+            String userId = getUserIdByNameFromMapping(userName);
+            if (userId != null)
+            {
+                userNameIdMap.put(userName, userId);
+            }
         }
 
         return userNameIdMap.get(userName);

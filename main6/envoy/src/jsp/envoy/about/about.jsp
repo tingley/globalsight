@@ -55,7 +55,9 @@
 <A CLASS="standardHREF" href="http://www.globalsight.com" TARGET="_blank">www.GlobalSight.com</A>
 </SPAN>
 <CENTER>
-<BR><INPUT TYPE="BUTTON" NAME="OK" VALUE="<%=lbClose %>" ONCLICK="window.close()"> 
+<BR>
+<INPUT TYPE="BUTTON" NAME="OK" VALUE="<%=lbClose %>" ONCLICK="window.close()"> 
+<INPUT TYPE="BUTTON" NAME="OK" VALUE="<%=bundle.getString("lb_installed_patches") %>" ONCLICK="location.replace('patches.jsp')"> 
 </CENTER>
 </DIV>
 </BODY>

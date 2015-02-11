@@ -41,13 +41,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hibernate.Session;
 import org.w3c.dom.Element;
 
 import com.globalsight.config.UserParamNames;
@@ -87,6 +86,8 @@ import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
+import com.globalsight.everest.page.pageexport.style.StyleFactory;
+import com.globalsight.everest.page.pageexport.style.StyleUtil;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -116,15 +117,14 @@ import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.corpusinterface.TuvMapping;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -152,6 +152,7 @@ import com.globalsight.util.modules.Modules;
  * This was refactored to be a separate helper class which can be invoked either
  * by the ExportMDB or other classes that need to use it directly.
  */
+@SuppressWarnings("deprecation")
 public class ExportHelper
 {
     static private final org.apache.log4j.Logger s_logger = org.apache.log4j.Logger
@@ -166,9 +167,11 @@ public class ExportHelper
     private FileProfile m_fp = null;
     private TranslationMemoryProfile m_tmp = null;
     private String m_format = null;
+
     /**
      * Key: String [sourcePageId-localeId] Value: TUV ArrayList
      */
+    @SuppressWarnings("rawtypes")
     private Map<String, ArrayList> cachedTuvs = new HashMap<String, ArrayList>();
     private SecondaryTargetFile m_secondaryTargetFile = null;
     private int m_genericPageType = -1;
@@ -179,6 +182,8 @@ public class ExportHelper
     private HashMap<String, String> m_gsColorMap;
     private List<Tuv> m_sourceTuvs;
     private List<Tuv> m_targetTuvs;
+
+    @SuppressWarnings("rawtypes")
     private Vector m_excludedItemTypes;
     private MatchTypeStatistics m_matchTypes;
 
@@ -192,10 +197,10 @@ public class ExportHelper
     private static String REGEX_BPT_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>[\\d\\D]*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_BPT_ALL_SUB = "<bpt[^>]*i=\"{0}\"[^>]*>.*</bpt>.*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_IT_END = "<it[^>]*pos=\"end\"[^>]*>([^<]*)</it>";
-    private static String REGEX_IT_START = "<it[^>]*pos=\"begin\"[^>]*>[^<]*&lt;.:t&gt;</it>[^<]*";
+    private static String REGEX_IT_START = "<it[^>]*pos=\"begin\"[^>]*>[^<]*</it>";
     private static String REGEX_IT = "<it [^>]*>([^<]*)</it>";
     private static String XML_SPACE_PRESERVE = "xml:space=&quot;preserve&quot;";
-    
+
     public static String GS_COLOR_S = "((GS_COLOR_START)";
     public static String GS_COLOR_E = "((GS_COLOR_END)";
     public static String GS_COLOR_S_100MATCH = GS_COLOR_S + "(100))";
@@ -204,17 +209,13 @@ public class ExportHelper
     public static String GS_COLOR_E_ICEMATCH = GS_COLOR_E + "(ICE))";
     public static String GS_COLOR_S_NONMATCH = GS_COLOR_S + "(NON))";
     public static String GS_COLOR_E_NONMATCH = GS_COLOR_E + "(NON))";
-    
+
     public static String GS_COLOR_S_P = "((GS_COLOR_START)" + "(_color_))";
     public static String GS_COLOR_E_P = "((GS_COLOR_END)" + "(_color_))";
-    
+
     public static String RE_GS_COLOR_S = "\\(\\(GS_COLOR_START\\)\\((.+?)\\)\\)";
     public static String RE_GS_COLOR_E = "\\(\\(GS_COLOR_END\\)\\((.+?)\\)\\)";
     public static String RE_GS_COLOR_DEFINE = "\\(\\(GS_COLOR_DEFINE\\)\\((.+?)\\)\\)";
-    
-    // //////////////////
-    // Public Methods //
-    // //////////////////
 
     /**
      * Constructor called ONLY for preview dynamic content.
@@ -244,6 +245,7 @@ public class ExportHelper
      * @exception RemoteException
      *                Network related exception.
      */
+    @SuppressWarnings("rawtypes")
     public String exportForPreview(long p_pageId, List p_tuvIds,
             String p_uiLocale) throws PageException
     {
@@ -281,6 +283,7 @@ public class ExportHelper
      * @param p_hashtable
      *            -- contains information needed for export
      */
+    @SuppressWarnings("rawtypes")
     public void export(Hashtable p_hashtable)
     {
         try
@@ -323,6 +326,7 @@ public class ExportHelper
      * @param p_hashtable
      *            -- contains information needed for export
      */
+    @SuppressWarnings("rawtypes")
     public void export(List<Hashtable> p_hashtable)
     {
         try
@@ -464,8 +468,8 @@ public class ExportHelper
         String fileStorageRoot = null;
         if (currentCompanyId.equals("1"))
         {
-            String companyId = ((TargetPage) m_page).getSourcePage()
-                    .getCompanyId();
+            String companyId = String.valueOf(((TargetPage) m_page)
+                    .getSourcePage().getCompanyId());
             fileStorageRoot = AmbFileStoragePathUtils
                     .getFileStorageDirPath(companyId);
         }
@@ -572,6 +576,7 @@ public class ExportHelper
             if (p_wf.getState().equals(Workflow.LOCALIZED))
             {
                 // just get the target pages associated with an extracted file
+                @SuppressWarnings("rawtypes")
                 List tps = p_wf.getTargetPages(ExtractedFile.EXTRACTED_FILE);
                 for (int i = 0, max = tps.size(); i < max; i++)
                 {
@@ -640,6 +645,8 @@ public class ExportHelper
                     sourcePageBomType = m_sourcePage.getBOMType();
                     PageTemplate pageTemplate = getExportTemplate();
                     pageTemplate.setTabsTrip(isTabstrip);
+                    pageTemplate.setXlfSrcAsTrg(p_exportParameters
+                            .getXlfSrcAsTrg());
                     String page = populatePage(pageTemplate,
                             getSegments(m_page.getGlobalSightLocale()),
                             targetLocale, false, null);
@@ -668,8 +675,8 @@ public class ExportHelper
             {
                 targetLocale = m_secondaryTargetFile.getWorkflow()
                         .getTargetLocale();
-                String companyId = m_secondaryTargetFile.getWorkflow().getJob()
-                        .getCompanyId();
+                String companyId = String.valueOf(m_secondaryTargetFile
+                        .getWorkflow().getJob().getCompanyId());
                 String fileName = absolutePathOfStf(
                         m_secondaryTargetFile.getStoragePath(), companyId);
                 File file = new File(fileName);
@@ -845,19 +852,6 @@ public class ExportHelper
 
     }
 
-    private String toUTF(String s)
-    {
-        try
-        {
-            return new String(s.getBytes(), "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }
-        return s;
-    }
-
     private void writeFile(String s, String fileName)
     {
         PrintWriter pw = null;
@@ -978,6 +972,7 @@ public class ExportHelper
      * @param p_uiLocale
      *            The locale of the UI.
      */
+    @SuppressWarnings("rawtypes")
     private String exportForPreview(ExportParameters p_exportParameters,
             List p_tuvIds, String p_uiLocale) throws PageException
     {
@@ -1036,7 +1031,7 @@ public class ExportHelper
     {
         return getTargetXmlPage(pageId, p_eventValue, false);
     }
-    
+
     public String getTargetXmlContent(long pageId, int p_eventValue,
             boolean isPreview) throws IOException
     {
@@ -1085,7 +1080,7 @@ public class ExportHelper
             content = merger.getContent();
         }
         temp.delete();
-        
+
         return content;
     }
 
@@ -1267,6 +1262,8 @@ public class ExportHelper
     }
 
     // return the page data for a given source page id and page template.
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private String getPageData(PageTemplate p_pageTemplate)
             throws PageException
     {
@@ -1338,7 +1335,8 @@ public class ExportHelper
      * @return List of Tuvs
      * @exception PageException
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     private ArrayList getSegments(GlobalSightLocale p_locale)
             throws PageException
     {
@@ -1396,6 +1394,7 @@ public class ExportHelper
      *            otherwise it can be NULL or an empty list.
      * 
      */
+    @SuppressWarnings("rawtypes")
     private String populatePage(PageTemplate p_template, ArrayList p_segments,
             GlobalSightLocale p_targetLocale, boolean p_isPreview, List p_tuvIds)
             throws PageException
@@ -1543,28 +1542,31 @@ public class ExportHelper
      * @param p_corpusSegments
      * @param p_restoreSpacesForJavaProerties
      */
+    @SuppressWarnings("rawtypes")
     private void populateTemplateWithUpdatedSegments(PageTemplate p_template,
             List p_segments, GlobalSightLocale p_locale, boolean p_isPreview,
             List p_tuvIds, Map p_corpusSegments,
             boolean p_restoreSpacesForJavaProerties) throws PageException
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
-        
+
         if (p_restoreSpacesForJavaProerties)
         {
             try
             {
-                String eventFlowXml = m_sourcePage.getRequest().getEventFlowXml();
+                String eventFlowXml = m_sourcePage.getRequest()
+                        .getEventFlowXml();
                 EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
                 parser.parse();
                 m_format = parser.getSourceFormatType();
-                
+
                 long fileProfileId = parser.getFileProfileId();
                 // Preserve trailing spaces?
-                m_fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(
-                        fileProfileId, false);
+                m_fp = ServerProxy.getFileProfilePersistenceManager()
+                        .getFileProfileById(fileProfileId, false);
                 long l10nprofileId = m_fp.getL10nProfileId();
-                L10nProfile l10nprofile = ServerProxy.getProjectHandler().getL10nProfile(l10nprofileId);
+                L10nProfile l10nprofile = ServerProxy.getProjectHandler()
+                        .getL10nProfile(l10nprofileId);
                 m_tmp = l10nprofile.getTranslationMemoryProfile();
             }
             catch (Exception ex)
@@ -1577,9 +1579,9 @@ public class ExportHelper
             s_logger.debug("There are " + p_segments.size()
                     + " segments in the template.");
         }
-        
+
         boolean needToAddGsColor = needToAddColorTag(p_isPreview);
-        
+
         if (needToAddGsColor)
         {
             needToAddGsColor = initGsColor();
@@ -1600,18 +1602,19 @@ public class ExportHelper
                 }
 
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
-                updateSegValue(p_template, segment, p_isPreview, needToAddGsColor, p_tuvIds,
-                        p_corpusSegments, isLocalizable, p_restoreSpacesForJavaProerties);
+                updateSegValue(p_template, segment, p_isPreview,
+                        needToAddGsColor, p_tuvIds, p_corpusSegments,
+                        isLocalizable, p_restoreSpacesForJavaProerties);
             }
         }
-        
+
         // add Color define for mif
-        if (needToAddGsColor && IFormatNames.FORMAT_MIF.equals(m_format) 
+        if (needToAddGsColor && IFormatNames.FORMAT_MIF.equals(m_format)
                 && m_targetTuvs != null && m_targetTuvs.size() > 0)
         {
             SourcePage sp = p_template.getSourcePage();
-            String companyId = sp != null ? sp.getCompanyId() : CompanyWrapper
-                    .getCurrentCompanyId();
+            long companyId = sp != null ? sp.getCompanyId() : Long
+                    .parseLong(CompanyWrapper.getCurrentCompanyId());
             for (int i = 0, max = m_targetTuvs.size(); i < max; i++)
             {
                 Tuv tuv = m_targetTuvs.get(i);
@@ -1770,6 +1773,7 @@ public class ExportHelper
             // and iterate through it while posting the replaced
             // images to CXE.
             //
+            @SuppressWarnings("rawtypes")
             Collection replaceImages = ServerProxy
                     .getImageReplaceFileMapPersistenceManager()
                     .getImageReplaceFileMapsForTargetPage(m_page.getIdAsLong());
@@ -1777,7 +1781,8 @@ public class ExportHelper
             Integer numImages = new Integer(replaceImages.size());
             int imageNum = 0;
 
-            for (Iterator itr = replaceImages.iterator(); itr.hasNext();)
+            for (@SuppressWarnings("rawtypes")
+            Iterator itr = replaceImages.iterator(); itr.hasNext();)
             {
                 ExportBatchInfo ebi = new ExportBatchInfo("N/A", numImages,
                         new Integer(imageNum));
@@ -1915,7 +1920,7 @@ public class ExportHelper
                     String workflowState = ((TargetPage) m_page)
                             .getWorkflowInstance().getState();
 
-                    if (!workflowState.equals(Workflow.DISPATCHED))
+                    if (!inProgressWorkflow(workflowState))
                     {
                         getPageEventObserver().notifyExportInProgressEvent(
                                 (TargetPage) m_page);
@@ -1961,7 +1966,8 @@ public class ExportHelper
         }
     }
 
-    private void startExport(Hashtable p_map) throws Exception
+    private void startExport(@SuppressWarnings("rawtypes") Hashtable p_map)
+            throws Exception
     {
         // check for a pageId, and export parameter object
         ExportParameters exportParam = (ExportParameters) p_map
@@ -2013,6 +2019,8 @@ public class ExportHelper
                 exportBatchId);
     }
 
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void startExport(List<Hashtable> p_maps) throws Exception
     {
         AdapterResult adapter = new AdapterResult();
@@ -2127,6 +2135,7 @@ public class ExportHelper
                 segments = segments == null ? new ArrayList() : segments;
 
                 pageTemplate.setTabsTrip(isTabstrip);
+                pageTemplate.setXlfSrcAsTrg(exportParam.getXlfSrcAsTrg());
                 String populatePage = populatePage(pageTemplate, segments,
                         targetLocale, false, null);
 
@@ -2161,7 +2170,7 @@ public class ExportHelper
                             String workflowState = ((TargetPage) m_page)
                                     .getWorkflowInstance().getState();
 
-                            if (!workflowState.equals(Workflow.DISPATCHED))
+                            if (!inProgressWorkflow(workflowState))
                             {
                                 getPageEventObserver()
                                         .notifyExportInProgressEvent(
@@ -2275,7 +2284,15 @@ public class ExportHelper
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
-        JmsHelper.sendMessageToTopic(adapter, jmsTopic);
+        JmsHelper.sendMessageToQueue(adapter, jmsTopic);
+    }
+
+    private boolean inProgressWorkflow(String workflowState)
+    {
+        return Workflow.READY_TO_BE_DISPATCHED.equals(workflowState)
+                || Workflow.PENDING.equals(workflowState)
+                || Workflow.DISPATCHED.equals(workflowState)
+                || Workflow.SKIPPING.equals(workflowState);
     }
 
     // starts off the request info
@@ -2308,13 +2325,15 @@ public class ExportHelper
      * @param p_restoreSpacesForJavaProerties
      *            Flag for preserve trailing spaces, default false
      */
+    @SuppressWarnings("rawtypes")
     private void updateSegValue(PageTemplate p_template, Tuv p_segment,
-            boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds, Map p_targetCorpusMappings,
-            boolean p_isLocalizable, boolean p_restoreSpacesForJavaProerties)
+            boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds,
+            Map p_targetCorpusMappings, boolean p_isLocalizable,
+            boolean p_restoreSpacesForJavaProerties)
     {
         SourcePage sp = p_template.getSourcePage();
-        String companyId = sp != null ? sp.getCompanyId() : CompanyWrapper
-                .getCurrentCompanyId();
+        long companyId = sp != null ? sp.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
         String tuvContent = null;
         Long tuId = p_segment.getTu(companyId).getIdAsLong();
 
@@ -2366,8 +2385,34 @@ public class ExportHelper
 
                         if (tu.hasRemovedTags())
                         {
+                            StyleUtil util = null;
+                            if (isDocx())
+                            {
+                                util = StyleFactory
+                                        .getStyleUtil(StyleFactory.DOCX);
+                                content = util.preHandle(content);
+                            }
+                            else if (isPptx())
+                            {
+                                util = StyleFactory
+                                        .getStyleUtil(StyleFactory.PPTX);
+                                content = util.preHandle(content);
+                            }
+
+                            String oriContent = content;
                             content = addRemovedTags(content,
                                     tu.getRemovedTag());
+
+                            if (oriContent.equals(content))
+                            {
+                                content = addRemovedTags2(content,
+                                        tu.getRemovedTag());
+                            }
+
+                            if (util != null)
+                            {
+                                content = util.sufHandle(content);
+                            }
                         }
 
                         tuvContent = m.group(1) + content + m.group(3);
@@ -2386,15 +2431,18 @@ public class ExportHelper
             tuvContent = addProjectTmTuIdToSegment(p_targetCorpusMappings,
                     p_segment, tuvContent);
         }
-        
+
         if (p_needToAddGsColor)
         {
-            tuvContent = addGlobalSightColorTag(tuvContent, p_segment, companyId);
+            tuvContent = addGlobalSightColorTag(tuvContent, p_segment,
+                    companyId);
         }
 
         p_template.insertTuvContent(tuId, tuvContent);
     }
-    
+
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     private boolean initGsColor()
     {
         m_gsColorMap = new HashMap<String, String>();
@@ -2406,23 +2454,25 @@ public class ExportHelper
         {
             try
             {
-                UserParameterPersistenceManager upm = ServerProxy.getUserParameterManager();
-                m_color100 = upm.getUserParameter(m_userid, UserParamNames.PREVIEW_100MATCH_COLOR)
-                        .getValue();
-                m_colorIce = upm.getUserParameter(m_userid, UserParamNames.PREVIEW_ICEMATCH_COLOR)
-                        .getValue();
-                m_colorNon = upm.getUserParameter(m_userid, UserParamNames.PREVIEW_NONMATCH_COLOR)
-                        .getValue();
+                UserParameterPersistenceManager upm = ServerProxy
+                        .getUserParameterManager();
+                m_color100 = upm.getUserParameter(m_userid,
+                        UserParamNames.PREVIEW_100MATCH_COLOR).getValue();
+                m_colorIce = upm.getUserParameter(m_userid,
+                        UserParamNames.PREVIEW_ICEMATCH_COLOR).getValue();
+                m_colorNon = upm.getUserParameter(m_userid,
+                        UserParamNames.PREVIEW_NONMATCH_COLOR).getValue();
             }
             catch (Exception e)
             {
                 s_logger.error(
-                        "Cannot get user parameter for previewing color, use default colors.", e);
+                        "Cannot get user parameter for previewing color, use default colors.",
+                        e);
             }
         }
-        
+
         // if 3 colors are black, so just keep it as before
-        if ("Black".equalsIgnoreCase(m_color100) 
+        if ("Black".equalsIgnoreCase(m_color100)
                 && "Black".equalsIgnoreCase(m_colorIce)
                 && "Black".equalsIgnoreCase(m_colorNon))
         {
@@ -2461,34 +2511,36 @@ public class ExportHelper
         try
         {
             m_matchTypes = LingServerProxy.getLeverageMatchLingManager()
-                    .getMatchTypesForStatistics(m_sourcePage.getId(), m_page.getLocaleId(), 0);
+                    .getMatchTypesForStatistics(m_sourcePage.getId(),
+                            m_page.getLocaleId(), 0);
         }
         catch (Exception e)
         {
-            s_logger.error("Cannot MatchTypesForStatistics for previewing color.", e);
+            s_logger.error(
+                    "Cannot MatchTypesForStatistics for previewing color.", e);
         }
 
-        m_excludedItemTypes = m_editorState == null ? new Vector() : m_editorState
-                .getExcludedItems();
-        
+        m_excludedItemTypes = m_editorState == null ? new Vector()
+                : m_editorState.getExcludedItems();
+
         return true;
     }
-    
+
     private int getTuvIndex(Tuv p_targetTuv)
     {
-        for(int i = 0, max = m_targetTuvs.size(); i < max; i++)
+        for (int i = 0, max = m_targetTuvs.size(); i < max; i++)
         {
             Tuv c = m_targetTuvs.get(i);
-            
+
             if (c.getId() == p_targetTuv.getId())
             {
                 return i;
             }
         }
-        
+
         return -1;
     }
-    
+
     private String addGSColorDefine(String tuvContent)
     {
         if (tuvContent == null || "".equals(tuvContent.trim()))
@@ -2497,10 +2549,11 @@ public class ExportHelper
         }
         else
         {
-            String define = "((GS_COLOR_DEFINE)(" + m_colorNon + "," + m_color100 + ","
-                    + m_colorIce + "))";
-            
-            if (tuvContent.startsWith("<segment") && tuvContent.endsWith("</segment>"))
+            String define = "((GS_COLOR_DEFINE)(" + m_colorNon + ","
+                    + m_color100 + "," + m_colorIce + "))";
+
+            if (tuvContent.startsWith("<segment")
+                    && tuvContent.endsWith("</segment>"))
             {
                 int index_e = tuvContent.length() - 10;
                 StringBuffer sb = new StringBuffer(tuvContent);
@@ -2514,8 +2567,9 @@ public class ExportHelper
             }
         }
     }
-    
-    private String addGlobalSightColorTag(String tuvContent, Tuv p_segment, String companyId)
+
+    private String addGlobalSightColorTag(String tuvContent, Tuv p_segment,
+            long companyId)
     {
         if (tuvContent == null || "".equals(tuvContent.trim()))
         {
@@ -2532,7 +2586,7 @@ public class ExportHelper
             {
                 int index = getTuvIndex(p_segment);
                 boolean isICE = isICEMatch(companyId, index);
-                
+
                 if (isICE)
                 {
                     start = GS_COLOR_S_ICEMATCH;
@@ -2550,7 +2604,8 @@ public class ExportHelper
                 end = GS_COLOR_E_NONMATCH;
 
                 int index = getTuvIndex(p_segment);
-                boolean is100Match = LeverageUtil.isExactMatch(index, m_sourceTuvs, m_matchTypes);
+                boolean is100Match = LeverageUtil.isExactMatch(index,
+                        m_sourceTuvs, m_matchTypes);
                 boolean isICE = isICEMatch(companyId, index);
                 if (isICE)
                 {
@@ -2582,13 +2637,15 @@ public class ExportHelper
                 start = GS_COLOR_S_NONMATCH;
                 end = GS_COLOR_E_NONMATCH;
             }
-            
+
             start = m_gsColorMap.get(start);
             end = m_gsColorMap.get(end);
-            
-            if (tuvContent.startsWith("<segment") && tuvContent.endsWith("</segment>"))
+
+            if (tuvContent.startsWith("<segment")
+                    && tuvContent.endsWith("</segment>"))
             {
-                return HtmlPreviewerHelper.addGSColorForSegment(m_format, tuvContent, start, end);
+                return HtmlPreviewerHelper.addGSColorForSegment(m_format,
+                        tuvContent, start, end);
             }
             else
             {
@@ -2602,24 +2659,24 @@ public class ExportHelper
         if (username != null)
         {
             boolean ismt = username.endsWith("_MT");
-            
+
             return ismt;
         }
-        
-        
+
         return false;
     }
 
-    private boolean isICEMatch(String companyId, int index)
+    private boolean isICEMatch(long companyId, int index)
     {
-        boolean isICE = LeverageUtil.isIncontextMatch(index, m_sourceTuvs, m_targetTuvs,
-                m_matchTypes, m_excludedItemTypes, companyId);
-        
+        @SuppressWarnings("unchecked")
+        boolean isICE = LeverageUtil.isIncontextMatch(index, m_sourceTuvs,
+                m_targetTuvs, m_matchTypes, m_excludedItemTypes, companyId);
+
         if (isICE && m_tmp != null && !m_tmp.getIsContextMatchLeveraging())
         {
             isICE = false;
         }
-        
+
         return isICE;
     }
 
@@ -2629,17 +2686,17 @@ public class ExportHelper
         {
             return false;
         }
-        
+
         if (IFormatNames.FORMAT_MIF.equals(m_format))
         {
             return true;
         }
-        
+
         if (IFormatNames.FORMAT_OFFICE_XML.equals(m_format))
         {
             return true;
         }
-        
+
         return false;
     }
 
@@ -2655,8 +2712,8 @@ public class ExportHelper
             // Preserve trailing spaces?
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .getFileProfileById(fileProfileId, false);
-            String companyId = fp != null ? fp.getCompanyId() : CompanyWrapper
-                    .getCurrentCompanyId();
+            long companyId = fp != null ? fp.getCompanyId() : Long
+                    .parseLong(CompanyWrapper.getCurrentCompanyId());
             boolean isPreserveTrailingSpace = fp.getPreserveSpaces();
             // Is properties file?
             boolean isJavaProperties = format.toLowerCase()
@@ -2702,14 +2759,14 @@ public class ExportHelper
 
     private boolean hasRemovedTags(TuImpl tu)
     {
-    	if (tu.hasRemovedTags())
-    		return true;
-    	
-    	if (tu.getPrefixTag() != null)
-    		return true;
-    	
-    	if (tu.getSuffixTag() != null)
-    		return true;
+        if (tu.hasRemovedTags())
+            return true;
+
+        if (tu.getPrefixTag() != null)
+            return true;
+
+        if (tu.getSuffixTag() != null)
+            return true;
 
         return false;
     }
@@ -2735,6 +2792,72 @@ public class ExportHelper
     }
 
     /**
+     * Checks the page type is idml or not.
+     * 
+     * @return
+     */
+    private boolean isIdml()
+    {
+        boolean isIdml = false;
+        if (m_page != null)
+        {
+            String page = m_page.getExternalPageId();
+            if (page != null && page.toLowerCase().endsWith(".idml"))
+            {
+                isIdml = true;
+            }
+        }
+
+        return isIdml;
+    }
+
+    /**
+     * Checks the page type is docx or not.
+     * 
+     * @return
+     */
+    private boolean isDocx()
+    {
+        if (m_page != null)
+        {
+            String page = m_page.getExternalPageId();
+            if (page != null)
+            {
+                String path = page.toLowerCase();
+                if (path.endsWith(".docx"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks the page type is docx or not.
+     * 
+     * @return
+     */
+    private boolean isPptx()
+    {
+        if (m_page != null)
+        {
+            String page = m_page.getExternalPageId();
+            if (page != null)
+            {
+                String path = page.toLowerCase();
+                if (path.endsWith(".pptx"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Adds tags which removed during import.
      * 
      * @param s
@@ -2750,17 +2873,7 @@ public class ExportHelper
             return s;
         }
 
-        boolean isIdml = false;
-        if (m_page != null)
-        {
-            String page = m_page.getExternalPageId();
-            if (page != null && page.toLowerCase().endsWith(".idml"))
-            {
-                isIdml = true;
-            }
-        }
-
-        if (isIdml)
+        if (isIdml())
         {
             // for [it]
             Pattern pIt = Pattern.compile(REGEX_IT);
@@ -2803,8 +2916,8 @@ public class ExportHelper
                 String all = mItStart.group();
                 int index = s.indexOf(all);
                 String s1 = s.substring(0, index);
-                String s2 = s.substring(index + all.length());
-                return addRemovedTags(s1, removedTag) + all + s2;
+                String s2 = s.substring(index);
+                return addRemovedTags(s1, removedTag) + s2;
             }
 
             // for [it] end
@@ -2814,31 +2927,11 @@ public class ExportHelper
             if (mIt.find())
             {
                 String all = mIt.group();
-                int n = s.indexOf(all);
-                String first = s.substring(0, n);
-                if (first.length() > 0)
-                {
-                    int index = first.lastIndexOf(">");
-                    index++;
-                    if (index < first.length())
-                    {
-                        String content = first.substring(index);
-                        all = content + all;
-                    }
-                }
+                int index = s.indexOf(all);
 
-                String tEnd = "&lt;/t&gt;";
-                if (tEnd.equals(removedTag.getSuffixString()))
-                {
-                    String tag = mIt.group(1);
-                    if (tag.contains(tEnd))
-                    {
-                        int index = s.indexOf(all);
-                        String s1 = s.substring(0, index);
-                        String s2 = s.substring(index + all.length());
-                        return s1 + all + addRemovedTags(s2, removedTag);
-                    }
-                }
+                String s1 = s.substring(0, index + all.length());
+                String s2 = s.substring(index + all.length());
+                return s1 + addRemovedTags(s2, removedTag);
             }
         }
 
@@ -2881,6 +2974,101 @@ public class ExportHelper
     }
 
     /**
+     * Adds tags which removed during import.
+     * 
+     * @param s
+     *            the original gxml
+     * @param removedTag
+     *            the removed tag
+     * @return the new gxml
+     */
+    private String addRemovedTags2(String s, RemovedTag removedTag)
+    {
+        if (s.trim().length() == 0)
+        {
+            return s;
+        }
+
+        if (isDocx())
+        {
+            String ree = "(.+?)(</bpt>.+?)(<bpt .+)";
+            String tagPre = removedTag.getPrefixString();
+            String tagSuf = removedTag.getSuffixString();
+
+            // add missed w:hyperlink tag which save in bpt ept
+            if (tagPre.startsWith("&lt;w:hyperlink ")
+                    && tagSuf
+                            .endsWith("&lt;/w:t&gt;&lt;/w:r&gt;&lt;/w:hyperlink&gt;"))
+            {
+                return s + "<bpt>" + tagPre + "</bpt><ept>" + tagSuf + "</ept>";
+            }
+            else if ((tagPre.contains("&lt;w:t&gt;") || tagPre
+                    .contains("&lt;w:t ")) && tagSuf.contains("&lt;/w:t&gt;"))
+            {
+                // for bpt
+                Pattern p = Pattern.compile(REGEX_BPT);
+                Matcher m = p.matcher(s);
+                if (m.find())
+                {
+                    String idd = m.group(1);
+                    String re = s.contains("</sub>") ? REGEX_BPT_ALL_SUB
+                            : REGEX_BPT_ALL;
+                    Pattern p2 = Pattern.compile(MessageFormat.format(re, idd));
+                    Matcher m2 = p2.matcher(s);
+
+                    if (m2.find())
+                    {
+                        String all = m2.group();
+                        int index = s.indexOf(all);
+                        String s1 = s.substring(0, index);
+                        String s2 = s.substring(index + all.length());
+                        if (all.contains("&lt;/w:r&gt;")
+                                && !all.contains("&lt;/w:t&gt;")
+                                && !all.contains("&lt;w:t "))
+                        {
+                            int i_ept = all.indexOf("<ept ");
+                            int i_pp = all.lastIndexOf("</", i_ept);
+                            int i_ee = all.indexOf(">", i_ept + 2) + 1;
+                            String result = all.substring(0, i_pp) + tagPre
+                                    + all.substring(i_pp, i_ee) + tagSuf
+                                    + all.substring(i_ee);
+                            result = s1 + result + s2;
+                            return result;
+                        }
+                        else if (all.contains("&lt;w:hyperlink ")
+                                && all.contains(" w:tooltip=&quot;<sub ")
+                                && all.matches(ree))
+                        {
+                            Pattern pat = Pattern.compile(ree);
+                            Matcher mer = pat.matcher(all);
+                            if (mer.matches())
+                            {
+                                String g1 = mer.group(1);
+                                String g2 = mer.group(2);
+                                String g3 = mer.group(3);
+
+                                int i_ee = g3.indexOf(">") + 1;
+                                String result = g1 + tagPre + g2
+                                        + g3.substring(0, i_ee) + tagSuf
+                                        + g3.substring(i_ee);
+                                result = s1 + result + s2;
+                                return result;
+                            }
+                        }
+                        else
+                        {
+                            return addRemovedTags2(s1, removedTag) + all
+                                    + addRemovedTags2(s2, removedTag);
+                        }
+                    }
+                }
+            }
+        }
+
+        return s;
+    }
+
+    /**
      * Adds the project_tm_tu_id to the segment gxml
      * 
      * @param p_corpusMappings
@@ -2891,6 +3079,7 @@ public class ExportHelper
      *            the segment text as gxml
      * @return new segment gxml
      */
+    @SuppressWarnings("rawtypes")
     private String addProjectTmTuIdToSegment(Map p_corpusMappings,
             Tuv p_segment, String p_tuvContent)
     {
@@ -3050,7 +3239,8 @@ public class ExportHelper
         }
     }
 
-    private void stripExtraSpaces(List p_targetSegments, String companyId)
+    @SuppressWarnings("rawtypes")
+    private void stripExtraSpaces(List p_targetSegments, long companyId)
             throws PageException
     {
         GlobalSightLocale sourceLocale = m_sourcePage.getGlobalSightLocale();
@@ -3067,9 +3257,10 @@ public class ExportHelper
             return;
         }
 
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             // get source segments
             HashMap sourceSegmentMap = getSourceSegments();
             int mergeStart = 0;
@@ -3082,7 +3273,7 @@ public class ExportHelper
                 if (mergeState.equals(Tuv.NOT_MERGED))
                 {
                     stripExtraSpaces(
-                            session.connection(),
+                            conn,
                             targetSegment,
                             (Tuv) sourceSegmentMap.get(targetSegment.getTuId()),
                             companyId);
@@ -3098,7 +3289,7 @@ public class ExportHelper
                     Tuv sourceSegment = getMergedSourceSegment(
                             targetSegmentList, sourceSegmentMap);
 
-                    stripExtraSpaces(session.connection(),
+                    stripExtraSpaces(conn,
                             (Tuv) p_targetSegments.get(mergeStart),
                             sourceSegment, companyId);
                 }
@@ -3111,10 +3302,12 @@ public class ExportHelper
         }
         finally
         {
-            TmUtil.closeStableSession(session);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private ArrayList removeNotTranslateTag(ArrayList p_targetSegments)
     {
         for (int i = 0; i < p_targetSegments.size(); i++)
@@ -3132,8 +3325,10 @@ public class ExportHelper
         return p_targetSegments;
     }
 
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void stripExtraSpaces(Connection p_connection, Tuv p_targetSegment,
-            Tuv p_sourceSegment, String companyId) throws Exception
+            Tuv p_sourceSegment, long companyId) throws Exception
     {
         Map modifiedSubs = new HashMap();
         String changedText = null;
@@ -3218,6 +3413,7 @@ public class ExportHelper
 
         if (p_subElement != null)
         {
+            @SuppressWarnings("rawtypes")
             List children = p_subElement
                     .getChildElements(GxmlElement.TEXT_NODE);
 
@@ -3266,6 +3462,8 @@ public class ExportHelper
     // get source segements of the page.
     // @return key: TU id (Long)
     // Value: source segment (Tuv)
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private HashMap getSourceSegments() throws PageException
     {
         HashMap result = new HashMap();
@@ -3285,6 +3483,8 @@ public class ExportHelper
     // target segment (p_targetSegments).
     // returns a clone of the first source segment with a merged text in it.
     // p_targetSegments must be sorted in order.
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private Tuv getMergedSourceSegment(List p_targetSegments,
             Map p_sourceSegmentMap) throws Exception
     {
@@ -3335,29 +3535,6 @@ public class ExportHelper
         }
 
         return trailingSpaceNum;
-    }
-
-    /**
-     * Get format type
-     * 
-     * @return
-     */
-    private String getFormatType()
-    {
-        String format = "";
-        try
-        {
-            String eventFlowXml = m_sourcePage.getRequest().getEventFlowXml();
-            EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
-            parser.parse();
-            format = parser.getSourceFormatType();
-        }
-        catch (Exception e)
-        {
-            s_logger.error("Problem parsing the event flow xml", e);
-        }
-
-        return format;
     }
 
     public void setUserId(String uid)

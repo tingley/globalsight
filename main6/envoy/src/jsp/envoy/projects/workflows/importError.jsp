@@ -93,12 +93,12 @@ function cleanError()
             <!-- End Details table -->
 		<P>
         <!-- Pages table -->
-		<TABLE CELLPADDING="3" CELLSPACING="0" BORDER="0">
+		<TABLE CELLPADDING="3" CELLSPACING="0" BORDER="0" style="width:100%;table-layout:fixed">
 		<TR CLASS="tableHeadingBasic">
-			<TD NOWRAP><%=bundle.getString("lb_pages")%></TD>
-			<TD ALIGN="CENTER" NOWRAP><%=bundle.getString("lb_source_word_count")%></TD>
-			<TD NOWRAP><%=bundle.getString("lb_status")%></TD>
-			<TD NOWRAP><%=bundle.getString("lb_message")%></TD>
+			<TD NOWRAP style="width:44%"><%=bundle.getString("lb_pages")%></TD>
+			<TD ALIGN="CENTER" NOWRAP style="width:12%"><%=bundle.getString("lb_source_word_count")%></TD>
+			<TD NOWRAP style="width:9%"><%=bundle.getString("lb_status")%></TD>
+			<TD NOWRAP style="width:35%"><%=bundle.getString("lb_message")%></TD>
 		</TR>
 		<%=request.getAttribute(JobManagementHandler.JOB_CONTENT_SCRIPTLET)%>
 		<TR>

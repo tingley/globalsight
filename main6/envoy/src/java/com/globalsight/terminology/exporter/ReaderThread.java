@@ -17,32 +17,24 @@
 
 package com.globalsight.terminology.exporter;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.ExportOptions;
-import com.globalsight.exporter.IReader;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.command.EntryOperation;
 import com.globalsight.terminology.command.EntryOperationImpl;
-import com.globalsight.terminology.exporter.ExportOptions.FilterCondition;
 
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.EntryFilter;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.util.SessionInfo;
-
-
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.Node;
-
-import java.util.*;
 
 /**
  * Reads entries from a termbase and produces Entry objects by putting
@@ -169,6 +161,8 @@ public class ReaderThread
 
             m_results.producerDone();
             m_results = null;
+
+            HibernateUtil.closeSession();
 
             if (CATEGORY.isDebugEnabled())
             {

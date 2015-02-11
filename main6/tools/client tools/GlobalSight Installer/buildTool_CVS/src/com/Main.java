@@ -40,6 +40,12 @@ public class Main
     {
         try
         {
+        	
+        	if (BuildUtil.VERSION.startsWith("8.3"))
+        	{
+        		IS_PATCH = false;
+        	}
+        	
             BuildUtil.build();
         }
         catch (Exception e)

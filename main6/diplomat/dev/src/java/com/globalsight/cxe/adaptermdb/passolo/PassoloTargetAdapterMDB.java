@@ -16,33 +16,39 @@
  */
 package com.globalsight.cxe.adaptermdb.passolo;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.jms.MessageListener;
+
 import com.globalsight.cxe.adapter.BaseAdapter;
-import com.globalsight.cxe.adapter.idml.IdmlAdapter;
 import com.globalsight.cxe.adapter.passolo.PassoloAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
+import com.globalsight.everest.util.jms.JmsHelper;
 
-/**
- * PdfTargetAdapterMDB uses the PdfAdapter
- */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_PASSOLO_TARGET_ADAPTER),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class PassoloTargetAdapterMDB extends BaseAdapterMDB
 {
     private static final long serialVersionUID = 848062561358350232L;
-    private static String ADAPTER_NAME = "PassoloTargetAdapter";
-    
+    private static String ADAPTER_NAME = PassoloTargetAdapterMDB.class
+            .getName();
+
     protected String getAdapterName()
     {
         return ADAPTER_NAME;
     }
 
-    /**
-     * Creates and loads the LingAdapter
-     * 
-     * @return BaseAdapter
-     * @exception Exception
-     */
     protected BaseAdapter loadAdapter() throws Exception
     {
         return new PassoloAdapter(ADAPTER_NAME);
     }
 }
-

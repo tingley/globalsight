@@ -99,6 +99,13 @@ public class SidRuleItem extends XmlRuleItem
                         f.setAccessible(true);
                         rootNode = (Node) f.get(node);
                     }
+                    else if (node instanceof org.apache.xerces.dom.NodeImpl)
+                    {
+                        Field f = org.apache.xerces.dom.NodeImpl.class
+                                .getDeclaredField("ownerNode");
+                        f.setAccessible(true);
+                        rootNode = (Node) f.get(node);
+                    }
                 }
                 else
                 {

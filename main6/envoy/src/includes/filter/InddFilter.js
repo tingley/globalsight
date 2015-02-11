@@ -143,7 +143,7 @@ InddFilter.prototype.generateDiv = function(topFilterId, color) {
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreLineBreak + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
-	str.append("<input type='checkbox' id='ignoreLineBreak' checked></input>");
+	str.append("<input type='checkbox' id='ignoreLineBreak'></input>");
 	str.append("</td>");
 	str.append("</tr>");
 	

@@ -43,8 +43,7 @@ import com.globalsight.util.edit.EditUtil;
 
 public class JobAttribute extends PersistentObject
 {
-    static private final Logger logger = Logger
-            .getLogger(JobAttribute.class);
+    static private final Logger logger = Logger.getLogger(JobAttribute.class);
 
     private static final long serialVersionUID = 4341436923688472768L;
     private JobImpl job;
@@ -86,27 +85,36 @@ public class JobAttribute extends PersistentObject
         }
         else if (Attribute.TYPE_FLOAT.equals(type))
         {
-            if (ob instanceof String) {
+            if (ob instanceof String)
+            {
                 floatValue = Float.parseFloat((String) ob);
-            } else {
-                floatValue = (Float) ob;                
+            }
+            else
+            {
+                floatValue = (Float) ob;
             }
             return true;
         }
         else if (Attribute.TYPE_INTEGER.equals(type))
         {
-            if (ob instanceof String) {
+            if (ob instanceof String)
+            {
                 integerValue = Integer.parseInt((String) ob);
-            } else {
-                integerValue = (Integer) ob;                
+            }
+            else
+            {
+                integerValue = (Integer) ob;
             }
             return true;
         }
         else if (Attribute.TYPE_DATE.equals(type))
         {
-            if (ob instanceof String) {
+            if (ob instanceof String)
+            {
                 dateValue = new Date(Long.parseLong((String) ob));
-            } else {
+            }
+            else
+            {
                 dateValue = (Date) ob;
             }
             return true;
@@ -406,8 +414,8 @@ public class JobAttribute extends PersistentObject
 
     public List<String> getFileValuesAsStrings()
     {
-        return JobAttributeFileManager.getAllFilesAsString2(getId(), getJob()
-                .getCompanyId());
+        return JobAttributeFileManager.getAllFilesAsString2(getId(),
+                String.valueOf(getJob().getCompanyId()));
     }
 
     public Set<FileValueItem> getFileValues()
@@ -611,7 +619,7 @@ public class JobAttribute extends PersistentObject
 
         return jobAttribute;
     }
-    
+
     public boolean isSet()
     {
         String type = attribute.getType();
@@ -639,7 +647,7 @@ public class JobAttribute extends PersistentObject
         {
             return getFiles().size() > 0;
         }
-        
+
         return false;
     }
 }

@@ -31,8 +31,6 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.usermgr.DirContextPool;
-import com.globalsight.everest.usermgr.LdapHelper;
 import com.globalsight.everest.usermgr.UserLdapHelper;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -51,8 +49,6 @@ public class SecurityManagerLocal implements SecurityManager
 {
     private static final Logger CATEGORY = Logger
             .getLogger(SecurityManagerLocal.class.getName());
-
-    private DirContextPool m_connectionPool; // LDAP connection pool
 
     private UserManager m_userManager = null;
 
@@ -151,12 +147,29 @@ public class SecurityManagerLocal implements SecurityManager
         try
         {
             loginUser = m_userManager.getUser(p_userId);
+
+            // Validate parameter
+            if (loginUser == null)
+            {
+                String[] messageArgument =
+                { "Invalid login info received: " + userName + ", password="
+                        + p_password };
+
+                CATEGORY.info("SecurityManagerException is thrown from: "
+                        + "SecurityManagerLocal::authenticateUser(): "
+                        + messageArgument[0]);
+
+                throw new SecurityManagerException(
+                        SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
+                        messageArgument, null);
+            }
+
             UserLdapHelper.authenticate(p_password, loginUser.getPassword());
         }
         catch (NamingException ex)
         {
             String[] messageArgument =
-            { "LDAP error for user " + userName };
+            { "Error for authenticating user " + userName };
 
             CATEGORY.info("SecurityManagerException is thrown from: "
                     + "SecurityManagerLocal::authenticateUser(): "
@@ -363,10 +376,6 @@ public class SecurityManagerLocal implements SecurityManager
                     vfs.setVendorId(v.getId());
                     HibernateUtil.save(vfs);
                 }
-                // tbd - log out user who made the updated
-                CATEGORY.info("Set the field security for vendor " + v.getId()
-                        + " with " + p_fs.toString());
-
             }
             catch (Exception e)
             {
@@ -402,8 +411,6 @@ public class SecurityManagerLocal implements SecurityManager
                     ufs.setUsername(u.getUserId());
                     HibernateUtil.save(ufs);
                 }
-                CATEGORY.info("Set the field security for user "
-                        + u.getUserName() + " with " + p_fs.toString());
             }
             catch (Exception e)
             {
@@ -418,7 +425,6 @@ public class SecurityManagerLocal implements SecurityManager
         }
         else
         {
-
             CATEGORY.error("Trying to set the field security on an object that isn't recognized.  Object: "
                     + p_objectWithFields.toString()
                     + " with "
@@ -464,22 +470,6 @@ public class SecurityManagerLocal implements SecurityManager
 
     private void initServer() throws SecurityManagerException
     {
-        try
-        {
-            m_connectionPool = LdapHelper.getConnectionPool();
-        }
-        catch (NamingException le)
-        {
-            String[] messageArgument =
-            { "Failed to get LDAP connection pool!" };
-            CATEGORY.error("SecurityManagerException is thrown from: "
-                    + "SecurityManagerException::initServer(): "
-                    + messageArgument[0], le);
-            throw new SecurityManagerException(
-                    SecurityManagerException.MSG_FAILED_TO_INIT_SERVER, null,
-                    le);
-        }
-
         try
         {
             m_userManager = ServerProxy.getUserManager();

@@ -23,7 +23,7 @@ import java.util.Map;
  * 
  * Configuration for company
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class CompanyConfiguration
@@ -31,6 +31,12 @@ public class CompanyConfiguration
     private String company = "";
     private String baseDir = "";
     private String inbox = "";
+    
+
+    private String inbox4XLZ = "";
+    private String jobCreatingBox4XLZ = "";
+   
+
     private String outbox = "";
     private String jobCreatingBox = "";
     private String jobCreateSuccessfulBox = "";
@@ -64,7 +70,7 @@ public class CompanyConfiguration
     // Time to check job status(successful)
     private final long jobSuccessfulCheckTime = 30000;
 
-    public CompanyConfiguration(String company, String baseDir, String inbox,
+    public CompanyConfiguration(String company, String baseDir, String inbox,String inbox4XLZ,String jobCreatingBox4XLZ,
             String outbox, String jobCreatingBox,
             String jobCreateSuccessfulBox, String failedBox, String tempBox,
             String preProcessClass, String postProcessClass, String host,
@@ -77,6 +83,8 @@ public class CompanyConfiguration
         this.company = company;
         this.baseDir = baseDir;
         this.inbox = inbox;
+        this.inbox4XLZ = inbox4XLZ;
+        this.jobCreatingBox4XLZ=jobCreatingBox4XLZ;
         this.outbox = outbox;
         this.jobCreatingBox = jobCreatingBox;
         this.jobCreateSuccessfulBox = jobCreateSuccessfulBox;
@@ -97,7 +105,23 @@ public class CompanyConfiguration
         this.ftpConfig = ftpConfig;
         this.smbConfig = smbConfig;
     }
+    public String getJobCreatingBox4XLZ()
+    {
+        return jobCreatingBox4XLZ;
+    }
+    public void setJobCreatingBox4XLZ(String jobCreatingBox4XLZ)
+    {
+        this.jobCreatingBox4XLZ = jobCreatingBox4XLZ;
+    }
+    public String getInbox4XLZ()
+    {
+        return inbox4XLZ;
+    }
 
+    public void setInbox4XLZ(String inbox4xlz)
+    {
+        inbox4XLZ = inbox4xlz;
+    }
     public String getCompany()
     {
         return company;
@@ -186,6 +210,20 @@ public class CompanyConfiguration
     public void setPreProcessClass(String preProcessClass)
     {
         this.preProcessClass = preProcessClass;
+    }
+    
+    // Get the ProcessCase value.
+    public String getProcessCase()
+    {
+        if(preProcessClass != null && preProcessClass.indexOf(".") > 0)
+        {
+            int start = preProcessClass.lastIndexOf(".") + 1;
+            int end = preProcessClass.indexOf("PreProcess");
+            if(end > start)
+                return preProcessClass.substring(start, end);
+        }
+        
+        return "Can't Find ProcessCase";
     }
 
     public String getPostProcessClass()

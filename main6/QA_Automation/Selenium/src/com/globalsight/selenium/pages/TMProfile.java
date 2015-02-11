@@ -66,7 +66,8 @@ public class TMProfile implements BasePage
     public static final String MT_OVERRIDE_NON_EXTRACT_LEVERAGING_PENALTY_TEXT= "mtSensitivePenalty";
     public static final String MT_SHOW_IN_EDITOR_CHECKBOX = "machineTranslation.showInEditor";
     public static final String MT_URL = "idMsMtUrl";
-    public static final String MT_APPID = "idMsMtAppid";
+    public static final String MT_CLINTID = "idMsMtClientid";
+    public static final String MT_CLINT_SECRET = "idMsMtClientSecret";
     public static final String MT_CATEGORY = "idMsMtCategory";
     public static final String MT_TEST_HOST_BUTTON = "test";
     

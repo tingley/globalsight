@@ -97,19 +97,24 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
     {
         // get the session from the event
         HttpSession session = p_event.getSession();
+        User user = null;
 
         try
         {
             // log the user out
-            User user = (User) getAttribute(WebAppConstants.USER);
-            ServerProxy.getSecurityManager().logUserOut(user.getUserName());
+            user = (User) getAttribute(WebAppConstants.USER);
+            ServerProxy.getSecurityManager().logUserOut(user.getUserId());
             // calculate the users after logging out the system.
-            ServerProxy.getUserManager().loggedOutUsers(user.getUserName(),
-                    session.getId());
+            if (session != null)
+            {
+                ServerProxy.getUserManager().loggedOutUsers(user.getUserId(),
+                        session.getId());                
+            }
         }
         catch (Exception e)
         {
-            CATEGORY.error("error when closing workflow session", e);
+            CATEGORY.error("error when log user out " + user == null ? ""
+                    : user.getUserId(), e);
         }
 
         try

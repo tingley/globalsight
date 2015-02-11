@@ -108,7 +108,7 @@ public class TemplateGenerator
      *
      * @return a PageTemplate of detail type
      */
-    public PageTemplate generateDetail(GxmlRootElement p_gxmlRoot, List p_Tus)
+    public PageTemplate generateDetail(GxmlRootElement p_gxmlRoot, List<Tu> p_Tus)
         throws FileImportException
     {
         if (c_logger.isDebugEnabled())
@@ -116,14 +116,14 @@ public class TemplateGenerator
             c_logger.debug("TemplateGenerator.generateDetail(Gxml)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
         int tuPointer = 0;
 
         String rest = getTemplateFormat(NAME_TMPL_START,
             TMPL_TYPE_DETAIL, SRC_TYPE_GXML);
 
-        PageTemplate pageTemplate =
-            new PageTemplate(PageTemplate.TYPE_DETAIL);
+        PageTemplate pageTemplate = new PageTemplate(PageTemplate.TYPE_DETAIL);
         SubProcessResult processResult =
             processOnGxmlRootForDetailAndPreview(p_gxmlRoot, p_Tus,
                 tuPointer, pageTemplate, templateParts, rest, true);
@@ -154,7 +154,7 @@ public class TemplateGenerator
      * @return a PageTemplate of standard type
      */
     public PageTemplate generateStandard(GxmlRootElement p_gxmlRootElement,
-        List p_Tus)
+        List<Tu> p_Tus)
         throws FileImportException
     {
         if (c_logger.isDebugEnabled())
@@ -162,7 +162,8 @@ public class TemplateGenerator
             c_logger.debug("TemplateGenerator.generateStandard(Gxml)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
 
         TemplatePart tPart = null;
         int size = p_Tus.size();
@@ -191,8 +192,8 @@ public class TemplateGenerator
 
 
     private String processStandardMode(PageTemplate p_pageTemplate,
-        GxmlRootElement p_gxmlRootElement, String p_rest,
-        ArrayList p_tmplParts, List p_Tus, int p_tuPointer)
+            GxmlRootElement p_gxmlRootElement, String p_rest,
+            ArrayList<TemplatePart> p_tmplParts, List<Tu> p_Tus, int p_tuPointer)
     {
         SubProcessResult spr =
             new SubProcessResult(p_tuPointer, p_tmplParts, p_rest);
@@ -203,8 +204,9 @@ public class TemplateGenerator
         return spr.getRest();
     }
 
+    @SuppressWarnings({ "rawtypes"})
     private SubProcessResult processStandardMode_1(PageTemplate p_pageTemplate,
-        SubProcessResult p_spr, GxmlElement p_gxmlElement, List p_Tus)
+            SubProcessResult p_spr, GxmlElement p_gxmlElement, List<Tu> p_Tus)
     {
         if (p_gxmlElement == null)
         {
@@ -220,7 +222,7 @@ public class TemplateGenerator
 
         String rest = p_spr.getRest();
         int tuPointer = p_spr.getTuPointer();
-        ArrayList tmplParts = p_spr.getTemplateParts();
+        ArrayList<TemplatePart> tmplParts = p_spr.getTemplateParts();
         DataSkeletonPair dataRow;
         TemplatePart tPart = null; 
         Tu tu = null;
@@ -270,7 +272,7 @@ public class TemplateGenerator
     
                     for (int k = 0; k < segments.size(); k++)
                     {
-                        GxmlElement segment = (GxmlElement)segments.get(k);
+//                        GxmlElement segment = (GxmlElement)segments.get(k);
                         tu = (Tu)p_Tus.get(tuPointer);
                         dataRow = generateDataSkeletonPairForGxmlStdTmpl(tuPointer);
                         tPart = new TemplatePart(p_pageTemplate,
@@ -309,15 +311,15 @@ public class TemplateGenerator
      * @return a PageTemplate of type PREVIEW
      */
     public PageTemplate generatePreview(GxmlRootElement p_gxmlRoot,
-        List p_Tus)
-        throws FileImportException
+            List<Tu> p_Tus) throws FileImportException
     {
         if (c_logger.isDebugEnabled())
         {
             c_logger.debug("TemplateGenerator.generatePreview(Gxml)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
         int tuPointer = 0;
         String rest = "";
 
@@ -352,15 +354,16 @@ public class TemplateGenerator
      *
      * @return  a PageTemplate of export type
      */
-    public PageTemplate generateExport(GxmlRootElement p_gxmlRoot, List p_Tus)
-        throws FileImportException
+    public PageTemplate generateExport(GxmlRootElement p_gxmlRoot,
+            List<Tu> p_Tus) throws FileImportException
     {
         if (c_logger.isDebugEnabled())
         {
             c_logger.debug("TemplateGenerator.generateExport(Gxml)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
         int tuPointer = 0;
         String rest = "";
 
@@ -368,9 +371,8 @@ public class TemplateGenerator
             new PageTemplate(PageTemplate.TYPE_EXPORT);
 
         // forward the process to sub-procedure
-        SubProcessResult processResult =
-            processOnGxmlRootForExport(p_gxmlRoot, p_Tus, tuPointer,
-                pageTemplate,templateParts, rest);
+        SubProcessResult processResult = processOnGxmlRootForExport(p_gxmlRoot,
+                p_Tus, tuPointer, pageTemplate, templateParts, rest);
 
         rest = processResult.getRest();
         templateParts = processResult.getTemplateParts();
@@ -395,16 +397,19 @@ public class TemplateGenerator
      * PrsRootElement
      *
      * @return a PageTemplate of standard type
+     * @deprecated -- legacy codes
      */
-    public PageTemplate generateStandard(PrsRootElement p_prsRoot, List p_Tus)
-        throws FileImportException
+    @SuppressWarnings("rawtypes")
+    public PageTemplate generateStandard(PrsRootElement p_prsRoot,
+            List<Tu> p_Tus) throws FileImportException
     {
         if (c_logger.isDebugEnabled())
         {
             c_logger.debug("TemplateGenerator.generateStandard(Prs)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
         int tuPointer = 0;
         Tu tu = null;
         TemplatePart tPart = null;
@@ -578,8 +583,10 @@ public class TemplateGenerator
      * PrsRootElement
      *
      * @return  a PageTemplate of detail type
+     * @deprecated -- legacy codes
      */
-    public PageTemplate generateDetail(PrsRootElement p_prsRoot, List p_Tus)
+    @SuppressWarnings("rawtypes")
+    public PageTemplate generateDetail(PrsRootElement p_prsRoot, List<Tu> p_Tus)
         throws FileImportException
     {
         if (c_logger.isDebugEnabled())
@@ -587,7 +594,8 @@ public class TemplateGenerator
             c_logger.debug("TemplateGenerator.generateDetail(Prs)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
 
         int tuPointer = 0;
         TemplatePart tPart = null;
@@ -746,16 +754,19 @@ public class TemplateGenerator
      * PrsRootElement
      *
      * @return  a PageTemplate of export type
+     * @deprecated -- legacy codes
      */
-    public PageTemplate generateExport(PrsRootElement p_prsRoot, List p_Tus)
-        throws FileImportException
+    @SuppressWarnings("rawtypes")
+    public PageTemplate generateExport(PrsRootElement p_prsRoot, List<Tu> p_Tus)
+            throws FileImportException
     {
         if (c_logger.isDebugEnabled())
         {
             c_logger.debug("TemplateGenerator.generateExport(Prs)");
         }
 
-        ArrayList templateParts = new ArrayList(p_Tus.size() + 1);
+        ArrayList<TemplatePart> templateParts = new ArrayList<TemplatePart>(
+                p_Tus.size() + 1);
         int tuPointer = 0;
 
         // Populate root tag and attribute
@@ -833,9 +844,9 @@ public class TemplateGenerator
                     GxmlRootElement gxmlRoot =
                         (GxmlRootElement)content.getChildElement(0);
 
-                    SubProcessResult processResult =
-                        processOnGxmlRootForExport(gxmlRoot, p_Tus,
-                            tuPointer, pageTemplate,templateParts, rest);
+                    SubProcessResult processResult = processOnGxmlRootForExport(
+                            gxmlRoot, p_Tus, tuPointer, pageTemplate,
+                            templateParts, rest);
 
                     rest = processResult.getRest();
                     templateParts = processResult.getTemplateParts();
@@ -892,8 +903,9 @@ public class TemplateGenerator
      * @return SubProcessResult
      */
     private SubProcessResult processOnGxmlRootForExport(
-        GxmlRootElement p_gxmlRoot, List p_Tus, int p_tuPointer,
-        PageTemplate p_pageTemplate, ArrayList p_tmplParts, String p_rest)
+            GxmlRootElement p_gxmlRoot, List<Tu> p_Tus, int p_tuPointer,
+            PageTemplate p_pageTemplate, ArrayList<TemplatePart> p_tmplParts,
+            String p_rest)
     {
         // special case: need to output <diplomat>
 
@@ -911,9 +923,10 @@ public class TemplateGenerator
         return spr;
     }
 
+    @SuppressWarnings("rawtypes")
     private SubProcessResult processOnGxmlRootForExport_1(
         SubProcessResult p_spr, GxmlElement p_gxmlElement,
-        PageTemplate p_pageTemplate, List p_Tus)
+        PageTemplate p_pageTemplate, List<Tu> p_Tus)
     {
         if (p_gxmlElement == null)
         {
@@ -929,7 +942,7 @@ public class TemplateGenerator
 
         StringBuffer theRest = new StringBuffer(p_spr.getRest());
         int tuPointer = p_spr.getTuPointer();
-        ArrayList tmplParts = p_spr.getTemplateParts();
+        ArrayList<TemplatePart> tmplParts = p_spr.getTemplateParts();
         TemplatePart tPart = null;
         Tu tu = null;
 
@@ -960,7 +973,7 @@ public class TemplateGenerator
                 break;
 
             case GxmlElement.LOCALIZABLE:
-                tu = (Tu)p_Tus.get(tuPointer);
+                tu = (Tu) p_Tus.get(tuPointer);
 
                 theRest.append(child.getStartTag());
                 tPart = new TemplatePart(p_pageTemplate, theRest.toString(), tu, tuPointer);
@@ -983,7 +996,7 @@ public class TemplateGenerator
                         c_logger.debug("Ignoring start tag" + segment.getStartTag());
                         tu = (Tu)p_Tus.get(tuPointer);
     
-                        tPart =new TemplatePart(p_pageTemplate, theRest.toString(), tu, tuPointer);
+                        tPart = new TemplatePart(p_pageTemplate, theRest.toString(), tu, tuPointer);
                         c_logger.debug("TPART='" + tPart.toString() + "'");
     
                         tmplParts.add(tPart);
@@ -1032,9 +1045,9 @@ public class TemplateGenerator
      * @return SubProcessResult
      */
     private SubProcessResult processOnGxmlRootForDetailAndPreview(
-        GxmlRootElement p_gxmlRoot, List p_Tus, int p_tuPointer,
-        PageTemplate p_pageTemplate, ArrayList p_tmplParts,
-        String p_rest, boolean p_encode)
+            GxmlRootElement p_gxmlRoot, List<Tu> p_Tus, int p_tuPointer,
+            PageTemplate p_pageTemplate, ArrayList<TemplatePart> p_tmplParts,
+            String p_rest, boolean p_encode)
     {
         SubProcessResult spr =
             new SubProcessResult(p_tuPointer, p_tmplParts, p_rest);
@@ -1045,8 +1058,9 @@ public class TemplateGenerator
         return spr;
     }
 
+    @SuppressWarnings("rawtypes")
     private SubProcessResult processOnGxmlRootForDetailAndPreview_1(
-        SubProcessResult p_spr, GxmlElement p_gxmlElement, List p_Tus,
+        SubProcessResult p_spr, GxmlElement p_gxmlElement, List<Tu> p_Tus,
         PageTemplate p_pageTemplate, boolean p_encode)
     {
         if (p_gxmlElement == null)
@@ -1063,7 +1077,7 @@ public class TemplateGenerator
 
         String rest = p_spr.getRest();
         int tuPointer =  p_spr.getTuPointer();
-        ArrayList tmplParts = p_spr.getTemplateParts();
+        ArrayList<TemplatePart> tmplParts = p_spr.getTemplateParts();
         TemplatePart tPart = null;
         Tu tu = null;
         String str_text;
@@ -1102,7 +1116,7 @@ public class TemplateGenerator
                 break;
 
             case GxmlElement.LOCALIZABLE:
-                tu = (Tu)p_Tus.get(tuPointer);
+                tu = (Tu) p_Tus.get(tuPointer);
                 tPart = new TemplatePart(p_pageTemplate, rest, tu, tuPointer);
                 tmplParts.add(tPart);
                 tuPointer++;
@@ -1179,6 +1193,8 @@ public class TemplateGenerator
      * template type and source type.</p>
      * @return a String representation of the template text.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    // ----------
     private String getTemplateFormat(String p_name, String p_tmplType,
         String p_srcType) throws FileImportException
     {

@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.comment;
 
 import java.io.File;
@@ -35,13 +51,14 @@ public class CommentFilesDownLoad
 
     private static final String UNDERLINE = "_";
 
-    private static final String COLON =	":";
-    
+    private static final String COLON = ":";
+
     private static final String ZERO = "0";
-    
+
     private static final int LENGTH_OF_HAS_LOCALE = 4;
-    
+
     private static final int LENGTH_OF_NO_LOCALE = 3;
+
     /**
      * Downloads the files in comment page.
      */
@@ -54,7 +71,7 @@ public class CommentFilesDownLoad
         Job job = ServerProxy.getJobHandler().getJobById(jobId);
         String jobName = job.getJobName();
         String zipFileName = URLEncoder.encode(jobName + "_comments" + ".zip");
-        String companyId = job.getCompanyId();
+        String companyId = String.valueOf(job.getCompanyId());
         File tmpFile = File.createTempFile("GSCommentsDownload", ".zip");
         m_zipper = new JobPackageZipper();
         m_zipper.createZipFile(tmpFile);
@@ -63,58 +80,58 @@ public class CommentFilesDownLoad
         sendFileToClient(request, response, zipFileName, tmpFile);
     }
 
-    public void sendFileToClient(HttpServletRequest request, HttpServletResponse response,
-            String zipFileName, File tmpFile)
+    public void sendFileToClient(HttpServletRequest request,
+            HttpServletResponse response, String zipFileName, File tmpFile)
     {
-		if (request.isSecure()) 
-		{
-			PageHandler.setHeaderForHTTPSDownload(response);
-		}
-		FileInputStream fis = null;
-		try 
-		{
-			response.setContentType("application/zip");
-			String attachment = "attachment; filename=\""
-					+ UrlUtil.encode(zipFileName, "utf-8") + "\";";
-			response.setHeader("Content-Disposition", attachment);
-			response.setContentLength((int) tmpFile.length());
-			byte[] inBuff = new byte[4096];
-			fis = new FileInputStream(tmpFile);
-			int bytesRead = 0;
-			while ((bytesRead = fis.read(inBuff)) != -1) 
-			{
-				response.getOutputStream().write(inBuff, 0, bytesRead);
-			}
+        if (request.isSecure())
+        {
+            PageHandler.setHeaderForHTTPSDownload(response);
+        }
+        FileInputStream fis = null;
+        try
+        {
+            response.setContentType("application/zip");
+            String attachment = "attachment; filename=\""
+                    + UrlUtil.encode(zipFileName, "utf-8") + "\";";
+            response.setHeader("Content-Disposition", attachment);
+            response.setContentLength((int) tmpFile.length());
+            byte[] inBuff = new byte[4096];
+            fis = new FileInputStream(tmpFile);
+            int bytesRead = 0;
+            while ((bytesRead = fis.read(inBuff)) != -1)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
 
-			if (bytesRead > 0) 
-			{
-				response.getOutputStream().write(inBuff, 0, bytesRead);
-			}
+            if (bytesRead > 0)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
 
-			fis.close();
-		} 
-		catch (IOException e) 
-		{
-			CATEGORY.error("Could not download the comment files.");
-		} 
-		finally 
-		{
-			if (fis != null) 
-			{
-				try 
-				{
-					fis.close();
-				} 
-				catch (IOException e) 
-				{
-					CATEGORY.error("Could not close the fileinputstream.");
-				}
-			}
-			if (tmpFile != null) 
-			{
-				tmpFile.deleteOnExit();
-			}
-		}
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            CATEGORY.error("Could not download the comment files.");
+        }
+        finally
+        {
+            if (fis != null)
+            {
+                try
+                {
+                    fis.close();
+                }
+                catch (IOException e)
+                {
+                    CATEGORY.error("Could not close the fileinputstream.");
+                }
+            }
+            if (tmpFile != null)
+            {
+                tmpFile.deleteOnExit();
+            }
+        }
 
     }
 
@@ -146,8 +163,8 @@ public class CommentFilesDownLoad
     }
 
     private void addCommentsFiles(String zipFileName, String[] commentIds,
-            HttpServletRequest request, String companyId) throws CommentException,
-            RemoteException
+            HttpServletRequest request, String companyId)
+            throws CommentException, RemoteException
     {
         PermissionSet perms = (PermissionSet) request.getSession()
                 .getAttribute(WebAppConstants.PERMISSIONS);
@@ -168,13 +185,14 @@ public class CommentFilesDownLoad
         Vector<String> commentIdList = new Vector<String>();
         for (int i = 0; i < commentIds.length; i++)
         {
-        	String commentId_Access_FileName = commentIds[i];
-        	if(ZERO.equals(commentId_Access_FileName))
-        	{
-        		continue;
-        	}
-        	String[] commentId_Access_FileNameArray = commentId_Access_FileName.split(COLON);
-        	String commentId = commentId_Access_FileNameArray[0];
+            String commentId_Access_FileName = commentIds[i];
+            if (ZERO.equals(commentId_Access_FileName))
+            {
+                continue;
+            }
+            String[] commentId_Access_FileNameArray = commentId_Access_FileName
+                    .split(COLON);
+            String commentId = commentId_Access_FileNameArray[0];
             String fileAccess = commentId_Access_FileNameArray[1];
             String fileName = commentId_Access_FileNameArray[2];
             ArrayList<CommentFile> commentReferences = commentManager
@@ -182,13 +200,13 @@ public class CommentFilesDownLoad
             L: for (int j = 0; j < commentReferences.size(); j++)
             {
                 CommentFile file = commentReferences.get(j);
-                if( ! fileAccess.equals(file.getFileAccess()))
+                if (!fileAccess.equals(file.getFileAccess()))
                 {
-                	continue L;
+                    continue L;
                 }
-                if( ! fileName.equals(file.getFilename()))
+                if (!fileName.equals(file.getFilename()))
                 {
-                	continue L;
+                    continue L;
                 }
                 String commentFile = file.getAbsolutePath();
                 fileList.add(commentFile);
@@ -222,8 +240,13 @@ public class CommentFilesDownLoad
         for (int i = 0; i < fileList.size(); i++)
         {
             File file = new File(fileList.get(i));
-            writeOneFile(zipFileName, file, newFileList.get(i).substring(
-                    newFileList.get(i).lastIndexOf(File.separatorChar) + 1));
+            writeOneFile(
+                    zipFileName,
+                    file,
+                    newFileList.get(i)
+                            .substring(
+                                    newFileList.get(i).lastIndexOf(
+                                            File.separatorChar) + 1));
         }
     }
 
@@ -241,13 +264,17 @@ public class CommentFilesDownLoad
             }
             else
             {
-            	if (zipFileName.indexOf(".") != -1) {
-            		m_zipper.writePath(zipFileName.substring(0, zipFileName
-							.indexOf(".")) + "/comments/" + fileName);
-            	} else {
-            		m_zipper.writePath(zipFileName + "/comments/" + fileName);
-            	}
-                
+                if (zipFileName.indexOf(".") != -1)
+                {
+                    m_zipper.writePath(zipFileName.substring(0,
+                            zipFileName.indexOf("."))
+                            + "/comments/" + fileName);
+                }
+                else
+                {
+                    m_zipper.writePath(zipFileName + "/comments/" + fileName);
+                }
+
                 m_zipper.writeFile(input);
             }
             input.close();
@@ -286,8 +313,8 @@ public class CommentFilesDownLoad
             {
                 // The i-th element have the same filename with the others
                 String oldFile = fileList.get(i);
-                String newFileName = oldFile.substring(0, oldFile
-                        .lastIndexOf('.'))
+                String newFileName = oldFile.substring(0,
+                        oldFile.lastIndexOf('.'))
                         + UNDERLINE
                         + commentIdList.get(i)
                         + oldFile.substring(oldFile.lastIndexOf('.'));
@@ -313,8 +340,8 @@ public class CommentFilesDownLoad
                 // The i-th element have the same filename with the others
                 String oldFile = fileList.get(i);
                 String access = getAccess(oldFile);
-                String newFileName = oldFile.substring(0, oldFile
-                        .lastIndexOf('.'))
+                String newFileName = oldFile.substring(0,
+                        oldFile.lastIndexOf('.'))
                         + "("
                         + access
                         + ")"
@@ -398,44 +425,48 @@ public class CommentFilesDownLoad
         return sameFileNameIndex;
     }
 
-	public String[] removeUnrelatedIds(String[] activityComments,
-			String selectedLocale)
-	{
-		if(activityComments == null){
-			return activityComments;
-		}
-		if("allLocales".equals(selectedLocale))
-		{
-			for(int i = 0; i < activityComments.length; i++)
-			{
-				String commentId_Access_FileName = activityComments[i];
-				String[] commentId_Access_FileNameArray = commentId_Access_FileName.split(COLON);
-				if(commentId_Access_FileNameArray.length == LENGTH_OF_HAS_LOCALE)
-				{
-					activityComments[i] = ZERO;
-				}
-			}
-		}
-		else
-		{
-			for(int i = 0; i < activityComments.length; i++)
-			{
-				String commentId_Access_FileName = activityComments[i];
-				String[] commentId_Access_FileNameArray = commentId_Access_FileName.split(COLON);
-				if(commentId_Access_FileNameArray.length == LENGTH_OF_NO_LOCALE)
-				{
-					activityComments[i] = commentId_Access_FileName;
-				}
-				else
-				{
-					if( ! commentId_Access_FileNameArray[LENGTH_OF_NO_LOCALE].equals(selectedLocale))
-					{
-						activityComments[i] = ZERO;
-					}
-				}
-			}
-		}
-		return activityComments;
-	}
+    public String[] removeUnrelatedIds(String[] activityComments,
+            String selectedLocale)
+    {
+        if (activityComments == null)
+        {
+            return activityComments;
+        }
+        if ("allLocales".equals(selectedLocale))
+        {
+            for (int i = 0; i < activityComments.length; i++)
+            {
+                String commentId_Access_FileName = activityComments[i];
+                String[] commentId_Access_FileNameArray = commentId_Access_FileName
+                        .split(COLON);
+                if (commentId_Access_FileNameArray.length == LENGTH_OF_HAS_LOCALE)
+                {
+                    activityComments[i] = ZERO;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < activityComments.length; i++)
+            {
+                String commentId_Access_FileName = activityComments[i];
+                String[] commentId_Access_FileNameArray = commentId_Access_FileName
+                        .split(COLON);
+                if (commentId_Access_FileNameArray.length == LENGTH_OF_NO_LOCALE)
+                {
+                    activityComments[i] = commentId_Access_FileName;
+                }
+                else
+                {
+                    if (!commentId_Access_FileNameArray[LENGTH_OF_NO_LOCALE]
+                            .equals(selectedLocale))
+                    {
+                        activityComments[i] = ZERO;
+                    }
+                }
+            }
+        }
+        return activityComments;
+    }
 
 }

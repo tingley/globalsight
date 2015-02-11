@@ -19,23 +19,17 @@
 
 package com.globalsight.everest.edit.offline.upload;
 
-import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
-import com.globalsight.ling.common.CodesetMapper;
-import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
-import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpEventHandlerInterface;
-import com.globalsight.ling.tw.offline.parser.ParseException;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
+import com.globalsight.ling.common.CodesetMapper;
 
 
 /**
@@ -150,19 +144,30 @@ public class FormatTwoEncodingSniffer
                 throw new AmbassadorDwUpException("PrematureEofFound",
                     null, null);
             }
-
-            skipNewlines();
-
-            bytes = new byte[HEADER_ENCODING_KEY.length()];
-            len = m_input.read(bytes, 0, HEADER_ENCODING_KEY.length());
-            if (len != HEADER_ENCODING_KEY.length())
+            
+            // start with "<?xml " or not
+            if (bytes[0] == 60 && bytes[1] == 0 && bytes[2] == 63
+                    && bytes[3] == 0 && bytes[4] == 120 && bytes[5] == 0
+                    && bytes[6] == 109 && bytes[7] == 0 && bytes[8] == 108
+                    && bytes[9] == 0 && bytes[10] == 32 && bytes[11] == 0)
             {
-                throw new AmbassadorDwUpException("PrematureEofFound",
-                    null, null);
+                encoding = "UTF-16LE";
             }
+            else
+            {
+                skipNewlines();
 
-            encoding = readEncoding();
+                bytes = new byte[HEADER_ENCODING_KEY.length()];
+                len = m_input.read(bytes, 0, HEADER_ENCODING_KEY.length());
+                if (len != HEADER_ENCODING_KEY.length())
+                {
+                    throw new AmbassadorDwUpException("PrematureEofFound",
+                            null, null);
+                }
 
+                encoding = readEncoding();
+            }
+            
             m_input.reset();
         }
         catch (IOException ex)
@@ -175,7 +180,7 @@ public class FormatTwoEncodingSniffer
         if (javaEncoding == null)
         {
             throw new AmbassadorDwUpException(READ_FATAL_ERROR,
-                "Java Encoding not found");
+                "Java Encoding not found for: " + encoding);
         }
 
         return javaEncoding;

@@ -88,7 +88,7 @@ public class TargetPageWorkflowAdditionPersistence extends
 
             // if it is a discard-add workflow, do not insert the tuvs.
             Job job = p_sourcePage.getRequest().getJob();
-            String companyId = job.getCompanyId();
+            long companyId = job.getCompanyId();
             Collection<Workflow> workflows = job.getWorkflows();
             Collection<GlobalSightLocale> allTargetLocales = new ArrayList<GlobalSightLocale>();
             for (Iterator it = p_targetLocales.iterator(); it.hasNext();)
@@ -163,11 +163,8 @@ public class TargetPageWorkflowAdditionPersistence extends
                         continue;
                     }
 
-                    Iterator allLocalesIt = allTargetLocales.iterator();
-                    while (allLocalesIt.hasNext())
+                    for (GlobalSightLocale targetLocale : allTargetLocales)
                     {
-                        Object obj2 = allLocalesIt.next();
-                        GlobalSightLocale targetLocale = (GlobalSightLocale) obj2;
                         Tuv tgtTuv = tu.getTuv(targetLocale.getId(), companyId);
 
                         if (tgtTuv == null)
@@ -242,7 +239,7 @@ public class TargetPageWorkflowAdditionPersistence extends
         return tuvs;
     }
 
-    private HashMap<Tu, Tuv> getSourceTuvMap(Collection p_tuvs, String companyId)
+    private HashMap<Tu, Tuv> getSourceTuvMap(Collection p_tuvs, long companyId)
     {
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
         Iterator it = p_tuvs.iterator();

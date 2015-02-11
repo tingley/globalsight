@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.workflowmanager.WorkflowExporting"
+		table="WORKFLOW_EXPORTING">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="workflowId" column="WORKFLOW_ID" length="20"
+			type="long" not-null="true" />
+		
+	</class>
+</hibernate-mapping>

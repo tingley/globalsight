@@ -16,25 +16,10 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
-import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
-import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.projecthandler.ProjectTM;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -42,6 +27,22 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
+import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class ModifyTMProfileHandler extends PageHandler implements
         TMProfileConstants
@@ -124,14 +125,15 @@ public class ModifyTMProfileHandler extends PageHandler implements
                             tm = ServerProxy
                                     .getProjectHandler()
                                     .getProjectTMById(
-                                            ((BigInteger) it.next()).longValue(),
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
                                             false);
                         }
                         catch (Exception e)
                         {
                             throw new EnvoyServletException(e);
                         }
-                        if (tm.getCompanyId().equals(companyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(companyId))
                         {
                             tmList.add(tm);
                         }
@@ -150,7 +152,8 @@ public class ModifyTMProfileHandler extends PageHandler implements
                             tm = ServerProxy
                                     .getProjectHandler()
                                     .getProjectTMById(
-                                            ((BigInteger) it.next()).longValue(),
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
                                             false);
                         }
                         catch (Exception e)
@@ -182,7 +185,8 @@ public class ModifyTMProfileHandler extends PageHandler implements
             throws EnvoyServletException
     {
         // get the template id first (for edit, or duplicate actions)
-        String id = (String) p_request.getParameter(TMProfileConstants.TM_PROFILE_ID);
+        String id = (String) p_request
+                .getParameter(TMProfileConstants.TM_PROFILE_ID);
         if (id != null)
         {
             addTMProfileToRequest(p_request, id);
@@ -225,11 +229,13 @@ public class ModifyTMProfileHandler extends PageHandler implements
         // Action type (edit or duplicate)
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);
-        
+
         List<TMPAttribute> tmpas = tmProfile.getAllTMPAttributes();
-        List<String> allAtt = TMPAttributeManager.getAvailableAttributenames(tmProfile);
-        
-        p_request.setAttribute(TMP_AVAILABLE_ATTS, TMPAttributeManager.toOneStr(allAtt));
+        List<String> allAtt = TMPAttributeManager
+                .getAvailableAttributenames(tmProfile);
+
+        p_request.setAttribute(TMP_AVAILABLE_ATTS,
+                TMPAttributeManager.toOneStr(allAtt));
         p_request.setAttribute(TMP_TMP_ATTS, TMPAttributeManager.toOne(tmpas));
     }
 }

@@ -25,8 +25,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +48,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -59,6 +61,7 @@ import com.globalsight.everest.util.comparator.CommentComparator;
 import com.globalsight.everest.util.comparator.IssueHistoryComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobComparator;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
@@ -68,7 +71,8 @@ import com.globalsight.util.IntHolder;
 
 public class CommentXlsReportHelper
 {
-    private static Logger s_logger = Logger.getLogger("Reports");
+    private static Logger s_logger = Logger
+            .getLogger(CommentXlsReportHelper.class);
 
     private WritableWorkbook m_workbook = null;
     private TargetPage targetPageVar = null;
@@ -89,6 +93,9 @@ public class CommentXlsReportHelper
     private final int TASK_FLAG = 2;
     private final int SEGMENT_FLAG = 3;
 
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
+    
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -112,9 +119,13 @@ public class CommentXlsReportHelper
         m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
                 settings);
 
-        addComments(p_request);
-        m_workbook.write();
-        m_workbook.close();
+        addComments(p_request, p_response);
+        
+        if (m_workbook != null)
+        {
+            m_workbook.write();
+            m_workbook.close();
+        }
     }
 
     /**
@@ -594,8 +605,11 @@ public class CommentXlsReportHelper
      * 
      * @exception Exception
      */
-    private void addComments(HttpServletRequest p_request) throws Exception
+    private void addComments(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
     {
+        String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         // print out the request parameters
         // show Priority or not
         setShowPriority(p_request);
@@ -619,6 +633,21 @@ public class CommentXlsReportHelper
 
         ArrayList jobs = new ArrayList();
         searchJob(jobs, p_request);
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
+                    + userId + ", " + "Comments Report" + ", " + reportJobIDS;
+            s_logger.debug(message);
+            m_workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
         s_logger.debug("test");
         s_logger.debug("jobs " + jobs.size());
         s_logger.debug("jobSheet " + jobSheet);
@@ -661,6 +690,10 @@ public class CommentXlsReportHelper
                 addSegmentComment(p_request, j, segmentSheet, segmentSheetRow);
             }
         }
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 100, ReportsData.STATUS_FINISHED);
     }
 
     /**
@@ -813,7 +846,6 @@ public class CommentXlsReportHelper
 
     /**
      * Gets Segment comment.
-     * 
      */
     private void addSegmentComment(HttpServletRequest p_request, Job j,
             WritableSheet segmentSheet, IntHolder row) throws Exception
@@ -823,40 +855,33 @@ public class CommentXlsReportHelper
             return;
         }
 
-        ArrayList comments = new ArrayList();
-        Collection c = j.getWorkflows();
-        for (Iterator it = c.iterator(); it.hasNext();)
+        ArrayList<IssueImpl> comments = new ArrayList<IssueImpl>();
+        for (Workflow wf : j.getWorkflows())
         {
-            Workflow wf = (Workflow) it.next();
-
-            // targe locale filter;
+            // target locale filter;
             if (checkLang(wf) == false)
             {
                 continue;
             }
 
-            Vector targetPages = wf.getTargetPages();
-
-            for (Iterator i = targetPages.iterator(); i.hasNext();)
+            for (TargetPage t : wf.getTargetPages())
             {
-                TargetPage t = (TargetPage) i.next();
-
                 // used to SetPageURL;
                 targetPageVar = t;
-                String targPageId = new Long(t.getId()).toString();
-
-                List commentList = ServerProxy.getCommentManager().getIssues(
-                        Issue.TYPE_SEGMENT, targPageId + "\\_");
+                List<IssueImpl> commentList = ServerProxy.getCommentManager()
+                        .getIssues(Issue.TYPE_SEGMENT, t.getId());
 
                 setCommentTargetPage(commentList, t);
                 comments.addAll(commentList);
             }
 
         }
+
         int flag = SEGMENT_FLAG;
         sortCommentBySegmentNumber(comments, p_request);
         addSegmentCommentFilter(p_request, j, segmentSheet, row, comments, flag);
-        // only coment with target locale need to print target language
+
+        // only comment with target locale need to print target language
         curLocale = null;
         targetPageVar = null;
     }

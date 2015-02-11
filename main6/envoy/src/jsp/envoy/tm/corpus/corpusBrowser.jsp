@@ -226,7 +226,7 @@ for (int i=0;i < pairs.size(); i++) {
     LocalePair lp = (LocalePair) pairs.get(i);
     if (companyId == null)
     {
-    	companyId = lp.getCompanyId();
+    	companyId = String.valueOf(lp.getCompanyId());
     }
     String key = lp.getSource().getId() + "-" + lp.getTarget().getId();
     pairsMap.put(key, lp);

@@ -417,7 +417,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
         Iterator it = wfs.iterator();
         Vector targetPages = new Vector();
 
-        String companyId = p_job.getCompanyId();
+        long companyId = p_job.getCompanyId();
 
         while (it.hasNext())
         {
@@ -569,14 +569,14 @@ public class CharacterCountReportGenerator implements ReportGenerator
     public void setPercent(int p_finishedJobNum)
     {
         ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS, 100
-                * p_finishedJobNum / m_jobIDS.size());
+                * p_finishedJobNum / m_jobIDS.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
         ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId,
-                m_jobIDS);
+                m_jobIDS, getReportType());
         if (data != null)
             return data.isCancle();
 

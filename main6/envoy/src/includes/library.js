@@ -197,3 +197,18 @@ function truncateUTF8Len(p_string, p_maxLen)
 
     return result;
 }
+
+// Convert Jquery XML Object to XML String
+function xmlObjToString(xmlObj) {
+	var xmlString = undefined;
+	if (window.ActiveXObject) {
+		xmlString = xmlObj[0].xml;
+	}
+
+	if (xmlString === undefined) {
+		var oSerializer = new XMLSerializer();
+		xmlString = oSerializer.serializeToString(xmlObj[0]);
+	}
+
+	return xmlString;
+}

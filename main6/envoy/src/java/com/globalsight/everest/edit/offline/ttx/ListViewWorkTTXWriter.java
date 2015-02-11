@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -152,9 +153,17 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
                 + "Fuzzy Match word count: "
                 + m_page.getFuzzyMatchWordCountAsString() + "</ut>");
         m_outputStream.write(m_strEOL);
+        // Server Instance ID
+        if (m_page.getServerInstanceID() != null)
+        {
+            m_outputStream.write("<ut DisplayText=\"GS:InstanceID\">"
+                    + AmbassadorDwUpConstants.LABEL_SERVER_INSTANCEID + ": "
+                    + m_page.getServerInstanceID() + "</ut>");
+            m_outputStream.write(m_strEOL);
+        }
         // EditAll
         m_outputStream.write("<ut DisplayText=\"GS:EditAll\">" + "Edit all: "
-                + m_page.getDisplayDownloadEditAll() + "</ut>");
+                + m_page.getDisplayTMEditType() + "</ut>");
         m_outputStream.write(m_strEOL);
         m_outputStream.write(m_strEOL);
     }

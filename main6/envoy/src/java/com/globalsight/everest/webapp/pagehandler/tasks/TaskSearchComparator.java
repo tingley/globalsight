@@ -18,6 +18,7 @@
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.util.Comparator;
+import org.apache.log4j.Logger;
 
 /**
  * TaskSearchComparator is used to sort List<TaskVo> 
@@ -51,7 +52,18 @@ public class TaskSearchComparator implements Comparator<TaskVo>
             r = o1.getWordCount() - o2.getWordCount();
             break;  
         case WorkflowTaskDataComparator.EST_COMP_DATE: // Estimated Completion Date
-            r = o1.getEstimatedCompletionDate().compareTo(o2.getEstimatedCompletionDate());
+
+            if (o1.getEstimatedCompletionDate() == null
+                    || o2.getEstimatedCompletionDate() == null)
+            {
+                r = 0;
+            }
+            else
+            {
+                r = o1.getEstimatedCompletionDate().compareTo(
+                        o2.getEstimatedCompletionDate());
+            }
+
             break;  
         }
         

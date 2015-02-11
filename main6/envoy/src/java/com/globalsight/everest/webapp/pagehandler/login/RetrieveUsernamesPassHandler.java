@@ -269,9 +269,10 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         {
             // validate email, and reset password
             String m_email = user.getEmail();
+            String password = null;
             if (m_email != null && m_email.equals(p_email))
             {
-                String password = new Password().generater(password_length);
+                password = new Password().generater(password_length);
                 user.setPasswordSet(true);
                 user.setPassword(password);
                 s_logger.info("The password of "
@@ -301,7 +302,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
 
                 result = false;
                 StringBuffer strBuffer = new StringBuffer();
-                strBuffer.append(",").append(user.getPassword()); // 0
+                strBuffer.append(",").append(password); // 0
                 strBuffer.append(",").append(user.getUserName()); // 1
                 strBuffer.append(",").append(user.getEmail()); // 2
                 strBuffer.append(",").append(

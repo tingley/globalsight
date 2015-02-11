@@ -19,6 +19,7 @@ package com.globalsight.everest.usermgr;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.naming.directory.Attribute;
@@ -31,6 +32,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.securitymgr.FieldSecurity;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserSearchParams;
 import com.globalsight.everest.workflow.Activity;
 
 /**
@@ -419,27 +421,30 @@ public interface UserManager
     public List getUsersByEmail(String p_email) throws UserManagerException,
             RemoteException;
 
-    /**
-     * Get users matched the specified criteria
-     * 
-     * @param p_userAttrs
-     *            - LDAPArrtibute array contains the User entry attributes
-     * @param p_roleAttrs
-     *            - LDAPArrtibute array contains the Role entry attributes
-     * @param p_project
-     *            - The project to filter the users by. This can be NULL if this
-     *            filtering shouldn't be done.
-     * 
-     * @author Bethany Wang
-     * @return a Vector of User objects
-     * @exception UserManagerException
-     *                - Component related exception.
-     * @exception java.rmi.RemoteException
-     *                Network related exception.
-     */
-    public Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
-            Project p_project) throws RemoteException, UserManagerException;
+//    /**
+//     * Get users matched the specified criteria
+//     * 
+//     * @param p_userAttrs
+//     *            - LDAPArrtibute array contains the User entry attributes
+//     * @param p_roleAttrs
+//     *            - LDAPArrtibute array contains the Role entry attributes
+//     * @param p_project
+//     *            - The project to filter the users by. This can be NULL if this
+//     *            filtering shouldn't be done.
+//     * 
+//     * @author Bethany Wang
+//     * @return a Vector of User objects
+//     * @exception UserManagerException
+//     *                - Component related exception.
+//     * @exception java.rmi.RemoteException
+//     *                Network related exception.
+//     */
+//    public Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
+//            Project p_project) throws RemoteException, UserManagerException;
 
+    public Vector getUsers(UserSearchParams p_searchParams,
+          Project p_project) throws RemoteException, UserManagerException;
+    		
     /**
      * Get all active users for current company only
      * 
@@ -466,6 +471,9 @@ public interface UserManager
      */
     public Vector getUsers() throws RemoteException, UserManagerException;
 
+    public Vector getUsers(String condtion) throws RemoteException,
+            UserManagerException;
+
     /**
      * Get all active user's information.
      * 
@@ -488,7 +496,7 @@ public interface UserManager
     public void addRole(Role p_role) throws RemoteException,
             UserManagerException;
 
-    public void removeRole(String p_roleName) throws RemoteException,
+    public void removeRole(Role p_role) throws RemoteException,
             UserManagerException;
 
     public void removeRoleFromLDAP(String p_roleName) throws RemoteException,
@@ -747,12 +755,14 @@ public interface UserManager
     /**
      * @see UserManagerLocal.loggedInUsers(String, String).
      */
-    public void loggedInUsers(String p_userName, String p_sessionId)
+    public void loggedInUsers(String p_userId, String p_sessionId)
             throws RemoteException, UserManagerException;
 
     /**
      * @see UserManagerLocal.loggedOutUsers(String, String).
      */
-    public void loggedOutUsers(String p_userName, String p_sessionId)
+    public void loggedOutUsers(String p_userId, String p_sessionId)
             throws RemoteException, UserManagerException;
+
+    public Map<String, String> getLoggedInUsers();
 }

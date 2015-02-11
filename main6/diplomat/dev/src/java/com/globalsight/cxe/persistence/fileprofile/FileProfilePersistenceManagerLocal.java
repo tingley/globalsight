@@ -16,6 +16,7 @@
  */
 package com.globalsight.cxe.persistence.fileprofile;
 
+import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +24,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 
 import com.globalsight.cxe.adapter.copyflow.CopyFlowAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
@@ -80,7 +85,8 @@ public class FileProfilePersistenceManagerLocal implements
             else
             {
                 // it is a duplicate
-                String errorArgs[] = { p_profile.getName() };
+                String errorArgs[] =
+                { p_profile.getName() };
                 throw new FileProfileEntityException(
                         FileProfileEntityException.MSG_FILE_PROFILE_ALREADY_EXISTS,
                         errorArgs, null);
@@ -95,10 +101,10 @@ public class FileProfilePersistenceManagerLocal implements
     /**
      * Return the file profile that has the given id.
      * 
-     * @param p_name -
-     *            The id of the file profile.
-     * @param p_editable --
-     *            whether the object should be editable
+     * @param p_name
+     *            - The id of the file profile.
+     * @param p_editable
+     *            -- whether the object should be editable
      * @return the file profile for the given name.
      */
     public FileProfile getFileProfileById(long p_id, boolean p_editable)
@@ -166,7 +172,8 @@ public class FileProfilePersistenceManagerLocal implements
             else
             {
                 // it is a duplicate
-                String errorArgs[] = { p_fileProfile.getName() };
+                String errorArgs[] =
+                { p_fileProfile.getName() };
                 throw new FileProfileEntityException(
                         FileProfileEntityException.MSG_FILE_PROFILE_ALREADY_EXISTS,
                         errorArgs, null);
@@ -201,7 +208,7 @@ public class FileProfilePersistenceManagerLocal implements
             {
                 hql.append("and f.companyId = :companyId ");
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             if (ids != null && ids.size() > 0)
@@ -217,6 +224,52 @@ public class FileProfilePersistenceManagerLocal implements
             hql.append(" order by f.name");
 
             return filterFileProfiles(HibernateUtil.search(hql.toString(), map));
+        }
+        catch (FileProfileEntityException fpee)
+        {
+            throw fpee;
+        }
+        catch (Exception e)
+        {
+            throw new FileProfileEntityException(e);
+        }
+    }
+
+    public Collection getAllFileProfilesByCondition(String condition)
+            throws FileProfileEntityException, RemoteException
+    {
+        try
+        {
+            Vector ids = KnownFormatTypeDescriptorModifier
+                    .getExcludedFormatIds();
+
+            StringBuilder hql = new StringBuilder();
+            Session session = HibernateUtil.getSession();
+            hql.append("select new com.globalsight.cxe.entity.fileprofile.FileprofileVo(f,kft.name,lp.name,c.name) ");
+            hql.append(" from FileProfileImpl f, Company c ,BasicL10nProfile lp, KnownFormatTypeImpl kft ");
+            hql.append(" where  kft.id=f.knownFormatTypeId and f.l10nProfileId=lp.id and c.id=f.companyId");
+
+            String currentId = CompanyThreadLocal.getInstance().getValue();
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+            {
+                hql.append(" and f.companyId = ").append(
+                        Long.parseLong(currentId));
+            }
+
+            if (ids != null && ids.size() > 0)
+            {
+                hql.append(" and f.knownFormatTypeId != ").append(ids.get(0));
+                for (int i = 1; i < ids.size(); i++)
+                {
+                    hql.append(" and f.knownFormatTypeId != " + ids.get(i));
+                }
+            }
+
+            hql.append(" ").append(condition)
+                    .append(" and f.isActive = 'Y' order by f.name");
+            Query q = session.createQuery(hql.toString());
+
+            return q.list();
         }
         catch (FileProfileEntityException fpee)
         {
@@ -259,8 +312,8 @@ public class FileProfilePersistenceManagerLocal implements
             sql.append(" is_active = 'Y' and id not in ( select distinct (");
             sql.append(" file_profile_id ) from FILE_PROFILE_EXTENSION ) ");
 
-            return HibernateUtil.searchWithSql(FileProfileImpl.class, sql
-                    .toString());
+            return HibernateUtil.searchWithSql(FileProfileImpl.class,
+                    sql.toString());
         }
         catch (Exception e)
         {
@@ -325,12 +378,12 @@ public class FileProfilePersistenceManagerLocal implements
         }
     }
 
-   /**
+    /**
      * Return the file profile id for the given name from the database The
      * returned object is in a state that does not allow editing.
      * 
-     * @param p_name -
-     *            The name of the file profile.
+     * @param p_name
+     *            - The name of the file profile.
      * @return the file profile id for the given name.
      */
     public long getFileProfileIdByName(String p_name)
@@ -372,10 +425,10 @@ public class FileProfilePersistenceManagerLocal implements
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and f.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
             hql += " order by f.id desc";
-            
+
             List result = HibernateUtil.search(hql, map);
 
             FileProfile fileProfile = null;
@@ -413,10 +466,10 @@ public class FileProfilePersistenceManagerLocal implements
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and f.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
             hql += " order by f.id desc";
-            
+
             List result = HibernateUtil.search(hql, map);
 
             FileProfile fileProfile = null;
@@ -563,7 +616,7 @@ public class FileProfilePersistenceManagerLocal implements
             {
                 hql += " and f.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return HibernateUtil.search(hql, map);
@@ -573,7 +626,7 @@ public class FileProfilePersistenceManagerLocal implements
             throw new FileProfileEntityException(e);
         }
     }
-    
+
     public FileExtensionImpl getFileExtension(long id)
     {
         try
@@ -584,6 +637,44 @@ public class FileProfilePersistenceManagerLocal implements
         {
             throw new FileProfileEntityException(e);
         }
+    }
+
+    public HashMap<Long, String> getIdViewFileExtensions()
+            throws FileProfileEntityException, RemoteException
+    {
+        String sql = "SELECT fp.ID fid,e.NAME ename FROM file_profile fp, extension e, file_profile_extension fpe "
+                + "WHERE fp.ID=fpe.FILE_PROFILE_ID AND e.ID=fpe.EXTENSION_ID AND fp.IS_ACTIVE='Y' AND e.IS_ACTIVE='Y'";
+
+        Session session = HibernateUtil.getSession();
+        SQLQuery query = session.createSQLQuery(sql);
+        Collection<Object[]> listo = query.list();
+        HashMap<Long, String> result = new HashMap<Long, String>();
+        try
+        {
+            for (Iterator<Object[]> a = listo.iterator(); a.hasNext();)
+            {
+                Object[] test = a.next();
+                long key = ((BigInteger) test[0]).longValue();
+                String value = result.get(key);
+                if (value != null)
+                {
+                    result.put(key, value + "<br>" + (String) test[1]);
+
+                }
+                else
+                {
+                    result.put(key, (String) test[1]);
+
+                }
+
+            }
+        }
+
+        catch (Exception e)
+        {
+            throw new FileProfileEntityException(e);
+        }
+        return result;
     }
 
     /**
@@ -720,7 +811,8 @@ public class FileProfilePersistenceManagerLocal implements
     {
         if (EditUtil.getUTF8Len(p_fileExtension.getName()) > 40)
         {
-            String errorArgs[] = { p_fileExtension.getName() };
+            String errorArgs[] =
+            { p_fileExtension.getName() };
             throw new FileProfileEntityException(
                     FileProfileEntityException.MSG_FILE_EXTENSION_TOO_LONG,
                     errorArgs, null,
@@ -728,7 +820,8 @@ public class FileProfilePersistenceManagerLocal implements
         }
         else if (!EditUtil.validateFileExtension(p_fileExtension.getName()))
         {
-            String errorArgs[] = { p_fileExtension.getName() };
+            String errorArgs[] =
+            { p_fileExtension.getName() };
             throw new FileProfileEntityException(
                     FileProfileEntityException.MSG_FILE_EXTENSION_INVALID,
                     errorArgs, null,
@@ -736,7 +829,8 @@ public class FileProfilePersistenceManagerLocal implements
         }
         else if (isFileExtensionNameDuplicate(p_fileExtension))
         {
-            String errorArgs[] = { p_fileExtension.getName() };
+            String errorArgs[] =
+            { p_fileExtension.getName() };
             throw new FileProfileEntityException(
                     FileProfileEntityException.MSG_FILE_EXTENSION_ALREADY_EXISTS,
                     errorArgs, null,
@@ -828,7 +922,8 @@ public class FileProfilePersistenceManagerLocal implements
         while (iter.hasNext())
         {
             KnownFormatType format = (KnownFormatType) iter.next();
-            if (formatNotInstalled(format)) iter.remove();
+            if (formatNotInstalled(format))
+                iter.remove();
         }
         return a;
     }
@@ -847,7 +942,8 @@ public class FileProfilePersistenceManagerLocal implements
             FileProfile fp = (FileProfile) iter.next();
             long formatId = fp.getKnownFormatTypeId();
             KnownFormatType format = queryKnownFormatType(formatId);
-            if (formatNotInstalled(format)) iter.remove();
+            if (formatNotInstalled(format))
+                iter.remove();
         }
         return a;
     }
@@ -897,11 +993,12 @@ public class FileProfilePersistenceManagerLocal implements
 
         return false; // format is installed
     }
-    
+
     /**
      * Validate if specified file profile is a XLZ reference file profile
+     * 
      * @param p_fileProfileName
-     * @return if specified file profile name is a xlz reference file profile, 
+     * @return if specified file profile name is a xlz reference file profile,
      *         return true
      */
     public boolean isXlzReferenceXlfFileProfile(String p_fileProfileName)
@@ -915,7 +1012,8 @@ public class FileProfilePersistenceManagerLocal implements
                 FileProfile xlzFP = getFileProfileByName(tmpFPName);
                 if (xlzFP == null)
                     xlzFP = getFileProfileByName(tmpFPName, false);
-                FileProfile xlfFP = getFileProfileByName(p_fileProfileName, false);
+                FileProfile xlfFP = getFileProfileByName(p_fileProfileName,
+                        false);
 
                 if (xlzFP != null && xlfFP != null
                         && xlzFP.getReferenceFP() == xlfFP.getId())

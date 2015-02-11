@@ -32,77 +32,38 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 String urlOk = ok.getPageURL();
 %>
 <html>
+<!-- This is /envoy/src/jsp/envoy/tm/management/statistics.jsp -->
 <head>
 <title><%= bundle.getString("lb_tm_statistics") %></title>
 <META HTTP-EQUIV="EXPIRES" CONTENT="0">
-<STYLE></STYLE>
-<%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT LANGUAGE="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
-<SCRIPT LANGUAGE="Javascript">
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript">
 var str_error = "<%=str_error == null ? "" : str_error%>";
 var str_tmName = "<%=str_tmName%>";
 
 function parseStatistics()
 { 
-  var dom;
-  //Mozilla compatibility  
   var xmlStr = 
 	  "<%=xmlStatistics.replace("\n","").replace("\r","").trim()%>";
+  var $xml = $( $.parseXML( xmlStr ) );
 
-  if(ie)
-  {
-    dom = oStatistics.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlStr,"text/xml");
-  }
+  var language, tus, tuvs;
+  $("#idTmName").html($xml.find("statistics > tm").text());
+  $("#idTmTus").html($xml.find("statistics > tus").text());
+  $("#idTmTuvs").html($xml.find("statistics > tuvs").text());
 
-  var tbody = idTableBody;
-
-  for (var i = tbody.rows.length; i > 0; --i)
-  {
-     tbody.deleteRow(i-1);
-  }
-
-  var row, cell;
-
-  var nodes, node;
-  var tm, tus, tuvs, language, number;
-
-  tm = dom.selectSingleNode('/statistics/tm').text;
-  tus  = dom.selectSingleNode('/statistics/tus').text;
-  tuvs = dom.selectSingleNode('/statistics/tuvs').text;
-
-  idTmName.innerHTML = tm;
-  idTmTus.innerHTML = tus;
-  idTmTuvs.innerHTML = tuvs;
-
-  nodes = dom.selectNodes('//languages/language');
-  for (var i = 0; i < nodes.length; ++i)
-  {
-    node = nodes[i];
-
-    row = tbody.insertRow(i);
-
-    language = node.selectSingleNode('name').text;
-    tus  = node.selectSingleNode('tus').text;
-    tuvs = node.selectSingleNode('tuvs').text;
-
-    cell = row.insertCell(0);
-    cell.innerHTML = language;
-
-    cell = row.insertCell(1);
-    cell.align = 'right';
-    cell.innerHTML = tus;
-
-    cell = row.insertCell(2);
-    cell.align = 'right';
-    cell.innerHTML = tuvs;
-  }
+  $("#idTableBody").html("");
+  $xml.find("statistics > languages > language").each(function(){
+	  language = $(this).find("name").text();
+	  tus = $(this).find("tus").text();
+	  tuvs = $(this).find("tuvs").text();
+	  html = "<tr><td>" + language + "</td><td align='right'>" + tus 
+	  		 + "</td><td align='right'>" + tuvs + "</td></tr>";
+	  $("#idTableBody").append(html);
+  });
 }
 
 function init()
@@ -148,8 +109,6 @@ function doLoad()
 </head>
 
 <body onload="doLoad()" onkeypress="doKeypress()">
-
-<XML id="oStatistics" style="display:none"><%=xmlStatistics%></XML>
 
 <DIV ID="contentLayer"
   STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;width:96%;">

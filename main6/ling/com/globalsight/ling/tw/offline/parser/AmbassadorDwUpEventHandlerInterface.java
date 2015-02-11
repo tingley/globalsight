@@ -94,4 +94,5 @@ public interface AmbassadorDwUpEventHandlerInterface
     
     public void handleJobID(String s);
     public void handleJobName(String s);
+    public void setServerInstanceID(String s);
 }

@@ -16,11 +16,7 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
-
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * LeveragedTuv is an interface that defines interfaces of Translation

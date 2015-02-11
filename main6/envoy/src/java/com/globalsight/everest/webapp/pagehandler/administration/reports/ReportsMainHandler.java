@@ -19,7 +19,13 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import org.apache.log4j.Logger;
 
 // Envoy packages
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.ProjectHandlerException;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
@@ -29,12 +35,16 @@ import java.io.IOException;
 
 import java.rmi.RemoteException;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean;
 
@@ -66,10 +76,88 @@ public class ReportsMainHandler extends PageHandler
     IOException,
     EnvoyServletException
     {
+
         addCustomExternalReportInfo(p_request);
+        checkSuperLP(p_request);
         super.invokePageHandler(p_pageDescriptor,p_request,p_response,p_context);
     }
 
+
+    private void checkSuperLP(HttpServletRequest p_request)
+    {
+        String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
+        String currentId = CompanyThreadLocal.getInstance().getValue();
+        boolean isSuperLP = false;
+
+
+        if (CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+        {
+
+            try
+            {
+                isSuperLP = ServerProxy.getUserManager()
+                        .containsPermissionGroup(userId,
+                                WebAppConstants.LOCALIZATION_PARTICIPANT);
+                if (!isSuperLP)
+                {
+                    return;
+                }
+                String superCompanyName = ServerProxy
+                        .getJobHandler()
+                        .getCompanyById(
+                                Long.parseLong(CompanyWrapper.SUPER_COMPANY_ID))
+                        .getCompanyName();
+                List<ProjectImpl> projects = ServerProxy.getProjectHandler()
+                        .getProjectsByUser(userId);
+                Set<String> set = new HashSet<String>();
+                for (ProjectImpl pr : projects)
+                {
+                    String name = CompanyWrapper.getCompanyNameById(pr
+                            .getCompanyId());
+                    set.add(name);
+                }
+                set.remove(superCompanyName);
+                StringBuilder json = new StringBuilder();
+                if (set != null && set.size() > 0)
+                {
+                    for (String str : set)
+                    {
+                        json.append(str);
+                        json.append(",");
+                    }
+                    json.setCharAt(json.length() - 1, ' ');
+                }
+                else
+                {
+                    json.append(" ");
+                }
+                p_request.setAttribute("companyJson", json.toString());
+
+            }
+            catch (ProjectHandlerException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (RemoteException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (GeneralException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (NamingException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     /**
      * Adds custom external report information to the request as attributes.

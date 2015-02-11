@@ -1,12 +1,9 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
 
-	<class name="com.globalsight.calendar.FluxCalendar"
-		table="CALENDAR">
+	<class name="com.globalsight.calendar.FluxCalendar" table="CALENDAR">
 
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
@@ -18,27 +15,25 @@
 			type="integer" not-null="true" />
 		<property name="timeZoneId" length="100" column="TIME_ZONE"
 			type="string" not-null="true" />
-		<property name="lastUpdatedBy" column="LAST_UPDATED_BY"
-			type="string" not-null="true" />
+		<property name="lastUpdatedBy" column="LAST_UPDATED_BY" type="string"
+			not-null="true" />
 		<property name="lastUpdatedTime" column="LAST_UPDATED_TIME"
 			type="timestamp" not-null="true" />
 		<property name="isDefault" column="IS_DEFAULT" type="yes_no"
 			not-null="true" />
-		<property name="companyId" length="22" column="COMPANY_ID"
-			type="string" not-null="true" />
+		<property name="companyId" length="20" column="COMPANY_ID"
+			type="long" not-null="true" />
 
-		<set name="holidays" table="CALENDAR_HOLIDAY"
-			cascade="save-update" lazy="false">
+		<set name="holidays" table="CALENDAR_HOLIDAY" cascade="save-update"
+			lazy="false">
 			<key column="CALENDAR_ID" />
 			<many-to-many class="com.globalsight.calendar.Holiday"
 				column="HOLIDAY_ID" />
 		</set>
 
-		<bag name="workingDays" inverse="true" cascade="all"
-			lazy="false">
+		<bag name="workingDays" inverse="true" cascade="all" lazy="false">
 			<key column="CALENDAR_ID" />
-			<one-to-many
-				class="com.globalsight.calendar.CalendarWorkingDay" />
+			<one-to-many class="com.globalsight.calendar.CalendarWorkingDay" />
 		</bag>
 
 	</class>

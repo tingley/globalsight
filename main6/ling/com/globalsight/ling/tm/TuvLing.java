@@ -253,7 +253,7 @@ abstract public class TuvLing extends PersistentObject implements Serializable,
      * 
      * @return true if localizable, false if translatable.
      */
-    abstract public boolean isLocalizable(String companyId);
+    abstract public boolean isLocalizable(long companyId);
 
     /**
      * Returns a localize type string which is used for persistence.

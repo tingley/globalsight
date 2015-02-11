@@ -26,10 +26,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -48,6 +46,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowEventObserver;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.UpdateSourcePageCommand;
 import com.globalsight.persistence.pageimport.UpdateTargetPageCommand;
@@ -248,7 +247,8 @@ public class PageEventObserverLocal implements PageEventObserver
         }
         catch (GeneralException e)
         {
-            String[] args = { p_targetPage.getExternalPageId() };
+            String[] args =
+            { p_targetPage.getExternalPageId() };
             throw new PageException(PageException.MSG_FAILED_TO_GET_PAGE_BY_ID,
                     args, e);
         }
@@ -283,7 +283,7 @@ public class PageEventObserverLocal implements PageEventObserver
                 Collection tuvs = getNonDeletedTuvsOfTargetPage(updatedPage);
 
                 // notify and update the state of the TUVs that are not deleted
-                Long companyId = Long.parseLong(p_targetPage.getSourcePage().getCompanyId());
+                long companyId = p_targetPage.getSourcePage().getCompanyId();
                 getTuvEventObserver().notifyPageExportedEvent(tuvs, companyId);
             }
 
@@ -357,8 +357,8 @@ public class PageEventObserverLocal implements PageEventObserver
     /**
      * Notification that the page export got cancelled.
      * 
-     * @param p_targetPage -
-     *            The target page of the export cancelled action.
+     * @param p_targetPage
+     *            - The target page of the export cancelled action.
      * @throws PageException
      *             when an error occurs.
      */
@@ -387,10 +387,11 @@ public class PageEventObserverLocal implements PageEventObserver
             PagePersistenceAccessor.updateStateOfPages(p_sourcePages,
                     PageState.EXPORTED);
 
-            for (Iterator it = p_sourcePages.iterator(); it.hasNext();) {
+            for (Iterator it = p_sourcePages.iterator(); it.hasNext();)
+            {
                 SourcePage sp = (SourcePage) it.next();
                 getTuvEventObserver().notifyJobExportedEvent(
-                        getTuvsOfSourcePage(sp), Long.parseLong(sp.getCompanyId()));
+                        getTuvsOfSourcePage(sp), sp.getCompanyId());
             }
         }
         catch (Exception e)
@@ -415,7 +416,7 @@ public class PageEventObserverLocal implements PageEventObserver
     {
         notifyExportFailEvent(p_targetPage, p_exceptionXml, true);
     }
-    
+
     /**
      * Set state of target page to EXPORT_FAILED.
      * 
@@ -428,25 +429,18 @@ public class PageEventObserverLocal implements PageEventObserver
      *             when an error occurs.
      */
     public void notifyExportFailEvent(TargetPage p_targetPage,
-            String p_exceptionXml, boolean sendEmail) throws PageException, RemoteException
+            String p_exceptionXml, boolean sendEmail) throws PageException,
+            RemoteException
     {
-    	PageManagerLocal.EXPORTING_TARGET_PAGE.remove(p_targetPage.getId());
+        WorkflowExportingHelper.setPageAsNotExporting(p_targetPage.getId());
+
         try
         {
             Workflow wf = p_targetPage.getWorkflowInstance();
-            
-            Vector<TargetPage> tPages = wf.getTargetPages();
-            if (tPages != null)
-            {
-                for (TargetPage tPage : tPages)
-                {
-                    PageManagerLocal.EXPORTING_TARGET_PAGE.remove(tPage.getId());
-                }
-            }
 
             // an interim export can happen during dispatch without
             // updating an states.
-            if (!wf.getState().equals(Workflow.DISPATCHED))
+            if (!inProgressWorkflow(wf.getState()))
             {
                 PagePersistenceAccessor.updateStateOfPage(p_targetPage,
                         PageState.EXPORT_FAIL, p_exceptionXml);
@@ -463,16 +457,23 @@ public class PageEventObserverLocal implements PageEventObserver
         {
             // if it fails, send an email to admin email address in
             // property file?
-            String[] args = { p_targetPage.toString() };
+            String[] args =
+            { p_targetPage.toString() };
             throw new PageException(
                     PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, args, e);
         }
     }
 
+    private boolean inProgressWorkflow(String workflowState)
+    {
+        return Workflow.READY_TO_BE_DISPATCHED.equals(workflowState)
+                || Workflow.PENDING.equals(workflowState)
+                || Workflow.DISPATCHED.equals(workflowState);
+    }
+
     /**
      * @see PageEventObserver#notifyImportSuccessEvent(Page, Collection, Page,
-     *      Collection)
-     *      <p>
+     *      Collection) <p>
      *      Set state IMPORT_SUCCESS for new pages. Set state OUT_OF_DATE for
      *      old pages.
      * @param p_sourcePage
@@ -677,7 +678,7 @@ public class PageEventObserverLocal implements PageEventObserver
             {
                 transaction.rollback();
             }
-            
+
             s_category.error("Could not persist page state failure.");
             throw new PageException(e);
         }
@@ -685,7 +686,7 @@ public class PageEventObserverLocal implements PageEventObserver
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
     }
@@ -781,20 +782,20 @@ public class PageEventObserverLocal implements PageEventObserver
     }
 
     // get the tuvs of a collection of pages.
-//    private List getTuvsOfSourcePages(Collection p_pages) throws Exception
-//    {
-//        Object[] sourcePages = p_pages.toArray();
-//        int size = sourcePages.length;
-//        List tuvs = new ArrayList();
-//
-//        for (int i = 0; i < size; i++)
-//        {
-//            SourcePage page = (SourcePage) sourcePages[i];
-//            tuvs.addAll(getTuvsOfSourcePage(page));
-//        }
-//
-//        return tuvs;
-//    }
+    // private List getTuvsOfSourcePages(Collection p_pages) throws Exception
+    // {
+    // Object[] sourcePages = p_pages.toArray();
+    // int size = sourcePages.length;
+    // List tuvs = new ArrayList();
+    //
+    // for (int i = 0; i < size; i++)
+    // {
+    // SourcePage page = (SourcePage) sourcePages[i];
+    // tuvs.addAll(getTuvsOfSourcePage(page));
+    // }
+    //
+    // return tuvs;
+    // }
 
     // get the tuvs of a collection of pages.
     private List getTuvsOfTargetPages(Collection p_pages) throws Exception
@@ -893,7 +894,7 @@ public class PageEventObserverLocal implements PageEventObserver
             SystemConfiguration config = SystemConfiguration.getInstance();
             String capLoginUrl = config
                     .getStringParameter(SystemConfiguration.CAP_LOGIN_URL);
-            String companyIdStr = job.getCompanyId();
+            String companyIdStr = String.valueOf(job.getCompanyId());
 
             String[] messageArguments = new String[6];
             messageArguments[0] = p_targetPage.getExternalPageId();
@@ -935,8 +936,7 @@ public class PageEventObserverLocal implements PageEventObserver
         catch (Exception e)
         {
             s_category
-                    .error(
-                            "Failed to notify Project Manager about an export failure.",
+                    .error("Failed to notify Project Manager about an export failure.",
                             e);
         }
     }
@@ -1024,7 +1024,8 @@ public class PageEventObserverLocal implements PageEventObserver
         }
         catch (Exception e)
         {
-            String[] args = { "Failed to get the snippet page template." };
+            String[] args =
+            { "Failed to get the snippet page template." };
 
             s_category.error(args[0], e);
             // tbd

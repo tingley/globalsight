@@ -62,6 +62,8 @@ import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TaskCommentInfoComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -167,7 +169,12 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 .getAttribute(WebAppConstants.PERMISSIONS);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-
+        if(p_request.getParameter("fromMyJobPage") != null) {
+            long contextMenuJobId = Long.valueOf(p_request.getParameter("jobId"));
+            Job contextMenuJob = WorkflowHandlerHelper.getJobById(contextMenuJobId);
+            TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT, contextMenuJob);
+        }
+        
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         String userId = user.getUserId();
         String wId = "";
@@ -246,7 +253,13 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 wId = (new Long(task.getId())).toString();
                 sessionMgr.setAttribute("jobName", task.getJobName());
 
-                companyId = ((Task) wo).getCompanyId();
+                
+                //added for JobDetails Page Rewirte
+                JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+                Job job = WorkflowHandlerHelper.getJobById(task.getJobId());
+                jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+                
+                companyId = String.valueOf(((Task) wo).getCompanyId());
             }
             else if (wo instanceof Job)
             {
@@ -254,7 +267,13 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 wId = (new Long(job.getId())).toString();
                 sessionMgr.setAttribute("jobName", job.getJobName());
 
-                companyId = ((Job) wo).getCompanyId();
+                //added for JobDetails Page Rewirte
+                JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+                //prevent hibernate lazily initialize Job Object
+                job = WorkflowHandlerHelper.getJobById(job.getJobId());
+                jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+
+                companyId = String.valueOf(((Job) wo).getCompanyId());
             }
         }
 
@@ -391,8 +410,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                             job.getJobComments());
 
                     // Get Segment comment summary info.
-					ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForTask(
-							task, p_request, sessionMgr, perms);
+                    ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForTask(
+                            task, p_request, sessionMgr, perms);
                     dataForTable(p_request, session, SEGMENT_COMMENT_LIST,
                             SEGMENT_COMMENT_KEY, new LocaleCommentsComparator(
                                     locale), segments);
@@ -411,8 +430,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                             JOB_COMMENT_KEY, new CommentComparator(locale),
                             job.getJobComments());
                     // Get list of target locales
-					List<GlobalSightLocale> targLocales = getValidTargetLocales(
-							job, p_request, perms);
+                    List<GlobalSightLocale> targLocales = getValidTargetLocales(
+                            job, p_request, perms);
 
                     // Get all activity comments for Job
                     ArrayList taskComments = (ArrayList) getTaskCommentsForJob(
@@ -427,8 +446,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     setTargetLocales(taskComments, sessionMgr, locale);
 
                     // Get Segment comment summary info.
-					ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForJob(
-							job, p_request, sessionMgr, perms);
+                    ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForJob(
+                            job, p_request, sessionMgr, perms);
 
                     dataForTable(p_request, session, SEGMENT_COMMENT_LIST,
                             SEGMENT_COMMENT_KEY, new LocaleCommentsComparator(
@@ -482,19 +501,23 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
      * Get the total # open comments count for each target page. Set it in the
      * request.
      */
-	private ArrayList<LocaleCommentsSummary> getSegmentSummaryForJob(Job job,
-			HttpServletRequest request, SessionManager sessionMgr,
-			PermissionSet perms) throws EnvoyServletException
+    private ArrayList<LocaleCommentsSummary> getSegmentSummaryForJob(Job job,
+            HttpServletRequest request, SessionManager sessionMgr,
+            PermissionSet perms) throws EnvoyServletException
     {
         CommentManager manager = null;
-        try {
+        try
+        {
             manager = ServerProxy.getCommentManager();
-        } catch (GeneralException ex) {
+        }
+        catch (GeneralException ex)
+        {
             throw new EnvoyServletException(ex);
         }
 
         // Set the selected locale in the request
-        String localeName = request.getParameter(SEGMENT_COMMENT_KEY + "Filter");
+        String localeName = request
+                .getParameter(SEGMENT_COMMENT_KEY + "Filter");
         if (localeName != null)
         {
             int idx = localeName.indexOf(',');
@@ -532,27 +555,31 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
 
             HashMap<Long, Integer> openCounts = null;
             HashMap<Long, Integer> closedCounts = null;
-			try {
-				openCounts = manager.getIssueCountPerTargetPage(
-						Issue.TYPE_SEGMENT, tpIds, statesOpen);
-				closedCounts = manager.getIssueCountPerTargetPage(
-						Issue.TYPE_SEGMENT, tpIds, statesClosed);
-			} catch (Exception e) {
-				throw new EnvoyServletException(e);
-			}
-
-			if (openCounts.size() == 0 && closedCounts.size() == 0) {
-            	continue;
+            try
+            {
+                openCounts = manager.getIssueCountPerTargetPage(
+                        Issue.TYPE_SEGMENT, tpIds, statesOpen);
+                closedCounts = manager.getIssueCountPerTargetPage(
+                        Issue.TYPE_SEGMENT, tpIds, statesClosed);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
             }
 
-			ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
+            if (openCounts.size() == 0 && closedCounts.size() == 0)
+            {
+                continue;
+            }
+
+            ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
             for (int k = 0; k < pages.size(); k++)
             {
-            	TargetPage tPage = (TargetPage) pages.get(k);
-				int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
-						: openCounts.get(tPage.getIdAsLong()));
-				int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
-						: closedCounts.get(tPage.getIdAsLong()));
+                TargetPage tPage = (TargetPage) pages.get(k);
+                int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
+                        : openCounts.get(tPage.getIdAsLong()));
+                int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
+                        : closedCounts.get(tPage.getIdAsLong()));
                 if ((countOpen + countClosed) > 0)
                 {
                     PageCommentsSummary ps = new PageCommentsSummary(tPage);
@@ -574,16 +601,19 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
      * Get the total # open comments count for each target page. Set it in the
      * request.
      */
-	private ArrayList<LocaleCommentsSummary> getSegmentSummaryForTask(
-			Task p_task, HttpServletRequest request, SessionManager sessionMgr,
-			PermissionSet perms) throws EnvoyServletException
+    private ArrayList<LocaleCommentsSummary> getSegmentSummaryForTask(
+            Task p_task, HttpServletRequest request, SessionManager sessionMgr,
+            PermissionSet perms) throws EnvoyServletException
     {
         CommentManager manager = null;
-		try {
-			manager = ServerProxy.getCommentManager();
-		} catch (GeneralException ex) {
-			throw new EnvoyServletException(ex);
-		}
+        try
+        {
+            manager = ServerProxy.getCommentManager();
+        }
+        catch (GeneralException ex)
+        {
+            throw new EnvoyServletException(ex);
+        }
 
         // Set the selected locale in the request
         String localeName = request
@@ -608,8 +638,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         {
             // get just the number of issues in OPEN state
             // query is also considered a subset of the OPEN state
-        	List<String> statesOpen = new ArrayList<String>();
-        	statesOpen.add(Issue.STATUS_OPEN);
+            List<String> statesOpen = new ArrayList<String>();
+            statesOpen.add(Issue.STATUS_OPEN);
             statesOpen.add(Issue.STATUS_QUERY);
             statesOpen.add(Issue.STATUS_REJECTED);
 
@@ -627,27 +657,31 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
 
             HashMap<Long, Integer> openCounts = null;
             HashMap<Long, Integer> closedCounts = null;
-			try {
-				openCounts = manager.getIssueCountPerTargetPage(
-						Issue.TYPE_SEGMENT, tpIds, statesOpen);
-				closedCounts = manager.getIssueCountPerTargetPage(
-						Issue.TYPE_SEGMENT, tpIds, statesClosed);
-			} catch (Exception e) {
-				throw new EnvoyServletException(e);
-			}
-
-			if (openCounts.size() == 0 && closedCounts.size() == 0) {
-            	return summary;
+            try
+            {
+                openCounts = manager.getIssueCountPerTargetPage(
+                        Issue.TYPE_SEGMENT, tpIds, statesOpen);
+                closedCounts = manager.getIssueCountPerTargetPage(
+                        Issue.TYPE_SEGMENT, tpIds, statesClosed);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
             }
 
-			ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
+            if (openCounts.size() == 0 && closedCounts.size() == 0)
+            {
+                return summary;
+            }
+
+            ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
             for (int k = 0; k < pages.size(); k++)
             {
-            	TargetPage tPage = (TargetPage) pages.get(k);
-				int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
-						: openCounts.get(tPage.getIdAsLong()));
-				int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
-						: closedCounts.get(tPage.getIdAsLong()));
+                TargetPage tPage = (TargetPage) pages.get(k);
+                int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
+                        : openCounts.get(tPage.getIdAsLong()));
+                int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
+                        : closedCounts.get(tPage.getIdAsLong()));
                 if ((countOpen + countClosed) > 0)
                 {
                     PageCommentsSummary ps = new PageCommentsSummary(tPage);
@@ -665,8 +699,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         return summary;
     }
 
-	private List<GlobalSightLocale> getValidTargetLocales(Job job,
-			HttpServletRequest request, PermissionSet perms)
+    private List<GlobalSightLocale> getValidTargetLocales(Job job,
+            HttpServletRequest request, PermissionSet perms)
     {
         HttpSession session = request.getSession();
         SessionManager sessionMgr = (SessionManager) session

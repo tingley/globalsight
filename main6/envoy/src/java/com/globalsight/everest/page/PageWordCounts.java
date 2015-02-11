@@ -26,16 +26,24 @@ public class PageWordCounts extends PersistentObject
     private static final long serialVersionUID = -5400707613158140160L;
     
     private Integer m_totalWordCount = new Integer(0);
-    
+    private Integer m_noMatchWordCount = new Integer(0);
     private Integer m_lowFuzzyWordCount = new Integer(0);
     private Integer m_medFuzzyWordCount = new Integer(0);
     private Integer m_medHiFuzzyWordCount = new Integer(0);
     private Integer m_hiFuzzyWordCount = new Integer(0);
-    private Integer m_unmatchedWordCount = new Integer(0);
     private Integer m_repetitionWordCount = new Integer(0);
-    private Integer m_subLevMatchWordCount = new Integer(0);
-    private Integer m_subLevRepetitionWordCount = new Integer(0);
-    
+
+    // When use MT,
+    // If MT confidence score is 100, mtTotalWordCount =
+    // m_MTExactMatchWordCount, mtFuzzyNoMatchWordCount and
+    // mtRepetitionsWordCount are 0 now.
+    // If MT confidence score is < 100, mtTotalWordCount =
+    // mtFuzzyNoMatchWordCount + mtRepetitionsWordCount, m_MTExactMatchWordCount
+    // is 0 now.
+    private Integer mtTotalWordCount = new Integer(0);
+    private Integer mtFuzzyNoMatchWordCount = new Integer(0);
+    private Integer mtRepetitionsWordCount = new Integer(0);
+
     /**
      * This includes ALL exact match word counts(segment-TM,context,MT,XLF and
      * PO exact matches etc).
@@ -58,14 +66,8 @@ public class PageWordCounts extends PersistentObject
     private Integer m_noUseInContextMatchWordCount = new Integer(0);
     
     private Integer m_MTExactMatchWordCount = new Integer(0);
-    
     private Integer m_xliffExactMatchWordCount = new Integer(0);
-    
     private Integer m_poExactMatchWordCount = new Integer(0);
-    
-    private Integer m_medFuzzyRepetitionWordCount = new Integer(0);
-    private Integer m_medHighFuzzyRepetitionWordCount = new Integer(0);
-    private Integer m_hiFuzzyRepetitionWordCount = new Integer(0);
     
     private Integer m_thresholdHiFuzzyWordCount = new Integer(0);
     private Integer m_thresholdMedHiFuzzyWordCount = new Integer(0);
@@ -86,10 +88,7 @@ public class PageWordCounts extends PersistentObject
             int p_medFuzzyWordCount, int p_medHiFuzzyWordCount,
             int p_hiFuzzyWordCount, int p_inContextMatchWordCount,
             int p_noUseInContextMatchWordCount, int p_totalExactMatchWordCount,
-            int p_unmatchedWordCount, int p_repetitionWordCount,
-            int p_medFuzzyRepetitionWordCount,
-            int p_medHighFuzzyRepetitionWordCount,
-            int p_hiFuzzyRepetitionWordCount)
+            int p_noMatchWordCount, int p_repetitionWordCount)
     {
         m_totalWordCount = new Integer(p_totalWordCount);
         contextMatchWordCount = new Integer(p_contextMatchWordCount);
@@ -101,11 +100,8 @@ public class PageWordCounts extends PersistentObject
         inContextMatchWordCount = new Integer(p_inContextMatchWordCount);
         m_noUseInContextMatchWordCount = new Integer(p_noUseInContextMatchWordCount);
         totalExactMatchWordCount = new Integer(p_totalExactMatchWordCount);
-        m_unmatchedWordCount = new Integer(p_unmatchedWordCount);
+        m_noMatchWordCount = new Integer(p_noMatchWordCount);
         m_repetitionWordCount = new Integer(p_repetitionWordCount);
-        m_medFuzzyRepetitionWordCount = new Integer(p_medFuzzyRepetitionWordCount);
-        m_medHighFuzzyRepetitionWordCount = new Integer(p_medHighFuzzyRepetitionWordCount);
-        m_hiFuzzyRepetitionWordCount = new Integer(p_hiFuzzyRepetitionWordCount);
     }
 
     //////////////////////////////////////////////////////////////////
@@ -338,9 +334,9 @@ public class PageWordCounts extends PersistentObject
     /**
      * To set the unmatched word count.
      */
-    public void setUnmatchedWordCount(int p_unmatchedWordCount)
+    public void setNoMatchWordCount(int p_noMatchWordCount)
     {
-        m_unmatchedWordCount = new Integer(p_unmatchedWordCount);
+        m_noMatchWordCount = new Integer(p_noMatchWordCount);
     }
 
     /**
@@ -348,14 +344,14 @@ public class PageWordCounts extends PersistentObject
      *
      * @return the unmatched word count as int type.
      */
-    public int getUnmatchedWordCount()
+    public int getNoMatchWordCount()
     {
-        int unmatchedWordCount = 0;
-        if (m_unmatchedWordCount != null)
+        int noMatchWordCount = 0;
+        if (m_noMatchWordCount != null)
         {
-            unmatchedWordCount = m_unmatchedWordCount.intValue();
+            noMatchWordCount = m_noMatchWordCount.intValue();
         }
-        return unmatchedWordCount;
+        return noMatchWordCount;
     }
 
 
@@ -382,74 +378,16 @@ public class PageWordCounts extends PersistentObject
         return repetitionWordCount;
     }
 
-    /**
-     * Get the word count for the sub-leverage-match category.
-     * See setSubLevMatchWordCount method for more details.
-     * 
-     * @return The sub-leverage-match category word counts.
-     */
-    public int getSubLevMatchWordCount()
-    {
-        return m_subLevMatchWordCount == null ? 0 : 
-            m_subLevMatchWordCount.intValue();
-    }
-
-    /**
-     * Set the value of the Sub-Leverage-Match word count to be
-     * the specified value.  This value is determined based on the 
-     * leverage match threshold percentage of the job during import
-     * with respect to the leverage match categories.  For example
-     * if the leverage match threshold is at 70%, the value for
-     * this word count would be the number of words in the 50-69%
-     * category.
-     *
-     * @param p_subLevMatchWordCount The number of words in the sub
-     * leverage match category.
-     */
-    public void setSubLevMatchWordCount(int p_subLevMatchWordCount)
-    {
-        m_subLevMatchWordCount = new Integer(p_subLevMatchWordCount);
-    }
-
-    /**
-     * Get the repetition word count for the sub-leverage-match category.
-     * See setSubLevRepetitionWordCount method for more details.
-     * 
-     * @return The sub-leverage-match-repetition word counts.
-     */
-    public int getSubLevRepetitionWordCount()
-    {
-        return m_subLevRepetitionWordCount == null ? 0 : 
-            m_subLevRepetitionWordCount.intValue();
-    }
-
-    /**
-     * Set the value of the Sub-Leverage-Match-Repetition word count to be
-     * the specified value.  This value is determined based on the 
-     * leverage match threshold percentage of the job during import
-     * with respect to the leverage match categories.  For example
-     * if the leverage match threshold is at 70%, the value for
-     * this word count would be the number of repetitions in the 50-69%
-     * category (since anything below 70% is considered no-match).
-     *
-     * @param p_subLevRepetitionWordCount The number of repetitions in the sub
-     * leverage match category.
-     */
-    public void setSubLevRepetitionWordCount(int p_subLevRepetitionWordCount)
-    {
-        m_subLevRepetitionWordCount = new Integer(p_subLevRepetitionWordCount);
-    }
-
-    public void setMTExtractMatchWordCount(int p_mtExactMatchWordCount)
+    public void setMtExactMatchWordCount(int p_mtExactMatchWordCount)
     {
     	this.m_MTExactMatchWordCount = new Integer(p_mtExactMatchWordCount);
     }
     
-    public int getMTExtractMatchWordCount()
+    public int getMtExactMatchWordCount()
     {
     	return this.m_MTExactMatchWordCount;
     }
-    
+
     public void setXliffExtractMatchWordCount(int p_xliffExactMatchWordCount)
     {
         this.m_xliffExactMatchWordCount = 
@@ -470,36 +408,35 @@ public class PageWordCounts extends PersistentObject
     {
         return this.m_poExactMatchWordCount;
     }
-    
-    public Integer getMedFuzzyRepetitionWordCount()
+
+    public void setMtTotalWordCount(int p_mtTotalWordCount)
     {
-        return m_medFuzzyRepetitionWordCount;
+        this.mtTotalWordCount = p_mtTotalWordCount;
     }
 
-    public void setMedFuzzyRepetitionWordCount(Integer medFuzzyRepetitionWordCount)
+    public int getMtTotalWordCount()
     {
-        this.m_medFuzzyRepetitionWordCount = medFuzzyRepetitionWordCount;
+        return this.mtTotalWordCount;
     }
 
-    public Integer getMedHighFuzzyRepetitionWordCount()
+    public void setMtFuzzyNoMatchWordCount(int p_mtFuzzyNoMatchWordCount)
     {
-        return m_medHighFuzzyRepetitionWordCount;
+        this.mtFuzzyNoMatchWordCount = p_mtFuzzyNoMatchWordCount;
     }
 
-    public void setMedHighFuzzyRepetitionWordCount(
-            Integer medHighFuzzyRepetitionWordCount)
+    public int getMtFuzzyNoMatchWordCount()
     {
-        this.m_medHighFuzzyRepetitionWordCount = medHighFuzzyRepetitionWordCount;
+        return this.mtFuzzyNoMatchWordCount;
     }
 
-    public Integer getHiFuzzyRepetitionWordCount()
+    public void setMtRepetitionsWordCount(int p_mtRepetitionsWordCount)
     {
-        return m_hiFuzzyRepetitionWordCount;
+        this.mtRepetitionsWordCount = p_mtRepetitionsWordCount;
     }
 
-    public void setHiFuzzyRepetitionWordCount(Integer hiFuzzyRepetitionWordCount)
+    public int getMtRepetitionsWordCount()
     {
-        this.m_hiFuzzyRepetitionWordCount = hiFuzzyRepetitionWordCount;
+        return this.mtRepetitionsWordCount;
     }
 
     /**
@@ -533,8 +470,8 @@ public class PageWordCounts extends PersistentObject
         sb.append((m_hiFuzzyWordCount != null ?
             m_hiFuzzyWordCount.toString() : "null"));
         sb.append(" unmatched=");
-        sb.append((m_unmatchedWordCount != null ?
-            m_unmatchedWordCount.toString() : "null"));
+        sb.append((m_noMatchWordCount != null ?
+            m_noMatchWordCount.toString() : "null"));
         sb.append(" repetition=");
         sb.append((m_repetitionWordCount != null ?
             m_repetitionWordCount.toString() : "null"));            

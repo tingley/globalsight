@@ -24,24 +24,27 @@ import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * This class provides factory methods to create a localization profile. 
+ * This class provides factory methods to create a localization profile.
  * 
  */
 public class L10nProfileFactory
 {
     /**
-     * Construct a new instance of BasicL10nProfile given an instance of
-     * a class that implements the L10nProfile interface.
-     *
-     * @param p_l10nProfile An instance of a class that implements the
-     *        l10nProfile interface.
-     * @return A new instance of BasicL10nProfile that has copies of
-     *         attributes from the provided instance of the class that
-     *         implements L10nProfile.
+     * Construct a new instance of BasicL10nProfile given an instance of a class
+     * that implements the L10nProfile interface.
+     * 
+     * @param p_l10nProfile
+     *            An instance of a class that implements the l10nProfile
+     *            interface.
+     * @return A new instance of BasicL10nProfile that has copies of attributes
+     *         from the provided instance of the class that implements
+     *         L10nProfile.
      */
-    public static BasicL10nProfile makeBasicL10nProfile(L10nProfile p_l10nProfile)
+    public static BasicL10nProfile makeBasicL10nProfile(
+            L10nProfile p_l10nProfile)
     {
-        BasicL10nProfile basicProfile = new BasicL10nProfile(p_l10nProfile.getName());
+        BasicL10nProfile basicProfile = new BasicL10nProfile(
+                p_l10nProfile.getName());
         basicProfile.setPriority(p_l10nProfile.getPriority());
         basicProfile.setAutomaticDispatch(p_l10nProfile.dispatchIsAutomatic());
         basicProfile.setProjectId(p_l10nProfile.getProjectId());
@@ -51,15 +54,17 @@ public class L10nProfileFactory
         }
         basicProfile.setTmChoice(p_l10nProfile.getTmChoice());
         basicProfile.setDescription(p_l10nProfile.getDescription());
-        basicProfile.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        basicProfile.setCompanyId(Long.parseLong(CompanyThreadLocal
+                .getInstance().getValue()));
         basicProfile.setSourceLocale(p_l10nProfile.getSourceLocale());
         basicProfile.setTimestamp(new Timestamp(System.currentTimeMillis()));
-        
+
         // Copy target locales and associated workflow template ids
         GlobalSightLocale[] targetLocales = p_l10nProfile.getTargetLocales();
         for (int i = 0; i < targetLocales.length; i++)
         {
-            WorkflowTemplateInfo wf = p_l10nProfile.getWorkflowTemplateInfo(targetLocales[i]);
+            WorkflowTemplateInfo wf = p_l10nProfile
+                    .getWorkflowTemplateInfo(targetLocales[i]);
 
             // clones the workflow and tasks - with cleared out ids
             WorkflowTemplateInfo newWf = wf.cloneForInsert();
@@ -67,27 +72,32 @@ public class L10nProfileFactory
         }
         return basicProfile;
     }
-    
+
     public static BasicL10nProfile makeDuplicateL10nProfile(
             L10nProfile p_l10nProfile, GlobalSightLocale p_gsl)
     {
         BasicL10nProfile duplicateProfile = new BasicL10nProfile();
         duplicateProfile.setName(p_l10nProfile.getName());
         duplicateProfile.setPriority(p_l10nProfile.getPriority());
-        duplicateProfile.setAutomaticDispatch(p_l10nProfile.dispatchIsAutomatic());
+        duplicateProfile.setAutomaticDispatch(p_l10nProfile
+                .dispatchIsAutomatic());
         duplicateProfile.setProjectId(p_l10nProfile.getProjectId());
         if (p_l10nProfile.getProject() != null)
         {
             duplicateProfile.setProject(p_l10nProfile.getProject());
         }
         duplicateProfile.setDescription(p_l10nProfile.getDescription());
-        duplicateProfile.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        duplicateProfile.setCompanyId(Long.parseLong(CompanyThreadLocal
+                .getInstance().getValue()));
         duplicateProfile.setSourceLocale(p_gsl);
         duplicateProfile.setTmChoice(p_l10nProfile.getTmChoice());
-        duplicateProfile.setDispatchCriteria(p_l10nProfile.getDispatchCriteria());
-        duplicateProfile.setExactMatchEditing(p_l10nProfile.isExactMatchEditing());
-        duplicateProfile.setRunScriptAtJobCreation(p_l10nProfile.runScriptAtJobCreation());
-        duplicateProfile.setJobCreationScriptName(p_l10nProfile.getNameOfJobCreationScript());
+        duplicateProfile.setDispatchCriteria(p_l10nProfile
+                .getDispatchCriteria());
+        duplicateProfile.setTMEditType(p_l10nProfile.getTMEditType());
+        duplicateProfile.setRunScriptAtJobCreation(p_l10nProfile
+                .runScriptAtJobCreation());
+        duplicateProfile.setJobCreationScriptName(p_l10nProfile
+                .getNameOfJobCreationScript());
         return duplicateProfile;
     }
 }

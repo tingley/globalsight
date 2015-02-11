@@ -780,6 +780,7 @@ public class FilterConfigurationFuncs {
 			String[] tag = tempStr.split("\\|\\|");
 			selenium.click(FilterConfiguration.BASE_FILTER_ADD_CONTENT_BUTTON);
 			selenium.type(FilterConfiguration.BASE_FILTER_CONTENT_NAME_TEXT, tag[0]);
+			selenium.type(FilterConfiguration.BASE_FILTER_PRIORITY, tag[2]);
 			if (tag[1].equals("true")) {
 				selenium.click(FilterConfiguration.BASE_FILTER_CONTENT_RE_CHECKBOX);
 			}

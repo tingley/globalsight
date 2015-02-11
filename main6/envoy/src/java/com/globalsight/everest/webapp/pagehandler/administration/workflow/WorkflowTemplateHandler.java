@@ -119,7 +119,8 @@ public class WorkflowTemplateHandler extends PageHandler implements
             String action = p_request.getParameter(ACTION);
             if (CANCEL_ACTION.equals(action))
             {
-                sessionMgr.setAttribute(WF_TEMPLATE_INFO,null);//distinguish cancel and previous
+                sessionMgr.setAttribute(WF_TEMPLATE_INFO, null);//distinguish cancel and previous
+                sessionMgr.setAttribute(TEMPLATE_ID, null);
             }
             if (SAVE_ACTION.equals(action))
             {
@@ -279,7 +280,7 @@ public class WorkflowTemplateHandler extends PageHandler implements
         String srcLocale = p_request.getParameter("srcLocale");
         String targLocale = p_request.getParameter("targLocale");
         String project = p_request.getParameter("project");
-        String companyName = p_request.getParameter("companyName");
+        String companyName = p_request.getParameter("workflowPageCompanyName");
 
         if (!FILTER_SEARCH.equals(action) || p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET)) {
             name = (String) sessionMgr.getAttribute("nameField");

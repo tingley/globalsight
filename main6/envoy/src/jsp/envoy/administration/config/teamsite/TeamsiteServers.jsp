@@ -322,7 +322,7 @@ function submitForm(selectedButton)
 
               String companyName =
                   ServerProxy.getJobHandler()
-                             .getCompanyById(Long.parseLong(tss.getCompanyId()))
+                             .getCompanyById(tss.getCompanyId())
                              .getCompanyName();
 
               String editURL = modifyUrl + "&" + tsServerId + "=" + tss.getId();

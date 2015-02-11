@@ -1,0 +1,25 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class
+		name="com.globalsight.everest.foundation.UserRoleImpl"
+		table="USER_ROLE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="sourceLocale" column="SOURCE_LOCALE" type="string"
+			not-null="true" unique="false" />
+		<property name="targetLocale" column="TARGET_LOCALE" type="string"
+			not-null="true" unique="false" />
+		<property name="name" column="NAME" type="string" />
+		<property name="cost" column="COST" type="string" />
+		<property name="rate" column="RATE" type="string" />
+		<property name="user" column="USER" type="string" />
+		<property name="state" column="STATE" type="int"/>
+		
+		<many-to-one name="activity" column="ACTIVITY_ID"
+			class="com.globalsight.everest.workflow.Activity" />
+	</class>
+
+</hibernate-mapping>

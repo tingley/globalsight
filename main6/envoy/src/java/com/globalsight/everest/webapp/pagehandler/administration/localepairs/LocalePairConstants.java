@@ -39,4 +39,6 @@ public interface LocalePairConstants
     public static final String DEPENDENCIES = "dependencies";
     public static final String REMOVE = "remove";
 
+    // Filter Names
+    public static final String FILTER_COMPANY = "lpCompanyFilter";
 }

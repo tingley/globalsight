@@ -12,7 +12,7 @@ public class FileProfile
     public static final String SAVE_BUTTON = "//input[@value='Save']";
     public static final String CANCEL_BUTTON = "//input[@value='Cancel']";
     
-    public static final String SEARCH_CONTENT_TEXT = "name=nameField";
+    public static final String SEARCH_CONTENT_TEXT = "//input[@id='uNameFilter']";
     public static final String SEARCH_BUTTON = "//input[@value='Search...']";
 
     // detail page
@@ -25,7 +25,7 @@ public class FileProfile
     public static final String FILE_EXTENSION_TYPE_SELECT = "extension";
     public static final String DEFAULT_EXPORT_CHECKBOX = "exportFiles";
     public static final String SELECTED_FILE_PROFILE_RADIO = "//input[@type='radio' and @onclick='enableButtons()' and @name='radioBtn' and @id='radioBtn']";
-    public static final String MAIN_TABLE = "//div[@id='contentLayer']/form/p/table/tbody/tr[2]/td/table/tbody";
+    public static final String MAIN_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
 
     // elements in the detail page
     private long id = -1l;

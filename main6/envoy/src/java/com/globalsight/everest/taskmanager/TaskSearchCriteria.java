@@ -49,8 +49,8 @@ public class TaskSearchCriteria
     /**
      * Return the search result based on the specified search criteria object.
      * 
-     * @param p_searchCriteriaParams -
-     *            The search criteria object.
+     * @param p_searchCriteriaParams
+     *            - The search criteria object.
      */
     public List search(SearchCriteriaParameters p_searchCriteriaParams)
             throws Exception
@@ -72,81 +72,82 @@ public class TaskSearchCriteria
             switch (((Integer) (keys[i])).intValue())
             {
             // job name
-            case TaskSearchParameters.JOB_NAME:
-                jobName(keys[i], criteria);
-                break;
+                case TaskSearchParameters.JOB_NAME:
+                    jobName(keys[i], criteria);
+                    break;
 
-            // job id
-            case TaskSearchParameters.JOB_ID:
-                jobId(keys[i], criteria);
-                break;
+                // job id
+                case TaskSearchParameters.JOB_ID:
+                    jobId(keys[i], criteria);
+                    break;
 
-            // job priority
-            case TaskSearchParameters.PRIORITY:
-                jobPriority(keys[i], criteria);
-                break;
+                // job priority
+                case TaskSearchParameters.PRIORITY:
+                    jobPriority(keys[i], criteria);
+                    break;
 
-            // activity name
-            case TaskSearchParameters.ACTIVITY_NAME:
-                activityName(keys[i], criteria);
-                break;
+                // activity name
+                case TaskSearchParameters.ACTIVITY_NAME:
+                    activityName(keys[i], criteria);
+                    break;
 
-            // activity state
-            case TaskSearchParameters.STATE:
-                activityState(keys[i], criteria);
-                break;
+                // activity state
+                case TaskSearchParameters.STATE:
+                    activityState(keys[i], criteria);
+                    break;
 
-            // Source locale
-            case TaskSearchParameters.SOURCE_LOCALE:
-                sourceLocaleExpression(keys[i], criteria);
-                break;
+                // Source locale
+                case TaskSearchParameters.SOURCE_LOCALE:
+                    sourceLocaleExpression(keys[i], criteria);
+                    break;
 
-            // target locale
-            case TaskSearchParameters.TARGET_LOCALE:
-                targetLocaleExpression(keys[i], criteria);
-                break;
+                // target locale
+                case TaskSearchParameters.TARGET_LOCALE:
+                    targetLocaleExpression(keys[i], criteria);
+                    break;
 
-            // activity acceptance start date
-            case TaskSearchParameters.ACCEPTANCE_START:
-                acceptanceStartExpression(keys[i], criteria);
-                break;
+                // activity acceptance start date
+                case TaskSearchParameters.ACCEPTANCE_START:
+                    acceptanceStartExpression(keys[i], criteria);
+                    break;
 
-            // activity acceptance end date
-            case TaskSearchParameters.ACCEPTANCE_END:
-                acceptanceEndExpression(keys[i], criteria);
-                break;
+                // activity acceptance end date
+                case TaskSearchParameters.ACCEPTANCE_END:
+                    acceptanceEndExpression(keys[i], criteria);
+                    break;
 
-            // activity est completion start date
-            case TaskSearchParameters.EST_COMPLETION_START:
-                estCompletionStartExpression(keys[i], criteria);
-                break;
+                // activity est completion start date
+                case TaskSearchParameters.EST_COMPLETION_START:
+                    estCompletionStartExpression(keys[i], criteria);
+                    break;
 
-            // activity est completion end date
-            case TaskSearchParameters.EST_COMPLETION_END:
-                estCompletionEndExpression(keys[i], criteria);
-                break;
+                // activity est completion end date
+                case TaskSearchParameters.EST_COMPLETION_END:
+                    estCompletionEndExpression(keys[i], criteria);
+                    break;
 
-            // company name
-            case TaskSearchParameters.COMPANY_NAME:
-                companyName(keys[i], criteria);
-                break;
-                
-            // ID
-            case TaskSearchParameters.ID:
-                id(keys[i], criteria);
-                break;
+                // company name
+                case TaskSearchParameters.COMPANY_NAME:
+                    companyName(keys[i], criteria);
+                    break;
 
-            default:
-                break;
+                // ID
+                case TaskSearchParameters.ID:
+                    id(keys[i], criteria);
+                    break;
+
+                default:
+                    break;
             }
         }
-        
+
         if (!criteria.keySet().contains(TaskSearchParameters.COMPANY_NAME))
         {
             if (!CompanyThreadLocal.getInstance().fromSuperCompany())
             {
                 hql.append(" and t.companyId = :companyId");
-                params.put("companyId", new Long(CompanyThreadLocal.getInstance().getValue()));
+                params.put("companyId", new Long(CompanyThreadLocal
+                        .getInstance().getValue()));
             }
         }
 
@@ -188,20 +189,20 @@ public class TaskSearchCriteria
 
         if (SearchCriteriaParameters.LESS_THAN.equals(condition))
         {
-            hql.append(" and t.workflow.job < :jobId ");
+            hql.append(" and t.workflow.job.id < :jobId ");
         }
         else if (SearchCriteriaParameters.GREATER_THAN.equals(condition))
         {
-            hql.append(" and t.workflow.job > :jobId ");
+            hql.append(" and t.workflow.job.id > :jobId ");
         }
         else
         {
-            hql.append(" and t.workflow.job = :jobId ");
+            hql.append(" and t.workflow.job.id = :jobId ");
         }
 
         params.put("jobId", Long.valueOf(jobId));
     }
-    
+
     /*
      * Prepare the search expression based on the job's priority.
      */
@@ -221,16 +222,16 @@ public class TaskSearchCriteria
 
         params.put("priority", priority);
     }
-    
 
     /*
      * Prepare the search expression based on the activity's name
      */
     private void activityName(Object p_key, Map criteria)
     {
-    	String name = (String) criteria.get(p_key);
-        String companyName = (String) criteria.get(TaskSearchParameters.COMPANY_NAME);
-        long companyId = CompanyWrapper.getCompanyByName(companyName).getId();        
+        String name = (String) criteria.get(p_key);
+        String companyName = (String) criteria
+                .get(TaskSearchParameters.COMPANY_NAME);
+        long companyId = CompanyWrapper.getCompanyByName(companyName).getId();
 
         if (name.indexOf("*") >= 0)
         {
@@ -240,12 +241,12 @@ public class TaskSearchCriteria
         else
         {
             hql.append(" and t.name = :name ");
-            name = name+"_"+companyId;
+            name = name + "_" + companyId;
         }
 
         params.put("name", name);
     }
-    
+
     /*
      * Prepare the search expression based on the activity's state
      */
@@ -253,22 +254,24 @@ public class TaskSearchCriteria
     {
         Integer state = (Integer) criteria.get(p_key);
         String stateStr = TaskImpl.getStateAsString(state.intValue());
-        
-        if(state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS) {
-            //add the "dispatched_to_translation","in translation",
-            //"translation completed" status into "in progress" search
-            hql.append(" and t.stateStr in ('"  
+
+        if (state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS)
+        {
+            // add the "dispatched_to_translation","in translation",
+            // "translation completed" status into "in progress" search
+            hql.append(" and t.stateStr in ('"
                     + TaskImpl.STATE_REDEAY_DISPATCH_GSEDTION_STR + "','"
                     + TaskImpl.STATE_DISPATCHED_TO_TRANSLATION_STR + "','"
                     + TaskImpl.STATE_IN_TRANSLATION_STR + "','"
-                    + TaskImpl.STATE_TRANSLATION_COMPLETED_STR +"') ");
+                    + TaskImpl.STATE_TRANSLATION_COMPLETED_STR + "') ");
         }
-        else {
+        else
+        {
             hql.append(" and t.stateStr = :state ");
             params.put("state", stateStr);
         }
     }
-    
+
     /**
      * Prepare the search expression based on the job's source locale
      */
@@ -324,7 +327,7 @@ public class TaskSearchCriteria
         hql.append(" and t.acceptedDate >= :acceptedDate ");
         params.put("acceptedDate", now.getTime());
     }
-    
+
     /*
      * Prepare the search expression based on the job's creation date (end)
      */
@@ -360,7 +363,7 @@ public class TaskSearchCriteria
         hql.append(" and t.acceptedDate <= :acceptedDate ");
         params.put("acceptedDate", now.getTime());
     }
-    
+
     /*
      * Prepare the search expression based on the job's workflows estimated
      * completion date
@@ -412,11 +415,10 @@ public class TaskSearchCriteria
             }
         }
 
-        hql
-                .append(" and t.estimatedCompletionDate >= :estimatedCompletionDate ");
+        hql.append(" and t.estimatedCompletionDate >= :estimatedCompletionDate ");
         params.put("estimatedCompletionDate", now.getTime());
     }
-    
+
     /*
      * Prepare the search expression based on the job's workflows' completion
      * end
@@ -467,11 +469,10 @@ public class TaskSearchCriteria
             }
         }
 
-        hql
-                .append(" and t.estimatedCompletionDate <= :estimatedCompletionDate ");
+        hql.append(" and t.estimatedCompletionDate <= :estimatedCompletionDate ");
         params.put("estimatedCompletionDate", now.getTime());
     }
-    
+
     /*
      * Prepare the search expression based on the company's name
      */

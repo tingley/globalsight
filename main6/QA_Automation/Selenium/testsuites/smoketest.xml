@@ -245,13 +245,13 @@
     </classes>
   </test>
   
-  <test name="CHECK 17.03 - CreateMTOptions" preserve-order="true">
+  <!--<test name="CHECK 17.03 - CreateMTOptions" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateMTOptions"/>
     </classes>
   </test>
 
-  <test name="CHECK 18.01 - Terminology" preserve-order="true">
+  --><test name="CHECK 18.01 - Terminology" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.Terminology"/>
     </classes>
@@ -367,7 +367,7 @@
     </classes>
   </test>
   
-  <test name="CHECK 21.03 - AddWFofLocalizationProfile" preserve-order="true">
+  <!--<test name="CHECK 21.03 - AddWFofLocalizationProfile" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.AddWFofLocalizationProfile"/>
     </classes>
@@ -379,7 +379,7 @@
     </classes>
   </test>  
   
-    <test name="CHECK 26.01 - CreateFileProfile" preserve-order="true">
+    --><test name="CHECK 26.01 - CreateFileProfile" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateFileProfile"/>
     </classes>

@@ -289,7 +289,15 @@ public class FMPreviewerHelper
 
                     if (getFirstGSColor(line) != null)
                     {
-                        String lineContent = Parser.getStringContent(line);
+                        // handle special char >
+                        String lineContent = line;
+                        int start = line.indexOf("`");
+                        int end = line.indexOf("'", start);
+                        if (start != -1 && end != -1)
+                        {
+                            lineContent = line.substring(start + 1, end);
+                        }
+                        
                         multiGSColors = getGSColor(lineContent);
                         line = removeGSColorTag(line);
                         paraLineStringTag = line;

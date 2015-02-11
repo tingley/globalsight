@@ -26,9 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.log4j.Logger;
-
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
@@ -101,6 +100,23 @@ public class PageTemplate extends PersistentObject
     private HashMap<String, String> mapOfSheetTabs = new HashMap<String, String>();
     private boolean isTabsTrip = false;
 
+    // For un-translated target in XLF/XLZ file, control if put source content
+    // into un-translated target when export. Generally, keep un-translated
+    // target as original, but sometimes it need source as target.
+    // -1 means this is an automatic export, user does not specify this
+    // parameter,it will refer to file profile definition.
+    private int populateSrcIntoUntranslatedTrg = -1;
+
+    public void setXlfSrcAsTrg(int p_value)
+    {
+        this.populateSrcIntoUntranslatedTrg = p_value;
+    }
+
+    public int getXlfSrcAsTrg()
+    {
+        return this.populateSrcIntoUntranslatedTrg;
+    }
+
     public boolean isTabsTrip()
     {
         return isTabsTrip;
@@ -140,6 +156,7 @@ public class PageTemplate extends PersistentObject
         m_templateParts = p_other.m_templateParts;
         m_tuvContents = p_other.m_tuvContents;
         m_sourcePage = p_other.m_sourcePage;
+        populateSrcIntoUntranslatedTrg = p_other.populateSrcIntoUntranslatedTrg;
     }
 
     /**
@@ -333,7 +350,7 @@ public class PageTemplate extends PersistentObject
 
                     if (part.getTuId() > 0)
                     {
-                        String companyId = m_sourcePage.getCompanyId();
+                        long companyId = m_sourcePage.getCompanyId();
                         Tuv targetTuv = part
                                 .getTuv(target_locale_id, companyId);
                         Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
@@ -352,8 +369,10 @@ public class PageTemplate extends PersistentObject
                             // then add
                             // the leverage match results into the alt-trans
                             // parts
+                            boolean isJobDataMigrated = m_sourcePage
+                                    .getRequest().getJob().isMigrated();
                             altStr = pt.getAltTrans(sourceTuv, targetTuv,
-                                    companyId);
+                                    companyId, isJobDataMigrated);
 
                             // If the tuv state is "localized" or
                             // "exact_match_localized"", add an attribute "isLocalized=yes"
@@ -374,7 +393,7 @@ public class PageTemplate extends PersistentObject
             // if there is a TU in this template part, append it too.
             if (part.getTuId() > 0)
             {
-                String companyId = m_sourcePage.getCompanyId();
+                long companyId = m_sourcePage.getCompanyId();
                 // If the TU has not been set, this will output "null"
                 // into the result string. Caller needs to make sure
                 // all TUs have been set to values.
@@ -384,64 +403,31 @@ public class PageTemplate extends PersistentObject
                 Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
                         companyId);
 
-                // For XLF file format, revert original target content in some
-                // cases.
+                // Revert original target content in some cases for XLF format.
                 if (tu.getDataType().equals(IFormatNames.FORMAT_XLIFF)
                         && tu instanceof TuImpl)
                 {
                     // For GBS-1864 by York on 2011-03-07
-                    boolean revertTrgCase1 = sourceTuv.getGxml().equals(
-                            targetTuv.getGxml())
-                            && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
-                                    .getValue();
-
-                    boolean wfFinished = isWfFinished();
-                    String sourceContent = tu.getSourceContent();
-                    boolean isMtlastModified = (targetTuv.getLastModifiedUser() != null && targetTuv
-                            .getLastModifiedUser().indexOf("_MT") > -1);
-                    boolean revertTrgCase2 = (!wfFinished
-                            && Extractor.IWS_REPETITION
-                                    .equalsIgnoreCase(sourceContent) && isMtlastModified);
+                    boolean revertTrgCase1 = needRevertXlfTargetCase1(
+                            sourceTuv, targetTuv);
+                    boolean revertTrgCase2 = needRevertXlfTargetCase2(tu,
+                            targetTuv);
                     if (revertTrgCase1 || revertTrgCase2)
                     {
-                        tuvString = tu.getXliffTarget();
-
-                        // If the target in source xliff file is empty like
-                        // "<target/>", when import, an extra space is added in
-                        // TU "<segment segmentId="1"> </segment>". This has
-                        // special purpose. When export,remove this extra space.
-                        if (tuvString != null)
-                        {
-                            String tmpTuvString = GxmlUtil
-                                    .stripRootTag(tuvString);
-                            if (tmpTuvString != null
-                                    && " ".equals(tmpTuvString))
-                            {
-                                tuvString = GxmlUtil.resetInnerText(tuvString,
-                                        "");
-                            }
-                        }
+                        tuvString = revertTargetForXlf(tu, sourceTuv,
+                                targetTuv);                        
                     }
                 }
-                // For PO file format, revert original target content in some
-                // cases.
+                // Revert original target content in some cases for PO format.
                 else if (IFormatNames.FORMAT_PO.equals(tu.getDataType())
                         && tu instanceof TuImpl)
                 {
-                    boolean revertTrgCase1 = sourceTuv.getGxml().equals(
-                            targetTuv.getGxml())
-                            && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
-                                    .getValue();
-                    if (revertTrgCase1)
+                    if (needRevertXlfTargetCase1(sourceTuv, targetTuv))
                     {
                         tuvString = tu.getXliffTarget();
                     }
                 }
 
-                if (c_logger.isDebugEnabled())
-                {
-                    System.err.println("tuv part: " + tuvString);
-                }
                 if (isTabsTrip)
                 {
                     String sheetName = buildSheetName(i + 1);
@@ -463,11 +449,102 @@ public class PageTemplate extends PersistentObject
                 {
                     tuvString = "<segment><removeTu/></segment>";
                 }
+
                 result.append(tuvString);
             }
         }
 
         return result.toString();
+    }
+
+    private String revertTargetForXlf(Tu tu, Tuv sourceTuv, Tuv targetTuv)
+    {
+        String result = tu.getXliffTarget();
+
+        // If the target in source xliff file is empty like "<target/>", when
+        // import, an extra space is added in TU
+        // "<segment segmentId="1"> </segment>". This has special purpose. When
+        // export, remove this extra space.
+        if (result != null)
+        {
+            String tmpTuvString = GxmlUtil.stripRootTag(result);
+            if (tmpTuvString != null && " ".equals(tmpTuvString))
+            {
+                result = GxmlUtil.resetInnerText(result, "");
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * For Idiom Word Server XLF or XLZ files, if target segment is not
+     * translated, need revert target to original content in general case.
+     * 
+     * @param sourceTuv
+     * @param targetTuv
+     * @return boolean
+     */
+    private boolean needRevertXlfTargetCase1(Tuv sourceTuv, Tuv targetTuv)
+    {
+        if (sourceTuv == null || targetTuv == null)
+            return false;
+
+        boolean isSrcEqualsToTrg = sourceTuv.getGxml().equals(
+                targetTuv.getGxml());
+        boolean isNotLocalized = (targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
+                .getValue());
+        if (isSrcEqualsToTrg && isNotLocalized)
+        {
+            if (populateSrcIntoUntranslatedTrg == 0)
+            {
+                return true;
+            }
+            else if (populateSrcIntoUntranslatedTrg == 1)
+            {
+                return false;
+            }
+            // user does not specify this, refer to file profile definition.
+            else
+            {
+                boolean populateSrcIntoTrg = false;
+                try
+                {
+                    long fpId = m_sourcePage.getRequest().getDataSourceId();
+                    FileProfile fp = ServerProxy
+                            .getFileProfilePersistenceManager()
+                            .getFileProfileById(fpId, false);
+                    populateSrcIntoTrg = (fp.getXlfSourceAsUnTranslatedTarget() == 1);
+                }
+                catch (Exception e)
+                {
+                }
+
+                return !populateSrcIntoTrg;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * For Idiom Word Server XLF or XLZ files, its "repetition" target should
+     * keep as original target content if workflow is not finished, even MTed.
+     * 
+     * @param tu
+     * @param targetTuv
+     * @return boolean
+     */
+    private boolean needRevertXlfTargetCase2(Tu tu, Tuv targetTuv)
+    {
+        String sourceContent = tu.getSourceContent();
+        boolean isMtlastModified = (targetTuv.getLastModifiedUser() != null && targetTuv
+                .getLastModifiedUser().indexOf("_MT") > -1);
+        boolean isRepetitionSegment = Extractor.IWS_REPETITION
+                .equalsIgnoreCase(sourceContent);
+        return (!isWfFinished() && isRepetitionSegment && isMtlastModified);
     }
 
     /**
@@ -582,14 +659,14 @@ public class PageTemplate extends PersistentObject
 
         return result;
     }
-    
+
     public String getTuvContent(Long tuId)
     {
         if (m_tuvContents != null)
         {
             return (String) m_tuvContents.get(tuId);
         }
-        
+
         return null;
     }
 

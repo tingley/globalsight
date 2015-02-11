@@ -63,7 +63,9 @@
     User user = (User)sessionManager.getAttribute(WebAppConstants.USER);
     String pmName = user.getUserName();
     String pNameFilter = (String) sessionManager.getAttribute("pNameFilter");
+    pNameFilter = pNameFilter == null ? "" : pNameFilter;
     String cNameFilter = (String) sessionManager.getAttribute("cNameFilter");
+    cNameFilter = cNameFilter == null ? "" : cNameFilter;
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     
     String error = (String) sessionManager.getAttribute(WebAppConstants.PROJECT_ERROR);
@@ -299,23 +301,41 @@ function submitForm(selectedButton)
             <amb:column label="checkbox" width="2%">
             <input type="checkbox" name="radioBtn" id="<%=user.getUserId()%>" value="<%=proj.getProjectId()%>" onclick="buttonManagement()">
             </amb:column>
-            <amb:column label="lb_name" sortBy="<%=ProjectComparator.PROJECTNAME%>" filter="pNameFilter" filterValue="<%=pNameFilter == null ? "" : pNameFilter %>" width="20%">
+            <amb:column label="lb_name" sortBy="<%=ProjectComparator.PROJECTNAME%>" filter="pNameFilter" filterValue="<%=pNameFilter%>" width="20%">
              <amb:permission name="<%=Permission.PROJECTS_EDIT%>" > <a href='javascript:void(0)' title='Edit project' onclick="modifyuser('<%= proj.getProjectId() %>')"> </amb:permission>
                <%=proj.getName()%> 
               <amb:permission name="<%=Permission.PROJECTS_EDIT%>" > </a> </amb:permission>
             </amb:column>
-            <amb:column label="lb_description" sortBy="<%=ProjectComparator.DESCRIPTION%>" width="45%">
+            <amb:column label="lb_description" sortBy="<%=ProjectComparator.DESCRIPTION%>" >
               <%=proj.getDescription()%>
             </amb:column>
             <amb:column label="lb_project_manager"
-             sortBy="<%=ProjectComparator.PROJECTMANAGER%>">
+             sortBy="<%=ProjectComparator.PROJECTMANAGER%>" width="10%">
               <%=proj.getProjectManagerName()%>
             </amb:column>
-            <amb:column label="lb_termbase" sortBy="<%=ProjectComparator.TERMBASE%>">
+            <amb:column label="lb_termbase" sortBy="<%=ProjectComparator.TERMBASE%>" width="10%">
               <% out.print(proj.getTermbaseName() == null ? "" : proj.getTermbaseName()); %>
             </amb:column>
+             <amb:column label="lb_pmcost_tag" sortBy="<%=ProjectComparator.PMCOST%>"  width="70px">
+              <% out.print(proj.getPMCost()*100); %>
+            </amb:column>
+             <amb:column label="lb_project_reviewOnlyAutoAccept" sortBy="<%=ProjectComparator.BOOLEANACCEPT%>"  width="150px">
+              <% out.print(proj.isReviewOnlyAutoAccept() == true ? "yes" : "no"); %>
+            </amb:column>
+             <amb:column label="lb_project_reviewOnlyAutoSend" sortBy="<%=ProjectComparator.BOOLEANSEND%>"  width="150px">
+              <% out.print(proj.isReviewOnlyAutoSend() == true ? "yes" : "no"); %>
+            </amb:column>
+             <amb:column label="lb_project_AutoAcceptPMTask" sortBy="<%=ProjectComparator.BOOLEANTASK%>"  width="150px">
+               <% out.print(proj.isAutoAcceptPMTask() == true ? "yes" : "no"); %>
+            </amb:column>
+             <% if (perms.getPermissionFor(Permission.ATTRIBUTE_GROUP_VIEW)) { %>
+             <amb:column label="lb_attribute_group"
+             sortBy="<%=ProjectComparator.ATTRIBUTESETNAME%>"  width="100px">
+              <%=proj.getAttributeSetName()%>
+            </amb:column>
+             <% } %>
             <% if (isSuperAdmin) { %>
-            <amb:column label="lb_company_name" sortBy="<%=ProjectComparator.ASC_COMPANY%>"  filter="cNameFilter" filterValue="<%=cNameFilter == null ? "" : cNameFilter %>" width="120">
+            <amb:column label="lb_company_name" sortBy="<%=ProjectComparator.ASC_COMPANY%>"  filter="cNameFilter" filterValue="<%=cNameFilter%>" width="100px">
               <%=CompanyWrapper.getCompanyNameById(proj.getCompanyId())%>
             </amb:column>
             <% } %>

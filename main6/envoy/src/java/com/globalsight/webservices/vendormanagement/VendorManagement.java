@@ -60,7 +60,8 @@ import com.globalsight.webservices.WebServiceException;
 public class VendorManagement extends AbstractWebService
 {
     // ------------------------ static variables
-    private static final Logger s_logger = Logger.getLogger("WebService");
+    private static final Logger s_logger = Logger
+            .getLogger(VendorManagement.class);
     private static com.globalsight.everest.vendormanagement.VendorManagement s_vm = null;
     private static ProjectHandler s_ph = null;
     private static SecurityManager s_sm = null;

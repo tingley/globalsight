@@ -54,6 +54,12 @@ var jsFilterNameOO = "<%= bundle.getString("lb_filter_ooFilter") %>";
 var jsFilterNameO2010 = "<%= bundle.getString("lb_filter_o2010Filter") %>";
 var jsFilterNamePO = "<%= bundle.getString("lb_filter_pofilter") %>";
 var jsFilterNameBase = "<%= bundle.getString("lb_filter_basefilter") %>";
+var jsPriority = "<%= bundle.getString("lb_priority") %>";
+var jsCurrentPriority = "<%= bundle.getString("lb_priority_current") %>";
+var jsNewPriority = "<%= bundle.getString("lb_priority_new") %>";
+var jsEditPriority = "<%= bundle.getString("lb_priority_edit") %>";
+var jsAlertSamePriority = "<%= bundle.getString("lb_filter_alertSamePriority") %>";
+var jsAlertPriorityValue = "<%= bundle.getString("lb_filter_alertPriorityValue") %>";
 
 var jsFilterDescJavaProperties = "<%= bundle.getString("lb_filter_javapropertiesfilter_desc") %>";
 var jsFilterDescJavaScript = "<%= bundle.getString("lb_filter_javascriptfilter_desc") %>";
@@ -226,6 +232,7 @@ var jsO2010UnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_U
 var jsO2010UnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
 var jsO2010XmlFilter = "<%= bundle.getString("lb_filter_o2010Filter_xmlFilter") %>";
 var jsO2010TransMaster = "<%= bundle.getString("lb_filter_extract_slidemaster") %>";
+var jsO2010TransFootEndNotes = "<%= bundle.getString("lb_filter_translateEndnoteFootnote") %>";
 
 var lbReferencedFileProfileName = "<%= bundle.getString("lb_filter_referenced_FPName") %>";
 var lbReferencedFilterName = "<%= bundle.getString("lb_filter_referenced_FilterName") %>";
@@ -251,6 +258,9 @@ var jsExposeLeftMasterPage = "<%= bundle.getString("lb_filter_translate_left_mas
 var jsExposeRightMasterPage = "<%= bundle.getString("lb_filter_translate_right_master_page")%>";
 var jsExposeOtherMasterPage = "<%= bundle.getString("lb_filter_translate_other_master_page")%>";
 
+var jsFilterNamePlainTextFilter = "<%= bundle.getString("lb_filter_plaintextfilter") %>";
+var jsFilterDescPlainTextFilter = "<%= bundle.getString("lb_filter_plaintextfilter_desc") %>";
+
 <%
 java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
 namemap.put("java_properties_filter", "jsFilterNameJavaProperties");
@@ -267,6 +277,7 @@ namemap.put("office2010_filter", "jsFilterNameO2010");
 namemap.put("po_filter", "jsFilterNamePO");
 namemap.put("base_filter", "jsFilterNameBase");
 namemap.put("frame_maker_filter", "jsFilterNameFMFilter");
+namemap.put("plain_text_filter", "jsFilterNamePlainTextFilter");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -283,6 +294,7 @@ descmap.put("office2010_filter", "jsFilterDescO2010");
 descmap.put("po_filter", "jsFilterDescPO");
 descmap.put("base_filter", "jsFilterDescBase");
 descmap.put("frame_maker_filter", "jsFilterDescFMFilter");
+descmap.put("plain_text_filter", "jsFilterDescPlainTextFilter");
 %>
 
 function getFilterNameByTableName(tablename)
@@ -349,6 +361,30 @@ function splitByFirstIndex(str, flag)
 	}
 	
 	return false;
+}
+
+function sortPriority(x, y)
+{
+    var p1 = parseInt(x.priority);
+    var p2 = parseInt(y.priority);
+    var n1 = "" + x.aName;
+    var n2 = "" + y.aName;
+    
+    if (p1 == p2)
+    {
+        if (n1 == n2)
+        {
+            return 0;
+        }
+        else
+        {
+            return n1 > n2 ? 1 : -1;
+        }
+    }
+    else
+    {
+        return p1 > p2 ? 1 : -1;
+    }
 }
 
 </script>

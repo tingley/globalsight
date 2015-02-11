@@ -35,7 +35,6 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -62,6 +61,7 @@ import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowPersistenceAccessor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -109,9 +109,10 @@ public class ExportEventObserverLocal implements ExportEventObserver
         }
 
         // remove the old events (older than a month)
-        // sometimes GS will generate some dirty data. Removing these data will result in exception.!!!
+        // sometimes GS will generate some dirty data. Removing these data will
+        // result in exception.!!!
         // so disable this.
-//        removeOldEvents();
+        // removeOldEvents();
     }
 
     //
@@ -144,7 +145,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
             String s = "notifyBeginExportSourceBatch: JobId=" + p_job.getId()
                     + "UserName=" + p_user.getUserName() + ", pageIds="
                     + p_pageIds + ", taskId=" + p_taskId;
-            String[] args = { s };
+            String[] args =
+            { s };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_INVALID_PARAMS, args, null);
@@ -187,7 +189,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
                     + "UserName=" + p_user.getUserName() + ", pageIds="
                     + p_pageIds + ", wfIds=" + p_wfIds + ", taskId=" + p_taskId
                     + ", exportType=" + p_exportType;
-            String[] args = { s };
+            String[] args =
+            { s };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_INVALID_PARAMS, args, null);
@@ -200,16 +203,17 @@ public class ExportEventObserverLocal implements ExportEventObserver
     /**
      * See ExportEventObserver interface
      */
-    synchronized public void notifyPageExportComplete(long p_exportBatchId, String p_pageId,
-            HttpServletRequest p_request) throws RemoteException,
-            ExportEventObserverException
+    synchronized public void notifyPageExportComplete(long p_exportBatchId,
+            String p_pageId, HttpServletRequest p_request)
+            throws RemoteException, ExportEventObserverException
     {
         if (p_exportBatchId <= 0 || p_pageId == null || p_request == null)
         {
             String s = "notifyPageExportComplete: p_exportId="
                     + p_exportBatchId + ", p_pageId=" + p_pageId
                     + ", p_request=" + p_request;
-            String[] args = { s };
+            String[] args =
+            { s };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_INVALID_PARAMS, args, null);
@@ -242,7 +246,17 @@ public class ExportEventObserverLocal implements ExportEventObserver
         {
             return;
         }
-
+        
+        List<ExportingPage> ps = event.getExportingPages();
+        for (ExportingPage p : ps)
+        {
+    		GenericPage tp = p.getPage();
+    		if (tp instanceof TargetPage) {
+				TargetPage tpage = (TargetPage) tp;
+				WorkflowExportingHelper.setPageAsNotExporting(tpage.getId());
+			}
+        }
+        
         boolean shouldRemove = s_removeInfo
                 || event.getExportType().equals(ExportBatchEvent.CREATE_STF);
 
@@ -258,8 +272,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
             try
             {
                 TaskManager mgr = ServerProxy.getTaskManager();
-                mgr.updateStfCreationState(event.getTaskId().longValue(), event
-                        .isExportSuccess() ? Task.COMPLETED : Task.FAILED);
+                mgr.updateStfCreationState(event.getTaskId().longValue(),
+                        event.isExportSuccess() ? Task.COMPLETED : Task.FAILED);
 
                 s_logger.debug("STF export (" + p_exportBatchId
                         + ") has completed.");
@@ -314,7 +328,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
         }
         catch (Exception ex)
         {
-            String args[] = { String.valueOf(p_eventId) };
+            String args[] =
+            { String.valueOf(p_eventId) };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_FAILED_TO_GET_EBE, args,
@@ -334,11 +349,12 @@ public class ExportEventObserverLocal implements ExportEventObserver
             Map map = new HashMap();
             map.put("jId", new Long(p_jobId));
             List events = HibernateUtil.search(hql, map);
-            HibernateUtil.delete(events);           
+            HibernateUtil.delete(events);
         }
         catch (Exception ex)
         {
-            String[] args = { String.valueOf(p_jobId) };
+            String[] args =
+            { String.valueOf(p_jobId) };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_FAILED_TO_REMOVE_BY_JOB_ID,
@@ -356,18 +372,18 @@ public class ExportEventObserverLocal implements ExportEventObserver
         arg.add(new Long(p_batchId));
         arg.add(new Long(p_pageId));
 
-//        ExportBatchEvent.class;
+        // ExportBatchEvent.class;
         String hql = "from ExportingPage p where p.exportBatchEvent.id = :bId and p.page.id = :pId";
         Map map = new HashMap();
         map.put("bId", new Long(p_batchId));
         map.put("pId", new Long(p_pageId));
-        
+
         List pages = HibernateUtil.search(hql, map);
         if (pages.size() > 0)
         {
-            return (ExportingPage)pages.get(0);
+            return (ExportingPage) pages.get(0);
         }
-        else 
+        else
         {
             return null;
         }
@@ -431,7 +447,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
                 // throw an exception.
                 if (p_exportType.equals(ExportBatchEvent.CREATE_STF))
                 {
-                    String[] args = { msg };
+                    String[] args =
+                    { msg };
 
                     throw new ExportEventObserverException(
                             ExportEventObserverException.MSG_FAILED_TO_GET_PAGE,
@@ -468,7 +485,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
         }
         catch (Exception ex)
         {
-            String[] args = { p_event.toString() };
+            String[] args =
+            { p_event.toString() };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_FAILED_TO_PERSIST_EXPORT_INFO,
@@ -523,7 +541,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
     }
@@ -564,18 +582,18 @@ public class ExportEventObserverLocal implements ExportEventObserver
             {
                 session = HibernateUtil.getSession();
                 transaction = session.beginTransaction();
-
-                ExportingPage pageClone = (ExportingPage) session.get(
+                session.evict(page);
+                page = (ExportingPage) session.get(
                         ExportingPage.class, page.getIdAsLong());
-                pageClone.setEndTime(endTime);
-                pageClone.setErrorMessage(details);
-                pageClone.setState(newState);
-                pageClone.setExportPath(exportPath);
+                page.setEndTime(endTime);
+                page.setErrorMessage(details);
+                page.setState(newState);
+                page.setExportPath(exportPath);
                 char isComp = (isComponentPage == null || isComponentPage
                         .equalsIgnoreCase("false")) ? 'N' : 'Y';
-                pageClone.setComponentPage(isComp);
+                page.setComponentPage(isComp);
 
-                session.update(pageClone);
+                session.saveOrUpdate(page);
                 transaction.commit();
 
                 s_logger.debug("updateExportingPage: ExportBatchId "
@@ -587,12 +605,11 @@ public class ExportEventObserverLocal implements ExportEventObserver
             }
             else
             {
-                s_logger
-                        .warn("updateExportingPage: PageId "
-                                + p_pageId
-                                + " in ExportBatch "
-                                + p_batchId
-                                + " was NOT found. Either the BatchId or the PageId are not valid.");
+                s_logger.warn("updateExportingPage: PageId "
+                        + p_pageId
+                        + " in ExportBatch "
+                        + p_batchId
+                        + " was NOT found. Either the BatchId or the PageId are not valid.");
                 return false;
             }
         }
@@ -604,18 +621,17 @@ public class ExportEventObserverLocal implements ExportEventObserver
             }
 
             // just warn, but do not throw an exception
-            s_logger
-                    .warn("updateExportingPage: PageId "
-                            + p_pageId
-                            + "in ExportBatch "
-                            + p_batchId
-                            + " was NOT found. Either the BatchId or the PageId are not valid.");
+            s_logger.warn("updateExportingPage: PageId "
+                    + p_pageId
+                    + "in ExportBatch "
+                    + p_batchId
+                    + " was NOT found. Either the BatchId or the PageId are not valid.");
         }
         finally
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
 
@@ -662,7 +678,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
                 transaction.rollback();
             }
 
-            String[] args = { event.toString() };
+            String[] args =
+            { event.toString() };
 
             throw new ExportEventObserverException(
                     ExportEventObserverException.MSG_FAILED_TO_UPDATE, args, ex);
@@ -671,7 +688,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
     }
@@ -710,9 +727,10 @@ public class ExportEventObserverLocal implements ExportEventObserver
             String dateBatchCompleted = DateHelper.getFormattedDateAndTime(
                     new Date(time), userLocale);
             Job job = p_batchEvent.getJob();
-            String companyIdStr = job.getCompanyId();
+            String companyIdStr = String.valueOf(job.getCompanyId());
 
-            String[] args = new String[] {
+            String[] args = new String[]
+            {
                     job.getJobName(),
                     p_batchEvent.getIdAsLong().toString(),
                     dateBatchStarted,
@@ -763,11 +781,10 @@ public class ExportEventObserverLocal implements ExportEventObserver
         }
         catch (Exception ex)
         {
-            s_logger
-                    .error(
-                            "Failed to send e-mail. The export process has completed but\r\n"
-                                    + "the user will not receive e-mail notification due to the following exception:\r\n",
-                            ex);
+            s_logger.error(
+                    "Failed to send e-mail. The export process has completed but\r\n"
+                            + "the user will not receive e-mail notification due to the following exception:\r\n",
+                    ex);
         }
     }
 
@@ -793,7 +810,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
             Iterator iter = requests.iterator();
             Request firstRequest = (Request) iter.next();
             String efxml = firstRequest.getEventFlowXml();
-            String companyIdStr = job.getCompanyId();
+            String companyIdStr = String.valueOf(job.getCompanyId());
 
             // parse the efxml for the import initiator id
             xmlParser = XmlParser.hire();
@@ -819,11 +836,10 @@ public class ExportEventObserverLocal implements ExportEventObserver
         }
         catch (Exception ex)
         {
-            s_logger
-                    .error(
-                            "Failed to send e-mail to the import initiator. The export process has completed but\r\n"
-                                    + "the user will not receive e-mail notification due to the following exception:\r\n",
-                            ex);
+            s_logger.error(
+                    "Failed to send e-mail to the import initiator. The export process has completed but\r\n"
+                            + "the user will not receive e-mail notification due to the following exception:\r\n",
+                    ex);
         }
         finally
         {
@@ -871,8 +887,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
 
                 pageName = exportPath
                         .equals(ExportConstants.ABSOLUTE_EXPORT_PATH_UNKNOWN) ? page
-                        .getExternalPageId()
-                        : exportPath;
+                        .getExternalPageId() : exportPath;
 
                 s_logger.debug("Page is a source page (" + pageName + ","
                         + locale.getDisplayName() + ", EP_ExportPath"
@@ -898,8 +913,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
                     // (as we did in the past).
                     pageName = exportPath
                             .equals(ExportConstants.ABSOLUTE_EXPORT_PATH_UNKNOWN) ? page
-                            .getExternalPageId()
-                            : exportPath;
+                            .getExternalPageId() : exportPath;
 
                     s_logger.debug("Page is a target page (" + pageName + ","
                             + locale.getDisplayName() + ", EP_ExportPath"
@@ -1021,8 +1035,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
             }
         }
 
-        String[] statusAndResults = { batchFailed ? "batchFailed" : null,
-                combinedResults.toString() };
+        String[] statusAndResults =
+        { batchFailed ? "batchFailed" : null, combinedResults.toString() };
         return statusAndResults;
     }
 
@@ -1122,7 +1136,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
 
             Vector arg = new Vector();
             arg.add(threshold);
-            
+
             String hql = "from ExportBatchEvent e where e.startTime <= :time";
             Map map = new HashMap();
             map.put("time", threshold);

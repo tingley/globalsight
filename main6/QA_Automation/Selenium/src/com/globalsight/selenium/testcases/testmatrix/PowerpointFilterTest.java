@@ -25,6 +25,7 @@ import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyJobs;
 import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
+import com.globalsight.selenium.testcases.util.SeleniumUtils;
 import com.thoughtworks.selenium.Selenium;
 
 public class PowerpointFilterTest extends BaseTestCase {
@@ -72,10 +73,9 @@ public class PowerpointFilterTest extends BaseTestCase {
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
 		selenium.type(FileProfile.SEARCH_CONTENT_TEXT, fp[0]);
-		selenium.click(FileProfile.SEARCH_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		basic.selectRadioButtonFromTable(selenium, FileProfile.MAIN_TABLE, fp[0]);
-		selenium.click(FileProfile.EDIT_BUTTON);
+		selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
+		SeleniumUtils.selectRadioButtonFromTable(selenium,FileProfile.MAIN_TABLE, fp[0]);
+        selenium.click("link=" + fp[0]);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		selenium.select(FileProfile.FILTER_SELECT, "label=" + ppt_filtername);
 		selenium.click(FileProfile.SAVE_BUTTON);
@@ -135,7 +135,7 @@ public class PowerpointFilterTest extends BaseTestCase {
 					internalTextPostFilter, internalTextPostFilterChoose, "powerpoint");
 
 			tmp.createJob(filterJob + i, dir, fp[0], targetLocales);
-			Thread.sleep(60000);
+			Thread.sleep(10000);
 			jobNames[i] = filterJob + i;
 
 		}

@@ -129,7 +129,8 @@ public class RatesFuncs extends BasicFuncs {
 			return;
 		}
 		try {
-			selenium.click(Rates.Edit_BUTTON);
+			//selenium.click(Rates.Edit_BUTTON);
+			selenium.click("link=" + iRateName);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			selenium.type(Rates.Name_TEXT_FIELD, newRateName);
 			selenium.select(Rates.Currency_SELECT, "label="+ newCurrency);
@@ -165,9 +166,9 @@ public class RatesFuncs extends BasicFuncs {
 			Assert.assertEquals(this.isPresentInTable(selenium,
 					Rates.Rates_TABLE, newRateName), true);
 			Assert.assertEquals(this.getColumnText(selenium, Rates.Rates_TABLE,
-					newRateName, 5), newCurrency);
+					newRateName, 6), newCurrency);
 			Assert.assertEquals(this.getColumnText(selenium, Rates.Rates_TABLE,
-					newRateName, 6), newRateType);
+					newRateName, 7), newRateType);
 		} catch (Exception e) {
 			Reporter.log(e.getMessage());
 		}
@@ -177,17 +178,18 @@ public class RatesFuncs extends BasicFuncs {
 	// added by ShenYang 2011-06-29
 	public void addUserNewRate(Selenium selenium, String iUserName)
 			throws Exception {
-		boolean selected = selectRadioButtonFromTable(selenium,
-				Users.USER_LIST_TABLE, iUserName);
-
-		// if(this.getColumnText(selenium, Users.NewRole_TABLE, iRateName,
-		// 1)==);
-		if (!selected) {
-			Reporter.log("Cannot find a proper Rate.");
-			return;
-		}
+//		boolean selected = selectRadioButtonFromTable(selenium,
+//				Users.USER_LIST_TABLE, iUserName);
+//
+//		// if(this.getColumnText(selenium, Users.NewRole_TABLE, iRateName,
+//		// 1)==);
+//		if (!selected) {
+//			Reporter.log("Cannot find a proper Rate.");
+//			return;
+//		}
 		try {
-			selenium.click(Users.EDIT_BUTTON);
+			selenium.click("link=" + iUserName);
+//			selenium.click(Users.EDIT_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			selenium.click(Users.ROLES_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);

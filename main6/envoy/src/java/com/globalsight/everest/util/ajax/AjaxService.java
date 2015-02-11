@@ -62,6 +62,7 @@ import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
 import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo;
 import com.globalsight.cxe.entity.filterconfiguration.SpecialFilterToDelete;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -456,6 +457,44 @@ public class AjaxService extends HttpServlet
         FilterHelper.updateJavaScriptFilter(filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
     }
+    
+    public void savePlainTextFilter()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        PlainTextFilter filter = new PlainTextFilter();
+        filter.setCompanyId(companyId);
+        filter.setConfigXml("");
+        filter.setFilterDescription(filterDesc);
+        filter.setFilterName(filterName);
+        long filterId = FilterHelper.saveFilter(filter);
+
+        saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
+
+        writer.write(filterId + "");
+    }
+
+    public void updatePlainTextFilter()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+
+        String hql = "from PlainTextFilter infl where infl.filterName=:name "
+                + "and infl.companyId = :companyId";
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", filterName);
+        map.put("companyId", companyId);
+
+        PlainTextFilter filter = (PlainTextFilter) HibernateUtil.getFirst(hql, map);
+        if (filter != null)
+        {
+            filter.setFilterDescription(filterDesc);
+            HibernateUtil.update(filter);
+            
+            saveBaseFilterMapping(filter.getId(),
+                    FilterConstants.PLAINTEXT_TABLENAME);
+        }
+    }
 
     private void loadInddFilterParameter(InddFilter filter)
     {
@@ -660,6 +699,10 @@ public class AjaxService extends HttpServlet
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
+        
+        boolean footendnoteTranslate = Boolean.parseBoolean(request
+                .getParameter("footendnoteTranslate"));
+        filter.setFootendnoteTranslate(footendnoteTranslate);
 
         boolean masterTranslate = Boolean.parseBoolean(request
                 .getParameter("masterTranslate"));

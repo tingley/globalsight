@@ -62,6 +62,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.BaseDataWrap;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 
 public abstract class BasicReportHandler
 {
@@ -70,9 +71,10 @@ public abstract class BasicReportHandler
     public static final String[] SUPPORTED_UI_LOCALES = new String[]
     { "en_US", "fr_FR", "es_ES", "de_DE", "ja_JP" };
 
+    public static final String BUNDLE_LOCATION = ResourceBundleConstants.BUNDLE_LOCATION;
+    public static final String COMMON_MESSAGES = BUNDLE_LOCATION + "common";
     public static final String DEFAULT_LOCALE = "en_US";
     public static final String UI_LOCALE_PARAM_NAME = "uilocale";
-    public static final String COMMON_MESSAGES = "messages/common";
 
     // workflow states
     public static final String DISPATCHED = "DISPATCHED";
@@ -635,35 +637,35 @@ public abstract class BasicReportHandler
             throws Exception
     {
         HashMap<Long, Object[]> map = new HashMap<Long, Object[]>();
-        
+
         JbpmContext ctx = null;
         try
         {
-        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             for (Workflow wf : job.getWorkflows())
             {
                 long instanceId = wf.getId();
                 ProcessInstance instance = ctx.getProcessInstance(instanceId);
-				Collection<?> taskCollection = instance.getTaskMgmtInstance()
-						.getTaskInstances();
-				for (Iterator<?> taskIt = taskCollection.iterator(); taskIt
-						.hasNext();)
+                Collection<?> taskCollection = instance.getTaskMgmtInstance()
+                        .getTaskInstances();
+                for (Iterator<?> taskIt = taskCollection.iterator(); taskIt
+                        .hasNext();)
                 {
                     TaskInstance taskInstance = (TaskInstance) taskIt.next();
-					Long taskId = new Long(taskInstance.getTask().getTaskNode()
-							.getId());
+                    Long taskId = new Long(taskInstance.getTask().getTaskNode()
+                            .getId());
                     String activityName = taskInstance.getName();
-					String userResponsible = UserUtil
-							.getUserNameById(taskInstance.getActorId());
+                    String userResponsible = UserUtil
+                            .getUserNameById(taskInstance.getActorId());
                     Object[] values = new Object[]
-                    		{ taskId, activityName, userResponsible };
+                    { taskId, activityName, userResponsible };
                     map.put(taskId, values);
                 }
             }
         }
         finally
         {
-        	ctx.close();
+            ctx.close();
         }
 
         return map;

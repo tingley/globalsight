@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,12 +38,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.entity.fileprofile.FileprofileVo;
+import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
@@ -64,6 +68,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 /**
  * FileProfileMainHandler, A page handler to produce the entry page (index.jsp)
@@ -75,7 +80,7 @@ public class FileProfileMainHandler extends PageHandler
 {
     static private final Logger logger = Logger
             .getLogger(FileProfileMainHandler.class);
-
+	private static int NUM_PER_PAGE = 10;
     /**
      * Invokes this PageHandler
      * 
@@ -96,9 +101,6 @@ public class FileProfileMainHandler extends PageHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-        FileProfileSearchParameters params = (FileProfileSearchParameters) sessionMgr
-                .getAttribute("searchParams");
-
         String action = p_request.getParameter("action");
 
         try
@@ -107,7 +109,7 @@ public class FileProfileMainHandler extends PageHandler
             {
                 clearSessionExceptTableInfo(session,
                         FileProfileConstants.FILEPROFILE_KEY);
-                sessionMgr.setAttribute("searchParams", params);
+                //sessionMgr.setAttribute("searchParams", params);
             }
             else if (FileProfileConstants.CREATE.equals(action))
             {
@@ -139,21 +141,13 @@ public class FileProfileMainHandler extends PageHandler
                 }
                 removeFileProfile(p_request, session);
             }
-            else if (FileProfileConstants.SEARCH_ACTION.equals(action))
+            if ((p_request.getParameter("linkName") != null && !p_request
+                    .getParameter("linkName").startsWith("self")))
             {
-                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=fileprofiles");
-                    return;
-                }
-                params = getSearchCriteria(p_request, false);
+                sessionMgr.clear();
             }
-            else if (FileProfileConstants.ADV_SEARCH_ACTION.equals(action))
-            {
-                params = getSearchCriteria(p_request, true);
-            }
-            dataForTable(p_request, session, params);
+            handleFilters( p_request, sessionMgr,  action);
+            dataForTable(p_request, session);
         }
         catch (NamingException ne)
         {
@@ -460,7 +454,7 @@ public class FileProfileMainHandler extends PageHandler
                 p_request.getParameter("desc"), xmlEncodeChar);
         p_fp.setDescription(desc);
 
-        p_fp.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
         p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
         p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") != null);
         p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") != null);
@@ -539,7 +533,6 @@ public class FileProfileMainHandler extends PageHandler
         p_fp.setJsFilterRegex(jsFilter);
 
         String terminologyApproval = p_request.getParameter("terminologyRadio");
-
         if (terminologyApproval != null)
         {
             p_fp.setTerminologyApproval(Integer.parseInt(terminologyApproval));
@@ -547,6 +540,14 @@ public class FileProfileMainHandler extends PageHandler
 
         String BOMType = p_request.getParameter("bomType");
         p_fp.setBOMType(Integer.parseInt(BOMType));
+
+        String xlfSourceAsUnTranslatedTarget = p_request
+                .getParameter("xlfSrcAsTargetRadio");
+        if (xlfSourceAsUnTranslatedTarget != null)
+        {
+            p_fp.setXlfSourceAsUnTranslatedTarget(Integer
+                    .parseInt(xlfSourceAsUnTranslatedTarget));
+        }
 
         /**
          * String referenceFPId = p_request.getParameter("xlfFp"); if
@@ -556,25 +557,66 @@ public class FileProfileMainHandler extends PageHandler
          */
     }
 
+  
     /**
      * Get data for main table.
      */
     private void dataForTable(HttpServletRequest p_request,
-            HttpSession p_session, FileProfileSearchParameters p_params)
-            throws RemoteException, NamingException, GeneralException
+            HttpSession p_session) throws RemoteException, NamingException,
+            GeneralException
     {
+        SessionManager sessionMgr = (SessionManager) p_session.getAttribute(SESSION_MANAGER);
+        StringBuffer condition = new StringBuffer();
+        String[][] array = new String[][]
+        {
+        { "uNameFilter", "f.name" },
+        { "uLPFilter", "lp.name" },
+        { "uSourceFileFormatFilter", "kft.name" },
+        { "uCompanyFilter", "c.name" } };
+        // filterTableName
+        String uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
+        boolean needRemove = false;
+        Map<String, String> filres = new HashMap<String, String>();
+        if (StringUtils.isNotBlank(uFNFilter))
+        {
+            condition.append(" and  f.filterTableName IS NOT null");
+            filres = FilterHelper.getallFiltersLikeName(StringUtil
+                    .transactSQLInjection(uFNFilter.trim()));
+            needRemove = true;
+
+        }
+        for (int i = 0; i < array.length; i++)
+        {
+            makeCondition(sessionMgr, condition, array[i][0], array[i][1]);
+        }
         Collection fileprofiles = null;
         try
         {
-            if (p_params == null)
-            {
-                fileprofiles = ServerProxy.getFileProfilePersistenceManager()
-                        .getAllFileProfiles();
-            }
-            else
-            {
-                fileprofiles = ServerProxy.getProjectHandler()
-                        .findFileProfileTemplates(p_params);
+            fileprofiles = ServerProxy.getFileProfilePersistenceManager().getAllFileProfilesByCondition(condition.toString());
+            if(needRemove){
+                if (filres.size() > 0)
+                {
+                    LOOP:
+                    for (Iterator iter = fileprofiles.iterator(); iter
+                            .hasNext();)
+                    {
+                        FileprofileVo fileprofilevo = (FileprofileVo) iter
+                                .next();
+                        FileProfile FileProfile = fileprofilevo
+                                .getFileProfile();
+                        String filterName = filres.get(FileProfile
+                                .getFilterTableName()
+                                + FileProfile.getFilterId());
+                        if (filterName == null)
+                        {
+                            iter.remove();
+                        }
+                    }
+                }
+                else
+                {
+                    fileprofiles.clear();
+                }
             }
         }
         catch (Exception e)
@@ -582,17 +624,27 @@ public class FileProfileMainHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
 
-        Locale uiLocale = (Locale) p_session
-                .getAttribute(WebAppConstants.UILOCALE);
-        Hashtable l10nprofiles = ServerProxy.getProjectHandler()
-                .getAllL10nProfileNames();
+        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
 
+        String numOfPerPage = p_request.getParameter("numOfPageSize");
+        if (StringUtil.isNotEmpty(numOfPerPage))
+        {
+            try
+            {
+                NUM_PER_PAGE = Integer.parseInt(numOfPerPage);
+            }
+            catch (Exception e)
+            {
+                NUM_PER_PAGE = Integer.MAX_VALUE;
+            }
+        }
+        HashMap<Long, String> idViewExtensions = ServerProxy
+                .getFileProfilePersistenceManager().getIdViewFileExtensions();
         setTableNavigation(p_request, p_session, (List) fileprofiles,
-                new FileProfileComparator(uiLocale, l10nprofiles), 10,
-                FileProfileConstants.FILEPROFILE_LIST,
+                new FileProfileComparator(uiLocale, idViewExtensions),
+                NUM_PER_PAGE, FileProfileConstants.FILEPROFILE_LIST,
                 FileProfileConstants.FILEPROFILE_KEY);
 
-        p_request.setAttribute("l10nprofiles", l10nprofiles);
         CVSFileProfileManagerLocal cvsFPManager = new CVSFileProfileManagerLocal();
         ArrayList<CVSFileProfile> cvsfps = (ArrayList<CVSFileProfile>) cvsFPManager
                 .getAllCVSFileProfiles();
@@ -606,8 +658,20 @@ public class FileProfileMainHandler extends PageHandler
             }
         }
         p_request.setAttribute("existCVSFPs", existCVSFPs);
-
+        p_request.setAttribute("idViewExtensions", idViewExtensions);
+        Hashtable l10nprofiles = ServerProxy.getProjectHandler().getAllL10nProfileNames();
         checkPreReqData(p_request, p_session, l10nprofiles);
+    }
+
+    private void makeCondition(SessionManager sessionMgr,
+            StringBuffer condition, String par, String sqlparam)
+    {
+        String uNameFilter = (String) sessionMgr.getAttribute(par);
+        if(StringUtils.isNotBlank(uNameFilter)){
+            condition.append(" and  " + sqlparam + " LIKE '%"
+                    + StringUtil.transactSQLInjection(uNameFilter.trim())
+                    + "%'");
+        }
     }
 
     /**
@@ -646,5 +710,34 @@ public class FileProfileMainHandler extends PageHandler
         }
         sessionMgr.setAttribute("searchParams", params);
         return params;
+    }
+
+    private void handleFilters(HttpServletRequest p_request,
+            SessionManager sessionMgr, String action)
+    {
+        String uNameFilter = (String) p_request.getParameter("uNameFilter");
+        String uLPFilter = (String) p_request.getParameter("uLPFilter");
+        String uFNFilter = (String) p_request.getParameter("uFNFilter");
+        String uSourceFileFormatFilter = (String) p_request
+                .getParameter("uSourceFileFormatFilter");
+        String uCompanyFilter = (String) p_request
+                .getParameter("uCompanyFilter");
+
+        if (p_request.getMethod().equalsIgnoreCase(
+                WebAppConstants.REQUEST_METHOD_GET))
+        {
+            uNameFilter = (String) sessionMgr.getAttribute("uNameFilter");
+            uLPFilter = (String) sessionMgr.getAttribute("uLPFilter");
+            uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
+            uSourceFileFormatFilter = (String) sessionMgr
+                    .getAttribute("uSourceFileFormatFilter");
+            uCompanyFilter = (String) sessionMgr.getAttribute("uCompanyFilter");
+        }
+        sessionMgr.setAttribute("uNameFilter", uNameFilter);
+        sessionMgr.setAttribute("uLPFilter", uLPFilter);
+        sessionMgr.setAttribute("uFNFilter", uFNFilter);
+        sessionMgr.setAttribute("uSourceFileFormatFilter",
+                uSourceFileFormatFilter);
+        sessionMgr.setAttribute("uCompanyFilter", uCompanyFilter);
     }
 }

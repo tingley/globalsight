@@ -8,6 +8,7 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+            com.globalsight.everest.edit.online.OnlineEditorConstants,
             com.globalsight.everest.edit.SynchronizationStatus,
             com.globalsight.everest.page.pageexport.ExportConstants,
             com.globalsight.everest.util.system.SystemConfiguration,
@@ -133,24 +134,13 @@ if (newStatus != null)
     }
 }
 
-List<String> SEGMENT_FILTERS = new ArrayList<String>();
-SEGMENT_FILTERS.add("segFilterAll");
-SEGMENT_FILTERS.add("segFilterAllExceptICE");
-SEGMENT_FILTERS.add("segFilterAllExceptICEand100");
-SEGMENT_FILTERS.add("segFilterICE");
-SEGMENT_FILTERS.add("segFilter100");
-SEGMENT_FILTERS.add("segFilterRepeated");
-SEGMENT_FILTERS.add("segFilterRepetitions");
-SEGMENT_FILTERS.add("segFilterModified");
-SEGMENT_FILTERS.add("segFilterCommented");
-
 String selSegFilter = (String)request.getAttribute("segmentFilter");
 StringBuffer str_segmengFilter = new StringBuffer();
 str_segmengFilter.append(bundle.getString("segment_filter")).append(":&nbsp;&nbsp;");
 str_segmengFilter.append("<select id='segmentFilter' ");
 str_segmengFilter.append("onchange='doSegmentFilter(this[this.selectedIndex].value)' ");
 str_segmengFilter.append("style='font-size: 8pt;'>");
-for(String segFilter : SEGMENT_FILTERS)
+for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
 {
     str_segmengFilter.append("<option ");
     if (segFilter.equals(selSegFilter))
@@ -177,7 +167,6 @@ tHead.append("</td></tr></table>");
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
-<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <link type="text/css" rel="StyleSheet" id="cssEditor"
@@ -924,6 +913,8 @@ function doScroll()
       pageToScroll.scroll(
         self.document.body.scrollLeft, self.document.body.scrollTop);
     }
+    
+    resetLocation("tgt_prograssbar");
 }
 
 <%--
@@ -933,13 +924,11 @@ template. The string looks like "&TuvId=103&TuvId=104&TuvId=105...".
 var pv_height = screen.height;
 var pv_width =  screen.width * .98;
 
-dojo.require("dijit.Dialog");
-
 function showProgressBar()
 {
    try
    {
-	   var div = dojo.byId('tgt_prograssbar');
+	   var div = document.getElementById('tgt_prograssbar');
 	   div.style.visibility = "visible";
    }
    catch(e)
@@ -1092,29 +1081,19 @@ function doSegmentFilter(p_segmentFilter)
 
 <script type="text/javascript">
 <!--
-	lastScrollY = 0;
 	function resetLocation(p_eid) {
-	try	{
-		var diffY;
-		if (document.documentElement && document.documentElement.scrollTop)
-			diffY = document.documentElement.scrollTop;
-		else if (document.body)
-			diffY = document.body.scrollTop
-		else {/*Netscape stuff*/
+		try	{
+			var diffY = 0;
+			if (document.documentElement && document.documentElement.scrollTop)
+				diffY = document.documentElement.scrollTop;
+			else if (document.body)
+				diffY = document.body.scrollTop;
+			else {/*Netscape stuff*/
+			}
+			document.getElementById(p_eid).style.top = diffY + 300;
+	    } catch(e) {
 		}
-		percent = .1 * (diffY - lastScrollY);
-		if (percent > 0)
-			percent = Math.ceil(percent);
-		else
-			percent = Math.floor(percent);
-		document.getElementById(p_eid).style.top = parseInt(document
-				.getElementById(p_eid).style.top)
-				+ percent + "px";
-		lastScrollY = lastScrollY + percent;
-	} catch(e) {
-  	}
 	}
-	window.setInterval("resetLocation(\"tgt_prograssbar\")", 1);
 //-->
 </script>
 

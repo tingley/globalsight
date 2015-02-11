@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.GlobalSightLocalePool;
@@ -120,8 +121,12 @@ public class SegmentTmQueryResult
     protected BaseTmTu createTu()
         throws Exception
     {
-        return new SegmentTmTu(getTuId(), m_tmId, getTuFormat(),
-            getTuType(), isTranslatable(), m_sourceLocale);
+        long tuid = getTuId();
+        SegmentTmTu tu = new SegmentTmTu(tuid, m_tmId, getTuFormat(),
+                getTuType(), isTranslatable(), m_sourceLocale);
+        tu.setProps(ProjectTmTuTProp.getTuProps(tuid));
+
+        return tu;
     }
 
 

@@ -20,12 +20,12 @@ package com.globalsight.cxe.adapter.openoffice;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.docproc.IFormatNames;
 
 public class OpenOfficeRuleHelper
 {
-    private static final Logger logger = Logger.getLogger(OpenOfficeRuleHelper.class);
+    private static final Logger logger = Logger
+            .getLogger(OpenOfficeRuleHelper.class);
 
     private static String defaultRule;
 
@@ -52,25 +52,23 @@ public class OpenOfficeRuleHelper
 
         if (dname.endsWith(".odp"))
         {
-            fileName = SystemConfiguration
-                    .getCompanyResourcePath("/properties/OdpXmlRule.properties");
+            fileName = "/properties/OdpXmlRule.properties";
         }
         else if (dname.endsWith(".ods"))
         {
-            fileName = SystemConfiguration
-                    .getCompanyResourcePath("/properties/OdsXmlRule.properties");
+            fileName = "/properties/OdsXmlRule.properties";
         }
         else
         // defalult is odt
         {
-            fileName = SystemConfiguration
-                    .getCompanyResourcePath("/properties/OdtXmlRule.properties");
+            fileName = "/properties/OdtXmlRule.properties";
         }
 
         String rule = null;
         try
         {
-            rule = FileUtils.read(OpenOfficeRuleHelper.class.getResourceAsStream(fileName));
+            rule = FileUtils.read(OpenOfficeRuleHelper.class
+                    .getResourceAsStream(fileName));
             if (logger.isDebugEnabled())
             {
                 logger.debug("openoffice rule file loaded:\n" + rule + "\n");
@@ -78,7 +76,8 @@ public class OpenOfficeRuleHelper
         }
         catch (Exception e)
         {
-            StringBuffer sb = new StringBuffer("Error when loading openoffice rules :\n");
+            StringBuffer sb = new StringBuffer(
+                    "Error when loading openoffice rules :\n");
             sb.append(fileName);
             logger.error(sb.toString(), e);
         }
@@ -92,21 +91,23 @@ public class OpenOfficeRuleHelper
 
     public static String loadStylesRule()
     {
-        String fileName = SystemConfiguration
-                .getCompanyResourcePath("/properties/OdStylesXmlRule.properties");
+        String fileName = "/properties/OdStylesXmlRule.properties";
         String rule = null;
         try
         {
             // load company xmp rule
-            rule = FileUtils.read(OpenOfficeRuleHelper.class.getResourceAsStream(fileName));
+            rule = FileUtils.read(OpenOfficeRuleHelper.class
+                    .getResourceAsStream(fileName));
             if (logger.isDebugEnabled())
             {
-                logger.debug("openoffice styles rule file loaded:\n" + rule + "\n");
+                logger.debug("openoffice styles rule file loaded:\n" + rule
+                        + "\n");
             }
         }
         catch (Exception e)
         {
-            StringBuffer sb = new StringBuffer("Error when loading openoffice rules :\n");
+            StringBuffer sb = new StringBuffer(
+                    "Error when loading openoffice rules :\n");
             sb.append(fileName);
             logger.error(sb.toString(), e);
         }

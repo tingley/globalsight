@@ -14,4 +14,5 @@ response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public");
 JobAttributeReportHelper helper = new JobAttributeReportHelper(request,response);
 helper.generateReport();
+out.clear();out = pageContext.pushBody();
 %>

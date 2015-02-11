@@ -1,91 +1,73 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="com.globalsight.everest.page.SourcePage"
-        table="SOURCE_PAGE">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
-        <component name="extractedFile"
-            class="com.globalsight.everest.page.ExtractedSourceFile"
-            lazy="false">
-            <property name="containGsTags" column="CONTAINS_GS_TAG"
-                type="yes_no" not-null="false" unique="false" />
-            <property name="externalBaseHref" length="2000"
-                column="EXTERNAL_BASE_HREF" type="string"
-                not-null="false" unique="false" />
-            <property name="dataType" length="20" column="DATA_TYPE"
-                type="string" not-null="false" unique="false" />
-            <property name="originalEncoding" length="30"
-                column="ORIGINAL_ENCODING" type="string"
-                not-null="false" unique="false" />
-            <property name="internalBaseHref" length="2000"
-                column="INTERNAL_BASE_HREF" type="string"
-                not-null="false" unique="false" />
-            <property name="gxmlVersion" length="10"
-                column="GXML_VERSION" type="string" not-null="false"
-                unique="false" />
+	<class name="com.globalsight.everest.page.SourcePage" table="SOURCE_PAGE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<component name="extractedFile"
+			class="com.globalsight.everest.page.ExtractedSourceFile" lazy="false">
+			<property name="containGsTags" column="CONTAINS_GS_TAG"
+				type="yes_no" not-null="false" unique="false" />
+			<property name="externalBaseHref" length="2000"
+				column="EXTERNAL_BASE_HREF" type="string" not-null="false" unique="false" />
+			<property name="dataType" length="20" column="DATA_TYPE"
+				type="string" not-null="false" unique="false" />
+			<property name="originalEncoding" length="30" column="ORIGINAL_ENCODING"
+				type="string" not-null="false" unique="false" />
+			<property name="internalBaseHref" length="2000"
+				column="INTERNAL_BASE_HREF" type="string" not-null="false" unique="false" />
+			<property name="gxmlVersion" length="10" column="GXML_VERSION"
+				type="string" not-null="false" unique="false" />
 
-            <bag name="leverageGroupSet" cascade="save-update"
-                table="SOURCE_PAGE_LEVERAGE_GROUP">
-                <key column="SP_ID" />
-                <many-to-many
-                    class="com.globalsight.everest.tuv.LeverageGroupImpl"
-                    column="LG_ID" />
-            </bag>
-            <map name="templates" inverse="true"
-                cascade="all" lazy="false">
-                <key column="SOURCE_PAGE_ID" />
-                <index column="TYPE" type="string" />
-                <one-to-many
-                    class="com.globalsight.everest.page.PageTemplate" />
-            </map>
-        </component>
-        <component name="unextractedFile"
-            class="com.globalsight.everest.page.UnextractedFile"
-            lazy="false">
-            <property name="lastModifiedDate" column="LAST_MODIFIED"
-                type="timestamp" not-null="false" unique="false" />
-            <property name="lastModifiedBy" length="80"
-                column="MODIFIER_USER_ID" type="string" not-null="false"
-                unique="false" />
-            <property name="storagePath" length="4000"
-                column="STORAGE_PATH" type="string" not-null="false"
-                unique="false" />
-            <property name="fileLength" column="FILE_LENGTH" type="long"
-                not-null="false" unique="false" />
-        </component>
-        <property name="companyId" column="COMPANY_ID" type="string"
-            not-null="true" unique="false" />
-        <property name="cuvId" column="CUV_ID" type="long"
-            not-null="false" unique="false" />
-        <property name="dataSourceType" length="20"
-            column="DATA_SOURCE_TYPE" type="string" not-null="false"
-            unique="false" />
-        <property name="externalPageId" length="260"
-            column="EXTERNAL_PAGE_ID" type="string" not-null="true"
-            unique="false" />
-        <property name="overrideWordCount" length="10"
-            column="OVERRIDEN_WORD_COUNT" type="int" not-null="false"
-            unique="false" />
-        <property name="pageState" length="20" column="STATE"
-            type="string" not-null="true" unique="false" />
-        <property name="previouPageId" column="PREVIOUS_PAGE_ID"
-            type="long" not-null="false" unique="false" />
-        <property name="prevStateBeforeUpdate" length="20"
-            column="PREV_UPDATE_STATE" type="string" not-null="false"
-            unique="false" />
-        <property name="timestamp" column="TIMESTAMP" type="timestamp"
-            not-null="true" unique="false" />
-        <property name="wordCount" length="10" column="WORD_COUNT"
-            type="int" not-null="false" unique="false" />
-        <property name="BOMType" column="BOM_TYPE"
-            type="int" not-null="false" unique="false" />
+			<bag name="leverageGroupSet" cascade="save-update" table="SOURCE_PAGE_LEVERAGE_GROUP">
+				<key column="SP_ID" />
+				<many-to-many class="com.globalsight.everest.tuv.LeverageGroupImpl"
+					column="LG_ID" />
+			</bag>
+			<map name="templates" inverse="true" cascade="all" lazy="false">
+				<key column="SOURCE_PAGE_ID" />
+				<index column="TYPE" type="string" />
+				<one-to-many class="com.globalsight.everest.page.PageTemplate" />
+			</map>
+		</component>
+		<component name="unextractedFile"
+			class="com.globalsight.everest.page.UnextractedFile" lazy="false">
+			<property name="lastModifiedDate" column="LAST_MODIFIED"
+				type="timestamp" not-null="false" unique="false" />
+			<property name="lastModifiedBy" length="80" column="MODIFIER_USER_ID"
+				type="string" not-null="false" unique="false" />
+			<property name="storagePath" length="4000" column="STORAGE_PATH"
+				type="string" not-null="false" unique="false" />
+			<property name="fileLength" column="FILE_LENGTH" type="long"
+				not-null="false" unique="false" />
+		</component>
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
+		<property name="cuvId" column="CUV_ID" type="long" not-null="false"
+			unique="false" />
+		<property name="dataSourceType" length="20" column="DATA_SOURCE_TYPE"
+			type="string" not-null="false" unique="false" />
+		<property name="externalPageId" length="260" column="EXTERNAL_PAGE_ID"
+			type="string" not-null="true" unique="false" />
+		<property name="overrideWordCount" length="10"
+			column="OVERRIDEN_WORD_COUNT" type="int" not-null="false" unique="false" />
+		<property name="pageState" length="20" column="STATE" type="string"
+			not-null="true" unique="false" />
+		<property name="previouPageId" column="PREVIOUS_PAGE_ID"
+			type="long" not-null="false" unique="false" />
+		<property name="prevStateBeforeUpdate" length="20"
+			column="PREV_UPDATE_STATE" type="string" not-null="false" unique="false" />
+		<property name="timestamp" column="TIMESTAMP" type="timestamp"
+			not-null="true" unique="false" />
+		<property name="wordCount" length="10" column="WORD_COUNT"
+			type="int" not-null="false" unique="false" />
+		<property name="BOMType" column="BOM_TYPE" type="int"
+			not-null="false" unique="false" />
 
-        <set name="targetPages" inverse="true" cascade="all">
-            <key column="SOURCE_PAGE_ID" />
-            <one-to-many
-                class="com.globalsight.everest.page.TargetPage" />
-        </set>
-    </class>
+		<set name="targetPages" inverse="true" cascade="all">
+			<key column="SOURCE_PAGE_ID" />
+			<one-to-many class="com.globalsight.everest.page.TargetPage" />
+		</set>
+	</class>
 </hibernate-mapping>

@@ -30,7 +30,7 @@ public class OfficeHtmlOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, String companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
 	{
 		if (gxml != null)
         {

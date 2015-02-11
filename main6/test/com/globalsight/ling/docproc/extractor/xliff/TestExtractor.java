@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.docproc.extractor.xliff;
 
 import static org.junit.Assert.fail;
@@ -14,6 +30,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
@@ -32,7 +49,6 @@ import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.BaseExtractorTestClass;
 import com.globalsight.ling.docproc.extractor.FileSet;
 import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
-import com.globalsight.util.ClassUtil;
 
 public class TestExtractor extends BaseExtractorTestClass
 {
@@ -40,19 +56,19 @@ public class TestExtractor extends BaseExtractorTestClass
     static final String UTF16LE = "UTF-16LE";
     private static final String extension = "xlf";
     public String lineSep = System.getProperty("line.separator");
-    
+
     private Extractor extractor;
-    
+
     @SuppressWarnings("unchecked")
-    private HashMap fileSets = new HashMap(); 
-    
+    private HashMap fileSets = new HashMap();
+
     @Before
     public void setUp() throws Exception
     {
         initExtractor();
         fileSets = initFileSet();
     }
-    
+
     @After
     public void clear()
     {
@@ -78,38 +94,44 @@ public class TestExtractor extends BaseExtractorTestClass
                     File sourceFile = fs.getSourceFile();
                     File answerFile = fs.getAnswerFile();
                     File roundtripFile = fs.getRoundtripFile();
-                    
+
                     if (sourceFile.exists() && sourceFile.isFile())
                     {
                         // extract source file
-                        Output output = doExtract(sourceFile, extractor, ENCODING);
+                        Output output = doExtract(sourceFile, extractor,
+                                ENCODING);
                         // get translatable text content
                         String resultContent = getTranslatableTextContent(output);
                         // generate result file for compare purpose
                         File tmpResultFile = new File(answerFile
                                 .getParentFile().getAbsolutePath()
-                                + File.separator + sourceFile.getName() + ".tmp");
+                                + File.separator
+                                + sourceFile.getName()
+                                + ".tmp");
                         generateFile(tmpResultFile, resultContent, ENCODING);
-                        
+
                         // compare result file to answer file
-                        if (fileCompareNoCareEndLining(tmpResultFile, answerFile))
+                        if (fileCompareNoCareEndLining(tmpResultFile,
+                                answerFile))
                         {
                             tmpResultFile.delete();
-                            
+
                             // generate target file
                             delTranslabaleSource(output);
                             String gxml = DiplomatWriter.WriteXML(output);
-                            byte[] mergeResult = getTargetFileContent(gxml, ENCODING);
+                            byte[] mergeResult = getTargetFileContent(gxml,
+                                    ENCODING);
                             String s = new String(mergeResult, ENCODING);
                             s = s.replace(" & ", " &amp; ");
                             generateFile(roundtripFile, s, ENCODING);
                             Assert.assertTrue(roundtripFile.exists());
-                            fileCompareNoCareEndLining(roundtripFile, sourceFile);
+                            fileCompareNoCareEndLining(roundtripFile,
+                                    sourceFile);
                         }
                         else
                         {
-                            fail("\n" + tmpResultFile + "\n and \n" + answerFile
-                                    + " not equal");
+                            fail("\n" + tmpResultFile + "\n and \n"
+                                    + answerFile + " not equal");
                         }
                     }
                 }
@@ -121,7 +143,7 @@ public class TestExtractor extends BaseExtractorTestClass
         }
 
     }
-    
+
     @Test
     public void testWsGetNodeInfo()
     {
@@ -135,8 +157,8 @@ public class TestExtractor extends BaseExtractorTestClass
             GsDOMParser parser = new GsDOMParser();
 
             // parse and create DOM tree
-            parser.parse(new InputSource(input));
-            Node doc = parser.getDocument().getFirstChild().getFirstChild();
+            Document document = parser.parse(new InputSource(input));
+            Node doc = document.getFirstChild().getFirstChild();
 
             while (!doc.getNodeName().equals("file"))
             {
@@ -225,16 +247,17 @@ public class TestExtractor extends BaseExtractorTestClass
             fail(e.getMessage());
         }
     }
-    
+
     @Override
     public String getTranslatableTextContent(Output p_output)
     {
-        if (p_output == null) {
+        if (p_output == null)
+        {
             return null;
         }
 
         StringBuffer resultContent = new StringBuffer();
-        
+
         Iterator<?> eleIter = p_output.documentElementIterator();
         while (eleIter.hasNext())
         {
@@ -242,7 +265,7 @@ public class TestExtractor extends BaseExtractorTestClass
             if (de instanceof TranslatableElement)
             {
                 String elemValue = de.getText();
-                String elemType = ((Segmentable)de).getXliffPartByName();
+                String elemType = ((Segmentable) de).getXliffPartByName();
 
                 if ("source".equalsIgnoreCase(elemType))
                 {
@@ -273,7 +296,8 @@ public class TestExtractor extends BaseExtractorTestClass
                 }
                 else
                 {
-                    Iterator<?> it = ((TranslatableElement) de).getSegments().iterator();
+                    Iterator<?> it = ((TranslatableElement) de).getSegments()
+                            .iterator();
                     while (it.hasNext())
                     {
                         SegmentNode sn = (SegmentNode) it.next();
@@ -286,7 +310,7 @@ public class TestExtractor extends BaseExtractorTestClass
                             resultContent.append(sn.getSegment());
                             resultContent.append("]");
                             resultContent.append(lineSep);
-                            
+
                         }
                     }
                 }
@@ -310,7 +334,8 @@ public class TestExtractor extends BaseExtractorTestClass
             DocumentElement element = (DocumentElement) it.next();
             if (element instanceof TranslatableElement)
             {
-                String type = ((TranslatableElement) element).getXliffPartByName();
+                String type = ((TranslatableElement) element)
+                        .getXliffPartByName();
                 if ("source".equalsIgnoreCase(type))
                 {
                     // Deletes the source translatable elements.
@@ -331,7 +356,7 @@ public class TestExtractor extends BaseExtractorTestClass
             }
         }
     }
-    
+
     /**
      * An empty method from parent class.
      */
@@ -341,7 +366,7 @@ public class TestExtractor extends BaseExtractorTestClass
     {
         return null;
     }
-    
+
     /**
      * Do extract, segmentation, handle "x","nbsp" etc.
      */
@@ -362,20 +387,20 @@ public class TestExtractor extends BaseExtractorTestClass
         // Extract this file
         extractor.extract();
 
-        //(Not required)
+        // (Not required)
         DiplomatCtrlCharConverter dc = new DiplomatCtrlCharConverter();
         dc.convertChars(output);
         output = dc.getOutput();
-        
+
         // Segment the output(Required)
         DiplomatSegmenter seg = new DiplomatSegmenter();
         seg.segment(output);
-        
+
         // Word count recalculate.(Not required)
-//        DiplomatWordCounter wc = new DiplomatWordCounter();
-//        wc.setLocalizableWordcount(0);
-//        wc.countDiplomatDocument(output);
-//        output = wc.getOutput();
+        // DiplomatWordCounter wc = new DiplomatWordCounter();
+        // wc.setLocalizableWordcount(0);
+        // wc.countDiplomatDocument(output);
+        // output = wc.getOutput();
 
         // CvdL new step to wrap nbsp and fix the "x" attributes.(Not required)
         DiplomatPostProcessor pp = new DiplomatPostProcessor();
@@ -395,15 +420,14 @@ public class TestExtractor extends BaseExtractorTestClass
         extractor = new Extractor();
         return extractor;
     }
-    
+
     @Override
     public HashMap initFileSet()
     {
         String[][] fileSet =
         {
-            {"testExtractor", "sample.xlf", "sample.txt", "sample.xlf"}
-        };
-        
+        { "testExtractor", "sample.xlf", "sample.txt", "sample.xlf" } };
+
         return formFileSets(fileSet, TestExtractor.class);
     }
 }

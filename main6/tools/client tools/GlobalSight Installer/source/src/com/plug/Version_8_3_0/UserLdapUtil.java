@@ -358,6 +358,16 @@ public class UserLdapUtil extends LdapUtil
 
         return buf.toString();
     }
+    
+    public static String getSearchFilterForRole()
+    {
+        StringBuilder buf = new StringBuilder();
+
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_ROLE_END_OBJECT_CLASS).append("))");
+
+        return buf.toString();
+    }
 
     public static String[] getRoleSearchAttributeNames()
     {

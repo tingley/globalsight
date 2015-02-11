@@ -20,38 +20,44 @@ package com.globalsight.cxe.entity.xmldtd;
 public interface XmlDtd
 {
     /**
-    ** Return the id of the XML Dtd File (cannot be set)
-    ** @return id as a long
-    **/
+     ** Return the id of the XML Dtd File (cannot be set)
+     ** 
+     * @return id as a long
+     **/
     public long getId();
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public String getCompanyId();
+    public long getCompanyId();
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public void setCompanyId(String p_companyId);
+    public void setCompanyId(long p_companyId);
 
     /**
      ** Return the name of the XML Dtd File
-     ** @return XML Dtd File name
+     ** 
+     * @return XML Dtd File name
      **/
     public String getName();
 
     /**
      ** Return the description of the XML Dtd File
-     ** @return XML Dtd File description
+     ** 
+     * @return XML Dtd File description
      **/
     public String getDescription();
 
     /**
      ** Return the body of the XML dtd File
-     ** @return XML Dtd File
+     ** 
+     * @return XML Dtd File
      **/
     public String getDtdText();
 
@@ -69,35 +75,39 @@ public interface XmlDtd
      ** Sets the body of the XML Dtd File
      **/
     public void setDtdText(String p_dtdText);
-    
+
     /**
      * Is add comment if dtd test failed.
+     * 
      * @return
      */
     public boolean isAddComment();
 
     /**
      * Set add comment or not if dtd test failed.
+     * 
      * @param addComment
      */
     public void setAddComment(boolean addComment);
-    
+
     /**
      * Is send email if dtd test failed.
+     * 
      * @return
      */
     public boolean isSendEmail();
 
     /**
      * Set send email or not if dtd test failed.
+     * 
      * @param sendEmail
      */
     public void setSendEmail(boolean sendEmail);
-    
+
     /**
      * Is referenced or not.
+     * 
      * @return
      */
     public boolean referenced();
 }
-

@@ -23,7 +23,6 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.util.system.SystemConfiguration;
 
 public class InddRuleHelper
 {
@@ -48,8 +47,7 @@ public class InddRuleHelper
 
     public static String loadRule()
     {
-        String fileName = "/properties/inddrule.properties";
-        String rule = loadCompanyFile(fileName);
+        String rule = loadRuleFile("/properties/inddrule.properties");
 
         if (logger.isDebugEnabled())
         {
@@ -59,9 +57,8 @@ public class InddRuleHelper
         return rule;
     }
 
-    private static String loadCompanyFile(String fileName)
+    private static String loadRuleFile(String file)
     {
-        String file = SystemConfiguration.getCompanyResourcePath(fileName);
         String rule = null;
         try
         {
@@ -87,7 +84,8 @@ public class InddRuleHelper
             }
             else
             {
-                rule = FileUtils.read(InddRuleHelper.class.getResourceAsStream(fileName));
+                rule = FileUtils.read(InddRuleHelper.class
+                        .getResourceAsStream(file));
             }
         }
         catch (Exception e)
@@ -105,9 +103,7 @@ public class InddRuleHelper
 
     public static String loadAdobeXmpRule()
     {
-        String fileName = SystemConfiguration
-                .getCompanyResourcePath("/properties/AdobeXmpRule.properties");
-        String rule = loadCompanyFile(fileName);
+        String rule = loadRuleFile("/properties/AdobeXmpRule.properties");
 
         if (logger.isDebugEnabled())
         {

@@ -85,8 +85,8 @@ public class RateBasicHandler extends PageHandler
                 // Fetch the currency to edit and store in session
                 SessionManager sessionMgr = (SessionManager)
                     session.getAttribute(WebAppConstants.SESSION_MANAGER);
-				String rateId = (String) p_request
-						.getParameter(WebAppConstants.RADIO_BUTTON);
+                String rateId = (String) p_request
+                        .getParameter(RateConstants.RATE_ID);
 				if (rateId == null
 						|| p_request.getMethod().equalsIgnoreCase(
 								WebAppConstants.REQUEST_METHOD_GET)) 

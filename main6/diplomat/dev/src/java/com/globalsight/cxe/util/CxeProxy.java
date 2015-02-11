@@ -21,19 +21,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueSender;
+import javax.jms.QueueSession;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
+import org.hornetq.api.jms.HornetQJMSConstants;
 
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
@@ -57,6 +58,7 @@ import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
@@ -67,11 +69,7 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
  */
 public class CxeProxy
 {
-    static private final Logger s_logger = Logger.getLogger("CXE");
-
-    // PUBLIC CONSTANTS
-
-    // import request types
+    static private final Logger s_logger = Logger.getLogger(CxeProxy.class);
 
     /** The name of the import type parameter. */
     static public final String IMPORT_TYPE = "ImportType";
@@ -82,25 +80,21 @@ public class CxeProxy
     /** The aligner import request **/
     static public final String IMPORT_TYPE_ALIGNER = "aligner";
 
-    static public final String JMS_FACTORY = "com.globalsight.jms.GlobalSightTopicConnectionFactory";
-
-    static private final String s_TS_KEY_SENDMSG = "TopicSessionKeySendMessage";
+    static private final String s_TS_KEY_SENDMSG = "QueueSessionKeySendMessage";
 
     static private final Integer ONE = new Integer(1);
 
     static private Context s_context = null;
-    static private HashMap s_topicSessions = new HashMap();
     static private HashMap s_targetLocales = new HashMap();
-    static private TopicConnectionFactory tcf = null;
-    static private TopicSession s_sendMessageTopicSession = null;
+    static private QueueConnectionFactory s_qcf = null;
 
     static
     {
         try
         {
             s_context = new InitialContext();
-            tcf = (TopicConnectionFactory) s_context.lookup(JMS_FACTORY);
-            s_sendMessageTopicSession = getTopicSession(s_TS_KEY_SENDMSG);
+            s_qcf = (QueueConnectionFactory) s_context
+                    .lookup(JmsHelper.JMS_QUEUE_FACTORY_NAME);
         }
         catch (Exception ex)
         {
@@ -223,7 +217,8 @@ public class CxeProxy
 
         Job job = JobCreationMonitor.loadJobFromDB(Long.parseLong(p_jobId));
 
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, job.getCompanyId());
+        params.put(CompanyWrapper.CURRENT_COMPANY_ID,
+                String.valueOf(job.getCompanyId()));
         params.put("Filename", p_fileName);
         params.put("JobId", p_jobId);
         params.put("BatchId", p_batchId);
@@ -263,7 +258,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendMessage(cxeMessage, jmsTopic);
+        sendCxeMessage(cxeMessage, jmsTopic);
 
     }
 
@@ -354,7 +349,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendMessage(cxeMessage, jmsTopic);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     static public void importFromFileSystem(String p_fileName,
@@ -415,7 +410,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendMessage(cxeMessage, jmsTopic);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     static public void importFromFileSystem(String p_fileName,
@@ -484,7 +479,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendMessage(cxeMessage, jmsTopic);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -759,9 +754,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     static public void importFromTeamSite(String p_originalFilename,
@@ -795,13 +788,25 @@ public class CxeProxy
     {
         CxeMessage cxeMessage = null;
         String jmsTopic = EventTopicMap.JMS_PREFIX + p_topic;
-        TopicPublisher sender = getPublisher(jmsTopic);
-        for (int i = 0; i < p_msgs.length; i++)
+        QueueConnection connection = null;
+        try
         {
-            cxeMessage = p_msgs[i].cxeMessage;
-            CompanyWrapper.saveCurrentCompanyIdInMap(
-                    cxeMessage.getParameters(), s_logger);
-            sender.publish(getTopicSession().createObjectMessage(cxeMessage));
+            connection = s_qcf.createQueueConnection();
+            QueueSession qs = connection.createQueueSession(false,
+                    HornetQJMSConstants.PRE_ACKNOWLEDGE);
+
+            QueueSender sender = getPublisher(qs, jmsTopic);
+            for (int i = 0; i < p_msgs.length; i++)
+            {
+                cxeMessage = p_msgs[i].cxeMessage;
+                CompanyWrapper.saveCurrentCompanyIdInMap(
+                        cxeMessage.getParameters(), s_logger);
+                sender.send(qs.createObjectMessage(cxeMessage));
+            }
+        }
+        finally
+        {
+            closeConnection(connection);
         }
     }
 
@@ -861,9 +866,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_VIGNETTE_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -901,9 +904,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_SERVICEWARE_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -953,9 +954,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_MEDIASURFACE_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -1041,7 +1040,7 @@ public class CxeProxy
      * @exception JMSException
      * @exception NamingException
      */
-    static private TopicPublisher getPublisher(String p_topicName)
+    static private QueueSender getPublisher(QueueSession qs, String p_topicName)
             throws JMSException, NamingException
     {
         // This is JBOSS specified, when jboss bind the JMS destination(Queue or
@@ -1056,46 +1055,13 @@ public class CxeProxy
         if (s_appServerWrapper.getJ2EEServerName().equals(
                 AppServerWrapperFactory.JBOSS))
         {
-            p_topicName = EventTopicMap.TOPIC_PREFIX_JBOSS + p_topicName;
+            p_topicName = EventTopicMap.QUEUE_PREFIX_JBOSS + p_topicName;
         }
 
-        Topic newTopic = (Topic) s_context.lookup(p_topicName);
-        TopicPublisher sender = getTopicSession().createPublisher(newTopic);
+        Queue newTopic = qs.createQueue(p_topicName);
+        QueueSender sender = qs.createSender(newTopic);
+        sender.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         return sender;
-    }
-
-    /**
-     * Gets a JMS topic session on a per-thread basis. This stores the
-     * TopicSessions per thread in a static HashMap.
-     * 
-     * @return JMS TopicSession
-     * @exception JMSException
-     * @exception NamingException
-     */
-    static private TopicSession getTopicSession() throws JMSException,
-            NamingException
-    {
-        String threadName = Thread.currentThread().getName();
-        return getTopicSession(threadName);
-    }
-
-    static private TopicSession getTopicSession(String key)
-            throws JMSException, NamingException
-    {
-        TopicSession ts = (TopicSession) s_topicSessions.get(key);
-
-        if (ts == null)
-        {
-            TopicConnectionFactory cf = (TopicConnectionFactory) s_context
-                    .lookup(JMS_FACTORY);
-            TopicConnection topicConnection = cf.createTopicConnection();
-            topicConnection.start();
-            ts = topicConnection.createTopicSession(false,
-                    Session.CLIENT_ACKNOWLEDGE);
-            s_topicSessions.put(key, ts);
-        }
-
-        return ts;
     }
 
     /**
@@ -1212,9 +1178,9 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
-        sendMessage(exportMsg, jmsTopic);
+        sendCxeMessage(exportMsg, jmsTopic);
     }
-    
+
     /**
      * Initiates an export within CXE using JMS(Override method for documentum
      * workflow Id).
@@ -1248,8 +1214,8 @@ public class CxeProxy
      * @exception JMSException
      * @exception NamingException
      */
-    static public CxeMessage getExportCxeMessage(String p_eventFlowXml, MessageData p_gxml,
-            String p_cxeRequestType, String p_targetLocale,
+    static public CxeMessage getExportCxeMessage(String p_eventFlowXml,
+            MessageData p_gxml, String p_cxeRequestType, String p_targetLocale,
             String p_targetCharset, int p_bomType, String p_messageId,
             String p_exportLocation, String p_localeSubDir,
             String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
@@ -1268,16 +1234,16 @@ public class CxeProxy
                     + p_isUnextracted + ", " + "dir=" + p_localeSubDir + ")");
         }
 
-        return getCxeMessage(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
-                p_targetCharset, p_bomType, p_messageId, p_exportLocation,
-                p_localeSubDir, p_exportBatchId, p_pageCount, p_pageNum,
-                p_docPageCount, p_docPageNum, newObjId, wfId, isJobDone,
-                p_isUnextracted, null, p_fileName, p_sourcePageBomType,
-                p_isFinalExport, p_companyId);
+        return getCxeMessage(p_eventFlowXml, p_gxml, p_cxeRequestType,
+                p_targetLocale, p_targetCharset, p_bomType, p_messageId,
+                p_exportLocation, p_localeSubDir, p_exportBatchId, p_pageCount,
+                p_pageNum, p_docPageCount, p_docPageNum, newObjId, wfId,
+                isJobDone, p_isUnextracted, null, p_fileName,
+                p_sourcePageBomType, p_isFinalExport, p_companyId);
     }
-    
-    static private CxeMessage getCxeMessage(String p_eventFlowXml, MessageData p_gxml,
-            String p_cxeRequestType, String p_targetLocale,
+
+    static private CxeMessage getCxeMessage(String p_eventFlowXml,
+            MessageData p_gxml, String p_cxeRequestType, String p_targetLocale,
             String p_targetCharset, int p_bomType, String p_messageId,
             String p_exportLocation, String p_localeSubDir,
             String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
@@ -1392,9 +1358,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -1434,9 +1398,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     /**
@@ -1501,9 +1463,7 @@ public class CxeProxy
 
         String jmsTopic = EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_DOCUMENTUM_SOURCE_ADAPTER;
-        ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
-        TopicPublisher sender = getPublisher(jmsTopic);
-        sender.publish(om);
+        sendCxeMessage(cxeMessage, jmsTopic);
     }
 
     private static String getCompanyIdByFileProfileId(String p_fileProfileId)
@@ -1513,7 +1473,7 @@ public class CxeProxy
         {
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .getFileProfileById(Long.parseLong(p_fileProfileId), false);
-            companyId = fp.getCompanyId();
+            companyId = String.valueOf(fp.getCompanyId());
         }
         catch (Exception e)
         {
@@ -1523,58 +1483,38 @@ public class CxeProxy
         return companyId;
     }
 
-    /**
-     * Sends message using JMS, after sending, it should close some resources.
-     * 
-     * @param msg
-     * @param jmsTopic
-     */
-    private static void sendMessage(CxeMessage msg, String jmsTopic)
+    private static void sendCxeMessage(CxeMessage cxeMessage, String jmsTopic)
+            throws JMSException, NamingException
     {
-        ObjectMessage om = null;
-        TopicPublisher sender = null;
+        QueueConnection connection = null;
         try
         {
-            om = s_sendMessageTopicSession.createObjectMessage(msg);
-
-            AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
-                    .getAppServerWrapper();
-            if (s_appServerWrapper.getJ2EEServerName().equals(
-                    AppServerWrapperFactory.JBOSS))
-            {
-                jmsTopic = EventTopicMap.TOPIC_PREFIX_JBOSS + jmsTopic;
-            }
-            Topic newTopic = (Topic) s_context.lookup(jmsTopic);
-            sender = s_sendMessageTopicSession.createPublisher(newTopic);
-            sender.publish(om);
-        }
-        catch (NamingException e)
-        {
-            s_logger.error("Failed to open topic connection", e);
-        }
-        catch (JMSException e)
-        {
-            s_logger.error("Failed to open jms", e);
+            connection = s_qcf.createQueueConnection();
+            QueueSession qs = connection.createQueueSession(false,
+                    HornetQJMSConstants.PRE_ACKNOWLEDGE);
+            ObjectMessage om = qs.createObjectMessage(cxeMessage);
+            QueueSender sender = getPublisher(qs, jmsTopic);
+            sender.send(om);
         }
         finally
         {
+            closeConnection(connection);
+        }
+    }
+
+    private static void closeConnection(QueueConnection connection)
+    {
+        if (connection != null)
+        {
             try
             {
-                if (sender != null)
-                {
-                    sender.close();
-                }
-                if (om != null)
-                {
-                    om = null;
-                }
-
+                connection.close();
             }
             catch (JMSException e)
             {
-                s_logger.error("Failed to close jms", e);
+                s_logger.error("Error when trying to close queue connection, ",
+                        e);
             }
         }
-
     }
 }

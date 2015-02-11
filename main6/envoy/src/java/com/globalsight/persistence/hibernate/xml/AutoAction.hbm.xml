@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
 
@@ -21,7 +19,7 @@
         <property name="description" length="2000"
             column="DESCRIPTION" type="string" not-null="true" />
             
-        <property name="companyID" length="100" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
+        <property name="companyID" length="20" column="COMPANY_ID" type="long" not-null="true" unique="false"/>
     </class>
 
 </hibernate-mapping>

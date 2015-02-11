@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
@@ -55,7 +56,10 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.ling.common.URLDecoder;
+import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.mediasurface.CmsUserInfo;
+import com.globalsight.util.Base64;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -409,9 +413,42 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         session.setAttribute(LOGIN_PROTOCOL, protocol);
         session.setAttribute(LOGIN_SERVER, loginServer);
 
-        String targetLink = WebAppConstants.LOGIN_PASS;
+        // Adds auto login cookie.
+        addAutoLoginCookie(p_userId, p_password);
+        
+        return WebAppConstants.LOGIN_PASS;
+    }
+    
+    // Adds auto login cookie.
+    private void addAutoLoginCookie(String p_userId, String p_pass)
+    {
+        String cookieName = "autoLogin";
+        int expires = 60 * 60 * 24 * 14;
+        String userName = UserUtil.getUserNameById(p_userId);
+        String pass = Base64.encodeToString(p_pass);
+        pass = URLEncoder.encode(pass);
+        Cookie cookie = new Cookie(cookieName, userName + "|" + pass);
+        cookie.setMaxAge(expires);
+        m_response.addCookie(cookie);
+    }
 
-        return targetLink;
+    // well,if the system need it will move to an class
+    private String getIpAddr(HttpServletRequest request)
+    {
+        String ip = request.getHeader("x-forwarded-for");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+        {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+        {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+        {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 
     /**
@@ -422,7 +459,6 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
             String p_sessionId) throws EnvoyServletException
     {
         User user = null;
-
         try
         {
             // first do authentication
@@ -447,11 +483,15 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
 
             throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
         }
-
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+        activityArgs.put("userIP", getIpAddr(m_request));
+        activityArgs.put("user", user.getUserName());
+        ActivityLog.Start activityStart = ActivityLog.start(
+                EntryPageControlFlowHelper.class, "_doPost", activityArgs);
         try
         {
             // calculate the users that logged in the system.
-            ServerProxy.getUserManager().loggedInUsers(user.getUserName(),
+            ServerProxy.getUserManager().loggedInUsers(user.getUserId(),
                     p_sessionId);
         }
         catch (Exception e)
@@ -463,7 +503,10 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
             throw new EnvoyServletException(
                     EnvoyServletException.MSG_FAILED_TO_LOGIN, msgArgs, e);
         }
-
+        finally
+        {
+            activityStart.end();
+        }
         return user;
     }
 

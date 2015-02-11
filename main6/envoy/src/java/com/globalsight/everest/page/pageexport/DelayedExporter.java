@@ -58,8 +58,8 @@ import com.globalsight.util.mail.MailerConstants;
 public class DelayedExporter
 {
     // for logging purposes
-    private static Logger s_logger = Logger
-            .getLogger(DelayedExporter.class.getName());
+    private static Logger s_logger = Logger.getLogger(DelayedExporter.class
+            .getName());
 
     // singleton
     private static DelayedExporter c_instance = null;
@@ -127,7 +127,6 @@ public class DelayedExporter
         notifyProjectManager(p_job, p_request, p_request.getTime(),
                 MailerConstants.PAGE_EFU_TO_PM_SUBJECT, PAGE_EFU_TO_PM_MESSAGE,
                 sp);
-
     }
 
     /**
@@ -143,7 +142,8 @@ public class DelayedExporter
         // won't be canceled.
         s_logger.info("Exporting source pages for job " + job.getJobName());
 
-        CompanyThreadLocal.getInstance().setIdValue(job.getCompanyId());
+        CompanyThreadLocal.getInstance().setIdValue(
+                String.valueOf(job.getCompanyId()));
         exportPages(p_delayedRequest, job);
     }
 
@@ -230,7 +230,7 @@ public class DelayedExporter
         try
         {
             WorkflowServer ws = ServerProxy.getWorkflowServer();
-            
+
             Iterator wfs = p_job.getWorkflows().iterator();
 
             while (wfs.hasNext())
@@ -245,8 +245,7 @@ public class DelayedExporter
 
                 TaskEmailInfo emailInfo = new TaskEmailInfo(
                         pmId,
-                        w
-                                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                        w.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                         wfti.notifyProjectManager(), p_job.getPriority());
 
                 emailInfo.setTime(p_time);
@@ -296,7 +295,7 @@ public class DelayedExporter
             SystemConfiguration config = SystemConfiguration.getInstance();
             String capLoginUrl = config
                     .getStringParameter(SystemConfiguration.CAP_LOGIN_URL);
-            String companyIdStr = p_job.getCompanyId();
+            String companyIdStr = String.valueOf(p_job.getCompanyId());
 
             // there is an order to these arguments
             // activity name, job name, priority, page name, time, comments,
@@ -395,8 +394,8 @@ public class DelayedExporter
             // so they will be placed in PAGE_TM and picked up on re-import
             if (sp.getPageState().equals(PageState.ACTIVE_JOB))
             {
-                PagePersistenceAccessor.updateStateOfPages(p_job.getSourcePages(),
-                        PageState.LOCALIZED);
+                PagePersistenceAccessor.updateStateOfPages(
+                        p_job.getSourcePages(), PageState.LOCALIZED);
             }
 
             Integer count = new Integer(sourcePages.size());

@@ -35,44 +35,46 @@ public class StfFilesServlet extends UncacheableFileServlet
 {
     private static final long serialVersionUID = 4989706150134879251L;
 
-    public Logger CATEGORY =
-        Logger.getLogger("StfFiles");
+    public Logger CATEGORY = Logger.getLogger(StfFilesServlet.class);
 
     /**
      * Write out the StfFiles to the response's buffered stream.
-     *
-     * @param p_request -- the request
-     * @param p_response -- the response
+     * 
+     * @param p_request
+     *            -- the request
+     * @param p_response
+     *            -- the response
      * @throws ServletException
      * @throws IOException
      */
     public void service(HttpServletRequest p_request,
-        HttpServletResponse p_response)
-        throws ServletException, IOException
+            HttpServletResponse p_response) throws ServletException,
+            IOException
     {
         String docHome = getInitParameter("docHome");
 
         // strip off the first StfFiles part of the url since it is not
         // part of the directory structure
         String url = p_request.getRequestURI();
-        String decodedUrl = com.globalsight.ling.common.URLDecoder.decode(url, "UTF-8");
+        String decodedUrl = com.globalsight.ling.common.URLDecoder.decode(url,
+                "UTF-8");
         String fileName = decodedUrl;
 
         int index = decodedUrl.indexOf(WebAppConstants.STF_FILES_URL_MAPPING);
         if (index >= 0)
         {
-            fileName = decodedUrl.substring(
-                index + WebAppConstants.STF_FILES_URL_MAPPING.length());
+            fileName = decodedUrl.substring(index
+                    + WebAppConstants.STF_FILES_URL_MAPPING.length());
             String[] rags = fileName.split("/");
             if (rags.length > 0)
             {
                 // start with company name
                 StringBuffer sb = new StringBuffer(rags[0]);
                 sb.append("/GlobalSight/SecondaryTargetFiles");
-                for (int i = 1; i < rags.length; i ++)
+                for (int i = 1; i < rags.length; i++)
                 {
-                	sb.append("/");
-                	sb.append(rags[i]);            	
+                    sb.append("/");
+                    sb.append(rags[i]);
                 }
                 fileName = sb.toString();
             }
@@ -80,8 +82,8 @@ public class StfFilesServlet extends UncacheableFileServlet
         else
         {
             // invalid or incorrect use of this servlet
-            CATEGORY.warn("Invalid request for " + fileName +
-                ", not under " + WebAppConstants.STF_FILES_URL_MAPPING);
+            CATEGORY.warn("Invalid request for " + fileName + ", not under "
+                    + WebAppConstants.STF_FILES_URL_MAPPING);
             p_response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -91,8 +93,8 @@ public class StfFilesServlet extends UncacheableFileServlet
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Requested StfFiles `" + fileName +
-                    "' does not exist.");
+                CATEGORY.debug("Requested StfFiles `" + fileName
+                        + "' does not exist.");
             }
             p_response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -104,8 +106,8 @@ public class StfFilesServlet extends UncacheableFileServlet
             {
                 CATEGORY.debug("Sending StfFiles " + fileName);
             }
-            
-            //set the content type appropriately
+
+            // set the content type appropriately
             p_response.setContentType("application/octet-stream");
 
             writeOutFile(file, p_response, false);

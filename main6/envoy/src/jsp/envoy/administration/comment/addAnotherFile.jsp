@@ -42,7 +42,7 @@
     }
 
 	if (wo != null) {
-		String companyId = null;
+		long companyId = -1;
 		if (wo instanceof Task) {
 			Task task = (Task) wo;
 			wid = (new Long(task.getId())).toString();
@@ -79,7 +79,7 @@
 			companyId = ((Workflow) wo).getCompanyId();
 		}
 
-		CompanyThreadLocal.getInstance().setIdValue(companyId);
+		CompanyThreadLocal.getInstance().setIdValue(String.valueOf(companyId));
 	}
 	String tmpDir = WebAppConstants.COMMENT_REFERENCE_TEMP_DIR + wid
 			+ userId;

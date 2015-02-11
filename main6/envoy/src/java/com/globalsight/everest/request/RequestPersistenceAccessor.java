@@ -36,7 +36,8 @@ import com.globalsight.util.GeneralException;
  */
 public class RequestPersistenceAccessor
 {
-    private static Logger c_logger = Logger.getLogger("IMPORT");
+    private static Logger c_logger = Logger
+            .getLogger(RequestPersistenceAccessor.class);
 
     /**
      * Finds the particular request in the cache/database.

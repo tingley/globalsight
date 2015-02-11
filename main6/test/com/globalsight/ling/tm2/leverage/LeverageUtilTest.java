@@ -22,6 +22,7 @@ import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.util.ClassUtil;
 
 public class LeverageUtilTest
 {
@@ -63,15 +64,16 @@ public class LeverageUtilTest
         List<Tuv> sourceTuvs1 = new ArrayList<Tuv>();
         sourceTuvs1.add(tuv);
 
-        Types types1 = new Types(false, MatchTypeStatistics.SEGMENT_PO_EXACT,
+        Types types1 = new Types(MatchTypeStatistics.SEGMENT_PO_EXACT,
                 MatchTypeStatistics.SEGMENT_PO_EXACT,
-                LeverageMatchLingManager.EXACT, MatchState.PO_EXACT_MATCH);
+                LeverageMatchLingManager.EXACT, MatchState.PO_EXACT_MATCH, false);
         Map<String, Types> matchTypes1 = new HashMap<String, Types>();
         matchTypes1.put(tuv.getId() + "-0", types1);
         MatchTypeStatistics matchTypeStatistics1 = new MatchTypeStatistics(75);
         matchTypeStatistics1.setMatchTypes(matchTypes1);
-        boolean result = LeverageUtil.isPoXlfICE(index, sourceTuvs1,
-                matchTypeStatistics1, "1000");
+        LeverageUtil LU = new LeverageUtil();
+        boolean result = (Boolean) ClassUtil.testMethod(LU, "isPoXlfICE", index, sourceTuvs1,
+                matchTypeStatistics1, 1000);
         assertTrue(result);
 
         // case 2
@@ -84,17 +86,17 @@ public class LeverageUtilTest
         List<SegmentTmTuv> sourceTuvs2 = new ArrayList<SegmentTmTuv>();
         sourceTuvs2.add(segTmTuv);
 
-        Types types2 = new Types(false, MatchTypeStatistics.SEGMENT_TM_EXACT,
+        Types types2 = new Types(MatchTypeStatistics.SEGMENT_TM_EXACT,
                 MatchTypeStatistics.SEGMENT_TM_EXACT,
                 LeverageMatchLingManager.EXACT,
-                MatchState.SEGMENT_TM_EXACT_MATCH);
+                MatchState.SEGMENT_TM_EXACT_MATCH, false);
         Map<String, Types> matchTypes2 = new HashMap<String, Types>();
         matchTypes2.put(segTmTuv.getId() + "-0", types2);
         MatchTypeStatistics matchTypeStatistics2 = new MatchTypeStatistics(75);
         matchTypeStatistics2.setMatchTypes(matchTypes2);
 
-        result = LeverageUtil.isPoXlfICE(index, sourceTuvs2,
-                matchTypeStatistics2, "1000");
+        result = (Boolean) ClassUtil.testMethod(LU, "isPoXlfICE", index, sourceTuvs2,
+                matchTypeStatistics2, 1000);
         assertTrue(!result);
     }
 

@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.tuv;
@@ -49,9 +49,10 @@ public final class LeverageGroupImpl extends PersistentObject implements
 
     /**
      * Get LeverageGroup unique identifier.
-     * 
+     *
      * @return unique identifier.
      */
+    @Override
     public long getLeverageGroupId()
     {
         return getId();
@@ -60,10 +61,11 @@ public final class LeverageGroupImpl extends PersistentObject implements
     /**
      * Add a Tu to the LeverageGoup. This should only be used when create job
      * for maintaining "belong to" relationship.
-     * 
+     *
      * @param p_tu
      *            -- Tu to add.
      */
+    @Override
     public void addTu(Tu p_tu)
     {
         m_tus.add(p_tu);
@@ -73,27 +75,35 @@ public final class LeverageGroupImpl extends PersistentObject implements
 
     /**
      * Get a collection of Tus for this leverage group.
-     * 
+     *
      * @return A collection of Tus.
      */
-    public Collection getTus()
+    @Override
+    public Collection<Tu> getTus()
     {
         boolean loadFromDb = true;
         return getTus(loadFromDb);
     }
-    
-    @SuppressWarnings("unchecked")
-    public Collection getTus(boolean loadFromDb)
+
+    @Override
+    public Collection<Tu> getTus(boolean loadFromDb)
     {
-        if ((m_tus == null || m_tus.size() == 0) && loadFromDb) {
+        if ((m_tus == null || m_tus.size() == 0) && loadFromDb)
+        {
             Connection connection = null;
-            try {
+            try
+            {
                 connection = DbUtil.getConnection();
-                m_tus = new ArrayList(SegmentTuUtil.getTusByLeverageGroupId(
-                        connection, getId()));
-            } catch (Exception e) {
+                m_tus = new ArrayList<Tu>(
+                        SegmentTuUtil.getTusByLeverageGroupId(connection,
+                                getId()));
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
-            } finally {
+            }
+            finally
+            {
                 DbUtil.silentReturnConnection(connection);
             }
         }
@@ -103,9 +113,10 @@ public final class LeverageGroupImpl extends PersistentObject implements
 
     /**
      * Return a string representation of the object.
-     * 
+     *
      * @return a string representation of the object.
      */
+    @Override
     public String toString()
     {
         return super.toString() + " m_tus.size()="
@@ -141,7 +152,7 @@ public final class LeverageGroupImpl extends PersistentObject implements
 //    {
 //        return m_tus;
 //    }
-    
+
     public void setSourcePageSet(List p_tus)
     {
         this.m_sourcepage = p_tus;

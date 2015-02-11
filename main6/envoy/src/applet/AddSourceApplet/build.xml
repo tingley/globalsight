@@ -24,10 +24,10 @@
 
 	<path id="addFiles.class.path">
 		   <pathelement path =".:${basedir.old}/${commonJarLib}/commons-httpclient-3.0-rc2.jar"/>
-           <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/axis.jar"/>
-		   <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/commons-discovery.jar"/>
-	       <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/jaxrpc.jar"/>
-	       <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/wsdl4j.jar"/>
+           <pathelement path =".:${basedir.old}/${commonJarLib}/axis.jar"/>
+		   <pathelement path =".:${basedir.old}/${commonJarLib}/commons-discovery.jar"/>
   	       <pathelement path =".:${basedir.old}/${appletLib}/webServiceClient.jar"/>
+   	       <pathelement path =".:${basedir.old}/../j2eeVendor/jboss/v4.0.1/jboss_server/server/default/deploy/jboss-ws4ee.sar/jaxrpc.jar"/>
+	       <pathelement path =".:${basedir.old}/../j2eeVendor/jboss/v4.0.1/jboss_server/server/default/deploy/jboss-ws4ee.sar/wsdl4j.jar"/>
 	</path>
 </project>

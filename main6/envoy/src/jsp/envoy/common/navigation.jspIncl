@@ -143,7 +143,6 @@
    String filterConfigurationUrl = LinkHelper.getWebActivityURL(request, "filterConfiguration");
    
    String fileProfilesUrl = LinkHelper.getWebActivityURL(request, "fileprofiles");
-   String fileProfilesSearchUrl = LinkHelper.getWebActivityURL(request, "fileprofilesSearch");
    String glossariesUrl = LinkHelper.getWebActivityURL(request, "glossaries");
    String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
    String importUrl = LinkHelper.getWebActivityURL(request,"import");
@@ -343,7 +342,8 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_permission_grou
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.USERS_VIEW) && (userPerms.getPermissionFor(Permission.USERS_EDIT) || 
-        userPerms.getPermissionFor(Permission.USERS_REMOVE) || userPerms.getPermissionFor(Permission.USERS_NEW))) { %>
+        userPerms.getPermissionFor(Permission.USERS_REMOVE) || userPerms.getPermissionFor(Permission.USERS_NEW) ||
+        userPerms.getPermissionFor(Permission.USERS_IMPORT) || userPerms.getPermissionFor(Permission.USERS_EXPORT) )) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_users")%>", "javascript:goToUrl('<%=usersUrl%>');", ""));
 <% } %>
 
@@ -425,10 +425,7 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_shutdown")%>", 
 //////////////// DataSource menu ///////////////////
 <% if (hasDataSourceMenu) { %>
 var dataSourcesMenu = new WebFXMenu;
-<% if (userPerms.getPermissionFor(Permission.FILE_PROFILES_SEARCH)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_file_profiles_search")%>", "javascript:goToUrl('<%=fileProfilesSearchUrl%>');", ""));
-<% } %>
-dataSourcesMenu.add(new WebFXMenuSeparator());
+
 <% if (userPerms.getPermissionFor(Permission.FILE_PROFILES_VIEW)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_file_profiles")%>", "javascript:goToUrl('<%=fileProfilesUrl%>');", ""));
 <% } %>
@@ -563,27 +560,6 @@ guidesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_database")%>",
 <%@ include file="/envoy/common/activitiesMenu.jspIncl" %>
 <%}%>
 
-<% if (b_reports) { %>
-//////////////// Reports menu ///////////////////
-<% if (hasReportsMenu) { %>
-var reportsMenu = new WebFXMenu;
-
-<% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN) ||
-       userPerms.getPermissionFor(Permission.REPORTS_CUSTOM_EXTERNAL)) {
-%>
-reportsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_reportsmain")%>", "javascript:goToUrl('<%=reportsUrl%>');", ""));
-<% } %>
-
-<% if (userPerms.getPermissionFor(Permission.REPORTS_ADMIN)) { %>
-reportsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_reportsAdmin")%>", "javascript:newWindow('/globalsight/ReportsAdmin','ReportsAdmin');", ""));
-<% } %>
-
-<% if (userPerms.getPermissionFor(Permission.REPORTS_COMPOSER)) { %>
-reportsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_reportsComposer")%>", "javascript:newWindow('/globalsight/Reports','ReportsComposer');", ""));
-<% } %>
-<%}%>
-<% } //end if hasReportsMenu %>
-
 //////////////// Vendor Management menu ///////////////////
 <% if (b_vendorManagement) { %>
 <% if (hasVendorMenu) { %>
@@ -631,7 +607,7 @@ menuBar.add(myActivitiesButton);
 
 <% if (b_reports) { %>
 <% if (hasReportsMenu) { %>
-var reportsButton = new WebFXMenuButton("<%=mainMenuBundle.getString("lb_reports")%>", null, "",  reportsMenu);
+var reportsButton = new WebFXMenuItem("<%=mainMenuBundle.getString("lb_reports")%>", "javascript:goToUrl('<%=reportsUrl%>');", "");
 menuBar.add(reportsButton);
 <% } %>
 <%}%>
@@ -642,6 +618,9 @@ var vmButton = new WebFXMenuButton("<%=mainMenuBundle.getString("lb_vendor_manag
 menuBar.add(vmButton);
 <% } %>
 <% } %>
+
+var docButton = new WebFXMenuItem("<%=mainMenuBundle.getString("lb_documentation")%>", "javascript:newWindow('http://www.globalsight.com/wiki/index.php/Main_Page', '_blank');", "");
+menuBar.add(docButton);
 
 var helpButton = new WebFXMenuItem("<%=mainMenuBundle.getString("lb_help")%>", "javascript:helpSwitch();", "");
 menuBar.add(helpButton);

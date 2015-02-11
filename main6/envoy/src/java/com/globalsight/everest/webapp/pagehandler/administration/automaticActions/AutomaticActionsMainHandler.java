@@ -1,6 +1,6 @@
 package com.globalsight.everest.webapp.pagehandler.administration.automaticActions;
 
-    /**
+/**
  *  Copyright 2009 Welocalize, Inc. 
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,17 +19,20 @@ package com.globalsight.everest.webapp.pagehandler.administration.automaticActio
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-
-import java.util.Vector;
-import java.util.Locale;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Vector;
+
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import com.globalsight.everest.autoactions.*;
+
+import com.globalsight.everest.autoactions.AutoAction;
+import com.globalsight.everest.autoactions.AutoActionException;
+import com.globalsight.everest.autoactions.AutoActionManagerLocal;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.comparator.AutoActionsComparator;
@@ -37,144 +40,170 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+
 /**
  */
 public class AutomaticActionsMainHandler extends PageHandler
 {
-    private AutoActionManagerLocal actionManager = 
-        new AutoActionManagerLocal();
+    private AutoActionManagerLocal actionManager = new AutoActionManagerLocal();
+
     /**
      * Invokes this PageHandler
-     *
-     * @param pageDescriptor the page desciptor
-     * @param request the original request sent from the browser
-     * @param response the original response object
-     * @param context context the Servlet context
+     * 
+     * @param pageDescriptor
+     *            the page desciptor
+     * @param request
+     *            the original request sent from the browser
+     * @param response
+     *            the original response object
+     * @param context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
 
         try
         {
-            if(action != null) {
+            if (action != null)
+            {
                 if (action.equals("create"))
                 {
                     createAction(p_request);
                 }
                 else if (action.equals("modify"))
                 {
-                    
+
                     editAction(p_request);
                 }
-                
+
                 else if (action.equals("remove"))
                 {
-                    removeAction(p_request); 
+                    removeAction(p_request);
                 }
             }
-            
+
             dataForTable(p_request, session);
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
-    private void dataForTable(HttpServletRequest p_request, HttpSession p_session)
-        throws RemoteException, NamingException, GeneralException
+    private void dataForTable(HttpServletRequest p_request,
+            HttpSession p_session) throws RemoteException, NamingException,
+            GeneralException
     {
-        Vector activities = 
-            vectorizedCollection(actionManager.getAllActions());
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
+        Vector activities = vectorizedCollection(actionManager.getAllActions());
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         setTableNavigation(p_request, p_session, activities,
-                           new AutoActionsComparator(uiLocale),
-                           10,"actionList", "actionKey");
+                new AutoActionsComparator(uiLocale), 10, "actionList",
+                "actionKey");
     }
-    
-    private void createAction(HttpServletRequest p_request) 
-        throws AutoActionException, RemoteException {
+
+    private void createAction(HttpServletRequest p_request)
+            throws AutoActionException, RemoteException
+    {
         AutoAction autoAction = new AutoAction();
 
         String name = p_request.getParameter("name");
         String email = p_request.getParameter("email");
         String description = p_request.getParameter("description");
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        
-        if (!actionManager.isActionExist(name)) {
+
+        if (!actionManager.isActionExist(name))
+        {
             autoAction.setName(name);
             autoAction.setEmail(email);
             autoAction.setDescription(description);
-            autoAction.setCompanyID(companyId);
+            autoAction.setCompanyID(Long.parseLong(companyId));
         }
-        
+
         actionManager.createAction(autoAction);
     }
-    
-    private void editAction(HttpServletRequest p_request) 
-        throws AutoActionException, RemoteException {
-        if(p_request.getParameter("actionID") != null) {
+
+    private void editAction(HttpServletRequest p_request)
+            throws AutoActionException, RemoteException
+    {
+        if (p_request.getParameter("actionID") != null)
+        {
             long id = Integer.parseInt(p_request.getParameter("actionID"));
             AutoAction autoAction = actionManager.getActionByID(id);
-       
-            try {
-                if(p_request.getParameter("name") !=null) {
+
+            try
+            {
+                if (p_request.getParameter("name") != null)
+                {
                     autoAction.setName(p_request.getParameter("name"));
                 }
-                
-                if(p_request.getParameter("email") !=null) {
+
+                if (p_request.getParameter("email") != null)
+                {
                     autoAction.setEmail(p_request.getParameter("email"));
                 }
-                
-                autoAction.setDescription(p_request.getParameter("description"));
+
+                autoAction
+                        .setDescription(p_request.getParameter("description"));
                 actionManager.updateAction(autoAction);
-            } catch (Exception e) {
-                throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(
+                        EnvoyServletException.EX_GENERAL, e);
             }
         }
     }
-    
+
     /*
      * remove the auto action.
      */
-    private void removeAction(HttpServletRequest p_request) 
-        throws AutoActionException, RemoteException {
-        
-        if(p_request.getParameter("id") != null) {
+    private void removeAction(HttpServletRequest p_request)
+            throws AutoActionException, RemoteException
+    {
+
+        if (p_request.getParameter("id") != null)
+        {
             long id = Integer.parseInt(p_request.getParameter("id"));
-       
-            try {
-                Collection acitivities = actionManager.getActivitiesByActionID
-                                         (p_request.getParameter("id"));
-                
-                if(acitivities != null && acitivities.size() > 0) {
+
+            try
+            {
+                Collection acitivities = actionManager
+                        .getActivitiesByActionID(p_request.getParameter("id"));
+
+                if (acitivities != null && acitivities.size() > 0)
+                {
                     p_request.setAttribute("canBeRemoved", "false");
                 }
-                else {
+                else
+                {
                     actionManager.removeAction(id);
                 }
-            } catch (Exception e) {
-                throw new 
-                    EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(
+                        EnvoyServletException.EX_GENERAL, e);
             }
         }
     }
 }
-
-

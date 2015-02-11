@@ -47,7 +47,7 @@ public class InternationalCostCenterAction implements AttributeAction
                 try
                 {
                     JobImpl job = jobAttribute.getJob();
-                    String companyIdStr = job.getCompanyId();
+                    String companyIdStr = String.valueOf(job.getCompanyId());
                     String[] args =
                     { job.getName(), Long.toString(job.getId()),
                             UserUtil.getUserNameById(job.getCreateUserId()) };

@@ -330,8 +330,10 @@ public class XliffFileUtil
             Vector<TargetPage> targetPages = p_workflow.getAllTargetPages();
 
             String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath();
-            if ("1".equals(CompanyWrapper.getCurrentCompanyId())
-                    && !"1".equals(p_workflow.getJob().getCompanyId()))
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
+                    .getCurrentCompanyId())
+                    && !CompanyWrapper.SUPER_COMPANY_ID.equals(String
+                            .valueOf(p_workflow.getJob().getCompanyId())))
             {
                 baseDocDir += baseDocDir + File.separator;
             }
@@ -380,6 +382,53 @@ public class XliffFileUtil
 
     }
 
+    public static String getSourceFile(String externalPageId, String companyId)
+    {
+    	if (!isXliffFile(externalPageId))
+    		return null;
+    	
+    	 String baseCxeDocDir = AmbFileStoragePathUtils.getCxeDocDirPath()
+                 .concat(File.separator);
+    	 String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
+         if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
+                 .getCurrentCompanyId())
+                 && !CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+         {
+             baseCxeDocDir += companyName + File.separator;
+         }
+         
+         int index = externalPageId.lastIndexOf(SEPARATE_FLAG + File.separator);
+         String tmp = "";
+         String sourceFilename = "";
+         File sourceFile = null;
+         File sourcePath = null, targetPath = null;
+         
+         if (index != -1)
+         {
+             tmp = externalPageId.substring(0, index);
+             sourceFilename = baseCxeDocDir + tmp;
+             sourceFile = new File(sourceFilename);
+             if (sourceFile.exists() && sourceFile.isFile())
+             {
+                 return sourceFile.getAbsolutePath();
+             }
+         }
+         
+         tmp = externalPageId.substring(0,
+        		 externalPageId.lastIndexOf(File.separator));
+         sourceFilename = baseCxeDocDir + tmp
+                 + XliffFileUtil.XLZ_EXTENSION;
+         sourceFile = new File(sourceFilename);
+         if (sourceFile.exists() && sourceFile.isFile())
+         {
+        	 return sourceFile.getAbsolutePath();
+         }
+         
+         return null;
+    }
+    
+    
     /**
      * Process the files if the source file is with XLZ file format
      * 
@@ -410,11 +459,12 @@ public class XliffFileUtil
                     .concat(File.separator);
 
             Job job = p_workflow.getJob();
-            String companyId = job.getCompanyId();
+            String companyId = String.valueOf(job.getCompanyId());
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
 
-            if ("1".equals(CompanyWrapper.getCurrentCompanyId())
-                    && !"1".equals(job.getCompanyId()))
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
+                    .getCurrentCompanyId())
+                    && !CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
                 baseCxeDocDir += companyName + File.separator;
             }

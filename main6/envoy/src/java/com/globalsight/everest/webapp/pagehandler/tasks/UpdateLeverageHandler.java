@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -63,6 +63,7 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 public class UpdateLeverageHandler extends PageActionHandler
@@ -242,13 +243,21 @@ public class UpdateLeverageHandler extends PageActionHandler
 
             // Available jobs should be 1) in the same project, 2) this job
             // should also have a workflow with the same target locale, 3) this
-            // workflow must be "In Progress" or "Localized"(translation work is
-            // in progress or finished, but not populate into storage TM yet).
+            // workflow must be "Ready", "In Progress" or
+            // "Localized"(translation work is in progress or finished, but not
+            // populate into storage TM yet).
             JobSearchParameters jobSearchParam = new JobSearchParameters();
             jobSearchParam.setProjectId(String.valueOf(projectId));// for 1)
             jobSearchParam.setSourceLocale(sourceLocale);// for 2)
             Collection<JobImpl> jobs = ServerProxy.getJobHandler().getJobs(
                     jobSearchParam);
+            for (Iterator<JobImpl> it = jobs.iterator(); it.hasNext();)
+            {
+                if (Job.CANCELLED.equals(it.next().getState()))
+                {
+                    it.remove();
+                }
+            }
             availableJobs.addAll(jobs);
         }
         catch (Exception e)
@@ -511,7 +520,6 @@ public class UpdateLeverageHandler extends PageActionHandler
         t.start();
     }
 
-    @SuppressWarnings("unchecked")
     private void reApplyRefTms(Workflow p_wf, TargetPage p_targetPage,
             String p_userId) throws Exception
     {
@@ -519,8 +527,9 @@ public class UpdateLeverageHandler extends PageActionHandler
         GlobalSightLocale targetLocale = p_wf.getTargetLocale();
 
         SourcePage sp = p_targetPage.getSourcePage();
-        String companyId = sp.getCompanyId();
+        long companyId = sp.getCompanyId();
         long sourcePageId = sp.getId();
+        boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
 
         // 1. Untranslated source segments
         Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
@@ -567,8 +576,8 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale,
-                        companyId);
+                .removeMatchesExistedInDB(ipMatches, targetLocale, sp.getCompanyId(),
+                        isJobDataMigrated);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -579,12 +588,13 @@ public class UpdateLeverageHandler extends PageActionHandler
             LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
             LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
                     leveragingLocales);
-            Session session = TmUtil.getStableSession();
+            Connection conn = null;
             try
             {
-                leverageMatchLingManager.saveLeverageResults(
-                        session.connection(), sourcePageId, mergedLevMatches,
-                        targetLocale, leverageOptions);
+                conn = DbUtil.getConnection();
+                leverageMatchLingManager.saveLeverageResults(conn,
+                        sourcePageId, mergedLevMatches, targetLocale,
+                        leverageOptions);
             }
             catch (Exception e)
             {
@@ -592,10 +602,7 @@ public class UpdateLeverageHandler extends PageActionHandler
             }
             finally
             {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
+                DbUtil.silentReturnConnection(conn);
             }
 
             // 6. Populate into target TUVs
@@ -609,7 +616,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 {
                     UpdateLeverageHelper.populateExactMatchesToTargetTuvs(
                             exactMap, untranslatedSrcTuvs, targetLocale,
-                            p_userId, companyId);
+                            p_userId, companyId, sourcePageId);
                 }
                 catch (Exception e)
                 {
@@ -619,7 +626,6 @@ public class UpdateLeverageHandler extends PageActionHandler
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void updateFromJobs(Workflow p_workflow, String[] p_selectedJobIds,
             int p_ipTmPenalty, TargetPage p_targetPage, String p_userId)
             throws Exception
@@ -628,8 +634,9 @@ public class UpdateLeverageHandler extends PageActionHandler
         GlobalSightLocale targetLocale = p_workflow.getTargetLocale();
 
         SourcePage sp = p_targetPage.getSourcePage();
-        String companyId = sp.getCompanyId();
+        long companyId = sp.getCompanyId();
         long sourcePageId = sp.getId();
+        boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
 
         // 1. Untranslated source segments
         Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
@@ -664,7 +671,7 @@ public class UpdateLeverageHandler extends PageActionHandler
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
                 .removeMatchesExistedInDB(ipMatches, targetLocale,
-                        companyId);
+                        companyId, isJobDataMigrated);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -675,12 +682,13 @@ public class UpdateLeverageHandler extends PageActionHandler
             LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
             LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
                     leveragingLocales);
-            Session session = TmUtil.getStableSession();
+            Connection conn = null;
             try
             {
-                leverageMatchLingManager.saveLeverageResults(
-                        session.connection(), sourcePageId, mergedLevMatches,
-                        targetLocale, leverageOptions);
+                conn = DbUtil.getConnection();
+                leverageMatchLingManager.saveLeverageResults(conn,
+                        sourcePageId, mergedLevMatches, targetLocale,
+                        leverageOptions);
             }
             catch (Exception e)
             {
@@ -688,10 +696,7 @@ public class UpdateLeverageHandler extends PageActionHandler
             }
             finally
             {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
+                DbUtil.silentReturnConnection(conn);
             }
 
             // 6. Populate into target TUVs
@@ -705,7 +710,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 {
                     UpdateLeverageHelper.populateExactMatchesToTargetTuvs(
                             exactMap, untranslatedSrcTuvs, targetLocale,
-                            p_userId, companyId);
+                            p_userId, companyId, sourcePageId);
                 }
                 catch (Exception e)
                 {
@@ -716,9 +721,9 @@ public class UpdateLeverageHandler extends PageActionHandler
     }
 
     /**
-     * Available job must has a workflow in "DISPATCHED", "LOCALIZED" or
-     * "EXPORT_FAILED" state, and this workflow must has same source and target
-     * locales with the specified workflow.
+     * Available job must has a workflow in "READY_TO_BE_DISPATCHED",
+     * "DISPATCHED", "LOCALIZED" or "EXPORT_FAILED" state, and this workflow
+     * must has same source and target locales with the specified workflow.
      * 
      * @param p_selectedJobIds
      * @param p_workflow
@@ -742,11 +747,13 @@ public class UpdateLeverageHandler extends PageActionHandler
                         && wf.getJob().getSourceLocale().equals(sourceLocale))
                 {
                     String wfState = wf.getState();
-                    if (Workflow.DISPATCHED.equalsIgnoreCase(wfState)
+                    if (Workflow.READY_TO_BE_DISPATCHED.equalsIgnoreCase(wfState)
+                            || Workflow.DISPATCHED.equalsIgnoreCase(wfState)
                             || Workflow.LOCALIZED.equalsIgnoreCase(wfState)
                             || Workflow.EXPORT_FAILED.equalsIgnoreCase(wfState))
                     {
                         jobIds.add(jobId);
+                        break;
                     }
                 }
             }

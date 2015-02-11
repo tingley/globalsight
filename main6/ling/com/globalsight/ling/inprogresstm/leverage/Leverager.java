@@ -204,7 +204,7 @@ public class Leverager
             LeverageMatches p_leverageMatches, BaseTmTuv p_sourceSegment,
             GlobalSightLocale p_targetLocale, long p_currentJobId)
     {
-        String companyId = null;
+        long companyId = -1;
         try
         {
             Job job = ServerProxy.getJobHandler().getJobById(p_currentJobId);
@@ -221,7 +221,7 @@ public class Leverager
                 p_sourceSegment.isTranslatable());
         // populate DynamicLeverageResults
         for (Iterator it = p_leverageMatches.matchIterator(p_targetLocale,
-                companyId); it.hasNext();)
+                String.valueOf(companyId)); it.hasNext();)
         {
             // These results came from the IP TM. This means that their TMID
             // is not a TMID but rather a JOB_ID. Therefore we need a way

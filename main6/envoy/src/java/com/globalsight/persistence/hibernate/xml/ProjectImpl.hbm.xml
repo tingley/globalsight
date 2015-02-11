@@ -1,51 +1,49 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-    <class name="com.globalsight.everest.projecthandler.ProjectImpl"
-        table="PROJECT">
+	<class name="com.globalsight.everest.projecthandler.ProjectImpl"
+		table="PROJECT">
 
-        <id name="id" column="PROJECT_SEQ" type="long">
-            <generator class="native" />
-        </id>
+		<id name="id" column="PROJECT_SEQ" type="long">
+			<generator class="native" />
+		</id>
 
-        <properties name="forUnique" unique="true">
-            <property name="name" length="40" column="PROJECT_NAME"
-                type="string" not-null="true" unique="false" />
-            <property name="companyId" column="COMPANYID" type="string"
-                not-null="true" unique="false" />
-        </properties>
+		<properties name="forUnique" unique="true">
+			<property name="name" length="40" column="PROJECT_NAME"
+				type="string" not-null="true" unique="false" />
+			<property name="companyId" column="COMPANYID" length="20"
+				type="long" not-null="true" unique="false" />
+		</properties>
 
-        <property name="description" length="4000" column="DESCRIPTION"
-            type="string" not-null="false" unique="false" />
-        <property name="managerUserId" length="80"
-            column="MANAGER_USER_ID" type="string" not-null="true" />
-        <property name="termbase" length="100" column="TERMBASE_NAME"
-            type="string" not-null="false" unique="false" />
-        <property name="quoteUserId" length="80" column="QUOTE_USER_ID"
-            type="string" not-null="false" />
-        <property name="isActive" column="IS_ACTIVE" type="yes_no"
-            not-null="true" />
-        <property name="PMCost" column="PMCOST" type="float"
-            not-null="false" />
-        <property name="poRequired" column="POREQUIRED" type="int"
-            not-null="false" />
-        <property name="reviewOnlyAutoAccept" column="REVIEWONLYAUTOACCEPT" 
-        	type="boolean" not-null="false" />
-        <property name="reviewOnlyAutoSend" column="REVIEWONLYAUTOSEND" 
-        	type="boolean" not-null="false" />
-        <property name="autoAcceptPMTask" column="AUTOACCEPTPMTASK" 
-        	type="boolean" not-null="false" />         
-                          
-        <many-to-one name="attributeSet" column="ATTRIBUTE_SET_ID" 
-            class="com.globalsight.cxe.entity.customAttribute.AttributeSet" 
-            not-null="false" />
-        
-        <set name="userIds" table="PROJECT_USER" lazy="false">
-            <key column="PROJECT_ID" />
-            <element column="USER_ID" type="string" />
-        </set>
-    </class>
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="managerUserId" length="80" column="MANAGER_USER_ID"
+			type="string" not-null="true" />
+		<property name="termbase" length="100" column="TERMBASE_NAME"
+			type="string" not-null="false" unique="false" />
+		<property name="quoteUserId" length="80" column="QUOTE_USER_ID"
+			type="string" not-null="false" />
+		<property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" />
+		<property name="PMCost" column="PMCOST" type="float"
+			not-null="false" />
+		<property name="poRequired" column="POREQUIRED" type="int"
+			not-null="false" />
+		<property name="reviewOnlyAutoAccept" column="REVIEWONLYAUTOACCEPT"
+			type="boolean" not-null="false" />
+		<property name="reviewOnlyAutoSend" column="REVIEWONLYAUTOSEND"
+			type="boolean" not-null="false" />
+		<property name="autoAcceptPMTask" column="AUTOACCEPTPMTASK"
+			type="boolean" not-null="false" />
+
+		<many-to-one name="attributeSet" column="ATTRIBUTE_SET_ID"
+			class="com.globalsight.cxe.entity.customAttribute.AttributeSet"
+			not-null="false" />
+
+		<set name="userIds" table="PROJECT_USER" lazy="false">
+			<key column="PROJECT_ID" />
+			<element column="USER_ID" type="string" />
+		</set>
+	</class>
 </hibernate-mapping>

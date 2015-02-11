@@ -56,17 +56,16 @@ import com.globalsight.terminology.TermbaseList;
 import com.globalsight.util.GeneralException;
 
 /**
- * <p>PageHandler is responsible creating, deleting and modifying
- * termbases.</p>
+ * <p>
+ * PageHandler is responsible creating, deleting and modifying termbases.
+ * </p>
  */
 
-public class TermbaseManagementPageHandler
-    extends PageHandler
-    implements WebAppConstants
+public class TermbaseManagementPageHandler extends PageHandler implements
+        WebAppConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TermbaseManagementPageHandler.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(TermbaseManagementPageHandler.class.getName());
 
     //
     // Static Members
@@ -99,25 +98,27 @@ public class TermbaseManagementPageHandler
 
     /**
      * Invoke this PageHandler.
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(
-            WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        Locale uiLocale = (Locale)session.getAttribute(
-            WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         String userId = getUser(session).getUserId();
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
@@ -127,9 +128,9 @@ public class TermbaseManagementPageHandler
                 .getCompanyById(currentCompanyId);
         boolean enableTBAccessControl = currentCompany
                 .getEnableTBAccessControl();
-        
-        String action = (String)p_request.getParameter(TERMBASE_ACTION);
-        String tbId   = (String)p_request.getParameter(RADIO_BUTTON);
+
+        String action = (String) p_request.getParameter(TERMBASE_ACTION);
+        String tbId = (String) p_request.getParameter(RADIO_BUTTON);
         String name = null;
         String description = null;
 
@@ -144,8 +145,9 @@ public class TermbaseManagementPageHandler
         {
             if (tbId != null)
             {
-                com.globalsight.terminology.java.Termbase tb = 
-                    HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, Long.parseLong(tbId));
+                com.globalsight.terminology.java.Termbase tb = HibernateUtil
+                        .get(com.globalsight.terminology.java.Termbase.class,
+                                Long.parseLong(tbId));
                 name = tb.getName();
                 description = tb.getDescription();
                 sessionMgr.setAttribute(TERMBASE_TB_ID, tbId);
@@ -156,12 +158,12 @@ public class TermbaseManagementPageHandler
             {
                 // show main screen with list of termbases
                 sessionMgr.setAttribute("isAdmin", isAdmin);
-                sessionMgr.setAttribute("enableTBAccessControl", enableTBAccessControl);
-                setTableNavigation(p_request, session, getTBs(userId,uiLocale),
-                           new TermbaseInfoComparator(uiLocale),
-                           10,
-                           TERMBASE_TB_NAMELIST,
-                           TERMBASE_TB_KEY);
+                sessionMgr.setAttribute("enableTBAccessControl",
+                        enableTBAccessControl);
+                setTableNavigation(p_request, session,
+                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        TERMBASE_TB_KEY);
             }
             else if (action.equals(TERMBASE_ACTION_NEW))
             {
@@ -173,14 +175,14 @@ public class TermbaseManagementPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_MODIFY))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
                 // load existing definition and display for modification
                 String definition = s_manager.getDefinition(name, false);
 
@@ -189,14 +191,14 @@ public class TermbaseManagementPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_CLONE))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
                 // load existing definition and display for cloning
                 String definition = s_manager.getDefinition(name, true);
 
@@ -204,14 +206,14 @@ public class TermbaseManagementPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_IMPORT))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
                 CATEGORY.error("TERMBASE_ACTION_INPUT_IMPORT");
 
                 // load existing definition and display for modification
@@ -221,14 +223,14 @@ public class TermbaseManagementPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_EXPORT))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
                 CATEGORY.error("TERMBASE_ACTION_INPUT_EXPORT");
 
                 // load existing definition and display for modification
@@ -245,14 +247,14 @@ public class TermbaseManagementPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_INPUT_MODELS))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
                 CATEGORY.error("TERMBASE_ACTION_INPUT_MODELS");
 
                 // load existing definition and display for modification
@@ -260,55 +262,63 @@ public class TermbaseManagementPageHandler
 
                 sessionMgr.setAttribute(TERMBASE_DEFINITION, definition);
             }
-            else if(action.equals(TERMBASE_ACTION_DELETE)) 
+            else if (action.equals(TERMBASE_ACTION_DELETE))
             {
-            	if (tbId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
-                try{
-                    ArrayList list = 
-                        (ArrayList)ServerProxy.getProjectHandler().getProjectsByTermbaseDepended(name);
-                    
-                    if(list != null && list.size() > 0) {
-                        sessionMgr.setAttribute("projectsByTermbaseDepended", list);
-                    }
-                    else 
+                if (tbId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=termbases");
+                    return;
+                }
+                try
+                {
+                    ArrayList list = (ArrayList) ServerProxy
+                            .getProjectHandler().getProjectsByTermbaseDepended(
+                                    name);
+
+                    if (list != null && list.size() > 0)
                     {
-                        ITermbaseManager m_manager = ServerProxy.getTermbaseManager();
+                        sessionMgr.setAttribute("projectsByTermbaseDepended",
+                                list);
+                    }
+                    else
+                    {
+                        ITermbaseManager m_manager = ServerProxy
+                                .getTermbaseManager();
                         m_manager.delete(name, userId, "");
                         ProjectTMTBUsers ptbUsers = new ProjectTMTBUsers();
                         ptbUsers.deleteAllUsers(tbId, "TB");
                     }
                 }
-                catch(Exception e) {}
-                
-				sessionMgr.setAttribute("isAdmin", isAdmin);
-				sessionMgr.setAttribute("enableTBAccessControl", enableTBAccessControl);
-                setTableNavigation(p_request, session, getTBs(userId,uiLocale),
-                           new TermbaseInfoComparator(uiLocale),
-                           10,
-                           TERMBASE_TB_NAMELIST,
-                           TERMBASE_TB_KEY);
-            }
-            else if(action.equals(TERMBASE_ACTION_SAVEUSERS))
-            {
-                String selectedField = (String)p_request.getParameter("toField");
-                
-                ProjectTMTBUsers projectTMTBUsers= new ProjectTMTBUsers();
-                projectTMTBUsers.updateUsers(tbId, "TB", selectedField);
-                
+                catch (Exception e)
+                {
+                }
+
                 sessionMgr.setAttribute("isAdmin", isAdmin);
-                sessionMgr.setAttribute("enableTBAccessControl", enableTBAccessControl);
-                setTableNavigation(p_request, session, getTBs(userId,uiLocale),
-                           new TermbaseInfoComparator(uiLocale),
-                           10,
-                           TERMBASE_TB_NAMELIST,
-                           TERMBASE_TB_KEY);
+                sessionMgr.setAttribute("enableTBAccessControl",
+                        enableTBAccessControl);
+                setTableNavigation(p_request, session,
+                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        TERMBASE_TB_KEY);
+            }
+            else if (action.equals(TERMBASE_ACTION_SAVEUSERS))
+            {
+                String selectedField = (String) p_request
+                        .getParameter("toField");
+
+                ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
+                projectTMTBUsers.updateUsers(tbId, "TB", selectedField);
+
+                sessionMgr.setAttribute("isAdmin", isAdmin);
+                sessionMgr.setAttribute("enableTBAccessControl",
+                        enableTBAccessControl);
+                setTableNavigation(p_request, session,
+                        getTBs(userId, uiLocale), new TermbaseInfoComparator(
+                                uiLocale), 10, TERMBASE_TB_NAMELIST,
+                        TERMBASE_TB_KEY);
             }
         }
         catch (TermbaseException ex)
@@ -317,12 +327,13 @@ public class TermbaseManagementPageHandler
             sessionMgr.setAttribute(TERMBASE_ERROR, ex.toString());
         }
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
      * Get tbs for user
+     * 
      * @param userId
      * @param uiLocale
      * @return
@@ -331,8 +342,7 @@ public class TermbaseManagementPageHandler
      * @author Leon Song
      * @since 8.0
      */
-    private List getTBs(String userId, Locale uiLocale)
-            throws RemoteException
+    private List getTBs(String userId, Locale uiLocale) throws RemoteException
     {
         List tbs = new ArrayList();
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
@@ -374,7 +384,7 @@ public class TermbaseManagementPageHandler
                 for (Iterator it = projectList.iterator(); it.hasNext();)
                 {
                     Project pj = (Project) it.next();
-                    String companyId = pj.getCompanyId();
+                    String companyId = String.valueOf(pj.getCompanyId());
                     if (!companies.contains(companyId))
                     {
                         companies.add(companyId);
@@ -447,4 +457,3 @@ public class TermbaseManagementPageHandler
         return tbs;
     }
 }
-

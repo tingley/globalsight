@@ -1,44 +1,59 @@
+/**
+ *  Copyright 2013 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.smartbox.util;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import sun.net.TelnetOutputStream;
-import sun.net.ftp.FtpClient;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
+/**
+ * FTP Utility, such as Upload and Download file from FTP.
+ * 
+ * @author Joey
+ */
 public class FtpHelper
 {
-    private FtpClient ftpClient = null;
-    private String host;
-    private String username;
-    private String password;
+    protected FTPClient ftpClient = null;
+    protected String host;
+    protected String username;
+    protected String password;
+    protected int port = 21;
 
-    /**
-     * Create a connection
-     * 
-     * @param host
-     * @param username
-     * @param password
-     * @return
-     * @throws Exception
-     */
     public FtpHelper(String host, String username, String password)
+    {
+        this(host, 21, username, password);
+    }
+    
+    public FtpHelper(String host, int port, String username, String password)
     {
         this.host = host;
         this.username = username;
         this.password = password;
+        setPort(port);
     }
-
-    /**
-     * Test connect
-     * 
-     * @return
-     */
+    
     public boolean testConnect()
     {
         boolean connect = ftpConnect();
@@ -46,49 +61,64 @@ public class FtpHelper
         return connect;
     }
 
-    /**
-     * Create a connection
-     * 
-     * @param host
-     * @param username
-     * @param password
-     * @return
-     * @throws Exception
-     */
-    private boolean ftpConnect()
+    protected boolean ftpConnect()
     {
         try
         {
-            ftpClient = new FtpClient();
-            ftpClient.openServer(host);
-            ftpClient.login(username, password);
-            ftpClient.binary();
+            boolean result ;
+            if (ftpClient == null || !ftpClient.isConnected())
+            {
+                ftpClient = new FTPClient();
+                ftpClient.connect(host, port);
+                result = ftpClient.login(username, password);
+                // Sets Binary File Type for ZIP File.  
+                ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+                // Set Buffer Size to speed up download/upload file.
+                ftpClient.setBufferSize(102400);
+            }
+            else
+            {
+                result = ftpClient.isConnected();
+            }
+            
+            return result;
         }
         catch (Exception e)
         {
             String message = "Failed to connect to FTP Server: " + host
-                    + ", user:" + username + ", password:" + password + ".";
+                    + ", FTPUsername:" + username + ", FTPPassword:" + password
+                    + ", FTPServerPort:" + port + ".";
             LogUtil.fail(message, e);
             return false;
         }
-        return true;
     }
 
-    /**
-     * Check the dir is existing, used for GSSmartBox init
-     * 
-     * @param host
-     * @param username
-     * @param password
-     * @return
-     */
-    public boolean ftpDirExists(String path)
+    public void ftpCreateDir(String p_path)
     {
         if (ftpConnect())
         {
             try
             {
-                ftpClient.cd(path);
+                ftpClient.makeDirectory(p_path);
+            }
+            catch (IOException e)
+            {
+                LogUtil.fail("Create Directory error by path:" + p_path, e);
+            }
+            finally
+            {
+                ftpClose();
+            }
+        }
+    }
+    
+    public boolean ftpDirExists(String p_path)
+    {
+        if (ftpConnect())
+        {
+            try
+            {
+                return ftpClient.changeWorkingDirectory(p_path);
             }
             catch (Exception e)
             {
@@ -103,16 +133,11 @@ public class FtpHelper
         return true;
     }
 
-    /**
-     * Close connection
-     * 
-     * @return
-     */
     public boolean ftpClose()
     {
         try
         {
-            ftpClient.closeServer();
+            ftpClient.disconnect();
         }
         catch (Exception e)
         {
@@ -122,34 +147,25 @@ public class FtpHelper
         }
         return true;
     }
-
+    
     /**
-     * Get file list
+     * Gets File Array in FTP Server by FTP Directory.
      * 
-     * @param fc
-     * @return
-     * @throws IOException
-     * @throws Exception
+     * @param directory
+     *            FTP Directory
      */
-    public List<String> ftpList(String directory)
+    public FTPFile[] ftpFileList(String p_directory)
     {
-        List<String> fileNames = new ArrayList<String>();
+        FTPFile[] result = {};
         if (ftpConnect())
         {
             try
             {
-                DataInputStream is = new DataInputStream(
-                        ftpClient.nameList(directory));
-                String fileName;
-                while ((fileName = is.readLine()) != null)
-                {
-                    fileNames.add(fileName);
-                }
-                is.close();
+                result = ftpClient.listFiles(p_directory);
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                String message = "Failed to get file list from inbox in FTP.";
+                String message = "Ftp get name list error.";
                 LogUtil.fail(message, e);
             }
             finally
@@ -158,23 +174,16 @@ public class FtpHelper
             }
         }
 
-        return fileNames;
+        return result;
     }
 
-    /**
-     * Rename file, move file to another directory in ftp
-     * 
-     * @param target
-     * @param file
-     * @return
-     */
-    public boolean ftpRename(String target, String file)
+    public boolean ftpRename(String p_target, String p_file)
     {
         if (ftpConnect())
         {
             try
             {
-                ftpClient.rename(file, target);
+                ftpClient.rename(p_file, p_target);
             }
             catch (IOException e)
             {
@@ -189,146 +198,210 @@ public class FtpHelper
         return true;
     }
 
-    /**
-     * Download file
-     * 
-     * @param fc
-     * @param filename
-     * @return
-     * @throws IOException
-     * @throws Exception
-     */
-    public InputStream ftpDownloadFile(String fileName)
+   
+    public InputStream ftpDownloadFile(String p_remoteFileName)
     {
         InputStream is = null;
         if (ftpConnect())
         {
             try
             {
-                is = ftpClient.get(fileName);
+                is = ftpClient.retrieveFileStream(p_remoteFileName);
             }
             catch (IOException e)
             {
                 String message = "Failed to download file from InBox(in FTP), fileName: "
-                        + fileName + ".";
+                        + p_remoteFileName + ".";
                 LogUtil.FAILEDLOG.error(message);
+            }
+            finally
+            {
+                ftpClose();
             }
         }
 
         return is;
     }
-
+    
     /**
-     * Create directory in ftp
+     * Downloads file from FTP to Locale.
      * 
-     * @param path
+     * @param p_remoteFileName
+     *            File Name in FTP Server
+     * @param p_localFileName
+     *            File Name in Locale
      */
-    public void ftpCreateDir(String path)
-    {
-        if (ftpConnect())
-        {
-            ftpClient.sendServer("MKD " + path + "\r\n");
-            ftpClose();
-        }
-    }
-
-    /**
-     * Upload file to ftp
-     * 
-     * @param targetFile
-     * @param fileName
-     * @return
-     * @throws IOException
-     */
-    private boolean ftpUpload(String targetFile, File file)
+    public void ftpDownloadFile(String p_remoteFileName, String p_localFileName)
     {
         if (ftpConnect())
         {
             try
             {
-                TelnetOutputStream os = ftpClient.put(targetFile);
-                FileInputStream is = new FileInputStream(file);
-                byte[] bytes = new byte[1024];
-                int c;
-                while ((c = is.read(bytes)) != -1)
-                {
-                    os.write(bytes, 0, c);
-                }
-                is.close();
-                os.close();
+                FileOutputStream local = new FileOutputStream(new File(
+                        p_localFileName));
+                ftpClient.retrieveFile(p_remoteFileName, local);
+                local.close();
             }
             catch (IOException e)
             {
+                String message = "Failed to download file from InBox(in FTP), fileName: "
+                        + p_remoteFileName + ".";
+                LogUtil.FAILEDLOG.error(message);
+            }
+            finally
+            {
+                ftpClose();
+            }
+        }
+    }
+   
+    public void ftpUploadDirectory(String p_remoteDir, File p_sourceFile,
+            String p_sourceFilePath)
+    {
+        if (p_sourceFile.isDirectory())
+        {
+            File[] files = p_sourceFile.listFiles();
+            for (File file : files)
+            {
+                ftpUploadDirectory(p_remoteDir, file, p_sourceFilePath);
+            }
+        }
+        else
+        {
+            String srcPath = p_sourceFilePath.replace("\\", "/");
+            String temp = p_sourceFile.getPath();
+            temp = temp.replace("\\", "/");
+            temp = temp.substring(temp.indexOf(srcPath) + srcPath.length());
+            String remoteFileName = p_remoteDir + temp;
+            boolean uploaded = ftpUpload(remoteFileName, p_sourceFile);
+            if (uploaded)
+            {
+                // File have been uploaded to FTP , delete unused file
+                FileUtil.deleteFile(p_sourceFile);
+            }
+        }
+    }
+    
+    /**
+     * Upload Locale file to FTP Server
+     * 
+     * @param p_remoteFileName
+     *            FTP Directory
+     * @param p_file
+     *            Locale File
+     * @return
+     */
+    public boolean ftpUpload(String p_remoteFileName, File p_file)
+    {
+        if (ftpConnect())
+        {
+            try
+            {
+                String remoteFileName = p_remoteFileName.replace("\\", "/").replace("//", "/");
+                ftpCreateDirectoryTree(remoteFileName.substring(0, remoteFileName.lastIndexOf("/")));
+                FileInputStream localFIS = new FileInputStream(p_file);
+                boolean result = ftpClient.storeFile(remoteFileName, localFIS);
+                localFIS.close();
+                LogUtil.info("Upload file successfully, FTP File:[" + remoteFileName + "]");
+                return result;
+            }
+            catch (IOException e)
+            {
+                String message = "Failed to upload file, FTP File:["
+                        + p_remoteFileName + "], locale File:["
+                        + p_file.getPath() + "].";
+                LogUtil.FAILEDLOG.error(message);
                 return false;
             }
             finally
             {
                 ftpClose();
             }
-            return true;
         }
+        
         return false;
     }
-
+        
     /**
-     * Upload directory to ftp
+     * Creates an arbitrary directory hierarchy on the remote ftp server.
      * 
-     * @param targetFile
-     * @param fileName
-     * @return
-     * @throws IOException
+     * @param dirTree
+     *            the directory tree only delimited with / chars. No file name!
+     * @throws Exception
      */
-    public void ftpUploadDirectory(String targetDir, File sourceFile,
-            String root)
+    private void ftpCreateDirectoryTree(String p_dirTree) throws IOException
     {
-        if (sourceFile.isDirectory())
+        boolean dirExists = true;
+
+        // Gets the relative ftp path.
+        List<String> directories = new ArrayList<String>();
+        String[] temp = p_dirTree.split("/"); 
+        StringBuffer path = new StringBuffer();
+        for (int i = 1; i < temp.length; i++)
         {
-            String sourceFilePath = sourceFile.getPath();
-            sourceFilePath = sourceFilePath.replace("\\", "/");
-            String ftpDir = targetDir
-                    + sourceFilePath.substring(sourceFilePath.indexOf(root)
-                            + root.length(), sourceFilePath.length());
-            if (!ftpDirExists(ftpDir))
-            {
-                ftpCreateDir(ftpDir);
-            }
-            File[] files = sourceFile.listFiles();
-            for (File file : files)
-            {
-                ftpUploadDirectory(targetDir, file, root);
-            }
+            path.append("/").append(temp[i]);
+            directories.add(path.toString());
         }
-        else
+        
+        for (String dir : directories)
         {
-            String sourceFilePath = sourceFile.getPath();
-            sourceFilePath = sourceFilePath.replace("\\", "/");
-            String ftpFile = targetDir
-                    + sourceFilePath.substring(sourceFilePath.indexOf(root)
-                            + root.length(), sourceFilePath.length());
-            boolean uploaded = ftpUpload(ftpFile, sourceFile);
-            if (uploaded)
+            if (!dir.isEmpty())
             {
-                // File have been uploaded to FTP , delete unused file
-                FileUtil.deleteFile(sourceFile);
+                if (dirExists)
+                {
+                    dirExists = ftpClient.changeWorkingDirectory(dir);
+                }
+                if (!dirExists)
+                {
+                    if (!ftpClient.makeDirectory(dir))
+                    {
+                        throw new IOException(
+                                "Unable to create remote directory '" + dir
+                                        + "'.  error='"
+                                        + ftpClient.getReplyString() + "'");
+                    }
+                    if (!ftpClient.changeWorkingDirectory(dir))
+                    {
+                        throw new IOException(
+                                "Unable to change into newly created remote directory '"
+                                        + dir + "'.  error='"
+                                        + ftpClient.getReplyString() + "'");
+                    }
+                }
             }
         }
     }
 
-    /**
-     * Delete file
-     * 
-     * @param fc
-     * @param filename
-     * @return
-     * @throws IOException
-     */
-    public boolean ftpDelete(String filename)
+    // Deletes a file on FTP Server.
+    public boolean ftpDeleteFile(String p_fileName)
     {
         if (ftpConnect())
         {
-            ftpClient.sendServer("dele " + filename + "\r\n");
+            try
+            {
+                return ftpClient.deleteFile(p_fileName);
+            }
+            catch (IOException e)
+            {
+                LogUtil.fail("Delete File Error: " + p_fileName, e);
+            }
+            
             ftpClose();
         }
-        return true;
+        
+        return false;
+    }
+    
+    public int getPort()
+    {
+        return port;
+    }
+
+    public void setPort(int p_port)
+    {
+        if (p_port > 0)
+        {
+            port = p_port;
+        }
     }
 }

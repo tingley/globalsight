@@ -139,10 +139,12 @@ public class CustomizeReportsMainHandler extends PageHandler
         p_response.setHeader("Pragma","public");
         p_response.setContentType("application/vnd.ms-excel");
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-        ReportWriter reportWriter = new ExcelReportWriter(p_response.getOutputStream(), bundle);
+        ExcelReportWriter reportWriter = new ExcelReportWriter(p_response.getOutputStream(), bundle);
         
         String currency = request.getParameter("currency");
         CurrencyThreadLocal.setCurrency(currency);
+        String userId = (String) request.getSession().getAttribute(WebAppConstants.USER_NAME);
+        p_paramMap.put(WebAppConstants.USER_NAME, userId);
         
         CustomizeReportsGenerator generator = new CustomizeReportsGenerator(p_paramMap, reportWriter);
         generator.pupulate();

@@ -181,8 +181,7 @@ public class FileUtil
      */
     public static void deleteFile(String path)
     {
-        File file = new File(path);
-        deleteFile(file);
+        deleteFile(new File(path));
     }
 
     /**
@@ -236,7 +235,7 @@ public class FileUtil
     /**
      * Try to guess the file encoding.
      * 
-     * Only guees encodings of "UTF-8", "UTF-16" or "UTF-16BE".
+     * Only guess encodings of "UTF-8", "UTF-16" or "UTF-16BE".
      * 
      * @param file
      *            The file needed to guess the encoding.

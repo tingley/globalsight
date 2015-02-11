@@ -119,7 +119,7 @@ public class LeverageSegment implements Serializable, SidComparable,
     }
 
     @Override
-    public String getOrgSid(String companyId)
+    public String getOrgSid(long companyId)
     {
         return orgSid;
     }

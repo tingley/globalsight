@@ -89,6 +89,7 @@ public class UploadThread extends MultiCompanySupportedThread
 
             AlignmentProject project =
                 new AlignmentProject(projectName, tm, tmSaveMode);
+            project.setUploadUser(m_user);
 
             AlignmentPackageReader packageReader = new AlignmentPackageReader(
                     m_packageFile, project.getProjectTmpDirectory());

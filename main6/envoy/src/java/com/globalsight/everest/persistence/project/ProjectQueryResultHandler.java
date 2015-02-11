@@ -89,9 +89,7 @@ public class ProjectQueryResultHandler
         {
             ProjectImpl result = (ProjectImpl) it.next();
 
-            v.add(new ProjectInfo(result.getId(), result.getName(), result
-                    .getDescription(), result.getCompanyId(), result
-                    .getManagerUserId(), result.getTermbaseName()));
+            v.add(new ProjectInfo(result));
         }
 
         Collection c = new ArrayList();

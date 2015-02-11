@@ -90,6 +90,7 @@
     ArrayList<Filter> o2010Filters = mapOfFormatTypeFilter.get("office-xml");
     ArrayList<Filter> poFilters = mapOfFormatTypeFilter.get("po");
     ArrayList<Filter> fmFilters = mapOfFormatTypeFilter.get("mif");
+    ArrayList<Filter> intxtFilters = mapOfFormatTypeFilter.get("plaintext");
     
 	FileProfile fp = (FileProfile) sessionMgr.getAttribute("fileprofile");
     String formatType = (String)sessionMgr.getAttribute("formatType");
@@ -113,6 +114,7 @@
 	String xslFile = "";
 	String xslRelativePath = "";
 	int terminologyApproval=0;
+	int populateSourceToTarget = 0;
 	int BOMType = 0;
 
     if (fp != null)
@@ -175,7 +177,9 @@
        }
        
        terminologyApproval = fp.getTerminologyApproval();
-       
+
+       populateSourceToTarget = fp.getXlfSourceAsUnTranslatedTarget();
+
        BOMType = fp.getBOMType();
     }
     
@@ -463,6 +467,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 	var o2010Filters = new Array();
 	var poFilters = new Array();
 	var fmFilters = new Array();
+	var intxtFilters = new Array();
   
 	<%
 		for(int i = 0; i < jpFilters.size(); i++)
@@ -643,6 +648,21 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 	}
 	
 	%>
+	
+	<%	
+	for(int i = 0; i < intxtFilters.size(); i++)
+	{
+		Filter filter = intxtFilters.get(i);
+		%>
+		var filter = new Object();
+		filter.id = "<%=filter.getId()%>";
+		filter.filterName = "<%=filter.getFilterName()%>";
+		filter.filterTableName = "<%=filter.getFilterTableName()%>";
+		intxtFilters.push(filter);
+		<%
+	}
+	
+	%>
 
     if (isXml(format))
     {
@@ -749,6 +769,11 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 		}
     }
     
+    if(isPlainText(format))
+	{
+		generateFilters(intxtFilters);
+	}
+    
     if(isHtml() || format == "XML" || format == "RESX")
     {
     	showBOMType();
@@ -760,6 +785,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
     isShowLocalizeFunction();
     isShowXmlDtd();
     hideXmlRule();
+    showOrHideXlfSourceAsTarget();
 }
 
 function setForXLZ() {
@@ -883,6 +909,16 @@ function isOpenOffice(format)
 function isOffice2010(format)
 {
     if (format == "Office2010 document")
+    {
+        return true;
+    }
+
+    return false;
+}
+
+function isPlainText(format)
+{
+    if (format == "PlainText")
     {
         return true;
     }
@@ -1032,6 +1068,11 @@ function isWordDoc()
 	return isSpecialFormat("Word");
 }
 
+function isXlfOrXlz()
+{
+    return isSpecialFormat("Xliff") || isSpecialFormat("XLZ");
+}
+
 function isSupportSid()
 {
     var selector = document.getElementById("formatSelector");
@@ -1093,6 +1134,20 @@ function removeFileCallback(data)
 function hideXmlRule()
 {
 	document.getElementById("xmlrule").style.display = "none";
+}
+
+function showOrHideXlfSourceAsTarget()
+{
+    if (isXlfOrXlz())
+    {
+        document.getElementById("lb_xlfSrcAsTarget").style.display = "block";
+        document.getElementById("td_xlfSrcAsTarget").style.display = "block";
+    }
+    else
+    {
+        document.getElementById("lb_xlfSrcAsTarget").style.display = "none";
+        document.getElementById("td_xlfSrcAsTarget").style.display = "none";
+    }
 }
 
 function isShowLocalizeFunction()
@@ -1529,7 +1584,20 @@ function isProjectUseTermbase(data) {
         </label>
       </td>
     </tr>
-      </table>
+
+    <tr>
+      <td valign="top">
+        <span id="lb_xlfSrcAsTarget" class="standardText" style="display:none">Populate Source Into<br>Un-Translated Target:</span>
+      </td>
+      <td id="td_xlfSrcAsTarget" style="display:none">
+        <input type="radio" name="xlfSrcAsTargetRadio" value="0" id="xlfSrcAsTargetRadio1" <%if(populateSourceToTarget==0) out.println("checked");%>>
+            <label for="xlfSrcAsTargetRadio1"><%=bundle.getString("lb_no")%></label>
+        <input type="radio" name="xlfSrcAsTargetRadio" value="1" id="xlfSrcAsTargetRadio2" <%if(populateSourceToTarget==1) out.println("checked");%>/>
+            <label for="xlfSrcAsTargetRadio2"><%=bundle.getString("lb_yes")%></label>
+      </td>
+    </tr>
+
+    </table>
     </td>
   </tr>
   <tr>

@@ -364,7 +364,7 @@ public class WordCountProcessor implements ReportsProcessor
                                                                             // match
         int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();// 50%
                                                                             // match
-        int unmatchedWordCount = tg.getWordCount().getUnmatchedWordCount();// no
+        int unmatchedWordCount = tg.getWordCount().getNoMatchWordCount();// no
                                                                             // match
         int lb_repetition_word_cnt = tg.getWordCount().getRepetitionWordCount();
 

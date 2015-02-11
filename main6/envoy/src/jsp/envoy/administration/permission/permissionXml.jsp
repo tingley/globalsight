@@ -121,13 +121,14 @@
         <permission id="<%=Permission.USERS_EDIT_ASSIGN_ANY_PERMGROUPS%>"/>
         <permission id="<%=Permission.USERS_ACCESS_CCEMAIL%>"/>
         <permission id="<%=Permission.USERS_ACCESS_BCCEMAIL%>"/>
-		<% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
-		     <permission id="<%=Permission.SET_DEFAULT_ROLES%>"/>
-		<% } %>
+        <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
+        <permission id="<%=Permission.SET_DEFAULT_ROLES%>"/>
+        <% } %>
      </permission>
      <permission id="<%=Permission.USERS_NEW%>"/>
      <permission id="<%=Permission.USERS_PROJECT_MEMBERSHIP%>"/>
      <permission id="<%=Permission.CHANGE_OWN_PASSWORD%>"/>
+     <permission id="<%=Permission.CHANGE_OWN_EMAIL%>"/>
      <permission id="<%=Permission.USERS_IMPORT%>"/>
      <permission id="<%=Permission.USERS_EXPORT%>"/>
   </permission>
@@ -267,7 +268,6 @@
 </category>
 <category id="lb_data_sources">
   <permission id="<%=Permission.FILE_PROFILES_VIEW%>">
-     <permission id="<%=Permission.FILE_PROFILES_SEARCH%>"/>
      <permission id="<%=Permission.FILE_PROFILES_REMOVE%>"/>     
      <permission id="<%=Permission.FILE_PROFILES_EDIT%>"/>     
      <permission id="<%=Permission.FILE_PROFILES_NEW%>"/>
@@ -421,7 +421,7 @@
               <permission id="<%=Permission.JOB_WORKFLOWS_RATEVENDOR%>"/>
     <% } %>
               <permission id="<%=Permission.JOB_WORKFLOWS_ARCHIVE%>"/>
-              <permission id="<%=Permission.JOB_WORKFLOWS_DETAILS%>">                  
+              <permission id="<%=Permission.JOB_WORKFLOWS_DETAILS%>">
                   <permission id="<%=Permission.JOB_WORKFLOWS_ESTCOMPDATE%>"/>
               </permission>
               <permission id="<%=Permission.JOB_WORKFLOWS_WORDCOUNT%>">
@@ -449,8 +449,9 @@
       <permission id="<%=Permission.ACTIVITIES_UPDATE_LEVERAGE%>"/>
       <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY%>"/>
       <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_WORKFLOW%>"/>
-      <permission id="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>"/>
-      <permission id="<%="activities.download.combined"%>"/>
+      <permission id="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>">
+          <permission id="<%=Permission.ACTIVITIES_DOWNLOAD_COMBINED%>"/>
+      </permission>
       <permission id="<%=Permission.ACTIVITIES_REJECT_BEFORE_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_EXPORT%>"/>
@@ -487,10 +488,7 @@
 </category>
 <% if (b_reports) { %>
 <category id="lb_reports">
-  <permission id="<%=Permission.REPORTS_MAIN%>"/>
-  <permission id="<%=Permission.REPORTS_CUSTOM%>"/>  
-  <permission id="<%=Permission.REPORTS_CUSTOM_EXTERNAL%>"/>
-  <category id="lb_reports_perms">
+  <permission id="<%=Permission.REPORTS_MAIN%>">
     <permission id="<%=Permission.REPORTS_TM%>"/>
     <permission id="<%=Permission.REPORTS_WORD_COUNT%>"/>
     <permission id="<%=Permission.REPORTS_WF_STATUS%>"/>
@@ -504,24 +502,26 @@
     <permission id="<%=Permission.REPORTS_CHARACTER_COUNT%>"/>
     <permission id="<%=Permission.REPORTS_CUSTOMIZE%>"/>
     <permission id="<%=Permission.REPORTS_COMMENT%>"/>
-  <category id="lb_reports_company_specific">
-    <permission id="<%=Permission.REPORTS_DELL_JOB_STATUS%>"/>
-    <permission id="<%=Permission.REPORTS_DELL_ACT_DUR%>"/>
-    <permission id="<%=Permission.REPORTS_DELL_FILE_LIST%>"/>
-    <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS%>">
-        <permission id="<%=Permission.REPORTS_DELL_ONLINE_REVIEW_STATUS%>"/>
-        <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_RECALC%>"/>
-        <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_ID%>"/>
-    </permission>
-    <permission id="<%=Permission.REPORTS_DELL_VENDOR_PO%>"/>
-    <permission id="<%=Permission.REPORTS_DELL_REVIEWER_VENDOR_PO%>"/>
-    <permission id="<%=Permission.REPORTS_SUMMARY%>"/>
-  </category>
-  <permission id="<%=Permission.REPORTS_SLA%>"/>
-  <permission id="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>"/>
-  <permission id="<%=Permission.REPORTS_IMPLEMENTED_COMMENTS_CHECK%>"/> 
-  <permission id="<%=Permission.JOB_ATTRIBUTE_REPORT%>"/>
-  </category>
+    <permission id="<%=Permission.REPORTS_SLA%>"/>
+    <permission id="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>"/>
+    <permission id="<%=Permission.REPORTS_IMPLEMENTED_COMMENTS_CHECK%>"/> 
+    <permission id="<%=Permission.JOB_ATTRIBUTE_REPORT%>"/>
+    <category id="lb_reports_company_specific">
+        <permission id="<%=Permission.REPORTS_DELL_JOB_STATUS%>"/>
+        <permission id="<%=Permission.REPORTS_DELL_ACT_DUR%>"/>
+        <permission id="<%=Permission.REPORTS_DELL_FILE_LIST%>"/>
+        <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS%>">
+            <permission id="<%=Permission.REPORTS_DELL_ONLINE_REVIEW_STATUS%>"/>
+            <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_RECALC%>"/>
+            <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_ID%>"/>
+        </permission>
+        <permission id="<%=Permission.REPORTS_DELL_VENDOR_PO%>"/>
+        <permission id="<%=Permission.REPORTS_DELL_REVIEWER_VENDOR_PO%>"/>
+        <permission id="<%=Permission.REPORTS_SUMMARY%>"/>
+    </category>
+  </permission>
+  <permission id="<%=Permission.REPORTS_CUSTOM%>"/>  
+  <permission id="<%=Permission.REPORTS_CUSTOM_EXTERNAL%>"/>
 </category>
 <% } %>
 <% if (b_vendorManagement) { %>

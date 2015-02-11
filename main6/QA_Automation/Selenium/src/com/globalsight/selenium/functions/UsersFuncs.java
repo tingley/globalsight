@@ -252,8 +252,8 @@ public class UsersFuncs extends BasicFuncs
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
                     selenium.click(Users.Next_BUTTON_LevelAccess);
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-                    // selenium.click(Users.Next_BUTTON_LevelAccess);
-                    // selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+                    selenium.click(Users.Next_BUTTON_LevelAccess);
+                    selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
                 }
                 else if (iFieldName.equals("available"))
                 {
@@ -278,11 +278,11 @@ public class UsersFuncs extends BasicFuncs
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             selenium.type(Users.USER_SEARCH_NAME_TEXT, iuserName);
-            selenium.click(Users.SEARCH_VALUE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
+            //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
             Assert.assertEquals(
                     isElementPresent(selenium,
-                            "//input[@name='radioBtn' and @value='" + iuserName
+                            "//input[@name='radioBtn' and @id='" + iuserName
                                     + "']"), true);
         }
         else
@@ -316,8 +316,7 @@ public class UsersFuncs extends BasicFuncs
         }
 
         selenium.type(Users.USER_SEARCH_NAME_TEXT, cm + username);
-        selenium.click(Users.SEARCH_VALUE_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
         Assert.assertEquals(
                 isElementPresent(selenium,
                         "//input[@name='radioBtn' and @value='" + cm + username
@@ -418,19 +417,21 @@ public class UsersFuncs extends BasicFuncs
                 }
                 else if (iFieldName.equals("project"))
                 {
-                    selenium.addSelection(Users.Project_Select_Table_Name,
-                            "label=" + iFieldValue);
-                    selenium.click(Users.Add_BUTTON);
+                    //selenium.select(Users.Project_Select_Table_Name,
+                            //"label=" + iFieldValue);
+                    //selenium.click(Users.Add_BUTTON);
                     selenium.click(Users.NEXT_BUTTON);
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
                     selenium.click(Users.Next_BUTTON_LevelAccess);
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+                    
                 }
                 else if (iFieldName.equals("available"))
                 {
-                    selenium.select(Users.Available_SELECTION_Permission,
+                    selenium.select(Users.Available_SELECTION,
                             "label=" + iFieldValue);
-                    selenium.click(Users.SAVE_VALUE_BUTTON);
+                    selenium.click(Users.Add_BUTTON);
+                    selenium.click("//input[@value='Save']");
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
                 }
             }
@@ -444,8 +445,10 @@ public class UsersFuncs extends BasicFuncs
             selenium.click(MainFrame.SETUP_MENU);
             selenium.click(MainFrame.USERS_SUBMENU);
             selenium.type(Users.USER_SEARCH_NAME_TEXT, iuserName);
-            selenium.click(Users.SEARCH_VALUE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            //selenium.click(Users.SEARCH_VALUE_BUTTON);
+
+            selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
+            //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
             Assert.assertEquals(
                     isElementPresent(selenium,
                             "//input[@name='radioBtn' and @value='" + iuserName
@@ -507,11 +510,11 @@ public class UsersFuncs extends BasicFuncs
     public Boolean verifyRoles(Selenium selenium, String rolename,
             String Sourcelocale, String Targetlocale) throws Exception
     {
-        boolean result = basicfuncs.selectRadioButtonFromTable(selenium,
-                Users.USER_LIST_TABLE, rolename);
+
+    	boolean result = basicfuncs.selectRadioButtonFromTable(selenium, Users.USER_LIST_TABLE, rolename);
         if (result)
         {
-            selenium.click(Users.EDIT_BUTTON);
+            selenium.click("link=" + rolename);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             selenium.click(Users.ROLES_BUTTON);
@@ -539,8 +542,8 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 selenium.type(Users.USER_SEARCH_NAME_TEXT, iFieldValue);
-                selenium.click(Users.SEARCH_VALUE_BUTTON);
-                selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+                selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
+                //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
                 Assert.assertEquals(
                         isElementPresent(selenium,
                                 "//input[@name='radioBtn' and @value='"
@@ -566,14 +569,14 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+               /* boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                clickAndWait(selenium, "link=" +cm + iFieldValue);
             }
 
             else if (iFieldName.equals("firstname"))
@@ -628,14 +631,14 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+                /*boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                clickAndWait(selenium, "link=" + cm + iFieldValue);
                 clickAndWait(selenium, Users.Edit_ContactInfo_BUTTON);
             }
             else if (iFieldName.equals("address"))
@@ -707,14 +710,14 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+                /*boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                clickAndWait(selenium, "link=" + cm + iFieldValue);
                 clickAndWait(selenium, Users.Edit_Project_BUTTON);
             }
             else if (iFieldName.equals("allprojects"))
@@ -779,14 +782,14 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+                /*boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                clickAndWait(selenium, "link=" + cm + iFieldValue);
                 clickAndWait(selenium, Users.Edit_Permissions_BUTTON);
             }
             else if (iFieldName.equals("edit"))
@@ -875,14 +878,14 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+                /*boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                clickAndWait(selenium, "link=" + cm + iFieldValue);
                 clickAndWait(selenium, Users.Edit_Roles_BUTTON);
 
             }
@@ -900,7 +903,7 @@ public class UsersFuncs extends BasicFuncs
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
                 }
-                clickAndWait(selenium, Users.EDIT_VALUE_BUTTON);
+                clickAndWait(selenium, "//input[@value='Edit...']");
 
             }
             else if (iFieldName.equals("edit"))
@@ -1004,14 +1007,15 @@ public class UsersFuncs extends BasicFuncs
             if (iFieldName.equals("username"))
             {
                 searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-                boolean selected = selectRadioButtonFromTable(selenium,
+               /* boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
                     Assert.assertTrue(false,
                             "Cannot find a proper user to edit.");
-                }
-                clickAndWait(selenium, Users.EDIT_BUTTON);
+                }*/
+                //clickAndWait(selenium, Users.EDIT_BUTTON);
+                selenium.click("link=" + cm + iFieldValue);
                 clickAndWait(selenium, Users.Edit_Roles_BUTTON);
 
             }

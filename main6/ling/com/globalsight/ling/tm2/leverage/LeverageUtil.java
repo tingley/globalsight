@@ -64,7 +64,7 @@ public class LeverageUtil
      *         instances
      */
     public static int compareSid(SidComparable tuv1, SidComparable tuv2,
-            String companyId)
+            long companyId)
     {
         return getSidCompareRusult(tuv2, companyId)
                 - getSidCompareRusult(tuv1, companyId);
@@ -77,7 +77,7 @@ public class LeverageUtil
      *            The specified <code>LeveragedTuv</code>.
      * @return 0 or 1. Returns 1 if the orgSid matched sid, others 0.
      */
-    public static int getSidCompareRusult(SidComparable tuv, String companyId)
+    public static int getSidCompareRusult(SidComparable tuv, long companyId)
     {
         String orgSid = tuv.getOrgSid(companyId);
 
@@ -164,7 +164,7 @@ public class LeverageUtil
     public static boolean isIncontextMatch(Tuv srcTuv,
             List<TuvImpl> sourceTuvs, List targetTuvs,
             MatchTypeStatistics tuvMatchTypes,
-            Vector<String> excludedItemTypes, String companyId)
+            Vector<String> excludedItemTypes, long companyId)
     {
         if (srcTuv == null)
             return false;
@@ -202,7 +202,7 @@ public class LeverageUtil
      */
     public static boolean isIncontextMatch(int index, List p_sourceTuvs,
             List p_targetTuvs, MatchTypeStatistics p_matchTypes,
-            Vector<String> p_excludedItemTypes, String companyId)
+            Vector<String> p_excludedItemTypes, long companyId)
     {
         String subId = DUMMY_SUBID;
         Object o = p_sourceTuvs.get(index);
@@ -236,7 +236,7 @@ public class LeverageUtil
      */
     public static boolean isIncontextMatch(int index, List p_sourceTuvs,
             List p_targetTuvs, MatchTypeStatistics p_matchTypes,
-            Vector<String> p_excludedItemTypes, String p_subId, String companyId)
+            Vector<String> p_excludedItemTypes, String p_subId, long companyId)
     {
         if (isSIDContextMatch(index, p_sourceTuvs, p_matchTypes))
         {
@@ -318,7 +318,7 @@ public class LeverageUtil
         return true;
     }
 
-    private static String getTuType(Object tuv, String companyId)
+    private static String getTuType(Object tuv, long companyId)
     {
         if (tuv instanceof Tuv)
         {
@@ -333,7 +333,7 @@ public class LeverageUtil
     }
 
     private static boolean isPassoloIncontextMatch(Object o,
-            MatchTypeStatistics p_matchTypes, String companyId)
+            MatchTypeStatistics p_matchTypes, long companyId)
     {
         boolean result = false;
         if (isExactMatch(o, p_matchTypes))
@@ -506,9 +506,9 @@ public class LeverageUtil
      * @param p_matchTypes
      * @return
      */
-    private static boolean isExactMatchLocalized(int index, List p_sourceTuvs,
+    public static boolean isExactMatchLocalized(int index, List p_sourceTuvs,
             List p_targetTuvs, MatchTypeStatistics p_matchTypes,
-            String p_subId, String companyId)
+            String p_subId, long companyId)
     {
         Object o = p_sourceTuvs.get(index);
         long id;
@@ -540,8 +540,8 @@ public class LeverageUtil
      * For PO segment, if it has a valid(not empty,different from source,
      * language matched) target from source file, take this TUV as ICE directly.
      */
-    static boolean isPoXlfICE(int index, List p_sourceTuvs,
-            MatchTypeStatistics p_matchTypes, String companyId)
+    private static boolean isPoXlfICE(int index, List p_sourceTuvs,
+            MatchTypeStatistics p_matchTypes, long companyId)
     {
         if (p_sourceTuvs == null || p_sourceTuvs.size() == 0 || index < 0
                 || index >= p_sourceTuvs.size())

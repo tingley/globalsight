@@ -238,17 +238,11 @@ public class ParamTradosMatchesPair extends ParamObjectPair
     
     private void countWorkCount(ProjectWorkflowData p_workflowData, Workflow p_workflow)
     {
-        TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
+        TranslationMemoryProfile tmProfile = p_workflow.getJob()
+                .getL10nProfile().getTranslationMemoryProfile();
 
-        //get the word count used for costing which incorporates the LMT
-//        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
-        //add the sublev rep count to the total rep count
-        p_workflowData.setTradosRepsWordCount(
-                p_workflow.getRepetitionWordCount()
-                + p_workflow.getSubLevRepetitionWordCount()
-                + p_workflow.getHiFuzzyRepetitionWordCount()
-                + p_workflow.getMedHiFuzzyRepetitionWordCount()
-                + p_workflow.getMedFuzzyRepetitionWordCount());
+        p_workflowData.setTradosRepsWordCount(p_workflow
+                .getRepetitionWordCount());
 
         p_workflowData.setTrados95to99WordCount(p_workflow.getThresholdHiFuzzyWordCount());
         p_workflowData.setTrados85to94WordCount(p_workflow.getThresholdMedHiFuzzyWordCount());
@@ -258,11 +252,15 @@ public class ParamTradosMatchesPair extends ParamObjectPair
         p_workflowData.setTradosNoMatchWordCount(
                 p_workflow.getThresholdNoMatchWordCount());
 
-        p_workflowData.setTrados100WordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? 
-                p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());
-        
-        p_workflowData.setTradosInContextWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? 
-                p_workflow.getInContextMatchWordCount() : p_workflow.getNoUseInContextMatchWordCount());
+        p_workflowData.setTrados100WordCount((PageHandler.isInContextMatch(
+                p_workflow.getJob(), tmProfile)) ? p_workflow
+                .getSegmentTmWordCount() : p_workflow
+                .getTotalExactMatchWordCount());
+
+        p_workflowData.setTradosInContextWordCount((PageHandler
+                .isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow
+                .getInContextMatchWordCount() : p_workflow
+                .getNoUseInContextMatchWordCount());
 
         p_workflowData.setTradosTotalWordCount(
                 p_workflowData.getTrados100WordCount() + 

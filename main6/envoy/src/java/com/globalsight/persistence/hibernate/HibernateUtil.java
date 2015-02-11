@@ -16,9 +16,11 @@
  */
 package com.globalsight.persistence.hibernate;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -38,6 +40,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.service.ServiceRegistryBuilder;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
@@ -59,8 +62,26 @@ public class HibernateUtil
     {
         try
         {
+            URL url = HibernateUtil.class.getResource("");
+            String path = url.getPath();
+            String path2 = path.substring(0, path.indexOf("globalsight.jar"))
+                    + "lib\\classes\\c3p0-config.xml";
+            path2 = path2.replace("\\", "/").replace("/", File.separator);
+            System.setProperty("com.mchange.v2.c3p0.cfg.xml", path2);
+        }
+        catch (Exception e)
+        {
+            s_logger.error(
+                    "Fail to set system property 'com.mchange.v2.c3p0.cfg.xml'",
+                    e);
+        }
+
+        try
+        {
             Configuration cfg = new Configuration().configure();
-            sessionFactory = cfg.buildSessionFactory();
+            sessionFactory = cfg
+                    .buildSessionFactory(new ServiceRegistryBuilder()
+                            .buildServiceRegistry());
         }
         catch (Throwable ex)
         {
@@ -72,11 +93,6 @@ public class HibernateUtil
     public static SessionFactory getSessionFactory()
     {
         return sessionFactory;
-    }
-
-    public static Session openSessionWithConnection(Connection conn)
-    {
-        return sessionFactory.openSession(conn);
     }
 
     /**
@@ -103,7 +119,7 @@ public class HibernateUtil
             sessionContext.set(null);
             s_logger.debug("Hibernate close session");
         }
-        
+
         SegmentTuTuvCacheManager.clearCache();
     }
 
@@ -156,7 +172,7 @@ public class HibernateUtil
 
         if (query.uniqueResult() != null)
         {
-            return ((Integer) query.uniqueResult()).intValue();
+            return ((Long) query.uniqueResult()).intValue();
         }
         else
         {
@@ -1421,6 +1437,42 @@ public class HibernateUtil
         try
         {
             session.update(object);
+            commit(tx);
+        }
+        catch (HibernateException e)
+        {
+            rollback(tx);
+            throw e;
+        }
+    }
+    
+    /**
+     * Copy the state of the given object onto the persistent object with the same
+     * identifier. If there is no persistent instance currently associated with
+     * the session, it will be loaded. Return the persistent instance. If the
+     * given instance is unsaved, save a copy of and return it as a newly persistent
+     * instance. The given instance does not become associated with the session.
+     * This operation cascades to associated instances if the association is mapped
+     * with <tt>cascade="merge"</tt>.<br>
+     * <br>
+     * The semantics of this method are defined by JSR-220.
+     *
+     * @param object a detached instance with state to be copied
+     * @return an updated persistent instance
+     */
+    public static void merge(Object object) throws HibernateException
+    {
+        if (object == null)
+        {
+            return;
+        }
+
+        Session session = getSession();
+        Transaction tx = getTransaction();
+
+        try
+        {
+            session.merge(object);
             commit(tx);
         }
         catch (HibernateException e)

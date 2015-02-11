@@ -61,7 +61,7 @@ public class ActivityTypeFuncs extends BasicFuncs
 
         try
         {
-            selenium.click(ActivityType.EDIT_BUTTON);
+            selenium.click("link=" + activtiyName);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             selenium.type(ActivityType.DESCRIPTION_TEXT, description);
@@ -73,7 +73,7 @@ public class ActivityTypeFuncs extends BasicFuncs
         catch (Exception e)
         {
             Reporter.log(e.getMessage());
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         }
         Assert.assertEquals(this.getColumnText(selenium,
                 ActivityType.ACTIVITY_TABLE, activtiyName, 3), description);

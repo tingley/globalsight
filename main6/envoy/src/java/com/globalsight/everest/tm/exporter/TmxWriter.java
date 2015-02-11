@@ -41,6 +41,7 @@ import org.dom4j.io.XMLWriter;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.util.Tmx;
@@ -223,6 +224,7 @@ public class TmxWriter implements IWriter
 
             // then convert to XML and print
             String xml = convertToTmx(tu);
+            xml = TmxUtil.operateCDATA(xml);
 
             // Goes through lengths not to throw an IO exception,
             // will check below.
@@ -503,7 +505,6 @@ public class TmxWriter implements IWriter
         }
 
         // Add all TUVs.
-
         Collection locales = p_tu.getAllTuvLocales();
         boolean doFilter = false;
         if (m_options.SELECT_FILTERED.equals(m_options.getSelectMode()))

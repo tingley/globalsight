@@ -112,7 +112,7 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
         return replaced;
     }
 
-    public void replace(Collection p_replacedSegments, String companyId)
+    public void replace(Collection p_replacedSegments, long companyId)
             throws TmManagerException, RemoteException
     {
         try
@@ -135,7 +135,7 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
 
             if (tuvs.size() > 0)
             {
-                SegmentTuvUtil.updateTuvs(tuvs, Long.parseLong(companyId));
+                SegmentTuvUtil.updateTuvs(tuvs, companyId);
             }
         }
         catch (Exception ex)

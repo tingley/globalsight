@@ -16,7 +16,9 @@
  */
 package com.globalsight.ling.tm;
 
-
+/**
+ * @deprecated as "Tu" interface will not implement this any more.
+ */
 public interface TuLing
 {
 

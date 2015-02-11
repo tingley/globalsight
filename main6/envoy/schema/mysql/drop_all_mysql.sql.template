@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS  RESERVED_TIME CASCADE;
 DROP TABLE IF EXISTS  VENDOR_FIELD_SECURITY CASCADE;
 DROP TABLE IF EXISTS  PAGE_TM_TUV_L CASCADE;
 DROP TABLE IF EXISTS  TEMPLATE_PART CASCADE;
+DROP TABLE IF EXISTS  TEMPLATE_PART_ARCHIVED CASCADE;
 DROP TABLE IF EXISTS  PAGE_TM_TUV_T CASCADE;
 DROP TABLE IF EXISTS  IMAGE_REPLACE_FILE_MAP CASCADE;
 DROP TABLE IF EXISTS  TARGET_PAGE_LEVERAGE_GROUP CASCADE;
@@ -224,7 +225,7 @@ DROP TABLE IF EXISTS  TB_SEQUENCE CASCADE;
 DROP TABLE IF EXISTS  TB_AUDIT_LOG CASCADE;
 
 --  TM INDEX TABLES -- 
-source %%canoncial_mysql_path%%delete_index_tables_mysql.sql
+source %%canoncial_mysql_path%%/delete_index_tables_mysql.sql
 
 --  VENDOR MANAGEMENT
 DROP TABLE IF EXISTS  PROJECT_VENDOR CASCADE;
@@ -255,7 +256,6 @@ DROP VIEW IF EXISTS VIEW_JOBSTATUS;
 --  JBOSS TABLES
 DROP TABLE IF EXISTS HILOSEQUENCES CASCADE;
 DROP TABLE IF EXISTS JMS_MESSAGES CASCADE;
-DROP TABLE IF EXISTS JMS_MESSAGES_DEBUG CASCADE;
 DROP TABLE IF EXISTS JMS_ROLES CASCADE;
 DROP TABLE IF EXISTS JMS_SUBSCRIPTIONS CASCADE;
 DROP TABLE IF EXISTS JMS_TRANSACTIONS CASCADE;
@@ -305,7 +305,7 @@ DROP TABLE IF EXISTS `TM3_ID`;
 DROP TABLE IF EXISTS `TM3_TM`;
 DROP TABLE IF EXISTS TM_TB_USERS CASCADE;
 
--- Drop separated LM/TU/TUV tables
+-- Drop separated LM/TU/TUV tables like "xxxx_[companyID]" and archived tables like "xxxx_archived" or "xxxx_[companyID]_archived".
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'leverage_match_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'translation_unit_variant_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'translation_unit_%' AND a.table_name not like 'translation_unit_variant%'); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;

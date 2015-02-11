@@ -9,9 +9,8 @@ driver=com.mysql.jdbc.Driver
 connect_string=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
 user_name=%%database_username%%
 password=%%database_password%%
-maxConnections=20
+maxConnections=200
 minConnections=5
 #3600000=60*60*1000 means 1 hour.
 maxConnectionWaitTime=3600000
 useConnectionPool=true
-

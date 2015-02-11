@@ -17,7 +17,6 @@
 package com.globalsight.ling.tm2;
 
 import java.rmi.RemoteException;
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +28,6 @@ import org.apache.log4j.Logger;
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
-import org.hibernate.Session;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tuv.Tuv;
@@ -44,8 +42,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.SegmentIdMap;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -62,43 +58,6 @@ public class TmUtil
     public static final String X_NBSP = "x-nbspace";
     public static final String X_MSO_SPACERUN = "x-mso-spacerun";
     public static final String X_MSO_TAB = "x-mso-tab";
-
-    /**
-     * Produce a Hibernate session wrapped around a stable connection from our
-     * pool. This will avoid TM code leaking connection objects when it calls
-     * session.connection(). Yes, this is all very gross.
-     * 
-     * @return
-     * @throws LingManagerException
-     */
-    public static Session getStableSession() throws LingManagerException
-    {
-        try
-        {
-            Connection conn = DbUtil.getConnection();
-            conn.setAutoCommit(false);
-            return HibernateUtil.openSessionWithConnection(conn);
-        }
-        catch (Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-    }
-
-    public static void closeStableSession(Session session)
-    {
-        try
-        {
-            Connection conn = session.disconnect();
-            conn.setAutoCommit(true);
-            DbUtil.returnConnection(conn);
-            session.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Create Tuvs suitable for storing in Segment TM. Tuvs in Segment TM don't
@@ -504,12 +463,14 @@ public class TmUtil
                         .getNthDescendantByAttributeValue(attName, tuType,
                                 elementType, pos);
 
-				if (p_attributes.getProperty(GxmlNames.BPT_TYPE) == null
-						&& "yes".equalsIgnoreCase(p_attributes.getProperty(GxmlNames.INTERNAL)))
+                if (p_attributes.getProperty(GxmlNames.BPT_TYPE) == null
+                        && "yes".equalsIgnoreCase(p_attributes
+                                .getProperty(GxmlNames.INTERNAL)))
                 {
-                    orgElem = m_sourceDom.getNthDescendantByAttributeNone(attName, elementType, pos);
+                    orgElem = m_sourceDom.getNthDescendantByAttributeNone(
+                            attName, elementType, pos);
                 }
-                
+
                 String tagGxml = null;
                 if (orgElem != null)
                 {
@@ -803,7 +764,7 @@ public class TmUtil
      * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
      */
     public static BaseTmTuv createTmSegment(Tuv p_tuv, String p_subId,
-            String companyId) throws LingManagerException
+            long companyId) throws LingManagerException
     {
         BaseTmTuv result = null;
 

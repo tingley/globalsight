@@ -91,6 +91,14 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("</td>");
 	str.append("</tr>");
 	
+	isChecked = (this.filter.footendnoteTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransFootEndNotes + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='footendnoteTranslate' type='checkbox' name='footendnoteTranslate' value='"+this.filter.footendnoteTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
 	isChecked = (this.filter.notesTranslate) ? "checked":"";
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTNotes + "</td>");
@@ -283,6 +291,13 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransHeader + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransFootEndNotes + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='footendnoteTranslate' type='checkbox' name='footendnoteTranslate' value='false' class='specialFilter_dialog_label'/>");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -1295,6 +1310,7 @@ function saveMSOffice2010DocFilter()
 	
 	var filterDesc = document.getElementById("o2010FilterDesc").value;
 	var headerTranslate = document.getElementById("headerTranslate").checked;
+	var footendnoteTranslate = document.getElementById("footendnoteTranslate").checked;
 	var masterTranslate = document.getElementById("masterTranslate").checked;
 	var notesTranslate = document.getElementById("notesTranslate").checked;
 	var pptlayoutTranslate = document.getElementById("pptlayoutTranslate").checked;
@@ -1326,6 +1342,7 @@ function saveMSOffice2010DocFilter()
 			filterName:filterName,
 			filterDesc:filterDesc,
 			headerTranslate:headerTranslate,
+			footendnoteTranslate:footendnoteTranslate,
 			masterTranslate:masterTranslate,
 			notesTranslate:notesTranslate,
 			pptlayoutTranslate:pptlayoutTranslate,
@@ -1391,6 +1408,7 @@ function updateMSOffice2010FilterCallback(data)
 		jpFilter.filterName = checkExistMSOffice2010FilterCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistMSOffice2010FilterCallback.obj.filterDesc;
 		jpFilter.headerTranslate = checkExistMSOffice2010FilterCallback.obj.headerTranslate;
+		jpFilter.footendnoteTranslate = checkExistMSOffice2010FilterCallback.obj.footendnoteTranslate;
 		jpFilter.masterTranslate = checkExistMSOffice2010FilterCallback.obj.masterTranslate;
 		jpFilter.notesTranslate = checkExistMSOffice2010FilterCallback.obj.notesTranslate;
 		jpFilter.pptlayoutTranslate = checkExistMSOffice2010FilterCallback.obj.pptlayoutTranslate;
@@ -1434,6 +1452,7 @@ function saveMSOffice2010FilterCallback(data)
 		jpFilter.filterName = checkExistMSOffice2010FilterCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistMSOffice2010FilterCallback.obj.filterDesc;
 		jpFilter.headerTranslate = checkExistMSOffice2010FilterCallback.obj.headerTranslate;
+		jpFilter.footendnoteTranslate = checkExistMSOffice2010FilterCallback.obj.footendnoteTranslate;
 		jpFilter.masterTranslate = checkExistMSOffice2010FilterCallback.obj.masterTranslate;
 		jpFilter.notesTranslate = checkExistMSOffice2010FilterCallback.obj.notesTranslate;
 		jpFilter.pptlayoutTranslate = checkExistMSOffice2010FilterCallback.obj.pptlayoutTranslate;

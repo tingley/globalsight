@@ -29,8 +29,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 
@@ -44,6 +42,8 @@ import com.globalsight.util.Assert;
 public class Ambassador2 extends Ambassador
 {
     private static final Logger logger = Logger.getLogger("WebService2");
+    
+    private static int MAX_SEND_SIZE = 5 * 1000 * 1024; // 5M
 
     /**
      * Logs into the WebService. Returns an access token and company name
@@ -95,6 +95,7 @@ public class Ambassador2 extends Ambassador
         {
             Assert.assertNotEmpty(p_accessToken, "Access token");
             Assert.assertNotEmpty(p_path, "Upload path");
+            p_path = p_path.replace("\\", "/");
             if (Integer.parseInt(p_companyId) < 1)
             {
                 throw new Exception("Invalid 'p_companyId' parameter: "
@@ -139,10 +140,22 @@ public class Ambassador2 extends Ambassador
             if (p_basePathType == 1)
             {
                 String extension = FileUtils.getFileExtension(newFile);
-                if (extension != null && extension.equalsIgnoreCase("zip"))
+                // When upload file, every time 5M. For large zip file, we must
+                // wait to unzip it after the whole file uploading is done.If
+                // the bytes size is less 5M, unzip it and delete the zip file.
+                // This is not 100% reliable, but harmless.
+                if (extension != null && extension.equalsIgnoreCase("zip") && bytes.length < MAX_SEND_SIZE)
                 {
                     unzipFile(newFile);
-                    newFile.delete();
+                    try
+                    {
+                        fos.close();
+                        newFile.delete();
+                    }
+                    catch (IOException e)
+                    {
+
+                    }
                 }
             }
         }
@@ -157,7 +170,8 @@ public class Ambassador2 extends Ambassador
         {
             try
             {
-                fos.close();
+                if (fos != null)
+                    fos.close();
             }
             catch (IOException e)
             {
@@ -197,18 +211,34 @@ public class Ambassador2 extends Ambassador
                 {
                     if (!outfile.getParentFile().exists())
                     {
-                        outfile.getParentFile().mkdirs();                        
+                        outfile.getParentFile().mkdirs();
                     }
                 }
                 
                 OutputStream os = new BufferedOutputStream(
-                        new FileOutputStream(outfile)); 
+                        new FileOutputStream(outfile));
                 int readLen = 0;
-                while ((readLen = zin.read(buf, 0, 1024)) != -1)
+                try
                 {
-                    os.write(buf, 0, readLen);  
-                }  
-                os.close();  
+                    readLen = zin.read(buf, 0, 1024);
+                }
+                catch (IOException ioe)
+                {
+                    readLen = -1;
+                }
+                while (readLen != -1)
+                {
+                    os.write(buf, 0, readLen);
+                    try
+                    {
+                        readLen = zin.read(buf, 0, 1024);
+                    }
+                    catch (IOException ioe)
+                    {
+                        readLen = -1;
+                    }
+                }
+                os.close();
             }
         }
         catch (IOException e)

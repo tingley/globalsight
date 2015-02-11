@@ -39,7 +39,9 @@
     String title = bundle.getString("lb_permission_groups");
     String error = (String)request.getAttribute("errorMsg");
     String pCompanyFilter= (String) sessionMgr.getAttribute("pCompanyFilter");
+    pCompanyFilter = pCompanyFilter == null ? "" : pCompanyFilter;
     String pNameFilter= (String) sessionMgr.getAttribute("pNameFilter");
+    pNameFilter = pNameFilter == null ? "" : pNameFilter;
     if (error == null)
     {
         error = "";
@@ -214,7 +216,7 @@ function enableButtons()
       </amb:column>
       
       
-      <amb:column label="lb_name" sortBy="<%=PermissionGroupComparator.NAME%>" filter="pNameFilter" filterValue="<%=pNameFilter == null ? "" : pNameFilter %>" width="20%">
+      <amb:column label="lb_name" sortBy="<%=PermissionGroupComparator.NAME%>" filter="pNameFilter" filterValue="<%=pNameFilter%>" width="20%">
     
        <amb:permission name="<%=Permission.PERMGROUPS_EDIT%>" ><a href='javascript:void(0)' title='Edit permissionGroup' onclick="modifyuser('<%= permissionGroup.getId() %>')">  </amb:permission>
         <%= permissionGroup.getName() %> 
@@ -225,8 +227,7 @@ function enableButtons()
        "" : permissionGroup.getDescription()); %>
       </amb:column>
       <% if (isSuperAdmin) { %>
-      <amb:column label="lb_company_name" sortBy="<%=PermissionGroupComparator.ASC_COMPANY%>"   filter="pCompanyFilter" filterValue="<%=pCompanyFilter == null ? "" : pCompanyFilter %>"
-      width="120">
+      <amb:column label="lb_company_name" sortBy="<%=PermissionGroupComparator.ASC_COMPANY%>"   filter="pCompanyFilter" filterValue="<%=pCompanyFilter%>" width="120">
         <%=CompanyWrapper.getCompanyNameById(permissionGroup.getCompanyId())%>
       </amb:column>
       <% } %>

@@ -17,7 +17,6 @@
 
 package com.globalsight.everest.integration.ling.tm2;
 
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,16 +35,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
-import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
@@ -67,7 +63,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
@@ -144,6 +139,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             + "  JOB_DATA_TU_ID) "
             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    private static final String DELETE_LM_BY_SOURCE_PAGE_ID =
+            "delete from " + LM_TABLE_NAME_PLACE_HOLDER + " WHERE source_page_id = ? ";
+
     /**
      * Indicate whether MT matches should be returned in the query results.
      * Default is true. For word-count statistics,if for WorldServer xliff file,
@@ -169,7 +167,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         super();
     }
 
-    public HashMap getFuzzyMatches(Long p_sourcePageId, Long p_targetLocaleId)
+    public HashMap<Long, Set<LeverageMatch>> getFuzzyMatches(
+            Long p_sourcePageId, Long p_targetLocaleId)
             throws LingManagerException
     {
         List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();
@@ -179,9 +178,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
         try
         {
-            long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(companyId);
+                    .getLMTableNameJobDataIn(p_sourcePageId);
             String sql = FUZZY_LEVERAGE_MATCH_SQL.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
@@ -215,18 +213,19 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      */
     public SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
             Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            String companyId, long... tmIds) throws LingManagerException
+            long companyId, boolean isJobDataMigrated, long... tmIds)
+            throws LingManagerException
     {
         TreeSet<LeverageMatch> set = null;
-
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try
         {
+            conn = DbUtil.getConnection();
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(companyId);
+                    .getLMTableNameJobDataIn(companyId, isJobDataMigrated);
             String sql = ALL_LEVERAGE_MATCHES_FOR_TUV_SQL.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
             if (isTmProcedence)
@@ -257,7 +256,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 sql = sql.replace("AND TM_ID in (tmId_list) ", "");
             }
 
-            ps = session.connection().prepareStatement(sql);
+            ps = conn.prepareStatement(sql);
             ps.setLong(1, p_sourceTuvId);
             ps.setLong(2, p_targetLocaleId);
             ps.setString(3, p_subId);
@@ -276,46 +275,40 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(ps);
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
 
         return set;
     }
 
     @SuppressWarnings("unchecked")
-    public HashMap getExactMatchesWithSetInside(Long p_sourcePageId,
-            Long p_targetLocaleId, int model, TranslationMemoryProfile tmProfile)
+    public HashMap<Long, ArrayList<LeverageSegment>> getExactMatchesWithSetInside(
+            Long p_sourcePageId, Long p_targetLocaleId, int model,
+            TranslationMemoryProfile tmProfile)
     {
         SourcePage sp = null;
         try
         {
-            sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
+            sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId); 
         }
         catch (Exception e)
         {
             c_logger.error(e.getMessage(), e);
         }
-        String companyId = sp.getCompanyId();
+        long companyId = sp.getCompanyId();
         HashMap<Long, ArrayList<LeverageSegment>> result = new HashMap<Long, ArrayList<LeverageSegment>>();
 
-        Collection matches = getExactLeverageMatches(p_sourcePageId,
-                p_targetLocaleId);
+        Collection<LeverageMatch> matches = getExactLeverageMatches(
+                p_sourcePageId, p_targetLocaleId);
         // return empty map if no match
         if (matches == null || matches.size() == 0)
         {
             return result;
         }
-
+        
         // create a new list for all LeverageMatch
         ArrayList<LeverageMatch> allLms = new ArrayList<LeverageMatch>();
-        for (Iterator it = matches.iterator(); it.hasNext();)
-        {
-            LeverageMatch lm = (LeverageMatch) it.next();
-            allLms.add(lm);
-        }
+        allLms.addAll(matches);
         matches.clear();
 
         // get root match with sub match
@@ -521,17 +514,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return result;
     }
 
-    public HashMap getExactMatches(Long p_sourcePageId, Long p_targetLocaleId)
-            throws LingManagerException
+    public HashMap<Long, LeverageSegment> getExactMatches(Long p_sourcePageId,
+            Long p_targetLocaleId) throws LingManagerException
     {
         Collection<LeverageMatch> matches = getExactLeverageMatches(
                 p_sourcePageId, p_targetLocaleId);
 
         HashMap<Long, LeverageSegment> result = new HashMap<Long, LeverageSegment>();
-        for (Iterator it = matches.iterator(); it.hasNext();)
+        for (LeverageMatch lm : matches)
         {
-            LeverageMatch lm = (LeverageMatch) it.next();
-
             String gxml = lm.getMatchedText();
 
             // LeverageSegment ls = new LeverageSegment(gxml, lm.getMatchType(),
@@ -546,8 +537,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return result;
     }
 
-    public Map getExactMatchesForDownLoadTmx(Long p_sourcePageId,
-            Long p_targetLocaleId)
+    public Map<Long, Set<LeverageMatch>> getExactMatchesForDownLoadTmx(
+            Long p_sourcePageId, Long p_targetLocaleId)
     {
         List<LeverageMatch> leverageMatches = getExactLeverageMatches(
                 p_sourcePageId, p_targetLocaleId);
@@ -568,9 +559,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             connection = DbUtil.getConnection();
 
-            long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(companyId);
+                    .getLMTableNameJobDataIn(p_sourcePageId);
             String sql = EXACT_LEVERAGE_MATCH_SQL.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
@@ -612,11 +602,12 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
         try
         {
+            companyId = SegmentTuTuvCacheManager
+                    .getCompanyIdBySourcePageId(p_sourcePageId);
             connection = DbUtil.getConnection();
 
-            companyId = getCompanyIdBySourcePageId(p_sourcePageId);
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(companyId);
+                    .getLMTableNameJobDataIn(p_sourcePageId);
             String sql = BEST_LEVERAGE_MATCH_SQL.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
@@ -637,15 +628,13 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             DbUtil.silentClose(ps);
             DbUtil.silentReturnConnection(connection);
         }
-        String companyIdAsString = String.valueOf(companyId);
 
         HashMap<String, LeverageMatch> leveragematchesMap = new HashMap<String, LeverageMatch>();
         try
         {
             // remove lower score_num record
-            for (Iterator it = leverageMatches.iterator(); it.hasNext();)
+            for (LeverageMatch match : leverageMatches)
             {
-                LeverageMatch match = (LeverageMatch) it.next();
                 LeverageMatch cloneMatch = new LeverageMatch(match);
                 long originalSourceTuvId = cloneMatch.getOriginalSourceTuvId();
 
@@ -658,8 +647,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                         TuImpl tu = (TuImpl) ServerProxy
                                 .getTuvManager()
                                 .getTuvForSegmentEditor(originalSourceTuvId,
-                                        companyIdAsString)
-                                .getTu(companyIdAsString);
+                                        companyId).getTu(companyId);
                         String translationType = tu.getXliffTranslationType();
                         float tm_score = Float.parseFloat(tu.getIwsScore());
                         if (Extractor.IWS_TRANSLATION_MANUAL
@@ -688,8 +676,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 {
                     if (scoreNum == 100)
                     {
-                        if ((LeverageUtil.compareSid(lm, cloneMatch,
-                                String.valueOf(companyId)) > 0 && cloneMatch
+                        if ((LeverageUtil.compareSid(lm, cloneMatch, companyId) > 0 && cloneMatch
                                 .getOrderNum() != -1)
                                 || lm.getScoreNum() < scoreNum)
                         {
@@ -719,11 +706,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 p_levMatchThreshold);
 
         // set the match type with the found leverage matches
-        Collection leverageMatches2 = leveragematchesMap.values();
+        Collection<LeverageMatch> leverageMatches2 = leveragematchesMap.values();
         List<String> list = new ArrayList<String>();
-        for (Iterator it = leverageMatches2.iterator(); it.hasNext();)
+        for (LeverageMatch match : leverageMatches2)
         {
-            LeverageMatch match = (LeverageMatch) it.next();
             String key = MatchTypeStatistics.makeKey(
                     match.getOriginalSourceTuvId(), match.getSubId());
             if (!list.contains(key))
@@ -749,10 +735,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             connection = DbUtil.getConnection();
             connection.setAutoCommit(false);
 
-            StringBuffer sql = new StringBuffer();
-            Long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
-            sql.append("delete from leverage_match_").append(companyId)
-                    .append(" where source_page_id = ").append(p_sourcePageId);
+            String lmTableName = SegmentTuTuvCacheManager
+                    .getLMTableNameJobDataIn(p_sourcePageId);
+            String sql = DELETE_LM_BY_SOURCE_PAGE_ID.replace(
+                    LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
             ps = connection.prepareStatement(sql.toString());
             ps.executeUpdate();
@@ -786,7 +772,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      */
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
             String p_subId, Long p_targetLocaleId, Long p_orderNum,
-            Long p_companyId) throws LingManagerException
+            Long p_companyId, boolean p_isJobDataMigrated)
+            throws LingManagerException
     {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -798,7 +785,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
             // Delete
             String sql = getDeleteSql(p_OriginalSourceTuvId, p_subId,
-                    p_targetLocaleId, p_orderNum, p_companyId);
+                    p_targetLocaleId, p_orderNum, p_companyId,
+                    p_isJobDataMigrated);
 
             ps = connection.prepareStatement(sql);
             ps.executeUpdate();
@@ -820,12 +808,13 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     }
 
     private String getDeleteSql(Long p_OriginalSourceTuvId, String p_subId,
-            Long p_targetLocaleId, Long p_orderNum, Long p_companyId)
+            Long p_targetLocaleId, Long p_orderNum, Long p_companyId,
+            boolean p_isJobDataMigrated)
     {
         StringBuilder sql = new StringBuilder();
 
-        String lmTableName = SegmentTuTuvCacheManager
-                .getLeverageMatchTableName(p_companyId);
+        String lmTableName = SegmentTuTuvCacheManager.getLMTableNameJobDataIn(
+                p_companyId, p_isJobDataMigrated);
         sql.append("DELETE FROM ").append(lmTableName).append(" ");
         // "p_OriginalSourceTuvId" can't be null
         sql.append(" WHERE ORIGINAL_SOURCE_TUV_ID = ").append(
@@ -870,16 +859,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     /**
      * Get a hash map from a collection of LeverageMatch (sourceTuvId as key).
      */
-    private HashMap getLeverageMatchMap(
+    private HashMap<Long, Set<LeverageMatch>> getLeverageMatchMap(
             Collection<LeverageMatch> p_leverageMatches)
     {
         // Put all the LeverageMatch in HashMap grouping by original Tuv id
         HashMap<Long, Set<LeverageMatch>> result = new HashMap<Long, Set<LeverageMatch>>();
 
-        for (Iterator it = p_leverageMatches.iterator(); it.hasNext();)
+        for (LeverageMatch match : p_leverageMatches)
         {
-            LeverageMatch match = (LeverageMatch) it.next();
-
             Long key = new Long(match.getOriginalSourceTuvId());
             Set<LeverageMatch> set = (TreeSet<LeverageMatch>) result.get(key);
 
@@ -898,8 +885,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     /**
      * Gets fuzzy match map merged with extract match map.
      */
-    public List getLeverageMatchesForOfflineDownLoad(Long p_sourcePageId,
-            Long p_targetLocaleId)
+    public List<LeverageMatch> getLeverageMatchesForOfflineDownLoad(
+            Long p_sourcePageId, Long p_targetLocaleId)
     {
         List<LeverageMatch> leverageMatches = new ArrayList<LeverageMatch>();
 
@@ -911,9 +898,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             connection = DbUtil.getConnection();
 
-            long companyId = getCompanyIdBySourcePageId(p_sourcePageId);
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(companyId);
+                    .getLMTableNameJobDataIn(p_sourcePageId);
             String sql = LEVERAGE_MATCH_FOR_OFFLINE_SQL.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
@@ -939,43 +925,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return leverageMatches;
     }
 
-	/**
-	 * @deprecated As there probably are large data in leverage match table,
-	 *             this updating will bring performance problem, suggest not to
-	 *             use this API.
-	 */
-    public void updateProjectTmIndex(long tmId, int projectTmIndex,
-            long tmProfileId)
-    {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        try
-        {
-            Tm tm = ServerProxy.getTmManager().getTmById(tmId);
-            String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(tm.getCompanyId());
-            connection = DbUtil.getConnection();
-            String sql = "update "
-                    + lmTableName
-                    + " set project_tm_index = ? where tm_id = ? and tm_profile_id=?";
-            ps = connection.prepareStatement(sql);
-            ps.setInt(1, projectTmIndex);
-            ps.setLong(2, tmId);
-            ps.setLong(3, tmProfileId);
-            ps.executeUpdate();
-        }
-        catch (Exception ex)
-        {
-            c_logger.error("database error", ex);
-            throw new LingManagerException(ex);
-        }
-        finally
-        {
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-    }
-
     /**
      * Save matched segments to the database
      * 
@@ -995,7 +944,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         LeverageOptions leverageOptions = p_leverageDataCenter
                 .getLeverageOptions();
         // walk through all LeverageMatches in p_leverageDataCenter
-        Iterator itLeverageMatches;
+        Iterator<LeverageMatches>  itLeverageMatches = null;
         try
         {
             itLeverageMatches = p_leverageDataCenter.leverageResultIterator();
@@ -1011,8 +960,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     .next();
 
             // walk through all target locales in the LeverageMatches
-            Iterator itLocales = levMatches.targetLocaleIterator(p_sourcePage
-                    .getCompanyId());
+            Iterator itLocales = levMatches.targetLocaleIterator(String
+                    .valueOf(p_sourcePage.getCompanyId()));
             while (itLocales.hasNext())
             {
                 try
@@ -1060,10 +1009,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     + p_sourcePageId);
         }
 
-        Iterator iter = p_leverageMatchesMap.entrySet().iterator();
-        while (iter.hasNext())
+        for (Map.Entry<Long, LeverageMatches> entry : p_leverageMatchesMap.entrySet())
         {
-            Map.Entry entry = (Map.Entry) iter.next();
             Long originalSourceTuvId = (Long) entry.getKey();
             LeverageMatches levMatches = (LeverageMatches) entry.getValue();
 
@@ -1088,27 +1035,35 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
     }
 
-    public void saveLeveragedMatches(Collection p_leverageMatchList)
+    public void saveLeveragedMatches(
+            Collection<LeverageMatch> p_leverageMatchList)
             throws LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-
-        saveLeveragedMatches(p_leverageMatchList, session.connection());
-
-        if (session != null)
+        Connection conn = null;
+        try
         {
-            TmUtil.closeStableSession(session);
+            conn = DbUtil.getConnection();
+
+            saveLeveragedMatches(p_leverageMatchList, conn);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error when saving leverage matches.", e);
+            throw new LingManagerException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
-    public void saveLeveragedMatches(Collection p_leverageMatchList,
+    public void saveLeveragedMatches(
+            Collection<LeverageMatch> p_leverageMatchList,
             Connection p_connection) throws LingManagerException
     {
         Map<Long, List<LeverageMatch>> groups = groupLeverageMatchesByCompany(p_leverageMatchList);
 
         PreparedStatement ps = null;
-        LeverageMatch lm = null;
-
         try
         {
             Set<Map.Entry<Long, List<LeverageMatch>>> entries = groups
@@ -1118,22 +1073,20 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 p_connection.setAutoCommit(false);
 
-                Map.Entry<Long, List<LeverageMatch>> entry = (Map.Entry<Long, List<LeverageMatch>>) it
-                        .next();
+                Map.Entry<Long, List<LeverageMatch>> entry =
+                        (Map.Entry<Long, List<LeverageMatch>>) it.next();
                 long companyId = (Long) entry.getKey();
                 List<LeverageMatch> lms = (List<LeverageMatch>) entry
                         .getValue();
 
                 String lmTableName = SegmentTuTuvCacheManager
-                        .getLeverageMatchTableName(companyId);
+                        .getLeverageMatchWorkingTableName(companyId);
                 String insertSql = INSERT_INTO_LEVERAGE_MATCH_SQL.replace(
                         LM_TABLE_NAME_PLACE_HOLDER, lmTableName);
 
                 ps = p_connection.prepareStatement(insertSql);
-                for (Iterator it2 = lms.iterator(); it2.hasNext();)
+                for (LeverageMatch lm : lms)
                 {
-                    lm = (LeverageMatch) it2.next();
-
                     ps.setLong(1, lm.getSourcePageId());
                     ps.setLong(2, lm.getOriginalSourceTuvId());
                     ps.setString(3, lm.getSubId());
@@ -1178,7 +1131,6 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
         finally
         {
-            lm = null;
             DbUtil.silentClose(ps);
         }
     }
@@ -1187,18 +1139,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * All leverage matches may be from different companies, group them first.
      * 
      * @param p_leverageMatchList
-     * @return
-     * @throws GeneralException
-     * @throws RemoteException
-     * @throws PageException
+     * 
      */
     private Map<Long, List<LeverageMatch>> groupLeverageMatchesByCompany(
-            Collection p_leverageMatchList)
+            Collection<LeverageMatch> p_leverageMatchList)
     {
         Map<Long, List<LeverageMatch>> result = new HashMap<Long, List<LeverageMatch>>();
-        for (Iterator it = p_leverageMatchList.iterator(); it.hasNext();)
+        for (LeverageMatch lm : p_leverageMatchList)
         {
-            LeverageMatch lm = (LeverageMatch) it.next();
             long companyId = getCompanyIdBySourcePageId(lm.getSourcePageId());
             List<LeverageMatch> lms = result.get(companyId);
             if (lms == null)
@@ -1216,16 +1164,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return result;
     }
 
-    private long getCompanyIdBySourcePageId(long p_sourcePageId)
+   private long getCompanyIdBySourcePageId(long p_sourcePageId)
     {
         long result = -1;
 
-        String companyId = null;
         try
         {
-            companyId = ServerProxy.getPageManager()
-                    .getSourcePage(p_sourcePageId).getCompanyId();
-            result = Long.parseLong(companyId);
+            result = ServerProxy.getPageManager().getSourcePage(p_sourcePageId)
+                    .getCompanyId();
         }
         catch (Exception e)
         {
@@ -1243,6 +1189,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * be "LevereageInProgressTuv"(from in progress TM).
      * 
      */
+    @SuppressWarnings("rawtypes")
     private Collection<LeverageMatch> getNonClobMatches(
             Connection p_connection, LeverageMatches p_levMatches,
             GlobalSightLocale p_targetLocale,
@@ -1252,7 +1199,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         Collection<LeverageMatch> results = new ArrayList<LeverageMatch>();
 
         Iterator itMatch = p_levMatches.matchIterator(p_targetLocale,
-                p_sourcePage.getCompanyId());
+                String.valueOf(p_sourcePage.getCompanyId()));
         while (itMatch.hasNext())
         {
             LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
@@ -1292,8 +1239,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 // 7.order_num
                 int maxOrderNum = getMaxOrderNum(p_connection,
                         originalSourceTuv.getId(), p_targetLocale.getId(),
-                        originalTu.getSubId(),
-                        Long.parseLong(p_sourcePage.getCompanyId()));
+                        originalTu.getSubId(), p_sourcePage.getCompanyId());
                 int orderNum = maxOrderNum + matchedTuv.getOrder();
                 lm.setOrderNum((short) orderNum);
                 // 8.score_num
@@ -1349,11 +1295,12 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     }
 
     /**
-     * Get max order_num per specified TUV.
+     * Get max order_num per specified TUV. Note that this does not work for
+     * archived jobs.
      * 
      * @return -- the max order NUM.
      */
-    public int getMaxOrderNum(Connection p_connection,
+    private int getMaxOrderNum(Connection p_connection,
             long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
             long p_companyId)
     {
@@ -1365,7 +1312,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         try
         {
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(p_companyId);
+                    .getLeverageMatchWorkingTableName(p_companyId);
             String sql = MAX_ORDER_NUM.replace(LM_TABLE_NAME_PLACE_HOLDER,
                     lmTableName);
             ps = p_connection.prepareStatement(sql);
@@ -1397,7 +1344,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
     public float getBestMatchScore(Connection p_connection,
             long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_companyId)
+            long p_companyId, boolean p_isJobDataMigrated)
     {
         // default;
         float bestMatchScore = 0;
@@ -1408,7 +1355,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         try
         {
             String lmTableName = SegmentTuTuvCacheManager
-                    .getLeverageMatchTableName(p_companyId);
+                    .getLMTableNameJobDataIn(p_companyId, p_isJobDataMigrated);
             ps = p_connection.prepareStatement(BEST_MATCH_SCORE.replace(
                     LM_TABLE_NAME_PLACE_HOLDER, lmTableName));
 
@@ -1483,14 +1430,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return type;
     }
 
+    @SuppressWarnings("rawtypes")
     class ComparatorByModifyDate implements Comparator
     {
         private int model;
         private TranslationMemoryProfile tmProfile;
-        private String companyId;
+        private long companyId = -1;
 
         public ComparatorByModifyDate(int model,
-                TranslationMemoryProfile tmProfile, String companyId)
+                TranslationMemoryProfile tmProfile, long companyId)
         {
             this.model = model;
             this.tmProfile = tmProfile;

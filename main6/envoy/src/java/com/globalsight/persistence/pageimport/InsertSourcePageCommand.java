@@ -17,58 +17,50 @@
 
 package com.globalsight.persistence.pageimport;
 
-import org.apache.log4j.Logger;
-
-// globalsight
-import com.globalsight.persistence.PersistenceCommand;
-import com.globalsight.persistence.SequenceStore;
-
-import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.request.Request;
-import com.globalsight.everest.page.ExtractedSourceFile;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.UnextractedFile;
-
-// java
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-/**
- * @deprecated
- * Persists a source page in the database - whether it has un-extraced
- * or extraced file content.
- */
-public class InsertSourcePageCommand
-    extends PersistenceCommand
-{
-    private static final Logger s_insertLogger =
-        Logger.getLogger(
-            InsertSourcePageCommand.class);
+import org.apache.log4j.Logger;
 
-    //this gets set to one of the SQLs below depending on the request type
+import com.globalsight.everest.page.ExtractedSourceFile;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.UnextractedFile;
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.request.Request;
+import com.globalsight.persistence.PersistenceCommand;
+import com.globalsight.persistence.SequenceStore;
+
+/**
+ * @deprecated Persists a source page in the database - whether it has
+ *             un-extraced or extraced file content.
+ */
+public class InsertSourcePageCommand extends PersistenceCommand
+{
+    private static final Logger s_insertLogger = Logger
+            .getLogger(InsertSourcePageCommand.class);
+
+    // this gets set to one of the SQLs below depending on the request type
     private String m_insertSourcePage;
 
-    private static final String m_insertSourcePageWithExtractedFile =
-        "insert into source_page(id,external_page_id, state, data_source_type, original_encoding, data_type, " +
-        "previous_page_id, internal_base_href, external_base_href, timestamp, contains_gs_tag, gxml_version, company_id) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String m_insertSourcePageWithUnextractedFile =
-        "insert into source_page(id, external_page_id, state, data_source_type, timestamp, storage_path, modifier_user_id, last_modified, file_length, company_id)" +
-        " values(?,?,?,?,?,?,?,?,?,?)";
+    private static final String m_insertSourcePageWithExtractedFile = "insert into source_page(id,external_page_id, state, data_source_type, original_encoding, data_type, "
+            + "previous_page_id, internal_base_href, external_base_href, timestamp, contains_gs_tag, gxml_version, company_id) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String m_insertSourcePageWithUnextractedFile = "insert into source_page(id, external_page_id, state, data_source_type, timestamp, storage_path, modifier_user_id, last_modified, file_length, company_id)"
+            + " values(?,?,?,?,?,?,?,?,?,?)";
 
     private String m_updateRequest = "update request set page_id = ? where id = ?";
     private Request m_request;
     private SourcePage m_sourcePage;
     private PreparedStatement m_ps1;
     private PreparedStatement m_ps2;
-    private SequenceStore     m_seqStore;
+    private SequenceStore m_seqStore;
+
     // specifies if this is an extracted file import or an un-extracted
     // set to "true" for extracted file import
 
-    public InsertSourcePageCommand(Request p_request,
-        SourcePage p_sourcePage,
-        SequenceStore p_seqStore)
+    public InsertSourcePageCommand(Request p_request, SourcePage p_sourcePage,
+            SequenceStore p_seqStore)
     {
         m_request = p_request;
         m_sourcePage = p_sourcePage;
@@ -78,14 +70,15 @@ public class InsertSourcePageCommand
         {
             m_insertSourcePage = m_insertSourcePageWithExtractedFile;
         }
-        else // un-extracted file
+        else
+        // un-extracted file
         {
             m_insertSourcePage = m_insertSourcePageWithUnextractedFile;
         }
     }
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -117,19 +110,18 @@ public class InsertSourcePageCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         m_ps1 = p_connection.prepareStatement(m_insertSourcePage);
         m_ps2 = p_connection.prepareStatement(m_updateRequest);
 
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         // set things common to the both and inserted in the same order
         long primaryKey = allocateSequenceNumberRange(m_seqStore);
-        m_ps1.setLong(1,primaryKey);
+        m_ps1.setLong(1, primaryKey);
         m_ps1.setString(2, m_sourcePage.getExternalPageId());
         m_ps1.setString(3, m_sourcePage.getPageState());
         m_ps1.setString(4, m_sourcePage.getDataSourceType());
@@ -141,24 +133,23 @@ public class InsertSourcePageCommand
         }
         else
         {
-            //tbd - will errors fall into there?
+            // tbd - will errors fall into there?
             setDataForUnextractedFileImport();
         }
 
         // set the data in the second command to set the request to
         // source page relationship
         m_sourcePage.setId(primaryKey);
-        m_ps2.setLong(1,primaryKey);
-        m_ps2.setLong(2,m_request.getId());
+        m_ps2.setLong(1, primaryKey);
+        m_ps2.setLong(2, m_request.getId());
         m_request.setSourcePage(m_sourcePage);
         m_sourcePage.setRequest(m_request);
     }
 
-    private void setDataForExtractedFileImport()
-        throws Exception
+    private void setDataForExtractedFileImport() throws Exception
     {
-        ExtractedSourceFile esf =
-            (ExtractedSourceFile)m_sourcePage.getPrimaryFile();
+        ExtractedSourceFile esf = (ExtractedSourceFile) m_sourcePage
+                .getPrimaryFile();
 
         m_ps1.setString(5, esf.getOriginalCodeSet());
         m_ps1.setString(6, esf.getDataType());
@@ -210,15 +201,14 @@ public class InsertSourcePageCommand
 
         String gxmlVersion = esf.getGxmlVersion();
         m_ps1.setString(12, gxmlVersion);
-        m_ps1.setLong(13, new Long(m_request.getCompanyId()).longValue());
+        m_ps1.setLong(13, m_request.getCompanyId());
     }
 
-    private void setDataForUnextractedFileImport()
-        throws Exception
+    private void setDataForUnextractedFileImport() throws Exception
     {
-        UnextractedFile uf = (UnextractedFile)m_sourcePage.getPrimaryFile();
+        UnextractedFile uf = (UnextractedFile) m_sourcePage.getPrimaryFile();
 
-        m_ps1.setDate(5, new Date(System.currentTimeMillis())); //timestamp
+        m_ps1.setDate(5, new Date(System.currentTimeMillis())); // timestamp
         m_ps1.setString(6, uf.getStoragePath());
 
         if (uf.getLastModifiedBy() != null)
@@ -240,7 +230,7 @@ public class InsertSourcePageCommand
         }
 
         m_ps1.setLong(9, uf.getLength());
-        m_ps1.setLong(10, new Long(m_request.getCompanyId()).longValue());
+        m_ps1.setLong(10, m_request.getCompanyId());
     }
 
     public void batchStatements() throws Exception

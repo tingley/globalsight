@@ -113,7 +113,8 @@ public class ProjectsFuncs extends BasicFuncs {
             return;
         }
         try {
-        	selenium.click(Projects.EDIT_BUTTON);
+        	//selenium.click(Projects.EDIT_BUTTON);
+        	selenium.click("link=" + iProjectName);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         	selenium.type(Projects.Name_TEXT_FIELD, iNewProName);
 	        selenium.select(Projects.PROJECT_MANAGER_SELECT, iNewProManager);
@@ -138,14 +139,15 @@ public class ProjectsFuncs extends BasicFuncs {
             return;
         }
         try {
-        	selenium.click(Projects.EDIT_BUTTON);
+        	//selenium.click(Projects.EDIT_BUTTON);
+        	selenium.click("link=" + iProjectName);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	        selenium.click(Projects.USER_BUTTON);
-	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+	        /*selenium.click(Projects.USER_BUTTON);
+	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);*/
 	        selenium.addSelection(Projects.Avavilable_FORM,	adduser);
 	        selenium.click(Projects.AddTO_BUTTON);
-	        selenium.click(Projects.USER_DONE_BUTTON);
-	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+	        /*selenium.click(Projects.USER_DONE_BUTTON);
+	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);*/
 	        selenium.click(Projects.SAVE_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        
@@ -165,7 +167,8 @@ public class ProjectsFuncs extends BasicFuncs {
             return;
         }
         try {
-        	selenium.click(Projects.EDIT_BUTTON);
+        	//selenium.click(Projects.EDIT_BUTTON);
+        	selenium.click("link=" + iProjectName);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        selenium.select(Projects.TermBase_SELECT, iTBName);
 	        selenium.click(Projects.SAVE_BUTTON);

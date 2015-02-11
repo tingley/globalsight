@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.ServerUtil"%>
 <%@ page contentType="text/html; charset=UTF-8"
 		import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
               com.globalsight.everest.util.system.SystemConfiguration,
@@ -8,6 +9,8 @@
               java.io.FilenameFilter,
 			  java.io.InputStreamReader,
               java.io.FileReader,
+              java.util.List,
+              com.globalsight.util.Hotfix,
 			  java.io.File" session="true" 
 %>
 <%!
@@ -114,47 +117,11 @@ public class PatchComparator implements Comparator {
 	String aboutUrl = "about.jsp";
 	String exception = null;
     ArrayList values = new ArrayList();
-	try
-        {        
-		    SystemConfiguration sc = SystemConfiguration.getInstance();
-            StringBuffer patchesDirectory = new StringBuffer(
-                sc.getStringParameter(SystemConfigParamNames.INSTALLATION_DATA_DIRECTORY));
-            patchesDirectory.append(File.separator);
-            patchesDirectory.append("ERs");
-            File fl = new File(patchesDirectory.toString());
-            if (!fl.exists())
-                fl.mkdirs();
-
-            File[] files = fl.listFiles(new ReadMeFilter());
-
-            for (int i=0; i<files.length; i++)
-            {
-/*			InputStreamReader isr = null;
-			String line = null;
-			FileReader fileReader = new FileReader(files[i]);
-			BufferedReader rd = new BufferedReader(fileReader);
-
-			if ((line = rd.readLine()) != null)
-			{
-				values[i] = line;
-			}
-			rd.close();			
-            }       
-*/			
-				//no need to show the first line of the readme, just show the readme name
-				//in alphabetical order
-                File file = files[i];
-                String filename = file.getName();
-				int idx = filename.indexOf("_ReadMe.txt");
-                values.add(filename.substring(0,idx));
-			}
-            Collections.sort(values, new PatchComparator());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            exception = e.getMessage();
-        }
+    List<Hotfix> hs = ServerUtil.getInstalledPatches();
+    for (Hotfix h : hs)
+    {
+    	values.add(h.getName().trim());
+    }
 %>
 
 <HTML>

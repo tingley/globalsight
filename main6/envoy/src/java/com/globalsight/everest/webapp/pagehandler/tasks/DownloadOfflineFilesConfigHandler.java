@@ -48,6 +48,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
     protected static boolean s_isParagraphEditorEnabled = false;
     public static final List<String> DOWNLOAD_OPTIONS = new ArrayList<String>();
     public static final List<String> DOWNLOAD_OPTIONS_DEFAULT = new ArrayList<String>();
+    public static HashMap optionsHash;
     static
     {
         try
@@ -70,6 +71,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);//12
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);//13
             DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);//14
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);//15
 
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);//0
@@ -89,7 +91,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             //need consolidate output file (for XLF format)
             DOWNLOAD_OPTIONS_DEFAULT.add("no");//12
             DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);//13
-            DOWNLOAD_OPTIONS_DEFAULT.add("no");//14
+            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 14
+            DOWNLOAD_OPTIONS_DEFAULT.add(String.valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));//15
         }
         catch (Throwable ignore)
         {
@@ -116,7 +119,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         HttpSession session = p_request.getSession();
         GeneralException exception = null;
         //
-
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        optionsHash = (HashMap) sessionMgr.getAttribute("optionsHash");
         try
         {
             if (p_request.getParameter("__save") != null)
@@ -128,8 +133,13 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             {
                 TaskHelper.saveBasicInformation(session, p_request);
             }
+            if (optionsHash == null)
 
-            getParameters(session, p_request);
+            {
+                optionsHash = new HashMap();
+                getParameters(session, p_request);
+                sessionMgr.setAttribute("optionsHash", optionsHash);
+            }
 
             // null error means everything ok
             p_request.setAttribute(USER_PARAMS_ERROR, "");
@@ -165,7 +175,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         for (int i = 0; i < DOWNLOAD_OPTIONS.size(); i++)
         {
             String downloadOption = DOWNLOAD_OPTIONS.get(i);
-            p_request.setAttribute(downloadOption, PageHandler
+            optionsHash.put(downloadOption,
+                    PageHandler
                     .getUserParameter(p_session, downloadOption).getValue());
         }
     }
@@ -173,27 +184,29 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
     private void saveOptions(HttpSession session, HttpServletRequest request)
             throws EnvoyServletException
     {
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
-        HashMap optionsHash = (HashMap) sessionMgr.getAttribute("optionsHash");
-        if (optionsHash == null)
-        {
-            optionsHash = new HashMap();
-            sessionMgr.setAttribute("optionsHash", optionsHash);
-        }
+
         for (int i = 0; i < DOWNLOAD_OPTIONS.size(); i++)
         {
             String downloadOption = DOWNLOAD_OPTIONS.get(i);
-            optionsHash.put(downloadOption, request
-                    .getParameter(downloadOption));
+            String temp=request.getParameter(downloadOption);
+            if (null == temp)
+            {
+                optionsHash
+                        .put(downloadOption, DOWNLOAD_OPTIONS_DEFAULT.get(i));
+            }
+            else
+            {
+                optionsHash.put(downloadOption, temp);
+            }
         }
 
         // Below parameters need "yes" or "no" as value,but it is "on" or null
         // from UI,so need convert to overwrite in "optionsHash".
-        String key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX;
-        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        // String key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX;
+        // optionsHash.put(key, request.getParameter(key) == null ? "no" :
+        // "yes");
         
-        key = UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT;
+        String key = UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
         
         key = UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM;

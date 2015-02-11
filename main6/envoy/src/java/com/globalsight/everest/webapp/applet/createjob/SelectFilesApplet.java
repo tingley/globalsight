@@ -1,5 +1,7 @@
 package com.globalsight.everest.webapp.applet.createjob;
 
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
@@ -11,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -55,12 +58,12 @@ public class SelectFilesApplet extends EnvoyJApplet
                 @Override
                 public Object run()
                 {
-                    JFileChooser chooser = new JFileChooser(baseFolder);
+                    MyJFileChooser chooser = new MyJFileChooser(baseFolder);
                     chooser.setMultiSelectionEnabled(true);
                     chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     chooser.setApproveButtonText("Add Files");
                     chooser.setApproveButtonToolTipText("Add files or directories to create job");
-                    int state = chooser.showOpenDialog(null);
+                    int state = chooser.showOpenDialog(label);
                     if (state == JFileChooser.APPROVE_OPTION)
                     {
                         File[] files = chooser.getSelectedFiles();
@@ -176,8 +179,24 @@ public class SelectFilesApplet extends EnvoyJApplet
 
         if (empty.size() != 0 || large.size() != 0 || exist.size() != 0)
         {
-            CreateJobUtil.runJavaScript(win, "showWarningMessage", new Object[]
-            { empty.toArray(), large.toArray(), exist.toArray() });
+            StringBuilder sb = new StringBuilder();
+            for (String emp : empty)
+            {
+                sb.append(emp).append(" is empty, ignored.\n");
+            }
+            for (String larg : large)
+            {
+                sb.append(larg).append(" is larger than 35M, ignored.\n");
+            }
+            for (String exi : exist)
+            {
+                sb.append(exi).append(" is already in the uploaded list, ignored.\n");
+            }
+            if (sb.length() > 0)
+            {
+                JOptionPane.showMessageDialog(null, sb.toString(), "Add Files",
+                        JOptionPane.WARNING_MESSAGE);
+            }
         }
         return left;
     }
@@ -280,7 +299,6 @@ public class SelectFilesApplet extends EnvoyJApplet
             }
             else
             {
-                
                 ret.append(addCommonFile(file));
             }
         }
@@ -367,4 +385,22 @@ public class SelectFilesApplet extends EnvoyJApplet
         }
     }
     
+}
+
+// Override the position of JFileChooser.
+class MyJFileChooser extends JFileChooser
+{
+    private static final long serialVersionUID = 1L;
+
+    public MyJFileChooser(String baseFolder)
+    {
+        super(baseFolder);
+    }
+
+    protected JDialog createDialog(Component parent) throws HeadlessException
+    {
+        JDialog dlg = super.createDialog(parent);
+        dlg.setLocationRelativeTo(null);
+        return dlg;
+    }
 }

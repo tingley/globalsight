@@ -215,8 +215,8 @@ public class PermissionHelper
             permGroup.setDescription(buf);
 
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        if (permGroup.getCompanyId() == null)
-            permGroup.setCompanyId(companyId);
+        if (permGroup.getCompanyId() < 0)
+            permGroup.setCompanyId(Long.parseLong(companyId));
     }
 
     /**

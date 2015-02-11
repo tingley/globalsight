@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,11 +33,11 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.command.ITermbaseTmPopulator;
 import com.globalsight.terminology.command.TermbaseTmPopulator;
 import com.globalsight.util.SessionInfo;
-
 
 /**
  * The persistence layer for termbase management.
@@ -83,12 +85,12 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
         while (ite.hasNext())
         {
-            com.globalsight.terminology.java.Termbase tbase = 
-                (com.globalsight.terminology.java.Termbase) ite.next();
+            com.globalsight.terminology.java.Termbase tbase = (com.globalsight.terminology.java.Termbase) ite
+                    .next();
 
             String companyId = String.valueOf(tbase.getCompany().getId());
             CompanyThreadLocal.getInstance().setIdValue(companyId);
-            
+
             try
             {
                 Termbase tb = new Termbase(tbase.getId(), tbase.getName(),
@@ -103,8 +105,9 @@ public class TermbaseManager implements TermbaseExceptionMessages
                         + "'", e);
             }
 
-            if (CATEGORY.isDebugEnabled()) {
-                CATEGORY.info("Started termbase `" + tbase.getName() + "'");                
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.info("Started termbase `" + tbase.getName() + "'");
             }
             CompanyThreadLocal.getInstance().setIdValue(null);
         }
@@ -156,7 +159,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
             if (name == null || name.length() == 0)
             {
-                String[] args = { "name is null" };
+                String[] args =
+                { "name is null" };
                 throw new TermbaseException(MSG_INVALID_ARG, args, null);
             }
         }
@@ -166,7 +170,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
         catch (Exception ex)
         {
-            String[] args = { name };
+            String[] args =
+            { name };
             throw new TermbaseException(MSG_FAILED_TO_CREATE_TB, args, ex);
         }
 
@@ -178,7 +183,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
                 if (tb != null)
                 {
-                    String[] args = { name };
+                    String[] args =
+                    { name };
                     throw new TermbaseException(MSG_TB_ALREADY_EXISTS, args,
                             null);
                 }
@@ -192,10 +198,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
                 TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
 
-//                tb.initIndexes(definition);
+                // tb.initIndexes(definition);
             }
-
-            CATEGORY.info("Termbase `" + name + "' created.");
 
             return tb;
         }
@@ -229,7 +233,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
             if (tb == null)
             {
-                String[] args = { p_name };
+                String[] args =
+                { p_name };
                 throw new TermbaseException(MSG_TB_DOES_NOT_EXIST, args, null);
             }
 
@@ -269,7 +274,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
                 CATEGORY.error("Termbase `" + p_name
                         + "' could not be deleted.", ex);
 
-                String[] args = { p_name };
+                String[] args =
+                { p_name };
                 throw new TermbaseException(MSG_FAILED_TO_DELETE_TB, args, ex);
             }
             finally
@@ -282,7 +288,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
         {
             notifyTermbaseDeleted(p_name);
 
-            CATEGORY.info("Termbase `" + p_name + "' deleted.");
+            CATEGORY.info("Termbase `" + p_name + "' is deleted.");
         }
     }
 
@@ -307,7 +313,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
         if (tb == null)
         {
-            String[] args = { p_name };
+            String[] args =
+            { p_name };
             throw new TermbaseException(MSG_TB_DOES_NOT_EXIST, args, null);
         }
 
@@ -357,7 +364,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
             if (tb != null)
             {
-                String[] args = { p_newName };
+                String[] args =
+                { p_newName };
                 throw new TermbaseException(MSG_TB_ALREADY_EXISTS, args, null);
             }
 
@@ -367,7 +375,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
             if (tb == null)
             {
-                String[] args = { p_name };
+                String[] args =
+                { p_name };
                 throw new TermbaseException(MSG_TB_DOES_NOT_EXIST, args, null);
             }
 
@@ -463,7 +472,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
             CATEGORY.error("Termbase `" + p_name
                     + "' could not be renamed to `" + p_name + "'.", e);
 
-            String[] args = { p_name, p_name };
+            String[] args =
+            { p_name, p_name };
             throw new TermbaseException(MSG_FAILED_TO_RENAME_TB, args, e);
         }
     }
@@ -478,42 +488,28 @@ public class TermbaseManager implements TermbaseExceptionMessages
     static private void deletePhysicalTermbase(Termbase p_tb)
             throws TermbaseException
     {
-        // Delete the entries in the background.
+        // Delete the termbase info only.
+        Connection conn = null;
+        Statement stmt = null;
         try
         {
-            StringBuffer termSql = new StringBuffer();
-            termSql.append("delete from tb_term where LID in (");
-            termSql.append("select LID from tb_language, tb_concept, tb_termbase where");
-            termSql.append(" tb_language.CID=tb_concept.CID and ");
-            termSql
-                    .append("tb_concept.TBID=tb_termbase.TBID and tb_termbase.TBID=");
-            termSql.append(p_tb.getId()).append(")");
-
-            HibernateUtil.executeSql(termSql.toString());
-
-            StringBuffer languageSql = new StringBuffer();
-            languageSql.append("delete from tb_language where CID in (");
-            languageSql.append("select CID from tb_concept, tb_termbase where");
-            languageSql.append(" tb_concept.TBID=tb_termbase.TBID and tb_termbase.TBID=");
-            languageSql.append(p_tb.getId()).append(")");
-
-            HibernateUtil.executeSql(languageSql.toString());
-
-            String conceptSql = "delete from tb_concept where tb_concept.TBID="
-                    + p_tb.getId();
-            HibernateUtil.executeSql(conceptSql);
-
-            com.globalsight.terminology.java.Termbase termbase = HibernateUtil
-                    .get(com.globalsight.terminology.java.Termbase.class, p_tb
-                            .getId());
-
-            HibernateUtil.delete(termbase);
+            conn = DbUtil.getConnection();
+            stmt = conn.createStatement();
+            stmt.addBatch("delete from TB_TERMBASE where tbid=" + p_tb.getId());
+            stmt.executeBatch();
+            conn.commit();
         }
         catch (Exception e)
         {
-            throw new TermbaseException(e);
+
+        }
+        finally
+        {
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
 
+        // Delete real TB data from DB store in background.
         try
         {
             HashMap params = new HashMap();
@@ -526,8 +522,9 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
         catch (Exception ex)
         {
-            CATEGORY.error("Cannot tell JMS queue to delete termbase " + p_tb.getId()
-                    + ", must delete data manually.", ex);
+            CATEGORY.error(
+                    "Cannot tell JMS queue to delete termbase " + p_tb.getId()
+                            + ", must delete data manually.", ex);
         }
     }
 
@@ -576,9 +573,11 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
         catch (Throwable ex)
         {
-            CATEGORY.warn("The re-index schedule for termbase `"
-                    + p_termbase.getName() + "' (ID=" + p_termbase.getId()
-                    + ") could not be deleted.", ex);
+            CATEGORY.warn(
+                    "The re-index schedule for termbase `"
+                            + p_termbase.getName() + "' (ID="
+                            + p_termbase.getId() + ") could not be deleted.",
+                    ex);
         }
     }
 
@@ -608,7 +607,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
         {
         }
     }
-    
+
     /**
      * <p>
      * Add tmtuv segemnts into termbase database.

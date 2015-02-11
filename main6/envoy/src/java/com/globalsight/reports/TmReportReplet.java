@@ -57,6 +57,7 @@ import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserLdapHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -64,7 +65,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class TmReportReplet extends GlobalSightReplet
 {
     private static final String MY_TEMPLATE = "/templates/basicFlowReport.srt";
-    private static final String MY_MESSAGES = "messages/tmReport";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "tmReport";
 
     private ResourceBundle m_bundle = null;
     // query parts
@@ -73,7 +75,7 @@ public class TmReportReplet extends GlobalSightReplet
     private StringBuffer m_where = null;
     private StringBuffer m_order = null;
     private StringBuffer m_from = null;
-    
+
     private StringBuffer m_jobQuery = null;
     private StringBuffer m_jobSelect = null;
     private String[] headers;
@@ -171,19 +173,22 @@ public class TmReportReplet extends GlobalSightReplet
         JDBCTableLens table = executeQuery();
 
         // sort by locale(2) and job_id(0)
-        SortFilter sf = new SortFilter(table, new int[] { 2, 0 });
+        SortFilter sf = new SortFilter(table, new int[]
+        { 2, 0 });
         // group by locale(2) and summarize columns 4,5,6
-        DefaultSortedTable dst = new DefaultSortedTable(sf, new int[] { 2 });
+        DefaultSortedTable dst = new DefaultSortedTable(sf, new int[]
+        { 2 });
 
-        GroupFilter group = new GroupFilter(dst, new int[] { 4, 5, 6, 7 },
-                new SumFormula(), new SumFormula());
+        GroupFilter group = new GroupFilter(dst, new int[]
+        { 4, 5, 6, 7 }, new SumFormula(), new SumFormula());
         group.setShowGroupColumns(false);
         group.setGrandLabel(ReportsPackage.getMessage(m_bundle,
                 "all_locales_short"));
         group.setAddGroupHeader(true);
         fullyLoadTable(group);
 
-        int chartCols[] = new int[] { 4, 5, 6, 7 };
+        int chartCols[] = new int[]
+        { 4, 5, 6, 7 };
         ArrayList labels = new ArrayList();
         ArrayList rows = new ArrayList();
 
@@ -251,8 +256,9 @@ public class TmReportReplet extends GlobalSightReplet
                     if (r < group.getRowCount() - 1)
                     {
                         // replace the locale with "SubTotal"
-                        dtm.setValueAt(ReportsPackage.getMessage(m_bundle,
-                                "subtotal"), r - 1, 0);
+                        dtm.setValueAt(
+                                ReportsPackage.getMessage(m_bundle, "subtotal"),
+                                r - 1, 0);
                     }
                     else
                     {
@@ -268,21 +274,27 @@ public class TmReportReplet extends GlobalSightReplet
                 }
             }
         }
-        if(headers[0] != null){
+        if (headers[0] != null)
+        {
             int index = 0;
-            for(int i = 0; i < jobs.size(); i ++){
+            for (int i = 0; i < jobs.size(); i++)
+            {
                 ArrayList job = (ArrayList) jobs.get(i);
-                
-                boolean isUseInContext = ((Boolean)job.get(0)).booleanValue();
-                if(dtm.getValueAt(i, 0) != null){
-                    index ++;
+
+                boolean isUseInContext = ((Boolean) job.get(0)).booleanValue();
+                if (dtm.getValueAt(i, 0) != null)
+                {
+                    index++;
                 }
-                if(!isUseInContext){
-                    
-                    dtm.setValueAt((dtm.getValueAt(index, 9) == null) ? null : job.get(2), index, 9);
-                    
-                    dtm.setValueAt((dtm.getValueAt(index, 10) == null)? null : job.get(1), index, 10);
-                    
+                if (!isUseInContext)
+                {
+
+                    dtm.setValueAt((dtm.getValueAt(index, 9) == null) ? null
+                            : job.get(2), index, 9);
+
+                    dtm.setValueAt((dtm.getValueAt(index, 10) == null) ? null
+                            : job.get(1), index, 10);
+
                 }
                 index++;
             }
@@ -301,21 +313,26 @@ public class TmReportReplet extends GlobalSightReplet
         }
 
         ss.addTable(prof);
-    }    
-    private String[] getHeaders(ArrayList jobs) {
+    }
+
+    private String[] getHeaders(ArrayList jobs)
+    {
         String[] headers = new String[2];
-        for(int i = 0; i < jobs.size(); i ++){
+        for (int i = 0; i < jobs.size(); i++)
+        {
             ArrayList job = (ArrayList) jobs.get(i);
-            boolean isUseInContext = ((Boolean)job.get(0)).booleanValue();
-            
-            if(isUseInContext){
+            boolean isUseInContext = ((Boolean) job.get(0)).booleanValue();
+
+            if (isUseInContext)
+            {
                 headers[0] = "IN CONTEXT MATCH";
             }
         }
         return headers;
     }
 
-    private ArrayList getIsUseInContext() {
+    private ArrayList getIsUseInContext()
+    {
         makeJobSelectClause();
         makeFromClause();
         makeWhereClause();
@@ -324,24 +341,37 @@ public class TmReportReplet extends GlobalSightReplet
         Connection conn = null;
         PreparedStatement ps = null;
         ArrayList table = null;
-        
-        try {
+
+        try
+        {
             conn = ConnectionPool.getConnection();
             ps = conn.prepareStatement(m_jobQuery.toString());
             ResultSet rs = ps.executeQuery();
             table = changeRSToArrayList(rs);
             ps.close();
-        } catch (ConnectionPoolException e) {
+        }
+        catch (ConnectionPoolException e)
+        {
             e.printStackTrace();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } catch (JobException e) {
+        }
+        catch (JobException e)
+        {
             e.printStackTrace();
-        } catch (RemoteException e) {
+        }
+        catch (RemoteException e)
+        {
             e.printStackTrace();
-        } catch (GeneralException e) {
+        }
+        catch (GeneralException e)
+        {
             e.printStackTrace();
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             e.printStackTrace();
         }
         finally
@@ -352,39 +382,49 @@ public class TmReportReplet extends GlobalSightReplet
 
         return table;
     }
-    
-    private ArrayList changeRSToArrayList(ResultSet rs) throws SQLException, JobException, RemoteException, GeneralException, NamingException {
+
+    private ArrayList changeRSToArrayList(ResultSet rs) throws SQLException,
+            JobException, RemoteException, GeneralException, NamingException
+    {
         ResultSetMetaData rsMetaData = rs.getMetaData();
         ArrayList allRowsDataList = new ArrayList();
-        while(rs.next())
+        while (rs.next())
         {
             ArrayList singleRowDataList = new ArrayList();
-            
+
             Job job = ServerProxy.getJobHandler().getJobById(rs.getLong(1));
-            Boolean isUseInContext = new Boolean(job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging());
-            boolean isInContextMatch = PageHandler.isInContextMatch(job, isUseInContext);
+            Boolean isUseInContext = new Boolean(job.getL10nProfile()
+                    .getTranslationMemoryProfile()
+                    .getIsContextMatchLeveraging());
+            boolean isInContextMatch = PageHandler.isInContextMatch(job,
+                    isUseInContext);
             singleRowDataList.add(isInContextMatch);
-            //NO_USE_IC_MATCH_WORD_COUNT
+            // NO_USE_IC_MATCH_WORD_COUNT
             singleRowDataList.add(new Integer(rs.getInt(2)));
-            //TOTAL_EXACT_MATCH_WORD_COUNT
+            // TOTAL_EXACT_MATCH_WORD_COUNT
             singleRowDataList.add(new Integer(rs.getInt(3)));
-            
+
             allRowsDataList.add(singleRowDataList);
         }
         return allRowsDataList;
     }
 
-    private void makeJobSelectClause(){
+    private void makeJobSelectClause()
+    {
         m_jobSelect = new StringBuffer();
         m_jobSelect.append("SELECT");
         m_jobSelect.append(" job.id as \"JobId\",");
-        m_jobSelect.append(" target_page.NO_USE_IC_MATCH_WORD_COUNT as \"").append("NOUSEINCONTEXT").append("\",");
-        m_jobSelect.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"").append("NOUSEEXACT").append("\" ");
+        m_jobSelect.append(" target_page.NO_USE_IC_MATCH_WORD_COUNT as \"")
+                .append("NOUSEINCONTEXT").append("\",");
+        m_jobSelect.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"")
+                .append("NOUSEEXACT").append("\" ");
     }
-    
-    private void makeJobQuery(){
+
+    private void makeJobQuery()
+    {
         m_jobQuery = new StringBuffer();
-        m_jobQuery.append(m_jobSelect).append(m_from).append(m_where).append(m_order);
+        m_jobQuery.append(m_jobSelect).append(m_from).append(m_where)
+                .append(m_order);
         c_category.debug(m_jobQuery.toString());
     }
 
@@ -403,22 +443,32 @@ public class TmReportReplet extends GlobalSightReplet
         String med = this.commonBundle.getString("lb_75");
         String medhi = this.commonBundle.getString("lb_85");
         String hi = this.commonBundle.getString("lb_95");
-        m_select.append(" target_page.FUZZY_LOW_WORD_COUNT as \"").append(low).append("\",");
-        m_select.append(" target_page.FUZZY_MED_WORD_COUNT as \"").append(med).append("\",");
-        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"").append(medhi).append("\",");
-        m_select.append(" target_page.FUZZY_HI_WORD_COUNT as \"").append(hi).append("\",");
+        m_select.append(" target_page.FUZZY_LOW_WORD_COUNT as \"").append(low)
+                .append("\",");
+        m_select.append(" target_page.FUZZY_MED_WORD_COUNT as \"").append(med)
+                .append("\",");
+        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"")
+                .append(medhi).append("\",");
+        m_select.append(" target_page.FUZZY_HI_WORD_COUNT as \"").append(hi)
+                .append("\",");
         String contexttm = this.commonBundle.getString("lb_context_tm");
         String exact = this.commonBundle.getString("lb_100");
-        m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"").append(contexttm).append("\",");
-        m_select.append(" target_page.EXACT_SEGMENT_TM_WORD_COUNT as \"").append(exact).append("\",");
+        m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"")
+                .append(contexttm).append("\",");
+        m_select.append(" target_page.EXACT_SEGMENT_TM_WORD_COUNT as \"")
+                .append(exact).append("\",");
         String inContexttm = this.commonBundle.getString("lb_in_context_tm");
-        m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"").append(inContexttm).append("\",");
-        String nomatchrep = this.commonBundle.getString("lb_no_match_repetition");
-        m_select.append(" target_page.REPETITION_WORD_COUNT as \"").append(nomatchrep).append("\",");
+        m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"")
+                .append(inContexttm).append("\",");
+        String nomatchrep = this.commonBundle
+                .getString("lb_no_match_repetition");
+        m_select.append(" target_page.REPETITION_WORD_COUNT as \"")
+                .append(nomatchrep).append("\",");
         m_select.append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\"");
     }
 
-    private void makeNoUseInContextMatch() {
+    private void makeNoUseInContextMatch()
+    {
         m_select = new StringBuffer();
         m_select.append("SELECT");
         m_select.append(" job.id as \"JobId\",");
@@ -429,18 +479,26 @@ public class TmReportReplet extends GlobalSightReplet
         String med = this.commonBundle.getString("lb_75");
         String medhi = this.commonBundle.getString("lb_85");
         String hi = this.commonBundle.getString("lb_95");
-        m_select.append(" target_page.FUZZY_LOW_WORD_COUNT as \"").append(low).append("\",");
-        m_select.append(" target_page.FUZZY_MED_WORD_COUNT as \"").append(med).append("\",");
-        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"").append(medhi).append("\",");
-        m_select.append(" target_page.FUZZY_HI_WORD_COUNT as \"").append(hi).append("\",");
+        m_select.append(" target_page.FUZZY_LOW_WORD_COUNT as \"").append(low)
+                .append("\",");
+        m_select.append(" target_page.FUZZY_MED_WORD_COUNT as \"").append(med)
+                .append("\",");
+        m_select.append(" target_page.FUZZY_MED_HI_WORD_COUNT as \"")
+                .append(medhi).append("\",");
+        m_select.append(" target_page.FUZZY_HI_WORD_COUNT as \"").append(hi)
+                .append("\",");
         String contexttm = this.commonBundle.getString("lb_context_tm");
         String exact = this.commonBundle.getString("lb_100");
-        m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"").append(contexttm).append("\",");
-        m_select.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"").append(exact).append("\",");
-//      String inContexttm = this.commonBundle.getString("lb_in_context_tm");
-//      m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"").append(inContexttm).append("\",");
-        String nomatchrep = this.commonBundle.getString("lb_no_match_repetition");
-        m_select.append(" target_page.REPETITION_WORD_COUNT as \"").append(nomatchrep).append("\",");
+        m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"")
+                .append(contexttm).append("\",");
+        m_select.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"")
+                .append(exact).append("\",");
+        // String inContexttm = this.commonBundle.getString("lb_in_context_tm");
+        // m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"").append(inContexttm).append("\",");
+        String nomatchrep = this.commonBundle
+                .getString("lb_no_match_repetition");
+        m_select.append(" target_page.REPETITION_WORD_COUNT as \"")
+                .append(nomatchrep).append("\",");
         m_select.append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\"");
     }
 
@@ -455,8 +513,7 @@ public class TmReportReplet extends GlobalSightReplet
         m_where = new StringBuffer();
         m_where.append(" WHERE workflow.job_id = job.id");
         m_where.append(" AND workflow.target_locale_id = locale.id");
-        m_where
-                .append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
+        m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
         m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
         m_where.append(" AND workflow.state != 'CANCELLED'");
         try
@@ -490,9 +547,12 @@ public class TmReportReplet extends GlobalSightReplet
 
     private JDBCTableLens executeQuery() throws Exception
     {
-        if(headers[0] != null){
+        if (headers[0] != null)
+        {
             makeSelectClause();
-        }else{
+        }
+        else
+        {
             makeNoUseInContextMatch();
         }
 

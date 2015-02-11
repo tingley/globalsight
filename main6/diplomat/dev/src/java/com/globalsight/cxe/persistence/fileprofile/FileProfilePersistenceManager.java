@@ -18,6 +18,7 @@ package com.globalsight.cxe.persistence.fileprofile;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import com.globalsight.cxe.entity.fileextension.FileExtension;
@@ -68,6 +69,8 @@ public interface FileProfilePersistenceManager
     **/
     public Collection getAllFileProfiles()
     throws FileProfileEntityException, RemoteException;
+    public Collection getAllFileProfilesByCondition(String condtion)
+            throws FileProfileEntityException, RemoteException;
 
     /**
      * Return the file profile id for the given name from the database
@@ -160,6 +163,9 @@ public interface FileProfilePersistenceManager
     **/
     public Collection getAllFileExtensions()
     throws FileProfileEntityException, RemoteException;
+    
+    public HashMap<Long, String> getIdViewFileExtensions()
+            throws FileProfileEntityException, RemoteException;
     
     /**
      * Return the file extension that has the given id.

@@ -127,6 +127,8 @@ function addOption()
             }
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+            from.options[i]=null;
+            i--;
         }
     }
     saveSelectedOptions();
@@ -135,6 +137,7 @@ function addOption()
 function removeOption()
 {
     var to = notifyForm.to;
+    var from = notifyForm.from;
 
     if (to.selectedIndex == -1)
     {
@@ -145,6 +148,9 @@ function removeOption()
     {
         if (to.options[i].selected)
         {
+            var len = from.options.length;
+            from.options[len] =  new Option(to.options[i].text, to.options[i].value);
+            
             to.options[i] = null;
             i--;
         }
@@ -240,16 +246,37 @@ function checkItems(notificationCheckbox)
   </tr>
     <tr>
         <td width="20%">
-        <select name="from" <%=disabled%> multiple class="standardText" size=15>
+        <select name="from" <%=disabled%> multiple class="standardText" size=15 style="width:250">
 <%
             if (availableOptions != null)
             {
                 for (int i = 0; i < availableOptions.size(); i++)
                 {
                    String availableOption = (String)availableOptions.get(i);
+                   if(addedOptions != null)
+                   {
+                	   boolean checkTag = false; //check if theelement exist in the "to" form
+                	   for(int j=0; j<addedOptions.size(); j++)
+                	   {
+                		   String addedOp = (String)addedOptions.get(j);
+                		   if(addedOp.equals(availableOption))
+                		   {
+                			   checkTag = true;
+                		   }
+                	   }
+                	   if(!checkTag)
+                	   {
 %>
-                   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+                		   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
 <%
+                	   }
+                   }		       
+					else
+					{
+%>
+                   		<option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<%
+                   	}
                 }
             }
 %>
@@ -273,7 +300,7 @@ function checkItems(notificationCheckbox)
           </table>
         </td>
         <td>
-            <select name="to" <%=disabled%> multiple class="standardText" size=15>
+            <select name="to" <%=disabled%> multiple class="standardText" size=15 style="width:250px">
 <%
                 if (addedOptions != null && addedOptions.size() != 0)
                 {

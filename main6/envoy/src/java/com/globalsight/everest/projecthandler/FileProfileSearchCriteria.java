@@ -41,8 +41,8 @@ public class FileProfileSearchCriteria
     /**
      * Get the search expression based on the specified search criteria object.
      * 
-     * @param p_searchCriteriaParams -
-     *            The search criteria object.
+     * @param p_searchCriteriaParams
+     *            - The search criteria object.
      */
     protected Collection search(SearchCriteriaParameters p_searchCriteriaParams)
             throws Exception
@@ -61,7 +61,7 @@ public class FileProfileSearchCriteria
         {
             switch (((Integer) (keys[i])).intValue())
             {
-                // fileprofile template name
+            // fileprofile template name
                 case FileProfileSearchParameters.FP_TEMPLATE_NAME:
                     fpTemplateName(keys[i], criteria);
                     break;
@@ -95,7 +95,7 @@ public class FileProfileSearchCriteria
             return;
         }
 
-        hql.append(" and f.companyId = " + currentId.trim());
+        hql.append(" and f.companyId = " + Long.parseLong(currentId.trim()));
     }
 
     /*

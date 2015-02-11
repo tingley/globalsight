@@ -1,0 +1,45 @@
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/includes/ieemu.js"></script>
+<script>
+function contextForTab(jobId, e)
+{
+    if(navigator.userAgent.indexOf("MSIE")==-1)
+    {
+	    e.preventDefault();
+	    e.stopPropagation();
+    }
+
+    var popupoptions;
+
+    popupoptions = [
+      new ContextItem("<%=bundle.getString("lb_workflows") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=" + jobId; })
+      
+      <amb:permission  name="<%=Permission.JOB_FILES_VIEW%>" >
+      	,new ContextItem("<%=bundle.getString("lb_SourceFiles") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobSourceFiles&pageName=SOURCEFILES&jobId=" + jobId; })
+      </amb:permission>
+      
+      <% 
+      	  boolean jobCostsTabPermission = (Boolean)request.getAttribute("jobCostsTabPermission");
+      	  if(jobCostsTabPermission){
+      %>
+      		  ,new ContextItem("<%=bundle.getString("lb_costs") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobCosts&pageName=COSTS&jobId=" + jobId; })
+      <%
+      	  }
+      %>
+      <amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
+      	,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobComments&pageName=JOBCOMMENTS&fromMyJobPage=true&jobId=" + jobId; })
+      </amb:permission>
+      
+      <amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
+      	,new ContextItem("<%=bundle.getString("lb_job_attributes") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobAttributes&pageName=JOBATTRIBUTES&jobId=" + jobId; })
+      </amb:permission>
+      
+      <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+      	,new ContextItem("<%=bundle.getString("lb_reports") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobReports&pageName=JOBREPORTS&jobId=" + jobId; })
+      </amb:permission>
+    ];
+    
+    ContextMenu.display(popupoptions, e);
+}
+</script>

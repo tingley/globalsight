@@ -1,14 +1,8 @@
-<!DOCTYPE hibernate-configuration PUBLIC
-    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
 <hibernate-configuration>
 	<session-factory>
-
-		<property name="hibernate.query.factory_class">
-			org.hibernate.hql.classic.ClassicQueryTranslatorFactory
-		</property>
-
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Activity.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AmountOfWork.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/BackingStoreImpl.hbm.xml" />
@@ -80,13 +74,9 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TeamSiteServerImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplateFormat.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePart.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePartArchived.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TranslationMemoryProfile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TMProfileMtInfo.hbm.xml" />
-		<!-- 
-		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageMatch.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TuImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TuvImpl.hbm.xml" />
-		 -->
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingHour.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserFieldSecurity.hbm.xml" />
@@ -126,6 +116,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/OpenOfficeFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/MSOffice2010Filter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/POFilter.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/PlainTextFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AttributeSet.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Attribute.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ListCondition.hbm.xml" />
@@ -170,5 +161,9 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TMAttribute.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TMPAttribute.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectTmTuTProp.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/User.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/UserRoleImpl.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/ContainerRoleImpl.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowExporting.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

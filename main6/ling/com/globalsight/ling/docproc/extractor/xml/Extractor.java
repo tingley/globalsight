@@ -30,9 +30,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -314,6 +311,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             }
 
             setMainBaseFilter(m_baseFilter);
+            // # GBS-2894 : do segmentation before internal text
+            if (isDoSegBeforeInlText())
+            {
+                setMainBaseFilter(null);
+                m_internalTexts = null;
+            }
 
             m_preserveEmptyTag = m_xmlFilterHelper.preserveEmptyTag();
             if (!m_isOfficeXml && m_preserveEmptyTag)
@@ -327,23 +330,24 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             if (m_checkWellFormed)
             {
                 XmlFilterChecker.checkWellFormed(reader);
+                reader = readInput();
             }
 
-            GsDOMParser parser = new GsDOMParser();
-
+            GsDOMParser parser = new GsDOMParser(
+                    "org.apache.xerces.jaxp.GSDocumentBuilderFactoryImpl");
             // don't read external DTDs
             parser.setEntityResolver(this);
             // provide detailed error report
             parser.setErrorHandler(this);
 
             // parse and create DOM tree
-            parser.parse(new InputSource(reader));
+            Document document = parser.parse(new InputSource(reader));
 
             // preserve the values in the inputs' XML declaration
-            m_haveXMLDecl = parser.getHaveXMLDecl();
-            m_version = parser.getXMLVersion();
-            m_standalone = parser.getStandalone();
-            encoding = parser.getEncoding();
+            encoding = document.getXmlEncoding();
+            m_version = document.getXmlVersion();
+            m_standalone = document.getXmlStandalone() ? "yes" : "no";
+            m_haveXMLDecl = encoding != null || m_version != null;
 
             // for xml filter implement
             m_elementPostFormat = m_xmlFilterHelper.getElementPostFormat();
@@ -353,60 +357,26 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             m_cdataPostFormat = m_xmlFilterHelper.getCdataPostFormat();
             m_isCdataPost = m_xmlFilterHelper.isCdataPostFilter();
 
-            Document toBeExtracted = parser.getDocument();
             String mainFormat = getMainFormat();
-            
+
             // process document.xml
-            if (IFormatNames.FORMAT_XML.equals(mainFormat) 
-                    && "w:document".equals(toBeExtracted.getDocumentElement().getNodeName()))
+            if (IFormatNames.FORMAT_XML.equals(mainFormat)
+                    && "w:document".equals(document.getDocumentElement()
+                            .getNodeName()))
             {
                 mainFormat = IFormatNames.FORMAT_OFFICE_XML;
                 m_isOfficeXml = true;
             }
-            
-            // for exception : java.lang.AbstractMethodError: 
-            // org.apache.xerces.dom.DeferredDocumentImpl.lookupNamespaceURI
-            // use JDK's xerces API for JDK's XPath
-            if (m_isOfficeXml)
-            {
-                DocumentBuilderFactory domFactory = DocumentBuilderFactory
-                        .newInstance("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl", 
-                                null);
-                domFactory.setNamespaceAware(true); // never forget this!
-                DocumentBuilder builder = domFactory.newDocumentBuilder();
-                reader = readInput();
-                toBeExtracted = builder.parse(new InputSource(reader));
-            }
-            
+
             // get rule map for the document
-            try
-            {
-                m_ruleMap = m_rules.buildRulesWithFilter(toBeExtracted,
-                        m_xmlFilterHelper.getXmlFilterTags(), mainFormat);
-            }
-            catch (Exception e)
-            {
-                if ("java.lang.NullPointerException".equals(e.getMessage()))
-                {
-                    DocumentBuilderFactory domFactory = DocumentBuilderFactory
-                            .newInstance();
-                    domFactory.setNamespaceAware(true); // never forget this!
-                    DocumentBuilder builder = domFactory.newDocumentBuilder();
-                    reader = readInput();
-                    toBeExtracted = builder.parse(new InputSource(reader));
-                    m_ruleMap = m_rules.buildRulesWithFilter(toBeExtracted,
-                            m_xmlFilterHelper.getXmlFilterTags(), mainFormat);
-                }
-                else
-                {
-                    throw e;
-                }
-            }
+            m_ruleMap = m_rules.buildRulesWithFilter(document,
+                    m_xmlFilterHelper.getXmlFilterTags(), mainFormat);
+
             m_useEmptyTag = m_rules.usesEmptyTag();
             m_useEmptyTag = m_xmlFilterHelper.usesEmptyTag();
 
             // traverse the DOM tree
-            domNodeVisitor(toBeExtracted, false, true, false);
+            domNodeVisitor(document, false, true, false);
         }
         catch (Exception e)
         {
@@ -453,8 +423,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     public void error(SAXParseException e) throws SAXException
     {
         String s = e.getMessage();
+        // ignore below errors
         if (s.matches("Attribute .*? was already specified for element[\\s\\S]*"))
+        {
             return;
+        }
 
         throw new SAXException("XML parse error at\n  line "
                 + e.getLineNumber() + "\n  column " + e.getColumnNumber()
@@ -1426,33 +1399,23 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         StringBuffer newParaText = new StringBuffer();
         int bptIndex = 0;
-        // [contents-contents-contents]
-        Pattern openTagPattern = Pattern
-                .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]");
-        // [/contents-contents-contents]
-        Pattern closeTagPattern = Pattern
-                .compile("\\[/([^-]+-[^-]+-[^\\]]+)\\]");
-        Matcher openMatcher = openTagPattern.matcher(p_paraText);
-        Matcher closeMatcher = closeTagPattern.matcher(p_paraText);
-        while (openMatcher.find())
+        // [contents-contents-contents]xxxxxx[/contents-contents-contents]
+        Pattern p = Pattern
+                .compile("\\[([^/-]+-[^-]+-[^\\]]+)\\]([^\\[]*)\\[/(\\1)\\]");
+        Matcher m = p.matcher(p_paraText);
+        while (m.find())
         {
-            String tagName = openMatcher.group(1);
-            int openTagEndIndex = openMatcher.end();
-            if (closeMatcher.find(openTagEndIndex)
-                    && tagName.equals(closeMatcher.group(1)))
-            {
-                bptIndex = m_admin.incrementBptIndex();
-                // Mark open font style tag
-                newParaText.append("<bpt i=\"" + bptIndex + "\" type=\"");
-                newParaText.append(tagName.toString() + "\"");
-                newParaText.append(">[" + tagName.toString() + "]</bpt>");
-                // Append translatable fragment
-                newParaText.append(m_xmlEncoder.encodeStringBasic(p_paraText
-                        .substring(openTagEndIndex, closeMatcher.start())));
-                // Mark close font style tag
-                newParaText.append("<ept i=\"" + bptIndex + "\">[/");
-                newParaText.append(tagName.toString() + "]</ept>");
-            }
+            String tagName = m.group(1);
+            bptIndex = m_admin.incrementBptIndex();
+            // Mark open font style tag
+            newParaText.append("<bpt i=\"" + bptIndex + "\" type=\"");
+            newParaText.append(tagName + "\"");
+            newParaText.append(">[" + tagName + "]</bpt>");
+            // Append translatable fragment
+            newParaText.append(m_xmlEncoder.encodeStringBasic(m.group(2)));
+            // Mark close font style tag
+            newParaText.append("<ept i=\"" + bptIndex + "\">[/");
+            newParaText.append(tagName + "]</ept>");
         }
         return newParaText.length() > 0 ? newParaText.toString() : p_paraText;
     }
@@ -2551,6 +2514,17 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         {
             isClosedTag = isClosedTag(parentNode);
         }
+        // make xml declare version first
+        // <xml version="1.0" encoding="UTF-8" standalone="yes"/>
+        Node versionNode = null;
+        if (isClosedTag && "xml".equals(parentNode.getNodeName()))
+        {
+            if (attrs.getNamedItem("version") != null && attrs.getLength() > 2)
+            {
+                versionNode = attrs.removeNamedItem("version");
+            }
+        }
+
         for (int i = 0; i < attrs.getLength(); ++i)
         {
             Node att = attrs.item(i);
@@ -2631,7 +2605,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         if (m_isOfficeXml && !m_isUrlTranslate
                                 && isPureUrl(value))
                         {
-                            stuff += m_xmlEncoder.encodeStringBasic(value);
+                            // encoding twice to avoid issue :
+                            // w:tooltip="http://support.microsoft.com/contactus/?ws=support&ln=pt-br"
+                            stuff += m_xmlEncoder
+                                    .encodeStringBasic(m_xmlEncoder
+                                            .encodeStringBasic(value));
                         }
                         else
                         {
@@ -2723,6 +2701,15 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 }
                 else
                 {
+                    if (versionNode != null)
+                    {
+                        String versionName = versionNode.getNodeName();
+                        String versionValue = versionNode.getNodeValue();
+                        outputSkeleton(" " + versionName + "=\"" + versionValue
+                                + "\"");
+                        versionNode = null;
+                    }
+
                     outputSkeleton(" " + attname + "=\""
                             + m_xmlEncoder.encodeStringBasic(value) + "\"");
                 }
@@ -2965,7 +2952,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         }
 
         String[] tagNames =
-        { "bpt", "ept", "it" };
+        { "bpt", "ept", "it", "ph" };
         String result = encodingEntitiesForOtherFormat(element.getChunk(),
                 tagNames);
         element.setChunk(result);

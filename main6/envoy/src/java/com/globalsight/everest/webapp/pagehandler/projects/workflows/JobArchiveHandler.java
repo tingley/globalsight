@@ -21,6 +21,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoArchivedSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
@@ -68,12 +69,10 @@ public class JobArchiveHandler extends JobManagementHandler
         m_exportBean = new NavigationBean(EXPORT_BEAN, p_pageDescriptor
                 .getPageName());
         performAppropriateOperation(p_request);
-        p_request.setAttribute(JOB_SCRIPTLET, getJobText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(), null,
-                ((NavigationBean) beanMap.get(DETAILS_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(PLANNED_COMPLETION_DATE_BEAN))
-                        .getPageURL(), getExpJobListing(p_request),
-                Job.ARCHIVED, false));
+
+        JobVoArchivedSearcher searcher = new JobVoArchivedSearcher();
+        searcher.setJobVos(p_request);
+        
         p_request.setAttribute(BASE_BEAN, ((NavigationBean) beanMap
                 .get(BASE_BEAN)));
         p_request.setAttribute(EXPORT_URL_PARAM, m_exportBean.getPageURL());

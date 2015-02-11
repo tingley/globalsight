@@ -438,6 +438,14 @@ function setPerSurchargeTextInputValue(id,value)
     </TD>
   </TR>
   <TR VALIGN="TOP">
+    <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_server_instance_id")%>:</SPAN></TD>
+    <TD><SPAN CLASS="standardText">
+      <INPUT TYPE="TEXT" NAME="<%=SystemConfigParamNames.SERVER_INSTANCE_ID%>"
+      SIZE="50" MAXLENGTH="50" CLASS="standardText"
+      VALUE="<%=request.getAttribute(SystemConfigParamNames.SERVER_INSTANCE_ID)%>"></SPAN>
+    </TD>
+  </TR>
+  <TR VALIGN="TOP">
     <TD COLSPAN="2"></TD>
   </TR>
   <TR VALIGN="TOP">

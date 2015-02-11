@@ -4,6 +4,7 @@ var baseTagsContentTable = "<table id='baseFilterTagsContentTable' border=0 widt
 var fontTagS = "<font class='specialFilter_dialog_label'>";
 var fontTagE = "</font>"
 var imgYes = "<IMG SRC='/globalsight/images/checkmark.gif' HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3></IMG>";
+var checkedId = "";
 	
 function BaseFilter()
 {
@@ -57,19 +58,7 @@ BaseFilter.prototype.initOptionMap = function (filter)
 		var obj0 = {tagName : "name1", enable : true, itemid : 1, attributes : [{itemid : 0, aName : "name1", aOp : "equal", aValue : "vvv1"}, {itemid : 1, aName : "name2", aOp : "equal", aValue : "vvv2"}]};
 		var obj1 = {tagName : "name2", enable : true, itemid : 2, attributes : [{itemid : 0, aName : "name1", aOp : "equal", aValue : "vvv1"}, {itemid : 1, aName : "name2", aOp : "equal", aValue : "vvv2"}]};
 		
-		var objArray = [obj0, obj1,
-		                {tagName:"name3",enable:true,itemid:3,attributes:[]},
-		                {tagName:"name4",enable:true,itemid:4,attributes:[]},
-		                {tagName:"name5",enable:true,itemid:5,attributes:[]},
-		                {tagName:"name6",enable:true,itemid:6,attributes:[]},
-		                {tagName:"name7",enable:true,itemid:7,attributes:[]},
-		                {tagName:"name8",enable:true,itemid:8,attributes:[]},
-		                {tagName:"name9",enable:true,itemid:9,attributes:[]},
-		                {tagName:"name10",enable:true,itemid:10,attributes:[]},
-		                {tagName:"name11",enable:true,itemid:11,attributes:[]},
-		                {tagName:"name12",enable:true,itemid:12,attributes:[]},
-		                {tagName:"name13",enable:true,itemid:13,attributes:[]},
-		                {tagName:"name14",enable:true,itemid:14,attributes:[]}];
+		var objArray = [obj0, obj1];
 		
 		// baseFilter.optionObjsMap[this.optionPreserveWsTags] = objArray;
 		// alert(preserveWsTags);
@@ -351,6 +340,8 @@ BaseFilter.prototype.generateTagsTable = function (filter)
 BaseFilter.prototype.closeAllTagPopup = function()
 {
 	closePopupDialog("baseFilter_InternalText_Dialog");
+	closePopupDialog("editPriorityDialog");
+	closePopupDialog("deleteBaseTagDialog");
 }
 
 BaseFilter.prototype.addTag = function(radioId)
@@ -379,6 +370,7 @@ BaseFilter.prototype.addTag = function(radioId)
 		var aName = isEdit ? editItem.aName : "";
 		document.getElementById("baseFilter_InternalText").value = aName;
 		document.getElementById("baseFilter_InternalText_isRE").checked = editItem.isRE;
+		document.getElementById("baseFilter_InternalText_priority").value = isEdit ? editItem.priority : "";
 	}
 }
 
@@ -415,9 +407,11 @@ BaseFilter.prototype.getItemById = function(itemId, optionValue)
 
 BaseFilter.prototype.saveInternalText = function()
 {
+	var itemId = baseFilter.editItemId;
 	var validate = new Validate();
 	var aName = new StringBuffer(document.getElementById("baseFilter_InternalText").value);
 	var isRE = document.getElementById("baseFilter_InternalText_isRE").checked;
+	var priority = document.getElementById("baseFilter_InternalText_priority").value;
 
 	if(validate.isEmptyStr(aName.trim()))
 	{
@@ -426,30 +420,33 @@ BaseFilter.prototype.saveInternalText = function()
 		return;
 	}
 	
-	if(this.isInternalTextExist(aName, isRE))
+	if (!this.validatePriority(priority, itemId))
+	{
+		return;
+	}
+	
+	if(this.isInternalTextExist(aName, isRE, priority))
 	{
 		alert(jsInternalExist);
 		return;
 	}
 	
 	var dialogId = "baseFilter_InternalText_Dialog";
-	var itemId = baseFilter.editItemId;
-	var enable = baseFilter.editItemEnable;
 	
-	var item;
-	item = {itemid : itemId, enable : enable, aName : aName.trim(), isRE : isRE};
+	var enable = baseFilter.editItemEnable;
+	var item = {itemid : itemId, enable : enable, aName : aName.trim(), isRE : isRE, priority : priority};
 	
 	baseFilter.addOneItemInCurrentOptions(item);
 	baseFilter.closeTagDialog(dialogId);
 }
 
-BaseFilter.prototype.isInternalTextExist = function(content, isRegex)
+BaseFilter.prototype.isInternalTextExist = function(content, isRegex, priority)
 {
 	var internalTexts = this.optionObjsMap[this.optionInternalTexts];
 	for (var i = 0; i < internalTexts.length; i++)
 	{
 		var item = internalTexts[i];
-		if (item.aName == content && item.isRE == isRegex)
+		if (item.aName == content && item.isRE == isRegex && item.priority == priority)
 		{
 			return true;
 		}
@@ -644,6 +641,156 @@ BaseFilter.prototype.generateDeleteTagTableContent = function()
 	return true;
 }
 
+BaseFilter.prototype.generatePriorityTagTableContent = function()
+{
+	checkedId = "";
+	var str = new StringBuffer("<center><table cellpadding=0 cellspacing=0 border=0 width='500px' class='standardText'>");
+	str.append("<tr class='deleteTagsDialog_header'>");
+	str.append("<td width='100px'>");
+	str.append("<Label class='tagName_td'>" + jsCurrentPriority + "</Label>");
+	str.append("</td>");
+	str.append("<td width='200px'>");
+	str.append("<Label class='tagName_td'>" + jsInternalContent + "</Label>");
+	str.append("</td>");
+	str.append("<td width='200px'>");
+	str.append("<Label class='tagName_td'>" + jsNewPriority + "</Label>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	var ruleObjects = baseFilter.optionObjsMap[baseFilter.optionInternalTexts];
+	var inputIdPre = "tag_priority_";
+	var doEncodeName = true;
+	var isOdd = true;
+	
+	for(var j = 0; j < ruleObjects.length; j++)
+	{
+		var backColor = isOdd ? "#DFE3EE" : "#C7CEE0";
+		isOdd = !isOdd;
+				
+		var ruleObject = ruleObjects[j];
+		var aaaname = ruleObject.aName;
+		var encodedName = doEncodeName ? encodeHtmlEntities(aaaname) : aaaname;
+		str.append("<tr style='background-color:"+backColor+";padding:4px'>");
+		str.append("<td>");
+		str.append(ruleObject.priority);
+		str.append("</td>");
+		str.append("<td>");
+		str.append(encodedName);
+		str.append("</td>");
+		str.append("<td>");
+		var iddd = inputIdPre + ruleObject.itemid;
+		//str.append("<input type='text' name='"+iddd+"' id='"+iddd+"' value='"+ruleObject.priority+"' onblur='baseFilter.checkPriorities()'></input>");
+		str.append("<input type='text' name='"+iddd+"' id='"+iddd+"' value='"+ruleObject.priority+"'></input>");
+		str.append("</td>");
+		str.append("</tr>");
+	}
+	str.append("</table></center>");
+	
+	document.getElementById("editPriorityTableContent").innerHTML = str.toString();
+	showPopupDialog("editPriorityDialog");
+}
+
+BaseFilter.prototype.checkPriorities = function()
+{
+	var ruleObjects = baseFilter.optionObjsMap[baseFilter.optionInternalTexts];
+	var inputIdPre = "tag_priority_";
+	var valuesArray = new Array();
+	var validate = new Validate();
+	
+	for(var j = 0; j < ruleObjects.length; j++)
+	{
+		var ruleObject = ruleObjects[j];
+		var iddd = inputIdPre + ruleObject.itemid;
+		var newpriority = document.getElementById(iddd).value;
+		
+		if ((!validate.isPositiveInteger(newpriority)
+				|| newpriority < 1 || newpriority > 255)
+			&& iddd != checkedId)
+		{
+			checkedId = iddd;
+			alert(jsAlertPriorityValue + " - " + ruleObject.aName);
+			document.getElementById(iddd).focus();
+			return;
+		}
+		
+		valuesArray[j] = newpriority;
+	}
+}
+
+BaseFilter.prototype.validatePriority = function(newpriority, eid)
+{
+	var validate = new Validate();
+		
+	if (!validate.isPositiveInteger(newpriority)
+			|| newpriority < 1 || newpriority > 255)
+	{
+		alert(jsAlertPriorityValue);
+		return false;
+	}
+	
+	var ruleObjects = baseFilter.optionObjsMap[baseFilter.optionInternalTexts];
+	for(var j = 0; j < ruleObjects.length; j++)
+	{
+		var ruleObject = ruleObjects[j];
+		if (newpriority == ruleObject.priority && eid != ruleObject.itemid)
+		{
+			alert(jsAlertSamePriority);
+			return false;
+		}
+	}
+		
+	return true;
+}
+
+BaseFilter.prototype.savePriorities = function()
+{
+	var ruleObjects = baseFilter.optionObjsMap[baseFilter.optionInternalTexts];
+	var inputIdPre = "tag_priority_";
+	var valuesArray = new Array();
+	var validate = new Validate();
+	
+	for(var j = 0; j < ruleObjects.length; j++)
+	{
+		var ruleObject = ruleObjects[j];
+		var iddd = inputIdPre + ruleObject.itemid;
+		var newpriority = document.getElementById(iddd).value;
+		
+		if (!validate.isPositiveInteger(newpriority)
+				|| newpriority < 1 || newpriority > 255)
+		{
+			alert(jsAlertPriorityValue + " - " + ruleObject.aName);
+			return;
+		}
+		
+		valuesArray[j] = newpriority;
+	}
+	
+	for(var j = 0; j < valuesArray.length; j++)
+	{
+		var newpriority = valuesArray[j];
+		for (var i = j + 1; i < valuesArray.length; i++)
+		{
+			var new2 = valuesArray[i];
+			
+			if (newpriority == new2)
+			{
+				alert(jsAlertSamePriority);
+				return;
+			}
+		}
+	}
+	
+	for(var j = 0; j < ruleObjects.length; j++)
+	{
+		var ruleObject = ruleObjects[j];
+		ruleObject.priority = valuesArray[j];
+	}
+	
+	closePopupDialog("editPriorityDialog");
+	var content = baseFilter.generateTagsContent(baseFilter.currentOption, baseFilter.currentPage);
+	baseFilter.refreshTagsContent(content);
+}
+
 BaseFilter.prototype.isDefined = function(objj)
 {
 	return (typeof(objj) != 'undefined');
@@ -785,6 +932,17 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 	
 	if (objArray && objArray.length > 0)
 	{
+		for(var i = 0; i < objArray.length; i++)
+		{
+			var ruleone = objArray[i];
+			if (typeof(ruleone.priority) == "undefined")
+			{
+				ruleone.priority = i + 1;
+			}
+		}
+		
+		objArray.sort(sortPriority);
+		
 		var sortImgSrc = "/globalsight/images/sort-up.gif";
 		if(baseFilter.sortOrder == 'asc')
 		{
@@ -803,6 +961,7 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		{
 			str.append("<td width='50%' class='tagName_td'>" + jsInternalContent + "</td>");
 			str.append("<td class='tagName_td'>" + jsInternalIsRegex + "</td>");
+			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");
 		var startIndex = 0;
@@ -836,6 +995,7 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 					var encodedName = encodeHtmlEntities(ruleObj.aName);
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"baseFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.isRE?imgYes:"") + "</td>");
+					str.append("<td class='tagValue_td'>" + (ruleObj.priority ? ruleObj.priority : 9) + "</td>");
 				}
 				str.append("</tr>");
 			}
@@ -849,6 +1009,7 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		{			
 			str.append("<td width='50%' class='tagName_td'>" + jsInternalContent + "</td>");
 			str.append("<td class='tagName_td'>" + jsInternalIsRegex + "</td>");
+			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");
 		str.append("<tr><td colspan='2'><p><br /></p></td></tr>");
@@ -974,6 +1135,10 @@ BaseFilter.prototype.generateAvailableFilterOptions = function(filter, filterIdP
 
 function encodeHtmlEntities(p_text)
 {
+	if (typeof(p_text) == "undefined" || typeof(p_text) == "number")
+	{
+		return p_text;
+	}
     return p_text.replace(/&/g, "&amp;").replace(/</g, "&lt;").
         replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
 }

@@ -36,6 +36,8 @@ import com.globalsight.util.database.PreparedStatementBatch;
  * Performs an in-place update of existing source page data: modified TUs and
  * TUVs are updated, unmodified but reordered TUs and TUVs are ordered into
  * their new place, and template parts are re-created.
+ * 
+ * @deprecated
  */
 public class UpdateGxmlPersistenceCommand extends PersistenceCommand
 {
@@ -111,7 +113,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
     private PreparedStatementBatch m_ps_tuBatch = null;
     private PreparedStatementBatch m_ps_tuvBatch = null;
 
-    private String m_companyId;
+    private long m_companyId = -1;
 
     //
     // Constructor
@@ -140,7 +142,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
         m_allTuvs = p_allTuvs;
     }
 
-    public void setCompanyId(String companyId)
+    public void setCompanyId(long companyId)
     {
         m_companyId = companyId;
     }

@@ -58,9 +58,7 @@ pre {
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
-<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <SCRIPT>
-dojo.require("dijit.Dialog");
 
 var g_targetLocale = "<%=str_targetLocale%>";
 
@@ -68,7 +66,7 @@ function showProgressBar()
 {
   try
   {
-	  var div = dojo.byId('src_prograssbar');
+	  var div = document.getElementById('src_prograssbar');
 	  div.style.visibility = "visible";
   }
   catch(e)
@@ -128,6 +126,8 @@ function doScroll()
         pageToScroll.scroll(self.document.body.scrollLeft,
           self.document.body.scrollTop);
     }
+    
+    resetLocation("src_prograssbar");
 }
 
 function doLoad()
@@ -196,29 +196,19 @@ function update_tr(id)
 
 <script type="text/javascript">
 <!--
-	lastScrollY = 0;
 	function resetLocation(p_eid) {
-	try	{
-		var diffY;
-		if (document.documentElement && document.documentElement.scrollTop)
-			diffY = document.documentElement.scrollTop;
-		else if (document.body)
-			diffY = document.body.scrollTop
-		else {/*Netscape stuff*/
-		}
-		percent = .1 * (diffY - lastScrollY);
-		if (percent > 0)
-			percent = Math.ceil(percent);
-		else
-			percent = Math.floor(percent);
-		document.getElementById(p_eid).style.top = parseInt(document
-				.getElementById(p_eid).style.top)
-				+ percent + "px";
-		lastScrollY = lastScrollY + percent;
-	} catch(e) {
-  	}
+		try	{
+			var diffY = 0;
+			if (document.documentElement && document.documentElement.scrollTop)
+				diffY = document.documentElement.scrollTop;
+			else if (document.body)
+				diffY = document.body.scrollTop;
+			else {/*Netscape stuff*/
+			}
+			document.getElementById(p_eid).style.top = diffY + 300;
+	    } catch(e) {
+  	    }
 	}
-	window.setInterval("resetLocation(\"src_prograssbar\")", 1);
 //-->
 </script>
 
@@ -230,7 +220,7 @@ function update_tr(id)
      style="behavior: url('/globalsight/envoy/edit/snippets/SnippetEditor.htc');
             display: none;"></div>
 
-<div dojoType="dijit.Dialog" id="src_prograssbar" style="top: 300px; left: 100px;">
+<div id="src_prograssbar" style="top: 300px; left: 100px;">
 	<br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
 </div>
 

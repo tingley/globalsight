@@ -143,8 +143,9 @@ public class TeamSiteServerHandler extends PageHandler implements
     /**
      * Clear the session manager
      * 
-     * @param p_session -
-     *            The client's HttpSession where the session manager is stored.
+     * @param p_session
+     *            - The client's HttpSession where the session manager is
+     *            stored.
      */
     private void clearSessionManager(HttpSession p_session)
     {
@@ -251,8 +252,7 @@ public class TeamSiteServerHandler extends PageHandler implements
             String destDir = "teamsite/" + p_ts.getName() + "/";
             // compose the TranslateServlet URL
             StringBuffer translateServletUrl = new StringBuffer();
-            port = sc
-                    .getStringParameter(SystemConfigParamNames.NON_SSL_PORT);
+            port = sc.getStringParameter(SystemConfigParamNames.NON_SSL_PORT);
             translateServletUrl.append("http://").append(serverName)
                     .append(":");
             translateServletUrl.append(nonSSLPort);
@@ -284,34 +284,42 @@ public class TeamSiteServerHandler extends PageHandler implements
             // Process the files that will reside on the TeamSite NT server
             if (p_ts.getOS().equals(WINDOWS))
             {
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightGlobalization.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightGlobalization.ipl"),
-                        tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightGlobalization.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightGlobalization.ipl"), tsHash);
 
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightImport.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightImport.ipl"), tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightImport.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightImport.ipl"), tsHash);
 
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightImportStatusReporter.tmpl"),
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightImportStatusReporter.tmpl"),
                         concatPath(installDir, destDir
                                 + "GlobalSightImportStatusReporter.ipl"),
                         tsHash);
 
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightImportTimerService.tmpl"),
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightImportTimerService.tmpl"),
                         concatPath(installDir, destDir
                                 + "GlobalSightImportTimerService.ipl"), tsHash);
 
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightTranslation.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightTranslation.ipl"),
-                        tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightTranslation.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightTranslation.ipl"), tsHash);
 
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightDcrGen.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightDcrGen.ipl"), tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightDcrGen.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightDcrGen.ipl"), tsHash);
 
                 processFile(
                         concatPath(installDir,
@@ -327,31 +335,38 @@ public class TeamSiteServerHandler extends PageHandler implements
             {
                 // Process the files that will reside on the TeamSite SOLARIS
                 // server
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightGlobalization.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightGlobalization.cgi"),
-                        tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightGlobalization.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightGlobalization.cgi"), tsHash);
                 // The GlobalSightImport.cgi is created from cgiwrap.c
                 // which calls GlobalSightImport2.cgi
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightImport2.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightImport2.cgi"), tsHash);
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightImportStatusReporter.tmpl"),
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightImport2.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightImport2.cgi"), tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightImportStatusReporter.tmpl"),
                         concatPath(installDir, destDir
                                 + "GlobalSightImportStatusReporter.cgi"),
                         tsHash);
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightTranslation.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightTranslation.cgi"),
-                        tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightTranslation.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightTranslation.cgi"), tsHash);
                 processFile(concatPath(installDir, "teamsite/Makefile.tmpl"),
                         concatPath(installDir, destDir + "Makefile"), tsHash);
                 // The GlobalSightDcrGen.cgi is created from cgiwrap.c
                 // which calls GlobalSightDcrGen2.cgi
-                processFile(concatPath(installDir,
-                        "teamsite/GlobalSightDcrGen2.tmpl"), concatPath(
-                        installDir, destDir + "GlobalSightDcrGen2.cgi"), tsHash);
+                processFile(
+                        concatPath(installDir,
+                                "teamsite/GlobalSightDcrGen2.tmpl"),
+                        concatPath(installDir, destDir
+                                + "GlobalSightDcrGen2.cgi"), tsHash);
 
                 processFile(
                         concatPath(installDir,
@@ -453,8 +468,8 @@ public class TeamSiteServerHandler extends PageHandler implements
                 .getAttribute(TEAMSITE_SERVER);
         try
         {
-            teamsiteServer.setCompanyId(CompanyThreadLocal.getInstance()
-                    .getValue());
+            teamsiteServer.setCompanyId(Long.parseLong(CompanyThreadLocal
+                    .getInstance().getValue()));
 
             Vector stores = (Vector) sessionMgr.getAttribute(CONTENT_STORES);
             Vector storeIds = new Vector();

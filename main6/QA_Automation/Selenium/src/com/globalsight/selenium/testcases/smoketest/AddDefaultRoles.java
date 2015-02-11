@@ -25,19 +25,19 @@ public class AddDefaultRoles extends BaseTestCase
         // Create a new project
         String projectName = projectsFuncs.newProject(selenium,
                 getProperty("defaultRole.project"));
-//        if (projectName != null)
+//      if (projectName != null)
+//    {
+//         Assert.assertEquals(projectsFuncs.isPresentInTable(selenium,
+//                 Projects.PROJECT_TABLE, projectName), true);
+//       }
+//       else
 //        {
-//            Assert.assertEquals(projectsFuncs.isPresentInTable(selenium,
-//                    Projects.PROJECT_TABLE, projectName), true);
+//           Reporter.log("the project creation failed!");
+//           return;
 //        }
-//        else
-//        {
-//            Reporter.log("the project creation failed!");
-//            return;
-//        }
-//
-//        // import workflow
-//        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+
+        // import workflow
+//       openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
 //                MainFrame.WORKFLOWS_SUBMENU);
 //        WorkflowsFuncs WorkflowsFuncs = new WorkflowsFuncs();
 //        String filePath = ConfigUtil.getConfigData("Base_Path")
@@ -47,31 +47,32 @@ public class AddDefaultRoles extends BaseTestCase
 //                "wf_suser_en_US_de_DE");
 
         // Create Superusers
-        CommonFuncs.logoutSystem(selenium);
-        CommonFuncs.loginSystemWithSuperAdmin(selenium);
+        //CommonFuncs.logoutSystem(selenium);
+        //CommonFuncs.loginSystemWithSuperAdmin(selenium);
 
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.USERS_SUBMENU);
         String newUsername = usersFuncs.newSuperUsers(selenium, getProperty("defaultRole.user"));
 
         // Edit DefaultRoles
-        usersFuncs.editDefaultRoles(selenium,
-                newUsername,
-                getProperty("defaultRole.sourceLocale"),
-                getProperty("defaultRole.targetLocale"));
+        //usersFuncs.editDefaultRoles(selenium,
+                //newUsername,
+                //getProperty("defaultRole.sourceLocale"),
+                //getProperty("defaultRole.targetLocale"));
 
-        CommonFuncs.logoutSystem(selenium);
-        CommonFuncs.loginSystemWithAdmin(selenium);
+        //CommonFuncs.logoutSystem(selenium);
+        //CommonFuncs.loginSystemWithAdmin(selenium);
 
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.PROJECTS_SUBMENU);
         if (projectsFuncs.selectProject(selenium, projectName))
         {
-            clickAndWait(selenium, Projects.EDIT_BUTTON);
-            clickAndWait(selenium, Projects.USER_BUTTON);
-            clickAndWait(selenium, Projects.USER_DONE_BUTTON);
+            //clickAndWait(selenium, Projects.EDIT_BUTTON);
+        	clickAndWait(selenium,"link=" + projectName);
+            /*clickAndWait(selenium, Projects.USER_BUTTON);
+            clickAndWait(selenium, Projects.USER_DONE_BUTTON);*/
             clickAndWait(selenium, Projects.SAVE_BUTTON);
         }
 

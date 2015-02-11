@@ -9,7 +9,7 @@ import com.util.ServerUtil;
 
 public class EnvoyConfig
 {
-    public final static String RESOURCE_PARENT = "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties";
+    public final static String RESOURCE_PARENT = "/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties";
     private final static String FILE_NAME = RESOURCE_PARENT
             + "/envoy.properties";
     private static List<String> COMPANY_FILES = null;

@@ -19,6 +19,7 @@ package com.globalsight.cxe.persistence.fileprofile;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
@@ -203,6 +204,19 @@ public class FileProfilePersistenceManagerWLRMIImpl
 	{
 		return m_localReference.getFileExtension(id);
 	}
+	public HashMap<Long, String> getIdViewFileExtensions()
+            throws FileProfileEntityException, RemoteException{
+        return m_localReference.getIdViewFileExtensions();
+        
+    }
+
+    @Override
+    public Collection getAllFileProfilesByCondition(String condtion)
+            throws FileProfileEntityException, RemoteException
+    {
+        // TODO Auto-generated method stub
+        return m_localReference.getAllFileProfilesByCondition(condtion);
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //  END: KnownFormatTypes  ///////////////////////////////////////////////////

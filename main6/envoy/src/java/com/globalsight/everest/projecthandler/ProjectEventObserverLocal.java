@@ -60,7 +60,7 @@ public class ProjectEventObserverLocal implements ProjectEventObserver
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and p.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             List projects = HibernateUtil.search(hql, map);

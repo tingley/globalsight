@@ -8,6 +8,7 @@
             com.globalsight.everest.webapp.pagehandler.administration.config.segmentationrulefile.SegmentationRuleConstant,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileType,
+            com.globalsight.everest.company.CompanyWrapper,
             com.globalsight.everest.webapp.webnavigation.LinkHelper,
             com.globalsight.everest.servlet.util.ServerProxy,
             com.globalsight.everest.servlet.EnvoyServletException,
@@ -100,10 +101,10 @@
         if (desc == null) desc = "";
         text = segmentationRule.getRuleText();
         ruleType = segmentationRule.getType();
-        if(segmentationRule.getCompanyId()!= null)
+        long companyId = segmentationRule.getCompanyId();
+        if(companyId != -1)
         {
-        	companyName = com.globalsight.everest.company.CompanyWrapper
-        				.getCompanyNameById(segmentationRule.getCompanyId());
+        	companyName = CompanyWrapper.getCompanyNameById(companyId);
         }
     }
 %>

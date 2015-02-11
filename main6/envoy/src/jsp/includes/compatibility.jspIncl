@@ -92,10 +92,12 @@ if(!ie)
     	}
     };    
 
-   if(!moz){ //XML object is only exist in firefox, for chrome using XML as a namespace.
-	var XML;
-	if(!XML) XML = {};
-   }
+    // Ensure the XML object existed in any cases
+    //XML object is only exist in firefox, for chrome using XML as a namespace.
+    if(typeof XML == "undefined")
+    {
+	    var XML = {};
+    }
 
    XML.getDataIsland = function(id)
    {

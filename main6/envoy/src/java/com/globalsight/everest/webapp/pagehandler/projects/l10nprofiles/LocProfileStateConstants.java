@@ -26,6 +26,13 @@ public interface LocProfileStateConstants
     public static final int NO_TM_USAGE = 0;
     public static final int DENY_EDIT_TM_USAGE = 1;
     public static final int ALLOW_EDIT_TM_USAGE = 2;
+    
+    public static final int TM_EDIT_TYPE_NONE = 0;
+    public static final int TM_EDIT_TYPE_BOTH = 1;
+    public static final int TM_EDIT_TYPE_ICE = 2;
+    public static final int TM_EDIT_TYPE_100PERCENT = 3;
+    public static final int TM_EDIT_TYPE_DENY = 4;
+    
 
     public static final String MOD_LOC_PROFILE = "ModLocProfile";
     public static final String MOD_TARGET_LOCALE = "ModTargetLocale";

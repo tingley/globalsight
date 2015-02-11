@@ -16,23 +16,22 @@
  */
 package com.globalsight.reports;
 
-import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.CurrencyFormat;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.usermgr.UserLdapHelper;
-import com.globalsight.reports.util.LabeledValueHolder;
-import com.globalsight.reports.util.ReportsPackage;
-import inetsoft.report.*;
-import inetsoft.report.filter.*;
-import inetsoft.report.lens.*;
-import inetsoft.report.lens.swing.*;
-import inetsoft.report.style.*;
-import inetsoft.sree.*;
+import inetsoft.report.ReportElement;
+import inetsoft.report.ReportSheet;
+import inetsoft.report.StyleConstants;
+import inetsoft.report.StyleSheet;
+import inetsoft.report.TextElement;
+import inetsoft.report.filter.DefaultSortedTable;
+import inetsoft.report.filter.SortFilter;
+import inetsoft.report.lens.DefaultFormLens;
+import inetsoft.report.lens.SubTableLens;
+import inetsoft.report.lens.TableChartLens;
+import inetsoft.report.lens.swing.TableModelLens;
+import inetsoft.report.style.Professional;
+import inetsoft.sree.RepletException;
+import inetsoft.sree.RepletRequest;
+import inetsoft.sree.SreeLog;
+
 import java.awt.Font;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,8 +43,22 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.TreeSet;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+
+import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.costing.Currency;
+import com.globalsight.everest.costing.CurrencyFormat;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.usermgr.UserLdapHelper;
+import com.globalsight.reports.handler.BasicReportHandler;
+import com.globalsight.reports.util.LabeledValueHolder;
+import com.globalsight.reports.util.ReportsPackage;
 
 /**
  * Presents a report on workflow status
@@ -53,7 +66,8 @@ import javax.swing.table.*;
 public class WorkflowStatusReplet extends GlobalSightReplet
 {
     private static final String MY_TEMPLATE = "/templates/basicFlowReport.srt";
-    private static final String MY_MESSAGES = "messages/workflowStatus";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "workflowStatus";
 
     private static final String LABEL_SUFFIX = ": ";
     protected ResourceBundle m_bundle = null;
@@ -147,23 +161,23 @@ public class WorkflowStatusReplet extends GlobalSightReplet
     protected void addWorkflowStatusParameter()
     {
         Object[] wfstates = new Object[6];
-        Object dispatched = new LabeledValueHolder(DISPATCHED, ReportsPackage
-                .getMessage(m_bundle, DISPATCHED));
+        Object dispatched = new LabeledValueHolder(DISPATCHED,
+                ReportsPackage.getMessage(m_bundle, DISPATCHED));
         int i = 0;
-        wfstates[i++] = new LabeledValueHolder(PENDING, ReportsPackage
-                .getMessage(m_bundle, PENDING));
-        wfstates[i++] = new LabeledValueHolder(READY, ReportsPackage
-                .getMessage(m_bundle, READY));
+        wfstates[i++] = new LabeledValueHolder(PENDING,
+                ReportsPackage.getMessage(m_bundle, PENDING));
+        wfstates[i++] = new LabeledValueHolder(READY,
+                ReportsPackage.getMessage(m_bundle, READY));
         wfstates[i++] = dispatched;
-        wfstates[i++] = new LabeledValueHolder(LOCALIZED, ReportsPackage
-                .getMessage(m_bundle, LOCALIZED));
-        wfstates[i++] = new LabeledValueHolder(EXPORTED, ReportsPackage
-                .getMessage(m_bundle, EXPORTED));
-        wfstates[i++] = new LabeledValueHolder(ARCHIVED, ReportsPackage
-                .getMessage(m_bundle, ARCHIVED));
+        wfstates[i++] = new LabeledValueHolder(LOCALIZED,
+                ReportsPackage.getMessage(m_bundle, LOCALIZED));
+        wfstates[i++] = new LabeledValueHolder(EXPORTED,
+                ReportsPackage.getMessage(m_bundle, EXPORTED));
+        wfstates[i++] = new LabeledValueHolder(ARCHIVED,
+                ReportsPackage.getMessage(m_bundle, ARCHIVED));
         theParameters.addChoice("wfstatus", dispatched, wfstates);
-        theParameters.setAlias("wfstatus", ReportsPackage.getMessage(m_bundle,
-                "wfstatus"));
+        theParameters.setAlias("wfstatus",
+                ReportsPackage.getMessage(m_bundle, "wfstatus"));
     }
 
     /**
@@ -192,10 +206,10 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             else
                 defvalue = (String) projectManagers.get(0);
 
-            theParameters.addChoice("projectMgr", defvalue, projectManagers
-                    .toArray());
-            theParameters.setAlias("projectMgr", ReportsPackage.getMessage(
-                    m_bundle, "projectMgr"));
+            theParameters.addChoice("projectMgr", defvalue,
+                    projectManagers.toArray());
+            theParameters.setAlias("projectMgr",
+                    ReportsPackage.getMessage(m_bundle, "projectMgr"));
         }
         finally
         {
@@ -295,7 +309,7 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             jobs = new ArrayList(ServerProxy.getJobHandler()
                     .getJobsByManagerIdAndState(projectManager, wfstate));
         }
-        
+
         super.setHeaders(jobs);
 
         // put all the job and workflow data into tables
@@ -309,7 +323,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
         }
 
         String[] headers = super.getHeaders();
-        HashMap workflowTableModels = makeWorkflowTableModels(jtm, jobWorkflows, wfstate, headers);
+        HashMap workflowTableModels = makeWorkflowTableModels(jtm,
+                jobWorkflows, wfstate, headers);
 
         // add a chart showing how many jobs are in each activity if we're
         // showing jobs in progress
@@ -318,8 +333,7 @@ public class WorkflowStatusReplet extends GlobalSightReplet
 
         // now tell how many jobs there are
         String textId = ss.addText(ReportsPackage.getMessage(m_bundle,
-                "totalNumJobs")
-                + " " + jtm.getRowCount());
+                "totalNumJobs") + " " + jtm.getRowCount());
         ReportElement re = ss.getElement(textId);
         re.setFont(m_labelFont);
         re.setAlignment(StyleConstants.H_CENTER);
@@ -328,8 +342,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
         // sort the job table model by job_id,
         // priority,project,pm,create_date,jobname
         TableModelLens tml = new TableModelLens(jtm);
-        int[] sortCols = new int[] { JobTableModel.PRIORITY,
-                JobTableModel.PROJECT, JobTableModel.PM,
+        int[] sortCols = new int[]
+        { JobTableModel.PRIORITY, JobTableModel.PROJECT, JobTableModel.PM,
                 JobTableModel.CREATE_DATE, JobTableModel.JOBNAME,
                 JobTableModel.ID };
         SortFilter sf = new SortFilter(tml, sortCols, true);
@@ -372,7 +386,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
                     subcols[l++] = WorkflowTableModel.ACCEPTER;
                 }
                 subcols[l++] = WorkflowTableModel.SEGMENT_TM_WC;
-                if(headers[0] != null ){
+                if (headers[0] != null)
+                {
                     subcols[l++] = WorkflowTableModel.IN_CONTEXT_WC;
                 }
                 subcols[l++] = WorkflowTableModel.FUZZY_HI_WC;
@@ -436,8 +451,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
     /**
      * Returns an arraylist containing workflowtablemodels for each job <br>
      * 
-     * @param p_jobWorkflows --
-     *            an arraylist of arraylists for each job containing the
+     * @param p_jobWorkflows
+     *            -- an arraylist of arraylists for each job containing the
      *            workflows
      * @return ArrayList of WorkflowTableModels
      */
@@ -445,14 +460,18 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             ArrayList p_jobWorkflows, String p_wfstate, String[] headers)
     {
         HashMap wtms = new HashMap();
-        for (int i=0; i < p_jobWorkflows.size(); i++)
+        for (int i = 0; i < p_jobWorkflows.size(); i++)
         {
             ArrayList workflows = (ArrayList) p_jobWorkflows.get(i);
-            WorkflowTableModel wtm = new WorkflowTableModel(workflows,p_wfstate,theSession,m_currency, false);
-            String[] columns = {
-                    "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER", "SEGMENT_TM_WC", "CONTEXT_WC", "FUZZY_LOW_WC", "FUZZY_MED_WC", "FUZZY_MED_HI_WC", "FUZZY_HI_WC", "NO_MATCH", "REP_WC", "PER_COMPLETE", "DURATION", "COST", "REVENUE"
-            };
-            if(headers[0] == null)
+            WorkflowTableModel wtm = new WorkflowTableModel(workflows,
+                    p_wfstate, theSession, m_currency, false);
+            String[] columns =
+            { "TRGLOCALE", "WFSTATE", "CURACTIVITY", "ACCEPTER",
+                    "SEGMENT_TM_WC", "CONTEXT_WC", "FUZZY_LOW_WC",
+                    "FUZZY_MED_WC", "FUZZY_MED_HI_WC", "FUZZY_HI_WC",
+                    "NO_MATCH", "REP_WC", "PER_COMPLETE", "DURATION", "COST",
+                    "REVENUE" };
+            if (headers[0] == null)
             {
                 wtm.setColumnNames(columns);
                 wtm.setUseInContext(false);
@@ -461,10 +480,10 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             {
                 wtm.setUseInContext(true);
             }
-            Long jobid = (Long) p_jtm.getValueAt(i,0);
+            Long jobid = (Long) p_jtm.getValueAt(i, 0);
             wtm.fillAllData(p_wfstate, workflows);
-            wtms.put(jobid,wtm);
-            
+            wtms.put(jobid, wtm);
+
         }
         return wtms;
     }
@@ -473,8 +492,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
      * Returns an array list containing an array list for each job containing
      * its workflows <br>
      * 
-     * @param p_jobs --
-     *            ArrayList of jobs
+     * @param p_jobs
+     *            -- ArrayList of jobs
      */
     private ArrayList getAllWorkflowsForAllJobs(ArrayList p_jobs)
     {
@@ -502,10 +521,10 @@ public class WorkflowStatusReplet extends GlobalSightReplet
     /**
      * Adds a form at the top with the selected PM and workflow state <br>
      * 
-     * @param projectmgr --
-     *            the selected PM
-     * @param wfstate --
-     *            the selected WF state
+     * @param projectmgr
+     *            -- the selected PM
+     * @param wfstate
+     *            -- the selected WF state
      */
     private void addCriteriaFormAtTop(String projectManager, String wfstate)
     {
@@ -527,8 +546,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             fields.add(m_currency.getDisplayName());
         }
 
-        DefaultFormLens dfl = new DefaultFormLens(labels.toArray(), fields
-                .toArray());
+        DefaultFormLens dfl = new DefaultFormLens(labels.toArray(),
+                fields.toArray());
         dfl.setLabelFont(m_labelFont);
         dfl.setFont(m_fieldFont);
         dfl.setUnderline(StyleConstants.NONE);
@@ -541,10 +560,10 @@ public class WorkflowStatusReplet extends GlobalSightReplet
     /**
      * Adds a form to the report containing the job information <br>
      * 
-     * @param p_jtm --
-     *            the JobTableModel
-     * @param r --
-     *            the current row
+     * @param p_jtm
+     *            -- the JobTableModel
+     * @param r
+     *            -- the current row
      */
     private void addJobForm(DefaultSortedTable p_dst, int r)
     {
@@ -587,8 +606,8 @@ public class WorkflowStatusReplet extends GlobalSightReplet
             fields.add(field);
         }
 
-        DefaultFormLens dfl = new DefaultFormLens(labels.toArray(), fields
-                .toArray());
+        DefaultFormLens dfl = new DefaultFormLens(labels.toArray(),
+                fields.toArray());
         dfl.setLabelFont(m_labelFont);
         dfl.setFont(m_fieldFont);
         dfl.setUnderline(StyleConstants.NONE);

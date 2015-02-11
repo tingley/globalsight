@@ -52,7 +52,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
 
     private static final String LABEL_SUFFIX = ": ";
     private static final String LABEL_COMMA = ",";
-    private static final String MY_MESSAGES = "messages/avgPercentCompletion";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION
+            + "avgPercentCompletion";
     private static final String PM_QUERY = "select distinct(manager_user_id) "
             + "from project p where p.companyid = ? order by manager_user_id";
     private static final String PM_QUERY_GS = "select distinct(manager_user_id) from project order by manager_user_id";

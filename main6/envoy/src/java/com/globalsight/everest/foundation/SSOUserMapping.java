@@ -17,18 +17,13 @@
 package com.globalsight.everest.foundation;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class SSOUserMapping implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private long id = -1l;
     private long companyId = -1l;
     private String userId = null;
@@ -92,7 +87,8 @@ public class SSOUserMapping implements Serializable
             return false;
 
         SSOUserMapping other = (SSOUserMapping) o;
-        return other.companyId == this.companyId && other.userId.equals(this.userId)
+        return other.companyId == this.companyId
+                && other.userId.equals(this.userId)
                 && other.ssoUserId.equals(this.ssoUserId);
     }
 }

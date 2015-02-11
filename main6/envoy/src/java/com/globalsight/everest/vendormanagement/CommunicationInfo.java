@@ -69,23 +69,23 @@ public class CommunicationInfo extends PersistentObject
         }
         switch (m_type)
         {
-        case CommunicationType.WORK:
-            type_char = 'W';
-            break;
-        case CommunicationType.HOME:
-            type_char = 'H';
-            break;
-        case CommunicationType.CELL:
-            type_char = 'C';
-            break;
-        case CommunicationType.FAX:
-            type_char = 'F';
-            break;
-        case CommunicationType.EMAIL:
-            type_char = 'E';
-            break;
-        case CommunicationType.OTHER:
-            type_char = 'O';
+            case CommunicationType.WORK:
+                type_char = 'W';
+                break;
+            case CommunicationType.HOME:
+                type_char = 'H';
+                break;
+            case CommunicationType.CELL:
+                type_char = 'C';
+                break;
+            case CommunicationType.FAX:
+                type_char = 'F';
+                break;
+            case CommunicationType.EMAIL:
+                type_char = 'E';
+                break;
+            case CommunicationType.OTHER:
+                type_char = 'O';
 
         }
         m_value = p_value;
@@ -125,15 +125,16 @@ public class CommunicationInfo extends PersistentObject
         boolean isValid = false;
         switch (p_type)
         {
-        case CommunicationType.WORK:
-        case CommunicationType.HOME:
-        case CommunicationType.CELL:
-        case CommunicationType.FAX:
-        case CommunicationType.EMAIL:
-        case CommunicationType.OTHER:
-            isValid = true;
-        default:
-            // leave as false
+            case CommunicationType.WORK:
+            case CommunicationType.HOME:
+            case CommunicationType.CELL:
+            case CommunicationType.FAX:
+            case CommunicationType.EMAIL:
+            case CommunicationType.OTHER:
+                isValid = true;
+                break;
+            default:
+                // leave as false
         }
         return isValid;
     }
@@ -143,20 +144,26 @@ public class CommunicationInfo extends PersistentObject
         String type = null;
         switch (p_type)
         {
-        case CommunicationType.WORK:
-            type = "WORK";
-        case CommunicationType.HOME:
-            type = "HOME";
-        case CommunicationType.CELL:
-            type = "CELL";
-        case CommunicationType.FAX:
-            type = "FAX";
-        case CommunicationType.EMAIL:
-            type = "EMAIL";
-        case CommunicationType.OTHER:
-            type = "OTHER";
-        default:
-            // leave as null because not valid
+            case CommunicationType.WORK:
+                type = "WORK";
+                break;
+            case CommunicationType.HOME:
+                type = "HOME";
+                break;
+            case CommunicationType.CELL:
+                type = "CELL";
+                break;
+            case CommunicationType.FAX:
+                type = "FAX";
+                break;
+            case CommunicationType.EMAIL:
+                type = "EMAIL";
+                break;
+            case CommunicationType.OTHER:
+                type = "OTHER";
+                break;
+            default:
+                // leave as null because not valid
         }
         return type;
     }
@@ -201,23 +208,23 @@ public class CommunicationInfo extends PersistentObject
         this.type_char = type_char;
         switch (type_char)
         {
-        case 'W':
-            m_type = CommunicationType.WORK;
-            break;
-        case 'H':
-            m_type = CommunicationType.HOME;
-            break;
-        case 'C':
-            m_type = CommunicationType.CELL;
-            break;
-        case 'F':
-            m_type = CommunicationType.FAX;
-            break;
-        case 'E':
-            m_type = CommunicationType.EMAIL;
-            break;
-        case 'O':
-            m_type = CommunicationType.OTHER;
+            case 'W':
+                m_type = CommunicationType.WORK;
+                break;
+            case 'H':
+                m_type = CommunicationType.HOME;
+                break;
+            case 'C':
+                m_type = CommunicationType.CELL;
+                break;
+            case 'F':
+                m_type = CommunicationType.FAX;
+                break;
+            case 'E':
+                m_type = CommunicationType.EMAIL;
+                break;
+            case 'O':
+                m_type = CommunicationType.OTHER;
         }
     }
 
@@ -231,4 +238,15 @@ public class CommunicationInfo extends PersistentObject
         this.m_vendor = m_vendor;
     }
 
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object paramObject)
+    {
+        return super.equals(paramObject);
+    }
 }

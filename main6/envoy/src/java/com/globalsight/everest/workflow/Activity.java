@@ -18,7 +18,6 @@ package com.globalsight.everest.workflow;
 
 // GlobalSight
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 
@@ -53,7 +52,7 @@ public class Activity extends PersistentObject
     private String m_type_str = "TRANSLATE"; // Use by hibernate
     private String m_useType = USE_TYPE_TRANS;
     // id of the company which this activity belong to
-    private String m_companyId;
+    private long m_companyId;
     private String m_displayName;
 
     private String m_autoActionID;
@@ -81,7 +80,8 @@ public class Activity extends PersistentObject
     public Activity(String p_activityName)
     {
         super();
-        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30) : p_activityName);
+        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30)
+                : p_activityName);
     }
 
     /**
@@ -96,10 +96,11 @@ public class Activity extends PersistentObject
             int p_type, String p_companyId)
     {
         super();
-        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30) : p_activityName);
+        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30)
+                : p_activityName);
         m_activityDescription = p_activityDescription;
         m_type = p_type;
-        setCompanyId(p_companyId);
+        setCompanyId(Long.parseLong(p_companyId));
     }
 
     // ////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +146,7 @@ public class Activity extends PersistentObject
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -155,7 +156,7 @@ public class Activity extends PersistentObject
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
@@ -259,8 +260,8 @@ public class Activity extends PersistentObject
         StringBuilder buff = new StringBuilder();
         buff.append(super.toString());
         buff.append(", m_activityDescription=");
-        buff
-                .append(m_activityDescription != null ? m_activityDescription : "null");
+        buff.append(m_activityDescription != null ? m_activityDescription
+                : "null");
         buff.append(", m_type=");
         buff.append(typeAsString(m_type));
         buff.append(", m_userType=");

@@ -96,6 +96,12 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getAllL10nProfiles();
     }
 
+    public Collection getAllL10nProfilesData() throws RemoteException,
+            ProjectHandlerException
+    {
+        return m_localReference.getAllL10nProfilesData();
+    }
+
     public Hashtable getAllL10nProfileNames() throws RemoteException,
             ProjectHandlerException
     {

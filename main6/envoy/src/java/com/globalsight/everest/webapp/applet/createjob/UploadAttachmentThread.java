@@ -3,7 +3,6 @@ package com.globalsight.everest.webapp.applet.createjob;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.Permission;
 import java.util.ArrayList;
 
 import netscape.javascript.JSObject;
@@ -72,13 +71,6 @@ public class UploadAttachmentThread extends Thread
     
     private void uploadFile() throws Exception
     {
-        MySecurityManager mySM = new MySecurityManager();
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
-        {
-            System.setSecurityManager(mySM);
-        }
-
         if (!file.exists())
         {
             throw new Exception("File(" + file.getPath() + ") does not exist.");
@@ -126,16 +118,5 @@ public class UploadAttachmentThread extends Thread
             }
         }
     }
-    
-    private class MySecurityManager extends SecurityManager
-    {
-        MySecurityManager()
-        {
-            super();
-        }
 
-        public void checkPermission(Permission permission)
-        {
-        }
-    }
 }

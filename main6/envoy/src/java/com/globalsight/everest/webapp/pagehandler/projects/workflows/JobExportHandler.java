@@ -175,12 +175,10 @@ public class JobExportHandler extends PageHandler
         p_request.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,
                 job.getJobName());
 
-        L10nProfile l10nProfile = LocProfileHandlerHelper.getL10nProfile(job
-                .getL10nProfileId());
+        L10nProfile l10nProfile = job.getL10nProfile();
         p_request.setAttribute(JobManagementHandler.L10NPROFILE_NAME_SCRIPTLET,
                 l10nProfile.getName());
-        Project project = WorkflowHandlerHelper.getProjectById(l10nProfile
-                .getProjectId());
+        Project project = job.getProject();
         p_request.setAttribute(JobManagementHandler.PROJECT_NAME_SCRIPTLET,
                 project.getName());
 

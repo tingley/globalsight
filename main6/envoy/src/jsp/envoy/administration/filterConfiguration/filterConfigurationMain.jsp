@@ -71,6 +71,7 @@ session="true" %>
         </SCRIPT>
         <script type="text/javascript" src="/globalsight/includes/filter/POFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
         
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
         <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -476,7 +477,7 @@ session="true" %>
                         </div>
                     </span>
                     <span id="xmlRuleFilter_configuredentity_content">
-                        <div id='xmlRuleFilter_configuredentity_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:185px;position:absolute;top:100px;z-index:22'>
+                        <div id='xmlRuleFilter_configuredentity_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:205px;position:absolute;top:100px;z-index:22'>
                             <div id='xmlRuleFilter_configuredentity_DialogT' onmousedown="DragAndDrop(document.getElementById('xmlRuleFilter_configuredentity_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold' id='xmlRuleFilter_configuredentity_title'>
                                     <%=bundle.getString("lb_filter_AddConfiguredEntity")%>
@@ -664,17 +665,17 @@ session="true" %>
                         </div>
                     </span>
                     <span id="baseFilter_content">
-                        <div id='baseFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:430px;position:absolute;top:100px;z-index:21'>
-                            <div id='baseFilterDialogT' onmousedown="DragAndDrop(document.getElementById('baseFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:430px;cursor:pointer'>
+                        <div id='baseFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:440px;position:absolute;top:100px;z-index:21'>
+                            <div id='baseFilterDialogT' onmousedown="DragAndDrop(document.getElementById('baseFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%=bundle.getString("lb_filter_basefilter")%>
                                 </label>
                             </div>
                             <div id='baseFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
                             </div>
-                            <div id="div_button_base_filter" style="margin-left:50px;margin-right:50px;margin-top:10px;margin-bottom:10px;">
+                            <div id="div_button_base_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
                                 <center>
-                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveBaseFilter()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('baseFilterDialog')"/>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveBaseFilter()'/><input type='button' value='<%=bundle.getString("lb_priority_edit")%>' onclick='baseFilter.generatePriorityTagTableContent()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('baseFilterDialog'); baseFilter.closeAllTagPopup()"/>
                                 </center>
                             </div>
                         </div>
@@ -695,12 +696,32 @@ session="true" %>
                                     <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_is_regex")%>:</td>
                                         <td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_InternalText_isRE'></input></td>
-                                    </tr>                       
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_priority")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='text' id='baseFilter_InternalText_priority'></input></td>
+                                    </tr>                        
                                 </table>
                             </div>
                             <div id="div_button_baseFilter_internalTexts" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
                                 <center>
                                     <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='baseFilter.saveInternalText()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('baseFilter_InternalText_Dialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="plaintextFilter_content">
+                        <div id='plaintextFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:450px;position:absolute;top:100px;z-index:21'>
+                            <div id='plaintextFilterDialogT' onmousedown="DragAndDrop(document.getElementById('plaintextFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:450px;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_plaintextfilter")%>
+                                </label>
+                            </div>
+                            <div id='plaintextFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_plaintext_filter" style="margin-left:50px;margin-right:50px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='savePlainTextFilter()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('plaintextFilterDialog')"/>
                                 </center>
                             </div>
                         </div>
@@ -719,6 +740,22 @@ session="true" %>
                             <span id='deleteBaseTagTableContent'></span>
                             <div id="div_button_delete_tag_base" style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
                                 <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='baseFilter.deleteCheckedTags()'/><input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('deleteBaseTagDialog')"/>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="edit_Priority_filter">
+                        <div id='editPriorityDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;hidden;position:absolute;top:120px;z-index:22'>
+                            <div id='editPriorityDialogT' onmousedown="DragAndDrop(document.getElementById('editPriorityDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_priority_edit")%>
+                                </label>
+                            </div>
+                            <div id='editPriorityTableContent' style='width:540px;margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px;max-height:400px;overflow:auto;'>
+                            </div>
+                            <div id="div_button_editPriority_base" style="float:left;margin-left:220px;margin-right:220px;margin-top:10px;margin-bottom:20px">
+                                <center>
+                                <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='baseFilter.savePriorities()'/><input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('editPriorityDialog')"/>
+                                </center>
                             </div>
                         </div>
                     </span>

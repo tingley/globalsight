@@ -102,7 +102,7 @@ public class LeveragedInProgressTuv extends SegmentTmTuv implements
         return m_jobDataTuId;
     }
 
-    public String getOrgSid(String companyId)
+    public String getOrgSid(long companyId)
     {
         return orgSid;
     }
@@ -115,7 +115,7 @@ public class LeveragedInProgressTuv extends SegmentTmTuv implements
     @Override
     public String getOrgSid()
     {
-        return getOrgSid(null);
+        return getOrgSid(-1);
     }
 
 }

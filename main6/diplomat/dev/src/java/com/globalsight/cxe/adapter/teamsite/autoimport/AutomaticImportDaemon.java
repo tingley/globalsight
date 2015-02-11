@@ -16,48 +16,51 @@
  */
 package com.globalsight.cxe.adapter.teamsite.autoimport;
 
-import java.io.*;
-import java.net.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
-import org.apache.log4j.Logger;
-import org.apache.commons.daemon.Daemon;
-import org.apache.commons.daemon.DaemonController;
-import org.apache.commons.daemon.DaemonContext;
+import java.io.IOException;
+import java.net.ServerSocket;
 
-public class AutomaticImportDaemon implements Daemon, Runnable {
-    private static final Logger s_logger = Logger.getLogger("AutomaticImportDaemon");
-    private ServerSocket server=null;
-    private Thread thread=null;
-    private DaemonController controller=null;
-    private boolean stopping=false;
-    private String directory=null;
-    public AutomaticImportDaemon() {
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonController;
+import org.apache.log4j.Logger;
+
+public class AutomaticImportDaemon implements Daemon, Runnable
+{
+    private static final Logger s_logger = Logger
+            .getLogger(AutomaticImportDaemon.class);
+    private ServerSocket server = null;
+    private Thread thread = null;
+    private DaemonController controller = null;
+    private boolean stopping = false;
+    private String directory = null;
+
+    public AutomaticImportDaemon()
+    {
         super();
-        s_logger.debug("AutomaticImportDaemon: instance "+this.hashCode()+
-                           " created");
+        s_logger.debug("AutomaticImportDaemon: instance " + this.hashCode()
+                + " created");
     }
 
-    protected void finalize() {
-        s_logger.debug("AutomaticImportDaemon: instance "+this.hashCode()+
-                           " garbage collected");
+    protected void finalize()
+    {
+        s_logger.debug("AutomaticImportDaemon: instance " + this.hashCode()
+                + " garbage collected");
     }
 
     /**
      * init and destroy were added in jakarta-tomcat-daemon.
      */
-    public void init(DaemonContext context)
-    throws Exception {
-        s_logger.debug("AutomaticImportDaemon: instance "+this.hashCode()+
-                           " init");
+    public void init(DaemonContext context) throws Exception
+    {
+        s_logger.debug("AutomaticImportDaemon: instance " + this.hashCode()
+                + " init");
         /* Set up this simple daemon */
-        this.controller=context.getController();
-        this.thread=new Thread(this);
+        this.controller = context.getController();
+        this.thread = new Thread(this);
     }
 
-    public void start() {
+    public void start()
+    {
         /* Dump a message */
         s_logger.debug("AutomaticImportDaemon: starting");
 
@@ -65,16 +68,16 @@ public class AutomaticImportDaemon implements Daemon, Runnable {
         this.thread.start();
     }
 
-    public void stop()
-    throws IOException, InterruptedException {
-	/* Shutdown the AutomaticImportMonitor */
-	boolean waitForThreadDeath = false;
-	AutomaticImportMonitor.getInstance().shutdown(waitForThreadDeath);
+    public void stop() throws IOException, InterruptedException
+    {
+        /* Shutdown the AutomaticImportMonitor */
+        boolean waitForThreadDeath = false;
+        AutomaticImportMonitor.getInstance().shutdown(waitForThreadDeath);
         /* Dump a message */
         s_logger.debug("AutomaticImportDaemon: stopping");
 
         /* Close the ServerSocket. This will make our thread to terminate */
-        this.stopping=true;
+        this.stopping = true;
         this.server.close();
 
         /* Wait for the main thread to exit and dump a message */
@@ -82,26 +85,38 @@ public class AutomaticImportDaemon implements Daemon, Runnable {
         s_logger.debug("AutomaticImportDaemon: stopped");
     }
 
-    public void destroy() {
-        s_logger.debug("AutomaticImportDaemon: instance "+this.hashCode()+
-                           " destroy");
+    public void destroy()
+    {
+        s_logger.debug("AutomaticImportDaemon: instance " + this.hashCode()
+                + " destroy");
     }
 
-    public void run() {
-	try {
-        int number=0;
-        s_logger.debug("AutomaticImportDaemon: started acceptor loop");
-	AutomaticImportMonitor.initialize();
-	s_logger.debug("AutomaticImportDaemon: Initialized monitor");
-	AutomaticImportMonitor aimonitor = AutomaticImportMonitor.getInstance();
-	aimonitor.startup();
-	s_logger.debug("AutomaticImportDaemon: monitor started");
-        } catch (IOException e) {
-            /* Don't dump any error message if we are stopping. A IOException
-               is generated when the ServerSocket is closed in stop() */
-            if (!this.stopping) e.printStackTrace(System.out);
-        }catch (Exception ex) {
-            if (!this.stopping) ex.printStackTrace(System.out);
-	}
+    public void run()
+    {
+        try
+        {
+            int number = 0;
+            s_logger.debug("AutomaticImportDaemon: started acceptor loop");
+            AutomaticImportMonitor.initialize();
+            s_logger.debug("AutomaticImportDaemon: Initialized monitor");
+            AutomaticImportMonitor aimonitor = AutomaticImportMonitor
+                    .getInstance();
+            aimonitor.startup();
+            s_logger.debug("AutomaticImportDaemon: monitor started");
+        }
+        catch (IOException e)
+        {
+            /*
+             * Don't dump any error message if we are stopping. A IOException is
+             * generated when the ServerSocket is closed in stop()
+             */
+            if (!this.stopping)
+                e.printStackTrace(System.out);
+        }
+        catch (Exception ex)
+        {
+            if (!this.stopping)
+                ex.printStackTrace(System.out);
+        }
     }
 }

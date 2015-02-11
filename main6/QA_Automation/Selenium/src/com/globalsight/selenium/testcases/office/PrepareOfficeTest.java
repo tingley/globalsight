@@ -130,8 +130,10 @@ public class PrepareOfficeTest extends BaseTestCase
             }
             SeleniumUtils
                     .type(selenium, TMProfile.MT_URL, getProperty("mtUrl"));
-            SeleniumUtils.type(selenium, TMProfile.MT_APPID,
-                    getProperty("mtAppID"));
+            SeleniumUtils.type(selenium, TMProfile.MT_CLINTID,
+                    getProperty("idMsMtClientid"));
+			SeleniumUtils.type(selenium, TMProfile.MT_CLINT_SECRET,
+					getProperty("idMsMtClientSecret"));
             SeleniumUtils.type(selenium, TMProfile.MT_CATEGORY,
                     getProperty("mtCategory"));
             SeleniumUtils.clickAndWait(selenium, TMProfile.MT_TEST_HOST_BUTTON);

@@ -216,7 +216,7 @@ function handleSelectAll() {
        pageUrl="self"
        emptyTableMsg="msg_attribute_group_none" >
         <amb:column label="checkbox">
-        <%isSuperAttributeSet = CompanyWrapper.SUPER_COMPANY_ID.equals(attributeSet.getCompanyId());
+        <%isSuperAttributeSet = 1 == attributeSet.getCompanyId();
           if (!(isSuperAttributeSet && !isSuperAdmin)){%>
           <input type="checkbox" name="selectAttributeSetIds" value="<%=attributeSet.getId()%>" 
               displayName="<%=attributeSet.getName()%>" 

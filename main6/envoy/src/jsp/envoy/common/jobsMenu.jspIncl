@@ -3,6 +3,7 @@
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.jobhandler.Job,
+        com.globalsight.ling.common.URLDecoder,
 	java.util.ArrayList,
 	java.util.StringTokenizer,
 	java.util.ResourceBundle,
@@ -50,13 +51,12 @@ ResourceBundle jbundle = PageHandler.getBundle(session);
 Cookie jobSearchCookie = JobSearchHandlerHelper.getJobSearchCookie(session, request);
 if (jobSearchCookie != null)
 {
-    String jcookie = jobSearchCookie.getValue();
+    String jcookie = URLDecoder.decode(jobSearchCookie.getValue());
     int begin = jcookie.indexOf(":"+JobSearchConstants.STATUS_OPTIONS+"=");
     int end = jcookie.indexOf(":", begin+1);
     String jobstate = jcookie.substring(begin+5, end);
     String lastJobUrl = null;
     String menuLabel = mainMenuBundle.getString("lb_last_search");
-    
     if (jobstate.equals(Job.PENDING))
     {
         menuLabel += " (" + jbundle.getString("lb_pending") + ")";
@@ -89,7 +89,7 @@ if (jobSearchCookie != null)
     }
     else
     {
-        menuLabel += " (" + jbundle.getString("lb_all_status") + ")";
+        menuLabel += " (" + jbundle.getString("lb_all_jobs") + ")";//modify for GBS-2875
         lastJobUrl = LinkHelper.getWebActivityURL(request, "jobsAll");
     }
     lastJobUrl += "&searchType=lastSearch";
@@ -115,7 +115,7 @@ myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_exported")%>",
 
 myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_archived")%>", "javascript:goToUrl('<%=jobsArchivedUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_status")%>", "javascript:goToUrl('<%=jobsAllStatusUrl%>');", ""));
+myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_jobs")%>", "javascript:goToUrl('<%=jobsAllStatusUrl%>');", ""));//modify for GBS-2875
 
 <%
 try

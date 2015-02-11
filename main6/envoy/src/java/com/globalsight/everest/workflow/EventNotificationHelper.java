@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
 import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 
@@ -81,13 +80,13 @@ public class EventNotificationHelper
     }
 
     @SuppressWarnings("unchecked")
-	static Map durationChangeMap(WorkflowTaskInstance p_workflowTaskInstance,
+    static Map durationChangeMap(WorkflowTaskInstance p_workflowTaskInstance,
             long p_originalAcceptDuration, long p_originalCompleteDuration)
     {
         long currentAcceptDuration = p_workflowTaskInstance.getAcceptTime();
-        long currentCompleteDuration = p_workflowTaskInstance.getCompletedTime();
+        long currentCompleteDuration = p_workflowTaskInstance
+                .getCompletedTime();
 
-        
         Map map = new HashMap(3);
         map.put(SchedulerConstants.ACTIVE_NODE, p_workflowTaskInstance);
         // NOTE: need to only populate map if the result is TRUE.
@@ -142,7 +141,7 @@ public class EventNotificationHelper
      * @param p_additionalInfo
      */
     @SuppressWarnings("unchecked")
-	static void performSchedulingProcess(Integer p_actionType,
+    static void performSchedulingProcess(Integer p_actionType,
             long p_unsheduleTaskId, Integer p_unScheduleEventType, Node p_node,
             TaskInfo p_taskInfo, Long p_creationTime,
             Integer p_scheduleEventType, Float p_threshold,
@@ -171,8 +170,8 @@ public class EventNotificationHelper
             long projectId = p_emailInfo.getProjectIdAsLong().longValue();
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     projectId);
-            map.put(SchedulerConstants.CURRENT_COMPANY_ID, project
-                    .getCompanyId());
+            map.put(SchedulerConstants.CURRENT_COMPANY_ID,
+                    String.valueOf(project.getCompanyId()));
 
             if (p_additionalInfo != null)
             {
@@ -223,8 +222,8 @@ public class EventNotificationHelper
             if (m_systemNotificationEnabled == null)
             {
                 SystemConfiguration config = SystemConfiguration.getInstance();
-                m_systemNotificationEnabled = new Boolean(config
-                        .getStringParameter(SystemConfiguration.SYSTEM_NOTIFICATION_ENABLED));
+                m_systemNotificationEnabled = new Boolean(
+                        config.getStringParameter(SystemConfiguration.SYSTEM_NOTIFICATION_ENABLED));
             }
         }
         catch (Exception e)
@@ -247,7 +246,7 @@ public class EventNotificationHelper
     // this is the first method that should be called which will return the
     // common HashMap used for both creating and stopping a timer.
     @SuppressWarnings("unchecked")
-	private static HashMap createSchedulingMap(Integer p_actionType)
+    private static HashMap createSchedulingMap(Integer p_actionType)
     {
         HashMap map = new HashMap(16);
         map.put(SchedulerConstants.ACTION_TYPE, p_actionType);
@@ -258,37 +257,32 @@ public class EventNotificationHelper
         return map;
     }
 
-    
-
     //
     @SuppressWarnings("unchecked")
-	private static HashMap emailInfo(TaskEmailInfo p_emailInfo,
+    private static HashMap emailInfo(TaskEmailInfo p_emailInfo,
             String p_activityName)
     {
         // email info
         HashMap emailMap = new HashMap(5);
-        emailMap.put(SchedulerConstants.PROJECT_ID, p_emailInfo
-                .getProjectIdAsLong());
+        emailMap.put(SchedulerConstants.PROJECT_ID,
+                p_emailInfo.getProjectIdAsLong());
         emailMap.put(SchedulerConstants.WF_ID, p_emailInfo.getWfIdAsLong());
         emailMap.put(SchedulerConstants.JOB_NAME, p_emailInfo.getJobName());
         emailMap.put(SchedulerConstants.ACTIVITY_NAME, p_activityName);
-        emailMap.put(SchedulerConstants.SOURCE_LOCALE, p_emailInfo
-                .getSourceLocale());
-        emailMap.put(SchedulerConstants.TARGET_LOCALE, p_emailInfo
-                .getTargetLocale());
+        emailMap.put(SchedulerConstants.SOURCE_LOCALE,
+                p_emailInfo.getSourceLocale());
+        emailMap.put(SchedulerConstants.TARGET_LOCALE,
+                p_emailInfo.getTargetLocale());
 
         // Put the assignees' names to the emailMap, for the overdue issue
-        emailMap.put(SchedulerConstants.ASSIGNEES_NAME, p_emailInfo
-                .getAssigneesName());
+        emailMap.put(SchedulerConstants.ASSIGNEES_NAME,
+                p_emailInfo.getAssigneesName());
 
         return emailMap;
     }
 
-    
-    
-
     @SuppressWarnings("unchecked")
-	private static HashMap schedulingNotificationInfo(HashMap p_map,
+    private static HashMap schedulingNotificationInfo(HashMap p_map,
             Node p_node, TaskInfo p_taskInfo, Long p_creationTime,
             Integer p_eventType, Float p_threshold, TaskEmailInfo p_emailInfo)
             throws Exception
@@ -299,11 +293,11 @@ public class EventNotificationHelper
         {
             p_map.put(SchedulerConstants.BIZ_CALENDAR, calendar);
         }
-        
+
         long jobId = Long.valueOf(p_emailInfo.getJobId());
         Job job = ServerProxy.getJobHandler().getJobById(jobId);
-        String companyIdStr = job.getCompanyId();
-        
+        String companyIdStr = String.valueOf(job.getCompanyId());
+
         // Task info containing the estimated acceptance/completion dates.
         p_map.put(SchedulerConstants.TASK_INFO, p_taskInfo);
 
@@ -329,17 +323,18 @@ public class EventNotificationHelper
                 .getCurrentContext().getProcessInstance(wfId);
         String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(
                 p_node, "_" + companyIdStr, pi, "");
-        p_map.put(SchedulerConstants.EMAIL_INFO, emailInfo(p_emailInfo, activityName));
+        p_map.put(SchedulerConstants.EMAIL_INFO,
+                emailInfo(p_emailInfo, activityName));
         // the id of the object for scheduling
-        p_map.put(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID, new Long(p_node
-                .getId()));
+        p_map.put(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID,
+                new Long(p_node.getId()));
         return p_map;
     }
 
     // populate the scheduling map with information required for stopping
     // an event notification.
     @SuppressWarnings("unchecked")
-	private static HashMap unschedulingNotificationInfo(HashMap p_map,
+    private static HashMap unschedulingNotificationInfo(HashMap p_map,
             Long p_workflowTaskInstanceId, Integer p_eventType)
     {
         // accept, complete or etc. The event type can be null during workflow

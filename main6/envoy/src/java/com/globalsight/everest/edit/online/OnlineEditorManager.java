@@ -201,9 +201,9 @@ public interface OnlineEditorManager extends UIConstants
             RemoteException;
 
     public void splitSegments(long p_tuv1, long p_tuv2, String p_location,
-            String companyId) throws OnlineEditorException, RemoteException;
+            long companyId) throws OnlineEditorException, RemoteException;
 
-    public void mergeSegments(long p_tuv1, long p_tuv2, String companyId)
+    public void mergeSegments(long p_tuv1, long p_tuv2, long companyId)
             throws OnlineEditorException, RemoteException;
 
     /**
@@ -272,6 +272,6 @@ public interface OnlineEditorManager extends UIConstants
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
             long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
-            String companyId);
+            long companyId);
 
 }

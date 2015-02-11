@@ -27,12 +27,12 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.D
 public class XmlDtdImpl extends PersistentObject implements XmlDtd
 {
     private static final long serialVersionUID = -873521866679410418L;
-    private String companyId;
+    private long companyId;
     private String description;
     private String dtdText;
     private boolean addComment;
     private boolean sendEmail;
-    
+
     private Set<FileProfileImpl> fileProfiles = new HashSet<FileProfileImpl>();
 
     public XmlDtdImpl()
@@ -54,7 +54,7 @@ public class XmlDtdImpl extends PersistentObject implements XmlDtd
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.companyId;
     }
@@ -64,7 +64,7 @@ public class XmlDtdImpl extends PersistentObject implements XmlDtd
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.companyId = p_companyId;
     }
@@ -104,7 +104,7 @@ public class XmlDtdImpl extends PersistentObject implements XmlDtd
     {
         dtdText = p_dtdText;
     }
-    
+
     public int getFileNumber()
     {
         return DtdFileManager.getAllFiles(getId()).size();

@@ -38,7 +38,7 @@ public class AddUserNewRate extends BaseTestCase
         rateFuncs.selectRadioButtonFromTable(selenium, Users.ROLES_TABLE,
                 "Dtp1", 1);
         String comid = userFuncs.companyID(selenium, Users.ROLES_TABLE, 1);
-        selenium.select("Dtp1_" + comid + "_expense", "label=" + newRateName);
+        selenium.select("Dtp1_" + comid + "_expense","label=" + newRateName);
         clickAndWait(selenium, Users.DONE_VALUE_BUTTON);
         clickAndWait(selenium, Users.DONE_VALUE_BUTTON);
         clickAndWait(selenium, Users.SAVE_BUTTON);

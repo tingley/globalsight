@@ -20,11 +20,12 @@ import java.util.Comparator;
 
 import com.globalsight.everest.tuv.Tuv;
 
+@SuppressWarnings("rawtypes")
 public class TuvSourceContentComparator implements Comparator
 {
-    private String m_companyId;
+    private long m_companyId;
     
-    public TuvSourceContentComparator (String companyId)
+    public TuvSourceContentComparator (long companyId)
     {
         m_companyId = companyId;
     }

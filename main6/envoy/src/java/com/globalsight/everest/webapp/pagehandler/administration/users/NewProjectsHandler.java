@@ -51,36 +51,40 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class NewProjectsHandler extends PageHandler
 {
-    
+
     public NewProjectsHandler()
     {
     }
 
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  ServletContext context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = request.getSession(false);
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(SESSION_MANAGER);
-        CreateUserWrapper wrapper = (CreateUserWrapper)
-            sessionMgr.getAttribute(CREATE_USER_WRAPPER);
-        
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        CreateUserWrapper wrapper = (CreateUserWrapper) sessionMgr
+                .getAttribute(CREATE_USER_WRAPPER);
+
         String action = (String) request.getParameter("action");
         if ("prev".equals(action))
         {
             // save security info
-            FieldSecurity fs = (FieldSecurity)sessionMgr.getAttribute("securitiesHash");
+            FieldSecurity fs = (FieldSecurity) sessionMgr
+                    .getAttribute("securitiesHash");
             UserUtil.extractSecurity(fs, request);
         }
         else if ("next".equals(action))
@@ -89,20 +93,20 @@ public class NewProjectsHandler extends PageHandler
             saveRoles(request, sessionMgr, wrapper);
         }
 
-        String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+        String userName = (String) session
+                .getAttribute(WebAppConstants.USER_NAME);
         setUpNew(request, sessionMgr, userName, wrapper);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(pageDescriptor, request,
-                                response, context);
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
     /**
-     *  Save data from roles page
+     * Save data from roles page
      */
-    private void saveRoles(HttpServletRequest request, SessionManager sessionMgr,
-                           CreateUserWrapper wrapper)
-    throws EnvoyServletException
+    private void saveRoles(HttpServletRequest request,
+            SessionManager sessionMgr, CreateUserWrapper wrapper)
+            throws EnvoyServletException
     {
         // Extract source and target locale Strings from the request.
         String sourceLocale = UserUtil.extractSourceLocale(request);
@@ -119,32 +123,40 @@ public class NewProjectsHandler extends PageHandler
     }
 
     /**
-     *  Set up edit of projects
+     * Set up edit of projects
      */
-    private void setUpNew(HttpServletRequest request, SessionManager sessionMgr,
-                          String userName, CreateUserWrapper wrapper)
-    throws EnvoyServletException
+    private void setUpNew(HttpServletRequest request,
+            SessionManager sessionMgr, String userName,
+            CreateUserWrapper wrapper) throws EnvoyServletException
     {
-        PermissionSet perms = (PermissionSet) request.getSession().getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet perms = (PermissionSet) request.getSession()
+                .getAttribute(WebAppConstants.PERMISSIONS);
 
         // get data for the page
         User user = UserHandlerHelper.getUser(userName);
-        
+
         boolean isSuperPM = false;
-        try {
+        try
+        {
             isSuperPM = UserUtil.isSuperPM(user.getUserId());
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
-        
+
         List projects = null;
         String companyId = null;
         if (!isSuperPM)
         {
             projects = UserHandlerHelper.getProjectsManagedByUser(user);
-            try {
-                companyId = CompanyWrapper.getCompanyIdByName(wrapper.getCompanyName());
-            } catch (PersistenceException e) {
+            try
+            {
+                companyId = CompanyWrapper.getCompanyIdByName(wrapper
+                        .getCompanyName());
+            }
+            catch (PersistenceException e)
+            {
                 throw new EnvoyServletException(e);
             }
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
@@ -153,46 +165,51 @@ public class NewProjectsHandler extends PageHandler
                 for (Iterator iter = projects.iterator(); iter.hasNext();)
                 {
                     project = (Project) iter.next();
-                    if (!project.getCompanyId().equals(companyId))
+                    if (!String.valueOf(project.getCompanyId()).equals(
+                            companyId))
                     {
                         iter.remove();
                     }
                 }
             }
         }
-        else 
+        else
         {
             projects = new ArrayList(ProjectHandlerHelper.getAllProjects());
         }
-        
+
         List avilableProjects = new ArrayList(projects);
-        Collections.sort(avilableProjects, new ProjectComparator(Locale
-                .getDefault()));
+        Collections.sort(avilableProjects,
+                new ProjectComparator(Locale.getDefault()));
         request.setAttribute("availableProjects", avilableProjects);
         ArrayList addedProjects = new ArrayList();
         if (sessionMgr.getAttribute("ProjectPageVisited") != null)
         {
-            ArrayList addedProjectIds = (ArrayList)wrapper.getProjects();
+            ArrayList addedProjectIds = (ArrayList) wrapper.getProjects();
             // convert list of projectIds to Projects
             for (int i = 0; i < addedProjectIds.size(); i++)
             {
-                Long id = (Long)addedProjectIds.get(i);
-                addedProjects.add(ProjectHandlerHelper.getProjectById(id.longValue()));
+                Long id = (Long) addedProjectIds.get(i);
+                addedProjects.add(ProjectHandlerHelper.getProjectById(id
+                        .longValue()));
             }
-            Collections.sort(addedProjects, new ProjectComparator(Locale
-                    .getDefault()));
+            Collections.sort(addedProjects,
+                    new ProjectComparator(Locale.getDefault()));
             request.setAttribute("addedProjects", addedProjects);
-            request.setAttribute("future", new Boolean(wrapper.isInAllProjects()));
+            request.setAttribute("future",
+                    new Boolean(wrapper.isInAllProjects()));
         }
         else
         {
-            Collections.sort(projects, new ProjectComparator(Locale
-                    .getDefault()));
+            Collections.sort(projects,
+                    new ProjectComparator(Locale.getDefault()));
             request.setAttribute("addedProjects", projects);
             if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
             {
                 request.setAttribute("future", new Boolean(true));
-            } else {
+            }
+            else
+            {
                 request.setAttribute("future", new Boolean(false));
             }
         }

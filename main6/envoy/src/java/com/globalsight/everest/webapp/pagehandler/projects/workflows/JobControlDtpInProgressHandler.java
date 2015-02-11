@@ -175,9 +175,13 @@ public class JobControlDtpInProgressHandler extends JobManagementHandler
         else if (action != null && action.equals("save"))
         {
             // save the results from a search/replace
-            SearchHandlerHelper.replace(
-                    (List) sessionMgr.getAttribute("tuvInfos"),
-                    (String) sessionMgr.getAttribute(COMPANY_ID));
+            String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
+            if (companyId != null)
+            {
+                SearchHandlerHelper.replace(
+                        (List) sessionMgr.getAttribute("tuvInfos"),
+                        Long.parseLong(companyId));
+            }
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {

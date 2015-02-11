@@ -59,6 +59,8 @@
 				<include name="hibernate-jbpm.cfg.xml.template" />
 				<include name="jbpm.cfg.xml" />
 				<include name="quartz.properties.template" />
+				<include name="c3p0.properties" />
+				<include name="c3p0-config.xml" />
 				<include name="properties/envoy_generated.properties.template" />
 			</fileset>
 		</copy>
@@ -240,16 +242,14 @@
 				<include name="ant.jar" />
 				<include name="commons-httpclient-3.0-rc2.jar" />
 				<include name="commons-codec-1.3.jar" />
-			</fileset>
-                        <fileset dir="../j2eeVendor/jboss/jboss_server/lib">
-			            <include name="commons-logging.jar" />
-			</fileset>
-			<fileset dir="${apacheAxisJarLib}">
-				<include name="axis.jar" />
+				<include name="commons-logging.jar" />
+                <include name="axis.jar" />
 				<include name="commons-discovery.jar" />
-				<include name="jaxrpc.jar" />
-				<include name="wsdl4j.jar" />
 			</fileset>
+			<fileset dir="../../tools/j2eeVendor/jboss/v4.0.1/jboss_server/server/default/deploy/jboss-ws4ee.sar">
+	            <include name="jaxrpc.jar" />
+	            <include name="wsdl4j.jar" />
+   			</fileset>
 		</signjar>
 	</target>
 

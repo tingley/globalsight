@@ -84,7 +84,8 @@ public class PermissionGroupsHandler extends PageHandler
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
-        SessionManager sessionMgr = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         try
         {
             if (CANCEL.equals(action))
@@ -111,9 +112,12 @@ public class PermissionGroupsHandler extends PageHandler
             {
                 removePermissionGroup(session, p_request);
             }
-            if(!"self".equals(p_request.getParameter("linkName"))){
-                sessionMgr.clear();                 
-            }else{
+            if (!"self".equals(p_request.getParameter("linkName")))
+            {
+                sessionMgr.clear();
+            }
+            else
+            {
                 handleFilters(p_request, sessionMgr, action);
             }
             dataForTable(p_request, session);
@@ -141,22 +145,27 @@ public class PermissionGroupsHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
-        
-        SessionManager sessionMgr = (SessionManager) p_session.getAttribute(SESSION_MANAGER);
+
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
         String pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
-        String pCompanyFilter = (String) sessionMgr.getAttribute("pCompanyFilter");
-        String condition="";
-        if(StringUtils.isNotBlank(pNameFilter)){
-            condition+=" and " +"p.name LIKE '%" + pNameFilter.trim() + "%'";
+        String pCompanyFilter = (String) sessionMgr
+                .getAttribute("pCompanyFilter");
+        String condition = "";
+        if (StringUtils.isNotBlank(pNameFilter))
+        {
+            condition += " and " + "p.name LIKE '%" + pNameFilter.trim() + "%'";
         }
-        if(StringUtils.isNotBlank(pCompanyFilter)){
-            condition+=" and " +"c.name LIKE '%" + pCompanyFilter.trim() + "%'";
+        if (StringUtils.isNotBlank(pCompanyFilter))
+        {
+            condition += " and " + "c.name LIKE '%" + pCompanyFilter.trim()
+                    + "%'";
         }
-        ArrayList pgroups = (ArrayList)Permission.getPermissionManager().getPermissionGroupsBycondition(condition);
+        ArrayList pgroups = (ArrayList) Permission.getPermissionManager()
+                .getPermissionGroupsBycondition(condition);
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
 
-        
         String numOfPerPage = p_request.getParameter("numOfPageSize");
         if (StringUtils.isNotEmpty(numOfPerPage))
         {
@@ -173,8 +182,8 @@ public class PermissionGroupsHandler extends PageHandler
                 PermissionHelper.getSuperPermissionGroupIds());
 
         setTableNavigation(p_request, p_session, pgroups,
-                new PermissionGroupComparator(uiLocale), NUM_PER_PAGE, PERM_GROUP_LIST,
-                PERM_GROUP_KEY);
+                new PermissionGroupComparator(uiLocale), NUM_PER_PAGE,
+                PERM_GROUP_LIST, PERM_GROUP_KEY);
     }
 
     /**
@@ -279,28 +288,35 @@ public class PermissionGroupsHandler extends PageHandler
         {
             return;
         }
-        String[] idarr=ids.trim().split(" ");
-        for(String id:idarr){
-            if("on".equals(id))continue;
-            PermissionGroup permGroup = Permission.getPermissionManager().readPermissionGroup(Long.parseLong(id));
+        String[] idarr = ids.trim().split(" ");
+        for (String id : idarr)
+        {
+            if ("on".equals(id))
+                continue;
+            PermissionGroup permGroup = Permission.getPermissionManager()
+                    .readPermissionGroup(Long.parseLong(id));
             Permission.getPermissionManager().deletePermissionGroup(permGroup);
-            
+
         }
-       
+
     }
-    
-    
-    private void handleFilters(HttpServletRequest p_request, SessionManager sessionMgr, String action)
+
+    private void handleFilters(HttpServletRequest p_request,
+            SessionManager sessionMgr, String action)
     {
         String pNameFilter = (String) p_request.getParameter("pNameFilter");
-        String pCompanyFilter = (String) p_request.getParameter("pCompanyFilter");
-        if (p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET))
+        String pCompanyFilter = (String) p_request
+                .getParameter("pCompanyFilter");
+        if (p_request.getMethod().equalsIgnoreCase(
+                WebAppConstants.REQUEST_METHOD_GET))
         {
-              pNameFilter = (String)sessionMgr.getAttribute("pNameFilter");
-              pCompanyFilter = (String) sessionMgr.getAttribute("pCompanyFilter");
+            pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
+            pCompanyFilter = (String) sessionMgr.getAttribute("pCompanyFilter");
         }
-        sessionMgr.setAttribute("pNameFilter", pNameFilter);
-        sessionMgr.setAttribute("pCompanyFilter", pCompanyFilter);
+        sessionMgr.setAttribute("pNameFilter", pNameFilter == null ? ""
+                : pNameFilter);
+        sessionMgr.setAttribute("pCompanyFilter", pCompanyFilter == null ? ""
+                : pCompanyFilter);
     }
 
 }

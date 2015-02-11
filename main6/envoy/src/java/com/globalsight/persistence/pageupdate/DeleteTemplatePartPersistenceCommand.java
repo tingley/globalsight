@@ -27,15 +27,12 @@ import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.persistence.PersistenceCommand;
 
-public class DeleteTemplatePartPersistenceCommand
-    extends PersistenceCommand
+public class DeleteTemplatePartPersistenceCommand extends PersistenceCommand
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            "EditSourcePage" /*DeleteTemplatePartPersistenceCommand.class*/);
+    private static Logger s_logger = Logger
+            .getLogger(DeleteTemplatePartPersistenceCommand.class);
 
-    private static final String s_DELETE_TEMPLATEPARTS =
-        "delete from template_part where template_id=?";
+    private static final String s_DELETE_TEMPLATEPARTS = "delete from template_part where template_id=?";
 
     private PreparedStatement m_ps = null;
     private ArrayList m_templates;
@@ -54,7 +51,7 @@ public class DeleteTemplatePartPersistenceCommand
     //
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -73,31 +70,29 @@ public class DeleteTemplatePartPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         m_ps = p_connection.prepareStatement(s_DELETE_TEMPLATEPARTS);
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         for (int i = 0, max = m_templates.size(); i < max; i++)
         {
-            PageTemplate template = (PageTemplate)m_templates.get(i);
+            PageTemplate template = (PageTemplate) m_templates.get(i);
 
             m_ps.setLong(1, template.getId());
             m_ps.addBatch();
 
             if (s_logger.isDebugEnabled())
             {
-                System.err.println(s_DELETE_TEMPLATEPARTS.replaceFirst(
-                    "\\?", String.valueOf(template.getId())));
+                System.err.println(s_DELETE_TEMPLATEPARTS.replaceFirst("\\?",
+                        String.valueOf(template.getId())));
             }
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         m_ps.executeBatch();
     }

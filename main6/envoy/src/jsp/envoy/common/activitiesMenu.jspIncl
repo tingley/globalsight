@@ -90,7 +90,7 @@ if (lastSearchState != null)
     }
     else
     {
-    	menuLabel += " (" + mainMenuBundle.getString("lb_all_status") + ")";
+    	menuLabel += " (" + mainMenuBundle.getString("lb_all_activities") + ")";//modify for GBS-2875
     }
 %>
 myActivitiesMenu.add(new WebFXMenuItem("<%=menuLabel%>", "javascript:goToUrl('<%=lastTaskUrl%>');", ""));
@@ -104,13 +104,13 @@ myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_availabl
 
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>", "javascript:goToUrl('<%=tasksInProgressUrl%>');", ""));
 
-myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>(<%=mainMenuBundle.getString("lb_gsedition")%>)", "javascript:goToUrl('<%=tasksInProgressGSEditionUrl%>');", ""));
+//myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>(<%=mainMenuBundle.getString("lb_gsedition")%>)", "javascript:goToUrl('<%=tasksInProgressGSEditionUrl%>');", ""));//modify for GBS-2875
 
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_finished")%>", "javascript:goToUrl('<%=tasksFinishedUrl%>');", ""));
 
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_rejected")%>", "javascript:goToUrl('<%=tasksRejectedUrl%>');", ""));
 
-myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_status")%>", "javascript:goToUrl('<%=tasksAllStatusUrl%>');", ""));
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_activities")%>", "javascript:goToUrl('<%=tasksAllStatusUrl%>');", ""));//modify for GBS-2875
 
 <%
 try

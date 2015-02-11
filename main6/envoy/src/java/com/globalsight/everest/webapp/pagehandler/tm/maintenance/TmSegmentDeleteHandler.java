@@ -17,61 +17,53 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.searchreplace.TmConcordanceResult;
-import com.globalsight.util.progress.ProcessStatus;
-import com.globalsight.everest.tm.searchreplace.SearchReplaceManager;
-
-import com.globalsight.ling.tm2.BaseTmTu;
-import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.ling.tm2.TmCoreManager;
-
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.edit.EditUtil;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.searchreplace.SearchReplaceManager;
+import com.globalsight.everest.tm.searchreplace.TmConcordanceResult;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.tm2.BaseTmTu;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  *
  */
-public class TmSegmentDeleteHandler
-    extends PageHandler
+public class TmSegmentDeleteHandler extends PageHandler
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TmSegmentDeleteHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TmSegmentDeleteHandler.class);
 
     //
     // Constructor
@@ -80,57 +72,58 @@ public class TmSegmentDeleteHandler
     {
     }
 
-
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
-    	if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
-		{
-			p_response
-					.sendRedirect("/globalsight/ControlServlet?activityName=tm");
-			return;
-		}
+        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+        {
+            p_response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+            return;
+        }
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
-        Locale uiLocale = (Locale)session.getAttribute(UILOCALE);
+        Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
 
         String userId = getUser(session).getUserId();
 
-        String action  = (String)p_request.getParameter(TM_ACTION);
+        String action = (String) p_request.getParameter(TM_ACTION);
 
         // From session Manger:
-        //  - get target search locale
-        GlobalSightLocale targetLocale =
-            (GlobalSightLocale)sessionMgr.getAttribute(
-                TM_TARGET_SEARCH_LOCALE);
+        // - get target search locale
+        GlobalSightLocale targetLocale = (GlobalSightLocale) sessionMgr
+                .getAttribute(TM_TARGET_SEARCH_LOCALE);
 
         // - get the previous search manager
-        SearchReplaceManager manager = (SearchReplaceManager)
-            sessionMgr.getAttribute(TM_CONCORDANCE_MANAGER);
+        SearchReplaceManager manager = (SearchReplaceManager) sessionMgr
+                .getAttribute(TM_CONCORDANCE_MANAGER);
 
-        ProcessStatus status
-            = (ProcessStatus)sessionMgr.getAttribute(TM_TM_STATUS);
+        ProcessStatus status = (ProcessStatus) sessionMgr
+                .getAttribute(TM_TM_STATUS);
 
         // - get the initial search results
-        TmConcordanceResult searchResults =
-            (TmConcordanceResult)status.getResults();
+        TmConcordanceResult searchResults = (TmConcordanceResult) status
+                .getResults();
 
         // - get user selected tu ids where the replacement will occur
-        String selectedTuIds[] = p_request.getParameterValues(
-            WebAppConstants.TM_REPLACE_SEGMENT_CHKBOX);
-
+        String selectedTuIds[] = p_request
+                .getParameterValues(WebAppConstants.TM_REPLACE_SEGMENT_CHKBOX);
 
         ArrayList deletedTus = null;
         ArrayList notDeletedTus = null;
@@ -171,38 +164,42 @@ public class TmSegmentDeleteHandler
         p_request.setAttribute(TM_DELETED_SEGMENTS, deletedTus);
         p_request.setAttribute(TM_NOT_DELETED_SEGMENTS, notDeletedTus);
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     //
     // Private Methods
     //
 
-    private Tm getTmForTus(ArrayList p_tus) throws EnvoyServletException {
-        try {
-            return ServerProxy.getProjectHandler()
-                .getProjectTMById(((BaseTmTu)p_tus.get(0)).getTmId(), true);
-        }
-        catch (Exception e) 
+    private Tm getTmForTus(ArrayList p_tus) throws EnvoyServletException
+    {
+        try
         {
-            throw new EnvoyServletException(GeneralException.EX_GENERAL, e); 
+            return ServerProxy.getProjectHandler().getProjectTMById(
+                    ((BaseTmTu) p_tus.get(0)).getTmId(), true);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(GeneralException.EX_GENERAL, e);
         }
     }
 
-    private Tm getTmForTuvs(ArrayList p_tuvs) throws EnvoyServletException {
-        try {
-            return ServerProxy.getProjectHandler()
-                .getProjectTMById(((BaseTmTuv)p_tuvs.get(0)).getTu().getTmId(), true);
-        }
-        catch (Exception e) 
+    private Tm getTmForTuvs(ArrayList p_tuvs) throws EnvoyServletException
+    {
+        try
         {
-            throw new EnvoyServletException(GeneralException.EX_GENERAL, e); 
+            return ServerProxy.getProjectHandler().getProjectTMById(
+                    ((BaseTmTuv) p_tuvs.get(0)).getTu().getTmId(), true);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(GeneralException.EX_GENERAL, e);
         }
     }
-    
+
     private void doDeleteTuvs(Tm p_tm, ArrayList p_tuvs)
-        throws  EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -215,9 +212,8 @@ public class TmSegmentDeleteHandler
         }
     }
 
-
     private void doDeleteTus(Tm p_tm, ArrayList p_tus)
-        throws  EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -243,9 +239,8 @@ public class TmSegmentDeleteHandler
         return getTus(makeMap(p_searchResults), p_selectedTuIds);
     }
 
-
     private ArrayList getTuvs(HashMap p_searchResultsMap, String[] p_tuIds,
-        GlobalSightLocale p_targetLocale)
+            GlobalSightLocale p_targetLocale)
     {
         ArrayList result = new ArrayList();
 
@@ -254,8 +249,8 @@ public class TmSegmentDeleteHandler
 
         for (int i = 0, max = p_tuIds.length; i < max; i++)
         {
-            if ((tu = (SegmentTmTu)p_searchResultsMap.get(
-                new Long(p_tuIds[i]))) != null)
+            if ((tu = (SegmentTmTu) p_searchResultsMap
+                    .get(new Long(p_tuIds[i]))) != null)
             {
                 result.addAll(tu.getTuvList(p_targetLocale));
             }
@@ -263,7 +258,6 @@ public class TmSegmentDeleteHandler
 
         return result;
     }
-
 
     private ArrayList getTus(HashMap p_searchResultsMap, String[] p_tuIds)
     {
@@ -273,8 +267,8 @@ public class TmSegmentDeleteHandler
 
         for (int i = 0, max = p_tuIds.length; i < max; i++)
         {
-            if ((tu = (SegmentTmTu)p_searchResultsMap.get(
-                new Long(p_tuIds[i]))) != null)
+            if ((tu = (SegmentTmTu) p_searchResultsMap
+                    .get(new Long(p_tuIds[i]))) != null)
             {
                 result.add(tu);
             }
@@ -282,7 +276,6 @@ public class TmSegmentDeleteHandler
 
         return result;
     }
-
 
     /**
      * Returns a map from [tu id (Long)] to [SegmentTmTu].
@@ -302,58 +295,55 @@ public class TmSegmentDeleteHandler
         return result;
     }
 
-
     private ArrayList getSourceTuvs(ArrayList p_tuvs)
     {
         return separeteSrcAndNonSrcTuvs(p_tuvs, true);
     }
-    
+
     private ArrayList getNonSourceTuvs(ArrayList p_tuvs)
     {
         return separeteSrcAndNonSrcTuvs(p_tuvs, false);
     }
-    
-    private ArrayList separeteSrcAndNonSrcTuvs(
-        ArrayList p_tuvs, boolean p_getSource)
+
+    private ArrayList separeteSrcAndNonSrcTuvs(ArrayList p_tuvs,
+            boolean p_getSource)
     {
         ArrayList result = new ArrayList();
-        
-        for(Iterator it = p_tuvs.iterator(); it.hasNext();)
+
+        for (Iterator it = p_tuvs.iterator(); it.hasNext();)
         {
-            SegmentTmTuv tuv = (SegmentTmTuv)it.next();
-            if(tuv.isSourceTuv() == p_getSource)
+            SegmentTmTuv tuv = (SegmentTmTuv) it.next();
+            if (tuv.isSourceTuv() == p_getSource)
             {
                 result.add(tuv);
             }
         }
-        
+
         return result;
     }
-    
 
     private ArrayList getTuList(ArrayList p_tuvs)
     {
         TreeSet tus = new TreeSet(new TuComparator());
-        
-        for(Iterator it = p_tuvs.iterator(); it.hasNext();)
+
+        for (Iterator it = p_tuvs.iterator(); it.hasNext();)
         {
-            SegmentTmTuv tuv = (SegmentTmTuv)it.next();
+            SegmentTmTuv tuv = (SegmentTmTuv) it.next();
             tus.add(tuv.getTu());
         }
-        
+
         return new ArrayList(tus);
     }
 
-    private class TuComparator
-        implements Comparator
+    private class TuComparator implements Comparator
     {
         public int compare(Object p_o1, Object p_o2)
         {
-            SegmentTmTu tu1 = (SegmentTmTu)p_o1;
-            SegmentTmTu tu2 = (SegmentTmTu)p_o2;
+            SegmentTmTu tu1 = (SegmentTmTu) p_o1;
+            SegmentTmTu tu2 = (SegmentTmTu) p_o2;
 
-            return (int)(tu1.getId() - tu2.getId());
+            return (int) (tu1.getId() - tu2.getId());
         }
     }
-    
+
 }

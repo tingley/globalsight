@@ -227,9 +227,8 @@ path = URLEncoder.encodeUrlStr(path);
         </td>
 <% } %>
       </tr>
-      </td>
       <tr>
-      <td style="text-align:right">
+      <td style="text-align:right; padding-top:6px">
      	<%--for gbs-2599
 	amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
 				<A CLASS="standardHREF" HREF="#"

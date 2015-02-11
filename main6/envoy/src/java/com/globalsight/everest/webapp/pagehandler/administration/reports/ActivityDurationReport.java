@@ -8,12 +8,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Logger;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -30,6 +30,8 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -39,6 +41,7 @@ import com.globalsight.everest.taskmanager.TaskInfo;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
@@ -73,7 +76,8 @@ public class ActivityDurationReport
 
     private static Logger s_logger = Logger
             .getLogger("Reports");
-
+    public static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -95,10 +99,13 @@ public class ActivityDurationReport
         _workbook = Workbook.createWorkbook(p_response.getOutputStream(),
                 settings);
 
-        addJobs(p_request);
+        addJobs(p_request, p_response);
 
-        _workbook.write();
-        _workbook.close();
+        if (_workbook != null)
+        {
+            _workbook.write();
+            _workbook.close();
+        }
     }
 
     /**
@@ -247,7 +254,8 @@ public class ActivityDurationReport
     /**
      * Get parameters from request perepare to get jobs.
      */
-    private void addJobs(HttpServletRequest p_request) throws Exception
+    private void addJobs(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
     {
         // print out the request parameters
         String[] paramJobId = p_request.getParameterValues("jobId");
@@ -256,8 +264,10 @@ public class ActivityDurationReport
         String dateFormtParameter = p_request.getParameter("dateFormat");
         JobSearchParameters searchParams = getSearchParams(p_request);
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
-        addJobs(paramJobId, paramTrgLocales, dateFormtParameter, searchParams,
-                bundle);
+        String userId = (String) p_request.getSession().getAttribute(
+                    WebAppConstants.USER_NAME);
+        addJobs(p_response, paramJobId, paramTrgLocales, dateFormtParameter, searchParams,
+                bundle, userId);
     }
 
     /**
@@ -265,9 +275,9 @@ public class ActivityDurationReport
      * 
      * @exception Exception
      */
-    private void addJobs(String[] paramJobId, String[] paramTrgLocales,
+    private void addJobs(HttpServletResponse p_response, String[] paramJobId, String[] paramTrgLocales,
             String dateFormtParameter, JobSearchParameters searchParams,
-            ResourceBundle bundle) throws Exception
+            ResourceBundle bundle, String p_userId) throws Exception
     {
 
         if (dateFormtParameter != null)
@@ -322,6 +332,19 @@ public class ActivityDurationReport
             }
         }
 
+        
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, p_userId,
+                reportJobIDS, null))
+        {
+            _workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, p_userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobs.iterator();
         int row = 1; // 1 header row already filled
         while (jobIter.hasNext())
@@ -350,6 +373,9 @@ public class ActivityDurationReport
             }
         }
 
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, p_userId, reportJobIDS,
+                null, 100, ReportsData.STATUS_FINISHED);
     }
 
     private int addWorkflow(Job job, Workflow w, WritableSheet sheet, int row,

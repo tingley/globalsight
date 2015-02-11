@@ -16,35 +16,41 @@
  */
 package com.globalsight.cxe.adaptermdb.msoffice;
 
-import javax.ejb.CreateException;
-import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.jms.MessageListener;
+
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
+import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
+import com.globalsight.everest.util.jms.JmsHelper;
 
 /**
  * MsOfficeSourceAdapterMDB uses the MsOfficeAdapter
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_MSOFFICE_SOURCE_ADAPTER),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class MsOfficeSourceAdapterMDB extends BaseAdapterMDB
 {
-    private static String ADAPTER_NAME = "MsOfficeSourceAdapter";
-    
-    /*
-     * Returns the Adapter Name
-     */
+    private static String ADAPTER_NAME = MsOfficeSourceAdapterMDB.class
+            .getName();
+
     protected String getAdapterName()
     {
         return ADAPTER_NAME;
     }
 
-    /**
-     * Creates and loads the LingAdapter
-     * 
-     * @return BaseAdapter
-     * @exception Exception
-     */
     protected BaseAdapter loadAdapter() throws Exception
     {
         return new MsOfficeAdapter(ADAPTER_NAME);
     }
 }
-

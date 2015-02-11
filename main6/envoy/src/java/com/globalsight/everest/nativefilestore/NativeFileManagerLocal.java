@@ -124,8 +124,9 @@ public class NativeFileManagerLocal implements NativeFileManager
         NativeFileManagerException nfme = null;
         boolean isRename = false;
         File newFile = null;
-        File originalAbsouluteStoragePath = new File(AmbFileStoragePathUtils
-                .getStfParentDir(), p_stf.getStoragePath());
+        File originalAbsouluteStoragePath = new File(
+                AmbFileStoragePathUtils.getStfParentDir(),
+                p_stf.getStoragePath());
         String storagePath = p_stf.getStoragePath();
 
         // if we are renaming the file, check for (and resolve) name collisions
@@ -158,9 +159,8 @@ public class NativeFileManagerLocal implements NativeFileManager
             {
                 if (!originalAbsouluteStoragePath.delete())
                 {
-                    CATEGORY
-                            .warn("Save/Rename was unable to remove the old file: "
-                                    + originalAbsouluteStoragePath.toString());
+                    CATEGORY.warn("Save/Rename was unable to remove the old file: "
+                            + originalAbsouluteStoragePath.toString());
                 }
             }
 
@@ -175,7 +175,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         catch (Exception e)
         {
             // hold over for finally
-            String[] args = { newFile.toString() };
+            String[] args =
+            { newFile.toString() };
             nfme = new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_SAVE_FILE, args, e);
         }
@@ -226,7 +227,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         catch (Exception e)
         {
             // hold over for finally
-            String[] args = { newFile.toString() };
+            String[] args =
+            { newFile.toString() };
             nfme = new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_SAVE_FILE, args, e);
         }
@@ -285,14 +287,15 @@ public class NativeFileManagerLocal implements NativeFileManager
             }
 
             FileOutputStream fos = new FileOutputStream(f);
-            OutputStreamWriter os = new OutputStreamWriter(fos,p_encoding);
+            OutputStreamWriter os = new OutputStreamWriter(fos, p_encoding);
             os.write(p_fileContent, 0, p_fileContent.length());
             os.close();
             return fullPath.toString();
         }
         catch (Exception e)
         {
-            String[] args = { fullPath };
+            String[] args =
+            { fullPath };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_SAVE_FILE, args, e);
         }
@@ -320,17 +323,18 @@ public class NativeFileManagerLocal implements NativeFileManager
         if (p_stf != null)
         {
             // return getBytes(m_stfParentDir, p_stf.getStoragePath());
-            return new File(AmbFileStoragePathUtils.getStfParentDir(companyId), p_stf
-                    .getStoragePath());
+            return new File(AmbFileStoragePathUtils.getStfParentDir(companyId),
+                    p_stf.getStoragePath());
         }
         else
         {
-            String[] args = { "p_stf=null" };
+            String[] args =
+            { "p_stf=null" };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
         }
     }
-    
+
     /**
      * See NativeFileManager interface for documentation
      */
@@ -340,12 +344,13 @@ public class NativeFileManagerLocal implements NativeFileManager
         if (p_stf != null)
         {
             // return getBytes(m_stfParentDir, p_stf.getStoragePath());
-            return new File(AmbFileStoragePathUtils.getStfParentDir(), p_stf
-                    .getStoragePath());
+            return new File(AmbFileStoragePathUtils.getStfParentDir(),
+                    p_stf.getStoragePath());
         }
         else
         {
-            String[] args = { "p_stf=null" };
+            String[] args =
+            { "p_stf=null" };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
         }
@@ -366,7 +371,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         else
         {
-            String[] args = { "p_unextractedFile=null" };
+            String[] args =
+            { "p_unextractedFile=null" };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
         }
@@ -381,25 +387,31 @@ public class NativeFileManagerLocal implements NativeFileManager
         return this.getBytes(AmbFileStoragePathUtils.getFileStorageDir(),
                 p_relPath);
     }
-    
+
     /**
      * @see NativeFileManager.getString
      */
-    public String getString(String p_relPath, String encoding) throws NativeFileManagerException
+    public String getString(String p_relPath, String encoding)
+            throws NativeFileManagerException
     {
-        try {
-			return this.getString(AmbFileStoragePathUtils.getFileStorageDir(),p_relPath,encoding);
-		} catch (NativeEnDecoderException e) {
-			e.printStackTrace();
-		}
-		return null; 
+        try
+        {
+            return this.getString(AmbFileStoragePathUtils.getFileStorageDir(),
+                    p_relPath, encoding);
+        }
+        catch (NativeEnDecoderException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
      * See NativeFileManager interface for documentation
      */
     public SecondaryTargetFile moveFileToStorage(String p_absolutePath,
-            SecondaryTargetFile p_stf, int p_sourcePageBomType) throws NativeFileManagerException
+            SecondaryTargetFile p_stf, int p_sourcePageBomType)
+            throws NativeFileManagerException
     {
         FileInputStream fis = null;
         File inputFile = null;
@@ -411,17 +423,17 @@ public class NativeFileManagerLocal implements NativeFileManager
             {
                 // Modify for super user.
                 String companyId;
-                if (wf != null && wf.getCompanyId() != null
-                        && wf.getCompanyId().length() > 0)
+                if (wf != null && wf.getCompanyId() != -1)
                 {
-                    companyId = wf.getCompanyId();
+                    companyId = String.valueOf(wf.getCompanyId());
                 }
                 else
                 {
                     companyId = CompanyThreadLocal.getInstance().getValue();
                 }
-                
-                File sftParentDir = AmbFileStoragePathUtils.getStfParentDir(companyId);
+
+                File sftParentDir = AmbFileStoragePathUtils
+                        .getStfParentDir(companyId);
                 // Make directories
                 makeAdditionalDirs(sftParentDir, p_stf.getStoragePath());
 
@@ -436,7 +448,7 @@ public class NativeFileManagerLocal implements NativeFileManager
                     {
                         newFile.delete();
                     }
-                    
+
                     if (p_sourcePageBomType != ExportConstants.NO_UTF_BOM)
                     {
                         fis = new FileInputStream(inputFile);
@@ -450,11 +462,15 @@ public class NativeFileManagerLocal implements NativeFileManager
                     {
 
                         // NOTE (do not remove this comment):
-                        // In checking Suns bug database, there seems to be a lot
+                        // In checking Suns bug database, there seems to be a
+                        // lot
                         // of chatter about renameTo() and various problems
-                        // related to different behavior on Unix vs Windoze and NFS
-                        // mounted voulumes(search the bug db for "renameTo"). If
-                        // renameTo fails we make an attempt to copy the file instead.
+                        // related to different behavior on Unix vs Windoze and
+                        // NFS
+                        // mounted voulumes(search the bug db for "renameTo").
+                        // If
+                        // renameTo fails we make an attempt to copy the file
+                        // instead.
                         if (!inputFile.renameTo(newFile))
                         {
                             CATEGORY.info("renameTo() Failed: Attempting a "
@@ -463,7 +479,8 @@ public class NativeFileManagerLocal implements NativeFileManager
                             fis = new FileInputStream(inputFile);
                             writeFile(fis, newFile);
                             CATEGORY.info("Copy "
-                                    + (newFile.exists() ? "successful" : "also failed!!"));
+                                    + (newFile.exists() ? "successful"
+                                            : "also failed!!"));
                         }
                     }
 
@@ -477,7 +494,8 @@ public class NativeFileManagerLocal implements NativeFileManager
                 }
                 else
                 {
-                    String[] args = { inputFile.getAbsolutePath() };
+                    String[] args =
+                    { inputFile.getAbsolutePath() };
                     throw new NativeFileManagerException(
                             NativeFileManagerException.MSG_INVALID_FILENAME,
                             args, null);
@@ -493,8 +511,9 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         else
         {
-            String[] args = { ((p_absolutePath == null ? "p_absolutePath=null"
-                    : "") + (p_stf == null ? " p_stf=null" : "")) };
+            String[] args =
+            { ((p_absolutePath == null ? "p_absolutePath=null" : "") + (p_stf == null ? " p_stf=null"
+                    : "")) };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
         }
@@ -518,14 +537,14 @@ public class NativeFileManagerLocal implements NativeFileManager
             try
             {
                 // Make directories
-                makeAdditionalDirs(AmbFileStoragePathUtils
-                        .getUnextractedParentDir(), p_unextractedFile
-                        .getStoragePath());
+                makeAdditionalDirs(
+                        AmbFileStoragePathUtils.getUnextractedParentDir(),
+                        p_unextractedFile.getStoragePath());
 
                 // copy the file
-                File newFile = new File(AmbFileStoragePathUtils
-                        .getUnextractedParentDir(), p_unextractedFile
-                        .getStoragePath());
+                File newFile = new File(
+                        AmbFileStoragePathUtils.getUnextractedParentDir(),
+                        p_unextractedFile.getStoragePath());
                 inputFile = new File(p_absolutePath);
                 if (inputFile.exists())
                 {
@@ -548,14 +567,16 @@ public class NativeFileManagerLocal implements NativeFileManager
                             .lastModified());
 
                     // if set delete the original file
+                    // What is the purpose?
                     if (p_removeOriginal)
                     {
-                        inputFile.delete();
+//                        inputFile.delete();
                     }
                 }
                 else
                 {
-                    String[] args = { inputFile.getAbsolutePath() };
+                    String[] args =
+                    { inputFile.getAbsolutePath() };
                     throw new NativeFileManagerException(
                             NativeFileManagerException.MSG_INVALID_FILENAME,
                             args, null);
@@ -563,7 +584,8 @@ public class NativeFileManagerLocal implements NativeFileManager
             }
             catch (Exception e)
             {
-                String[] args = {
+                String[] args =
+                {
                         p_unextractedFile.getName(),
                         p_absolutePath,
                         AmbFileStoragePathUtils.getUnextractedParentDir()
@@ -575,8 +597,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         else
         {
-            String[] args = { ((p_absolutePath == null ? "p_absolutePath=null"
-                    : "") + (p_unextractedFile == null ? " p_unextractedFile=null"
+            String[] args =
+            { ((p_absolutePath == null ? "p_absolutePath=null" : "") + (p_unextractedFile == null ? " p_unextractedFile=null"
                     : "")) };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
@@ -613,9 +635,8 @@ public class NativeFileManagerLocal implements NativeFileManager
                 originalFile.delete();
                 if (originalFile.exists())
                 {
-                    CATEGORY
-                            .debug("Deleting file failed: setting deleteOnExit(): "
-                                    + p_absolutePathToOriginalFile);
+                    CATEGORY.debug("Deleting file failed: setting deleteOnExit(): "
+                            + p_absolutePathToOriginalFile);
                     originalFile.deleteOnExit();
                 }
             }
@@ -624,7 +645,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         catch (Exception e)
         {
-            String[] args = { fullPath };
+            String[] args =
+            { fullPath };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_SAVE_FILE, args, e);
         }
@@ -648,8 +670,8 @@ public class NativeFileManagerLocal implements NativeFileManager
     private String makeFullPath(String p_relPathToNewFile)
     {
         // StringBuffer fullPath = new StringBuffer(m_absolutePath_doc);
-        StringBuffer fullPath = new StringBuffer(AmbFileStoragePathUtils
-                .getFileStorageDirPath());
+        StringBuffer fullPath = new StringBuffer(
+                AmbFileStoragePathUtils.getFileStorageDirPath());
         fullPath.append("/").append(p_relPathToNewFile);
         return fullPath.toString();
     }
@@ -672,7 +694,8 @@ public class NativeFileManagerLocal implements NativeFileManager
             }
             catch (Exception e)
             {
-                String[] args = { finalFile.toString() };
+                String[] args =
+                { finalFile.toString() };
                 throw new NativeFileManagerException(
                         NativeFileManagerException.MSG_FAILED_TO_SAVE_FILE,
                         args, e);
@@ -680,8 +703,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         }
         else
         {
-            String[] args = { p_file == null ? " p_file=null" : p_file
-                    .getAbsolutePath()
+            String[] args =
+            { p_file == null ? " p_file=null" : p_file.getAbsolutePath()
                     + " does not exist!!" };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
@@ -731,7 +754,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         catch (Exception ex)
         {
             // hold over for finally
-            String[] args = { fileToReadFrom.toString() };
+            String[] args =
+            { fileToReadFrom.toString() };
             ne = new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_GET_FILE, args, ex);
         }
@@ -752,8 +776,8 @@ public class NativeFileManagerLocal implements NativeFileManager
         return contents;
     }
 
-    private String getString(File p_parentDirectory, String p_storagePath, String p_encoding)
-            throws NativeEnDecoderException
+    private String getString(File p_parentDirectory, String p_storagePath,
+            String p_encoding) throws NativeEnDecoderException
     {
         NativeFileManagerException ne = null;
         FileInputStream fis = null;
@@ -767,7 +791,7 @@ public class NativeFileManagerLocal implements NativeFileManager
             char[] buffer = new char[1024 * 16];
 
             fis = new FileInputStream(fileToReadFrom);
-            fisr = new BufferedReader(new InputStreamReader(fis,p_encoding));
+            fisr = new BufferedReader(new InputStreamReader(fis, p_encoding));
             int i_read;
             while ((i_read = fisr.read(buffer)) != -1)
             {
@@ -788,24 +812,30 @@ public class NativeFileManagerLocal implements NativeFileManager
                 }
                 else
                 {
-                	contents.append(buffer, 0, i_read);
+                    contents.append(buffer, 0, i_read);
                 }
             }
         }
         catch (Exception ex)
         {
             // hold over for finally
-            String[] args = { fileToReadFrom.toString() };
+            String[] args =
+            { fileToReadFrom.toString() };
             ne = new NativeFileManagerException(
                     NativeFileManagerException.MSG_FAILED_TO_GET_FILE, args, ex);
         }
         finally
         {
-			try{
-				if (fisr != null)	fisr.close();
-				if (fis != null)	fis.close();
-			} catch (IOException e) {
-			}
+            try
+            {
+                if (fisr != null)
+                    fisr.close();
+                if (fis != null)
+                    fis.close();
+            }
+            catch (IOException e)
+            {
+            }
             if (ne != null)
                 throw ne;
         }
@@ -899,13 +929,14 @@ public class NativeFileManagerLocal implements NativeFileManager
     {
         if (p_prefix == null || p_prefix.length() <= 0)
         {
-            String[] args = { "adjustStoragePath(p_prefix is null)" };
+            String[] args =
+            { "adjustStoragePath(p_prefix is null)" };
             throw new NativeFileManagerException(
                     NativeFileManagerException.MSG_INVALID_ARGS, args, null);
         }
 
-        File currentAbsoulutePath = new File(AmbFileStoragePathUtils
-                .getStfParentDir(), p_storagePath);
+        File currentAbsoulutePath = new File(
+                AmbFileStoragePathUtils.getStfParentDir(), p_storagePath);
         File newStoragePath = new File(currentAbsoulutePath.getParent(),
                 p_newFilename);
         String origParent = new File(p_storagePath).getParent();

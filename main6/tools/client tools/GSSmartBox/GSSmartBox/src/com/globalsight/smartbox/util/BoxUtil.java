@@ -2,9 +2,10 @@ package com.globalsight.smartbox.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.net.ftp.FTPFile;
 
 import jcifs.smb.SmbFile;
 
@@ -16,7 +17,7 @@ import com.globalsight.smartbox.bo.SMBConfiguration;
 /**
  * Directory box operation
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class BoxUtil
@@ -32,22 +33,34 @@ public class BoxUtil
     public static List<File> moveFilesFromInboxToJobCreatingBox(
             CompanyConfiguration cpConfig)
     {
-        String jobCreatingBox = cpConfig.getJobCreatingBox();
         String inBox = cpConfig.getInbox();
+        String inBox4XLZ = cpConfig.getInbox4XLZ();
+        String jobCreatingBox = cpConfig.getJobCreatingBox();
         List<File> filesJobCreating = new ArrayList<File>();
 
         FTPConfiguration ftpConfig = cpConfig.getFtpConfig();
         if (ftpConfig != null)
         {
-            downloadFileToInboxFromFTP(inBox, ftpConfig);
+            downloadFileToInboxFromFTP(cpConfig, ftpConfig);
         }
 
         SMBConfiguration smbConfig = cpConfig.getSmbConfig();
         if (smbConfig != null)
         {
-            downloadFileToInboxFromSMB(inBox, smbConfig);
+            downloadFileToInboxFromSMB(cpConfig, smbConfig);
         }
 
+        moveFiles(jobCreatingBox, inBox, filesJobCreating);
+        if (null != inBox4XLZ && inBox4XLZ != "")
+        {
+            moveFiles(cpConfig.getJobCreatingBox4XLZ(), inBox4XLZ, filesJobCreating);
+        }
+         return filesJobCreating;
+    }
+
+    private static void moveFiles(String jobCreatingBox, String inBox,
+            List<File> filesJobCreating)
+    {
         File inbox = new File(inBox);
         File[] files = inbox.listFiles();
         for (File file : files)
@@ -67,7 +80,6 @@ public class BoxUtil
                     + file.getName());
             filesJobCreating.add(newFile);
         }
-        return filesJobCreating;
     }
 
     /**
@@ -76,50 +88,49 @@ public class BoxUtil
      * @param inBox
      * @param ftpConfig
      */
-    private static void downloadFileToInboxFromFTP(String inBox,
+    private static void downloadFileToInboxFromFTP(CompanyConfiguration cpConfig,
             FTPConfiguration ftpConfig)
     {
         String ftpHost = ftpConfig.getFtpHost();
         String ftpUsername = ftpConfig.getFtpUsername();
         String ftpPassword = ftpConfig.getFtpPassword();
-        String ftpInbox = ftpConfig.getFtpInbox();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpUsername, ftpPassword);
+        int ftpPort = ftpConfig.getFtpPort();
+        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {
-            List<String> files = new ArrayList<String>();
-            files = ftpHelper.ftpList(ftpInbox);
-            for (String fileName : files)
+            String ftpInbox = ftpConfig.getFtpInbox();
+            String inBox = cpConfig.getInbox();
+            copyFtpFile(ftpHelper, ftpInbox, inBox);
+            String inbox4XLZ = cpConfig.getInbox4XLZ();
+            if (null != inbox4XLZ && !"".equals(inbox4XLZ))
             {
-                if ((ftpInbox + "/.").equals(fileName)
-                        || (ftpInbox + "/..").equals(fileName)
-                        || (ftpInbox + "/...").equals(fileName))
+                String rootDir = ftpInbox.substring(0, ftpInbox.lastIndexOf("/"));
+                String ftpInbox4XLZ = rootDir + inbox4XLZ.substring(inbox4XLZ.lastIndexOf(File.separator));
+                if (!ftpHelper.ftpDirExists(ftpInbox4XLZ))
                 {
-                    continue;
+                    ftpHelper.ftpCreateDir(ftpInbox4XLZ);
                 }
-                File targetFile = null;
-                try
-                {
-                    InputStream is = ftpHelper.ftpDownloadFile(fileName);
-                    if (is == null)
-                    {
-                        continue;
-                    }
-                    String name = fileName.substring(fileName.lastIndexOf("/"));
-                    targetFile = new File(inBox + File.separator + name);
-                    FileUtil.copyFile(targetFile, is);
-                    ftpHelper.ftpDelete(fileName);
-                }
-                catch (IOException e)
-                {
-                    // The file may be used by other user
-                    if (targetFile.exists())
-                    {
-                        FileUtil.deleteFile(targetFile);
-                    }
-                    continue;
-                }
+                copyFtpFile(ftpHelper, ftpInbox4XLZ, inbox4XLZ);
             }
+        }
+    }
+
+    private static void copyFtpFile(FtpHelper ftpHelper, String ftpInbox,
+            String inBox)
+    {
+        FTPFile[] files = ftpHelper.ftpFileList(ftpInbox);
+        for (FTPFile file : files)
+        {
+            String fileName = file.getName();
+            if (fileName == null || fileName.matches("\\.*"))
+            {
+                continue;
+            }
+            String remoteFilePath = ftpInbox + "/" + fileName;
+            String localeFilePath = inBox + File.separator + fileName;
+            ftpHelper.ftpDownloadFile(remoteFilePath, localeFilePath);
+            ftpHelper.ftpDeleteFile(remoteFilePath);
         }
     }
 
@@ -129,14 +140,24 @@ public class BoxUtil
      * @param inBox
      * @param ftpConfig
      */
-    private static void downloadFileToInboxFromSMB(String inBox,
+    private static void downloadFileToInboxFromSMB(CompanyConfiguration cpConfig,
             SMBConfiguration smbConfig)
     {
         String smbInbox = smbConfig.getSMBInbox();
-        SmbFile smbDir;
+        copySMBFile(cpConfig.getInbox(), smbInbox);
+        String inbox4XLZ=cpConfig.getInbox4XLZ();
+        if(null!=inbox4XLZ&&!"".equals(inbox4XLZ)){
+            String rootDir=smbInbox.substring(0, smbInbox.lastIndexOf("/"));
+            String sbmInbox4XLZ=rootDir + inbox4XLZ.substring(inbox4XLZ.lastIndexOf(File.separator));
+            copySMBFile( inbox4XLZ,sbmInbox4XLZ);
+        }
+    }
+
+    private static void copySMBFile(String inBox, String smbInbox)
+    {
         try
         {
-            smbDir = new SmbFile(smbInbox);
+            SmbFile smbDir = new SmbFile(smbInbox);
             SmbFile[] files = smbDir.listFiles();
             for (SmbFile sf : files)
             {
@@ -153,7 +174,6 @@ public class BoxUtil
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -184,16 +204,16 @@ public class BoxUtil
         String ftpUsername = ftpConfig.getFtpUsername();
         String ftpPassword = ftpConfig.getFtpPassword();
         String ftpFailedbox = ftpConfig.getFtpFailedbox();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpUsername, ftpPassword);
+        int ftpPort = ftpConfig.getFtpPort();
+        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {
             File failedBox = new File(failedboxPath);
-            String root = failedboxPath.replace("\\", "/");
             File[] files = failedBox.listFiles();
             for (File file : files)
             {
-                ftpHelper.ftpUploadDirectory(ftpFailedbox, file, root);
+                ftpHelper.ftpUploadDirectory(ftpFailedbox, file, failedboxPath);
             }
 
         }
@@ -231,16 +251,16 @@ public class BoxUtil
         String ftpUsername = ftpConfig.getFtpUsername();
         String ftpPassword = ftpConfig.getFtpPassword();
         String ftpOutbox = ftpConfig.getFtpOutbox();
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpUsername, ftpPassword);
+        int ftpPort = ftpConfig.getFtpPort();
+        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort, ftpUsername, ftpPassword);
         boolean ftpInit = ftpHelper.testConnect();
         if (ftpInit)
         {
             File outBox = new File(outboxPath);
-            String root = outboxPath.replace("\\", "/");
             File[] files = outBox.listFiles();
             for (File file : files)
             {
-                ftpHelper.ftpUploadDirectory(ftpOutbox, file, root);
+                ftpHelper.ftpUploadDirectory(ftpOutbox, file, outboxPath);
             }
         }
     }
@@ -355,23 +375,84 @@ public class BoxUtil
      * @param failedJobInfos
      * @param targetDir
      */
-    private static void moveJobFiles(List<JobInfo> jobInfos, String targetDir)
+    private static void moveJobFiles(List<JobInfo> jobInfos, String origintargetDir)
     {
+        String targetDir=origintargetDir;
         for (JobInfo jobInfo : jobInfos)
         {
+           
             File file = new File(jobInfo.getOriginFile());
-            try
-            {
-                FileUtil.copyFileToDir(targetDir, file);
-                FileUtil.deleteFile(file);
+            if(file.isDirectory()){
+                //separator for unzip folder which fail and successful named the some.
+                //maybe used for we don't know the fail and successful  
+                targetDir=origintargetDir+File.separator+jobInfo.getJobName();
+                File dir=new File(targetDir);
+                dir.mkdir();
             }
-            catch (IOException e)
-            {
-                String message = "File read/write error when move job files.";
-                LogUtil.fail(message, e);
+            else{                
+                moveFiles(targetDir, jobInfo, file);
+                continue;
             }
-            jobInfo.setOriginFile(targetDir + File.separator + file.getName());
+            //if it not a folder it will run the bellow code.
+            if(null!=jobInfo.getSourceFiles()&&jobInfo.getSourceFiles().size()>0){
+               
+                    for(String sf:jobInfo.getSourceFiles()){
+                        file = new File(sf);
+                        //they don't need to copy the root folder
+                        if(file.isDirectory())continue;
+                        try
+                        {
+                            FileUtil.copyFileToDir(targetDir, file);
+                            //the first fail come in the folder we left.
+                            file.delete();
+                        }
+                        catch (IOException e)
+                        {
+                            String message = "File read/write error when move job files.";
+                            LogUtil.fail(message, e);
+                            continue;
+                        }
+                          
+                    }
+                
+                  
+            }
+            else{                
+                try
+                {
+                    for(File subfile:file.listFiles()){
+                        FileUtil.copyFileToDir(targetDir, subfile);
+                        if(subfile.isDirectory())continue;
+                    }
+                    //the second successful come in the folder we delete.
+                    FileUtil.deleteFile(file);
+                }
+                catch (IOException e)
+                {
+                    String message = "File read/write error when move job files.";
+                    LogUtil.fail(message, e);
+                }
+               
+            }
+            jobInfo.setOriginFile(targetDir); 
+            continue;
+            
         }
+    }
+
+    private static void moveFiles(String targetDir, JobInfo jobInfo, File file)
+    {
+        try
+        {
+            FileUtil.copyFileToDir(targetDir, file);
+            FileUtil.deleteFile(file);
+        }
+        catch (IOException e)
+        {
+            String message = "File read/write error when move job files.";
+            LogUtil.fail(message, e);
+        }
+        jobInfo.setOriginFile(targetDir + File.separator + file.getName());
     }
 
     /**
@@ -443,5 +524,15 @@ public class BoxUtil
             }
         }
         return list;
+    }
+
+    public static void deleteSubFile(String tempBox)
+    {
+        File temp = new File(tempBox);
+        File[] files = temp.listFiles();
+        for (int i = 0; i < files.length; i++)
+        {
+            files[i].delete();
+        }
     }
 }

@@ -751,19 +751,18 @@ public class UserHandlerHelper
             for (Iterator<Object[]> a = listo.iterator(); a.hasNext();)
             {
                 Object[] test = a.next();
-                String key = (String) test[0];
+                String key = String.valueOf(test[0]);
                 String value = result.get(key);
                 if (value != null)
                 {
-                    result.put(key, value + "<br>" + (String) test[1]);
+                    result.put(key, value + "<br>" + String.valueOf(test[1]));
 
                 }
                 else
                 {
-                    result.put(key, (String) test[1]);
+                    result.put(key, String.valueOf(test[1]));
 
                 }
-
             }
         }
         catch (RemoteException re)

@@ -19,6 +19,8 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -26,6 +28,8 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
+import com.globalsight.everest.util.comparator.PriorityComparator;
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DocumentElement;
@@ -66,7 +70,8 @@ public class InternalTextHelper
      * @return
      */
     public static String handleString(String oriStr,
-            List<InternalText> internalTexts, String format, boolean useBpt)
+            List<InternalText> internalTexts, String format, boolean useBpt,
+            boolean doSegFirst)
     {
         if (oriStr == null || oriStr.length() == 0)
             return oriStr;
@@ -75,7 +80,7 @@ public class InternalTextHelper
             return oriStr;
 
         List<String> sList = handleStringWithListReturn(oriStr, internalTexts,
-                format);
+                format, doSegFirst);
 
         if (useBpt)
         {
@@ -83,6 +88,234 @@ public class InternalTextHelper
         }
 
         return listToString(sList);
+    }
+
+    /**
+     * Handle the internal texts for one string
+     * 
+     * @param oriStr
+     * @param internalTexts
+     * @param format
+     * @param useBpt
+     *            true to use bpt/ept tag; false to use GS-INTERNAL-TEXT tag
+     * @return
+     */
+    public static String handleString(String oriStr,
+            List<InternalText> internalTexts, String format, boolean useBpt)
+    {
+        return handleString(oriStr, internalTexts, format, useBpt, false);
+    }
+
+    /**
+     * Handle the internal texts for one string, use GS-INTERNAL-TEXT tag
+     * 
+     * @param oriStr
+     * @param internalTexts
+     * @param format
+     * @return
+     */
+    public static List<String> handleStringWithListReturn(String oriStr,
+            List<InternalText> internalTexts, String format, boolean doSegFirst)
+    {
+        List<String> sList = new ArrayList<String>();
+        sList.add(oriStr);
+
+        if (oriStr == null || oriStr.length() == 0)
+            return sList;
+
+        if (internalTexts == null || internalTexts.size() == 0)
+            return sList;
+
+        Collections.sort(internalTexts, new PriorityComparator());
+
+        if (!doSegFirst
+                || (doSegFirst && !oriStr.contains("<") && !oriStr
+                        .contains(">")))
+        {
+            for (InternalText it : internalTexts)
+            {
+                List<String> result = new ArrayList<String>();
+                for (String s : sList)
+                {
+                    result.addAll(handleStringByOneRule(s, it, format,
+                            doSegFirst));
+                }
+
+                sList = result;
+            }
+
+            if (sList == null || sList.size() == 0)
+            {
+                sList = new ArrayList<String>();
+                sList.add(oriStr);
+            }
+
+            return sList;
+        }
+        else
+        {
+            List<InternalTextElement> elms = null;
+            try
+            {
+                elms = InternalTextElement.parse(oriStr);
+            }
+            catch (Exception e1)
+            {
+                String msg = "Exception in handleStringWithListReturn, InternalTextElement.parse:"
+                        + oriStr;
+                CATEGORY.error(msg, e1);
+                elms = new ArrayList<InternalTextElement>();
+                elms.add(InternalTextElement.newTag(oriStr));
+            }
+
+            for (InternalText it : internalTexts)
+            {
+                List<InternalTextElement> result = new ArrayList<InternalTextElement>();
+                for (InternalTextElement e : elms)
+                {
+                    result.addAll(handleElementByOneRule(e, it, format));
+                }
+
+                elms = result;
+            }
+            sList = new ArrayList<String>();
+
+            if (elms != null && elms.size() > 0)
+            {
+                // find max i
+                int i = 0;
+                for (InternalTextElement ite : elms)
+                {
+                    if (ite.isTag())
+                    {
+                        StringIndex si = StringIndex.getValueBetween(
+                                new StringBuffer(ite.toString()), 0, " i=\"",
+                                "\"");
+                        if (si != null && si.value != null)
+                        {
+                            try
+                            {
+                                int temp = Integer.parseInt(si.value);
+                                if (temp > i)
+                                    i = temp;
+                            }
+                            catch (Exception exx)
+                            {
+                                // ignore
+                            }
+                        }
+                    }
+                }
+                // then add bpt tag
+                for (InternalTextElement ite : elms)
+                {
+                    if (ite.isInternalText())
+                    {
+                        String c = ite.getContent();
+                        String before = BPT_START.replace("iii", "" + (i + 1));
+                        String end = EPT_END.replace("iii", "" + (i + 1));
+                        ite.setContent(before + c + end);
+                        ++i;
+                    }
+
+                    sList.add(ite.toString());
+                }
+            }
+            else
+            {
+                sList.add(oriStr);
+            }
+
+            return sList;
+        }
+    }
+
+    private static List<InternalTextElement> handleElementByOneRule(
+            InternalTextElement e, InternalText it, String format)
+    {
+        List<InternalTextElement> result = new ArrayList<InternalTextElement>();
+        if (!e.doInternalText())
+        {
+            result.add(e);
+            return result;
+        }
+
+        String s = e.toString();
+        if (!it.isRE())
+        {
+            String internalText = getInternalTextValue(it.getName(), format);
+            String itext = resolveInternalTextValue(internalText, format, true);
+            String end = new String(s.toCharArray());
+            int i = end.indexOf(internalText);
+
+            while (i > -1)
+            {
+                String first = end.substring(0, i);
+                if (first.length() != 0)
+                {
+                    result.add(InternalTextElement.newText(first, false));
+                }
+                result.add(InternalTextElement.newText(itext, true));
+                end = end.substring(i + internalText.length());
+
+                i = end.indexOf(internalText);
+            }
+
+            if (end.length() != 0)
+            {
+                result.add(InternalTextElement.newText(end, false));
+            }
+        }
+        else
+        {
+            try
+            {
+                Pattern p = Pattern.compile(it.getName());
+                Matcher m = p.matcher(s);
+                int fromIndex = 0;
+                String end = new String(s.toCharArray());
+                while (m.find())
+                {
+                    String internalText = m.group();
+
+                    // if the length of internal text is 0, continue
+                    if (internalText.length() == 0)
+                    {
+                        continue;
+                    }
+
+                    int i = s.indexOf(internalText, fromIndex);
+                    String first = s.substring(fromIndex, i);
+                    end = s.substring(i + internalText.length());
+
+                    if (first.length() != 0)
+                    {
+                        result.add(InternalTextElement.newText(first, false));
+                    }
+
+                    String itext = resolveInternalTextValue(internalText,
+                            format, true);
+                    result.add(InternalTextElement.newText(itext, true));
+
+                    fromIndex = i + internalText.length();
+                }
+
+                if (end != null && end.length() != 0)
+                {
+                    result.add(InternalTextElement.newText(end, false));
+                }
+            }
+            catch (Exception exx)
+            {
+                String msg = "Exception in handleStringByOneRule, re rule:"
+                        + it.getName() + " text:" + s;
+                CATEGORY.error(msg, exx);
+                result.clear();
+                result.add(e);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -96,36 +329,7 @@ public class InternalTextHelper
     public static List<String> handleStringWithListReturn(String oriStr,
             List<InternalText> internalTexts, String format)
     {
-        List<String> sList = new ArrayList<String>();
-        sList.add(oriStr);
-
-        if (oriStr == null || oriStr.length() == 0)
-            return sList;
-
-        if (internalTexts == null || internalTexts.size() == 0)
-            return sList;
-
-        for (InternalText it : internalTexts)
-        {
-            List<String> result = new ArrayList<String>();
-            for (String s : sList)
-            {
-                result.addAll(handleStringByOneRule(s, it, format));
-            }
-
-            sList = result;
-        }
-
-        if (sList != null && sList.size() > 0)
-        {
-            return sList;
-        }
-        else
-        {
-            sList = new ArrayList<String>();
-            sList.add(oriStr);
-            return sList;
-        }
+        return handleStringWithListReturn(oriStr, internalTexts, format, false);
     }
 
     /**
@@ -186,7 +390,7 @@ public class InternalTextHelper
      * @return
      */
     private static List<String> handleStringByOneRule(String s,
-            InternalText it, String format)
+            InternalText it, String format, boolean doSegFirst)
     {
         String tagStart = GS_INTERNALT_TAG_START;
         String tagEnd = GS_INTERNALT_TAG_END;
@@ -200,7 +404,8 @@ public class InternalTextHelper
         if (!it.isRE())
         {
             String internalText = getInternalTextValue(it.getName(), format);
-            String itext = resolveInternalTextValue(internalText, format);
+            String itext = resolveInternalTextValue(internalText, format,
+                    doSegFirst);
             String end = new String(s.toCharArray());
             int i = end.indexOf(internalText);
 
@@ -250,7 +455,7 @@ public class InternalTextHelper
                     }
 
                     String itext = resolveInternalTextValue(internalText,
-                            format);
+                            format, doSegFirst);
                     result.add(tagStart + itext + tagEnd);
 
                     fromIndex = i + internalText.length();
@@ -281,14 +486,33 @@ public class InternalTextHelper
             return name;
         }
 
-        if (IFormatNames.FORMAT_XML.equals(format))
+        if ((IFormatNames.FORMAT_XML.equals(format) || IFormatNames.FORMAT_OFFICE_XML
+                .equals(format)) && (name != null && name.length() == 1))
         {
-            return m_xmlEncoder.decodeStringBasic(name);
+            return m_xmlEncoder.encodeStringBasic(name);
         }
 
+        if (IFormatNames.FORMAT_XML.equals(format))
+        {
+            return name;
+        }
+
+        if (IFormatNames.FORMAT_WORD_HTML.equals(format)
+                || IFormatNames.FORMAT_EXCEL_HTML.equals(format)
+                || IFormatNames.FORMAT_POWERPOINT_HTML.equals(format))
+        {
+            return m_xmlEncoder.encodeStringBasic(name);
+        }
+
+        if (IFormatNames.FORMAT_HTML.equals(format) && name != null
+                && name.length() == 1)
+        {
+            return m_xmlEncoder.encodeStringBasic(name);
+        }
+        
         if (IFormatNames.FORMAT_HTML.equals(format))
         {
-            return m_htmlDecoder.decodeStringBasic(name);
+            return name;
         }
 
         if (IFormatNames.FORMAT_JAVAPROP_HTML.equals(format)
@@ -298,10 +522,16 @@ public class InternalTextHelper
             return m_tmx.encode(name);
         }
 
+        if (IFormatNames.FORMAT_PLAINTEXT.equals(format))
+        {
+            return m_tmx.encode(name);
+        }
+
         return name;
     }
 
-    private static String resolveInternalTextValue(String p_value, String format)
+    private static String resolveInternalTextValue(String p_value,
+            String format, boolean doSegFirst)
     {
         if (format == null)
         {
@@ -311,13 +541,23 @@ public class InternalTextHelper
         if (IFormatNames.FORMAT_XML.equals(format)
                 || IFormatNames.FORMAT_OFFICE_XML.equals(format))
         {
-            return m_xmlEncoder.encodeStringBasic(p_value);
+            if (p_value != null && p_value.length() == 1)
+                return m_xmlEncoder.encodeStringBasic(p_value);
+            if (doSegFirst)
+                return p_value;
+            else
+                return m_xmlEncoder.encodeStringBasic(p_value);
         }
 
         if (IFormatNames.FORMAT_HTML.equals(format)
                 || IFormatNames.FORMAT_WORD_HTML.equals(format)
                 || IFormatNames.FORMAT_EXCEL_HTML.equals(format)
                 || IFormatNames.FORMAT_POWERPOINT_HTML.equals(format))
+        {
+            return p_value;
+        }
+
+        if (IFormatNames.FORMAT_PLAINTEXT.equals(format))
         {
             return p_value;
         }
@@ -501,8 +741,7 @@ public class InternalTextHelper
         for (int i = 0; i < ids.size(); i++)
         {
             String id = (String) ids.get(i);
-            Object[] ob =
-            { id };
+            Object[] ob = { id };
             String regex = MessageFormat.format(REGEX_ALL, ob);
             Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
@@ -532,5 +771,84 @@ public class InternalTextHelper
         }
 
         return internalTexts;
+    }
+
+    public static void handleOutput(Output p_output, Filter mFilter,
+            boolean useBptTag)
+    {
+        if (mFilter == null || p_output == null)
+        {
+            return;
+        }
+
+        // get base filter (internal text filer) for main filter
+        BaseFilter bf = null;
+        if (mFilter instanceof BaseFilter)
+        {
+            bf = (BaseFilter) mFilter;
+        }
+        else
+        {
+            long filterId = mFilter.getId();
+            String filterTableName = mFilter.getFilterTableName();
+            bf = BaseFilterManager.getBaseFilterByMapping(filterId,
+                    filterTableName);
+        }
+
+        if (bf == null)
+        {
+            return;
+        }
+
+        // get internal texts
+        List<InternalText> internalTexts = null;
+        try
+        {
+            internalTexts = BaseFilterManager.getInternalTexts(bf);
+            Collections.sort(internalTexts, new PriorityComparator());
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Get internal text failed. ", e);
+        }
+        if (internalTexts == null || internalTexts.size() == 0)
+        {
+            return;
+        }
+
+        String format = p_output.getDataFormat();
+        // handle internal text by segment
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
+        {
+            DocumentElement de = (DocumentElement) it.next();
+
+            switch (de.type())
+            {
+                case DocumentElement.TRANSLATABLE:
+                {
+                    TranslatableElement elem = (TranslatableElement) de;
+                    ArrayList segments = elem.getSegments();
+
+                    if (segments != null && !segments.isEmpty())
+                    {
+                        for (Object object : segments)
+                        {
+                            SegmentNode snode = (SegmentNode) object;
+                            String segment = snode.getSegment();
+
+                            String result = handleString(segment,
+                                    internalTexts, format, useBptTag, true);
+                            snode.setSegment(result);
+                        }
+                    }
+
+                    break;
+                }
+
+                default:
+                    // skip all others
+                    break;
+            }
+        }
     }
 }

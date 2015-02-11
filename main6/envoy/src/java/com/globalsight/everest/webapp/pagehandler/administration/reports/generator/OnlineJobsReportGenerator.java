@@ -71,6 +71,7 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.FlatSurcharge;
 import com.globalsight.everest.costing.PercentageSurcharge;
 import com.globalsight.everest.costing.Surcharge;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -85,7 +86,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.XlsReports;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
@@ -104,7 +104,7 @@ import com.globalsight.util.JfreeCharUtil;
 public class OnlineJobsReportGenerator extends XlsReports implements
         ReportGenerator
 {
-    private static Logger s_logger = Logger
+    private static Logger logger = Logger
             .getLogger(OnlineJobsReportGenerator.class.getName());
 
     // defines a 0 format for a 3 decimal precision point BigDecimal
@@ -154,6 +154,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         m_data.setTradosStyle(p_request.getParameter("reportStyle"));
         m_data.setDateFormatString(p_request.getParameter("dateFormat"));
         setProjectIdList(p_request, m_data);
+        setLocpIdList(p_request, m_data);
         setTargetLocales(p_request, m_data);
         // get all the jobs that were originally imported with the wrong project
         // the users want to pretend that these jobs are in this project
@@ -191,12 +192,18 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         m_data.jobIds = p_jobIDS;
         HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = reportDataMap(
                 jobs, false, false);
-        // Create sheets in Workbook.
-        createSheets(workbook, projectMap, false);
-        workbook.write();
-        workbook.close();
-        return new File[]
-        { file };
+        if (projectMap != null && projectMap.size() > 0)
+        {
+            // Create sheets in Workbook.
+            createSheets(workbook, projectMap, false);
+            workbook.write();
+            workbook.close();
+            return new File[]{ file };
+        }
+        else
+        {
+            return new File[0];
+        }
     }
 
     /**
@@ -265,7 +272,11 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = getProjectDataForMonth(
                         p_request, i, recalculateFinishedWorkflow,
                         includeExReview);
-
+             
+                // Cancel the report.
+                if (isCancelled())
+                    return new File[0];
+                
                 if (projectMap.size() > 0)
                 {
                     // This sheets array has two elements.
@@ -394,12 +405,9 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             }
 
             paramsSheet.addCell(new Label(2, 0, m_bundle.getString("lb_Year")));
-            paramsSheet.addCell(new Label(2, 1, (String) p_request
-                    .getParameter("year")));
-            paramsSheet.addCell(new Label(3, 0, m_bundle
-                    .getString("lb_re_cost_jobs")));
-            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean
-                    .toString(recalculateFinishedWorkflow)));
+            paramsSheet.addCell(new Label(2, 1, (String) p_request.getParameter("year")));
+            paramsSheet.addCell(new Label(3, 0, m_bundle.getString("lb_re_cost_jobs")));
+            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean.toString(recalculateFinishedWorkflow)));
 
             workbook.write();
             workbook.close();
@@ -412,6 +420,10 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = getProjectDataForMonth(
                     p_request, 0, recalculateFinishedWorkflow, includeExReview);
 
+            // Cancel the report.
+            if (isCancelled())
+                return new File[0];
+            
             // Create sheets in Workbook.
             createSheets(workbook, projectMap, includeExReview);
 
@@ -467,8 +479,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             workbook.close();
         }
 
-        return new File[]
-        { file };
+        return new File[]{ file };
     }
 
     /**
@@ -654,10 +665,10 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     }
 
     /**
-     * Gets the report data for report.
+     * Prepares the data for generating the report.
      * 
-     * @return HashMap<key, HashMap<TargetLocale, ProjectWorkflowData>> String
-     *         key = getMapKey(companyName, projectDesc, jobId);
+     * @return HashMap<key, HashMap<TargetLocale, ProjectWorkflowData>>. 
+     *         String key = getMapKey(companyName, projectDesc, jobId);
      */
     private HashMap<String, HashMap<String, ProjectWorkflowData>> reportDataMap(
             HashSet<Job> p_jobs, boolean p_recalculateFinishedWorkflow,
@@ -669,7 +680,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
-        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = new HashMap<String, HashMap<String, ProjectWorkflowData>>();
+        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = 
+                new HashMap<String, HashMap<String, ProjectWorkflowData>>();
         Currency pivotCurrency = ServerProxy.getCostingEngine()
                 .getCurrencyByName(
                         ReportUtil.getCurrencyName(m_data.getCurrency()),
@@ -677,7 +689,25 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         for (Job j : p_jobs)
         {
+            if(isCancelled())
+                return new HashMap<String, HashMap<String, ProjectWorkflowData>>();
+            
+            L10nProfile l10nprofile = j.getL10nProfile();
+            if (!m_data.wantsAllLocProfile
+                    && !m_data.locProfileIdList.contains(l10nprofile.getId()))
+            {
+                continue;
+            }
+            String l10nProfileName = l10nprofile.getName();
+            String fileProfileNames = j.getFProfileNames();
+
             String projectDesc = getProjectDesc(m_data, j);
+            String jobId = Long.toString(j.getId());
+            String jobName = j.getJobName();
+            String companyId = String.valueOf(j.getCompanyId());
+            String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
+            List<FileProfile> allFileProfiles = j.getAllFileProfiles();
 
             // Calculate additional charges
             // GBS-1698, Vincent Yan, 2011/02/21
@@ -753,11 +783,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     continue;
                 }
 
-                String jobId = Long.toString(j.getId());
-                String jobName = j.getJobName();
-                String companyId = j.getCompanyId();
-                String companyName = CompanyWrapper
-                        .getCompanyNameById(companyId);
+
                 String key = getMapKey(companyName, projectDesc, jobId);
                 HashMap<String, ProjectWorkflowData> localeMap = projectMap
                         .get(key);
@@ -773,7 +799,10 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 data.jobName = jobName;
                 data.projectDesc = projectDesc;
                 data.companyName = companyName;
-                data.allFileProfiles = j.getAllFileProfiles();
+                data.allFileProfiles = allFileProfiles;
+                // the property is as same as jobName one to one
+                data.l10nProfileName = l10nProfileName;
+                data.fileProfileNames = fileProfileNames;
                 data.targetLang = targetLang;
                 data.creationDate = j.getCreateDate();
                 data.status = j.getDisplayState();
@@ -794,15 +823,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 if (j.getCreateDate().before(data.creationDate))
                     data.creationDate = j.getCreateDate();
 
-                // get the word count used for costing which incorporates the
-                // LMT
-                // WordcountForCosting wfc = new WordcountForCosting(w);
-                // add the sublev rep count to the total rep count
-                data.repetitionWordCount = w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount()
-                        + w.getHiFuzzyRepetitionWordCount()
-                        + w.getMedHiFuzzyRepetitionWordCount()
-                        + w.getMedFuzzyRepetitionWordCount();
+                data.repetitionWordCount = w.getRepetitionWordCount();
                 data.lowFuzzyMatchWordCount = w.getThresholdLowFuzzyWordCount();
                 data.medFuzzyMatchWordCount = w.getThresholdMedFuzzyWordCount();
                 data.medHiFuzzyMatchWordCount = w
@@ -815,7 +836,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                         + data.hiFuzzyMatchWordCount;
 
                 // add the lowest fuzzies and sublev match to nomatch
-                data.noMatchWordCount = w.getThresholdNoMatchWordCount();
+                data.noMatchWordCount = w.getThresholdNoMatchWordCount()
+                        + w.getThresholdLowFuzzyWordCount();
 
                 data.segmentTmWordCount = (isInContextMatch) ? w
                         .getSegmentTmWordCount() : (isDefaultContextMatch) ? w
@@ -1108,6 +1130,9 @@ public class OnlineJobsReportGenerator extends XlsReports implements
      */
     private class ProjectWorkflowData
     {
+        public String l10nProfileName;
+        public String fileProfileNames;
+
         // For "Job id not showing in external review tabs" Issue
         public String jobId;
 
@@ -1238,6 +1263,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     {
         public boolean wantsAllProjects = false;
 
+        public boolean wantsAllLocProfile = true;
+
         boolean wantsAllLocales = false;
 
         private boolean tradosStyle = true;
@@ -1247,6 +1274,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         HashSet<String> trgLocaleList = new HashSet<String>();
 
         ArrayList<Long> projectIdList = new ArrayList<Long>();
+        
+        ArrayList<Long> locProfileIdList = new ArrayList<Long>();
 
         Hashtable<Long, Project> wrongJobMap = new Hashtable<Long, Project>(); // maps
 
@@ -1358,6 +1387,35 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 {
                     p_data.wantsAllProjects = true;
                     break;
+                }
+            }
+        }
+    }
+
+    private void setLocpIdList(HttpServletRequest p_request, MyData p_data)
+    {
+        // set the project Id
+        String[] locprofiles = p_request.getParameterValues("locprofile");
+
+        if (locprofiles != null)
+        {
+            for (int i = 0; i < locprofiles.length; i++)
+            {
+                String ids = locprofiles[i];
+                if (ids.equals("*") == false)
+                {
+                    m_data.wantsAllLocProfile = false;
+                    // Long p_id = new Long(id);
+                    // Collection<? extends Long> c = ServerProxy
+                    // .getFileProfilePersistenceManager()
+                    // .readFileProfileBy(p_id);
+                    String[] locproids = ids.split(",");
+                    for (int j = 0; j < locproids.length; j++)
+                    {
+                        String id = locproids[j];
+                        p_data.locProfileIdList.add(new Long(id));
+                    }
+
                 }
             }
         }
@@ -1554,6 +1612,15 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         p_sheet.addCell(new Label(++col, 2, bundle
                 .getString("lb_source_file_format"), headerFormat));
         p_sheet.mergeCells(col, 2, col, 3);
+
+        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_loc_profile"),
+                headerFormat));
+        p_sheet.mergeCells(col, 2, col, 3);
+
+        p_sheet.addCell(new Label(++col, 2, bundle
+                .getString("lb_file_profiles"), headerFormat));
+        p_sheet.mergeCells(col, 2, col, 3);
+
         p_sheet.addCell(new Label(++col, 2, bundle
                 .getString("lb_creation_date"), headerFormat));
         p_sheet.mergeCells(col, 2, col, 3);
@@ -1889,6 +1956,14 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         p_sheet.addCell(new Label(++col, 2, bundle
                 .getString("lb_source_file_format"), headerFormat));
+        p_sheet.mergeCells(col, 2, col, 3);
+
+        p_sheet.addCell(new Label(++col, 2, bundle.getString("lb_loc_profile"),
+                headerFormat));
+        p_sheet.mergeCells(col, 2, col, 3);
+
+        p_sheet.addCell(new Label(++col, 2, bundle
+                .getString("lb_file_profiles"), headerFormat));
         p_sheet.mergeCells(col, 2, col, 3);
 
         p_sheet.addCell(new Label(++col, 2, bundle
@@ -2310,6 +2385,16 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                         getAllSouceFileFormats(data.allFileProfiles),
                         temp_normalFormat));
                 p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
+                
+                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                        data.l10nProfileName,
+                        temp_normalFormat));
+                p_sheets[MONTH_SHEET].setColumnView(col - 1, 25);
+                
+                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                        data.fileProfileNames,
+                        temp_normalFormat));
+                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
 
                 if (data.wasExportFailed)
                 {
@@ -2361,7 +2446,6 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 // Language
                 p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
                         data.targetLang, temp_normalFormat));
-
                 int numwidth = 10;
                 // Summary Start Column
                 p_data.initSumStartCol(col);
@@ -2915,6 +2999,14 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                         temp_normalFormat));
                 p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
 
+                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                        data.l10nProfileName, temp_normalFormat));
+                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
+
+                p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
+                        data.fileProfileNames, temp_normalFormat));
+                p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
+
                 if (data.wasExportFailed)
                 {
                     p_sheets[MONTH_SHEET].addCell(new DateTime(col++, row,
@@ -3386,7 +3478,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         File imgFile = File.createTempFile("GSJobChart", ".png");
         JfreeCharUtil.drawPieChart2D("", totalCostDate, imgFile);
-        WritableImage img = new WritableImage(12, row - 1, 7, 25, imgFile);
+        WritableImage img = new WritableImage(15, row - 1, 7, 25, imgFile);
         p_sheet.addImage(img);
 
         WritableCellFormat moneyFormat = getMoneyFormat();
@@ -3619,7 +3711,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         }
         catch (Exception e)
         {
-            s_logger.error(
+            logger.error(
                     "Failed to add jobs which are in the 'wrong' project.", e);
         }
     }
@@ -3641,7 +3733,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         {
             if (p_data.warnedAboutMissingWrongJobsFile == false)
             {
-                s_logger.info("jobsInWrongDivision.txt file not found.");
+                logger.info("jobsInWrongDivision.txt file not found.");
                 p_data.warnedAboutMissingWrongJobsFile = true;
             }
             return wrongJobs;
@@ -3698,7 +3790,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             }
             catch (Exception e)
             {
-                s_logger.warn("Ignoring mapping line for "
+                logger.warn("Ignoring mapping line for "
                         + jobname
                         + " => "
                         + projectname
@@ -3823,8 +3915,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             }
             catch (Exception e)
             {
-                s_logger.error(
-                        "Can't get KnownFormatType in Online Jobs Report", e);
+                logger.error("Can't get KnownFormatType in Online Jobs Report", e);
             }
 
             if (type != null && !type.getName().isEmpty())
@@ -3860,18 +3951,13 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     public void setPercent(int p_finishedJobNum)
     {
         ReportGeneratorHandler.setReportsMapByGenerator(m_userId,
-                m_data.jobIds, 100 * p_finishedJobNum / m_data.jobIds.size());
+                m_data.jobIds, 100 * p_finishedJobNum / m_data.jobIds.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId,
-                m_data.jobIds);
-        if (data != null)
-            return data.isCancle();
-
-        return false;
+        return ReportGeneratorHandler.isCancelled(m_userId, null, getReportType());
     }
 
     private String getExportDateStr(SimpleDateFormat sdf, Date exportDate)

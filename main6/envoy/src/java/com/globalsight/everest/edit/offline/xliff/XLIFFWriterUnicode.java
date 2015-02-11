@@ -78,7 +78,7 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
     protected abstract void writeXlfDocHeader(DownloadParams p_downloadParams)
             throws IOException, AmbassadorDwUpException;
 
-    protected abstract void writeXlfDocBody(boolean isTmx, boolean editAll,
+    protected abstract void writeXlfDocBody(boolean isTmx, int TMEditType,
             DownloadParams p_downloadParams) throws AmbassadorDwUpException;
 
     protected void setOfflinePageData(OfflinePageData p_page, Locale p_uiLocale)
@@ -133,15 +133,18 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
             AmbassadorDwUpException
     {
         boolean isTmx = true;
-        boolean editAll = p_downloadParams.getDownloadEditAllState() == AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
-        if (p_downloadParams.getResInsOption() == AmbassadorDwUpConstants.MAKE_RES_ATNS)
+        int TMEditType = p_downloadParams.getTMEditType();
+//        boolean editAll = p_downloadParams.getDownloadEditAllState() == AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
+        if (p_downloadParams.getResInsOption() == AmbassadorDwUpConstants.MAKE_RES_ATNS
+                || p_downloadParams.getResInsOption() == AmbassadorDwUpConstants.MAKE_RES_TMX_BOTH)
         {
             isTmx = false;
         }
         setDefaults();
         writeXlfHeader();
         writeXlfDocHeader(p_downloadParams);
-        writeXlfDocBody(isTmx, editAll, p_downloadParams);
+        //writeXlfDocBody(isTmx, editAll, p_downloadParams);
+        writeXlfDocBody(isTmx, TMEditType, p_downloadParams);
         writeXlfEnd();
     }
 

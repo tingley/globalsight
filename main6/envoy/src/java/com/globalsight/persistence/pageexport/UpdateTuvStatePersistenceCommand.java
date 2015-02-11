@@ -110,7 +110,7 @@ public class UpdateTuvStatePersistenceCommand extends PersistenceCommand
         if (m_companyId > 0)
         {
             tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvTableName(m_companyId);
+                    .getTuvWorkingTableName(m_companyId);
         }
 
         if (m_tuvsForState != null)

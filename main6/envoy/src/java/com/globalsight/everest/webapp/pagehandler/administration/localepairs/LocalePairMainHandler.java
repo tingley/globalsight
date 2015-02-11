@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -40,11 +42,11 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.LocalePairComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.dependencychecking.LocalePairDependencyChecker;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 public class LocalePairMainHandler extends PageHandler
     implements LocalePairConstants, WebAppConstants
@@ -226,16 +228,88 @@ public class LocalePairMainHandler extends PageHandler
         throws RemoteException, NamingException, GeneralException
     {
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
+        // Get all locale pairs
         Vector lps = localeMgr.getSourceTargetLocalePairs();
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
+        // Filter locale pairs by company name
+        filterLocalePairsByCompanyName(p_request, p_session, lps);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
+        // Get the number per page
+        int numPerPage = getNumPerPage(p_request, p_session);
 
-
-        setTableNavigation(p_request, p_session, lps,
-                       new LocalePairComparator(uiLocale),
-                       10,
-                       LP_LIST, LP_KEY);
+        setTableNavigation(p_request, p_session, lps, new LocalePairComparator(
+                uiLocale), numPerPage, LP_LIST, LP_KEY);
     }
 
+    private void filterLocalePairsByCompanyName(HttpServletRequest p_request,
+            HttpSession p_session, Vector p_lps)
+    {
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        String lpCompanyFilterValue = p_request
+                .getParameter(LocalePairConstants.FILTER_COMPANY);
+        if (lpCompanyFilterValue == null)
+        {
+            lpCompanyFilterValue = (String) sessionManager
+                    .getAttribute(LocalePairConstants.FILTER_COMPANY);
+        }
+        if (lpCompanyFilterValue == null)
+        {
+            lpCompanyFilterValue = "";
+        }
+        sessionManager.setAttribute(LocalePairConstants.FILTER_COMPANY,
+                lpCompanyFilterValue.trim());
+
+        if (!StringUtil.isEmpty(lpCompanyFilterValue))
+        {
+            for (Iterator it = p_lps.iterator(); it.hasNext();)
+            {
+                LocalePair lp = (LocalePair) it.next();
+                String comName = CompanyWrapper.getCompanyNameById(
+                        lp.getCompanyId()).toLowerCase();
+                if (comName.indexOf(lpCompanyFilterValue.trim().toLowerCase()) == -1)
+                {
+                    it.remove();
+                }
+            }
+        }
+    }
+    
+    private int getNumPerPage(HttpServletRequest p_request,
+            HttpSession p_session)
+    {
+        int result = 10;
+
+        SessionManager sessionManager = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String lpNumPerPage = p_request.getParameter("numOfPageSize");
+        if (StringUtil.isEmpty(lpNumPerPage))
+        {
+            lpNumPerPage = (String) sessionManager.getAttribute("lpNumPerPage");
+        }
+
+        if (lpNumPerPage != null)
+        {
+            sessionManager.setAttribute("lpNumPerPage", lpNumPerPage.trim());
+            if ("all".equalsIgnoreCase(lpNumPerPage))
+            {
+                result = Integer.MAX_VALUE;
+            }
+            else
+            {
+                try
+                {
+                    result = Integer.parseInt(lpNumPerPage);
+                }
+                catch (NumberFormatException ignore)
+                {
+                    result = 10;
+                }
+            }
+        }
+        
+        return result;
+    }
 }
 

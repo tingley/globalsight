@@ -52,7 +52,8 @@ import com.globalsight.reports.util.ReportsPackage;
  */
 public class WorkflowStatusReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/workflowStatus";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION
+            + "workflowStatus";
     private static final String PM_QUERY = "select distinct(manager_user_id) "
             + "from project p where p.companyid = ? "
             + "order by manager_user_id";

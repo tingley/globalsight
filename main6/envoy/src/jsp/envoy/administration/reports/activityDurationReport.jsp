@@ -572,4 +572,5 @@ response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public"); 
 activityDurationReport.generateReport( request, response );
+out.clear();out = pageContext.pushBody();
 %>

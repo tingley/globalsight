@@ -17,6 +17,8 @@
 package com.globalsight.everest.webapp.pagehandler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1043,6 +1045,12 @@ public class PageHandler
     protected boolean isPost(HttpServletRequest p_request) 
     {
         return "POST".equals(p_request.getMethod());
+    }
+    
+    protected String iso88591ToUtf8(String oldValue)
+            throws UnsupportedEncodingException
+    {
+        return new String(oldValue.getBytes("ISO-8859-1"), "UTF-8");
     }
 }
 

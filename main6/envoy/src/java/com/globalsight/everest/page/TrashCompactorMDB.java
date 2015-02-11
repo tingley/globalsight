@@ -17,22 +17,30 @@
 
 package com.globalsight.everest.page;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.everest.workflowmanager.TaskTuvDeleter;
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.workflowmanager.TaskTuvDeleter;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Helper class for asynchronously deleting garbage in the database, for
@@ -42,6 +50,13 @@ import java.util.HashMap;
  * The data should be inaccessible and deletable in small chunks in order not to
  * overflow database's rollback segments.
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_TRASH_COMPACTION_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class TrashCompactorMDB extends GenericQueueMDB
 {
     private static final Logger CATEGORY = Logger
@@ -57,6 +72,7 @@ public class TrashCompactorMDB extends GenericQueueMDB
         super(CATEGORY);
     }
 
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         try
@@ -66,8 +82,6 @@ public class TrashCompactorMDB extends GenericQueueMDB
             CompanyThreadLocal.getInstance().setIdValue(
                     (String) map.get(CompanyWrapper.CURRENT_COMPANY_ID));
 
-            // TODO: check message parameters, delete stuff.
-            // When done, ackowledge message.
             String command = (String) map.get("command");
             if ("DeleteTuvIds".equals(command))
             {
@@ -83,18 +97,12 @@ public class TrashCompactorMDB extends GenericQueueMDB
                 Long wfId = (Long) map.get("workflowId");
                 TaskTuvDeleter.deleteTaskTuvs(wfId.longValue());
             }
-
-            p_message.acknowledge();
         }
-        catch (JMSException ex)
-        {
-            // Unexpected, but do nothing. The message will come back.
-        }
-        catch (Exception ex)
+        catch (Exception e)
         {
             // tbd - more specific?
             CATEGORY.error("An error occurred when processing a message "
-                    + "for the TrashCompactor.", ex);
+                    + "for the TrashCompactor.", e);
         }
         finally
         {

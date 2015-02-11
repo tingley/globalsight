@@ -48,6 +48,8 @@ public interface WorkflowMailerConstants
     public static final int NO_AVAILABLE_RESOURCE = 10;
     public static final int ACTIVATE_REVIEW_TASK  = 11;
     public static final int AUTOACTION_TASK  = 12;
+    public static final int COMPLETED_WFL = 13;
+    public static final int COMPLETED_JOB = 14;
 
     // message text.
     public static final String ACCEPT_TASK_MESSAGE = "message_accept_task";
@@ -60,6 +62,8 @@ public interface WorkflowMailerConstants
     public static final String ACTIVATE_TASK_MESSAGE = "message_activate_task";
     public static final String ACTIVATE_REVIEW_TASK_MESSAGE = "message_activate_review_task";
     public static final String COMPLETED_TASK_MESSAGE = "message_completed_task";
+    public static final String COMPLETED_WFL_MESSAGE = "message_completed_workflow";
+    public static final String COMPLETED_JOB_MESSAGE = "message_completed_job";
     public static final String PAGE_REIMPORTED_MESSAGE = "message_page_reimported";
     public static final String PAGE_EXPORTED_FOR_UPDATE_MESSAGE = "message_page_efu";
     public static final String NO_AVAILABLE_RESOURCE_MESSAGE = "message_no_available_resource";
@@ -76,6 +80,8 @@ public interface WorkflowMailerConstants
     public static final String ACTIVATE_TASK_SUBJECT = "subject_activate_task";
     public static final String ACTIVATE_REVIEW_TASK_SUBJECT = "subject_activate_review_task";
     public static final String COMPLETED_TASK_SUBJECT = "subject_completed_task";
+    public static final String COMPLETED_WFL_SUBJECT = "subject_completed_workflow";
+    public static final String COMPLETED_JOB_SUBJECT = "subject_completed_job";
     public static final String PAGE_REIMPORTED_SUBJECT = "subject_page_reimported";
     public static final String PAGE_EXPORTED_FOR_UPDATE_SUBJECT = "subject_page_efu";
     public static final String NO_AVAILABLE_RESOURCE_SUBJECT = "subject_no_available_resource";

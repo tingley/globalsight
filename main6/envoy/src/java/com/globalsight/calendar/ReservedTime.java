@@ -18,10 +18,13 @@ package com.globalsight.calendar;
 
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.util.date.DateHelper;
 
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ReservedTime is an object representing a time blocked for a user calendar.
@@ -325,6 +328,24 @@ public class ReservedTime extends PersistentObject
 	public void setSubject(String p_subject)
 	{
 		m_subject = p_subject;
+	}
+	
+	public String getDisplaySubject()
+	{
+		if (m_subject == null)
+			return "";
+		
+		Pattern p = Pattern.compile("(\\[[^\\]]*\\]\\[[^\\]]*\\])\\[([^\\]]*)\\]");
+		Matcher m = p.matcher(m_subject);
+		if (m.find())
+		{
+			String s1 = m.group(1);
+			String s2 = m.group(2);
+			String name = UserUtil.getUserNameById(s2);
+			return s1 + "[" + name + "]";
+		}
+		
+		return m_subject;
 	}
 
 	/**

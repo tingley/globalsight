@@ -96,8 +96,8 @@ public class LeverageMatchSaver
     public void saveMatchesToDb(SourcePage p_sourcePage,
             LeverageDataCenter p_leverageDataCenter) throws Exception
     {
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        String companyId = p_sourcePage != null ? String.valueOf(p_sourcePage
+                .getCompanyId()) : CompanyWrapper.getCurrentCompanyId();
         Collection nonClobMatches = new ArrayList();
         // Collection clobMatches = new ArrayList();
         LeverageOptions leverageOptions = p_leverageDataCenter

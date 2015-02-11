@@ -26,19 +26,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Transaction;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.DataSourceType;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
@@ -47,18 +54,26 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_CANCEL_JOB_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class JobCancelMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger
-            .getLogger(JobCancelMDB.class.getName());
+    private static Logger log = Logger.getLogger(JobCancelMDB.class.getName());
 
     public JobCancelMDB()
     {
@@ -70,6 +85,7 @@ public class JobCancelMDB extends GenericQueueMDB
      * 
      * @param message
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message message)
     {
         String oldState = null;
@@ -90,12 +106,14 @@ public class JobCancelMDB extends GenericQueueMDB
             jobId = (Long) msg.get(0);
             oldState = (String) msg.get(1);
             Boolean reimport = (Boolean) msg.get(2);
-            
+
             log.info("Starting to cancel job: " + jobId);
 
             tx = HibernateUtil.getTransaction();
 
             JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
+            long companyId = job.getCompanyId();
+            CompanyThreadLocal.getInstance().setIdValue(companyId);
 
             if (!reimport)
             {
@@ -109,33 +127,33 @@ public class JobCancelMDB extends GenericQueueMDB
             {
                 Workflow wf = (Workflow) it.next();
                 String state = wf.getState();
-                Workflow wfClone = HibernateUtil.get(WorkflowImpl.class, wf
-                        .getIdAsLong());
+                Workflow wfClone = HibernateUtil.get(WorkflowImpl.class,
+                        wf.getIdAsLong());
                 wfClone.setState(Workflow.CANCELLED);
 
                 // only update the target page state if not LOCALIZED or
                 // EXPORTED yet
                 if (Workflow.PENDING.equals(state)
-                        || Workflow.IMPORT_FAILED.equals(state) 
-                        || Workflow.READY_TO_BE_DISPATCHED.equals(state) 
-                        || Workflow.DISPATCHED.equals(state) 
+                        || Workflow.IMPORT_FAILED.equals(state)
+                        || Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.DISPATCHED.equals(state)
                         || Workflow.BATCHRESERVED.equals(state))
                 {
-                    
+
                     updatePageState(wfClone.getTargetPages(),
                             PageState.NOT_LOCALIZED);
                     // also update the secondary target files (if any)
-                    updateSecondaryTargetFileState(wfClone
-                            .getSecondaryTargetFiles(),
+                    updateSecondaryTargetFileState(
+                            wfClone.getSecondaryTargetFiles(),
                             SecondaryTargetFileState.CANCELLED);
                 }
-                
-                if (Workflow.DISPATCHED.equals(state) 
-                		|| Workflow.READY_TO_BE_DISPATCHED.equals(state))
+
+                if (Workflow.DISPATCHED.equals(state)
+                        || Workflow.READY_TO_BE_DISPATCHED.equals(state))
                 {
                     Map activeTasks = ServerProxy.getWorkflowServer()
                             .getActiveTasksForWorkflow(wf.getId());
-                    if (activeTasks != null && activeTasks.size()!= 0)
+                    if (activeTasks != null && activeTasks.size() != 0)
                     {
                         tasks = activeTasks.values().toArray();
                         taskList.add(tasks);
@@ -149,15 +167,19 @@ public class JobCancelMDB extends GenericQueueMDB
                             .getWorkflowTemplateInfo(wfClone.getTargetLocale());
 
                     TaskEmailInfo emailInfo = new TaskEmailInfo(
-                            job.getL10nProfile().getProject().getProjectManagerId(),
+                            job.getL10nProfile().getProject()
+                                    .getProjectManagerId(),
                             wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                             wfti.notifyProjectManager(), job.getPriority());
-                    
+
                     emailInfo.setJobName(job.getJobName());
-                    emailInfo.setProjectIdAsLong(new Long(job.getL10nProfile().getProjectId()));
-                    emailInfo.setSourceLocale(wfClone.getJob().getSourceLocale().toString());
-                    emailInfo.setTargetLocale(wfClone.getTargetLocale().toString());
-                    emailInfo.setCompanyId(job.getCompanyId());
+                    emailInfo.setProjectIdAsLong(new Long(job.getL10nProfile()
+                            .getProjectId()));
+                    emailInfo.setSourceLocale(wfClone.getJob()
+                            .getSourceLocale().toString());
+                    emailInfo.setTargetLocale(wfClone.getTargetLocale()
+                            .toString());
+                    emailInfo.setCompanyId(String.valueOf(companyId));
 
                     ServerProxy.getWorkflowServer().suspendWorkflow(
                             wfClone.getId(), emailInfo);
@@ -165,21 +187,27 @@ public class JobCancelMDB extends GenericQueueMDB
                 HibernateUtil.saveOrUpdate(wfClone);
             }
 
-            if (Job.CANCELLED.equals(resetJobState(job, job.getWorkflows(), reimport)))
+            String jobState = resetJobState(job, job.getWorkflows(), reimport);
+            HibernateUtil.commit(tx);
+            
+            if (Job.CANCELLED.equals(jobState))
             {
-                WorkflowManagerLocal.cleanCorpus(jobId);
-                WorkflowManagerLocal.deleteInProgressTmData(job);
+                //WorkflowManagerLocal.cleanCorpus(jobId);
+                //WorkflowManagerLocal.deleteInProgressTmData(job);
+                // GBS-2915, discard a job to remove all job data
+                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
+                        .getCompanyId()));
+                removal.removeJob(job);
             }
 
-            HibernateUtil.commit(tx);
             // for gbs-1302, cancel interim activities
-            TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
+            //TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Finished to cancel job: " + jobId);
         }
         catch (Exception oe)
         {
             log.info("Failed to cancel job: " + jobId);
-            
+
             HibernateUtil.rollback(tx);
             HibernateUtil.getSession().flush();
 
@@ -272,6 +300,8 @@ public class JobCancelMDB extends GenericQueueMDB
             tx = HibernateUtil.getTransaction();
 
             wf = HibernateUtil.get(WorkflowImpl.class, workflowId);
+            long companyId = wf.getCompanyId();
+            CompanyThreadLocal.getInstance().setIdValue(companyId);
 
             if (isDispatched)
             {
@@ -292,7 +322,8 @@ public class JobCancelMDB extends GenericQueueMDB
                     .getWorkflowTemplateInfo(wf.getTargetLocale());
 
             TaskEmailInfo emailInfo = new TaskEmailInfo(
-                    wf.getJob().getL10nProfile().getProject().getProjectManagerId(),
+                    wf.getJob().getL10nProfile().getProject()
+                            .getProjectManagerId(),
                     wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                     wfti.notifyProjectManager(), wf.getJob().getPriority());
             emailInfo.setJobName(wf.getJob().getJobName());
@@ -300,7 +331,7 @@ public class JobCancelMDB extends GenericQueueMDB
                     .getProjectId()));
             emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
             emailInfo.setTargetLocale(wf.getTargetLocale().toString());
-            emailInfo.setCompanyId(wf.getJob().getCompanyId());
+            emailInfo.setCompanyId(String.valueOf(companyId));
 
             getWFServer().suspendWorkflow(workflowId, emailInfo);
 
@@ -412,7 +443,8 @@ public class JobCancelMDB extends GenericQueueMDB
             {
                 File diExportedDir = AmbFileStoragePathUtils
                         .getDesktopIconExportedDir();
-                File jobDir = new File(diExportedDir, p_job.getJobName());
+                File jobDir = new File(diExportedDir, String.valueOf(p_job
+                        .getId()));
                 if (!jobDir.exists())
                 {
                     jobDir.mkdirs();

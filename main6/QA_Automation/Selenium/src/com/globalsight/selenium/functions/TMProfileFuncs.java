@@ -176,7 +176,7 @@ public class TMProfileFuncs extends BasicFuncs {
 			} else if (iFieldName.equals("tda_password")){
 				selenium.type(TMProfile.TDA_Password_TEXTFEILD, iFieldValue);
 			} else if (iFieldName.equals("mtAppId")) {
-			    selenium.type(TMProfile.MT_APPID, iFieldValue);
+			    selenium.type(TMProfile.MT_CLINTID, iFieldValue);
 			    
 	            SeleniumUtils.clickAndWait(selenium, TMProfile.MT_TEST_HOST_BUTTON);
 
@@ -232,7 +232,7 @@ public class TMProfileFuncs extends BasicFuncs {
 		        {
 					Assert.assertTrue(false, "Cannot find a proper currency to edit.");
 		        }
-		        clickAndWait(selenium,TMProfile.EDIT_BUTTON);
+		        clickAndWait(selenium,"link=" + iFieldValue);
 			}
 			if (iFieldName.equals("name")) {
 				selenium.type(TMProfile.Name_TEXTFIELD, iFieldValue);

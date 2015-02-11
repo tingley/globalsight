@@ -45,6 +45,21 @@ if(userList != null && userList.size() > 0) {
 
 userArray = userArray + "]";
 
+String userNameArray = "var userNameArray = [";
+
+if(userList != null && userList.size() > 0) {
+    for(int i = 0; i < userList.size(); i++) {
+        if(i != (userList.size() -1)) {
+        	userNameArray = userNameArray + "'" + UserUtil.getUserNameById((String) userList.get(i)) + "',";
+        }
+        else {
+        	userNameArray = userNameArray + "'" + UserUtil.getUserNameById((String) userList.get(i)) + "'";
+        }
+    }
+}
+
+userNameArray = userNameArray + "]";
+
 String sidArray = "var sidArray = [";
 
 if(sidList != null && sidList.size() > 0) {
@@ -83,6 +98,7 @@ sidArray = sidArray + "]";
 <SCRIPT>
 <%=userArray%>;
 <%=sidArray%>;
+<%=userNameArray%>;
 
 function selectType() {
     var type = document.all("searchType")[0].checked;
@@ -122,7 +138,7 @@ function filtrateUser() {
             cell.width = "10";
             cell.style.textAlign = "left";
             cell.style.fontSize = "10pt";
-            cell.innerHTML='<INPUT TYPE="radio" name="userIdRadio"  ID="userIdRadio" value="' + arr + '">' + arr;
+            cell.innerHTML='<INPUT TYPE="radio" name="userIdRadio"  ID="userIdRadio" value="' + arr + '">' + userNameArray[i];
             
             resultNum++;
        }

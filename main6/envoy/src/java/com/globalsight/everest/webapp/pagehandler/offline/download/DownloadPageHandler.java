@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.offline.download;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import com.globalsight.everest.localemgr.CodeSet;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
@@ -53,7 +55,7 @@ public class DownloadPageHandler extends PageHandler
 {
     private static final Logger CATEGORY = Logger
             .getLogger(DownloadPageHandler.class);
-
+    public static HashMap optionsHash;
     // Constructor
     public DownloadPageHandler()
     {
@@ -184,18 +186,32 @@ public class DownloadPageHandler extends PageHandler
                 encodingNames);
 
         // exact match editing
-        Boolean exactMatchEditing = new Boolean(task.getWorkflow().getJob()
-                .getL10nProfile().isExactMatchEditing());
-        session.setAttribute(OfflineConstants.DOWNLOAD_EDIT_EXACT,
-                exactMatchEditing);
+//        int exactMatchEditing = task.getWorkflow().getJob()
+//                .getL10nProfile().getTMEditType();
+//        String tmChoice = String.valueOf(task.getWorkflow().getJob()
+//                .getL10nProfile().getTmChoice());
+//        session.setAttribute(OfflineConstants.DOWNLOAD_EDIT_EXACT,
+//                tmChoice);
+        
+        session.setAttribute(
+                OfflineConstants.DOWNLOAD_TM_EDIT_TYPE,
+                String.valueOf(task.getWorkflow().getJob().getL10nProfile()
+                        .getTMEditType()));
 
         // The glossary state information for this locale pair
         GlossaryState glossaryState = getGlossaryState(task);
         session.setAttribute(OfflineConstants.DOWNLOAD_GLOSSARY_STATE,
                 glossaryState);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        optionsHash = (HashMap) sessionMgr.getAttribute("optionsHash");
+        if (optionsHash == null)
 
-        setDownloadOptions(session, p_request);
-
+        {
+            optionsHash = new HashMap();
+            setDownloadOptions(session, p_request);
+            sessionMgr.setAttribute("optionsHash", optionsHash);
+        }
     }
 
     private void setDownloadOptions(HttpSession p_session,
@@ -206,7 +222,8 @@ public class DownloadPageHandler extends PageHandler
         {
             String downloadOption = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
                     .get(i);
-            p_request.setAttribute(downloadOption, PageHandler
+            optionsHash.put(downloadOption,
+                    PageHandler
                     .getUserParameter(p_session, downloadOption).getValue());
         }
     }
@@ -283,7 +300,8 @@ public class DownloadPageHandler extends PageHandler
         GlossaryState result = new GlossaryState();
 
         result.setGlossaries(getGlossaries(p_task.getSourceLocale(),
-                p_task.getTargetLocale(), null, p_task.getCompanyId()));
+                p_task.getTargetLocale(), null,
+                String.valueOf(p_task.getCompanyId())));
 
         return result;
     }

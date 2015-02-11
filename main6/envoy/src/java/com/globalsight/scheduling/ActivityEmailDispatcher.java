@@ -158,7 +158,7 @@ public class ActivityEmailDispatcher extends EventHandler
                     .info("Not found the project in the system. Ignoring this request.");
             return;
         }
-        String companyId = proj.getCompanyId();
+        String companyId = String.valueOf(proj.getCompanyId());
         Company c = CompanyWrapper.getCompanyById(companyId);
         if (c == null)
         {
@@ -187,7 +187,7 @@ public class ActivityEmailDispatcher extends EventHandler
                     .info("Not found the project in the system. Ignoring this request.");
             return;
         }
-        String companyId = proj.getCompanyId();
+        String companyId = String.valueOf(proj.getCompanyId());
         Company c = CompanyWrapper.getCompanyById(companyId);
         if (c == null)
         {

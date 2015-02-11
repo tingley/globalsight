@@ -16,11 +16,10 @@
  */
 package com.globalsight.everest.util.comparator;    
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Locale;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
-import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.cxe.entity.fileprofile.FileprofileVo;
 
 /**
 * This class can be used to compare FileProfile objects
@@ -33,9 +32,14 @@ public class FileProfileComparator extends StringComparator
 	public static final int LP = 2;
 	public static final int ASC_COMPANY = 3;
 	public static final int FILTER_NAME = 4;
-
-    Hashtable m_l10nProfiles = new Hashtable();
-
+	public static final int FORMATTYPES_NAME = 5;
+	public static final int EXTENSIONS_NAME = 6;
+	public static final int CODE_NAME = 7;
+	public static final String L10NPROFILES="p_l10nProfiles";
+    public static final String FORMATTYPES = "idViewFormatTypes";
+    public static final String EXTENSIONS = "idViewExtensions";
+    HashMap<Long,String> m_idViewExtensions = new HashMap<Long,String>();
+    
 	/**
 	* Creates a FileProfileComparator with the given type and locale.
 	* If the type is not a valid type, then the default comparison
@@ -46,18 +50,18 @@ public class FileProfileComparator extends StringComparator
 	    super(p_type, p_locale);
 	}
 
-	public FileProfileComparator(Locale p_locale, Hashtable  p_l10nProfiles)
+	public FileProfileComparator(Locale p_locale,HashMap<Long,String> idViewExtensions)
 	{
 	    super(p_locale);
-        m_l10nProfiles = p_l10nProfiles;
+	    m_idViewExtensions=idViewExtensions;
 	}
 
 	/**
 	* Performs a comparison of two Tm objects.
 	*/
 	public int compare(java.lang.Object p_A, java.lang.Object p_B) {
-		FileProfileImpl a = (FileProfileImpl) p_A;
-		FileProfileImpl b = (FileProfileImpl) p_B;
+	    FileprofileVo a = (FileprofileVo) p_A;
+	    FileprofileVo b = (FileprofileVo) p_B;
 
 		String aValue;
 		String bValue;
@@ -76,8 +80,8 @@ public class FileProfileComparator extends StringComparator
 			rv = this.compareStrings(aValue,bValue);
 			break;
 		case ASC_COMPANY:
-			aValue = CompanyWrapper.getCompanyNameById(a.getCompanyId());
-			bValue = CompanyWrapper.getCompanyNameById(b.getCompanyId());
+			aValue = a.getCompanyName();
+			bValue = b.getCompanyName();
 			rv = this.compareStrings(aValue,bValue);
 			break;
         case FILTER_NAME:
@@ -85,11 +89,26 @@ public class FileProfileComparator extends StringComparator
             bValue = b.getFilterName();
             rv = this.compareStrings(aValue,bValue);
             break;
+        case FORMATTYPES_NAME:
+            aValue = a.getFormatName();
+            bValue = b.getFormatName();
+            rv = this.compareStrings(aValue,bValue);
+            break;
+        case EXTENSIONS_NAME:
+            aValue = m_idViewExtensions.get(a.getId());
+            bValue =  m_idViewExtensions.get(b.getId());
+//            aValue =aValue==null?"all":aValue;
+//            bValue =bValue==null?"all":bValue;
+            rv = this.compareStrings(aValue,bValue);
+            break;
+        case CODE_NAME:
+            aValue = a.getCodeSet();
+            bValue = b.getCodeSet();
+            rv = this.compareStrings(aValue,bValue);
+            break;
 		default:
-            long aid = a.getL10nProfileId();
-            long bid = b.getL10nProfileId();
-			aValue = (String)m_l10nProfiles.get(new Long(aid));
-			bValue = (String)m_l10nProfiles.get(new Long(bid));
+			aValue = a.getLocName();
+			bValue = b.getLocName();
 			rv = this.compareStrings(aValue,bValue);
 			break;
 		}

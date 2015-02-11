@@ -20,24 +20,34 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * File Profile from GlobalSight
+ * File Profile Business Object
  * 
  * @author leon
- * 
+ * @author Joey
+ *      Adds fields aliasFPName/gsUnExtractedFPName for "Usecase01".
  */
 public class FileProfile
 {
-
     private String id = "";
     private String name = "";
     private String sourceLocale = "";
     private Set<String> fileExtensions = null;
     private Set<String> targetLocales = null;
+    private String aliasFPName;                 // Adds for alias File Profile Name
+    private String gsUnExtractedFPName;         // Adds for UnExtracted GS File Profile Name
 
     public FileProfile()
     {
         fileExtensions = new HashSet<String>();
         targetLocales = new HashSet<String>();
+    }
+    
+    public FileProfile(String p_gsFPName, String p_aliasFPName,
+            String p_gsUnExtractedFPName)
+    {
+        name = p_gsFPName;
+        aliasFPName = p_aliasFPName;
+        gsUnExtractedFPName = p_gsUnExtractedFPName;
     }
 
     public void setId(String id)
@@ -88,5 +98,25 @@ public class FileProfile
     public Set<String> getTargetLocale()
     {
         return this.targetLocales;
+    }
+
+    public String getAliasFPName()
+    {
+        return aliasFPName;
+    }
+
+    public void setAliasFPName(String aliasFPName)
+    {
+        this.aliasFPName = aliasFPName;
+    }
+
+    public String getGsUnExtractedFPName()
+    {
+        return gsUnExtractedFPName;
+    }
+
+    public void setGsUnExtractedFPName(String gsUnExtractedFPName)
+    {
+        this.gsUnExtractedFPName = gsUnExtractedFPName;
     }
 }

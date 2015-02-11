@@ -71,6 +71,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     private static final String CATEGORY_NAME = "OfficeXmlAdapter";
     private static Object m_locker = new Object();
     private Logger m_logger;
+    private static int gcCounter = 0;
 
     // Supported extensions for Office (XML)
     static private final String DOCX = ".docx";
@@ -90,6 +91,8 @@ public class OfficeXmlHelper implements IConverterHelper2
     private boolean m_isImport = true;
 
     private boolean m_isHeaderTranslate = false;
+    private boolean m_isFootendNotesTranslate = false;
+    private boolean m_isURLTranslate = false;
     private boolean m_isMasterTranslate = false;
     private boolean m_isNotesTranslate = false;
     private boolean m_isSlideLayoutTranslate = false;
@@ -135,6 +138,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String OFFICE_XML = "office-xml";
     public static final String CONVERSION_DIR_NAME = "OfficeXml-Conv";
     public static final String DOCX_CONTENT_XML = "word/document.xml";
+    public static final String DOCX_RELS_XML = "word/_rels/document.xml.rels";
     public static final String DOCX_COMMENT_XML = "word/comments.xml";
     public static final String DOCX_STYLE_XML = "word/styles.xml";
     public static final String DOCX_WORD_DIR = "word";
@@ -171,7 +175,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     private static final String[] prefix_sheet =
     { "sheet" };
     private static final String[] prefix_header =
-    { "header", "footer", "footnotes" };
+    { "header", "footer" };
+    private static final String[] prefix_footendnotes =
+    { "endnotes", "footnotes" };
     private static final String[] prefix_slideMaster =
     { "slideMaster" };
     private static final String[] prefix_slideLayout =
@@ -232,6 +238,7 @@ public class OfficeXmlHelper implements IConverterHelper2
      */
     public AdapterResult[] performConversion() throws MsOfficeAdapterException
     {
+        gcCounter++;
         m_isImport = true;
         String filename = null;
         try
@@ -248,8 +255,12 @@ public class OfficeXmlHelper implements IConverterHelper2
             // 5 merge tags
             OfficeXmlTagHelper help = new OfficeXmlTagHelper(m_type);
             help.mergeTags(xmlFiles);
-            // call GC to free memory for large file
-            System.gc();
+            if (gcCounter > 100)
+            {
+                // call GC to free memory for large file
+                System.gc();
+                gcCounter = 0;
+            }
 
             preHandleHiddenTextInDocx(dir);
 
@@ -771,6 +782,8 @@ public class OfficeXmlHelper implements IConverterHelper2
 
             MSOffice2010Filter f = getMainFilter();
             m_isHeaderTranslate = f != null ? f.isHeaderTranslate() : false;
+            m_isFootendNotesTranslate = f != null ? f.isFootendnoteTranslate() : false;
+            m_isURLTranslate = f != null ? f.isUrlTranslate() : false;
             m_isMasterTranslate = (m_type == OFFICE_PPTX && f != null) ? f
                     .isMasterTranslate() : false;
             m_isNotesTranslate = (m_type == OFFICE_PPTX && f != null) ? f
@@ -1019,10 +1032,26 @@ public class OfficeXmlHelper implements IConverterHelper2
         if (m_isHeaderTranslate)
         {
             if (fileNamePrefix.startsWith("header")
-                    || fileNamePrefix.startsWith("footer")
-                    || fileNamePrefix.startsWith("footnotes"))
+                    || fileNamePrefix.startsWith("footer"))
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
+            }
+        }
+        
+        if (m_isFootendNotesTranslate)
+        {
+            if (fileNamePrefix.startsWith("footnotes")
+                    || fileNamePrefix.startsWith("endnotes"))
+            {
+                newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
+            }
+        }
+        
+        if (m_isURLTranslate)
+        {
+            if (fileNamePrefix.startsWith("document.xml"))
+            {
+                newDisplayName = "(Hyperlinks) " + m_oriDisplayName;
             }
         }
 
@@ -1389,6 +1418,40 @@ public class OfficeXmlHelper implements IConverterHelper2
                             list.add(f.getPath());
                     }
                 }
+            }
+        }
+        
+        // get endnotes / footnotes xml
+        if (m_isFootendNotesTranslate)
+        {
+            File wordDir = new File(dir, DOCX_WORD_DIR);
+            if (wordDir.isDirectory())
+            {
+                File[] notes = listAcceptFiles(wordDir, prefix_footendnotes);
+
+                if (notes != null && notes.length >= 0)
+                {
+                    for (int i = 0; i < notes.length; i++)
+                    {
+                        File f = notes[i];
+                        String keyText = "</w:t>";
+                        if (isFileContains(f, keyText, true))
+                            list.add(f.getPath());
+                    }
+                }
+            }
+        }
+        
+        if (m_isURLTranslate)
+        {
+            File docxmlRels = new File(dir, DOCX_RELS_XML);
+            if (docxmlRels.exists())
+            {
+                String keyText = " TargetMode=\"External\"";
+                String keyText2 = "/hyperlink\"";
+                if (isFileContains(docxmlRels, keyText, true)
+                        && isFileContains(docxmlRels, keyText2, true))
+                    list.add(docxmlRels.getPath());
             }
         }
 

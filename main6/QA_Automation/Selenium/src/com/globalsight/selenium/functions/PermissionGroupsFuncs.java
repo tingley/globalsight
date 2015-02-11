@@ -22,8 +22,8 @@ public class PermissionGroupsFuncs extends BasicFuncs
     public void editPermissionGroups(Selenium selenium, String GroupName,
             String Permissionprofiles) throws Exception
     {
-        selectRadioButtonFromTable(selenium,
-                PermissionGroups.PermissionGroups_TABLE, GroupName);
+        //selectRadioButtonFromTable(selenium,
+                //PermissionGroups.PermissionGroups_TABLE, GroupName);
         selenium.click(PermissionGroups.Edit_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 

@@ -1,5 +1,6 @@
 package com.globalsight.ling.tm3.core;
 
+import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -311,4 +312,12 @@ public interface TM3Tm<T extends TM3Data> {
      * to set this at run-time.
      */
     public void setIndexTarget(boolean indexTarget);
+    
+    public void setConnection(Connection connection);
+    
+    public Connection getConnection();
+    
+    public boolean isFirstImporting();
+    
+    public void setFirstImporting(boolean firstImporting);
 }

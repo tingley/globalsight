@@ -19,35 +19,25 @@ package com.globalsight.cxe.adapter.quarkframe;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.ArrayList;
+
+import org.w3c.dom.Element;
+
+import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.message.FileMessageData;
+import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.diplomat.util.Logger;
-import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.cxe.adapter.msoffice.RecursiveCopy;
-import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.cxe.message.CxeMessage;
-import com.globalsight.cxe.message.MessageData;
-import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.cxe.message.FileMessageData;
-import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.util.FileUtil;
-import org.w3c.dom.Element;
 
 /**
  * The DesktopAppHelper is an abstract base class intended to be subclassed to
@@ -152,14 +142,14 @@ public abstract class DesktopAppHelper
             {
                 String fullSafeName = writeFileToSaveDir();
 
-                m_logger.info("Converting: " + m_parser.getDisplayName() + ", size: "
-                        + m_cxeMessage.getMessageData().getSize());
+                m_logger.info("Converting: " + m_parser.getDisplayName()
+                        + ", size: " + m_cxeMessage.getMessageData().getSize());
 
                 convertWithFrameMaker();
 
                 // Gather up the filenames.
-                String expectedFileName = fullSafeName.substring(0, fullSafeName.lastIndexOf("."))
-                        + ".mif";
+                String expectedFileName = fullSafeName.substring(0,
+                        fullSafeName.lastIndexOf(".")) + ".mif";
 
                 m_logger.debug("Expected main file is " + expectedFileName);
 
@@ -170,8 +160,9 @@ public abstract class DesktopAppHelper
                 }
                 else
                 {
-                    throw new Exception("conversion failed to produce the mif file: "
-                            + expectedFileName);
+                    throw new Exception(
+                            "conversion failed to produce the mif file: "
+                                    + expectedFileName);
                 }
 
                 modifyEventFlowXmlForImport(true);
@@ -192,7 +183,8 @@ public abstract class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
             throw new DesktopApplicationAdapterException("Import", errorArgs, e);
         }
     }
@@ -217,24 +209,27 @@ public abstract class DesktopAppHelper
             {
                 Element categoryElement = m_parser
                         .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
-                String safeBaseFileName = m_parser.getCategoryDaValue(categoryElement,
-                        "safeBaseFileName")[0];
-                String relSafeName = FileUtils.getPrefix(safeBaseFileName) + ".mif";
+                String safeBaseFileName = m_parser.getCategoryDaValue(
+                        categoryElement, "safeBaseFileName")[0];
+                String relSafeName = FileUtils.getPrefix(safeBaseFileName)
+                        + ".mif";
                 String saveFile = m_saveDir + File.separator + relSafeName;
 
-                m_logger.info("ReConverting: " + m_parser.getDisplayName() + ", tmp file: "
-                        + saveFile);
+                m_logger.info("ReConverting: " + m_parser.getDisplayName()
+                        + ", tmp file: " + saveFile);
                 File saveFile_f = new File(saveFile);
                 m_cxeMessage.getMessageData().copyTo(saveFile_f);
 
-                String expectedFile = m_saveDir + File.separator + safeBaseFileName;
+                String expectedFile = m_saveDir + File.separator
+                        + safeBaseFileName;
                 m_safeBaseFileName = safeBaseFileName;
 
                 // Run the conversion process (from mif to fm).
                 m_logger.info("Reconstructing: " + expectedFile);
                 convertWithFrameMaker();
 
-                FileMessageData fmd = (FileMessageData) MessageDataFactory.createFileMessageData();
+                FileMessageData fmd = (FileMessageData) MessageDataFactory
+                        .createFileMessageData();
                 fmd.copyFrom(new File(expectedFile));
 
                 return fmd;
@@ -251,7 +246,8 @@ public abstract class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
             throw new DesktopApplicationAdapterException("Export", errorArgs, e);
         }
     }
@@ -265,7 +261,8 @@ public abstract class DesktopAppHelper
     public static String getConversionDir() throws Exception
     {
         StringBuffer convDir = new StringBuffer();
-        convDir.append(m_sc.getStringParameter(SystemConfigParamNames.CXE_NTCS_DIR,
+        convDir.append(m_sc.getStringParameter(
+                SystemConfigParamNames.CXE_NTCS_DIR,
                 CompanyWrapper.SUPER_COMPANY_ID));
         convDir.append(File.separator);
         convDir.append("FrameMaker9");
@@ -275,7 +272,8 @@ public abstract class DesktopAppHelper
 
     private MessageData importFiles(File fileToImport) throws Exception
     {
-        FileMessageData fmd = (FileMessageData) MessageDataFactory.createFileMessageData();
+        FileMessageData fmd = (FileMessageData) MessageDataFactory
+                .createFileMessageData();
         fmd.copyFrom(fileToImport);
 
         return fmd;
@@ -289,7 +287,8 @@ public abstract class DesktopAppHelper
         try
         {
             // First create the command file.
-            String baseName = m_safeBaseFileName.substring(0, m_safeBaseFileName.lastIndexOf("."));
+            String baseName = m_safeBaseFileName.substring(0,
+                    m_safeBaseFileName.lastIndexOf("."));
             StringBuffer commandFileNameBuffer = new StringBuffer(m_saveDir);
             commandFileNameBuffer.append(File.separator).append(baseName);
             commandFileNameBuffer.append(".fm_command");
@@ -299,7 +298,8 @@ public abstract class DesktopAppHelper
 
             // Now wait for status file.
             StringBuffer statusFileName = new StringBuffer(m_saveDir);
-            statusFileName.append(File.separator).append(baseName).append(".status");
+            statusFileName.append(File.separator).append(baseName)
+                    .append(".status");
             File statusFile = new File(statusFileName.toString());
 
             determineMaxTriesAndSleepTime();
@@ -307,7 +307,8 @@ public abstract class DesktopAppHelper
 
             // Conversion is done, but check the status to see if there is an
             // error.
-            BufferedReader reader = new BufferedReader(new FileReader(statusFile));
+            BufferedReader reader = new BufferedReader(new FileReader(
+                    statusFile));
             String line = reader.readLine();
             String msg = reader.readLine();
             m_logger.info(msg);
@@ -361,8 +362,8 @@ public abstract class DesktopAppHelper
         text.append(convertFrom).append("\r\n");
         text.append(convertTo).append("\r\n");
 
-        FileUtil.writeFileAtomically(
-            new File(p_commandFileName), text.toString(), "US-ASCII");
+        FileUtil.writeFileAtomically(new File(p_commandFileName),
+                text.toString(), "US-ASCII");
     }
 
     /**
@@ -400,7 +401,8 @@ public abstract class DesktopAppHelper
         StringBuffer saveDir = new StringBuffer(m_convDir);
 
         saveDir.append(File.separator);
-        saveDir.append(m_isImport ? m_parser.getSourceLocale() : m_parser.getTargetLocale());
+        saveDir.append(m_isImport ? m_parser.getSourceLocale() : m_parser
+                .getTargetLocale());
         File saveDirF = new File(saveDir.toString());
         saveDirF.mkdirs();
 
@@ -438,7 +440,8 @@ public abstract class DesktopAppHelper
         int lastSeparatorindex = (forwardSlashIndex > backwardSlashIndex) ? forwardSlashIndex
                 : backwardSlashIndex;
 
-        String baseFileName = m_parser.getDisplayName().substring(lastSeparatorindex + 1);
+        String baseFileName = m_parser.getDisplayName().substring(
+                lastSeparatorindex + 1);
 
         return System.currentTimeMillis() + baseFileName;
     }
@@ -543,7 +546,8 @@ public abstract class DesktopAppHelper
      * 
      * @throws DesktopApplicationAdapterException
      */
-    protected void writeContentToNativeInbox() throws DesktopApplicationAdapterException
+    protected void writeContentToNativeInbox()
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -560,7 +564,8 @@ public abstract class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
             throw new DesktopApplicationAdapterException("Import", errorArgs, e);
         }
     }
@@ -572,7 +577,8 @@ public abstract class DesktopAppHelper
      * 
      * @throws DesktopApplicationAdapterException
      */
-    protected void writeContentToXmlInbox() throws DesktopApplicationAdapterException
+    protected void writeContentToXmlInbox()
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -590,7 +596,8 @@ public abstract class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
             throw new DesktopApplicationAdapterException("Export", errorArgs, e);
         }
     }
@@ -642,7 +649,8 @@ public abstract class DesktopAppHelper
     private void determineMaxTriesAndSleepTime()
     {
         m_numTries = 0;
-        int max_sleep = (int) m_conversionWaitTime * (1 + m_originalFileSize / BYTES_IN_100KB);
+        int max_sleep = (int) m_conversionWaitTime
+                * (1 + m_originalFileSize / BYTES_IN_100KB);
         m_maxTries = 1 + (int) (max_sleep / m_sleepTime);
     }
 
@@ -655,7 +663,8 @@ public abstract class DesktopAppHelper
      * 
      * @throws DesktopApplicationAdapterException
      **/
-    protected MessageData readNativeOutput() throws DesktopApplicationAdapterException, IOException
+    protected MessageData readNativeOutput()
+            throws DesktopApplicationAdapterException, IOException
     {
         // figure out what filename we're looking for
         StringBuffer fileName = new StringBuffer(getNativeOutbox());
@@ -682,12 +691,14 @@ public abstract class DesktopAppHelper
      *             if the file does not appear after the appropriate number of
      *             attempts to see it.
      */
-    protected void waitForFileToAppear(File p_file) throws DesktopApplicationAdapterException
+    protected void waitForFileToAppear(File p_file)
+            throws DesktopApplicationAdapterException
     {
         while (m_numTries <= m_maxTries)
         {
             m_numTries++;
-            m_logger.debug("Waiting for file " + p_file.getAbsolutePath() + " to appear.");
+            m_logger.debug("Waiting for file " + p_file.getAbsolutePath()
+                    + " to appear.");
 
             if (p_file.exists())
             {
@@ -700,7 +711,8 @@ public abstract class DesktopAppHelper
             }
         }
 
-        String[] errorArgs = { p_file.getAbsolutePath() };
+        String[] errorArgs =
+        { p_file.getAbsolutePath() };
         throw new DesktopApplicationAdapterException("Timeout", errorArgs, null);
     }
 
@@ -729,7 +741,8 @@ public abstract class DesktopAppHelper
      * @throws DesktopApplicationAdapterException
      *             -- if there is a timeout
      */
-    protected void waitForFileToBeWritten(File p_file) throws DesktopApplicationAdapterException
+    protected void waitForFileToBeWritten(File p_file)
+            throws DesktopApplicationAdapterException
     {
         byte[] buffer = new byte[32];
         while (m_numTries < m_maxTries)
@@ -737,7 +750,8 @@ public abstract class DesktopAppHelper
             m_numTries++;
             try
             {
-                m_logger.debug("Waiting for file " + p_file.getAbsolutePath() + " to be written.");
+                m_logger.debug("Waiting for file " + p_file.getAbsolutePath()
+                        + " to be written.");
 
                 FileInputStream fis = new FileInputStream(p_file);
                 int bytesRead = fis.read(buffer);
@@ -746,14 +760,16 @@ public abstract class DesktopAppHelper
                 if (bytesRead == -1)
                 {
                     // nothing in the file yet
-                    m_logger.debug("No data yet in file " + p_file.getAbsolutePath());
+                    m_logger.debug("No data yet in file "
+                            + p_file.getAbsolutePath());
                 }
                 else
                 {
-                    m_logger.debug("Conversion for file " + p_file.getAbsolutePath()
-                            + " is started.");
+                    m_logger.debug("Conversion for file "
+                            + p_file.getAbsolutePath() + " is started.");
 
-                    waitForConversionServerToStopWritingFile(p_file.getAbsolutePath());
+                    waitForConversionServerToStopWritingFile(p_file
+                            .getAbsolutePath());
                     return;
                 }
             }
@@ -774,19 +790,23 @@ public abstract class DesktopAppHelper
                     // Do nothing because the file is still being
                     // written (we're on UNIX looking at a file on NT
                     // over NFS.
-                    m_logger.debug("(Solaris?) Permission denied: " + ioe.getMessage());
+                    m_logger.debug("(Solaris?) Permission denied: "
+                            + ioe.getMessage());
                 }
                 else
                 {
-                    String[] errorArgs = { p_file.getAbsolutePath() };
-                    throw new DesktopApplicationAdapterException("IO", errorArgs, ioe);
+                    String[] errorArgs =
+                    { p_file.getAbsolutePath() };
+                    throw new DesktopApplicationAdapterException("IO",
+                            errorArgs, ioe);
                 }
             }
 
             sleep();
         }
 
-        String[] errorArgs = { p_file.getAbsolutePath() };
+        String[] errorArgs =
+        { p_file.getAbsolutePath() };
         throw new DesktopApplicationAdapterException("Timeout", errorArgs, null);
     }
 
@@ -818,7 +838,8 @@ public abstract class DesktopAppHelper
             long currentFileSize = currentFile.length();
             if (lastFileSize == currentFileSize)
             {
-                m_logger.debug("file has stopped growing, size: " + lastFileSize);
+                m_logger.debug("file has stopped growing, size: "
+                        + lastFileSize);
 
                 try
                 {
@@ -838,8 +859,8 @@ public abstract class DesktopAppHelper
                             stillGrowing = false;
 
                             m_logger.info("Really done converting file: "
-                                    + m_parser.getDisplayName() + ", size: " + currentFileSize
-                                    + "b");
+                                    + m_parser.getDisplayName() + ", size: "
+                                    + currentFileSize + "b");
                         }
                         else
                         {
@@ -854,20 +875,24 @@ public abstract class DesktopAppHelper
                         // there is no easy way to check.
                         stillGrowing = false;
 
-                        m_logger.info("Done converting file: " + m_parser.getDisplayName()
-                                + ", size: " + currentFileSize + "b");
+                        m_logger.info("Done converting file: "
+                                + m_parser.getDisplayName() + ", size: "
+                                + currentFileSize + "b");
                     }
                 }
                 catch (Exception e)
                 {
-                    m_logger.error("Could not read file to determine if it is done.", e);
+                    m_logger.error(
+                            "Could not read file to determine if it is done.",
+                            e);
                     lastFileSize = currentFileSize;
                 }
             }
             else
             {
                 lastFileSize = currentFileSize;
-                m_logger.debug("file is still growing. last size: " + lastFileSize);
+                m_logger.debug("file is still growing. last size: "
+                        + lastFileSize);
             }
         }
     }
@@ -911,7 +936,8 @@ public abstract class DesktopAppHelper
      * 
      * @throws Exception
      */
-    protected void modifyEventFlowXmlForImport(boolean isFMtoMif) throws Exception
+    protected void modifyEventFlowXmlForImport(boolean isFMtoMif)
+            throws Exception
     {
         // now save all the data to the EventFlowXml
         saveDataToEventFlowXml(isFMtoMif);
@@ -929,31 +955,38 @@ public abstract class DesktopAppHelper
      */
     private void saveDataToEventFlowXml(boolean isFMtoMif) throws Exception
     {
-        String originalPostMergeEvent = m_parser.setPostMergeEvent(getPostMergeEvent().getName());
-        String originalFormat = m_parser.setSourceFormatType(isFMtoMif ? "mif" : "xml");
+        String originalPostMergeEvent = m_parser
+                .setPostMergeEvent(getPostMergeEvent().getName());
+        String originalFormat = m_parser.setSourceFormatType(isFMtoMif ? "mif"
+                : "xml");
 
         m_originalFileSize = (int) m_cxeMessage.getMessageData().getSize();
 
         // <category name="DesktopApplicationAdapter">
-        Element categoryElement = m_parser.addCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
+        Element categoryElement = m_parser
+                .addCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
         String[] values = new String[1];
 
         // <da
         // name="postMergeEvent><dv>GlobalSight::FileSystemMergedEvent</dv></da>
         values[0] = originalPostMergeEvent;
-        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement("postMergeEvent", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "postMergeEvent", values));
 
         // <da name="formatType"><dv>word</dv></da>
         values[0] = originalFormat;
-        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement("formatType", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "formatType", values));
 
         // <da name="safeBaseFileName"><dv>12345test.doc</dv></da>
         values[0] = m_safeBaseFileName;
-        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement("safeBaseFileName", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "safeBaseFileName", values));
 
         // <da name="originalFileSize"><dv>11574</dv></da>
         values[0] = Integer.toString(m_originalFileSize);
-        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement("originalFileSize", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "originalFileSize", values));
     }
 
     /**
@@ -966,18 +999,21 @@ public abstract class DesktopAppHelper
      */
     protected void modifyEventFlowXmlForExport() throws Exception
     {
-        Element categoryElement = m_parser.getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
-        String originalPostMergeEvent = m_parser.getCategoryDaValue(categoryElement,
-                "postMergeEvent")[0];
+        Element categoryElement = m_parser
+                .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
+        String originalPostMergeEvent = m_parser.getCategoryDaValue(
+                categoryElement, "postMergeEvent")[0];
         m_parser.setPostMergeEvent(originalPostMergeEvent);
 
-        String originalFormat = m_parser.getCategoryDaValue(categoryElement, "formatType")[0];
+        String originalFormat = m_parser.getCategoryDaValue(categoryElement,
+                "formatType")[0];
         m_parser.setSourceFormatType(originalFormat);
 
         // re-set the safe base file name
-        m_safeBaseFileName = m_parser.getCategoryDaValue(categoryElement, "safeBaseFileName")[0];
-        m_originalFileSize = Integer.parseInt(m_parser.getCategoryDaValue(categoryElement,
-                "originalFileSize")[0]);
+        m_safeBaseFileName = m_parser.getCategoryDaValue(categoryElement,
+                "safeBaseFileName")[0];
+        m_originalFileSize = Integer.parseInt(m_parser.getCategoryDaValue(
+                categoryElement, "originalFileSize")[0]);
 
         // reconstruct the EventFlowXml String
         m_parser.reconstructEventFlowXmlStringFromDOM();
@@ -1036,11 +1072,13 @@ public abstract class DesktopAppHelper
         String fname = getFormatName();
         if (fname.equalsIgnoreCase(FRAME9))
         {
-            return CxeMessageType.getCxeMessageType(CxeMessageType.MIF_IMPORTED_EVENT);
+            return CxeMessageType
+                    .getCxeMessageType(CxeMessageType.MIF_IMPORTED_EVENT);
         }
         else
         {
-            return CxeMessageType.getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT);
+            return CxeMessageType
+                    .getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT);
         }
     }
 
@@ -1090,24 +1128,20 @@ public abstract class DesktopAppHelper
      */
     private void readProperties()
     {
-        String propertyFileInSuperCompany = getPropertyFileName();
-        String propertyFile = SystemConfiguration
-                .getCompanyResourcePath(propertyFileInSuperCompany);
+        String propertyFile = getPropertyFileName();
         try
         {
             URL url = DesktopAppHelper.class.getResource(propertyFile);
             if (url == null)
             {
-                url = DesktopAppHelper.class.getResource(propertyFileInSuperCompany);
-            }
-            if (url == null)
-            {
-                throw new FileNotFoundException("Property file " + propertyFile + " not found");
+                throw new FileNotFoundException("Property file " + propertyFile
+                        + " not found");
             }
 
             Properties props = new Properties();
             props.load(new FileInputStream(url.toURI().getPath()));
-            m_conversionWaitTime = Long.parseLong(props.getProperty("conversionWaitTime")) * 1000;
+            m_conversionWaitTime = Long.parseLong(props
+                    .getProperty("conversionWaitTime")) * 1000;
             m_sleepTime = Long.parseLong(props.getProperty("sleepTime")) * 1000;
             m_logger.info("conversionWaitTime=" + m_conversionWaitTime);
             m_logger.info("sleepTime=" + m_sleepTime);

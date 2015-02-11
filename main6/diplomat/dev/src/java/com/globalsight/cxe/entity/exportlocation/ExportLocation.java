@@ -15,62 +15,48 @@
  *  
  */
 package com.globalsight.cxe.entity.exportlocation;
-/*
- * Copyright (c) 2002 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
 
 /** Represents a CXE Export Location entity object. */
 public interface ExportLocation
 {
-	/**
-	** Return the id of the export location (cannot be set)
-	** @return id as a long
-	**/
-	public long getId();
+    /**
+     ** Return the id of the export location (cannot be set)
+     ** 
+     * @return id as a long
+     **/
+    public long getId();
 
-	/**
-	 ** Return the name
-	 **/
-	public String getName();
+    /**
+     ** Return the name
+     **/
+    public String getName();
 
-	/**
-	 ** Return the description
-	 **/
-	public String getDescription();
+    /**
+     ** Return the description
+     **/
+    public String getDescription();
 
-	/**
-	 ** Return the location (directory)
-	 **/
-	public String getLocation();
+    /**
+     ** Return the location (directory)
+     **/
+    public String getLocation();
 
-	/**
-	 ** Sets the name
-	 **/
-	public void setName(String p_name);
+    /**
+     ** Sets the name
+     **/
+    public void setName(String p_name);
 
-	/**
-	 ** Sets the description
-	 **/
-	public void setDescription(String p_desc);
+    /**
+     ** Sets the description
+     **/
+    public void setDescription(String p_desc);
 
-	/**
-	 ** Sets the location (directory)
-	 **/
-	public void setLocation(String p_location);
-	
-	public String getCompanyId();
-	
-	public void setCompanyId(String id);
+    /**
+     ** Sets the location (directory)
+     **/
+    public void setLocation(String p_location);
+
+    public long getCompanyId();
+
+    public void setCompanyId(long id);
 }
-

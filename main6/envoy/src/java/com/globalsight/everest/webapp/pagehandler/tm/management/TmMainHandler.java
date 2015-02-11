@@ -43,7 +43,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -73,7 +72,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -108,7 +107,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             }
             catch (Exception ignore)
             {
-                logger.error("Error found in generating ProjectHandler.", ignore);
+                logger.error("Error found in generating ProjectHandler.",
+                        ignore);
             }
         }
     }
@@ -117,7 +117,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
     /**
      * Invoke this PageHandler.
-     *
+     * 
      * @param p_pageDescriptor
      *            the page desciptor
      * @param p_request
@@ -187,22 +187,26 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 tmas = new ArrayList<TMAttribute>();
                 allAtt = TMAttributeManager.getAvailableAttributenames();
             }
-            p_request.setAttribute(TM_AVAILABLE_ATTS, TMAttributeManager.toOneStr(allAtt));
+            p_request.setAttribute(TM_AVAILABLE_ATTS,
+                    TMAttributeManager.toOneStr(allAtt));
             p_request.setAttribute(TM_TM_ATTS, TMAttributeManager.toOne(tmas));
 
-            //Handle actions
-            if (action == null) {
-                Tm3ConvertProcess tm3ConvertProcess = Tm3ConvertProcess.getInstance();
+            // Handle actions
+            if (action == null)
+            {
+                Tm3ConvertProcess tm3ConvertProcess = Tm3ConvertProcess
+                        .getInstance();
                 String tm3Status = tm3ConvertProcess.getStatus();
                 if ("".equals(tm3Status) || "Cancelled".equals(tm3Status))
                     tm3ConvertProcess.setStatus("null");
-            } else if (action.equals(TM_ACTION_CANCEL_VALIDATION))
+            }
+            else if (action.equals(TM_ACTION_CANCEL_VALIDATION))
             {
                 cancelValidation(sessionMgr);
             }
             else if (action.equals(TM_ACTION_NEW))
             {
-                //Generate an empty TM defination
+                // Generate an empty TM defination
                 createTM(p_request, sessionMgr);
             }
             else if (action.equals(TM_ACTION_MODIFY))
@@ -263,7 +267,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                         .getParameter(TM_TM_DESCRIPTION));
                 String isRemoteTm = EditUtil.utf8ToUnicode((String) p_request
                         .getParameter(TM_TM_REMOTE_TM));
-                String tmAttributes = (String) p_request.getParameter("tmAttributes");
+                String tmAttributes = (String) p_request
+                        .getParameter("tmAttributes");
 
                 try
                 {
@@ -275,7 +280,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     tm.setDescription(description);
                     tm.setCreationUser(userId);
                     tm.setCreationDate(new Date());
-                    tm.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+                    tm.setCompanyId(Long.parseLong(CompanyThreadLocal
+                            .getInstance().getValue()));
                     TMAttributeManager.setTMAttributes(tm, tmAttributes);
                     if (isRemoteTm != null && "on".equals(isRemoteTm))
                     {
@@ -332,7 +338,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                                     FormUtil.Forms.NEW_TRANSLATION_MEMORY);
                         }
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     logger.error("Error found in saving project TM.", e);
                 }
             }
@@ -385,7 +393,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     sessionMgr.setAttribute("tmLocales", TMLocales);
                     sessionMgr.setAttribute(TM_TM_ID, tmIdString);
                     sessionMgr.setAttribute("projectTms", tms);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     logger.error("Error found in deleting project TM.", e);
                 }
             }
@@ -411,7 +421,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             }
             else if (action.equals(TM_ACTION_STATISTICS))
             {
-                Tm tm = projectHandler.getProjectTMById(Long.parseLong(tmId), false);
+                Tm tm = projectHandler.getProjectTMById(Long.parseLong(tmId),
+                        false);
                 String stats = LingServerProxy.getTmCoreManager()
                         .getTmStatistics(tm, uiLocale, false).asXML();
 
@@ -442,23 +453,23 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 long tm2Id = Long.parseLong(tmId);
                 try
                 {
-                    Session hsession = TmUtil.getStableSession();
-
-                    ProjectTM oldTm = (ProjectTM) hsession.get(ProjectTM.class,
-                            tm2Id);
+                    ProjectTM oldTm = (ProjectTM) HibernateUtil.get(
+                            ProjectTM.class, tm2Id);
                     if (oldTm != null)
                     {
-                        long companyId = Long.valueOf(oldTm.getCompanyId());
+                        long companyId = oldTm.getCompanyId();
 
                         Tm3ConvertHelper tm3Convert = new Tm3ConvertHelper(
-                                hsession, companyId, oldTm);
+                                companyId, oldTm);
 
                         convertProcess.setConvertHelper(tm3Convert);
                         convertProcess.setTm2Id(oldTm.getId());
                         convertProcess.setTm2Name(oldTm.getName());
-                        if (oldTm.getLastTUId() == -1) {
+                        if (oldTm.getLastTUId() == -1)
+                        {
                             convertProcess.setTm3Id(-1);
-                            convertProcess.setStatus(WebAppConstants.TM_STATUS_DEFAULT);
+                            convertProcess
+                                    .setStatus(WebAppConstants.TM_STATUS_DEFAULT);
                         }
 
                         session.setAttribute("tm3Convert", tm3Convert);
@@ -488,12 +499,16 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     logger.info("Run into cancel operation.");
                     Tm3ConvertHelper tm3ConvertHelper = (Tm3ConvertHelper) session
                             .getAttribute("tm3Convert");
-                    logger.info("TM3ConvertHelper object is " + tm3ConvertHelper);
+                    logger.info("TM3ConvertHelper object is "
+                            + tm3ConvertHelper);
                     if (tm3ConvertHelper != null)
                         tm3ConvertHelper.cancel();
 
-                    Tm3ConvertProcess convertProcess = Tm3ConvertProcess.getInstance();
-                    while (!WebAppConstants.TM_STATUS_CONVERTED_CANCELLED.equals(convertProcess.getStatus())) {
+                    Tm3ConvertProcess convertProcess = Tm3ConvertProcess
+                            .getInstance();
+                    while (!WebAppConstants.TM_STATUS_CONVERTED_CANCELLED
+                            .equals(convertProcess.getStatus()))
+                    {
                         convertProcess = Tm3ConvertProcess.getInstance();
                     }
                     convertProcess.setConvertedRate(5);
@@ -519,11 +534,14 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         ArrayList<ProjectTM> proceedTms = new ArrayList<ProjectTM>(tms);
         String tm3Tms = "", convertingTms = "", remoteTms = "";
         String tmpTmId = "";
-        for (ProjectTM tm : proceedTms) {
+        for (ProjectTM tm : proceedTms)
+        {
             tmpTmId = String.valueOf(tm.getId());
             if (tm.getTm3Id() != null)
                 tm3Tms += tmpTmId + ",";
-            if (tm.getLastTUId() > 0 || WebAppConstants.TM_STATUS_CONVERTING.equals(tm.getStatus()))
+            if (tm.getLastTUId() > 0
+                    || WebAppConstants.TM_STATUS_CONVERTING.equals(tm
+                            .getStatus()))
                 convertingTms += tmpTmId + ",";
             if (tm.getIsRemoteTm())
                 remoteTms = tmpTmId + ",";
@@ -588,33 +606,43 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         String name = (String) p_request.getParameter("tmNameFilter");
         String company = (String) p_request.getParameter("tmCompanyFilter");
 
-        if (!FILTER_SEARCH.equals(action) || p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET)) {
+        if (!FILTER_SEARCH.equals(action)
+                || p_request.getMethod().equalsIgnoreCase(
+                        WebAppConstants.REQUEST_METHOD_GET))
+        {
             name = (String) sessionMgr.getAttribute("tmNameFilter");
             company = (String) sessionMgr.getAttribute("tmCompanyFilter");
         }
         sessionMgr.setAttribute("tmNameFilter", name == null ? "" : name);
-        sessionMgr.setAttribute("tmCompanyFilter", company == null ? "" : company);
+        sessionMgr.setAttribute("tmCompanyFilter", company == null ? ""
+                : company);
 
         String condition = "";
-        if (StringUtil.isNotEmpty(name)) {
+        if (StringUtil.isNotEmpty(name))
+        {
             name = fixQueryString(name);
             condition = "pt.name like '%" + name + "%'";
         }
-        if (StringUtil.isNotEmpty(company)) {
+        if (StringUtil.isNotEmpty(company))
+        {
             company = fixQueryString(company);
             if (!StringUtil.isEmpty(condition))
                 condition += " and ";
-            condition += "pt.companyId in (select c.id from Company c where c.name like '%" + company + "%')";
+            condition += "pt.companyId in (select c.id from Company c where c.name like '%"
+                    + company + "%')";
         }
-        if (FILTER_SEARCH.equals(action)) {
-            //Go to page #1 if current action is filter searching.
-            sessionMgr.setAttribute(TM_KEY + TableConstants.LAST_PAGE_NUM, Integer.valueOf(1));
+        if (FILTER_SEARCH.equals(action))
+        {
+            // Go to page #1 if current action is filter searching.
+            sessionMgr.setAttribute(TM_KEY + TableConstants.LAST_PAGE_NUM,
+                    Integer.valueOf(1));
         }
 
         return condition;
     }
 
-    private String fixQueryString(String s) {
+    private String fixQueryString(String s)
+    {
         return s.replace("_", "\\_");
     }
 
@@ -636,12 +664,16 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
     {
         StringBuffer result = new StringBuffer(200);
 
-        if (p_tm == null) {
-            result.append("<tm><name></name><domain></domain><organization></organization>")
-                  .append("<description></description><isRemoteTm>false</isRemoteTm>")
-                  .append("<gsEditionId></gsEditionId><remoteTmProfileId></remoteTmProfileId>")
-                  .append("<remoteTmProfileName></remoteTmProfileName></tm>");
-        } else {
+        if (p_tm == null)
+        {
+            result.append(
+                    "<tm><name></name><domain></domain><organization></organization>")
+                    .append("<description></description><isRemoteTm>false</isRemoteTm>")
+                    .append("<gsEditionId></gsEditionId><remoteTmProfileId></remoteTmProfileId>")
+                    .append("<remoteTmProfileName></remoteTmProfileName></tm>");
+        }
+        else
+        {
             if (!p_clone)
             {
                 result.append("<tm id='");
@@ -668,30 +700,30 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
             // for bug GBS-2547,by fan
             String desc1 = EditUtil.encodeXmlEntities(p_tm.getDescription())
-                    .replaceAll("\r\n", "&lt;br/&gt;"); //for windows
-            String desc2 = desc1.replaceAll("\n", "&lt;br/&gt;"); //for unix
+                    .replaceAll("\r\n", "&lt;br/&gt;"); // for windows
+            String desc2 = desc1.replaceAll("\n", "&lt;br/&gt;"); // for unix
             result.append(desc2);
 
             result.append("</description>");
             result.append("<isRemoteTm>");
-            result.append(EditUtil.encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true" : "false"));
+            result.append(EditUtil
+                    .encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true"
+                            : "false"));
             result.append("</isRemoteTm>");
             result.append("<gsEditionId>");
             result.append(EditUtil
-                    .encodeXmlEntities(p_tm.getGsEditionId() == -1 ? "" : String
-                            .valueOf(p_tm.getGsEditionId())));
+                    .encodeXmlEntities(p_tm.getGsEditionId() == -1 ? ""
+                            : String.valueOf(p_tm.getGsEditionId())));
             result.append("</gsEditionId>");
             result.append("<remoteTmProfileId>");
-            result
-                    .append(EditUtil
-                            .encodeXmlEntities(p_tm.getRemoteTmProfileId() == -1 ? "" : String
-                                    .valueOf(p_tm.getRemoteTmProfileId())));
+            result.append(EditUtil.encodeXmlEntities(p_tm
+                    .getRemoteTmProfileId() == -1 ? "" : String.valueOf(p_tm
+                    .getRemoteTmProfileId())));
             result.append("</remoteTmProfileId>");
             result.append("<remoteTmProfileName>");
-            result
-                    .append(EditUtil.encodeXmlEntities(p_tm
-                            .getRemoteTmProfileName() == null ? "" : p_tm
-                            .getRemoteTmProfileName()));
+            result.append(EditUtil.encodeXmlEntities(p_tm
+                    .getRemoteTmProfileName() == null ? "" : p_tm
+                    .getRemoteTmProfileName()));
             result.append("</remoteTmProfileName>");
             result.append("</tm>");
         }
@@ -701,19 +733,19 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
     /**
      * Get TMs for user
-     *
+     * 
      * @param userId
      * @return
      * @throws ProjectHandlerException
      * @throws RemoteException
      */
-    private List getTMs(String userId, String cond) throws ProjectHandlerException,
-            RemoteException
+    private List getTMs(String userId, String cond)
+            throws ProjectHandlerException, RemoteException
     {
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company curremtCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
-        //Enable TM Access Control of current company
+        // Enable TM Access Control of current company
         boolean enableTMAccessControl = curremtCompany
                 .getEnableTMAccessControl();
         List tms = new ArrayList();
@@ -723,10 +755,16 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
         ProjectHandler projectHandler;
         Collection allTMs = null;
+        ArrayList<Long> tmsIds = new ArrayList<Long>();
+        ProjectTM ptm = null;
         try
         {
             projectHandler = ServerProxy.getProjectHandler();
             allTMs = projectHandler.getAllProjectTMs(cond);
+            for (Iterator iterator = allTMs.iterator(); iterator.hasNext();) {
+                ptm = (ProjectTM) iterator.next();
+                tmsIds.add(ptm.getIdAsLong());
+            }
         }
         catch (Exception e)
         {
@@ -752,7 +790,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 for (Iterator it = projectList.iterator(); it.hasNext();)
                 {
                     Project pj = (Project) it.next();
-                    String companyId = pj.getCompanyId();
+                    String companyId = String.valueOf(pj.getCompanyId());
                     if (!companies.contains(companyId))
                     {
                         companies.add(companyId);
@@ -761,7 +799,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 for (Iterator it = allTMs.iterator(); it.hasNext();)
                 {
                     ProjectTM tm = (ProjectTM) it.next();
-                    String companyId = tm.getCompanyId();
+                    String companyId = String.valueOf(tm.getCompanyId());
                     if (companies.contains(companyId))
                     {
                         tms.add(tm);
@@ -797,14 +835,17 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     }
                     if (isSuperPM)
                     {
-                        if (tm.getCompanyId().equals(currentCompanyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(
+                                currentCompanyId)
+                                && tmsIds.contains(tm.getIdAsLong()))
                         {
                             tms.add(tm);
                         }
                     }
                     else
                     {
-                        tms.add(tm);
+                        if (tmsIds.contains(tm.getIdAsLong()))
+                            tms.add(tm);
                     }
                 }
             }
@@ -820,7 +861,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
     /**
      * Set exist TM names into request.
-     *
+     * 
      * @param request
      * @throws ProjectHandlerException
      * @throws RemoteException
@@ -828,8 +869,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
     private String getExistTMNames(List<ProjectTM> tms)
             throws ProjectHandlerException, RemoteException
     {
-        StringBuilder existTMNames = new StringBuilder();
-        if (tms != null) {
+        StringBuilder existTMNames = new StringBuilder(",");
+        if (tms != null)
+        {
             Iterator<ProjectTM> iterator = tms.iterator();
             while (iterator.hasNext())
             {
@@ -843,7 +885,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
     /**
      * Get file profile Id-Names map from remote server specified by
      * gsEditionId.
-     *
+     * 
      * @param p_gsEditionId
      * @return
      */
@@ -856,9 +898,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             GSEdition edition = gsEditionManager
                     .getGSEditionByID(p_gsEditionId);
             Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(), edition
-                            .getUserName(), edition.getPassword(), edition
-                            .getEnableHttps());
+                    edition.getHostName(), edition.getHostPort(),
+                    edition.getUserName(), edition.getPassword(),
+                    edition.getEnableHttps());
             String fullAccessToken = ambassador.login(edition.getUserName(),
                     edition.getPassword());
             String realAccessToken = WebServiceClientHelper
@@ -870,8 +912,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            InputStream stream = new ByteArrayInputStream(strAllTmProfiles
-                    .getBytes("UTF-8"));
+            InputStream stream = new ByteArrayInputStream(
+                    strAllTmProfiles.getBytes("UTF-8"));
             org.w3c.dom.Document doc = db.parse(stream);
             Element root = doc.getDocumentElement();
 
@@ -925,10 +967,12 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         return results;
     }
 
-    private void setNumberOfPerPage(HttpServletRequest req) {
+    private void setNumberOfPerPage(HttpServletRequest req)
+    {
         String pageSize = (String) req.getParameter("numOfPageSize");
 
-        if (!StringUtil.isEmpty(pageSize)) {
+        if (!StringUtil.isEmpty(pageSize))
+        {
             try
             {
                 NUM_PER_PAGE = Integer.parseInt(pageSize);

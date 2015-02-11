@@ -1,3 +1,5 @@
+<%@page import="com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler"%>
+<%@page import="com.globalsight.util.StringUtil"%>
 <%@page import="com.globalsight.ling.common.URLEncoder"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
@@ -34,6 +36,7 @@
             com.globalsight.everest.servlet.util.SessionManager,
             java.text.DateFormat,
             java.text.NumberFormat,
+            org.json.JSONObject,
             java.io.File,
             java.util.*"
     session="true"
@@ -62,6 +65,7 @@
     SessionManager sessionManager =
         (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
     HashMap optionsHash = (HashMap) sessionManager.getAttribute("optionsHash");
+    JSONObject dwnldOpt=new JSONObject(optionsHash);
 
     String urlDone = done.getPageURL() +
     "&" + WebAppConstants.DOWNLOAD_ACTION +
@@ -127,9 +131,6 @@
     String psLastModifiedBy = bundle.getString("lb_primary_source_last_modified_by");
     String format = bundle.getString("lb_format") +
                     bundle.getString("lb_colon");
-    String editor = bundle.getString("lb_editor") +
-                    bundle.getString("lb_colon");
-    String encoding = bundle.getString("lb_character_encoding");
     String placeholderFormat = bundle.getString("lb_placeholder_format");
     String exactMatchesEditable = bundle.getString("lb_exact_matches_editable");
     String noGlossaries = bundle.getString("lb_no_glossaries");
@@ -151,8 +152,9 @@
     String editorSelector = OfflineConstants.EDITOR_SELECTOR;
     String encodingSelector = OfflineConstants.ENCODING_SELECTOR;
     String ptagSelector = OfflineConstants.PTAG_SELECTOR;
-    String editExactSelector = OfflineConstants.EDIT_EXACT_SELECTOR;
+    String tmEditTypeSelector = OfflineConstants.TM_EDIT_TYPE;
     String resInsertionSelector = OfflineConstants.RES_INS_SELECTOR;
+    String resTermSelector = OfflineConstants.TERM_SELECTOR;
     String pageCheckBoxes = OfflineConstants.PAGE_CHECKBOXES;
     String glossaryCheckBoxes = OfflineConstants.GLOSSARY_CHECKBOXES;
     String stfCheckBoxes = OfflineConstants.STF_CHECKBOXES;
@@ -161,43 +163,25 @@
     // Option value names
     //   format selector
     String formatValueRtfListView = OfflineConstants.FORMAT_RTF;
-    String formatValueRtfListViewTrados = OfflineConstants.FORMAT_RTF_TRADOS;
     String formatValueRtfListViewTradosOptimized = OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED;
-    String formatValueTextListView = OfflineConstants.FORMAT_TEXT;
-    String formatValueRtfParaView = OfflineConstants.FORMAT_RTF_PARA_VIEW;
 	
     String formatXlfName12 = OfflineConstants.FORMAT_XLF_NAME_12;
 	String formatXlfValue12 = OfflineConstants.FORMAT_XLF_VALUE_12;
 	
 	String formatTTXName = OfflineConstants.FORMAT_TTX_NAME;
 	String formatTTXValue = OfflineConstants.FORMAT_TTX_VALUE;
-    
-    //   editor selector
-    String editorValueWin2000 = OfflineConstants.EDITOR_WIN2000;
-    String editorValueWin2000AndAbove = OfflineConstants.EDITOR_WIN2000_ANDABOVE;
-    String editorValueWin97 = OfflineConstants.EDITOR_WIN97;
-    String editorValueMac2001 = OfflineConstants.EDITOR_MAC2001;
-    String editorValueMac98 = OfflineConstants.EDITOR_MAC98;
-    String editorValueOther = OfflineConstants.EDITOR_OTHER;
-    String editorValueTradosTagEditor = OfflineConstants.EDITOR_TRADOS_TAGEDITOR;
-	String editorXlfName = OfflineConstants.EDITOR_XLF_NAME;//this is not used any more(GBS-970)
-	String editorXlfValue = OfflineConstants.EDITOR_XLF_VALUE;
 	
+	String formatOmegaTName = OfflineConstants.FORMAT_OMEGAT_NAME;
+	String formatOmegaTValue = OfflineConstants.FORMAT_OMEGAT_VALUE;
+    
     //   ptag format selector
     String ptagValueCompact = OfflineConstants.PTAG_COMPACT;
     String ptagValueVerbose = OfflineConstants.PTAG_VERBOSE;
-    //   edit exact selector
-    String editExactValueNo = OfflineConstants.EDIT_EXACT_NO;
-    String editExactValueYes = OfflineConstants.EDIT_EXACT_YES;
     //   resource link selector
     String resInsertValueAtns = OfflineConstants.RES_INS_ATNS;
-    String resInsertValueSingleLink = OfflineConstants.RES_INS_LINK;
     String resInsertValueNone = OfflineConstants.RES_INS_NONE;
-    String resValueTmxPlain = OfflineConstants.RES_INS_TMX_PLAIN;
     String resValueTmx14b = OfflineConstants.RES_INS_TMX_14B;
     String resValueTmxBoth = OfflineConstants.RES_INX_TMX_BOTH;
-    //   encoding selector
-    String encodingValueDefault = OfflineConstants.ENCODING_DEFAULT;
     
     // Option text names
     //   format selector
@@ -208,40 +192,17 @@
     String formatTextListView = bundle.getString("lb_text");
     String formatRtfParaView = bundle.getString("lb_rtf_paraview_1");
 
-    //   editor selector
-    String editorTextSelect = bundle.getString("lb_select_an_editor");
-    String editorTextWin2000 = bundle.getString("lb_win_2000");
-    String editorTextWin2000AndAbove = bundle.getString("lb_win_2000_and_above");
-    String editorTextWin97 = bundle.getString("lb_win_97");
-    String editorTextMac2001 = bundle.getString("lb_mac_2001");
-    String editorTextMac98 = bundle.getString("lb_mac_98");
-    String editorTextOther = bundle.getString("lb_other");
-    String editorTextTradosTagEditor = "Trados TagEditor";
-    //   encoding selector
-    String encodingTextDefault = bundle.getString("lb_default_encoding");
     //   ptag format selector
     String ptagTextCompact = bundle.getString("lb_compact");
     String ptagTextVerbose = bundle.getString("lb_verbose");
-    //   edit exact selector
-    String editExactTextNo = bundle.getString("lb_no");
-    String editExactTextYes = bundle.getString("lb_yes");
     //   resource link selector
     String resInsertTextAtns = bundle.getString("lb_make_res_atns");
-    String resInsertTextSingleLink = bundle.getString("lb_make_res_link");
     String resInsertTextNone = bundle.getString("lb_make_res_none");
-    String resTmxPlain = bundle.getString("lb_make_res_tmx_plain");
+    String resTermTxt = "TEXT";
     String resTmx14b = bundle.getString("lb_make_res_tmx_14b");
     String resTmxBoth = bundle.getString("lb_make_res_tmx_both");
-    // encoding names
-    List encodingOptions
-    //    = (List)request.getAttribute(OfflineConstants.DOWNLOAD_ENCODING_OPTIONS);
-        = (List)session.getAttribute(OfflineConstants.DOWNLOAD_ENCODING_OPTIONS);
 
-    // edit exact allowed?
-    Boolean editExact
-    //    = (Boolean)request.getAttribute(OfflineConstants.DOWNLOAD_EDIT_EXACT);
-        = (Boolean)session.getAttribute(OfflineConstants.DOWNLOAD_EDIT_EXACT);
-
+    
     // Glossaries  - list of all glossaries
     GlossaryState glossaryState
         = (GlossaryState)session.getAttribute(OfflineConstants.DOWNLOAD_GLOSSARY_STATE);
@@ -274,10 +235,8 @@
 
     // Get cookie names
     String cookieNameFileFormat = OfflineConstants.COOKIE_FILE_FORMAT;
-    String cookieNameEditor = OfflineConstants.COOKIE_EDITOR;
-    String cookieNameEncoding = OfflineConstants.COOKIE_ENCODING;
     String cookieNamePtagFormat = OfflineConstants.COOKIE_PTAG_FORMAT;
-    String cookieNameEditExact = OfflineConstants.COOKIE_EDIT_EXACT;
+    String cookieNameTMEditType = OfflineConstants.COOKIE_TM_EDIT_TYPE;
     String cookieNameResInsMode = OfflineConstants.COOKIE_RES_INS_MODE;
 
     boolean hasExtractedFiles = false;
@@ -286,6 +245,14 @@
         UserParamNames.PAGENAME_DISPLAY);
     boolean showShortNames =
         param.getValue().equals(UserParamNames.PAGENAME_DISPLAY_SHORT);
+    
+    String TMEditTypeString = (String)session.getAttribute(OfflineConstants.DOWNLOAD_TM_EDIT_TYPE);
+    if (StringUtil.isEmpty(TMEditTypeString) || "no".equalsIgnoreCase(TMEditTypeString))
+        TMEditTypeString = "0";
+    int TMEditType = Integer.parseInt(TMEditTypeString);
+    
+    String userOptionOfTMEditString = (String)optionsHash.get(DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTION_TM_EDIT_TYPE);
+    int userOptionOfTMEdit = Integer.parseInt(userOptionOfTMEditString);
     
     String path = "";
 %>
@@ -296,12 +263,14 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
+<SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
 var objectName = "";
 var guideNode = "myActivitiesDownload";
 var helpFile = "<%=bundle.getString("help_download")%>";
-
+var dwnldOpt=<%=dwnldOpt%>;
 function doCheckAll(checkBoxName)
 {
     if (document.layers) {
@@ -353,131 +322,6 @@ function doClearAll(checkBoxName)
     return false;
 }
 
-var editorOptionNull = new Option(" ", "-");
-var editorOptionSelect = new Option("<%= editorTextSelect %>", "-");
-var editorOptionWin2000 = new Option("<%= editorTextWin2000 %>", "<%= editorValueWin2000 %>");
-var editorOptionWin2000AndAbove = new Option("<%= editorTextWin2000AndAbove %>", "<%= editorValueWin2000AndAbove %>");
-var editorOptionWin97 = new Option("<%= editorTextWin97 %>", "<%= editorValueWin97 %>");
-var editorOptionMac2001 = new Option("<%= editorTextMac2001 %>", "<%= editorValueMac2001 %>");
-var editorOptionMac98 = new Option("<%= editorTextMac98 %>", "<%= editorValueMac98 %>");
-var editorOptionOther = new Option("<%= editorTextOther %>", "<%= editorValueOther %>");
-var editorOptionTradosTagEditor = new Option("<%= editorTextTradosTagEditor %>", "<%= editorValueTradosTagEditor %>");
-
-var editorOptNames = new Array;
-	editorOptNames[0] = "<%= editorTextWin2000 %>";
-	editorOptNames[1] = "<%= editorTextWin97 %>";
-	editorOptNames[2] = "<%= editorTextMac2001 %>";
-	editorOptNames[3] = "<%= editorTextMac98 %>";
-	editorOptNames[4] = "<%= editorTextOther %>";
-	editorOptNames[5] = "<%= editorTextTradosTagEditor %>";
-	editorOptNames[6] = "<%= editorTextWin2000AndAbove %>";
-	editorOptNames[7] = "<%= editorXlfValue %>";
-
-var editorOptValues = new Array;
-	editorOptValues[0] = "<%= editorValueWin2000 %>";
-	editorOptValues[1] = "<%= editorValueWin97 %>";
-	editorOptValues[2] = "<%= editorValueMac2001 %>";
-	editorOptValues[3] = "<%= editorValueMac98 %>";
-	editorOptValues[4] = "<%= editorValueOther %>";
-	editorOptValues[5] = "<%= editorValueTradosTagEditor %>";
-	editorOptValues[6] = "<%= editorValueWin2000AndAbove %>";
-	editorOptValues[7] = "<%= editorXlfValue %>";
-
-<%-- construct the encoding options --%>
-var siteoptNames = new Array;
-var siteoptValues = new Array;
-<%
-    for(int i = 0; i < encodingOptions.size(); i++)
-    {
-%>
-		siteoptNames[<%= i %>] = "<%= encodingOptions.get(i) %>";
-		siteoptValues[<%= i %>] = "<%= encodingOptions.get(i) %>";
-<%
-    }
-%>
-
-var resourceOptNames = new Array;
-	resourceOptNames[0] = "<%= resInsertTextAtns %>";
-	resourceOptNames[1] = "<%= resInsertTextSingleLink %>";
-	resourceOptNames[2] = "<%= resTmxPlain %>";
-	resourceOptNames[3] = "<%= resTmx14b %>";
-	resourceOptNames[4] = "<%= resTmxBoth %>";
-	resourceOptNames[5] = "<%= resInsertTextNone %>";
-
-var resourceOptValues = new Array;
-	resourceOptValues[0] = "<%= resInsertValueAtns %>";
-	resourceOptValues[1] = "<%= resInsertValueSingleLink %>";
-	resourceOptValues[2] = "<%= resValueTmxPlain %>";
-	resourceOptValues[3] = "<%= resValueTmx14b %>";
-	resourceOptValues[4] = "<%= resValueTmxBoth %>";
-	resourceOptValues[5] = "<%= resInsertValueNone %>";
-
-
-function setEditorSelector(formSent)
-{
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    var formatSelect = formSent.<%= formatSelector %>;
-    var editorSelect = formSent.<%= editorSelector %>;
-    var encodingSelect = formSent.<%= encodingSelector %>;
-    var ptagSelect = formSent.<%= ptagSelector %>;
-    ptagSelect.disabled = false;
-
-    editorSelect.options.length = 0;
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListView %>")
-    {
-        editorSelect.options[0] = new Option(editorOptNames[2],editorOptValues[2]);
-        editorSelect.options[1] = new Option(editorOptNames[3],editorOptValues[3]);
-        editorSelect.options[2] = new Option(editorOptNames[5],editorOptValues[5]);
-        editorSelect.options[3] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[4] = new Option(editorOptNames[0],editorOptValues[0]);
-        editorSelect.selectedIndex = 1;
-    }
-    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>" 
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
-    {
-        editorSelect.options[0] = new Option(editorOptNames[5],editorOptValues[5]);
-        editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[2] = new Option(editorOptNames[0],editorOptValues[0]);
-        editorSelect.selectedIndex = 1;
-    }
-    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfParaView %>")
-    {
-        editorSelect.options[0] = new Option(editorOptNames[6],editorOptValues[6]);
-        editorSelect.selectedIndex = 0;
-    }
-    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueTextListView %>")
-    {
-        
-        editorSelect.options[0] = new Option(editorOptNames[2],editorOptValues[2]);
-        editorSelect.options[1] = new Option(editorOptNames[3],editorOptValues[3]);
-        editorSelect.options[2] = new Option(editorOptNames[4],editorOptValues[4]);
-        editorSelect.options[3] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[4] = new Option(editorOptNames[0],editorOptValues[0]);
-        editorSelect.selectedIndex = 1;
-    }
-	else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>")
-	{
-	    editorSelect.options[0] = new Option(editorOptNames[7],editorOptValues[7]);
-		editorSelect.selectedIndex = 0;
-		ptagSelect.selectedIndex = 0;
-		ptagSelect.disabled = true;
-	}
-	else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatTTXValue %>")
-	{
-        editorSelect.options[0] = new Option(editorOptNames[5],editorOptValues[5]);
-        editorSelect.selectedIndex = 0;
-		ptagSelect.selectedIndex = 0;
-		ptagSelect.disabled = true;
-	}
-	
-    setCharsetSelector(formSent);
-    setResourceSelector(formSent);
-    setPopulates(formatSelect);
-    setConsolidate(formatSelect);
-    setRepetitions(formatSelect);
-    return true;
-}
 
 function updatePTFControlState()
 {
@@ -512,29 +356,24 @@ function disablePTFOptions(p_state)
         {
             theForm = document.all.downloadForm;
         }
-
-        theForm.<%= formatSelector %>.disabled = state;
-        theForm.<%= editorSelector %>.disabled = state;
-        theForm.<%= encodingSelector %>.disabled = state;
-    	var formatSelect = theForm.<%= formatSelector %>;
+        theForm.formatSelector.disabled = state;
+    	var formatSelect = theForm.formatSelector;
     	if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>" ||
-    	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatTTXValue %>" )
+    	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatTTXValue %>" ||
+    	    formatSelect.options[formatSelect.selectedIndex].value == "<%= formatOmegaTValue %>" )
     	{
-    	    theForm.<%= ptagSelector %>.disabled = true;
+    	    theForm.ptagSelector.disabled = true;
     	}
     	else
     	{
-    	    theForm.<%= ptagSelector %>.disabled = state;
+    	    theForm.ptagSelector.disabled = state;
     	}
-        theForm.<%= resInsertionSelector %>.disabled = state;
+        theForm.resInsertionSelector.disabled = state;
         
-        document.getElementById("consolidateCheckBox").disabled = state;
-        document.getElementById("changeCreationIdForMTCheckBox").disabled = state;
-        
-<%      if(editExact.booleanValue())
-        {%>
-            theForm.<%= editExactSelector %>.disabled = state;
-<%      }%>
+         document.getElementById("changeCreationIdForMT").disabled = state;
+     
+         theForm.tmEditTypeSelector.disabled = state;
+         theForm.resTermSelector.disabled = state;
 
 	}
 }
@@ -694,7 +533,7 @@ function optionTest(formSent)
 
 }
 
-function submitForm(form)
+function dsubmit()
 {
     if (document.layers)
     {
@@ -709,416 +548,16 @@ function submitForm(form)
 
     if (optionTest(theForm))
     {
-        saveUserOptions(theForm);
         theForm.submit();
     }
 }
 
 
-function setCharsetSelector(formSent)
-{
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    var word = formSent.editor;
-    var cs = formSent.encoding;
-    var resources = formSent.<%= resInsertionSelector %>;
 
-    var idx = 0;
-    cs.options.length = 0;
 
-    if (word.options[word.selectedIndex].value == "<%= editorValueOther %>")
-    {
-        for(i = 0; i < siteoptNames.length; i++)
-        {
-             cs.options[i] = new Option(siteoptNames[i], siteoptValues[i]);
-             if (cs.options[i].text == "UTF-8") idx = i;
-        }
-    }
-    else
-    {
-        cs.options[0] = new Option("<%= encodingTextDefault %>","<%= encodingValueDefault %>");
-    }
 
-    cs.selectedIndex = idx;
 
-    // hack for TagEditor
-    setResourceSelector(formSent);
-    //if(word.options[word.selectedIndex].value == "<%= editorValueTradosTagEditor %>")
-    //{
-    //    resources.selectedIndex = 1; //suggest links
-    //}
 
-    return true;
-}
-
-function setPopulates(formatSelect)
-{
-	var populatefuzzy = document.getElementById("populatefuzzy");
-	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
-    {
-    	populatefuzzy.style.display = "";
-    }
-    else
-    {
-    	populatefuzzy.style.display = "none";
-    }
-}
-
-function setConsolidate(formatSelect) {
-	var consolidate = document.getElementById("needConsolidateBox");
-	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
-    {
-    	consolidate.style.display = "";
-    }
-    else
-    {
-    	consolidate.style.display = "none";
-    }
-}
-
-function setRepetitions(formatSelect) {
-	var includeRepetitionsObj = document.getElementById("includeRepetitionsBox");
-	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
-    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
-    {
-    	includeRepetitionsObj.style.display = "";
-    }
-    else
-    {
-    	includeRepetitionsObj.style.display = "none";
-    }
-}
-
-function setResourceSelector(formSent)
-{
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    var editor = formSent.editor;
-    var resources = formSent.<%= resInsertionSelector %>;
-    var formatSelect = formSent.<%= formatSelector %>;
-
-    if (editor.options[editor.selectedIndex].value == "<%= editorValueTradosTagEditor %>")
-    {
-        resources.options.length = 0;
-//        resources.options[0] = new Option(resourceOptNames[1],resourceOptValues[1]);//need not Link
-        resources.options[0] = new Option(resourceOptNames[2],resourceOptValues[2]);
-        resources.options[1] = new Option(resourceOptNames[3],resourceOptValues[3]);
-        resources.options[2] = new Option(resourceOptNames[4],resourceOptValues[4]);
-		resources.options[3] = new Option(resourceOptNames[5],resourceOptValues[5]);
-	    resources.selectedIndex = 3;	
-    }
-	else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>")
-	{
-	    resources.options.length=0;
-		resources.options[0] = new Option(resourceOptNames[0],resourceOptValues[0]);
-	    resources.options[1] = new Option(resourceOptNames[2],resourceOptValues[2]);
-        resources.options[2] = new Option(resourceOptNames[3],resourceOptValues[3]);
-        resources.options[3] = new Option(resourceOptNames[4],resourceOptValues[4]);
-		resources.options[4] = new Option(resourceOptNames[5],resourceOptValues[5]);	
-	}
-	else if(resources.options.length != 3)
-    {
-        resources.options[0] = new Option(resourceOptNames[0],resourceOptValues[0]);
-        resources.options[1] = new Option(resourceOptNames[1],resourceOptValues[1]);
-        resources.options[2] = new Option(resourceOptNames[2],resourceOptValues[2]);
-		resources.options[3] = new Option(resourceOptNames[3],resourceOptValues[3]);
-		resources.options[4] = new Option(resourceOptNames[4],resourceOptValues[4]);
-		resources.options[5] = new Option(resourceOptNames[5],resourceOptValues[5]);
-    }
-    return true;
-}
-
-// Constructor
-// Creates a default download options object by reading the client coookies.
-// If cookie does not exist, its value is set to false.
-function ClientDownloadOptions()
-{
-	this.fileFormat = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_FORMAT) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_FORMAT)%>";
-
-    this.editor = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_EDITOR) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_EDITOR)%>";
-	    				
-	this.encoding = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_ENCODING) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_ENCODING)%>";
-	    				
-	this.ptagFormat = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER)%>";
-
-	this.resInsMode = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT)%>";
-	    					
-	this.editExact = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_EDITEXACT) :
-		optionsHash.get(UserParamNames.DOWNLOAD_OPTION_EDITEXACT)%>";
-	    					
-	this.consolidate = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX) :
-        optionsHash.get(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX)%>";
-
-    this.changeCreationIdForMT = "<%=(optionsHash == null) ? request.getAttribute(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT) :
-    	optionsHash.get(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT)%>";
-                
-    this.terminology = "<%=(optionsHash == null) ? request.getAttribute("termSelector") :
-			optionsHash.get("termSelector")%>";       
-	this.consolidateTerm = "<%=(optionsHash == null) ? request.getAttribute("consolidateTerm") :
-			optionsHash.get("consolidateTerm")%>";
-	this.populate100 = "<%=(optionsHash == null) ? request.getAttribute("populate100") :
-			optionsHash.get("populate100")%>";
-	this.populatefuzzy = "<%=(optionsHash == null) ? request.getAttribute("populatefuzzy") :
-			optionsHash.get("populatefuzzy")%>";
-			
-	this.needConsolidate = "<%=(optionsHash == null) ? request.getAttribute("needConsolidate") :
-			optionsHash.get("needConsolidate")%>";
-			
-	this.includeRepetitions = "<%=(optionsHash == null) ? request.getAttribute("includeRepetitions") :
-			optionsHash.get("includeRepetitions")%>";
-}
-
-/*
-* save download options
-* but the saved options won't be used any more, 
-* because the settings in "My Accounts" >> "Download Options" are used instead.
-*/
-function saveClientDownloadOptions(fileFormatVal, editorVal, encodingVal, ptagFormatVal, resInsModeVal, editExactVal)
-{
-	var duration = 12; // months
-
-    setCookieValue("<%= cookieNameFileFormat %>", fileFormatVal, duration);
-    setCookieValue("<%= cookieNameEditor %>", editorVal, duration);
-    setCookieValue("<%= cookieNameEncoding %>", encodingVal, duration);
-    setCookieValue("<%= cookieNamePtagFormat %>", ptagFormatVal, duration);
-    setCookieValue("<%= cookieNameResInsMode %>", resInsModeVal, duration);
-    if( editExactVal != null )
-    {
-        setCookieValue("<%= cookieNameEditExact %>", editExactVal, duration) ;
-    }
-}
-
-/*
-* Reads the users settings from a locale cookie
-* If cookies values are not found, we default to the values selected by the HTML
-*/
-function setClientDwnldOptions(formSent)
-{
-    // Load the Guides
-    loadGuides();
-
-    // get client download options
-    var dwnldOpt = new ClientDownloadOptions();
-    
-    // get selectors
-    var formatSelect = formSent.<%= formatSelector %>;
-    var editorSelect = formSent.<%= editorSelector %>;
-    var encodingSelect = formSent.<%= encodingSelector %>;
-    var ptagSelect = formSent.<%= ptagSelector %>;
-    var resInsModeSelect = formSent.<%= resInsertionSelector %>;
-    var editExactSelect = formSent.<%= editExactSelector %>;
-	var terminologySelect = formSent.termTypeSelector;
-    formatSelect.disabled = false;
-    editorSelect.disabled = false;
-    encodingSelect.disabled = false;
-    ptagSelect.disabled = false;
-    resInsModeSelect.disabled = false;
-
-    // We only set format/editor/encoding if we have all three values
-    if (dwnldOpt.fileFormat.length > 0 && dwnldOpt.editor.length > 0 &&
-        dwnldOpt.encoding.length > 0)
-    {
-		// Set FileFormat
-		for(i = 0; i < formatSelect.length; i++)
-		{
-	        if (formatSelect.options[i].value == dwnldOpt.fileFormat)
-	        {
-	            formatSelect.selectedIndex = i;
-			    break;
-	        }
-		}
-
-		// Set Editor: first, establish editor selections based on
-        // FileFormat set above
-		setEditorSelector(formSent);
-		for (i = 0; i < editorSelect.length; i++)
-		{
-	       if (editorSelect.options[i].value == dwnldOpt.editor)
-	       {
-	           editorSelect.selectedIndex = i;
-			   break;
-	       }
-		}
-
-		// Set encoding: first, establish encoding selections based on
-        // editor set above
-		setCharsetSelector(formSent);
-		for (i = 0; i < encodingSelect.length; i++)
-		{
-	       if (encodingSelect.options[i].value == dwnldOpt.encoding)
-	       {
-	          encodingSelect.selectedIndex = i;
-	          break;
-	       }
-		}
-	}
-
-    // Set Placeholder
-    if (dwnldOpt.ptagFormat)
-    {
-      for(i = 0; i < ptagSelect.length; i++)
-      {
-         if (ptagSelect.options[i].value == dwnldOpt.ptagFormat)
-         {
-            ptagSelect.selectedIndex = i;
-            break;
-         }
-      }
-    }
-
-    // Set resource insertion mode
-    if (dwnldOpt.resInsMode)
-    {
-      for(i = 0; i < resInsModeSelect.length; i++)
-      {
-         if (resInsModeSelect.options[i].value == dwnldOpt.resInsMode)
-         {
-             resInsModeSelect.selectedIndex = i;
-             break;
-         }
-      }
-    }
-
-    if (dwnldOpt.consolidate == 'yes')
-    {
-        document.getElementById("consolidateCheckBox").checked = true;
-    }
-
-    if (dwnldOpt.changeCreationIdForMT == 'yes')
-    {
-    	document.getElementById("changeCreationIdForMTCheckBox").checked = true;
-    }
-    
-	if(dwnldOpt.consolidateTerm == 'true' || dwnldOpt.consolidateTerm == 'yes')
-	{
-		document.getElementById("consolidateTermCheckBox").checked = true;
-	}
-
-	if (dwnldOpt.populate100)
-	{
-		if(dwnldOpt.populate100 == 'false' || dwnldOpt.populate100 == 'no')
-		{
-			document.getElementById("populate100CheckBox").checked = false;
-		}
-	}
-
-	if (dwnldOpt.populatefuzzy)
-	{
-		if(dwnldOpt.populatefuzzy == 'false' || dwnldOpt.populatefuzzy == 'no')
-		{
-			document.getElementById("populatefuzzyCheckBox").checked = false;
-		}
-	}
-	
-	if (dwnldOpt.needConsolidate)
-	{
-		if(dwnldOpt.needConsolidate == 'false' || dwnldOpt.needConsolidate == 'no')
-		{
-			document.getElementById("needConsolidate").checked = false;
-		}
-	}
-	
-	if (dwnldOpt.includeRepetitions)
-	{
-		if(dwnldOpt.includeRepetitions == 'false' || dwnldOpt.includeRepetitions == 'no')
-		{
-			document.getElementById("includeRepetitions").checked = false;
-		}
-	}
-	
-	// Set EditExact
-<%  if (editExact.booleanValue()) {%>
-    	if(dwnldOpt.editExact) 
-        {
-	        for(i = 0; i < editExactSelect.length; i++)
-			{
-	            if (editExactSelect.options[i].value == dwnldOpt.editExact)
-	            {
-	                editExactSelect.selectedIndex = i;
-					break;
-	            }
-	        }
-	    }
-<% } %>
-	editExactSelect.disabled = false;
-	if(dwnldOpt.terminology)
-	{
-		for(var i = 0; i < terminologySelect.length; i++)
-		{
-			if(terminologySelect.options[i].value == dwnldOpt.terminology)
-			{
-				terminologySelect.selectedIndex = i; 
-				break;
-			}
-		}
-	}
-    operateConsolidate();
-    operateConsolidateTerm();
-}
-
-function operateConsolidate()
-{
-	var selector = document.getElementById("tmxTypeSelector");
-	var text = selector.options[selector.selectedIndex].value;
-
-    if (text == "<%= resValueTmxPlain %>" || text == "<%= resValueTmx14b %>" || text == "<%= resValueTmxBoth %>")
-	{
-	   document.getElementById("consolidateCheckBox").disabled=false;
-	   document.getElementById("changeCreationIdForMTCheckBox").disabled=false;
-	}
-	else
-	{
-	   document.getElementById("consolidateCheckBox").disabled=true;
-	   document.getElementById("changeCreationIdForMTCheckBox").disabled=true;
-	}
-}
-
-function operateConsolidateTerm()
-{
-    var selector = document.getElementById("termTypeSelector");
-    document.getElementById("consolidateTermCheckBox").disabled = (selector.value == 'termNone');
-}
-
-function saveUserOptions(formSent)
-{
-    //var duration = 12; // months
-    var formatSelect = formSent.<%= formatSelector %>;
-    var editorSelect = formSent.<%= editorSelector %>;
-    var encodingSelect = formSent.<%= encodingSelector %>;
-    var ptagSelect = formSent.<%= ptagSelector %>;
-    var resInsModeSelect = formSent.<%= resInsertionSelector %>;
-    
-var terminologySelect = formSent.termTypeSelector;
-
-    var cookieValFileFormat = formatSelect.options[formatSelect.selectedIndex].value;
-    var cookieValEditor = editorSelect.options[editorSelect.selectedIndex].value;
-    var cookieValEncoding = encodingSelect.options[encodingSelect.selectedIndex].value;
-    var cookieValPtagFormat = ptagSelect.options[ptagSelect.selectedIndex].value;
-    var cookieValResInsMode = resInsModeSelect.options[resInsModeSelect.selectedIndex].value;
-    var cookieValTerm = terminologySelect.options[terminologySelect.selectedIndex].value;
-    
-    var cookieValEditExact = null; // set below - if enabled
-
-<% if(editExact.booleanValue())
-{%>
-    var editExactSelect = formSent.<%= editExactSelector %>;
-    cookieValEditExact = editExactSelect.options[editExactSelect.selectedIndex].value;
-<%}%>
-
-    saveClientDownloadOptions(cookieValFileFormat, cookieValEditor, cookieValEncoding, cookieValPtagFormat, cookieValResInsMode, cookieValEditExact);
-}
 
 //not sure where it is used
 function doFinished(urlSent) {
@@ -1131,11 +570,6 @@ function doOk()
     window.location.href = "<%=urlDone%>";
 }
 
-function doOnLoad()
-{
-    loadGuides();
-    setClientDwnldOptions(document.downloadForm);
-}
 
 //for GBS-2599
 function handleSelectAll(selectAll,theBoxes) {
@@ -1149,7 +583,7 @@ function handleSelectAll(selectAll,theBoxes) {
 </SCRIPT>
 </HEAD>
 
-<BODY onload="doOnLoad()" LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
+<BODY onload="init()" LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
@@ -1227,10 +661,10 @@ function handleSelectAll(selectAll,theBoxes) {
 
 <P>
 
-  <FORM NAME="downloadForm" ACTION="<%=urlStartDownload%>" METHOD="POST">
-    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="100%">
+  <FORM NAME="downloadForm" ACTION="<%=urlStartDownload%>" METHOD="POST" >
+    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="100%" >
       <TR>
-        <TD CLASS="tableHeadingBasic" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=pageCheckBoxes%>')" checked="true"/>&nbsp;<%= activityContent %></TD>
+        <TD CLASS="tableHeadingBasic" style="width:1630px; *width:auto;" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=pageCheckBoxes%>')" checked="true"/>&nbsp;<%= activityContent %></TD>
       </TR>
       <TR>
         <TD VALIGN="TOP" width="700px">
@@ -1385,63 +819,26 @@ function handleSelectAll(selectAll,theBoxes) {
         <%-- // *************************
              // TABLE: PRIMARY FILE DOWNLOAD OPTIONS
              // ************************* --%>
-          <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0">
+          <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" >
             <TR>
               <TD COLSPAN="2" NOWRAP><SPAN CLASS="standardTextBold"><%= downloadOptions %></SPAN></TD>
             </TR>
             <TR>
               <TD><SPAN CLASS="standardText"><%= format %></SPAN></TD>
               <TD ><SPAN CLASS="standardText">
-                <SELECT onChange="setEditorSelector(this.form);" NAME="<%= formatSelector %>" CLASS="standardText" DISABLED="TRUE">
-                  <!-- <OPTION VALUE="-"><%= formatStartHere %></OPTION> -->
-                  <OPTION VALUE="<%= formatValueRtfListViewTrados %>"><%= formatRtfListViewTrados %></OPTION>
-                  <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>"><%= formatRtfListViewTradosOptimized %></OPTION>
-                  <OPTION VALUE="<%= formatValueRtfListView %>"><%= formatRtfListView %></OPTION>
-                  <% if(EditHelper.isParagraphEditorInstalled())
-                  {
-                  %>
-                  <!-- <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION> -->
-                  <%
-                  }
-                  %>
-                  <OPTION VALUE="<%= formatValueTextListView %>"><%= formatTextListView %></OPTION> 
-				  <OPTION VALUE="<%= formatTTXValue %>"><%=formatTTXName %></OPTION>
-				  <OPTION VALUE="<%= formatXlfName12 %>"><%=formatXlfValue12 %></OPTION>
+                <SELECT NAME="formatSelector" CLASS="standardText" >
+                  <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>" title="For Trados 7 and SDL Trados 2007"><%= formatRtfListViewTradosOptimized %></OPTION>
+                  <OPTION VALUE="<%= formatValueRtfListView %>" title="For SDL Trados 2009 and 2011"><%= formatRtfListView %></OPTION>
+                  <OPTION VALUE="<%= formatXlfName12 %>" title="For Xliff 1.2"><%=formatXlfValue12 %></OPTION>
+                  <OPTION VALUE="<%= formatTTXValue %>" title="For Trados 7 and SDL Trados 2007"><%=formatTTXName %></OPTION>
+                  <OPTION VALUE="<%= formatOmegaTValue %>" title="For OmegaT"><%=formatOmegaTName %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>
-            <TR>
-              <TD><SPAN CLASS="standardText"><%= editor %></SPAN></TD>
-              <TD><SPAN CLASS="standardText">
-                <SELECT onChange="setCharsetSelector(this.form);" NAME="<%= editorSelector %>" CLASS="standardText" DISABLED="TRUE">
-                  <!-- <OPTION VALUE="-">-----------------------------</OPTION> -->
-                
-                  <OPTION VALUE="<%= editorValueWin2000 %>"><%= editorTextWin2000%></OPTION>
-                  
-                  <OPTION VALUE="<%= editorValueMac2001 %>"><%= editorTextMac2001 %></OPTION>
-
-                  <OPTION VALUE="<%= editorValueMac98 %>"><%= editorTextMac98 %></OPTION>
-                
-                  <OPTION VALUE="<%= editorValueWin97 %>" SELECTED><%= editorTextWin97 %></OPTION>
-                  
-                  
-
-                </SELECT>
-              </SPAN></TD>
-            </TR>
-            <TR>
-              <TD><SPAN CLASS="standardText"><%= encoding %></SPAN></TD>
-              <TD><SPAN CLASS="standardText">
-                <SELECT NAME="<%= encodingSelector %>" CLASS="standardText" DISABLED="TRUE">
-                  <OPTION VALUE="-" SELECTED>-----------------------------</OPTION>
-                  <OPTION VALUE="<%= encodingValueDefault %>" SELECTED><%= encodingTextDefault %></OPTION>
-                </SELECT>
-              </SPAN></TD>
-            </TR>
-            <TR>
+			<TR>
               <TD><SPAN CLASS="standardText"><%= placeholderFormat %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
-                <SELECT NAME="<%= ptagSelector %>" CLASS="standardText" DISABLED="TRUE">
+                <SELECT NAME="ptagSelector" id="ptagSelector" CLASS="standardText">
                   <OPTION VALUE="<%= ptagValueCompact %>" SELECTED><%= ptagTextCompact %></OPTION>
                   <OPTION VALUE="<%= ptagValueVerbose %>"><%= ptagTextVerbose %></OPTION>
                 </SELECT>
@@ -1450,71 +847,62 @@ function handleSelectAll(selectAll,theBoxes) {
             <TR>
               <TD><SPAN CLASS="standardText"><%= labelResInsertion %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
-                <SELECT id="tmxTypeSelector" NAME="<%= resInsertionSelector %>" CLASS="standardText" DISABLED="TRUE" onchange="operateConsolidate()">
-                  <OPTION VALUE="<%= resInsertValueAtns %>" SELECTED><%= resInsertTextAtns %></OPTION>
-                  <OPTION VALUE="<%= resInsertValueSingleLink %>"><%= resInsertTextSingleLink %></OPTION>
-                  <OPTION  VALUE="<%= resValueTmxPlain %>"><%= resTmxPlain %></OPTION>
-                  <OPTION VALUE="<%= resValueTmx14b %>"><%= resTmx14b %></OPTION>
-                  <OPTION VALUE="<%= resValueTmxBoth %>"><%= resTmxBoth %></OPTION>
+                <SELECT id="tmxTypeSelector" NAME="resInsertionSelector" CLASS="standardText" >
+                  <OPTION VALUE="<%= resInsertValueAtns %>" class="TTX" SELECTED><%= resInsertTextAtns %></OPTION>
+                  <OPTION VALUE="<%= resValueTmx14b %>"  SELECTED><%= resTmx14b %></OPTION>
+                  <OPTION VALUE="<%= resValueTmxBoth %>" class="TTX"><%= resTmxBoth %></OPTION>
                   <OPTION VALUE="<%= resInsertValueNone %>"><%= resInsertTextNone %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>
-            <TR>
+  			<TR>
               <TD></TD>
-              <TD><SPAN CLASS="standardText"><input id="consolidateCheckBox" type="checkbox" name="<%=OfflineConstants.CONSOLIDATE_TMX %>" value="true"/><%=bundle.getString("lb_consolidate_tmx_files") %></SPAN></TD>
-            </TR>
-			<TR>
-              <TD></TD>
-			  <TD><SPAN CLASS="standardText"><input type="checkbox" id="changeCreationIdForMTCheckBox" name="<%=OfflineConstants.CHANGE_CREATION_ID_FOR_MT_SEGMENTS %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
+			  <TD><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="changeCreationIdForMT" name="<%=UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT %>"/><%=bundle.getString("lb_tm_export_change_creationid_for_mt")%></SPAN></TD>
 			</TR>
             <TR>
               <TD><SPAN CLASS="standardText"><%= labelTerminology %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
-                <SELECT id="termTypeSelector" NAME="<%= OfflineConstants.TERM_SELECTOR %>" CLASS="standardText" onchange="operateConsolidateTerm()">
-                  <OPTION VALUE="<%= OfflineConstants.TERM_GLOBALSIGHT %>"><%=bundle.getString("lb_terminology_globalsight_format")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_HTML %>"><%=bundle.getString("lb_terminology_html")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_TBX %>"><%=bundle.getString("lb_terminology_import_format_tbx")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_TRADOS %>"><%=bundle.getString("lb_terminology_multiterm_ix_format")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_NONE %>" SELECTED><%= resInsertTextNone %></OPTION>
+                <SELECT id="resTermSelector" NAME="termSelector" CLASS="standardText" >
+                  <OPTION VALUE="<%= OfflineConstants.TERM_HTML %>" class="unOmegaT"  SELECTED><%=bundle.getString("lb_terminology_html")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_TBX %>" class="unOmegaT" ><%=bundle.getString("lb_terminology_import_format_tbx")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_TRADOS %>" class="unOmegaT" ><%=bundle.getString("lb_terminology_multiterm_ix_format")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_TXT %>" class="OmegaT"><%= resTermTxt %></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_NONE %>"><%= resInsertTextNone %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>
             
-            <TR>
-              <TD></TD>
-              <TD><SPAN CLASS="standardText"><input id="consolidateTermCheckBox" type="checkbox" name="<%=OfflineConstants.CONSOLIDATE_TERM %>" value="true" disabled="disabled" /><%=bundle.getString("lb_consolidate_term_files") %></SPAN></TD>
-            </TR>
-            
-<%
-    		if(editExact.booleanValue())
-    		{
-%>
-            <TR>
+            <%
+            if (TMEditType > 1) {
+            %>
+             <TR>
               <TD><SPAN CLASS="standardText"><%= exactMatchesEditable %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
-                <SELECT NAME="<%= editExactSelector %>" CLASS="standardText" DISABLED="TRUE">
-                  <OPTION VALUE="<%= editExactValueNo %>" SELECTED><%= editExactTextNo %></OPTION>
-                  <OPTION VALUE="<%= editExactValueYes %>"><%= editExactTextYes %></OPTION>
+                <SELECT NAME="TMEditType" CLASS="standardText">
+                  <option value="1" <%=userOptionOfTMEdit == 1 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_both") %></option>
+                  <option value="2" <%=userOptionOfTMEdit == 2 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_ice") %></option>
+                  <option value="3" <%=userOptionOfTMEdit == 3 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_100") %></option>
+                  <option value="4" <%=userOptionOfTMEdit == 4 ? "selected" : "" %>><%=bundle.getString("lb_l10nprofile_tm_edit_type_deny") %></option>
                 </SELECT>
               </SPAN></TD>
-            </TR>
-<%
-		    }
-%>
-            <TR id="populate100">
+            </TR>   
+            <%
+            }
+            %>
+            
+            <TR id="populate100" class="formatAcces">
                 <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_populate_100_target_segment") %></SPAN></TD>
                 <TD><SPAN CLASS="standardText">
                 <input id="populate100CheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_100%>" checked="checked" value="true"/></SPAN>
                 </TD>
             </TR>
-             <TR id="populatefuzzy">
+             <TR id="populatefuzzy" class="formatAcces">
                 <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_populate_fuzzy_target_segment") %></SPAN></TD>
                 <TD><SPAN CLASS="standardText">
                 <input id="populatefuzzyCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_FUZZY%>" checked="checked" value="true"/></SPAN>
                 </TD>
             </TR>
-            <TR id="needConsolidateBox">
+            <TR id="needConsolidateBox" class="formatAcces">
             	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_consolate") %></SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
@@ -1522,7 +910,7 @@ function handleSelectAll(selectAll,theBoxes) {
                     </SPAN>
                 </TD>
             </TR>
-            <TR id="includeRepetitionsBox">
+            <TR id="includeRepetitionsBox" class="formatAcces">
             	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_repetition") %></SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
@@ -1534,7 +922,7 @@ function handleSelectAll(selectAll,theBoxes) {
                     <TD COLSPAN="3"> &nbsp;  </TD>
             </TR>
             <TR>
-                    <TD COLSPAN="3"><SPAN CLASS="smallText"><%= labelResInsertionNote %></SPAN></TD>
+                    <TD  COLSPAN="3"><SPAN CLASS="smallText"><%= labelResInsertionNote %></SPAN></TD>
             </TR>
           </TABLE>
         </TD>

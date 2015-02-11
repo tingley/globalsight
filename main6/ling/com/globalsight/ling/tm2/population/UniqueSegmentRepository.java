@@ -17,9 +17,15 @@
 package com.globalsight.ling.tm2.population;
 
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Tu;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +44,7 @@ public class UniqueSegmentRepository
     // value: BaseTmTu
     private Map<BaseTmTuv, BaseTmTu> m_tus; 
     private GlobalSightLocale m_sourceLocale;
+    private Map<BaseTmTuv, ArrayList<BaseTmTu>> m_attTus;
     
     /**
      * Constructor.
@@ -46,6 +53,7 @@ public class UniqueSegmentRepository
     public UniqueSegmentRepository(GlobalSightLocale p_sourceLocale)
     {
         m_tus = new HashMap<BaseTmTuv, BaseTmTu>();
+        m_attTus = new HashMap<BaseTmTuv, ArrayList<BaseTmTu>>();
         m_sourceLocale = p_sourceLocale;
     }
 
@@ -63,7 +71,26 @@ public class UniqueSegmentRepository
 
     public Collection<BaseTmTu> getAllTus()
     {
-        return m_tus.values();
+        List<BaseTmTu> result = new ArrayList<BaseTmTu>();
+        result.addAll(m_tus.values());
+        result.addAll(getAllAttTus());
+        
+        return result;
+    }
+    
+    public Collection<BaseTmTu> getAllAttTus()
+    {
+        List<BaseTmTu> result = new ArrayList<BaseTmTu>();
+        Collection<ArrayList<BaseTmTu>> values = m_attTus.values();
+        if (values != null && values.size() > 0)
+        {
+            for (ArrayList<BaseTmTu> list : values)
+            {
+                result.addAll(list);
+            }
+        }
+        
+        return result;
     }
     
 
@@ -79,6 +106,35 @@ public class UniqueSegmentRepository
     public BaseTmTu getMatchedTu(BaseTmTuv p_sourceTuv)
     {
         return (BaseTmTu)m_tus.get(p_sourceTuv);
+    }
+    
+    /**
+     * Get a Tu that has an identical source Tuv with a given
+     * Tuv with attributes. 
+     * @param p_sourceTuv Tuv object
+     * @return matched Tu or null if there isn't a match
+     */
+    public List<BaseTmTu> getMatchedAttTu(BaseTmTuv p_sourceTuv)
+    {
+        return m_attTus.get(p_sourceTuv);
+    }
+    
+    public List<BaseTmTu> getAllMatchedTu(BaseTmTuv p_sourceTuv)
+    {
+        ArrayList<BaseTmTu> result = new ArrayList<BaseTmTu>();
+        BaseTmTu f = getMatchedTu(p_sourceTuv);
+        if (f != null)
+        {
+            result.add(f);
+        }
+        
+        ArrayList<BaseTmTu> atttus = m_attTus.get(p_sourceTuv);
+        if (atttus != null)
+        {
+            result.addAll(atttus);
+        }
+        
+        return result;
     }
     
 
@@ -99,25 +155,138 @@ public class UniqueSegmentRepository
         }
         else
         {
-            // the same source segment is found. Each target Tuvs must
-            // be merged into the found Tu.
-            for (GlobalSightLocale trgLocale : p_tu.getAllTuvLocales())
+            if (isMergeAble(tu, p_tu))
             {
-                if(!trgLocale.equals(m_sourceLocale))
+                mergeTu(p_tu, tu);
+            }
+            else
+            {
+                ArrayList<BaseTmTu> attTus = m_attTus.get(srcTuv);
+                if (attTus == null)
                 {
-                    Collection<BaseTmTuv> tuvs = p_tu.getTuvList(trgLocale);
-                    if (tuvs != null )
+                    attTus = new ArrayList<BaseTmTu>();
+                    attTus.add(p_tu);
+                    m_attTus.put(srcTuv, attTus);
+                }
+                else
+                {
+                    boolean isMerged = false;
+                    for (BaseTmTu curTu : attTus)
                     {
-                        for (BaseTmTuv trgTuv : tuvs)
+                        if (isMergeAble(curTu, p_tu))
                         {
-                            tu.addTuv(trgTuv);
+                            curTu = mergeTu(p_tu, curTu);
+                            isMerged = true;
+                            break;
                         }
+                    }
+                    
+                    if (!isMerged)
+                    {
+                        attTus.add(p_tu);
                     }
                 }
             }
         }
     }
 
+
+    private boolean isMergeAble(BaseTmTu tu, BaseTmTu p_tu)
+    {
+        SegmentTmTu oriTu = null;
+        SegmentTmTu newTu = null;
+
+        if (tu instanceof SegmentTmTu)
+        {
+            oriTu = (SegmentTmTu) tu;
+        }
+
+        if (p_tu instanceof SegmentTmTu)
+        {
+            newTu = (SegmentTmTu) p_tu;
+        }
+
+        if (newTu == null || oriTu == null)
+        {
+            return false;
+        }
+
+        Collection<ProjectTmTuTProp> oriProps = oriTu.getProps();
+        // merge tu if one of them has non tu attribute
+        if (oriProps == null || oriProps.size() == 0)
+        {
+            return true;
+        }
+
+        Collection<ProjectTmTuTProp> newProps = newTu.getProps();
+        // merge tu if one of them has non tu attribute
+        if (newProps == null || newProps.size() == 0)
+        {
+            return true;
+        }
+
+        for (ProjectTmTuTProp tuProp : oriProps)
+        {
+            String name = tuProp.getAttributeName();
+            String value = tuProp.getPropValue();
+            for (ProjectTmTuTProp newTuProp : newProps)
+            {
+                String newName = newTuProp.getAttributeName();
+                String newvalue = newTuProp.getPropValue();
+
+                // return false if tu attributes are not same
+                if (name.equals(newName) && !value.equals(newvalue))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    private BaseTmTu mergeTu(BaseTmTu p_tu, BaseTmTu tu)
+    {
+        // merge tu attribute
+        SegmentTmTu oriTu = null;
+        SegmentTmTu newTu = null;
+        if (tu instanceof SegmentTmTu && p_tu instanceof SegmentTmTu)
+        {
+            oriTu = (SegmentTmTu) tu;
+            newTu = (SegmentTmTu) p_tu;
+            Collection<ProjectTmTuTProp> oriProps = oriTu.getProps();
+            Collection<ProjectTmTuTProp> newProps = newTu.getProps();
+            if (newProps != null && newProps.size() > 0)
+            {
+                if (oriProps == null)
+                {
+                    oriProps = new ArrayList<ProjectTmTuTProp>();
+                }
+                oriProps.addAll(newProps);
+                oriTu.setProps(oriProps);
+            }
+        }
+        
+        // the same source segment is found. Each target Tuvs must
+        // be merged into the found Tu.
+        for (GlobalSightLocale trgLocale : p_tu.getAllTuvLocales())
+        {
+            if (!trgLocale.equals(m_sourceLocale))
+            {
+                Collection<BaseTmTuv> tuvs = p_tu.getTuvList(trgLocale);
+                if (tuvs != null)
+                {
+                    for (BaseTmTuv trgTuv : tuvs)
+                    {
+                        tu.addTuv(trgTuv);
+                    }
+                }
+            }
+        }
+        
+        return tu;
+    }
 
     /**
      * Add a list Tus. This method calls addTu() on each Tu.

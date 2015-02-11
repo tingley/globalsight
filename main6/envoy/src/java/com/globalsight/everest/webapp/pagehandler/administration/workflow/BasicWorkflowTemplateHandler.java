@@ -91,6 +91,7 @@ public class BasicWorkflowTemplateHandler extends PageHandler
             .getAttribute(SESSION_MANAGER);
         String action = (String)p_request.getParameter(
             WorkflowTemplateConstants.ACTION);
+        p_request.setAttribute(WorkflowTemplateConstants.ACTION, action);
 
         if(action != null && 
            action.equals(WorkflowTemplateConstants.LEVERAGE_ACTION))

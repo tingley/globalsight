@@ -65,7 +65,7 @@ public class MissingTermsReportHandler extends BasicReportHandler
     private static final String USERNAME = "MissingTermsReport";
     private static final String PASSWORD = "";
     private static final String SEPRATOR = " --     ";
-    private static final String MY_MESSAGES = "messages/missingTerms";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION + "missingTerms";
     private static final String LANGUAGEDEFINITION = "/definition/languages/language/name";
     private static final String TERMBASEXML = "/conceptGrp/languageGrp/termGrp/term";
     // Query to find all the terms and their languages in a termbase
@@ -74,7 +74,7 @@ public class MissingTermsReportHandler extends BasicReportHandler
             + "where tb.companyid = ? order by tb_name";
     private static final String TERM_BASE_QUERY_GS = "select tbid, tb_name from tb_termbase order by tb_name";
     private static final String TERM_ENTRY_LANG_QUERY = "select cid,name from tb_language where tbid=? order by cid, name";
-    
+
     private static final int pageCount = 50;
 
     /**
@@ -97,11 +97,11 @@ public class MissingTermsReportHandler extends BasicReportHandler
     /**
      * The entry of the handler. This method will dispatch the
      * HttpServletRequest to different page based on the value of
-     * <code>Constants.REPORT_ACT</code>.
-     * <code>Constants.REPORT_ACT_PREP</code> means this is request for
-     * prepare the parameter data, then system will show the parameter page.
-     * <code>Constants.REPORT_ACT_CREATE</code> means create the real report
-     * based on the user input data, then system will show the report page.
+     * <code>Constants.REPORT_ACT</code>. <code>Constants.REPORT_ACT_PREP</code>
+     * means this is request for prepare the parameter data, then system will
+     * show the parameter page. <code>Constants.REPORT_ACT_CREATE</code> means
+     * create the real report based on the user input data, then system will
+     * show the report page.
      */
     public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
             ServletContext p_context) throws Exception
@@ -112,21 +112,24 @@ public class MissingTermsReportHandler extends BasicReportHandler
         {
             cleanSession(theSession);
             addMoreReportParameters(req); // prepare data for parameter page
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_PREP), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_PREP), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
         {
             createReport(req); // fill report DataWrap with data
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act))
         {
             String pageId = req.getParameter(Constants.REPORT_SHOWPAGE_PAGEID);
             bindData(req, pageId); // bind the data to one report page
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
     }
 
@@ -333,8 +336,7 @@ public class MissingTermsReportHandler extends BasicReportHandler
 
             PageDataWrap pageDataWrap = new PageDataWrap();
             pageDataWrap.setPageHeader(ReportsPackage.getMessage(m_bundle,
-                    Constants.MISSING)
-                    + BLANK + currentLang);
+                    Constants.MISSING) + BLANK + currentLang);
             Iterator keyIter = m_map.keySet().iterator();
             int numMissing = 0;
 
@@ -346,19 +348,20 @@ public class MissingTermsReportHandler extends BasicReportHandler
                 {
                     String term = getTerm(tb, key.longValue());
                     String temp = ReportsPackage.getMessage(m_bundle,
-                            Constants.ENTRY)
-                            + BLANK + key + SEPRATOR + term;
+                            Constants.ENTRY) + BLANK + key + SEPRATOR + term;
                     pageDataWrap.setMissingItems(temp);
-                    
-                    if ((numMissing + 1) % pageCount == 0) {
-                    	pageDataWrap.setPageFooter(BLANK);
-                		pageId2DataMap.put(new Integer(++pageId), pageDataWrap);
-                		pageDataWrap = new PageDataWrap();
-                		pageDataWrap.setPageHeader(ReportsPackage.getMessage(m_bundle,
-                                Constants.MISSING)
-                                + BLANK + currentLang);
-                	}
-                    
+
+                    if ((numMissing + 1) % pageCount == 0)
+                    {
+                        pageDataWrap.setPageFooter(BLANK);
+                        pageId2DataMap.put(new Integer(++pageId), pageDataWrap);
+                        pageDataWrap = new PageDataWrap();
+                        pageDataWrap.setPageHeader(ReportsPackage.getMessage(
+                                m_bundle, Constants.MISSING)
+                                + BLANK
+                                + currentLang);
+                    }
+
                     numMissing++;
                 }
             }
@@ -371,8 +374,7 @@ public class MissingTermsReportHandler extends BasicReportHandler
             else
             {
                 pageDataWrap.setPageFooter(ReportsPackage.getMessage(m_bundle,
-                        Constants.TOTALMISSING)
-                        + BLANK + numMissing);
+                        Constants.TOTALMISSING) + BLANK + numMissing);
             }
             // put the pageDataWrap into HashMap(Key: pageId, Value:
             // pageDataWrap)
@@ -445,8 +447,7 @@ public class MissingTermsReportHandler extends BasicReportHandler
     private void addCriteriaFormAtTop(String termbaseName)
     {
         String termbaseLabel = ReportsPackage.getMessage(m_bundle,
-                Constants.TERMBASE)
-                + LABEL_SUFFIX;
+                Constants.TERMBASE) + LABEL_SUFFIX;
         ArrayList criteriaFormLabel = new ArrayList();
         ArrayList criteriaFormValue = new ArrayList();
         criteriaFormLabel.add(termbaseLabel);

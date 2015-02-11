@@ -23,9 +23,12 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +66,7 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -75,7 +79,10 @@ public class TranslationProgressReportHelper
 {
 	private static Logger s_logger = Logger
 			.getLogger("Reports");
-
+	
+	private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
+	
 	public WritableWorkbook m_workbook = null;
 
 	public static String JOB_ID = "jobId";
@@ -123,9 +130,12 @@ public class TranslationProgressReportHelper
 		settings.setEncoding("UTF-8");
 		m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
 				settings);
-		addJobs(p_request);
-		m_workbook.write();
-		m_workbook.close();
+		addJobs(p_request, p_response);
+        if (m_workbook != null)
+        {
+            m_workbook.write();
+            m_workbook.close();
+        }
 	}
 
 	/**
@@ -133,8 +143,11 @@ public class TranslationProgressReportHelper
 	 * 
 	 * @exception Exception
 	 */
-	private void addJobs(HttpServletRequest p_request) throws Exception
-	{
+    private void addJobs(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
+    {
+	    String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
 	    ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
 		// print out the request parameters
 		String[] paramJobId = p_request.getParameterValues(JOB_ID);
@@ -179,6 +192,20 @@ public class TranslationProgressReportHelper
 				}
 			}
 		}
+		
+		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            m_workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
+        
 		// *******
 		// seperate jobs by Division
 		// *******
@@ -216,6 +243,10 @@ public class TranslationProgressReportHelper
 						paramTargetLocales);
 			}
 		}
+		
+		// Set m_reportsDataMap.
+		ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+		                null, 100, ReportsData.STATUS_FINISHED);
 	}
 
 	/**

@@ -173,7 +173,7 @@ public class CostingEngineWLRMIImpl extends RemoteServer implements
     /**
      * @see CostingEngine.getCurrency(String)
      */
-    public Currency getCurrency(String p_isoCode, String p_companyId)
+    public Currency getCurrency(String p_isoCode, long p_companyId)
             throws RemoteException, CostingException
     {
         return m_localInstance.getCurrency(p_isoCode, p_companyId);

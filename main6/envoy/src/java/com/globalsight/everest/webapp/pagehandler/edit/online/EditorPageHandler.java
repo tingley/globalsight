@@ -1568,7 +1568,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     }
 
     private void shareImg(long tuId, long tuvId, boolean overwrite,
-            String companyId)
+            long companyId)
     {
         File img = getTuvCommentImg(tuvId);
 
@@ -1689,7 +1689,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 CATEGORY.error("Problem getting source page", e);
                 throw new EnvoyServletException(e);
             }
-            String companyId = String.valueOf(sp.getCompanyId());
+            long companyId = sp.getCompanyId();
             shareImg(Long.parseLong(tuId), Long.parseLong(tuvId), overwrite,
                     companyId);
 
@@ -1711,9 +1711,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 @SuppressWarnings("unchecked")
                 Map<Long, Tuv> tuvs = tu.getTuvAsSet(true, companyId);
-                for (Iterator iter = tuvs.entrySet().iterator(); iter.hasNext();)
+                for (Map.Entry<Long, Tuv> entry : tuvs.entrySet())
                 {
-                    Map.Entry entry = (Map.Entry) iter.next();
                     Long localeId = (Long) entry.getKey();
                     TuvImpl tuv = (TuvImpl) entry.getValue();
 
@@ -1729,7 +1728,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
                     String hql = "from IssueImpl i where "
                             + "i.levelObjectTypeAsString = :type "
-                            + "&& i.levelObjectId = :oId";
+                            + "and i.levelObjectId = :oId";
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("type", "S");
                     map.put("oId", tuv.getId());

@@ -66,7 +66,6 @@
     String removeUrl = remove.getPageURL() + "&" + action + "=" + TMProfileConstants.REMOVE_ACTION;
     String mtEditUrl = mt_edit.getPageURL() + "&" + action + "=" + TMProfileConstants.MT_EDIT_ACTION;
     String tdaEditUrl = tda_edit.getPageURL() + "&" + action + "=" + TMProfileConstants.MT_EDIT_ACTION;
-    String searchUrl = self.getPageURL() + "&" + action + "=" + TMProfileConstants.SEARCH_ACTION;
 
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     
@@ -97,7 +96,7 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
@@ -107,7 +106,7 @@ var helpFile = "<%=bundle.getString("help_tmprofile")%>";
 
 function handleSelectAll() {
     var selectAll = $("#selectAll").is(":checked");
-    $("input[name='tmProfileCheckBox']").each(function(){
+    $("input[name='checkboxBtn']").each(function() {
         if (selectAll == true){
             $(this).attr("checked", true);
         } else {
@@ -115,11 +114,11 @@ function handleSelectAll() {
         }
     });
 
-    changeButtonState();
+    buttonManagement();
 }
 
-function changeButtonState() {
-    var count = $("input[name='tmProfileCheckBox']:checked").length;
+function buttonManagement() {
+    var count = $("input[name='checkboxBtn']:checked").length;
 
     // Only one TM profile is selected
     if (count == 1) {
@@ -198,7 +197,7 @@ function editTdaOptions()
 function findSelectedTmProfiles()
 {
     var ids = "";
-    $("input[name='tmProfileCheckBox']:checked").each(function (){
+    $("input[name='checkboxBtn']:checked").each(function (){
         ids += $(this).val() + ",";
     });
     if (ids != "")
@@ -207,7 +206,7 @@ function findSelectedTmProfiles()
     return ids;
 }
 
-function ifCanBeRemoved(selectedRadioBtn)
+function ifCanBeRemoved(selectedTmProfileId)
 {
     var rtnMsg = "";
     <%
@@ -222,7 +221,7 @@ function ifCanBeRemoved(selectedRadioBtn)
                 tmProfileId = tmProfile.getId();
             }
             %>
-            if ( '<%=tmProfileId%>' == selectedRadioBtn ) 
+            if ( '<%=tmProfileId%>' == selectedTmProfileId ) 
             {
                 if ( rtnMsg == "" ) {
                     rtnMsg = "<%=bundle.getString("msg_tm_remove_tmp_lp") %>";
@@ -245,7 +244,7 @@ function filterItems(e)
     var keyCode = e.which ? e.which : e.keyCode;
     if (keyCode == 13)
     {
-        TMProfileForm.action = "<%=searchUrl%>";
+        TMProfileForm.action = "<%=selfUrl%>";
         TMProfileForm.submit();
     }
 }
@@ -272,8 +271,7 @@ function filterItems(e)
                  pageUrl="self"
                  emptyTableMsg="msg_no_tm_profiles" hasFilter="true">
             <amb:column label="checkbox" width="2%">
-                <input type="checkbox" id="<%=TMProfileConstants.TM_PROFILE_ID%>" name="tmProfileCheckBox" 
-                    value="<%=tmProfile.getId()%>" onclick="changeButtonState();">
+                <input type="checkbox" id="checkboxBtn" name="checkboxBtn" value="<%=tmProfile.getId()%>" onclick="buttonManagement();">
             </amb:column>
             <amb:column label="lb_name" sortBy="<%=TMProfileComparator.NAME%>" width="11%" 
                 filter="<%=TMProfileConstants.FILTER_NAME %>" filterValue="<%=filterNameValue%>">
@@ -313,7 +311,7 @@ function filterItems(e)
             <amb:column label="lb_company_name" sortBy="<%=TMProfileComparator.ASC_COMPANY%>" 
                 filter="<%=TMProfileConstants.FILTER_COMPANY_NAME%>" filterValue="<%=filterCompanyValue%>">
                 <%
-                    String companyId = ServerProxy.getProjectHandler().getProjectTMById(tmProfile.getProjectTmIdForSave(), false).getCompanyId();
+                    long companyId = ServerProxy.getProjectHandler().getProjectTMById(tmProfile.getProjectTmIdForSave(), false).getCompanyId();
                     String companyName = CompanyWrapper.getCompanyNameById(companyId);
                     out.print(companyName);
                 %>

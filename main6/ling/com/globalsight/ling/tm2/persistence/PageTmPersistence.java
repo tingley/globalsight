@@ -153,8 +153,8 @@ public class PageTmPersistence
      * @param p_targetLocales
      *            Collection of GlobalSightLocale objects
      */
-    public void deleteTargetSegments(long p_tmId, Collection p_targetLocales)
-            throws Exception
+    public void deleteTargetSegments(long p_tmId,
+            Collection<GlobalSightLocale> p_targetLocales) throws Exception
     {
         String inLocaleList = DbUtil.createLocaleInClause(p_targetLocales);
 

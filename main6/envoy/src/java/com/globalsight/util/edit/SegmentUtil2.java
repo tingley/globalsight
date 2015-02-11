@@ -31,7 +31,6 @@ import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
@@ -295,7 +294,7 @@ public class SegmentUtil2
      * @return -- true or false
      */
     public static boolean canBeModified(Tuv tuv, String p_segment,
-            String companyId)
+            long companyId)
     {
         try
         {

@@ -22,14 +22,13 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.openoffice.OpenOfficeRuleHelper;
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.docproc.IFormatNames;
 
 public class OfficeXmlRuleHelper
 {
-    private static final Logger logger = Logger.getLogger(OfficeXmlRuleHelper.class);
+    private static final Logger logger = Logger
+            .getLogger(OfficeXmlRuleHelper.class);
 
     private static String defaultRule;
 
@@ -57,14 +56,17 @@ public class OfficeXmlRuleHelper
             fileName = "/properties/MSDocxXmlRule.properties";
         }
         else if (p_displayName.startsWith("(sheet")
-                || p_displayName.startsWith(OfficeXmlHelper.DNAME_PRE_XLSX_SHARED)
-                || p_displayName.startsWith(OfficeXmlHelper.DNAME_PRE_XLSX_SHEET_NAME))
+                || p_displayName
+                        .startsWith(OfficeXmlHelper.DNAME_PRE_XLSX_SHARED)
+                || p_displayName
+                        .startsWith(OfficeXmlHelper.DNAME_PRE_XLSX_SHEET_NAME))
         {
             fileName = "/properties/MSXlsxXmlRule.properties";
         }
         else if (p_displayName.startsWith("(presentation")
                 || p_displayName.startsWith("(slide")
-                || p_displayName.startsWith(OfficeXmlHelper.DNAME_PRE_PPTX_DIAGRAM))
+                || p_displayName
+                        .startsWith(OfficeXmlHelper.DNAME_PRE_PPTX_DIAGRAM))
         {
             fileName = "/properties/MSPptxXmlRule.properties";
         }
@@ -92,10 +94,9 @@ public class OfficeXmlRuleHelper
         {
             try
             {
-                file = SystemConfiguration.getCompanyResourcePath(fileName);
-                URL url = OfficeXmlRuleHelper.class.getResource(file);                
+                URL url = OfficeXmlRuleHelper.class.getResource(fileName);
                 File theFile = null;
-                
+
                 if (url != null)
                 {
                     try
@@ -107,19 +108,21 @@ public class OfficeXmlRuleHelper
                         theFile = new File(url.getPath());
                     }
                 }
-                
+
                 if (theFile != null && theFile.exists())
                 {
                     rule = FileUtils.read(theFile);
                 }
                 else
                 {
-                    rule = FileUtils.read(OfficeXmlRuleHelper.class.getResourceAsStream(fileName));
+                    rule = FileUtils.read(OfficeXmlRuleHelper.class
+                            .getResourceAsStream(fileName));
                 }
             }
             catch (Exception e)
             {
-                StringBuffer sb = new StringBuffer("Error when loading office (xml) rules :\n");
+                StringBuffer sb = new StringBuffer(
+                        "Error when loading office (xml) rules :\n");
                 sb.append(fileName);
                 logger.error(sb.toString(), e);
             }

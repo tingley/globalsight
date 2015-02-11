@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	<class
 		name="com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter"
@@ -14,6 +14,8 @@
 		<property name="filterDescription" length="4000"
 			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
 		<property name="headerTranslate" column="IS_HEADER_TRANSLATE"
+			type="yes_no" not-null="true" />
+		<property name="footendnoteTranslate" column="IS_FOOTENDNOTE_TRANSLATE"
 			type="yes_no" not-null="true" />
 		<property name="masterTranslate" column="IS_MASTER_TRANSLATE"
 			type="yes_no" not-null="true" />

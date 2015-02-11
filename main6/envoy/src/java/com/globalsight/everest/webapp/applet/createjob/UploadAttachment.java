@@ -42,12 +42,12 @@ public class UploadAttachment extends EnvoyJApplet
                 @Override
                 public Object run()
                 {
-                    JFileChooser chooser = new JFileChooser(baseFolder);
+                    MyJFileChooser chooser = new MyJFileChooser(baseFolder);
                     chooser.setMultiSelectionEnabled(false);
                     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                     chooser.setApproveButtonText("Select");
                     chooser.setApproveButtonToolTipText("Select Attachment");
-                    int state = chooser.showOpenDialog(null);
+                    int state = chooser.showOpenDialog(label);
                     if (state == JFileChooser.APPROVE_OPTION)
                     {
                         File file = chooser.getSelectedFile();

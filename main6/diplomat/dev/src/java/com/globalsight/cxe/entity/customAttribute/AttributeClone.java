@@ -17,8 +17,6 @@
 
 package com.globalsight.cxe.entity.customAttribute;
 
-import java.util.Set;
-
 import com.globalsight.everest.persistence.PersistentObject;
 
 public class AttributeClone extends PersistentObject
@@ -26,7 +24,7 @@ public class AttributeClone extends PersistentObject
     private static final long serialVersionUID = -9043113788985393187L;
 
     public static final String PROTECT_NAME_PREFIX = "protect_";
-    
+
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_CHOICE_LIST = "choiceList";
     public static final String TYPE_DATE = "date";
@@ -39,11 +37,11 @@ public class AttributeClone extends PersistentObject
     private boolean visible;
     private boolean editable;
     private boolean required;
-    private String companyId;
+    private long companyId;
     private String description;
 
     private Condition condition;
-    
+
     public String getType()
     {
         if (condition == null)
@@ -72,12 +70,12 @@ public class AttributeClone extends PersistentObject
         this.editable = editable;
     }
 
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return companyId;
     }
 
-    public void setCompanyId(String companyId)
+    public void setCompanyId(long companyId)
     {
         this.companyId = companyId;
     }
@@ -131,7 +129,7 @@ public class AttributeClone extends PersistentObject
     {
         this.displayName = displayName;
     }
-    
+
     public boolean removeable()
     {
         return !name.startsWith(PROTECT_NAME_PREFIX);

@@ -1306,6 +1306,12 @@ function deactivateButtons()
     	disable(idPtag);
     }
   }
+  
+  if (!parent.parent.HasOfficeTags())
+  {
+    disable(idSub);
+    disable(idSup);
+  }
 }
 
 function fixSize()
@@ -1938,6 +1944,14 @@ function showMatchdetailInfo()
       <td class="coolButton" id="idSpellCheck" onclick="spellCheck()">
         <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
       </td>
+      <td class="coolButton" id="idSub"
+	    onclick="o_textbox.makeSub(); o_textbox.frameWindow.focus();">
+	    <img src="/globalsight/envoy/edit/online2/subscript.gif">
+	  </td>
+      <td class="coolButton" id="idSup"
+	    onclick="o_textbox.makeSup(); o_textbox.frameWindow.focus();">
+	    <img src="/globalsight/envoy/edit/online2/superscript.gif">
+	  </td>
       <td class="coolButton" id="idBold"
         onclick="o_textbox.makeBold(); o_textbox.frameWindow.focus();">
         &nbsp;<B>[bold]</B>&nbsp;

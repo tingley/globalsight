@@ -18,8 +18,9 @@
 package com.globalsight.persistence.hibernate.entity;
 
 import java.io.Serializable;
-import com.globalsight.util.GlobalSightLocale;
+
 import com.globalsight.everest.localemgr.CodeSetImpl;
+import com.globalsight.util.GlobalSightLocale;
 
 public class LocaleCodeSet implements Serializable
 {
@@ -47,5 +48,17 @@ public class LocaleCodeSet implements Serializable
     public void setLocal(GlobalSightLocale local)
     {
         this.local = local;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object paramObject)
+    {
+        return super.equals(paramObject);
     }
 }

@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.indexer;
 
+import java.util.Iterator;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.util.ObjectPool;
@@ -24,19 +26,8 @@ import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.terminology.java.TbConcept;
-import com.globalsight.terminology.util.SqlUtil;
-
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
-import java.util.*;
 
 /**
  * Reads entries from a termbase and produces Entry objects by putting
@@ -82,7 +73,7 @@ public class ConceptXmlReaderThread
             String hql = "select tc from TbConcept tc where tc.termbase.id=" 
                 + m_termbase.getId();
             Iterator ite = HibernateUtil.search(hql).iterator();
-            
+
             while(ite.hasNext()) {
                 result = m_results.hireResult();
                 IndexObject object = (IndexObject)m_pool.getInstance();
@@ -118,6 +109,8 @@ public class ConceptXmlReaderThread
 
             m_results.producerDone();
             m_results = null;
+
+            HibernateUtil.closeSession();
 
             if (CATEGORY.isDebugEnabled())
             {

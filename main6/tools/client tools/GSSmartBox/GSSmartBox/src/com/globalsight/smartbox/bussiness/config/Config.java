@@ -50,7 +50,7 @@ public class Config
             + File.separator + ConfigConstants.CONFIG_FILE;
 
     /**
-     * Get params of configuration and do validate
+     * Get parameters of configuration and do validate
      * 
      * @return
      */
@@ -76,14 +76,24 @@ public class Config
 
         paramName = ConfigConstants.INBOX;
         String inbox = getRealPath(paramName, baseDir, r.getString(paramName));
-
+       
         paramName = ConfigConstants.OUTBOX;
         String outbox = getRealPath(paramName, baseDir, r.getString(paramName));
 
         paramName = ConfigConstants.JOB_CREATING_BOX;
         String jobCreatingBox = getRealPath(paramName, baseDir,
                 r.getString(paramName));
-
+        
+        paramName = ConfigConstants.INBOX4XLZ;
+        String inbox4XLZ ="";
+        String jobCreatingBox4XLZ="";
+        if (r.containsKey(paramName))
+        {
+            inbox4XLZ = getRealPath(paramName, baseDir, r.getString(paramName));
+            jobCreatingBox4XLZ = getRealPath(paramName, baseDir,
+                    r.getString(ConfigConstants.JOB_CREATING_BOX)
+                            + File.separator + r.getString(paramName));
+        }
         paramName = ConfigConstants.JOB_CREATE_SUCCESSFUL_BOX;
         String jobCreateSuccessfulBox = getRealPath(paramName, baseDir,
                 r.getString(paramName));
@@ -107,12 +117,17 @@ public class Config
             String ftpInbox = r.getString(ConfigConstants.FTPINBOX);
             String ftpOutbox = r.getString(ConfigConstants.FTPOUTBOX);
             String ftpFailedbox = r.getString(ConfigConstants.FTPFAILEDBOX);
+            int ftpPort = 21;
+            if (r.containsKey(ConfigConstants.FTPPORT))
+            {
+                ftpPort = Integer.valueOf(r.getString(ConfigConstants.FTPPORT));
+            }
 
-            ftpValidate = ftpValidate(ftpHost, ftpUsername, ftpPassword,
+            ftpValidate = ftpValidate(ftpHost, ftpPort, ftpUsername, ftpPassword,
                     ftpInbox, ftpOutbox, ftpFailedbox);
             if (ftpValidate)
             {
-                ftpConfiguration = new FTPConfiguration(useFTP, ftpHost,
+                ftpConfiguration = new FTPConfiguration(useFTP, ftpHost, ftpPort,
                         ftpUsername, ftpPassword, ftpInbox, ftpOutbox,
                         ftpFailedbox);
             }
@@ -237,11 +252,12 @@ public class Config
         }
 
         CompanyConfiguration cpConfig = new CompanyConfiguration(company,
-                baseDir, inbox, outbox, jobCreatingBox, jobCreateSuccessfulBox,
-                failedBox, tempBox, preProcessClass, postProcessClass, host,
-                port, https, username, password, fileCheckToCreateJobTime,
-                downloadCheckTime, sourceLocale, targetLocales, extension2fp,
-                ftpConfiguration, smbConfiguration);
+                baseDir, inbox, inbox4XLZ, jobCreatingBox4XLZ, outbox,
+                jobCreatingBox, jobCreateSuccessfulBox, failedBox, tempBox,
+                preProcessClass, postProcessClass, host, port, https, username,
+                password, fileCheckToCreateJobTime, downloadCheckTime,
+                sourceLocale, targetLocales, extension2fp, ftpConfiguration,
+                smbConfiguration);
 
         // Set to current configuration
         return cpConfig;
@@ -359,16 +375,18 @@ public class Config
      * Validate ftp server and ftp directory
      * 
      * @param ftpHost
+     * @param ftpPort
      * @param ftpUsername
      * @param ftpPassword
      * @return
      */
-    private boolean ftpValidate(String ftpHost, String ftpUsername,
+    private boolean ftpValidate(String ftpHost, int ftpPort, String ftpUsername,
             String ftpPassword, String ftpInbox, String ftpOutbox,
             String ftpFailedbox)
     {
         // Validate FTP server
-        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpUsername, ftpPassword);
+        FtpHelper ftpHelper = new FtpHelper(ftpHost, ftpPort,
+                ftpUsername, ftpPassword);
         boolean serverAvaliable = ftpHelper.testConnect();
         if (!serverAvaliable)
         {

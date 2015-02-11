@@ -160,7 +160,7 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_50" width="50px"
              sortBy="<%=WorkflowComparator.BAND4%>">
-            <%=wf.getSubLevMatchWordCount()%>
+            <%=wf.getLowFuzzyMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=WorkflowComparator.NO_MATCH%>">
@@ -168,9 +168,7 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=WorkflowComparator.REPETITIONS%>">
-            <%=wf.getRepetitionWordCount() + wf.getHiFuzzyRepetitionWordCount() + 
-            	wf.getMedHiFuzzyRepetitionWordCount() + wf.getMedFuzzyRepetitionWordCount() + 
-            	wf.getSubLevRepetitionWordCount()%>
+            <%=wf.getRepetitionWordCount()%>
         </amb:column>
         <%
             if(isInContextMatch){
@@ -307,9 +305,7 @@ if (userPerms.getPermissionFor(Permission.JOB_WORKFLOWS_SUMMARY_STATISTICS)){
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=WorkflowComparator.REPETITIONS%>">
-            <%= wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount() + 
-	            wf.getHiFuzzyRepetitionWordCount() + wf.getMedHiFuzzyRepetitionWordCount() + 
-	            wf.getMedFuzzyRepetitionWordCount()%>
+            <%= wf.getRepetitionWordCount()%>
         </amb:column>
         <%if (!isDell) {%>
         

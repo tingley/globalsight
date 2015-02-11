@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -77,7 +75,6 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -421,8 +418,8 @@ public class BrowseCorpusMainHandler extends PageHandler
         p_request.setAttribute("corpusDocs", docs);
     }
 
-	private void handleFullTextSearch(HttpServletRequest p_request,
-			HttpServletResponse p_response) throws Exception
+    private void handleFullTextSearch(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
     {
         HttpSession session = p_request.getSession();
         SessionManager sessionMgr = (SessionManager) session
@@ -514,11 +511,11 @@ public class BrowseCorpusMainHandler extends PageHandler
                 String tableRows = "";
                 if (results != null)
                 {
-					tableRows = tableMaker.getTableRows(
-							EditUtil.encodeHtmlEntities(queryText), false,
-							null, false, results,
-							new TmConcordanceResultComparator(mapOfTmIdIndex),
-							null);
+                    tableRows = tableMaker.getTableRows(
+                            EditUtil.encodeHtmlEntities(queryText), false,
+                            null, false, results,
+                            new TmConcordanceResultComparator(mapOfTmIdIndex),
+                            null);
                 }
                 p_request.setAttribute("tableRows", tableRows);
                 sessionMgr.setAttribute("results", results);
@@ -553,10 +550,10 @@ public class BrowseCorpusMainHandler extends PageHandler
                     results.readNextPage();
                 }
                 queryText = stripWildCards(queryText);
-				String tableRows = tableMaker.getTableRows(EditUtil
-						.encodeHtmlEntities(queryText), false, null, false,
-						results, new TmConcordanceResultComparator(
-								mapOfTmIdIndex), null);
+                String tableRows = tableMaker.getTableRows(EditUtil
+                        .encodeHtmlEntities(queryText), false, null, false,
+                        results, new TmConcordanceResultComparator(
+                                mapOfTmIdIndex), null);
 
                 p_request.setAttribute("tableRows", tableRows);
             }
@@ -699,7 +696,7 @@ public class BrowseCorpusMainHandler extends PageHandler
                     .getProjectTMById(tm.getProjectTmId(), false);
             if (companyId == null)
             {
-                companyId = projectTM.getCompanyId();
+                companyId = String.valueOf(projectTM.getCompanyId());
             }
             map.put(tm.getProjectTmId(), projectTM.getName());
         }
@@ -824,7 +821,7 @@ public class BrowseCorpusMainHandler extends PageHandler
                     {
                         throw new EnvoyServletException(e);
                     }
-                    if (tm.getCompanyId().equals(companyId))
+                    if (String.valueOf(tm.getCompanyId()).equals(companyId))
                     {
                         tmListOfUser.add(tm.getName());
                     }

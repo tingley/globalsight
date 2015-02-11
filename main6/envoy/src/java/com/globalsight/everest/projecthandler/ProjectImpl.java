@@ -43,6 +43,8 @@ public class ProjectImpl extends PersistentObject implements Project,
     public static final String QP_USER_ID = "m_qpId";
     public static final String USER_IDS = "m_userIds";
 
+    private String projectManagerName;
+
     private String m_description = null;
     private String m_name = null;
     private User m_projectManager = null;
@@ -50,7 +52,7 @@ public class ProjectImpl extends PersistentObject implements Project,
     private String m_userId = null;
     private String m_qpId = null;
     private String m_termbase = null;
-    private String m_companyId = null;
+    private long m_companyId = -1;
     // holds the list of users that are associated with this project.
     // it doesn't hold duplicates
     private Set m_userIds = new TreeSet();
@@ -225,7 +227,7 @@ public class ProjectImpl extends PersistentObject implements Project,
      * 
      * @return The name of the company id of this project.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return m_companyId;
     }
@@ -377,7 +379,7 @@ public class ProjectImpl extends PersistentObject implements Project,
      * @param p_tb
      *            The company id of this project.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         m_companyId = p_companyId;
     }
@@ -546,5 +548,16 @@ public class ProjectImpl extends PersistentObject implements Project,
     {
         this.autoAcceptPMTask = autoAcceptPMTask;
     }
+
+    public String getProjectManagerName()
+    {
+        return projectManagerName;
+    }
+
+    public void setProjectManagerName(String projectManagerName)
+    {
+        this.projectManagerName = projectManagerName;
+    }
+
 
 }

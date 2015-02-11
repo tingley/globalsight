@@ -65,12 +65,12 @@ public class AddJobAttributeThread extends Thread
 
         this.start();
     }
-    
+
     public static byte[] getLock(String uuid)
     {
         if (uuid == null)
             return new byte[1];
-        
+
         byte[] lock = LOCKS.get(uuid);
         if (lock == null)
         {
@@ -86,17 +86,17 @@ public class AddJobAttributeThread extends Thread
     {
         synchronized (getLock(jobUuid))
         {
-            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
             activityArgs.put("jobUuid", jobUuid);
             ActivityLog.Start activityStart = ActivityLog.start(
-                AddJobAttributeThread.class, "run", activityArgs);
+                    AddJobAttributeThread.class, "run", activityArgs);
             try
             {
                 String hql = "from JobImpl j where j.uuid = :uuid and j.companyId = :companyId";
                 Map map = new HashMap();
                 map.put("uuid", jobUuid);
-                map.put("companyId", companyId);
+                map.put("companyId", Long.parseLong(companyId));
                 int i = 0;
                 while (i < 600)
                 {
@@ -128,8 +128,10 @@ public class AddJobAttributeThread extends Thread
                             {
                                 String path = jobUuid + "/"
                                         + jobAttribute.getAttribute().getName();
-                                File root = new File(AmbFileStoragePathUtils
-                                        .getJobAttributeDir(), path);
+                                File root = new File(
+                                        AmbFileStoragePathUtils
+                                                .getJobAttributeDir(),
+                                        path);
                                 if (root.exists())
                                 {
                                     File[] files = root.listFiles();

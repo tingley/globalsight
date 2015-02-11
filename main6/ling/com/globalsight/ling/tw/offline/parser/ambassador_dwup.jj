@@ -18,7 +18,7 @@
 Javacc grammar file for GlobalSight Download/upload file format.
 Version 1.0 9/25/2000 Initial version
 Version 1.1 9/22/2005 Added Help and Note lines in the header.
-Version 1.2 10/25/2012 [#GBS-2823]： text version of rtf file doesn't upload
+Version 1.2 10/25/2012 [#GBS-2823]: text version of rtf file doesn't upload
 */
 
 options
@@ -130,6 +130,7 @@ void header() :
     (exactMatchWordCount())?
     (fuzzyMatchWordCount())?
     (unmatchedMatchWordCount())?
+    (serverInstanceID())?
     (editAll())?
     (help())*
     (notes())*
@@ -277,6 +278,15 @@ void unmatchedMatchWordCount() :
 {
     "# No Match word count: " t=<ALPHANUMERIC> <NEWLINE>
     { m_handler.handleUnmatchedMatchWordCount(t.image); }
+}
+
+void serverInstanceID() :
+{
+    Token t;
+}
+{
+    "# GlobalSight Instance ID: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.setServerInstanceID(t.image); }
 }
 
 void editAll() :

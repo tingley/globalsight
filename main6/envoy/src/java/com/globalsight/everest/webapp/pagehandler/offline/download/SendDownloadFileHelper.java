@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.util.StringUtil;
 
 /**
  * SendDownloadFileHandler is responsible for creating a download file and
@@ -134,7 +135,7 @@ public class SendDownloadFileHelper implements WebAppConstants
                 tmpFile = (File) status.getResults();
                 String downloadFileName = "";
                 // GBS-633 Downloaded folder naming convention:
-                // <jobname>_<targetlocale> instead of <jobname>_<task id>
+                // <jobid>_<targetlocale> instead of <jobid>_<task id>
                 // before
                 if (downloadParams.isSupportFilesOnlyDownload())
                 {
@@ -254,7 +255,7 @@ public class SendDownloadFileHelper implements WebAppConstants
         List pageIdList = new ArrayList();
         List pageNameList = new ArrayList();
         List<Boolean> canUseUrlList = new ArrayList<Boolean>();
-        int downloadEditAll = -1;
+        int TMEditType = -1;
         Vector excludeTypes = null;
         int editorId = -1;
         int platformId = -1;
@@ -321,7 +322,7 @@ public class SendDownloadFileHelper implements WebAppConstants
             // allow exact match editing
             L10nProfile l10nProfile = task.getWorkflow().getJob()
                     .getL10nProfile();
-            downloadEditAll = getEditAllState(p_request, l10nProfile);
+            TMEditType = getEditAllState(p_request, l10nProfile);
 
             excludeTypes = l10nProfile.getTranslationMemoryProfile()
                     .getJobExcludeTuTypes();
@@ -342,7 +343,7 @@ public class SendDownloadFileHelper implements WebAppConstants
                 pageIdList, pageNameList, canUseUrlList, primarySourceFiles,
                 stfList, editorId, platformId, encoding, ptagFormat, uiLocale,
                 task.getSourceLocale(), task.getTargetLocale(), true,
-                fileFormat, excludeTypes, downloadEditAll, supportFileList,
+                fileFormat, excludeTypes, TMEditType, supportFileList,
                 resInsMode, user);
 
         params.setActivityType(act.getDisplayName());
@@ -409,17 +410,26 @@ public class SendDownloadFileHelper implements WebAppConstants
         return task;
     }
 
-    public void getAllPageIdList(Task task, List<Long> pageIdList, List<String> pageNameList)
-    {
-        List pages = task.getSourcePages();
+    /**
+     * Get source page ID list and corresponding external page ID list.
+     * Note that "zero" word-count page will be ignored for offline downloading. 
+     */
+	public void getAllPageIdList(Task task, List<Long> pageIdList,
+			List<String> pageNameList)
+	{
+		List<SourcePage> sourcePages = task.getSourcePages();
+		Long targetLocaleId = task.getTargetLocale().getIdAsLong();
 
-        for (Iterator it = pages.iterator(); it.hasNext();)
-        {
-            SourcePage page = (SourcePage) it.next();
-            pageIdList.add(new Long(page.getId()));
-            pageNameList.add(page.getExternalPageId());
-        }
-    }
+		for (SourcePage page : sourcePages)
+		{
+			TargetPage tp = page.getTargetPageByLocaleId(targetLocaleId);
+			if (tp != null && tp.getWordCount().getTotalWordCount() > 0)
+			{
+				pageIdList.add(page.getIdAsLong());
+				pageNameList.add(page.getExternalPageId());
+			}
+		}
+	}
 
     @SuppressWarnings("unchecked")
     private void getPageIdList(HttpServletRequest p_request, List p_pageIdList,
@@ -556,44 +566,21 @@ public class SendDownloadFileHelper implements WebAppConstants
             L10nProfile p_l10nProfile) throws EnvoyServletException
     {
         String editExact = p_request
-                .getParameter(OfflineConstants.EDIT_EXACT_SELECTOR);
+                .getParameter(OfflineConstants.TM_EDIT_TYPE);
         return getEditAllState(editExact, p_l10nProfile);
     }
 
     public int getEditAllState(String editExact, L10nProfile p_l10nProfile)
     {
-        int result;
-        if (p_l10nProfile.isExactMatchEditing())
+        try
         {
-
-            if (editExact == null)
-            {
-                result = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-            }
-            else if (editExact.equals(OfflineConstants.EDIT_EXACT_YES))
-            {
-                result = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
-            }
-            else if (editExact.equals(OfflineConstants.EDIT_EXACT_NO))
-            {
-                result = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO;
-            }
-            else
-            {
-                String[] args = new String[2];
-                args[0] = OfflineConstants.EDIT_EXACT_SELECTOR;
-                args[1] = editExact;
-                throw new EnvoyServletException("WrongRequestParameter", args,
-                        null);
-            }
+            return StringUtil.isNotEmpty(editExact) ? Integer
+                    .parseInt(editExact) : p_l10nProfile.getTMEditType();
         }
-        else
+        catch (Exception e)
         {
-            result = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+            return AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
         }
-
-        return result;
-
     }
 
     private int getEditorId(HttpServletRequest p_request)
@@ -643,6 +630,10 @@ public class SendDownloadFileHelper implements WebAppConstants
         else if (editor.equals(OfflineConstants.EDITOR_XLF_VALUE))
         {
             result = AmbassadorDwUpConstants.EDITOR_XLIFF;
+        }
+        else if (editor.equals(OfflineConstants.EDITOR_OMEGAT))
+        {
+            result = AmbassadorDwUpConstants.EDITOR_OMEGAT;
         }
         else
         {
@@ -763,6 +754,10 @@ public class SendDownloadFileHelper implements WebAppConstants
         else if (fileFormat.equals(OfflineConstants.FORMAT_TTX_VALUE))
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX;
+        }
+        else if (fileFormat.equals(OfflineConstants.FORMAT_OMEGAT_VALUE))
+        {
+            result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT;
         }
         else
         {

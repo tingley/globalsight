@@ -407,55 +407,42 @@ public class SelectFileHandler extends PageHandler
         // 2. job name
         String jobName = EditUtil.utf8ToUnicode(
                 p_request.getParameter(JOB_NAME)).trim();
+        // priority
+        BasicL10nProfile blp = null;
+        String priority = null;
+        
+        // create job for initialized
+        String uuid = sessionMgr.getAttribute("uuid") == null ? null : (String) sessionMgr
+                .getAttribute("uuid");
+        Job job = null;
+        
         while (iterator.hasNext())
         {
             String fileName = (String) iterator.next();
             FileProfile fp = (FileProfile) fileList.get(fileName);
             l10nProfileId = fp.getL10nProfileId();
+            if (job == null) {
+                blp = HibernateUtil.get(BasicL10nProfile.class,
+                        l10nProfileId);
+                priority = String.valueOf(blp.getPriority());
+                job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(),
+                        l10nProfileId, priority, Job.IN_QUEUE);
+            }
 
             fileName = fileName.replace('\\', File.separatorChar);
-            // for GBS-2113, import files from web DI tmp folder
-            if (fileName.startsWith(CreateJobsMainHandler.TMP_FOLDER_NAME))
-            {
-                if (StringUtils.isEmpty(sourceLocaleName))
-                {
-                    BasicL10nProfile blp = HibernateUtil.get(
-                            BasicL10nProfile.class, l10nProfileId);
-                    sourceLocaleName = blp.getSourceLocale().getLocaleCode();
-                    int index = fileName
-                            .indexOf(CreateJobsMainHandler.TMP_FOLDER_NAME)
-                            + CreateJobsMainHandler.TMP_FOLDER_NAME.length();
-                    String tmp = fileName.substring(index + 1);
-                    oldFolderName = tmp.substring(0,
-                            tmp.indexOf(File.separator));
-                }
-                fileName = copyAndDeleteTmpFiles(sourceLocaleName, fileName,
-                        oldFolderName, jobName);
-            }
+            sourceLocaleName = blp.getSourceLocale().getLocaleCode();
+            
+            oldFolderName = fileName.substring(fileName.indexOf(File.separator) + 1);
+            oldFolderName = oldFolderName.substring(0, oldFolderName.indexOf(File.separator));
+            
+            fileName = copyAndDeleteTmpFiles(sourceLocaleName, fileName,
+                    oldFolderName, String.valueOf(job.getId()));
             mappedFiles.put(fileName, fp);
-        }
-        if (!oldFolderName.equals(""))
-        {
-            File tmp = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                    + File.separator + CreateJobsMainHandler.TMP_FOLDER_NAME
-                    + File.separator + oldFolderName);
-            if (FileUtil.getAllFiles(tmp).size() == 0)
-            {
-                FileUtil.deleteFile(tmp);
-            }
         }
         sessionMgr.setAttribute(MapFileProfileToFileHandler.MAPPINGS,
                 mappedFiles);
 
-        // priority
-        BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class,
-                l10nProfileId);
-        String priority = String.valueOf(blp.getPriority());
         // for GBS-2137, initialize the job with "IN_QUEUE" state
-        String uuid = sessionMgr.getAttribute("uuid") == null ? null : (String) sessionMgr
-                .getAttribute("uuid");
-        Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(),
-                l10nProfileId, priority, Job.IN_QUEUE);
         Map<String, JobAttribute> jobAttributes = (Map<String, JobAttribute>) sessionMgr
                 .getAttribute(SetAttributeHandler.JOB_ATTRIBUTES);
         if (jobAttributes != null && uuid != null)
@@ -466,7 +453,7 @@ public class SelectFileHandler extends PageHandler
         }
 
         // 3. send off to be imported
-        sendToCxe(mappedFiles, jobName, job.getJobId(), targetLocalesList,
+        sendToCxe(mappedFiles, jobName, job.getId(), targetLocalesList,
                 jobType, priority);
 
         // 4. set job attributes
@@ -491,8 +478,7 @@ public class SelectFileHandler extends PageHandler
         try
         {
             String destinationLocation = fileName.replaceFirst(
-                    CreateJobsMainHandler.TMP_FOLDER_NAME, sourceLocaleName)
-                    .replace(oldName, jobName);
+                    oldName, jobName);
 
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             File sourceFile = new File(saveDir + File.separator + fileName);
@@ -500,7 +486,7 @@ public class SelectFileHandler extends PageHandler
                     + destinationLocation);
 
             FileUtil.copyFile(sourceFile, descFile);
-            sourceFile.delete();
+            //sourceFile.delete();
             return destinationLocation;
         }
         catch (Exception e)
@@ -700,7 +686,7 @@ public class SelectFileHandler extends PageHandler
 
             CxeProxy.importFromFileSystem(fileName, String.valueOf(p_jobId),
                     batchId, fileProfileId, pageCount, new Integer(count),
-                    new Integer(1), new Integer(1), isAutoImport,
+                    Integer.valueOf(1), Integer.valueOf(1), isAutoImport,
                     Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue,
                     p_priority);
         }

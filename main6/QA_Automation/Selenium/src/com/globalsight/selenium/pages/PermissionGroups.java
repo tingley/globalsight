@@ -7,8 +7,9 @@ package com.globalsight.selenium.pages;
 public class PermissionGroups {
 	//Permission Groups
 	public static final String New_BUTTON="//input[@value='New...']";
-	public static final String Edit_BUTTON="editBtn";
+	public static final String Edit_BUTTON="link=Administrator";
 	public static final String PermissionGroups_TABLE="//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
+
 	
 	//Edit Permission Group-Basic Information
 	

@@ -155,6 +155,7 @@ public interface WebAppConstants
     public static final String UPLOAD_ACTION_BACK = "uploadBack";
     public static final String UPLOAD_ACTION_CANCEL = "uploadCancel";
     public static final String UPLOAD_ACTION_CANCE_PROGRESS = "uploadProgressCancel";
+    public static final String UPLOAD_ACTION_CONFIRM_CONTINUE = "uploadConfirmContinue";
     public static final String UPLOAD_ACTION_REFRESH = "uploadRefresh";
     public static final String UPLOAD_ACTION_DONE = "uploadDone";
     public static final String UPLOAD_ACTION_PROGRESS = "uploadProgress";

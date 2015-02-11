@@ -320,7 +320,7 @@ public class EditorHelper implements EditorConstants
         {
             Job job = ServerProxy.getJobHandler().getJobById(
                     Long.parseLong(p_jobId));
-            String companyId = job.getCompanyId();
+            String companyId = String.valueOf(job.getCompanyId());
 
             setPagesInJob(p_state, job);
             // Why this invoking is ignored?
@@ -544,7 +544,7 @@ public class EditorHelper implements EditorConstants
             Task task = ServerProxy.getTaskManager()
                     .getTask(p_userId, Long.parseLong(p_taskId),
                             WorkflowConstants.TASK_ALL_STATES);
-            String companyId = task.getCompanyId();
+            String companyId = String.valueOf(task.getCompanyId());
 
             p_state.setIsReviewActivity(task.isType(Activity.TYPE_REVIEW));
 
@@ -642,8 +642,9 @@ public class EditorHelper implements EditorConstants
      */
     static private void setAllowEditAll(EditorState p_state, Task p_task)
     {
-        p_state.setAllowEditAll(p_task.getWorkflow().getJob().getL10nProfile()
-                .isExactMatchEditing());
+        int TMEditType = p_task.getWorkflow().getJob().getL10nProfile().getTMEditType();
+        
+        p_state.setAllowEditAll(TMEditType == 2);
     }
 
     //
@@ -1189,7 +1190,7 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void splitSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String p_location, String companyId)
+            String p_tuv2, String p_location, long companyId)
             throws EnvoyServletException
     {
         try
@@ -1208,7 +1209,7 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void mergeSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String companyId) throws EnvoyServletException
+            String p_tuv2, long companyId) throws EnvoyServletException
     {
         try
         {
@@ -1418,13 +1419,13 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public Tuv getTuv(String p_tuvId, String companyId)
+    static public Tuv getTuv(String p_tuvId, long companyId)
             throws EnvoyServletException
     {
         return getTuv(Long.parseLong(p_tuvId), companyId);
     }
 
-    static public Tuv getTuv(long p_tuvId, String companyId)
+    static public Tuv getTuv(long p_tuvId, long companyId)
             throws EnvoyServletException
     {
         Tuv result;
@@ -1448,7 +1449,7 @@ public class EditorHelper implements EditorConstants
     }
 
     static public Tuv getTuv(long p_tuId, GlobalSightLocale p_targetLocale,
-            String companyId) throws EnvoyServletException
+            long companyId) throws EnvoyServletException
     {
         Tuv result;
 
@@ -1748,7 +1749,7 @@ public class EditorHelper implements EditorConstants
         TargetPage targetPage = (TargetPage) HibernateUtil.get(
                 TargetPage.class, p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
-        String companyId = sourcePage.getCompanyId();
+        long companyId = sourcePage.getCompanyId();
 
         HashSet includedTuIds = null;
         if (p_state.hasGsaTags())
@@ -1945,7 +1946,7 @@ public class EditorHelper implements EditorConstants
         TargetPage targetPage = (TargetPage) HibernateUtil.get(
                 TargetPage.class, p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
-        String companyId = sourcePage.getCompanyId();
+        long companyId = sourcePage.getCompanyId();
 
         // Find the "previous" segment depending on what segment types
         // the user is looking at. I.e., looking at all translatable
@@ -2071,6 +2072,15 @@ public class EditorHelper implements EditorConstants
                 {
                     break;
                 }
+                
+                if (b_includeSubs
+                        && EditHelper.isTuvInProtectedState(currentTuv,
+                                companyId)
+                        && !isRealExactMatchLocalied(srcTuv, currentTuv,
+                                tuvMatchTypes, companyId, "" + currentSubId))
+                {
+                    break;
+                }
             }
 
             p_state.setTuId(currentTuId);
@@ -2092,6 +2102,41 @@ public class EditorHelper implements EditorConstants
                 return;
             }
         }
+    }
+    
+
+    /**
+     * For segment with sub, when sub is exact match
+     */
+    public static boolean isRealExactMatchLocalied(Tuv p_srcTuv,
+            Tuv p_targetTuv, MatchTypeStatistics p_matchTypes, long companyId,
+            String subid)
+    {
+        boolean result = p_targetTuv.isExactMatchLocalized(companyId);
+
+        if (result)
+        {
+            int tuvState = p_matchTypes.getLingManagerMatchType(
+                    p_srcTuv.getId(), subid);
+
+            if (tuvState == LeverageMatchLingManager.NO_MATCH
+                    || tuvState == LeverageMatchLingManager.FUZZY)
+            {
+                result = false;
+            }
+        }
+        else
+        {
+            int tuvState = p_matchTypes.getLingManagerMatchType(
+                    p_srcTuv.getId(), subid);
+            
+            if (tuvState == LeverageMatchLingManager.EXACT)
+            {
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -2169,7 +2214,7 @@ public class EditorHelper implements EditorConstants
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
     private static long findNextSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, String companyId)
+            Vector p_excludedTypes, long companyId)
     {
         if (p_tuv == null)
         {
@@ -2251,7 +2296,7 @@ public class EditorHelper implements EditorConstants
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
     private static long findPreviousSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, String companyId)
+            Vector p_excludedTypes, long companyId)
     {
         // No previous sub in this tuv when looking at top-level segment
         if (p_tuv == null || p_sub == 0)

@@ -38,6 +38,7 @@ import org.dom4j.Element;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.LabeledValueHolder;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.terminology.ITermbase;
@@ -50,7 +51,8 @@ import com.globalsight.terminology.util.XmlParser;
 public class MissingTermsReplet extends GlobalSightReplet
 {
     private static final String MY_TEMPLATE = "/templates/basicFlowReport.srt";
-    private static final String MY_MESSAGES = "messages/missingTerms";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "missingTerms";
 
     /** Query to find all the terms and their languages in a termbase * */
     private static final String TERM_ENTRY_LANG_QUERY = "select cid,name from tb_language where tbid=? order by cid, name";
@@ -139,8 +141,8 @@ public class MissingTermsReplet extends GlobalSightReplet
 
             theParameters.addChoice("termbaseId", termbaseIds.get(0),
                     termbaseIds.toArray());
-            theParameters.setAlias("termbaseId", ReportsPackage.getMessage(
-                    m_bundle, "termbase"));
+            theParameters.setAlias("termbaseId",
+                    ReportsPackage.getMessage(m_bundle, "termbase"));
         }
         finally
         {
@@ -176,8 +178,8 @@ public class MissingTermsReplet extends GlobalSightReplet
             // this widget just does not work in the current inetsoft version
             // with the DHTML viewer (ok for java viewer)
             // So, we're stuck with giving the user one value to choose.
-            theParameters.addChoice("selectedLang", ALL, termbaseLangs
-                    .toArray());
+            theParameters.addChoice("selectedLang", ALL,
+                    termbaseLangs.toArray());
             theParameters.setAlias("selectedLang", "Language");
         }
         finally

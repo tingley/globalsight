@@ -91,6 +91,11 @@ public class ReportsData
     {
         return STATUS_CANCEL.equals(status);
     }
+    
+    public boolean isInProgress()
+    {
+        return STATUS_INPROGRESS.equals(status);
+    }
 
     public List<String> getReportTypeList()
     {
@@ -123,8 +128,8 @@ public class ReportsData
     @Override
     public String toString()
     {
-        return "ReportsData [reportJobIDS=" + reportJobIDS
-                + ", reportTypeList=" + reportTypeList + ", user=" + user
-                + ", percent=" + percent + ", status=" + status + "]";
+        return "{reportJobIDS=" + reportJobIDS + ", reportTypeList="
+                + reportTypeList + ", user=" + user + ", percent=" + percent
+                + ", status=" + status + "}@ReportsData";
     }
 }

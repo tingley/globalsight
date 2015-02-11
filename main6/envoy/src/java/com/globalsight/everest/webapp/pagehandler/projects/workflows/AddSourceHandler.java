@@ -20,7 +20,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.rmi.RemoteException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,8 +32,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.naming.NamingException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -44,11 +42,8 @@ import org.apache.tools.zip.ZipOutputStream;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
@@ -59,6 +54,7 @@ import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UpdatedSourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
@@ -78,7 +74,6 @@ import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.file.XliffFileUtil;
@@ -127,17 +122,15 @@ public class AddSourceHandler extends PageActionHandler
     public void canUpdateWorkflow(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String id = request.getParameter("jobId");
             JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
             if (Job.ADD_FILE.equalsIgnoreCase(job.getState()))
             {
-                ResourceBundle bundle = getBundle(request.getSession(false));
-                out = response.getOutputStream();
-                out.write(bundle.getString("msg_access_workflow_no").getBytes(
-                        "UTF-8"));
+                out.write(bundle.getString("msg_access_workflow_no"));
             }
 
             pageReturn();
@@ -162,7 +155,8 @@ public class AddSourceHandler extends PageActionHandler
     public void checkPageExist(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String id = request.getParameter("sourcePageId");
@@ -173,9 +167,7 @@ public class AddSourceHandler extends PageActionHandler
                 if (page == null)
                 {
                     ResourceBundle bundle = getBundle(request.getSession(false));
-                    out = response.getOutputStream();
-                    out.write(bundle.getString("msg_no_source_page").getBytes(
-                            "UTF-8"));
+                    out.write(bundle.getString("msg_no_source_page"));
                 }
             }
         }
@@ -199,7 +191,8 @@ public class AddSourceHandler extends PageActionHandler
     public void canAddDeleteSourceFiles(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String id = request.getParameter("jobId");
@@ -208,8 +201,7 @@ public class AddSourceHandler extends PageActionHandler
             if (errorMsgkey != null)
             {
                 ResourceBundle bundle = getBundle(request.getSession(false));
-                out = response.getOutputStream();
-                out.write(bundle.getString(errorMsgkey).getBytes("UTF-8"));
+                out.write(bundle.getString(errorMsgkey));
             }
             pageReturn();
         }
@@ -263,7 +255,8 @@ public class AddSourceHandler extends PageActionHandler
     public void beforeDeleteSourceFiles(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String id = request.getParameter("jobId");
@@ -279,10 +272,9 @@ public class AddSourceHandler extends PageActionHandler
             if (errorMsgkey != null)
             {
                 ResourceBundle bundle = getBundle(request.getSession(false));
-                out = response.getOutputStream();
                 String s = "({\"error\" : "
                         + JsonUtil.toJson(bundle.getString(errorMsgkey)) + "})";
-                out.write(s.getBytes("UTF-8"));
+                out.write(s);
             }
             else
             {
@@ -298,8 +290,7 @@ public class AddSourceHandler extends PageActionHandler
                 {
                     String msg = bundle.getString("msg_change_all_file");
                     String s = "({\"confirm\" : " + JsonUtil.toJson(msg) + "})";
-                    out = response.getOutputStream();
-                    out.write(s.getBytes("UTF-8"));
+                    out.write(s);
                 }
                 else if (otherIds.size() > 0)
                 {
@@ -319,8 +310,7 @@ public class AddSourceHandler extends PageActionHandler
                     String s = "({\"confirm\" : "
                             + JsonUtil.toJson(msg.toString()) + "})";
 
-                    out = response.getOutputStream();
-                    out.write(s.getBytes("UTF-8"));
+                    out.write(s);
                 }
             }
 
@@ -586,7 +576,8 @@ public class AddSourceHandler extends PageActionHandler
     {
         logger.debug("Update souce files ...");
 
-        ServletOutputStream out = response.getOutputStream();
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String randomNum = request.getParameter("randomNum");
@@ -637,12 +628,12 @@ public class AddSourceHandler extends PageActionHandler
             }
 
             StringBuffer result = new StringBuffer();
-            result.append("<html><body><textarea>");
 
             Map<String, String> error = updateSouceFiles(Long.parseLong(jobId),
                     paths, randomNum);
             if (error.size() > 0)
             {
+                result.append("<html><body onload='parent.popupUploadErrorMessage()'><div id='uploadFileErroInfo' style='margin:20px 50px'>");
                 StringBuffer html = new StringBuffer();
                 html.append(bundle.getString("msg_add_failed"));
                 html.append("<table CLASS='listborder' CELLPADDING='3' style='width:480px; ' CELLSPACING='0' BORDER='0'>");
@@ -663,19 +654,25 @@ public class AddSourceHandler extends PageActionHandler
                     i++;
                 }
 
-                result.append(JsonUtil.toObjectJson(html.toString()));
+                result.append(html.toString());
+                result.append("</div></body></html>");
+            }
+            else
+            {
+                result.append("<script type='text/javascript'>");
+                result.append("parent.refreshJobPage();");
+                result.append("</script>");
             }
 
-            result.append("</textarea></body></html>");
-            out.write(result.toString().getBytes("UTF-8"));
+            out.write(result.toString());
         }
         catch (Exception e)
         {
             StringBuffer result = new StringBuffer();
-            result.append("<html><body><textarea>");
-            result.append(JsonUtil.toObjectJson(e.getMessage()));
-            result.append("</textarea></body></html>");
-            out.write(result.toString().getBytes("UTF-8"));
+            result.append("<script type='text/javascript'>");
+            result.append("alert(\"" + e.getMessage() + "\")");
+            result.append("</script>");
+            out.write(result.toString());
             logger.error(e.getMessage(), e);
         }
         finally
@@ -719,10 +716,14 @@ public class AddSourceHandler extends PageActionHandler
                     page.getTargetPages().remove(tPage);
 
                     WorkflowImpl w = (WorkflowImpl) tPage.getWorkflowInstance();
-                    Set tps = w.getTargetPagesSet();
-                    tps.remove(tPage);
-                    w.setTargetPagesSet(tps);
-                    HibernateUtil.update(w);
+                    if (w != null)
+                    {
+                        Set tps = w.getTargetPagesSet();
+                        tps.remove(tPage);
+                        w.setTargetPagesSet(tps);
+                        HibernateUtil.update(w);                        
+                    }
+
                     ExtractedFile f = tPage.getExtractedFile();
                     if (f != null)
                     {
@@ -810,6 +811,7 @@ public class AddSourceHandler extends PageActionHandler
         StatisticsService.calculateWorkflowStatistics(workflowList, job
                 .getL10nProfile().getTranslationMemoryProfile()
                 .getJobExcludeTuTypes());
+        SegmentTuTuvCacheManager.clearCache();
 
         nums[0] = -1;
         DELETE_PROGRESS.put(randomNum, nums);
@@ -819,7 +821,8 @@ public class AddSourceHandler extends PageActionHandler
     public void showDeleteProgress(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String randomNum = request.getParameter("randomNum");
@@ -853,8 +856,7 @@ public class AddSourceHandler extends PageActionHandler
             {
                 String s = "({\"number\" : " + JsonUtil.toJson(num)
                         + ", \"total\" : " + JsonUtil.toJson(total) + "})";
-                out = response.getOutputStream();
-                out.write(s.getBytes("UTF-8"));
+                out.write(s);
             }
 
             pageReturn();
@@ -879,7 +881,8 @@ public class AddSourceHandler extends PageActionHandler
     public void showUpdateProgress(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String randomNum = request.getParameter("randomNum");
@@ -939,8 +942,7 @@ public class AddSourceHandler extends PageActionHandler
                 {
                     String s = "({\"number\" : " + JsonUtil.toJson(num)
                             + ", \"total\" : " + JsonUtil.toJson(total) + "})";
-                    out = response.getOutputStream();
-                    out.write(s.getBytes("UTF-8"));
+                    out.write(s);
                 }
             }
         }
@@ -964,7 +966,8 @@ public class AddSourceHandler extends PageActionHandler
     public void deleteSourceFiles(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        ServletOutputStream out = null;
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
         try
         {
             String id = request.getParameter("jobId");
@@ -988,9 +991,8 @@ public class AddSourceHandler extends PageActionHandler
                         WorkflowHandlerHelper.getJobById(Long.parseLong(id)),
                         null);
 
-                out = response.getOutputStream();
                 String s = "({\"discard\" : " + JsonUtil.toJson("true") + "})";
-                out.write(s.getBytes("UTF-8"));
+                out.write(s);
             }
             else
             {
@@ -1129,7 +1131,6 @@ public class AddSourceHandler extends PageActionHandler
     {
         logger.debug("Download files...");
 
-        ServletOutputStream out = null;
         try
         {
             String[] ids = request.getParameter("pageIds").split(",");

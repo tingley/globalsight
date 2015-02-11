@@ -30,37 +30,34 @@ import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.util.system.SystemConfiguration;
-
 
 public class PassoloUtil
 {
-    static private final Logger logger =
-            Logger.getLogger(PassoloUtil.class);
-    private static String PATH = SystemConfiguration.getCompanyResourcePath("/properties/Passolo.properties");
-    public static Properties PROPERTIES = new Properties(); //passolo to globalsight
-    public static Map<String, List<String>> LOCALE_G2P = new HashMap<String, List<String>>(); // globalesight to passolo
+    static private final Logger logger = Logger.getLogger(PassoloUtil.class);
+    private static String PATH = "/properties/Passolo.properties";
+    public static Properties PROPERTIES = new Properties();
+    public static Map<String, List<String>> LOCALE_G2P = new HashMap<String, List<String>>();
     public static Map<String, Integer> EXPORTING_PAGES = new HashMap<String, Integer>();
-    
+
     static
     {
         try
         {
             PROPERTIES.load(PassoloUtil.class.getResourceAsStream(PATH));
-            
+
             Set<Object> keys = PROPERTIES.keySet();
             for (Object o : keys)
             {
                 String key = (String) o;
                 String value = PROPERTIES.getProperty(key);
-                
+
                 List<String> ls = LOCALE_G2P.get(value);
                 if (ls == null)
                 {
                     ls = new ArrayList<String>();
                     LOCALE_G2P.put(value, ls);
                 }
-                
+
                 ls.add(key);
             }
         }
@@ -69,13 +66,13 @@ public class PassoloUtil
             logger.error(e.getMessage(), e);
         }
     }
-    
+
     public static String getLocale(String path)
     {
-        String temp = path.toLowerCase().replace("\\","/");
-        
+        String temp = path.toLowerCase().replace("\\", "/");
+
         int i = temp.indexOf("/passolo/");
-        
+
         int beginIndex = temp.indexOf(".lpu/", i);
         if (beginIndex > 0)
         {
@@ -85,29 +82,31 @@ public class PassoloUtil
                 return path.substring(beginIndex + 5, endIndex);
             }
         }
-        
-        throw new IllegalArgumentException("Can not find the locale from the path: " + path);
+
+        throw new IllegalArgumentException(
+                "Can not find the locale from the path: " + path);
     }
-    
+
     public static String getMappingLocales(String locale)
     {
         return PROPERTIES.getProperty(locale, locale.replace("-", "_"));
     }
-    
+
     public static List<String> getMappingLocalesG2P(String locale)
     {
         return LOCALE_G2P.get(locale);
     }
-    
-    public static String getKey(String baseHref, String displayName, long exportBatchId)
+
+    public static String getKey(String baseHref, String displayName,
+            long exportBatchId)
     {
         displayName = displayName.replace("\\", "/");
         int index = displayName.indexOf("/", baseHref.length() + 2);
         String key = exportBatchId + displayName.substring(0, index);
-        
+
         return key;
     }
-    
+
     public static void addExportingPage(TargetPage targetPage,
             long exportBatchId)
     {
@@ -131,8 +130,8 @@ public class PassoloUtil
             }
         }
     }
-    
-    public static boolean isPassoloFile (SourcePage sourcePage)
+
+    public static boolean isPassoloFile(SourcePage sourcePage)
     {
         ExtractedFile f = sourcePage.getExtractedFile();
         if (f != null && f instanceof ExtractedSourceFile)
@@ -140,7 +139,7 @@ public class PassoloUtil
             ExtractedSourceFile sf = (ExtractedSourceFile) f;
             return "passolo".equals(sf.getDataType());
         }
-        
+
         return false;
     }
 }

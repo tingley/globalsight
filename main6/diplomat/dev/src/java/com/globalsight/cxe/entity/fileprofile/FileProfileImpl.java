@@ -55,7 +55,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      * Used for TOPLink queries based on a file profile name.
      */
     public static final String NAME = "m_name";
-    
+
     public boolean useActive = true;
     private Long newId;
 
@@ -65,7 +65,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     private Long m_xmlRuleFileId;
     private String m_name;
     private String m_description;
-    private String m_companyId;
+    private long m_companyId;
     private String m_code_set;
     private Set m_extensionIds;
     private boolean m_byDefaultExportStf = false;
@@ -75,7 +75,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     private boolean unicodeEscape = false;
     private boolean entityEscape = false;
     private boolean preserveSpaces = false;
-    
+
     private boolean headerTranslate = false;
 
     private String jsFilterRegex;
@@ -89,9 +89,11 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     private long secondFilterId = 0;
 
     private String secondFilterTableName = null;
-    
-    private int terminology_approval=0;
-    
+
+    private int terminology_approval = 0;
+
+    private int xlfSourceAsUnTranslatedTarget = 0;
+
     private long reference_fp = 0;
 
     public static final int UTF_BOM_PRESERVE = 1;
@@ -112,7 +114,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_xmlRuleFileId = null;
         m_name = null;
         m_description = null;
-        m_companyId = null;
+        m_companyId = -1;
         m_code_set = null;
         m_scriptOnImport = null;
         m_scriptOnExport = null;
@@ -141,7 +143,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_extensionIds = new HashSet();
         if (o.getFileExtensionIds() != null)
         {
-        	m_extensionIds.addAll(o.getFileExtensionIds());
+            m_extensionIds.addAll(o.getFileExtensionIds());
         }
 
         m_byDefaultExportStf = o.byDefaultExportStf();
@@ -189,8 +191,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public Vector getFileExtensionIds()
     {
-    	Vector ids = new Vector();
-    	ids.addAll(m_extensionIds);
+        Vector ids = new Vector();
+        ids.addAll(m_extensionIds);
         return ids;
     }
 
@@ -245,7 +247,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      * 
      * @return file profile company id
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return m_companyId;
     }
@@ -272,7 +274,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -281,8 +283,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             else
             {
                 return (filter instanceof XMLRuleFilter) ? ((XMLRuleFilter) filter)
-                        .getXmlRuleId()
-                        : 0;
+                        .getXmlRuleId() : 0;
             }
         }
         else
@@ -345,22 +346,22 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public void setFileExtensionIds(Vector p_extensionIds)
     {
-    	m_extensionIds = new HashSet();
-    	if (p_extensionIds != null)
-    	{
-    		 int size = p_extensionIds.size();
-             for (int i = 0; i < size; i++)
-             {
-                 Long extensionId = new Long(((Number) p_extensionIds
-                         .elementAt(i)).longValue());
-                 m_extensionIds.add(extensionId);
-             }
-    	}
+        m_extensionIds = new HashSet();
+        if (p_extensionIds != null)
+        {
+            int size = p_extensionIds.size();
+            for (int i = 0; i < size; i++)
+            {
+                Long extensionId = new Long(
+                        ((Number) p_extensionIds.elementAt(i)).longValue());
+                m_extensionIds.add(extensionId);
+            }
+        }
     }
 
     public void setExtensionIds(Set p_extensionIds)
     {
-    	m_extensionIds = p_extensionIds;
+        m_extensionIds = p_extensionIds;
     }
 
     /**
@@ -413,7 +414,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      * @param p_companyId
      *            The company id of the file profile
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         m_companyId = p_companyId;
     }
@@ -513,7 +514,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -526,7 +527,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                 if (xmlRuleId > 0)
                     return xmlRuleId;
             }
-            
+
             return null;
         }
 
@@ -545,7 +546,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -554,8 +555,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             else
             {
                 return (filter instanceof MSOfficeDocFilter) ? ((MSOfficeDocFilter) filter)
-                        .isHeaderTranslate()
-                        : false;
+                        .isHeaderTranslate() : false;
             }
         }
         else
@@ -583,7 +583,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -592,8 +592,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             else
             {
                 return (filter instanceof JavaPropertiesFilter) ? ((JavaPropertiesFilter) filter)
-                        .getEnableSidSupport()
-                        : false;
+                        .getEnableSidSupport() : false;
             }
         }
         else
@@ -621,7 +620,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -635,7 +634,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             {
                 return ((JavaScriptFilter) filter).getEnableUnicodeEscape();
             }
-            else 
+            else
             {
                 return false;
             }
@@ -666,7 +665,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -675,8 +674,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             else
             {
                 return (filter instanceof JSPFilter) ? ((JSPFilter) filter)
-                        .getEnableEscapeEntity()
-                        : false;
+                        .getEnableEscapeEntity() : false;
             }
         }
         else
@@ -686,6 +684,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
 
     }
+
     public void setEntityEscape(Boolean entityEscape)
     {
         if (entityEscape == null)
@@ -697,6 +696,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             this.entityEscape = entityEscape;
         }
     }
+
     public String getJsFilterRegex()
     {
 
@@ -704,7 +704,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -713,8 +713,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             else
             {
                 return (filter instanceof JavaScriptFilter) ? ((JavaScriptFilter) filter)
-                        .getJsFunctionText()
-                        : null;
+                        .getJsFunctionText() : null;
             }
         }
         else
@@ -760,7 +759,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         this.filterId = filterId;
     }
-    
+
     public String getFilterTableName()
     {
         return filterTableName;
@@ -770,42 +769,49 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         this.filterTableName = filterTableName;
     }
-    
+
     /**
-     * Get secondary filter Id for current filter.
-     * Default -2.
-     * @return long 
+     * Get secondary filter Id for current filter. Default -2.
+     * 
+     * @return long
      */
     public long getSecondFilterId()
     {
         long secondFilterId = -2;
         if (filterId > 0)
         {
-            try {
-                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
-                if (filter != null) 
+            try
+            {
+                Filter filter = FilterHelper.getFilter(filterTableName,
+                        filterId);
+                if (filter != null)
                 {
-                    if (filter instanceof JavaPropertiesFilter) 
+                    if (filter instanceof JavaPropertiesFilter)
                     {
-                        secondFilterId = ((JavaPropertiesFilter) filter).getSecondFilterId();
+                        secondFilterId = ((JavaPropertiesFilter) filter)
+                                .getSecondFilterId();
                     }
-                    else if (filter instanceof XMLRuleFilter) 
+                    else if (filter instanceof XMLRuleFilter)
                     {
-                        secondFilterId = ((XMLRuleFilter) filter).getSecondFilterId();
+                        secondFilterId = ((XMLRuleFilter) filter)
+                                .getSecondFilterId();
                     }
                     else if (filter instanceof POFilter)
                     {
-                        secondFilterId = ((POFilter) filter).getSecondFilterId();
+                        secondFilterId = ((POFilter) filter)
+                                .getSecondFilterId();
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 s_logger.error(e.getMessage(), e);
             }
         }
-        
+
         return secondFilterId;
     }
-    
+
     /**
      * There are some problems with second filter. Because time is limited, only
      * some file types will be deal with.
@@ -819,21 +825,21 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             return true;
         }
-        
+
         try
         {
             Filter filter = FilterHelper.getFilter(filterTableName, filterId);
 
-            if(filter instanceof MSOfficeExcelFilter) 
+            if (filter instanceof MSOfficeExcelFilter)
             {
                 return false;
             }
-            
+
             if (filter instanceof MSOfficeDocFilter)
             {
                 return false;
-            }           
-            
+            }
+
             if (filter instanceof MSOfficePPTFilter)
             {
                 return false;
@@ -843,12 +849,13 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             s_logger.error(e.getMessage(), e);
         }
-        
+
         return true;
     }
 
     /**
      * Get secondary filter table name for current filter.
+     * 
      * @return
      */
     public String getSecondFilterTableName()
@@ -856,24 +863,31 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         String secondFilterTableName = null;
         if (filterId > 0)
         {
-            try {
-                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
+            try
+            {
+                Filter filter = FilterHelper.getFilter(filterTableName,
+                        filterId);
                 if (filter != null)
                 {
-                    if (filter instanceof JavaPropertiesFilter) 
+                    if (filter instanceof JavaPropertiesFilter)
                     {
-                        secondFilterTableName = ((JavaPropertiesFilter) filter).getSecondFilterTableName();
+                        secondFilterTableName = ((JavaPropertiesFilter) filter)
+                                .getSecondFilterTableName();
                     }
-                    else if (filter instanceof XMLRuleFilter) 
+                    else if (filter instanceof XMLRuleFilter)
                     {
-                        secondFilterTableName = ((XMLRuleFilter) filter).getSecondFilterTableName();
+                        secondFilterTableName = ((XMLRuleFilter) filter)
+                                .getSecondFilterTableName();
                     }
                     else if (filter instanceof POFilter)
                     {
-                        secondFilterTableName = ((POFilter) filter).getSecondFilterTableName();
+                        secondFilterTableName = ((POFilter) filter)
+                                .getSecondFilterTableName();
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 s_logger.error(e.getMessage(), e);
             }
         }
@@ -903,46 +917,62 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
 
         return name;
     }
-    
+
     public void setPreserveSpaces(Boolean p_preserveSpaces)
     {
-        if (p_preserveSpaces == null) {
+        if (p_preserveSpaces == null)
+        {
             this.preserveSpaces = false;
-        } else {
+        }
+        else
+        {
             this.preserveSpaces = p_preserveSpaces;
         }
     }
-    
+
     public boolean getPreserveSpaces()
     {
         if (filterId > 0)
         {
             // The filter have been take effect.
             ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, Long.parseLong(m_companyId));
+                    m_knownFormatTypeId, m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
-            if (filter == null) 
+            if (filter == null)
             {
                 return false;
             }
             else
             {
-                return (filter instanceof JavaPropertiesFilter)?((JavaPropertiesFilter) filter).getEnablePreserveSpaces() : false;
+                return (filter instanceof JavaPropertiesFilter) ? ((JavaPropertiesFilter) filter)
+                        .getEnablePreserveSpaces() : false;
             }
         }
         else
         {
             // The former logic
             return this.preserveSpaces;
-        }       
+        }
     }
-    
-    public int getTerminologyApproval() {
+
+    public int getTerminologyApproval()
+    {
         return this.terminology_approval;
     }
-    
-    public void setTerminologyApproval(int flag) {
+
+    public void setTerminologyApproval(int flag)
+    {
         this.terminology_approval = flag;
+    }
+
+    public int getXlfSourceAsUnTranslatedTarget()
+    {
+        return this.xlfSourceAsUnTranslatedTarget;
+    }
+
+    public void setXlfSourceAsUnTranslatedTarget(int flag)
+    {
+        this.xlfSourceAsUnTranslatedTarget = flag;
     }
 
     public long getReferenceFP()
@@ -964,5 +994,5 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         this.newId = oldId;
     }
-    
+
 }

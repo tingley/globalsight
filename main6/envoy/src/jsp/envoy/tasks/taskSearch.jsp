@@ -199,9 +199,8 @@ function setSearchCookie()
               "<%=completionStartOptions%>=" + getOption(searchForm.<%=completionStartOptions%>) + ":" +
               "<%=completionEnd%>=" + searchForm.<%=completionEnd%>.value + ":" +
               "<%=completionEndOptions%>=" + getOption(searchForm.<%=completionEndOptions%>) + ":";
-    var today = new Date();
-    var expires = new Date(today.getTime() + (365 * 86400000));
-    document.cookie = "<%=cookieName%>=" + buf + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+              
+    document.cookie = "<%=cookieName%>=" + escape(buf);
 }
 
 function getOption(field)
@@ -319,7 +318,8 @@ function setField(fieldname, field, searchCriteria, option)
             <select name="<%=statusOptions%>">
                 <option value='<%=Task.STATE_ACTIVE%>'><%= bundle.getString("lb_available") %></option>
                 <option value='<%=Task.STATE_ACCEPTED%>'><%= bundle.getString("lb_inprogress") %></option>
-                <option value='<%=WorkflowConstants.TASK_GSEDITION_IN_PROGESS%>'><%= bundle.getString("lb_inprogress") %>(<%= bundle.getString("lb_gsedition") %>)</option>
+<!--            <option value='<%=WorkflowConstants.TASK_GSEDITION_IN_PROGESS%>'><%= bundle.getString("lb_inprogress") %>(<%= bundle.getString("lb_gsedition") %>)</option>
+ -->
                 <option value='<%=Task.STATE_COMPLETED%>'><%= bundle.getString("lb_finished") %></option>
                 <option value='<%=Task.STATE_REJECTED%>'><%= bundle.getString("lb_rejected") %></option>
                 <option value='<%=Task.STATE_ALL%>'><%= bundle.getString("lb_all_status") %></option> 
@@ -339,7 +339,7 @@ function setField(fieldname, field, searchCriteria, option)
               List projectList =  UserHandlerHelper.getProjectsByUser(userId);
               for(int i = 0; i < projectList.size(); i++)
               {
-                 String companyId = ((Project)projectList.get(i)).getCompanyId();
+                 long companyId = ((Project) projectList.get(i)).getCompanyId();
                  companyName =  CompanyWrapper.getCompanyNameById(companyId);
                  if (!companyList.contains(companyName))
                  {

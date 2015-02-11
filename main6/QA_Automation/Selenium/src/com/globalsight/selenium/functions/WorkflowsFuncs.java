@@ -21,7 +21,7 @@ public class WorkflowsFuncs extends BasicFuncs {
 	 * This method used to import the workflow from the exist .xml file.
 	 * Author:Jester
 	 */
-	public static final String MAIN_TABLE = "//div[@id='contentLayer']/form/p/table/tbody/tr[2]/td/table/tbody";
+	public static final String MAIN_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
 		
 	//note: 1. when exported the template workflow, use needs to manually click save. 
 	public void exportWorkflow(Selenium selenium,String workflowTemplate) throws Exception
@@ -106,6 +106,7 @@ public class WorkflowsFuncs extends BasicFuncs {
 			Reporter.log("Cannot find the workflow template to duplicate!");
             return;
 		}
+		else{
 		selenium.click(Workflows.Duplicate_BUTTON);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		selenium.type(Workflows.Name_TEXT_FIELD_DUPLICATE, newName);
@@ -116,6 +117,7 @@ public class WorkflowsFuncs extends BasicFuncs {
 		selenium.click(Workflows.Add_BUTTON_DUPLICATE);
 		selenium.click(Workflows.Save_BUTTON_DUPLICATE);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		}
 	}
 	
 	public void duplicateWorkFlow(Selenium selenium, String iFile, String workflowTemplate,String Project, String source, String target) throws Exception 

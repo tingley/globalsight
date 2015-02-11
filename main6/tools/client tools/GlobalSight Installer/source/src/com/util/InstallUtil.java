@@ -36,10 +36,12 @@ import java.util.jar.JarFile;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import com.config.properties.InstallValues;
 import com.config.properties.Resource;
 import com.config.xml.model.SystemInfo;
 import com.plug.Plug;
 import com.plug.PlugManager;
+import com.plug.PrePlug;
 import com.ui.UI;
 import com.ui.UIFactory;
 import com.util.db.DbUtil;
@@ -207,6 +209,17 @@ public abstract class InstallUtil
         }
         return sqlFile;
     }
+    
+    public void runPrePlug() throws Exception
+    {
+    	List<String> PlugClasses = getPlugClasses();
+    	while (PlugClasses.size() > 0)
+    	{
+    		runPrePlugClass(PlugClasses);
+    	}
+    	
+    	plugClass = null;
+    }
 
     public void upgradeVerion(int totalProgress) throws Exception
     {
@@ -297,6 +310,28 @@ public abstract class InstallUtil
 
         PlugClasses.remove(0);
     }
+    
+    private void runPrePlugClass(List<String> PlugClasses) throws Exception
+    {
+        String name = "Plug_" + PlugClasses.get(0).replace(".", "_");
+        Plug plug = null;
+        try
+        {
+            plug = (Plug) Class.forName("com.plug." + name).newInstance();
+        }
+        catch (ClassNotFoundException e)
+        {
+            // Ignore it.
+        }
+
+        if (plug != null && plug instanceof PrePlug)
+        {
+        	PrePlug prePlug = (PrePlug) plug;
+        	prePlug.preRun();
+        }
+
+        PlugClasses.remove(0);
+    }
 
     private void updateDb(List<File> sqlFiles, int rate) throws IOException
     {
@@ -366,10 +401,7 @@ public abstract class InstallUtil
     }
     
     private Properties getProperties()
-    {
-        File installValues = new File(ServerUtil.getPath()
-                + "/install/data/installValues.properties");
-        
+    {        
         Properties properties = new Properties();
 		try 
 		{
@@ -380,30 +412,7 @@ public abstract class InstallUtil
 			log.error(e.getMessage(), e);
 		}
 		
-		FileInputStream in = null;
-        try 
-        {
-        	in = new FileInputStream(installValues);
-			properties.load(in);
-		} 
-        catch (Exception e) 
-		{
-			log.error(e.getMessage(), e);
-		} 
-        finally
-        {
-        	if (in != null)
-        	{
-        		try 
-        		{
-					in.close();
-				} 
-        		catch (IOException e) 
-				{
-					log.error(e.getMessage(), e);
-				}
-        	}
-        }
+		properties.putAll(InstallValues.getProperties());
 
         properties.put("Jboss_JNDI_prefix", "topic/");
         properties.put("ldap_user_password", encodeMD5(properties.getProperty("ldap_password")));
@@ -443,6 +452,18 @@ public abstract class InstallUtil
             properties.setProperty("server_ssl_ks_pwd", "changeit");
         }
         
+        boolean enableEmailServer = "true".equalsIgnoreCase(properties.getProperty("system_notification_enabled", "false"));
+        properties.setProperty("mail_smtp_start", enableEmailServer ? "" : "<!--");
+        properties.setProperty("mail_smtp_end", enableEmailServer ? "" : "-->");
+        
+        boolean enableEmailAuthentication = "true".equalsIgnoreCase(properties.getProperty("email_authentication_enabled", "false"));
+        if (!enableEmailServer)
+        {
+        	enableEmailAuthentication = true;
+        }
+        properties.setProperty("mail_authentication_start", enableEmailAuthentication ? "" : "<!--");
+        properties.setProperty("mail_authentication_end", enableEmailAuthentication ? "" : "-->");
+        
         return properties;
     }
     
@@ -463,6 +484,8 @@ public abstract class InstallUtil
     
     public void parseTemplates(List<File> files)
     {
+    	InstallValues.addAdditionalInstallValues();
+    	
         URL url = InstallUtil.class.getClassLoader().getResource("generateFiles.properties");
         Properties installValues = getProperties();
         for (File file : files)
@@ -479,6 +502,48 @@ public abstract class InstallUtil
             }
             
             processFile(file, new File(ServerUtil.getPath() + "/" + trg), installValues);
+        }
+    }
+    
+    public void removeHotfix()
+    {
+    	String path = ServerUtil.getPath() + "/hotfix";
+    	File f = new File(path);
+    	if (f.exists())
+    	{
+    		FileUtil.deleteFile(new File(path));
+    	}
+    }
+    
+    /**
+     * @throws IOException
+     */
+    public void parseAllTemplates() throws IOException
+    {
+    	InstallValues.addAdditionalInstallValues();
+    	
+        URL url = InstallUtil.class.getClassLoader().getResource("generateFiles.properties");
+        Properties properties = new Properties();
+        InputStream in = url.openStream();
+        properties.load(in);
+        Properties installValues = getProperties();
+        
+        for (Object ob : properties.keySet())
+        {
+        	String path = (String) ob;
+        	File f1 = new File(ServerUtil.getPath() + "/" + path);
+        	File f2 = new File(ServerUtil.getPath() + "/" + properties.getProperty(path));
+        	
+        	try 
+        	{
+        		processFile(f1, f2, installValues);
+			} 
+        	catch (Exception e) 
+        	{
+        		log.error("Failed to parse " + f1.getPath() + " to " + f2.getPath());
+				log.error(e);
+				continue;
+			}
         }
     }
     

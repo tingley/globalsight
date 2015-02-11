@@ -226,7 +226,7 @@ public class Permission
     static public final String JOBS_DOWNLOAD = "jobs.download";
     static public final String JOBS_MAKE_READY = "jobs.makeready";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
-    static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";
+//    static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";//GBS-2875
 
     // For sla report issue
     static public final String JOBS_ESTIMATEDCOMPDATE = "jobs.estimatedcompdate";
@@ -306,8 +306,8 @@ public class Permission
     static public final String ACTIVITIES_TM_SEARCH = "activities.tm.search";
     static public final String ACTIVITIES_TB_SEARCH = "activities.tb.search";
     static public final String REPORTS_MAIN = "reports.main";
-    static public final String REPORTS_ADMIN = "reports.admin";
-    static public final String REPORTS_COMPOSER = "reports.composer";
+   // static public final String REPORTS_ADMIN = "reports.admin";
+   // static public final String REPORTS_COMPOSER = "reports.composer";
     static public final String REPORTS_CUSTOM_EXTERNAL = "reports.custom.external";
     static public final String REPORTS_CUSTOM = "reports.custom";
     static public final String VENDORS_NEW = "vendors.new";
@@ -405,6 +405,7 @@ public class Permission
     // For " add download button to my activities " issue
     static public final String ACTIVITIES_DOWNLOAD = "activities.download";
     static public final String CHANGE_OWN_PASSWORD = "activities.change.own.password";
+    static public final String CHANGE_OWN_EMAIL = "activities.change.own.email";
     static public final String SERVICE_TM_GET_ALL_TMPROFILES = "service.tm.getAllTMProfiles";
     static public final String SERVICE_TB_CREATE_ENTRY = "service.tb.createEntries";
     static public final String SERVICE_TB_SEARCH_ENTRY = "service.tb.searchEntries";
@@ -508,15 +509,16 @@ public class Permission
             SOURCE_PAGE_EDIT, COMMENT_ACCESS_RESTRICTED,
             ACTIVITIES_COMMENTS_NEW, ACTIVITIES_COMMENTS_JOB,
             ACTIVITIES_COMMENTS_DOWNLOAD, ACTIVITIES_SECONDARYTARGETFILE,
-            ACTIVITIES_JOB_COMMENTS_VIEW, ACTIVITIES_JOB_COMMENTS_EDIT,
-            ACTIVITIES_JOB_COMMENTS_NEW, ACTIVITIES_JOB_COMMENTS_DOWNLOAD,
-            REPORTS_TRANSLATIONS_EDIT, REPORTS_LANGUAGE_SIGN_OFF,
-            REPORTS_CHARACTER_COUNT, ACTIVITY_DASHBOARD_VIEW,
-            ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
+            USERS_VIEW, CHANGE_OWN_EMAIL, ACTIVITIES_JOB_COMMENTS_VIEW,
+            ACTIVITIES_JOB_COMMENTS_EDIT, ACTIVITIES_JOB_COMMENTS_NEW,
+            ACTIVITIES_JOB_COMMENTS_DOWNLOAD, REPORTS_TRANSLATIONS_EDIT,
+            REPORTS_MAIN, REPORTS_LANGUAGE_SIGN_OFF, REPORTS_CHARACTER_COUNT,
+            REPORTS_DELL_FILE_LIST,
+            ACTIVITY_DASHBOARD_VIEW, ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
             ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
             ACTIVITIES_TM_SEARCH, ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW,
-            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED };
+            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED};
 
     /**
      * You should add any new permissions to this call so that the permission
@@ -707,8 +709,8 @@ public class Permission
         added = addPermission(172, ACTIVITIES_COMMENTS_VIEW) || added;
         added = addPermission(173, ACTIVITIES_COMMENTS_EDIT) || added;
         added = addPermission(174, REPORTS_MAIN) || added;
-        added = addPermission(175, REPORTS_ADMIN) || added;
-        added = addPermission(176, REPORTS_COMPOSER) || added;
+        //added = addPermission(175, REPORTS_ADMIN) || added;
+        //added = addPermission(176, REPORTS_COMPOSER) || added;
         added = addPermission(177, VENDORS_NEW) || added;
         added = addPermission(178, VENDORS_VIEW) || added;
         added = addPermission(179, VENDORS_EDIT) || added;
@@ -790,8 +792,8 @@ public class Permission
         // issue
         added = addPermission(248, JOB_COSTING_REEDIT) || added;
 
-        // For "FileProfiles Search" issue"
-        added = addPermission(249, FILE_PROFILES_SEARCH) || added;
+        // "File Profiles Search" is not required (GBS-2875)
+        //added = addPermission(249, FILE_PROFILES_SEARCH) || added;
 
         // For " Quotation process for WebEx " issue
         added = addPermission(250, JOB_QUOTE_APPROVE) || added;
@@ -1003,6 +1005,7 @@ public class Permission
         added = addPermission(384, COMPANY_MIGRATE) || added;
         added = addPermission(385, REPORTS_SUMMARY) || added;
         added = addPermission(386, ACTIVITIES_DOWNLOAD_COMBINED) || added;
+        added = addPermission(387, CHANGE_OWN_EMAIL) || added;
         
         return added;
     }
@@ -1205,6 +1208,7 @@ public class Permission
         try
         {
             c = ConnectionPool.getConnection();
+            c.setAutoCommit(false);
             stmt = c.prepareStatement(SQL_SELECT_PERMISSION_SET_FROM_PERMISSION_GROUP);
             stmt1 = c.prepareStatement(SQL_UPDATE_PERMISSION_SET);
             rs = stmt.executeQuery();
@@ -1235,6 +1239,7 @@ public class Permission
             }
 
             stmt1.executeBatch();
+            c.commit();
         }
         catch (Exception e)
         {
@@ -1271,7 +1276,6 @@ public class Permission
             {
                 long id = rs.getLong(1);
                 String name = rs.getString(2);
-
                 // the key is the permission name
                 s_idMap.put(name, new Long(id));
 
@@ -1314,6 +1318,7 @@ public class Permission
         try
         {
             c = ConnectionPool.getConnection();
+            c.setAutoCommit(false);
 
             if (s_idMap.isEmpty())
             {
@@ -1341,6 +1346,7 @@ public class Permission
                 }
             }
 
+            c.commit();
         }
         catch (Exception ex)
         {

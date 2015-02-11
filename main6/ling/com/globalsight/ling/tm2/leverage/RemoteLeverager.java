@@ -17,6 +17,7 @@
 package com.globalsight.ling.tm2.leverage;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.gsedition.GSEdition;
 import com.globalsight.everest.gsedition.GSEditionManagerLocal;
@@ -40,7 +40,7 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.webservices.WebServiceException;
@@ -71,7 +71,8 @@ public class RemoteLeverager
             Collection loSegments = new ArrayList();
 
             Iterator itOriginalSegment = p_leverageDataCenter
-                    .getOriginalSeparatedSegments(p_sourcePage.getCompanyId())
+                    .getOriginalSeparatedSegments(
+                            String.valueOf(p_sourcePage.getCompanyId()))
                     .iterator();
             while (itOriginalSegment.hasNext())
             {
@@ -277,9 +278,10 @@ public class RemoteLeverager
             LeverageOptions p_leverageOptions) throws LocaleManagerException,
             RemoteException, GeneralException
     {
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             // For one remote tm
             Iterator iter1 = null;
             if (remoteLevResultMap != null && remoteLevResultMap.size() > 0)
@@ -371,8 +373,7 @@ public class RemoteLeverager
                             }
                             // save to leverage_match
                             LingServerProxy.getLeverageMatchLingManager()
-                                    .saveLeveragedMatches(c,
-                                            session.connection());
+                                    .saveLeveragedMatches(c, conn);
                         }
                     }
                 }
@@ -384,10 +385,7 @@ public class RemoteLeverager
         }
         finally
         {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 

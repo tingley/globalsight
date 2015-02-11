@@ -56,6 +56,8 @@ String str_userId =
 
 SegmentView view =
   (SegmentView)sessionMgr.getAttribute(WebAppConstants.SEGMENTVIEW);
+String pagePath = view.getPagePath().toLowerCase();
+boolean isWord = pagePath.endsWith(".docx") || pagePath.endsWith(".pptx");
 
 String url_topMenu       = topMenu.getPageURL();
 String url_bottomMenu    = bottomMenu.getPageURL();
@@ -117,7 +119,8 @@ String needUpdatePopupEditor = state.getNeedUpdatePopUpEditor();
 // for internal text display
 if (str_sourceSegment != null && str_sourceSegment.contains("internal=\"yes\"")
         && str_dataType != null && (str_dataType.equals(IFormatNames.FORMAT_JAVAPROP)
-        || str_dataType.equals(IFormatNames.FORMAT_JAVAPROP_MSG)))
+        || str_dataType.equals(IFormatNames.FORMAT_JAVAPROP_MSG)
+        || str_dataType.equals(IFormatNames.FORMAT_PLAINTEXT)))
 {
     b_colorPtags = true;
     url_theEditor = url_segmentEditor;
@@ -474,8 +477,11 @@ function HilitePtags(bright)
   fr_target.HilitePtags(bright);
 }
 
+var internalTagMsg = "";
+
 function checkError()
 {
+	internalTagMsg = "";
     var message;
     if ((message = doErrorCheck()) != null)
     {
@@ -483,6 +489,18 @@ function checkError()
         fr_target.SetFocus();
         return 1;
     }
+    if (internalTagMsg != null && internalTagMsg != "")
+    {
+    	var rrr = confirm("<%=bundle.getString("msg_internal_moved_continue")%>" + "\n\r\t" + internalTagMsg);
+    	if (rrr == true)
+    		return 0;
+    	else
+    	{
+    		fr_target.SetFocus();
+    		return 1;
+    	}
+    }
+    
     return 0;
 }
 
@@ -491,6 +509,7 @@ function doErrorCheck()
     applet.setUntranslateStyle(<%="\"" + SegmentUtil2.getTAGS() + "\""%>);
     var msg = applet.errorCheck(fr_editor.GetTargetSegment(), source_segment,
       max_segment_len, gsa_encoding, db_segment_len, db_encoding);
+    internalTagMsg = applet.getInternalErrMsg();
 
     if (msg == "" || msg == null || msg == "null")
     {
@@ -559,12 +578,22 @@ function IsWhitePreserving()
 // Formatting tags are B/I/U
 function HasFormattingTags()
 {
+  if (<%=isWord%> || datatype == "mif")
+  {
+	  return true;
+  }
+	
   if (HasPTags() && itemtype == "text")
   {
     return true;
   }
 
   return false;
+}
+
+function HasOfficeTags()
+{
+	return <%=isWord%> || datatype == "mif";
 }
 
 function openPtags()

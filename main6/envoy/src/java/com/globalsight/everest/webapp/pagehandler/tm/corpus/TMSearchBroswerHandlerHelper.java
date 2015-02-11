@@ -37,8 +37,6 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.Session;
-
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -75,7 +73,6 @@ import com.globalsight.ling.tm2.PageTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
@@ -320,7 +317,8 @@ public class TMSearchBroswerHandlerHelper
                     }
                     if (isSuperPM)
                     {
-                        if (tm.getCompanyId().equals(currentCompanyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(
+                                currentCompanyId))
                         {
                             tmList.add(tm);
                         }
@@ -422,10 +420,10 @@ public class TMSearchBroswerHandlerHelper
                 String companyId = null;
                 try
                 {
-                    companyId = ServerProxy
+                    companyId = String.valueOf(ServerProxy
                             .getProjectHandler()
                             .getProjectTMById(tmp.getProjectTmIdForSave(),
-                                    false).getCompanyId();
+                                    false).getCompanyId());
                 }
                 catch (Exception e)
                 {
@@ -573,7 +571,7 @@ public class TMSearchBroswerHandlerHelper
 
         ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
                 tmp.getProjectTmIdForSave(), false);
-        String companyId = ptm.getCompanyId();
+        String companyId = String.valueOf(ptm.getCompanyId());
 
         ArrayList tmNamesOverride = new ArrayList();
         Vector<LeverageProjectTM> leverageProjectTms = tmp
@@ -935,7 +933,6 @@ public class TMSearchBroswerHandlerHelper
         GlobalSightLocale targetLocale = ServerProxy.getLocaleManager()
                 .getLocaleByString(targetLocaleStr);
         ProjectHandler ph = ServerProxy.getProjectHandler();
-        Session session = TmUtil.getStableSession();
         TmCoreManager tmManager = LingServerProxy.getTmCoreManager();
         try
         {
@@ -949,7 +946,7 @@ public class TMSearchBroswerHandlerHelper
                 Tm tm = ph.getProjectTMById(tmId, false);
                 // get all TUS in current TM
                 List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(
-                        session, tm, tuIds);
+                        tm, tuIds);
                 for (SegmentTmTu tu : tus)
                 {
                     long tuId = tu.getId();
@@ -973,10 +970,6 @@ public class TMSearchBroswerHandlerHelper
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
         }
 
         // refresh the search results
@@ -1122,7 +1115,6 @@ public class TMSearchBroswerHandlerHelper
         GlobalSightLocale locale = ServerProxy.getLocaleManager()
                 .getLocaleByString(localeStr);
         ProjectHandler ph = ServerProxy.getProjectHandler();
-        Session session = TmUtil.getStableSession();
         int replacedNum = 0;
         try
         {
@@ -1138,7 +1130,7 @@ public class TMSearchBroswerHandlerHelper
                 Tm tm = ph.getProjectTMById(tmId, false);
                 // get all TUS in current TM
                 List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(
-                        session, tm, tuIds);
+                        tm, tuIds);
                 for (SegmentTmTu tu : tus)
                 {
                     long tuId = tu.getId();
@@ -1176,10 +1168,6 @@ public class TMSearchBroswerHandlerHelper
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
         }
         TmCoreManager tmManager = LingServerProxy.getTmCoreManager();
         for (Map.Entry<Tm, List<SegmentTmTuv>> entry : tmTuvs.entrySet())

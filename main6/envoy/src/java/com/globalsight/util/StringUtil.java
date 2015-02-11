@@ -33,6 +33,10 @@ public class StringUtil
 
     public static final String EMPTY_STRING = "";
 
+    public static String transactSQLInjection(String str)
+    {
+        return str.replaceAll(".*([';]+|(--)+).*", " ");
+    }
     public static boolean isEmpty(String s)
     {
         return s == null || s.trim().length() == 0;

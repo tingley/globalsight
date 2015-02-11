@@ -18,7 +18,7 @@ package com.install;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
+//import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +31,11 @@ import com.config.properties.Resource;
 import com.ui.UI;
 import com.ui.UIFactory;
 import com.util.FileUtil;
+import com.util.JbossUpdater;
 import com.util.ServerUtil;
 import com.util.UpgradeUtil;
 import com.util.db.DbUtil;
+//import com.util.db.DbUtil;
 import com.util.db.DbUtilFactory;
 
 /**
@@ -56,9 +58,8 @@ public class Upgrade
 
     private static UpgradeUtil UPGRADE_UTIL = UpgradeUtil.newInstance();
 
-    private static final String PROPERTIES_PATH = "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties";
     private static final String BACKUP_FILE = "backup";
-    private static final String EAR_PATH = "/jboss/jboss_server/server/default/deploy/globalsight.ear";
+//    private static final String EAR_PATH = "/jboss/server/standalone/deployments/globalsight.ear";
     private UI ui = UIFactory.getUI();
 
     private static final String VALIEDATE = "validate";
@@ -66,6 +67,8 @@ public class Upgrade
     private static final String DELETE = "delete";
     private static final String DATABASE = "database";
     private static final String COPY = "copy";
+    
+    private Boolean isUpgradeJboss = null;
 
     private List<String> ignoreFiles;
     private List<String> ignoreEndPaths;
@@ -100,12 +103,159 @@ public class Upgrade
     	BACKUP_FILES.add("/jboss");
     	BACKUP_FILES.add("/logs");
     }
-
-    private String getRealPath(String s)
+    
+    private static List<String> REMOVE_FILES = new ArrayList<String>();
+    static
     {
-        return UPGRADE_UTIL.getPath() + s;
+    	REMOVE_FILES.add("/install");
+    	REMOVE_FILES.add("/jboss");
     }
-
+    
+    private boolean isUpdateJboss()
+    {
+    	if (isUpgradeJboss == null)
+    	{
+    		File f = new File(ServerUtil.getPath() + "/install/JavaServiceWrapper/conf/wrapper.conf");
+    		isUpgradeJboss = f.exists();
+    	}
+    	
+    	return isUpgradeJboss;
+    }
+    
+    private void removeFilesForUpdateJboss() throws Exception
+    {
+    	if (!isUpdateJboss())
+    		return;
+    	
+    	ui.addProgress(0, Resource.get("process.deleteFiles"));
+    	log.info("Removing files for update jboss.");
+    	
+        for (String f : REMOVE_FILES)
+        {
+        	FileUtil.deleteFile(new File(ServerUtil.getPath() + f));
+        }
+        log.info("Removing files finished.");
+    }
+    
+    private void backImages() throws Exception
+    {
+    	String imagePath = "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/images";
+    	File root = new File(ServerUtil.getPath() + imagePath);
+    	if (!root.exists())
+    		return;
+    	
+    	List<File> files = FileUtil.getAllFiles(root, new FileFilter() 
+    	{
+			@Override
+			public boolean accept(File pathname) 
+			{
+//				List<String> notBackupFiles = new ArrayList<String>();
+//				notBackupFiles.add("server.properties");
+//				
+//				return !notBackupFiles.contains(pathname.getName());
+				return true;
+			}
+		});
+    	
+    	for (File f : files)
+    	{
+    		String path = f.getCanonicalPath().replace("\\", "/");
+            String serverPath = ServerUtil.getPath().replace("\\", "/");
+            String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
+            
+            path = path.replace(serverPath, upgradePath);
+            
+            FileUtil.copyFile(f, new File(path));
+    	}
+    }
+    
+    private void backupForUpdateJboss() throws Exception
+    {
+    	File f1 = new File(ServerUtil.getPath() + "/jboss/jboss_server/server/default/conf/globalsight.keystore");
+        if (f1.exists())
+        {
+            String path = UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
+            FileUtil.copyFile(f1, new File(path));
+        }
+        
+        f1 = new File(ServerUtil.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore");
+        if (f1.exists())
+        {
+            String path = UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
+            FileUtil.copyFile(f1, new File(path));
+        }
+        
+    	if (!isUpdateJboss())
+    		return;
+    	
+    	Map<String, String> paths = new HashMap<String, String>();
+		paths.put(
+				"/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties",
+				"/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties");
+		paths.put(
+				"/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/reports/messages",
+				"/jboss/server/standalone/deployments/globalsight.ear/lib/classes/com/globalsight/resources/messages");
+		paths.put(
+				"/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/images",
+				"/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/images");
+    	
+        for (String bfile : paths.keySet())
+        {
+        	File root = new File(ServerUtil.getPath() + bfile);
+        	if (!root.exists())
+        		continue;
+        	
+        	List<File> files = FileUtil.getAllFiles(root, new FileFilter() 
+        	{
+				@Override
+				public boolean accept(File pathname) 
+				{
+					List<String> notBackupFiles = new ArrayList<String>();
+					notBackupFiles.add("server.properties");
+					notBackupFiles.add("AdobeAdapter.properties");
+					notBackupFiles.add("db_connection.properties.template");
+					notBackupFiles.add("envoy.properties");
+					notBackupFiles.add("Wordcounter.properties");
+					notBackupFiles.add("idmlrule.properties");
+					notBackupFiles.add("MSDocxXmlRule.properties");
+					notBackupFiles.add("WhitespaceForExport.properties");
+					
+					return !notBackupFiles.contains(pathname.getName());
+				}
+			});
+        	
+        	for (File f : files)
+        	{
+        		String path = f.getCanonicalPath().replace("\\", "/");
+                String serverPath = ServerUtil.getPath().replace("\\", "/");
+                String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
+                
+                path = path.replace(serverPath, upgradePath);
+                path = path.replace(bfile, paths.get(bfile));
+                
+                FileUtil.copyFile(f, new File(path));
+        	}
+        }
+        
+        File f = new File(ServerUtil.getPath() + "/install/data/installValues.properties");
+        if (f.exists())
+        {
+        	String path = f.getCanonicalPath().replace("\\", "/");
+            String serverPath = ServerUtil.getPath().replace("\\", "/");
+            String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
+            
+            path = path.replace(serverPath, upgradePath);
+            
+            FileUtil.copyFile(f, new File(path));
+        }
+        else
+        {
+        	log.error("Can not find the file: " + f.getAbsolutePath());
+        }
+        
+        JbossUpdater.readOptionsFromWrapper();
+    }
+    
     private void backup() throws Exception
     {
         log.info("Backuping files.");
@@ -127,7 +277,9 @@ public class Upgrade
         List<File> files = new ArrayList<File>();
         for (String bfile : BACKUP_FILES)
         {
-        	files.addAll(FileUtil.getAllFiles(new File(ServerUtil.getPath()  + bfile)));
+        	File f = new File(ServerUtil.getPath()  + bfile);
+        	if (f.exists())
+        	    files.addAll(FileUtil.getAllFiles(f));
         }
         
         int size = files.size();
@@ -151,7 +303,7 @@ public class Upgrade
 
             try
             {
-                FileUtil.copyFile(f, new File(BACKUP_FILE + File.separator
+        		FileUtil.copyFile(f, new File(BACKUP_FILE + File.separator
                         + backupName + File.separator + path));
             }
             catch (Exception e)
@@ -168,78 +320,78 @@ public class Upgrade
         log.info("Backuping files finished");
     }
 
-    private FileFilter getClassFilter()
-    {
-        return new FileFilter()
-        {
-            @Override
-            public boolean accept(File pathname)
-            {
-                String name = pathname.getName();
-                return name.endsWith(".class");
-            }
-        };
-    }
+//    private FileFilter getClassFilter()
+//    {
+//        return new FileFilter()
+//        {
+//            @Override
+//            public boolean accept(File pathname)
+//            {
+//                String name = pathname.getName();
+//                return name.endsWith(".class");
+//            }
+//        };
+//    }
+//    
+//    private FileFilter getJarFilter()
+//    {
+//        return new FileFilter()
+//        {
+//            @Override
+//            public boolean accept(File pathname)
+//            {
+//                String name = pathname.getName();
+//                return name.endsWith(".class");
+//            }
+//        };
+//    }
     
-    private FileFilter getJarFilter()
-    {
-        return new FileFilter()
-        {
-            @Override
-            public boolean accept(File pathname)
-            {
-                String name = pathname.getName();
-                return name.endsWith(".class");
-            }
-        };
-    }
-    
-    private void removeClassFiles()
-    {
-        log.info("Removing class files");
-        List<File> files = FileUtil.getAllFiles(new File(ServerUtil.getPath()
-                + EAR_PATH), getClassFilter());
-        
-        List<File> jares = FileUtil.getAllFiles(new File(UPGRADE_UTIL.getPath()
-                + EAR_PATH), getJarFilter());        
-        if (jares.size() > 10)
-        {
-            log.info("Removing jar files");
-            files.addAll(FileUtil.getAllFiles(new File(ServerUtil.getPath()
-                + EAR_PATH), getJarFilter()));
-        }
-
-        int size = files.size();
-        log.info("Size: " + size);
-        int processTotle = RATES.get(DELETE);
-        if (size == 0)
-        {
-            ui.addProgress(processTotle, "");
-            return;
-        }
-        int rate = processTotle / size;
-        int lose = processTotle - rate * size;
-
-        int i = 0;
-        for (File f : files)
-        {
-            ui.addProgress(0, MessageFormat.format(Resource
-                    .get("process.delete"), f.getName(), i + 1, size));
-            
-            String path = f.getPath().replace("\\", "/");
-            while(f.exists() && !f.delete())
-            {
-                ui.tryAgain(MessageFormat.format(Resource
-                        .get("msg.deleteFile"), path));
-            }
-            ui.addProgress(rate, MessageFormat.format(Resource
-                    .get("process.delete"), f.getName(), i + 1, size));
-            i++;
-        }
-
-        ui.addProgress(lose, "");
-        log.info("Removing class files finished");
-    }
+//    private void removeClassFiles()
+//    {
+//        log.info("Removing class files");
+//        List<File> files = FileUtil.getAllFiles(new File(ServerUtil.getPath()
+//                + EAR_PATH), getClassFilter());
+//        
+//        List<File> jares = FileUtil.getAllFiles(new File(UPGRADE_UTIL.getPath()
+//                + EAR_PATH), getJarFilter());        
+//        if (jares.size() > 10)
+//        {
+//            log.info("Removing jar files");
+//            files.addAll(FileUtil.getAllFiles(new File(ServerUtil.getPath()
+//                + EAR_PATH), getJarFilter()));
+//        }
+//
+//        int size = files.size();
+//        log.info("Size: " + size);
+//        int processTotle = RATES.get(DELETE);
+//        if (size == 0)
+//        {
+//            ui.addProgress(processTotle, "");
+//            return;
+//        }
+//        int rate = processTotle / size;
+//        int lose = processTotle - rate * size;
+//
+//        int i = 0;
+//        for (File f : files)
+//        {
+//            ui.addProgress(0, MessageFormat.format(Resource
+//                    .get("process.delete"), f.getName(), i + 1, size));
+//            
+//            String path = f.getPath().replace("\\", "/");
+//            while(f.exists() && !f.delete())
+//            {
+//                ui.tryAgain(MessageFormat.format(Resource
+//                        .get("msg.deleteFile"), path));
+//            }
+//            ui.addProgress(rate, MessageFormat.format(Resource
+//                    .get("process.delete"), f.getName(), i + 1, size));
+//            i++;
+//        }
+//
+//        ui.addProgress(lose, "");
+//        log.info("Removing class files finished");
+//    }
 
     /**
      * Upgrades a server to a new server.
@@ -251,11 +403,26 @@ public class Upgrade
         {
             ui.showWelcomePage();
             validate();
+            UPGRADE_UTIL.removeHotfix();
+            UPGRADE_UTIL.runPrePlug();
+            backupForUpdateJboss();
+            backImages();
             backup();
-            removeClassFiles();
+            removeFilesForUpdateJboss();
             copyFiles();
+            UPGRADE_UTIL.parseAllTemplates();
+            
+            if (isUpdateJboss())
+            {
+            	JbossUpdater.updateJavaOptions();
+            }
+            
             UPGRADE_UTIL.upgradeVerion(RATES.get(DATABASE));           
             UPGRADE_UTIL.saveSystemInfo();
+            
+            DbUtil util = DbUtilFactory.getDbUtil();
+            util.closeExistConn();
+            
             ui.finish();
         }
         catch (Exception e)
@@ -340,7 +507,7 @@ public class Upgrade
         ui.addProgress(lose, "");
         log.info("Copying files finished");
     }
-
+    
     private List<String> getCopyRoots()
     {
         List<String> roots = new ArrayList<String>();
@@ -403,6 +570,13 @@ public class Upgrade
             ignoreFiles.add("run.sh");
             ignoreFiles.add("run.bat");
             ignoreFiles.add("run.conf");
+            
+            if (!isUpdateJboss())
+            {
+            	ignoreFiles.add("standalone.xml");
+                ignoreFiles.add("standalone.conf");
+                ignoreFiles.add("standalone.conf.bat");
+            }
         }
 
         return ignoreFiles;

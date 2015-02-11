@@ -46,8 +46,8 @@
     String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
     String creationEnd = JobSearchConstants.CREATION_END;
     String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
-    String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
-        + "&action=" + ReportConstants.GENERATE_REPORTS;
+    String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+    String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/onlineJobsXlsReportWebForm.jsp-->
@@ -56,6 +56,7 @@
 </head>
 <body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
 bgcolor="LIGHTGREY">
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 function checkNow(field, text)
 {
@@ -91,6 +92,38 @@ function validateForm()
     return "";
 }
 
+//Check the status before close the page.
+function doClose()
+{
+	var jobIDArr = new Array();
+	
+	$.ajax({
+		type: 'POST',
+		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+		data: {'inputJobIDS' : jobIDArr.toString(),
+			   'reportType'  : $("input[name='reportType']").val()},
+		success: function(data) {
+					if(data != null && data.status == "inProgress")
+					{
+						if(!confirm(<%=bundle.getString("msg_cancel_report")%>))
+						{
+							return;
+						}
+						else
+						{
+							$.getJSON("<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>", 
+									{"inputJobIDS":jobIDArr.toString(), "reportType":$("input[name='reportType']").val()},
+									function(data) {});
+							window.close();
+						}
+					}
+			
+					window.close();
+    			 },
+		dataType: 'json'
+	});
+}
+
 function submitForm()
 {
    var msg = validateForm();
@@ -100,7 +133,21 @@ function submitForm()
     return;
    }
    else
-    searchForm.submit();
+   {
+	   // Submit the Form, if possible(No report is generating.)
+	   $.ajax({
+			type: 'POST',
+			url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+			data: {'reportType'  : $("input[name='reportType']").val()},
+			success: function(data) {
+						if(data == null || data.status != "inProgress")
+						{
+							$("form[name='searchForm']").submit();
+						}
+	    			 },
+			dataType: 'json'
+		});
+   }
 }
 
 function checkThis(obj)
@@ -314,11 +361,13 @@ function checkThis(obj)
 	</td>
 	</tr>
 	<tr>
-		<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
-		<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
+		<TD><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>"
+				id="submitButton" name="submitButton" onClick="submitForm()"></TD>
+		<TD><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" 
+				onClick="doClose();"></TD>
 	</tr>
 </table>
 </form>
-<BODY>
+</body>
 </HTML>
 

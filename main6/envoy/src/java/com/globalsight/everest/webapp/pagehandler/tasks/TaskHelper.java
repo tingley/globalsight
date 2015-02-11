@@ -43,6 +43,7 @@ import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -62,6 +63,7 @@ import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ServerUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -239,10 +241,28 @@ public class TaskHelper
      */
     public static void autoAcceptTask(Task p_task)
     {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(TaskThread.KEY_ACTION, TaskThread.ACTION_AUTOACCEPT);
-        TaskThread t = new TaskThread((TaskImpl) p_task, map);
-        t.start();
+        long companyId = p_task.getCompanyId();
+        String projectName = p_task.getProjectName();
+        ProjectImpl project = null;
+        try
+        {
+            project = (ProjectImpl) ServerProxy.getProjectHandler()
+                    .getProjectByNameAndCompanyId(projectName, companyId);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Fail to get project by project name " + projectName
+                    + " and companyID " + companyId, e);
+            return;
+        }
+
+        if (project.getReviewOnlyAutoAccept() || project.getAutoAcceptPMTask())
+        {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(TaskThread.KEY_ACTION, TaskThread.ACTION_AUTOACCEPT);
+            TaskThread t = new TaskThread((TaskImpl) p_task, map);
+            t.start();
+        }
     }
 
     /**
@@ -276,18 +296,8 @@ public class TaskHelper
     public static String getTaskURL(Task p_task)
     {
         StringBuffer url = new StringBuffer();
-        SystemConfiguration sc = SystemConfiguration.getInstance();
-        if (sc.getBooleanParameter("server.ssl.enable"))
-        {
-            url.append(sc.getStringParameter("cap.login.url.ssl"));
-        }
-        else
-        {
-            url.append(sc
-                    .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL));
-        }
-
-        url.append("/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask");
+        url.append(ServerUtil.getServerURL());
+        url.append("ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask");
         url.append("&taskId=").append(p_task.getId());
         return url.toString();
     }
@@ -700,7 +710,7 @@ public class TaskHelper
         SessionManager sessionMgr = (SessionManager) p_httpSession
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        return sessionMgr.getAttribute(p_key);
+        return sessionMgr == null ? null : sessionMgr.getAttribute(p_key);
     }
 
     /**

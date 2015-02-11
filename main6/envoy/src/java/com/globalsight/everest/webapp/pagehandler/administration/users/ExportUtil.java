@@ -59,9 +59,21 @@ public class ExportUtil
             {
                 e.printStackTrace();
             }
+
             if (file.exists())
             {
-                file.delete();
+                try
+                {
+                    file.delete();
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+                finally
+                {
+                    file.deleteOnExit();
+                }
             }
         }
     }

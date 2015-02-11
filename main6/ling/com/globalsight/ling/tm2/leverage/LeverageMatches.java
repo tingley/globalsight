@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.customAttribute.TMAttributeCons;
@@ -261,6 +260,7 @@ public class LeverageMatches
     {
         float score = tu.getScore();
         long tmId = tu.getTmId();
+        float oriscore = score;
         ProjectTM ptm = HibernateUtil.get(ProjectTM.class, tmId);
         if (ptm == null)
         {
@@ -297,11 +297,10 @@ public class LeverageMatches
         {
             tuProps = new HashSet<ProjectTmTuTProp>();
             TM3Tm tm3tm = null;
-            Session session = TmUtil.getStableSession();
             try
             {
-                tm3tm = DefaultManager.create().getTm(session,
-                        new GSDataFactory(), ptm.getTm3Id());
+                tm3tm = DefaultManager.create().getTm(new GSDataFactory(),
+                        ptm.getTm3Id());
                 if (tm3tm != null)
                 {
                     TM3Tu tm3tu = tm3tm.getTu(tuId);
@@ -329,10 +328,6 @@ public class LeverageMatches
             catch (Exception e)
             {
                 throw new TM3Exception(e);
-            }
-            finally
-            {
-                TmUtil.closeStableSession(session);
             }
         }
 
@@ -446,6 +441,11 @@ public class LeverageMatches
         }
 
         tu.setScore(score);
+        
+        if (oriscore > score)
+        {
+            tu.setMatchState(MatchState.FUZZY_MATCH);
+        }
     }
 
     public BaseTmTuv getOriginalTuv()

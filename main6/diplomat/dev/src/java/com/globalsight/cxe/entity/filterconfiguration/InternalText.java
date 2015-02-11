@@ -21,10 +21,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class InternalText
+import com.globalsight.everest.util.comparator.Priorityable;
+
+public class InternalText implements Priorityable
 {
     private String name = null;
     private boolean isRE = false;
+    private int priority = 9;
 
     public InternalText()
     {
@@ -56,9 +59,19 @@ public class InternalText
         this.name = name;
     }
 
+    public int getPriority()
+    {
+        return priority;
+    }
+
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
+    }
+
     public String toString()
     {
-        return this.name + "|isRE=" + this.isRE;
+        return this.name + "|isRE=" + this.isRE  + "|priority=" + this.priority;
     }
 
     public static InternalText initFromElement(Element tagElement)
@@ -72,8 +85,24 @@ public class InternalText
         {
             isRE = "true".equals(isREElements.item(0).getFirstChild().getNodeValue());
         }
+        
+        NodeList priorityElements = tagElement.getElementsByTagName("priority");
+        int priority = 9;
+        if (priorityElements != null && priorityElements.getLength() > 0)
+        {
+            String pp = priorityElements.item(0).getFirstChild().getNodeValue();
+            try
+            {
+                priority = Integer.parseInt(pp);
+            }
+            catch(Exception ex)
+            {
+                priority = 9;
+            }
+        }
 
         InternalText it = new InternalText(name, isRE);
+        it.setPriority(priority);
 
         return it;
     }

@@ -85,6 +85,8 @@ public class AmbFileStoragePathUtils
 
     private static Map<String, File> wfTemplateXmlDir = new HashMap<String, File>();
 
+    private static Map<String, File> corpusDirs = new HashMap<String, File>();
+
     public final static String INDEX_SUB_DIR = "GlobalSight/Indexes";
 
     public final static String TEMPFILE_SUB_DIRECTORY = "GlobalSight/CXE";
@@ -136,6 +138,10 @@ public class AmbFileStoragePathUtils
     public final static String FRAMEMAKER9_CONV_DIR = "FrameMaker9";
     
     public final static String OFFLINE_FILE_DOWNLOAD_DIR = "workOfflineDownload";
+    
+    public final static String WEBSERVICE_DIR = "webservice";
+    
+    public final static String CORPUS_DIR = "GlobalSight/Corpus";
 
     public static File getTempFileDir()
     {
@@ -157,6 +163,11 @@ public class AmbFileStoragePathUtils
         String companyId = CompanyThreadLocal.getInstance().getValue();
 
         return getCxeDocDir(companyId);
+    }
+
+    public static File getCxeDocDir(long companyId)
+    {
+        return getCxeDocDir(String.valueOf(companyId));
     }
 
     public static File getCxeDocDir(String p_companyId)
@@ -196,6 +207,11 @@ public class AmbFileStoragePathUtils
         return (String) cxeDocDirPaths.get(p_companyId);
     }
 
+    public static String getCxeDocDirPath(long companyId)
+    {
+        return getCxeDocDirPath(String.valueOf(companyId));
+    }
+
     /**
      * Get the storage dir for company base on the company_id in current thread.
      * 
@@ -228,6 +244,16 @@ public class AmbFileStoragePathUtils
         return (String) fileStorageDirPaths.get(p_companyId);
     }
 
+    public static String getFileStorageDirPath(long companyId)
+    {
+        return getFileStorageDirPath(String.valueOf(companyId));
+    }
+
+    public static File getFileStorageDir(long companyId)
+    {
+        return getFileStorageDir(String.valueOf(companyId));
+    }
+
     public static File getFileStorageDir(String p_companyId)
     {
         if (fileStorageDirs.get(p_companyId) == null)
@@ -251,6 +277,11 @@ public class AmbFileStoragePathUtils
         String companyId = CompanyThreadLocal.getInstance().getValue();
 
         return getFileStorageDir(companyId);
+    }
+
+    public static File getStfParentDir(long companyId)
+    {
+        return getStfParentDir(String.valueOf(companyId));
     }
 
     public static File getStfParentDir(String companyId)
@@ -296,6 +327,11 @@ public class AmbFileStoragePathUtils
         }
 
         return (File) unextractedParentDirs.get(companyId);
+    }
+
+    public static File getUnextractedParentDir(long companyId)
+    {
+        return getUnextractedParentDir(String.valueOf(companyId));
     }
 
     public static File getUnextractedParentDir(String companyId)
@@ -345,6 +381,11 @@ public class AmbFileStoragePathUtils
         return (File) commentReferenceDirs.get(companyId);
     }
 
+    public static File getCommentReferenceDir(long companyId)
+    {
+        return getCommentReferenceDir(String.valueOf(companyId));
+    }
+
     public static File getDtdDir()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
@@ -371,6 +412,11 @@ public class AmbFileStoragePathUtils
         }
 
         return (File) jobAttributeDirs.get(companyId);
+    }
+
+    public static File getJobAttributeDir2(long companyId)
+    {
+        return getJobAttributeDir2(String.valueOf(companyId));
     }
 
     public static File getJobAttributeDir2(String companyId)
@@ -407,7 +453,7 @@ public class AmbFileStoragePathUtils
         String companyId = null;
         if (fp != null)
         {
-            companyId = fp.getCompanyId();
+            companyId = String.valueOf(fp.getCompanyId());
         }
         else
         {
@@ -507,7 +553,7 @@ public class AmbFileStoragePathUtils
             return getGoldTmIndexDir();
         }
 
-        String companyId = tm.getCompanyId();
+        String companyId = String.valueOf(tm.getCompanyId());
         if (goldTmIndexDirs.get(companyId) == null)
         {
             File goldTmIndexDir = new File(getFileStorageDirPath(companyId),
@@ -613,6 +659,29 @@ public class AmbFileStoragePathUtils
         return (File) pdfPreviewDir.get(p_company_id);
     }
 
+    public static File getCorpusDir(long companyId)
+    {
+        return getCorpusDir(String.valueOf(companyId));
+    }
+
+    public static File getCorpusDir(String p_company_id)
+    {
+        if (corpusDirs .get(p_company_id) == null)
+        {
+            File corpusDir = new File(getFileStorageDirPath(p_company_id),
+                    CORPUS_DIR);
+            corpusDir.mkdirs();
+            corpusDirs.put(p_company_id, corpusDir);
+        }
+
+        return (File) corpusDirs.get(p_company_id);
+    }
+
+    public static File getPdfPreviewDir(long companyId)
+    {
+        return getPdfPreviewDir(String.valueOf(companyId));
+    }
+
     /**
      * Gets the directory of the workflow template xml.
      * 
@@ -642,6 +711,16 @@ public class AmbFileStoragePathUtils
         }
 
         return (File) wfTemplateXmlDir.get(p_company_id);
+    }
+
+    public static File getWorkflowTemplateXmlDir(long companyId)
+    {
+        return getWorkflowTemplateXmlDir(String.valueOf(companyId));
+    }
+
+    public static File getPropertiesDir(long companyId)
+    {
+        return getPropertiesDir(String.valueOf(companyId));
     }
 
     public static File getPropertiesDir(String companyId)

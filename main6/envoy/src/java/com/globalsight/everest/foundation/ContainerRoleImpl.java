@@ -18,36 +18,40 @@ package com.globalsight.everest.foundation;
 
 // java
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
  */
 public class ContainerRoleImpl extends RoleImpl implements ContainerRole, Serializable {
 
-    private Vector m_users = null;
+    private List userIds = new ArrayList();
 
     public ContainerRoleImpl() 
     {
         super();
-        m_users = new Vector();
     }
 
-    public Vector getUsers() {
-        return m_users;
+    public Vector getUsers() 
+    {
+    	Vector users = new Vector();
+    	users.addAll(userIds);
+        return users;
     }
 
     public boolean addUsers(Vector p_users) {
-        return m_users.addAll(p_users);
+        return userIds.addAll(p_users);
     }
 
     public boolean removeUsers(Vector p_users) {
-        return m_users.removeAll(p_users);
+        return userIds.removeAll(p_users);
     }
 
     public String toString() 
     {
         return super.toString()
-                + " m_users=" + (m_users!=null?m_users.toString():"null")
+                + " m_users=" + (userIds!=null?userIds.toString():"null")
                 ;
     }
 
@@ -79,8 +83,16 @@ public class ContainerRoleImpl extends RoleImpl implements ContainerRole, Serial
      */
     public boolean isContainerRoleValid()
     {
-        return m_users != null && m_users.size() > 0;
+        return userIds != null && userIds.size() > 0;
     }
+
+	public List getUserIds() {
+		return userIds;
+	}
+
+	public void setUserIds(List userIds) {
+		this.userIds = userIds;
+	}
 
 }
 

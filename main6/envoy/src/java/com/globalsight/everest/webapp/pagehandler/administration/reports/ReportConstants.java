@@ -8,6 +8,7 @@ public interface ReportConstants
     public static final String GENERATE_REPORTS = "generateReports";
     public static final String GET_REPORT = "getReport";
     public static final String ACTION_GET_PERCENT = "getPercent";
+    public static final String ACTION_GET_REPORTSDATA = "getReportsData";
     public static final String ACTION_CANCEL_REPORTS = "cancelReports";
     public static final String ACTION_CANCEL_REPORT = "cancelReport";
     public static final String ACTION_REFRESH_PROGRESS = "refreshProgress";
@@ -28,5 +29,10 @@ public interface ReportConstants
     public static final String REPORTJOBINFO_LIST = "reportsJobInfoList";
     public static final String TARGETLOCALE_LIST = "targetLocalesList";
     public static final String PROJECT_LIST = "reportsProjectList";
+    public static final String L10N_PROFILES = "l10nProfiles";
     
+    // Excel parameter name
+    public static final String CATEGORY_LIST = "categoryList";
+    
+    public static final String ERROR_PAGE = "/envoy/administration/reports/error.jsp";
 }

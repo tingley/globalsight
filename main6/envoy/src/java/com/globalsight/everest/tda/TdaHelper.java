@@ -17,12 +17,16 @@
 
 package com.globalsight.everest.tda;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.ZipInputStream;
-
-import org.apache.log4j.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -37,8 +41,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -51,8 +57,7 @@ import com.globalsight.ling.tm2.TmCoreManager;
 
 public class TdaHelper
 {
-    private static Logger s_logger = Logger
-            .getLogger(TdaHelper.class);
+    private static Logger s_logger = Logger.getLogger(TdaHelper.class);
     private static String appKey = "C1927572";
 
     /*
@@ -252,9 +257,8 @@ public class TdaHelper
                     {
                         if (i > 40)
                         {
-                            s_logger
-                                    .info("Get TDA job status overtime. TDA job id:"
-                                            + obj.getInt("id"));
+                            s_logger.info("Get TDA job status overtime. TDA job id:"
+                                    + obj.getInt("id"));
                             s_logger.info("TDA leveraging waited time:"
                                     + (40 * 3) + " seconds!");
                             return;
@@ -264,23 +268,21 @@ public class TdaHelper
                         HttpGet httpget = new HttpGet(loginUrl + "leverage/"
                                 + obj.getInt("id") + ".json?auth_username="
                                 + tda.getUserName() + "&auth_password="
-                                + tda.getPassword()
-                                + "&auth_app_key=" + appKey);
+                                + tda.getPassword() + "&auth_app_key=" + appKey);
 
                         response = httpclient.execute(httpget);
                         StatusLine status = response.getStatusLine();
 
                         if (status.getStatusCode() != 200)
                         {
-                            s_logger
-                                    .info("Get TDA job status error, please confirm the TDA url is correct or not! TDA job id:"
-                                            + obj.getInt("id"));
+                            s_logger.info("Get TDA job status error, please confirm the TDA url is correct or not! TDA job id:"
+                                    + obj.getInt("id"));
                             return;
                         }
 
                         entity = response.getEntity();
-                        JSONObject getObj = new JSONObject(EntityUtils
-                                .toString(entity));
+                        JSONObject getObj = new JSONObject(
+                                EntityUtils.toString(entity));
 
                         if (getObj.getJSONObject("leverage").getString("state")
                                 .equals("ready"))
@@ -302,8 +304,7 @@ public class TdaHelper
                         + obj.getInt("id")
                         + ".json?action=approve&auth_username="
                         + tda.getUserName() + "&auth_password="
-                        + tda.getPassword()
-                        + "&auth_app_key=" + appKey);
+                        + tda.getPassword() + "&auth_app_key=" + appKey);
 
                 response = httpclient.execute(httpPost2);
                 entity = response.getEntity();
@@ -365,13 +366,11 @@ public class TdaHelper
 
                 if (reason.equals("bad_request"))
                 {
-                    s_logger
-                            .info("TDA connect error, please confirm the TDA url is correct or not!");
+                    s_logger.info("TDA connect error, please confirm the TDA url is correct or not!");
                 }
                 else if (reason.equals("invalid_params"))
                 {
-                    s_logger
-                            .info("TDA request parameters were missing, of the wrong types, or otherwise incorrect!");
+                    s_logger.info("TDA request parameters were missing, of the wrong types, or otherwise incorrect!");
                 }
                 else if (reason.equals("no_such_resource"))
                 {
@@ -382,8 +381,7 @@ public class TdaHelper
         }
         else if (status.getStatusCode() == 401)
         {
-            s_logger
-                    .info("The TDA request requires authentication but no credentials were supplied, please check the user name and password!");
+            s_logger.info("The TDA request requires authentication but no credentials were supplied, please check the user name and password!");
         }
         else if (status.getStatusCode() == 403)
         {
@@ -391,13 +389,11 @@ public class TdaHelper
         }
         else if (status.getStatusCode() == 404)
         {
-            s_logger
-                    .info("The TDA resource named in the URL does not exist or is invisible to this user!");
+            s_logger.info("The TDA resource named in the URL does not exist or is invisible to this user!");
         }
         else if (status.getStatusCode() == 500)
         {
-            s_logger
-                    .info("TDA system error. TDA will investigate the problem!");
+            s_logger.info("TDA system error. TDA will investigate the problem!");
         }
     }
 
@@ -412,12 +408,11 @@ public class TdaHelper
             GsDOMParser parser = new GsDOMParser();
             InputStreamReader inputStream = new InputStreamReader(file, "UTF-8");
             // parse and create DOM tree
-            parser.parse(new InputSource(inputStream));
+            Document document = parser.parse(new InputSource(inputStream));
             // traverse the DOM tree
             ArrayList matchList = new ArrayList();
 
-            Node doc = parser.getDocument();
-            domNodeVisitor(doc, matchList, tmProfileThreshold);
+            domNodeVisitor(document, matchList, tmProfileThreshold);
 
             ArrayList sortedList = new ArrayList();
 
@@ -667,8 +662,10 @@ public class TdaHelper
                     tdaResult2 = temp;
                 }
 
-                tdaResult1.setOrderNum(TmCoreManager.LM_ORDER_NUM_START_TDA + i);
-                tdaResult2.setOrderNum(TmCoreManager.LM_ORDER_NUM_START_TDA + j);
+                tdaResult1
+                        .setOrderNum(TmCoreManager.LM_ORDER_NUM_START_TDA + i);
+                tdaResult2
+                        .setOrderNum(TmCoreManager.LM_ORDER_NUM_START_TDA + j);
                 matchList.set(i, tdaResult1);
                 matchList.set(j, tdaResult2);
             }
@@ -687,8 +684,8 @@ public class TdaHelper
                 LeverageTDAResult tdaResult2 = (LeverageTDAResult) matchList
                         .get(j);
 
-                if (PecentToInt(tdaResult1.getMatchPercent()) 
-                        == PecentToInt(tdaResult2.getMatchPercent())
+                if (PecentToInt(tdaResult1.getMatchPercent()) == PecentToInt(tdaResult2
+                        .getMatchPercent())
                         && tdaResult1.getResultText().equals(
                                 tdaResult2.getResultText()))
                 {

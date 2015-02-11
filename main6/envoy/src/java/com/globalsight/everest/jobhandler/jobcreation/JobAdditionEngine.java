@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -100,7 +99,14 @@ public class JobAdditionEngine
     {
         try
         {
-            String companyId = request.getCompanyId();
+            boolean useMT = request.getL10nProfile()
+                    .getTranslationMemoryProfile().getUseMT();
+            long mtConfidenceScore = request.getL10nProfile()
+                    .getTranslationMemoryProfile().getMtConfidenceScore();
+            if (!useMT) {
+                mtConfidenceScore = 0;
+            }
+            long companyId = request.getCompanyId();
 
             job.setCreateDate(new Timestamp(System.currentTimeMillis()));
             job.setPriority(request.getL10nProfile().getPriority());
@@ -138,6 +144,8 @@ public class JobAdditionEngine
                 workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 workflow.setCompanyId(companyId);
                 workflow.setPriority(job.getPriority());
+                workflow.setUseMT(useMT);
+                workflow.setMtConfidenceScore((int) mtConfidenceScore);
 
                 workflows.add(workflow);
 
@@ -196,7 +204,7 @@ public class JobAdditionEngine
 
             newJob = new JobImpl();
             String priority = p_request.getPriority();
-            if (priority !=null && !("null").equals(priority))
+            if (priority != null && !("null").equals(priority))
             {
                 newJob.setPriority(Integer.parseInt(priority));
             }
@@ -365,20 +373,12 @@ public class JobAdditionEngine
                     }
                     else
                     {
-                        temp = externalPageId.substring(index
-                                + source_locale_key.length());
-                        index = temp.indexOf('\\');
-                        uploadedJobName = temp.substring(0, index);
+                        uploadedJobName = p_job.getJobName();
                         // If the 'uploadedJobName' is 'webservice', it means
                         // that the job is created by DI
-                        if (uploadedJobName.equals("webservice"))
-                        {
-                            temp = temp.substring(index + 1);
-                            // Get the real job name
-                            uploadedJobName = temp.substring(0,
-                                    temp.indexOf('\\'));
+                        if (externalPageId.indexOf("\\webservice\\") > 0)
                             isFromDI = true;
-                        }
+                        
                         jobnotesFile = new File(
                                 AmbFileStoragePathUtils.getCxeDocDir(),
                                 uploadedJobName + ".txt");
@@ -406,7 +406,9 @@ public class JobAdditionEngine
                                 // CommentReference folder and delete the temp
                                 // files
                                 String srcf = AmbFileStoragePathUtils
-                                        .getCxeDocDirPath(p_job.getCompanyId())
+                                        .getCxeDocDirPath(
+                                                String.valueOf(p_job
+                                                        .getCompanyId()))
                                         .concat(File.separator)
                                         .concat(p_job.getJobName());
                                 srcFolder = new File(srcf);
@@ -439,6 +441,7 @@ public class JobAdditionEngine
                         {
                             // Update CVS files status
                             conn = ConnectionPool.getConnection();
+                            conn.setAutoCommit(false);
                             String sql = "select * from cvs_source_files where status=1 and job_name = ?";
                             pstmt = conn.prepareStatement(sql);
                             pstmt.setString(1, uploadedJobName);
@@ -451,11 +454,13 @@ public class JobAdditionEngine
                                 pstmt2.setLong(1, p_job.getJobId());
                                 pstmt2.setString(2, uploadedJobName);
                                 pstmt2.executeUpdate();
+                                conn.commit();
                             }
                         }
                         catch (SQLException se)
                         {
-                            c_logger.error("Can NOT update CVS files status. ", se);
+                            c_logger.error("Can NOT update CVS files status. ",
+                                    se);
                         }
                         finally
                         {
@@ -843,7 +848,7 @@ public class JobAdditionEngine
                                 + p_wf.getId());
                     }
                 }
-                task.setIsUploading('N');//for GBS-1939
+                task.setIsUploading('N');// for GBS-1939
                 p_wf.addTask(task);
             }
 
@@ -1008,7 +1013,7 @@ public class JobAdditionEngine
             String sourceLocale = p_tp.getSourcePage().getGlobalSightLocale()
                     .toString();
             String targetLocale = p_tp.getGlobalSightLocale().toString();
-            String jobName = p_tp.getWorkflowInstance().getJob().getJobName();
+            String jobName = String.valueOf(p_tp.getWorkflowInstance().getJob().getId());
 
             // get "sourceModule"
             String tmp = p_tp.getExternalPageId();

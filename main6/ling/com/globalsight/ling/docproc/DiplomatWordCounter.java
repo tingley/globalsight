@@ -28,12 +28,12 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.dom4j.Attribute;
 
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -136,8 +136,7 @@ public class DiplomatWordCounter
             countDashedTokens = Boolean.TRUE;
         }
         // Get word count place holder from properties file
-        // value = props.getProperty("wordcounter_count_placeholders");
-        value = dpsc.getPlaceHolders();
+        value = props.getProperty("wordcounter_count_placeholders");
         String[] placeHolderRegexArray = setPlaceHolderRegexArray(value);
         companyProMap.put("wordcounter_count_numerics", countNumerics);
         companyProMap.put("wordcounter_count_dashed_tokens", countDashedTokens);

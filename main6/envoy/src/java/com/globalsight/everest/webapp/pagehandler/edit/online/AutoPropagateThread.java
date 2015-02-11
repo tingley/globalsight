@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,12 +42,12 @@ import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.TuvComparator;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.util.GlobalSightCrc;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil;
@@ -62,7 +61,6 @@ public class AutoPropagateThread implements Runnable
             .getLogger(AutoPropagateThread.class);
 
     private static final PageManager pageManager = ServerProxy.getPageManager();
-    private static final TuvManager tuvManager = ServerProxy.getTuvManager();
     private static final LocaleManager localeManager = ServerProxy
             .getLocaleManager();
     // For worldServer XLF file only
@@ -71,11 +69,17 @@ public class AutoPropagateThread implements Runnable
 
     private String targetPageId;
 
+    // "File Scope" on UI
     private String tuScope;
-
     private String specTus;
 
+    // "Segment Scope" on UI
     private String tuvScope;
+
+    // "Multiple Translations" on UI
+    private String pickup;
+
+    private User user;
 
     public String getTargetPageId()
     {
@@ -137,13 +141,10 @@ public class AutoPropagateThread implements Runnable
         this.pickup = pickup;
     }
 
-    private User user;
-
-    private String pickup;
-
     // Indicate propagate progress
     private static int propagatePercentage = 0;
 
+    @SuppressWarnings("rawtypes")
     public void run()
     {
         try
@@ -151,72 +152,52 @@ public class AutoPropagateThread implements Runnable
             TargetPage tp = pageManager.getTargetPage(Long
                     .parseLong(targetPageId));
             SourcePage sp = tp.getSourcePage();
-            String companyId = String.valueOf(sp.getCompanyId());
+            long companyId = sp.getCompanyId();
             GlobalSightLocale sourceLocale = localeManager.getLocaleById(sp
                     .getLocaleId());
             GlobalSightLocale targetLocale = localeManager.getLocaleById(tp
                     .getLocaleId());
 
-            HashMap<Long, List<TuImpl>> repGroupsMap = new HashMap<Long, List<TuImpl>>();
-            List<Tuv> targetTuvs = new ArrayList<Tuv>();
+            // TargetTuvID : TuvImpl list
+            HashMap<Long, List<TuvImpl>> trgTuvRepGroupsMap = new HashMap<Long, List<TuvImpl>>();
+            List<TuvImpl> targetTuvs = new ArrayList<TuvImpl>();
             if ("currentFile".equals(tuScope))
             {
-                Long spId = sp.getIdAsLong();
-                Collection<TuImpl> currentFileRepTus = tuvManager
-                        .getRepTusBySourcePageId(spId);
-                repGroupsMap = getRepGroups(currentFileRepTus);
-                targetTuvs.addAll(tuvManager.getTargetTuvsForStatistics(tp));
+                targetTuvs.addAll(SegmentTuvUtil.getTargetTuvs(tp));
+                trgTuvRepGroupsMap = getTargetTuvRepGroups(targetTuvs);
             }
             else if ("allFiles".equals(tuScope))
             {
-                List<TuImpl> allTus = new ArrayList<TuImpl>();
                 Job job = sp.getRequest().getJob();
-                Collection srcPages = job.getSourcePages();
-                for (Iterator spIter = srcPages.iterator(); spIter.hasNext();)
+                for (Iterator spIter = job.getSourcePages().iterator(); spIter
+                        .hasNext();)
                 {
                     SourcePage sourcePage = (SourcePage) spIter.next();
-                    Collection<TuImpl> repTus = tuvManager
-                            .getRepTusBySourcePageId(sourcePage.getIdAsLong());
-                    allTus.addAll(repTus);
-                    for (Iterator it = sourcePage.getTargetPages().iterator(); it
-                            .hasNext();)
-                    {
-                        TargetPage trgPage = (TargetPage) it.next();
-                        if (targetLocale.getId() == trgPage.getLocaleId())
-                        {
-                            targetTuvs.addAll(tuvManager
-                                    .getTargetTuvsForStatistics(trgPage));
-                        }
-                    }
+                    TargetPage trgPage = sourcePage
+                            .getTargetPageByLocaleId(targetLocale.getId());
+                    targetTuvs.addAll(SegmentTuvUtil.getTargetTuvs(trgPage));
                 }
-                repGroupsMap = getRepGroups(allTus);
+                trgTuvRepGroupsMap = getTargetTuvRepGroups(targetTuvs);
             }
             else if ("specifiedTus".equals(tuScope))
             {
-                String[] tuIds = specTus.split(",");
-                repGroupsMap = getRepGroupsForSpecTuIds(companyId, tuIds,
-                        tp.getLocaleId());
-
                 Job job = sp.getRequest().getJob();
-                Collection srcPages = job.getSourcePages();
-                for (Iterator spIter = srcPages.iterator(); spIter.hasNext();)
+                for (Iterator spIter = job.getSourcePages().iterator(); spIter
+                        .hasNext();)
                 {
                     SourcePage sourcePage = (SourcePage) spIter.next();
-                    for (Iterator it = sourcePage.getTargetPages().iterator(); it
-                            .hasNext();)
-                    {
-                        TargetPage trgPage = (TargetPage) it.next();
-                        if (targetLocale.getId() == trgPage.getLocaleId())
-                        {
-                            targetTuvs.addAll(tuvManager
-                                    .getTargetTuvsForStatistics(trgPage));
-                        }
-                    }
+                    TargetPage trgPage = sourcePage
+                            .getTargetPageByLocaleId(targetLocale.getId());
+                    targetTuvs.addAll(SegmentTuvUtil.getTargetTuvs(trgPage));
                 }
-                
-            }
+
+                boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
+                String[] tuIds = specTus.split(",");
+                trgTuvRepGroupsMap = getRepGroupsForSpecTuIds(companyId, tuIds,
+                        tp.getLocaleId(), isJobDataMigrated);
+			}
             logger.info("Propagate repetition group size is: "
-                    + repGroupsMap.size());
+                    + trgTuvRepGroupsMap.size());
 
             // Cache the target TUVs in map in advance.
             HashMap<Long, Tuv> targetTuvsMap = new HashMap<Long, Tuv>();
@@ -226,23 +207,19 @@ public class AutoPropagateThread implements Runnable
             }
 
             propagatePercentage = 0;// Initialize this to 0
-            if (repGroupsMap.size() > 0)
+            if (trgTuvRepGroupsMap.size() > 0)
             {
-                int total = repGroupsMap.size();
+                int total = trgTuvRepGroupsMap.size();
                 int repGroupCount = 0;
-                for (Iterator iter = repGroupsMap.entrySet().iterator(); iter
-                        .hasNext();)
+                for (Iterator iter = trgTuvRepGroupsMap.entrySet().iterator(); iter.hasNext();)
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
-                    Long tuIdAsKey = (Long) entry.getKey();
                     @SuppressWarnings("unchecked")
-                    List<TuImpl> loopGroup = (List<TuImpl>) entry.getValue();
+                    List<TuvImpl> loopGroup = (List<TuvImpl>) entry.getValue();
                     if (loopGroup.size() > 1)
                     {
                         // Get applying TUV
-                        Tuv applyingTuv = getApplyingTuv(tuScope, tuIdAsKey,
-                                loopGroup, pickup, targetLocale, targetTuvsMap,
-                                companyId);
+                        Tuv applyingTuv = getApplyingTuv(loopGroup, pickup);
                         // Decide flags
                         boolean isTagOrderChanged = false;
                         boolean hasSubSegments = false;
@@ -251,18 +228,19 @@ public class AutoPropagateThread implements Runnable
                             Tuv srcTuvOfApplyingTuv = applyingTuv.getTu(
                                     companyId).getTuv(sourceLocale.getId(),
                                     companyId);
-                            isTagOrderChanged = isTargOrderChanged(srcTuvOfApplyingTuv,
-                                    applyingTuv);
+                            isTagOrderChanged = isTargOrderChanged(
+                                    srcTuvOfApplyingTuv, applyingTuv);
                             hasSubSegments = applyingTuv
                                     .getSubflowsAsGxmlElements() != null
                                     && applyingTuv.getSubflowsAsGxmlElements()
                                             .size() > 0;
                         }
-                        
+
                         // ignore order change for html
                         boolean oriIsOrderChanged = isTagOrderChanged;
-                        if (isTagOrderChanged && 
-                                "html".equalsIgnoreCase(applyingTuv.getTu(companyId).getDataType()))
+                        if (isTagOrderChanged
+                                && "html".equalsIgnoreCase(applyingTuv.getTu(
+                                        companyId).getDataType()))
                         {
                             isTagOrderChanged = false; 
                         }
@@ -290,42 +268,54 @@ public class AutoPropagateThread implements Runnable
             logger.error("Error when propgate repetitions : " + e.getMessage(),
                     e);
         }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
     }
 
-    private HashMap<Long, List<TuImpl>> getRepGroups(Collection<TuImpl> p_tus)
+    /**
+     * Filter to get all repeated or repetitions target TUVs and group them.
+     * 
+     * @param p_tuvs -- target TUVs
+     * @return HashMap<tuvID, List<TuvImpl>>
+     */
+    private HashMap<Long, List<TuvImpl>> getTargetTuvRepGroups(
+            List<TuvImpl> p_tuvs)
     {
-        HashMap<Long, List<TuImpl>> result = new HashMap<Long, List<TuImpl>>();
+        HashMap<Long, List<TuvImpl>> result = new HashMap<Long, List<TuvImpl>>();
 
-        if (p_tus == null || p_tus.size() == 0)
+        if (p_tuvs == null || p_tuvs.size() == 0)
         {
             return result;
         }
 
-        for (Iterator tusIter = p_tus.iterator(); tusIter.hasNext();)
+        for (TuvImpl targetTuv : p_tuvs)
         {
-            TuImpl tu = (TuImpl) tusIter.next();
-            long repeatedTuId = 0;
-            if (tu.isRepeated())
+            long repeatedTuvId = 0;
+            if (targetTuv.isRepeated())
             {
-                repeatedTuId = tu.getId();
+                repeatedTuvId = targetTuv.getId();
             }
-            else if (tu.getRepetitionOfId() > 0)
+            else if (targetTuv.getRepetitionOfId() > 0)
             {
-                repeatedTuId = tu.getRepetitionOfId();
+                repeatedTuvId = targetTuv.getRepetitionOfId();
             }
 
-            if (repeatedTuId > 0)
+            if (repeatedTuvId > 0
+                    && !TuvState.EXACT_MATCH_LOCALIZED.equals(targetTuv
+                            .getState()))
             {
-                List<TuImpl> tuGroup = (List<TuImpl>) result.get(repeatedTuId);
-                if (tuGroup != null)
+                List<TuvImpl> tuvGroup = (List<TuvImpl>) result.get(repeatedTuvId);
+                if (tuvGroup != null)
                 {
-                    tuGroup.add(tu);
+                    tuvGroup.add(targetTuv);
                 }
                 else
                 {
-                    List<TuImpl> newGroup = new ArrayList<TuImpl>();
-                    newGroup.add(tu);
-                    result.put(repeatedTuId, newGroup);
+                    List<TuvImpl> newTuvGroup = new ArrayList<TuvImpl>();
+                    newTuvGroup.add(targetTuv);
+                    result.put(repeatedTuvId, newTuvGroup);
                 }
             }
         }
@@ -334,170 +324,90 @@ public class AutoPropagateThread implements Runnable
     }
 
     /**
-     * Get the repetition TU groups in map<SpecifiedTuID, List<TuImpl>>.
+     * Get the repetition TUV groups in map<SpecifiedRepTuvID, List<TuvImpl>>.
+     * 
+     * If one specified TU's target TUV for specified target locale is
+     * "repeated" or "repetitions", return it in result map.
      * 
      * If one specified TU "has" the target TUV specified by target locale, and
      * this target TUV "has been" localized, it will be applied to others.
      */
-    private HashMap<Long, List<TuImpl>> getRepGroupsForSpecTuIds(
-            String companyId, String[] p_tuIds, long p_targetLocaleId)
-            throws TuvException, RemoteException
+    private HashMap<Long, List<TuvImpl>> getRepGroupsForSpecTuIds(
+            long companyId, String[] p_tuIds, long p_targetLocaleId,
+            boolean p_isJobDataMigrated) throws Exception
     {
-        HashMap<Long, List<TuImpl>> result = new HashMap<Long, List<TuImpl>>();
+        HashMap<Long, List<TuvImpl>> result = new HashMap<Long, List<TuvImpl>>();
+
         if (p_tuIds == null || p_tuIds.length == 0)
         {
             return result;
         }
-        // Filter to get "valid" TUs.
-        List<Tu> repTus = new ArrayList<Tu>();
+
+        List<Long> tuIds = new ArrayList<Long>();
         for (int i = 0; i < p_tuIds.length; i++)
         {
             long tuId = Long.parseLong(p_tuIds[i]);
-            Tu tu = tuvManager.getTuForSegmentEditor(tuId, companyId);
-            Tuv targetTuv = tu.getTuv(p_targetLocaleId, companyId);
-            if ((tu.isRepeated() || tu.getRepetitionOfId() > 0)
-                    && targetTuv != null && this.isLocalized(targetTuv))
-            {
-                repTus.add(tu);
-            }
+            tuIds.add(tuId);
         }
-        //
-        for (Iterator iter = repTus.iterator(); iter.hasNext();)
-        {
-            Tu tu = (Tu) iter.next();
-            List<TuImpl> currentGroup = tuvManager.getRepTusByTuId(tu.getId(),
-                    companyId);
-            if (currentGroup != null && currentGroup.size() > 1)
-            {
-                List<TuImpl> existedGroup = (List<TuImpl>) result.get(tu
-                        .getIdAsLong());
-                if (existedGroup == null)
-                {
-                    result.put(tu.getIdAsLong(), currentGroup);
-                }
-            }
-        }
+
+        // All REP TUVs that are not grouped.
+        List<TuvImpl> repTuvs = SegmentTuvUtil.getRepTuvsByTuIdsAndLocaleId(
+                tuIds, p_targetLocaleId, companyId, p_isJobDataMigrated);
+
+        result = getTargetTuvRepGroups(repTuvs);
 
         return result;
     }
 
     /**
-     * Determine the Tuv to be populated into other target Tuvs for tuScope:
-     * "Propagate to All Job Files" and "Propagate in Current File".
-     * 
-     * @throws RemoteException
-     * @throws TuvException
-     */
-    private Tuv getApplyingTuv(String p_tuScope, long p_tuIdAsKey,
-            List<TuImpl> p_group, String p_pickup,
-            GlobalSightLocale p_targetLocale, HashMap<Long, Tuv> targetTuvsMap,
-            String companyId) throws TuvException, RemoteException
-    {
-        if (p_group == null || p_targetLocale == null)
-        {
-            return null;
-        }
-
-        Tuv applyingTuv = null;
-        if ("specifiedTus".equals(p_tuScope))
-        {
-            applyingTuv = getApplyingTuvForSpecifiedTus(p_tuIdAsKey, p_group,
-                    p_targetLocale, companyId);
-        }
-        else
-        {
-            applyingTuv = getApplyingTuvForOthers(p_group, p_pickup,
-                    p_targetLocale, targetTuvsMap);
-        }
-
-        return applyingTuv;
-    }
-
-    /**
-     * Determine the applying TUV when TU scope "Specified TUs" is selected.
-     * 
-     * @param p_tuIdAsKey
-     *            - The specified TuID whose target TUV will be applying to
-     *            others.
-     * @param p_group
-     *            - All Tus in one repetition group.
-     * @param p_targetLocale
-     *            - Target locales.
-     * @return - Tuv that will be applied to the others in repetition group.
-     * @throws RemoteException
-     * @throws TuvException
-     */
-    private Tuv getApplyingTuvForSpecifiedTus(long p_tuIdAsKey,
-            List<TuImpl> p_group, GlobalSightLocale p_targetLocale,
-            String companyId) throws TuvException, RemoteException
-    {
-        Tuv applyingTuv = null;
-        for (Iterator iter = p_group.iterator(); iter.hasNext();)
-        {
-            Tu tu = (Tu) iter.next();
-            if (tu.getIdAsLong() == p_tuIdAsKey)
-            {
-                Tuv targetTuv = tuvManager.getTuvForSegmentEditor(tu.getId(),
-                        p_targetLocale.getId(), companyId);
-                if (targetTuv != null && this.isLocalized(targetTuv))
-                {
-                    applyingTuv = targetTuv;
-                }
-            }
-        }
-
-        return applyingTuv;
-    }
-
-    /**
-     * Determine the Tuv to be populated into other target Tuvs for tuScope:
-     * "Propagate to All Job Files" and "Propagate in Current File".
+     * Determine the Tuv to be populated into other target Tuvs.
      * 
      * @param p_group
      *            - All Tus in one repetition group.
      * @param p_pickup
      *            - "Latest" or "Oldest".
-     * @param p_targetLocale
-     *            - Target locales.
      * @return - Tuv that will be applied to the others in repetition group.
      */
-    private Tuv getApplyingTuvForOthers(List<TuImpl> p_group, String p_pickup,
-            GlobalSightLocale p_targetLocale, HashMap<Long, Tuv> targetTuvsMap)
+    private Tuv getApplyingTuv(List<TuvImpl> p_group, String p_pickup)
+            throws TuvException, RemoteException
     {
+        if (p_group == null)
+        {
+            return null;
+        }
+
         if (p_pickup == null || p_pickup.isEmpty())
         {
             p_pickup = "latest";
         }
 
         // Filter to get all "localized" Tuvs in the Tu group.
-        List<Tuv> targetTuvs = new ArrayList<Tuv>();
-        for (Iterator iter = p_group.iterator(); iter.hasNext();)
+        List<Tuv> localizedTargetTuvs = new ArrayList<Tuv>();
+        for (TuvImpl tuv : p_group)
         {
-            TuImpl tu = (TuImpl) iter.next();
-            Tuv targetTuv = targetTuvsMap.get(tu.getId());
-            if (targetTuv != null && this.isLocalized(targetTuv))
+            if (tuv != null && this.isLocalized(tuv))
             {
-                targetTuvs.add(targetTuv);
+                localizedTargetTuvs.add(tuv);
             }
         }
-        if (targetTuvs.size() == 0)
+        if (localizedTargetTuvs.size() == 0)
         {
             return null;
         }
 
         // Sort target TUVs by last modified date.
-        Collections.sort(targetTuvs, new TuvComparator(
+        Collections.sort(localizedTargetTuvs, new TuvComparator(
                 TuvComparator.LAST_MODIFIED, Locale.US));
 
         // Get applying Tuv
         Tuv applyingTuv = null;
         if ("oldest".equals(p_pickup))
         {
-            applyingTuv = targetTuvs.get(0);
+            applyingTuv = localizedTargetTuvs.get(0);
         }
         else
         {
-            applyingTuv = targetTuvs.get(targetTuvs.size() - 1);
+            applyingTuv = localizedTargetTuvs.get(localizedTargetTuvs.size() - 1);
         }
 
         return applyingTuv;
@@ -508,19 +418,19 @@ public class AutoPropagateThread implements Runnable
      * 
      * @throws Exception
      */
-    private void propagateToOthers(Tuv p_applyingTuv, List<TuImpl> p_group,
+    private void propagateToOthers(Tuv p_applyingTuv, List<TuvImpl> p_group,
             String p_tuvScope, GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, User p_user,
-            HashMap<Long, Tuv> p_targetTuvsMap, String companyId, boolean isOrderChanged)
-            throws Exception
+            HashMap<Long, Tuv> p_targetTuvsMap, long companyId,
+            boolean isOrderChanged) throws Exception
     {
         String gxml = p_applyingTuv.getGxml();
         List<TuvImpl> tuvs = new ArrayList<TuvImpl>();
 
-        for (TuImpl tu : p_group)
+        for (TuvImpl targetTuv : p_group)
         {
+            Tu tu = targetTuv.getTu(companyId);
             Tuv sourceTuv = tu.getTuv(p_sourceLocale.getId(), companyId);
-            Tuv targetTuv = p_targetTuvsMap.get(tu.getId());
 
             // If need update target TUV.
             boolean updateTargetTuv = false;
@@ -547,28 +457,35 @@ public class AutoPropagateThread implements Runnable
 
                 boolean canBeModified = SegmentUtil2.canBeModified(targetTuv,
                         gxml, companyId);
-                
+
                 // some tag are missing, but they are repetitions, if the 
                 // first repetition can be modified, then all can
                 if (isOrderChanged && "html".equalsIgnoreCase(tu.getDataType()))
                 {
                     canBeModified = true;
                 }
-                
+
                 if (canBeModified)
                 {
-                    gxml = getTargetGxmlFitForItsOwnSourceContent(sourceTuv,
-                            gxml, companyId);
-                    TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv, gxml,
-                            p_user);
-                    tuvs.add(changedTargetTuv);
+                    try
+                    {
+                        gxml = getTargetGxmlFitForItsOwnSourceContent(sourceTuv,
+                                gxml, companyId);
+                        TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv, gxml,
+                                p_user);
+                        tuvs.add(changedTargetTuv);                        
+                    }
+                    catch (Exception ignore)
+                    {
+                        
+                    }
                 }
             }
         }
 
         if (tuvs.size() > 0)
         {
-            SegmentTuvUtil.updateTuvs(tuvs, Long.parseLong(companyId));
+            SegmentTuvUtil.updateTuvs(tuvs, companyId);
         }
     }
 
@@ -664,7 +581,7 @@ public class AutoPropagateThread implements Runnable
     }
 
     private String adjustSegmentAttributeValues(Tuv p_sourceTuv,
-            String p_targetGxml, String companyId)
+            String p_targetGxml, long companyId)
     {
         // Get values in list for "id" and "x" attributes
         List<String> idList = new ArrayList<String>();
@@ -690,6 +607,7 @@ public class AutoPropagateThread implements Runnable
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
     private void resetAttributeValues(GxmlElement element,
             List<String> attValueList, String p_attName)
     {
@@ -831,7 +749,7 @@ public class AutoPropagateThread implements Runnable
      * @throws Exception
      */
     private String getTargetGxmlFitForItsOwnSourceContent(Tuv p_sourceTuv,
-            String p_gxml, String companyId) throws Exception
+            String p_gxml, long companyId) throws Exception
     {
         String srcGxml = p_sourceTuv.getGxml();
         int index = srcGxml.indexOf(">");
@@ -905,6 +823,7 @@ public class AutoPropagateThread implements Runnable
     /**
      * Get specified attribute's values in List from GxmlElement.
      */
+    @SuppressWarnings("rawtypes")
     private List<String> getAttValuesByName(List<String> list, GxmlElement element,
             String attName)
     {

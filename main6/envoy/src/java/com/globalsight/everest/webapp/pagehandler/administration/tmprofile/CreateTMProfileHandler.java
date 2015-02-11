@@ -16,8 +16,25 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
 import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -25,23 +42,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
-import com.globalsight.everest.projecthandler.ProjectTM;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
-// servlet package
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 public class CreateTMProfileHandler extends PageHandler implements
         TMProfileConstants
@@ -100,7 +100,8 @@ public class CreateTMProfileHandler extends PageHandler implements
             {
                 if (isSuperPM)
                 {
-                    String companyId = CompanyThreadLocal.getInstance().getValue();
+                    String companyId = CompanyThreadLocal.getInstance()
+                            .getValue();
                     ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
                     List tmIdList = projectTMTBUsers.getTList(userId, "TM");
                     Iterator it = tmIdList.iterator();
@@ -112,14 +113,15 @@ public class CreateTMProfileHandler extends PageHandler implements
                             tm = ServerProxy
                                     .getProjectHandler()
                                     .getProjectTMById(
-                                            ((BigInteger) it.next()).longValue(),
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
                                             false);
                         }
                         catch (Exception e)
                         {
                             throw new EnvoyServletException(e);
                         }
-                        if (tm.getCompanyId().equals(companyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(companyId))
                         {
                             tmList.add(tm);
                         }
@@ -138,7 +140,8 @@ public class CreateTMProfileHandler extends PageHandler implements
                             tm = ServerProxy
                                     .getProjectHandler()
                                     .getProjectTMById(
-                                            ((BigInteger) it.next()).longValue(),
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
                                             false);
                         }
                         catch (Exception e)
@@ -151,11 +154,12 @@ public class CreateTMProfileHandler extends PageHandler implements
             }
         }
         sessionMgr.setAttribute("tmsOfUser", tmList);
-        
+
         List<TMPAttribute> tmpas = new ArrayList<TMPAttribute>();
         List<String> allAtt = TMPAttributeManager.getAvailableAttributenames();
-        
-        p_request.setAttribute(TMP_AVAILABLE_ATTS, TMPAttributeManager.toOneStr(allAtt));
+
+        p_request.setAttribute(TMP_AVAILABLE_ATTS,
+                TMPAttributeManager.toOneStr(allAtt));
         p_request.setAttribute(TMP_TMP_ATTS, TMPAttributeManager.toOne(tmpas));
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,

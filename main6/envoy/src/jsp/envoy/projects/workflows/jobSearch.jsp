@@ -32,7 +32,7 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-    String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+    String userId = (String)session.getAttribute(WebAppConstants.USER_NAME);
 
     // Labels, etc
     String title= bundle.getString("lb_jobs") + " - " + bundle.getString("lb_search");
@@ -76,13 +76,13 @@
     List srcLocales = (List)request.getAttribute("srcLocales");
     List targLocales = (List)request.getAttribute("targLocales");
     List projects = (List)request.getAttribute("projects");
-    String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE + userName.hashCode();
+    String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE + userId.hashCode();
     Cookie cookie = (Cookie)sessionMgr.getAttribute(cookieName);
     String searchCriteria = "";
-    if (cookie != null)
-    {
-        searchCriteria = cookie.getValue();
-    }
+//    if (cookie != null)
+//    {
+//        searchCriteria = cookie.getValue();
+//    }
 %>
 <html>
 <head>
@@ -227,9 +227,7 @@ function setSearchCookie()
               "<%=exportDateEnd%>=" + searchForm.<%=exportDateEnd%>.value + ":" +
               "<%=exportDateEndOptions%>=" + getOption(searchForm.<%=exportDateEndOptions%>) + ":";
               
-    var today = new Date();
-    var expires = new Date(today.getTime() + (365 * 86400000));
-    document.cookie = "<%=cookieName%>=" + buf + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
+    document.cookie = "<%=cookieName%>=" + escape(buf);
 }
 
 function setField(fieldname, field, searchCriteria, option)

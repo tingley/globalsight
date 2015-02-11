@@ -2,20 +2,20 @@ package com.globalsight.selenium.pages;
 
 public class TMManagement
 {
-    public static final String New_BUTTON = "idNew";
+    public static final String New_BUTTON = "//input[@value='New...']";
     public static final String EDIT_BUTTON = "idModify";
     public static final String Demo = "TMId";
 
     public static final String TM_MANAGEMENT_TABLE = "//div[@id='contentLayer']//form//table//tbody//tr[2]//td//table//tbody";
 
     
-    public static final String CorpusBrowser_BUTTON="idCorpusBrowser";
-    public static final String Statistics_BUTTON="idStatistics";
-    public static final String MAINTENANCE_BUTTON="idMaintenance";
-    public static final String EXPORT_BUTTON="idExport";
-    public static final String REINDEX_BUTTON="idReindex";
-    public static final String DUPLICATE_BUTTON="idClone";
-    public static final String REMOVE_BUTTON="idRemove";
+    public static final String CorpusBrowser_BUTTON="//input[@id='corpusBtn']";
+    public static final String Statistics_BUTTON="//input[@value='Statistics']";
+    public static final String MAINTENANCE_BUTTON="//input[@id='mainBtn']";
+    public static final String EXPORT_BUTTON="//input[@id='exportBtn']";
+    public static final String REINDEX_BUTTON="//input[@id='reindexBtn']";
+    public static final String DUPLICATE_BUTTON="//input[@id='dupBtn']";
+    public static final String REMOVE_BUTTON="//input[@id='deleteBtn']";
     
     // Define New TM
     public static final String Name_TEXT_FIELD = "name";

@@ -19,11 +19,12 @@ package com.globalsight.selenium.testcases.smoketest;
 /*
  * TestCaseName: ChangePermissionGroups.java
  * Author:Jester
- * Tests:Change_PermissionGroups()
+ * Tests:Change_PermissionGr oups()
  * 
  * History:
  * Date       Comments       Updater
  * 2011-6-8  First Version  Jester
+ * 2012-12-25
  */
 
 import org.testng.Assert;
@@ -52,14 +53,14 @@ public class ChangePermissionGroups extends BaseTestCase
         selenium.click(MainFrame.SETUP_MENU);
         Assert.assertEquals(
                 selenium.isElementPresent(MainFrame.ATTRIBUTES_SUBMENU), true);
-        /**
-         * selenium.click(MainFrame.Setup_MENU);
-         * selenium.click(MainFrame.PermissionGroups_SUBMENU);
-         * selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-         * 
-         * iPermissionGroupsFuncs.editPermissionGroups(selenium,
-         * ConfigUtil.getDataInCase(testCaseName, "GROUP"),
-         * ConfigUtil.getDataInCase(testCaseName, "PERMISSONPROFILE"));
+        
+         /*selenium.click(MainFrame.Setup_MENU);
+         selenium.click(MainFrame.PermissionGroups_SUBMENU);
+         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+         
+         iPermissionGroupsFuncs.editPermissionGroups(selenium,
+         ConfigUtil.getDataInCase(testCaseName, "GROUP"),
+         ConfigUtil.getDataInCase(testCaseName, "PERMISSONPROFILE"));
          */
     }
 }

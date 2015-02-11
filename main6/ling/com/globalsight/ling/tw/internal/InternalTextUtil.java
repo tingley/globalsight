@@ -103,13 +103,13 @@ public class InternalTextUtil
     {
         String newSegment = segment;
         Pattern p = Pattern.compile(bptRegex);
-        Matcher m = p.matcher(segment);
+        Matcher m = p.matcher(newSegment);
         while (m.find())
         {
             String i = m.group(1);
             String regex = allRegex.replace("%n%", i);
             Pattern p2 = Pattern.compile(regex, Pattern.DOTALL);
-            Matcher m2 = p2.matcher(segment);
+            Matcher m2 = p2.matcher(newSegment);
 
             if (m2.find())
             {

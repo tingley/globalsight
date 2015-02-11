@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -49,21 +50,20 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 
 /**
- * <p>This PageHandler is responsible for reindexing TMs.</p>
+ * <p>
+ * This PageHandler is responsible for reindexing TMs.
+ * </p>
  */
 
-public class TmReindexHandler
-    extends PageHandler
-    implements WebAppConstants
+public class TmReindexHandler extends PageHandler implements WebAppConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TmReindexHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TmReindexHandler.class);
 
     //
     // Static Members
     //
-    static private ProjectHandler /*TmManager*/ s_manager = null;
+    static private ProjectHandler /* TmManager */s_manager = null;
 
     //
     // Constructor
@@ -76,7 +76,7 @@ public class TmReindexHandler
         {
             try
             {
-                s_manager = ServerProxy.getProjectHandler()/*getTmManager()*/;
+                s_manager = ServerProxy.getProjectHandler()/* getTmManager() */;
             }
             catch (Exception ex)
             {
@@ -85,79 +85,79 @@ public class TmReindexHandler
         }
     }
 
-
     //
     // Interface Methods: PageHandler
     //
 
     /**
      * Invoke this PageHandler.
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         String userId = getUser(session).getUserId();
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
         boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
         boolean isSuperPM = UserUtil.isSuperPM(userId);
-        
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company currentCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
         boolean enableTMAccessControl = currentCompany
                 .getEnableTMAccessControl();
-        
+
         sessionMgr.setAttribute("isAdmin", isAdmin);
         sessionMgr.setAttribute("isSuperAdmin", isSuperAdmin);
 
-        String action  = (String)p_request.getParameter(TM_ACTION);
+        String action = (String) p_request.getParameter(TM_ACTION);
 
         try
         {
             if (action.equals(TM_ACTION_REINDEX))
             {
-                String tmid = (String)p_request.getParameter(RADIO_TM_ID);
+                String tmid = (String) p_request.getParameter(RADIO_TM_ID);
                 String tmName = "";
-				if (p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=tm");
-					return;
-				}
+                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+                    return;
+                }
 
                 if (tmid != null)
                 {
-                    Tm tm = s_manager.getProjectTMById(
-                        Long.parseLong(tmid), false);
+                    Tm tm = s_manager.getProjectTMById(Long.parseLong(tmid),
+                            false);
                     tmName = tm.getName();
                     sessionMgr.setAttribute(TM_TM_ID, tmid);
                 }
                 sessionMgr.setAttribute(TM_TM_NAME, tmName);
-                
+
             }
             else if (action.equals(TM_ACTION_REINDEX_START))
             {
                 // initialize with -1 (reindex all tms)
                 long tmId = -1;
-                
-                String tmChoice = (String)p_request.getParameter(TM_TM_CHOICE);
-                if(tmChoice.equals("idSelectedTm"))
+
+                String tmChoice = (String) p_request.getParameter(TM_TM_CHOICE);
+                if (tmChoice.equals("idSelectedTm"))
                 {
-                    String tmIdStr = (String)sessionMgr.getAttribute(TM_TM_ID);
+                    String tmIdStr = (String) sessionMgr.getAttribute(TM_TM_ID);
                     tmId = Long.parseLong(tmIdStr);
                 }
 
@@ -173,9 +173,9 @@ public class TmReindexHandler
                     if (enableTMAccessControl)
                     {
                         /**
-                         * Enable TM Access Control
-                         * for administrator, get all the TMs except(TM3 and Remote TM)
-                         * for others, get the TMs he can access, except(TM3 and Remote TM)
+                         * Enable TM Access Control for administrator, get all
+                         * the TMs except(TM3 and Remote TM) for others, get the
+                         * TMs he can access, except(TM3 and Remote TM)
                          * 
                          */
                         if (isAdmin || isSuperAdmin)
@@ -207,7 +207,8 @@ public class TmReindexHandler
                                     tm = ServerProxy
                                             .getProjectHandler()
                                             .getProjectTMById(
-                                                    ((BigInteger) it.next()).longValue(),
+                                                    ((BigInteger) it.next())
+                                                            .longValue(),
                                                     false);
                                     if (tm.getTm3Id() != null
                                             || tm.getIsRemoteTm())
@@ -219,7 +220,8 @@ public class TmReindexHandler
                                 }
                                 if (isSuperPM)
                                 {
-                                    if (tm.getCompanyId().equals(currentCompanyId))
+                                    if (String.valueOf(tm.getCompanyId())
+                                            .equals(currentCompanyId))
                                     {
                                         tms.add(tm);
                                     }
@@ -276,7 +278,7 @@ public class TmReindexHandler
             sessionMgr.setAttribute(TM_ERROR, ex.getMessage());
         }
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 }

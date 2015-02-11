@@ -16,53 +16,37 @@
  */
 package com.globalsight.everest.page.pageupdate;
 
-import com.globalsight.diplomat.util.Logger;
-
-import com.globalsight.everest.util.jms.JmsHelper;
-import com.globalsight.everest.servlet.util.ServerProxy;
-
-import com.globalsight.everest.page.Page;
-import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.PagePersistenceAccessor;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.pageupdate.PageUpdateApi;
-
-//parsing gxml
-import com.globalsight.util.gxml.GxmlNames;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlFragmentReader;
-import com.globalsight.util.gxml.GxmlRootElement;
-import com.globalsight.util.gxml.GxmlFragmentReaderPool;
-
-//ling api
-import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.ling.jtidy.Tidy;
-
-//java 3rd party
-import javax.naming.NamingException;
-
-//java core
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import com.globalsight.diplomat.util.Logger;
+import com.globalsight.everest.page.PageManager;
+import com.globalsight.everest.page.PagePersistenceAccessor;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.ling.docproc.DiplomatAPI;
+import com.globalsight.ling.jtidy.Tidy;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlFragmentReader;
+import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.gxml.GxmlRootElement;
 
 /**
- * <p>Validates an imported and extracted file.
- * Parses through updated gxml and validates the updates.</p>
- *
+ * <p>
+ * Validates an imported and extracted file. Parses through updated gxml and
+ * validates the updates.
+ * </p>
+ * 
  */
 class ExtractedFileValidation
 {
     // use a common logger category for all EditSourcePage classes
-    private static final org.apache.log4j.Logger CATEGORY =
-        org.apache.log4j.Logger.getLogger(
-            PageUpdateApi.LOGGER_CATEGORY);
+    private static final org.apache.log4j.Logger CATEGORY = org.apache.log4j.Logger
+            .getLogger(ExtractedFileValidation.class);
 
     //
     // Members
@@ -133,22 +117,22 @@ class ExtractedFileValidation
     }
 
     /**
-     * Validate the GXML and return the update state.  The update
-     * state has a method on it called "getValidated" to check if the
-     * validation was confirmed or not.
+     * Validate the GXML and return the update state. The update state has a
+     * method on it called "getValidated" to check if the validation was
+     * confirmed or not.
      */
     UpdateState validateGxml()
     {
-        GxmlFragmentReader reader =
-            GxmlFragmentReaderPool.instance().getGxmlFragmentReader();
+        GxmlFragmentReader reader = GxmlFragmentReaderPool.instance()
+                .getGxmlFragmentReader();
 
         try
         {
             GxmlRootElement gxmlRoot = reader.parse(m_state.getGxml());
 
             m_state.setGxmlRoot(gxmlRoot);
-            m_state.setDataFormat(gxmlRoot.getAttribute(
-                GxmlNames.GXMLROOT_DATATYPE));
+            m_state.setDataFormat(gxmlRoot
+                    .getAttribute(GxmlNames.GXMLROOT_DATATYPE));
             m_state.setHasGsTags(containGsTags(gxmlRoot));
 
             m_state.setValidated(true);
@@ -168,7 +152,6 @@ class ExtractedFileValidation
 
         return m_state;
     }
-
 
     //
     // Private Methods
@@ -192,7 +175,7 @@ class ExtractedFileValidation
             Logger.writeDebugFile("validationHtml.html", html);
 
             Tidy tidy = new Tidy();
-            //getSourcePage().getExternalPageId()
+            // getSourcePage().getExternalPageId()
             tidy.setInputStreamName("(input)");
             tidy.addMessageListener(m_state);
 
@@ -205,7 +188,7 @@ class ExtractedFileValidation
             // out.close();
 
             m_state.setValidated(true);
-            //m_state.clearValidationErrors();
+            // m_state.clearValidationErrors();
         }
         catch (Throwable ex)
         {
@@ -221,8 +204,7 @@ class ExtractedFileValidation
     /**
      * Calls the Diplomat merger to extract the original page from GXML.
      */
-    private String mergeGxml(String p_gxml)
-        throws Exception
+    private String mergeGxml(String p_gxml) throws Exception
     {
         DiplomatAPI api = getDiplomatApi();
         // Keep GS tags.
@@ -238,7 +220,8 @@ class ExtractedFileValidation
      */
     private boolean containGsTags(GxmlRootElement p_root)
     {
-        int gsTag[] = { GxmlElement.GS};
+        int gsTag[] =
+        { GxmlElement.GS };
         List tagElements = p_root.getChildElements(gsTag);
 
         return (tagElements.size() > 0);
@@ -261,16 +244,15 @@ class ExtractedFileValidation
         return m_state.getSourcePage();
     }
 
-    private ArrayList getTargetPages()
-        throws Exception
+    private ArrayList getTargetPages() throws Exception
     {
         ArrayList result = m_state.getTargetPages();
 
         if (result == null)
         {
             long id = getSourcePage().getId();
-            m_state.setTargetPages(new ArrayList(
-                PagePersistenceAccessor.getTargetPages(id)));
+            m_state.setTargetPages(new ArrayList(PagePersistenceAccessor
+                    .getTargetPages(id)));
 
             result = m_state.getTargetPages();
         }

@@ -360,6 +360,8 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         // Indicate the match type and score.
         // This is required for upload error checking
         String tmp = p_osd.getDisplayMatchType();
+        if (p_osd.isWriteAsProtectedSegment())
+            tmp = "DO NOT TRANSLATE OR MODIFY (Locked).";
         if (tmp != null && tmp.length() > 0)
         {
             // See Trados Note in header.
@@ -555,7 +557,8 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         m_outputStream.write("{" + m_strExternalStyle
                 + AmbassadorDwUpConstants.SEGMENT_RESOURCE_KEY + " ");
 
-        if (atnEnabled && m_resInsOpt == AmbassadorDwUpConstants.MAKE_RES_ATNS)
+        if (atnEnabled
+                && (m_resInsOpt == AmbassadorDwUpConstants.MAKE_RES_ATNS || m_resInsOpt == AmbassadorDwUpConstants.MAKE_RES_TMX_BOTH))
         {
             // Source atn.
             // The source is embedded in a Trados document so we don't
@@ -834,6 +837,15 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
                 + AmbassadorDwUpConstants.HEADER_NOMATCH_COUNT_KEY + " "
                 + m_page.getNoMatchWordCount() + "\\par}");
         m_outputStream.write(m_strEOL);
+        
+        // Server Instance ID
+        if (m_page.getServerInstanceID() != null)
+        {
+            m_outputStream.write("{" + m_strExternalStyle
+                    + AmbassadorDwUpConstants.HEADER_SERVER_INSTANCEID_KEY + " "
+                    + m_page.getServerInstanceID() + "\\par}");
+            m_outputStream.write(m_strEOL);
+        }
 
         // Help links
         m_outputStream.write("{" + m_strExternalStyle

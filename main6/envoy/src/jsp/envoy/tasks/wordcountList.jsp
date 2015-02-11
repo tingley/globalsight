@@ -194,7 +194,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_50" width="50px"
              sortBy="<%=TaskComparator.BAND4%>">
-            <%=task.getWorkflow().getSubLevMatchWordCount()%>
+            <%=task.getWorkflow().getLowFuzzyMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
@@ -202,11 +202,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-            <%=task.getWorkflow().getRepetitionWordCount() + 
-            task.getWorkflow().getHiFuzzyRepetitionWordCount() + 
-            task.getWorkflow().getMedHiFuzzyRepetitionWordCount() + 
-            task.getWorkflow().getMedFuzzyRepetitionWordCount() + 
-            task.getWorkflow().getSubLevRepetitionWordCount()%>
+            <%=task.getWorkflow().getRepetitionWordCount()%>
         </amb:column>
         <%
             if(isInContextMatch){
@@ -368,11 +364,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-            <%= wf == null ? 0 : wf.getRepetitionWordCount() + 
-                    wf.getSubLevRepetitionWordCount() + 
-                    wf.getHiFuzzyRepetitionWordCount() + 
-                    wf.getMedHiFuzzyRepetitionWordCount() + 
-                    wf.getMedFuzzyRepetitionWordCount() %>
+            <%= wf == null ? 0 : wf.getRepetitionWordCount()%>
         </amb:column>
         <%if (!isDell) {%>
         <%if(isInContextMatch){ %>

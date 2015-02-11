@@ -31,9 +31,8 @@ import com.globalsight.webservices.WebServiceException;
 public class FileSystemUtil
 {
     private static final Logger s_logger = Logger
-    .getLogger("FileSystemUtil");
+            .getLogger(FileSystemUtil.class);
 
-    
     /**
      * <p>
      * Calls script.
@@ -52,7 +51,8 @@ public class FileSystemUtil
      *         exitValueser.
      * @throws WebServiceException
      */
-    public static Vector execScript(Vector p_files, Vector p_fps, Vector p_locales)
+    public static Vector execScript(Vector p_files, Vector p_fps,
+            Vector p_locales)
     {
         if (p_files.size() != p_fps.size())
         {
@@ -60,8 +60,6 @@ public class FileSystemUtil
                     + p_files.size() + "but the file profile size is "
                     + p_fps.size());
         }
-
-        s_logger.info("Begin call script");
 
         Vector files = new Vector();
         Vector fileProfiles = new Vector();
@@ -81,11 +79,12 @@ public class FileSystemUtil
                 int index = AmbFileStoragePathUtils.getCxeDocDirPath(
                         fp.getCompanyId()).length() + 1;
                 String fileName = path.substring(index);
-                String scriptedDir = fileName.substring(0, fileName
-                        .lastIndexOf("."));
+                String scriptedDir = fileName.substring(0,
+                        fileName.lastIndexOf("."));
                 String scriptedFolderPath = AmbFileStoragePathUtils
                         .getCxeDocDirPath(fp.getCompanyId())
-                        + File.separator + scriptedDir;
+                        + File.separator
+                        + scriptedDir;
                 File scriptedFolder = new File(scriptedFolderPath);
 
                 if (!scriptedFolder.exists())
@@ -128,8 +127,7 @@ public class FileSystemUtil
                         // Set exitValue to 1 if the file was not scripted
                         // correctly.
                         exitValue = 1;
-                        s_logger
-                                .error("The script on import was not executed successfully.");
+                        s_logger.error("The script on import was not executed successfully.");
                     }
                 }
 

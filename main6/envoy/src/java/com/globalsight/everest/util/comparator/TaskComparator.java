@@ -41,8 +41,8 @@ public class TaskComparator extends StringComparator
     public static final int CONTEXT             = 9;
     public static final int WC_TOTAL            = 10;
     public static final int EXACT               = 11;
-    public static final int SUBLEVMATCH         = 12;
-    public static final int SUBLEVREP           = 13;
+//    public static final int SUBLEVMATCH         = 12;
+//    public static final int SUBLEVREP           = 13;
     public static final int LMT                 = 14;
     public static final int TOTAL_FUZZY         = 15;
     public static final int IN_CONTEXT          = 16;
@@ -105,7 +105,7 @@ public class TaskComparator extends StringComparator
 			rv = aValue.compareTo(bValue);
 			break;
 
-        case EXACT:  
+        case EXACT:
 			int aint = a.getWorkflow().getSegmentTmWordCount();
 			int bint = b.getWorkflow().getSegmentTmWordCount();
             if (aint > bint)
@@ -114,6 +114,7 @@ public class TaskComparator extends StringComparator
                rv = 0;
             else
                rv = -1;
+            break;
 
         case BAND1:  
 			aint = a.getWorkflow().getHiFuzzyMatchWordCount();
@@ -159,7 +160,7 @@ public class TaskComparator extends StringComparator
                rv = -1;
 			break;
 
-        case NO_MATCH:  // JPF- fix when have back end
+        case NO_MATCH:
 			aint = a.getWorkflow().getNoMatchWordCount();
 			bint = b.getWorkflow().getNoMatchWordCount();
             if (aint > bint)
@@ -181,9 +182,9 @@ public class TaskComparator extends StringComparator
                rv = -1;
 			break;
 
-        case CONTEXT:  // JPF- fix when have back end
-			aint = a.getWorkflow().getRepetitionWordCount();
-			bint = b.getWorkflow().getRepetitionWordCount();
+        case CONTEXT:
+			aint = a.getWorkflow().getContextMatchWordCount();
+			bint = b.getWorkflow().getContextMatchWordCount();
             if (aint > bint)
                rv = 1;
             else if (aint == bint)
@@ -202,7 +203,7 @@ public class TaskComparator extends StringComparator
                 rv = -1;
             break;
 
-        case IN_CONTEXT:  // JPF- fix when have back end
+        case IN_CONTEXT:
             aint = a.getWorkflow().getInContextMatchWordCount();
             bint = b.getWorkflow().getInContextMatchWordCount();
             if (aint > bint)
@@ -213,7 +214,7 @@ public class TaskComparator extends StringComparator
                rv = -1;
             break;
 
-        case NO_USE_IN_CONTEXT:  // JPF- fix when have back end
+        case NO_USE_IN_CONTEXT:
             aint = a.getWorkflow().getNoUseInContextMatchWordCount();
             bint = b.getWorkflow().getNoUseInContextMatchWordCount();
             if (aint > bint)
@@ -224,7 +225,7 @@ public class TaskComparator extends StringComparator
                rv = -1;
             break;
 
-        case TOTAL_EXACT:  // JPF- fix when have back end
+        case TOTAL_EXACT:
             aint = a.getWorkflow().getTotalExactMatchWordCount();
             bint = b.getWorkflow().getTotalExactMatchWordCount();
             if (aint > bint)
@@ -235,29 +236,7 @@ public class TaskComparator extends StringComparator
                rv = -1;
             break;
 
-        case SUBLEVREP:  // JPF- fix when have back end
-    	    aint = a.getWorkflow().getSubLevRepetitionWordCount();
-    	    bint = b.getWorkflow().getSubLevRepetitionWordCount();
-    	    if (aint > bint)
-    	       rv = 1;
-    	    else if (aint == bint)
-    	       rv = 0;
-    	    else
-    	       rv = -1;
-    	    break;
-
-        case SUBLEVMATCH:  // JPF- fix when have back end
-    	    aint = a.getWorkflow().getSubLevMatchWordCount();
-    	    bint = b.getWorkflow().getSubLevMatchWordCount();
-    	    if (aint > bint)
-    	       rv = 1;
-    	    else if (aint == bint)
-    	       rv = 0;
-    	    else
-    	       rv = -1;
-    	    break;
-
-        case LMT:  // Leverage match threshold 
+        case LMT:
     	    aint = a.getWorkflow().getJob().getLeverageMatchThreshold();
     	    bint = b.getWorkflow().getJob().getLeverageMatchThreshold();
     	    if (aint > bint)
@@ -272,16 +251,12 @@ public class TaskComparator extends StringComparator
             aint = (a.getWorkflow().getLowFuzzyMatchWordCount() + 
                         a.getWorkflow().getMedFuzzyMatchWordCount() + 
                         a.getWorkflow().getMedHiFuzzyMatchWordCount() +
-                        a.getWorkflow().getHiFuzzyMatchWordCount()) - 
-                    (a.getWorkflow().getSubLevMatchWordCount() + 
-                     a.getWorkflow().getSubLevRepetitionWordCount());
+                        a.getWorkflow().getHiFuzzyMatchWordCount());
 
             bint = (b.getWorkflow().getLowFuzzyMatchWordCount() + 
                     b.getWorkflow().getMedFuzzyMatchWordCount() + 
                     b.getWorkflow().getMedHiFuzzyMatchWordCount() +
-                    b.getWorkflow().getHiFuzzyMatchWordCount()) - 
-                (b.getWorkflow().getSubLevMatchWordCount() + 
-                 b.getWorkflow().getSubLevRepetitionWordCount());            
+                    b.getWorkflow().getHiFuzzyMatchWordCount());
     	    if (aint > bint)
     	       rv = 1;
     	    else if (aint == bint)

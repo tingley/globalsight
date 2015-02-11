@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
 
@@ -18,8 +16,8 @@
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" />
 
-        <property name="companyId" length="22" column="COMPANY_ID"
-            type="string" not-null="true" />
+        <property name="companyId" length="20" column="COMPANY_ID"
+			type="long" not-null="true" />
 
         <many-to-one name="isoCurrency" column="CURRENCY_ID"
             class="com.globalsight.everest.costing.IsoCurrency"

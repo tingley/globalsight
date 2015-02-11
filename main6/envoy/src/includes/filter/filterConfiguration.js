@@ -18,6 +18,7 @@ allFilterDialogIds[10] = "msoffice2010FilterDialog";
 allFilterDialogIds[11] = "poFilterDialog";
 allFilterDialogIds[12] = "baseFilterDialog";
 allFilterDialogIds[13] = "fmFilterDialog";
+allFilterDialogIds[14] = "plaintextFilterDialog";
 var isBaseFilterSelectChanged = false;
 
 //For HTML
@@ -57,6 +58,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["po_filter"] = new POFilter();
 	specialFiltersMap["base_filter"] = new BaseFilter();
 	specialFiltersMap["frame_maker_filter"] = new FMFilter();
+	specialFiltersMap["plain_text_filter"] = new PlainTextFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }

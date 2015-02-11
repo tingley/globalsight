@@ -50,7 +50,8 @@ public class RuleSet implements EntityResolver, ErrorHandler
 {
 	static private final Logger logger = Logger
             .getLogger(RuleSet.class);
-	
+
+	private static int gcCounter = 0;
     private DOMParser m_parser = null;
     private boolean m_useEmptyTag = true;
     public static final String INTERNAL = "internal";
@@ -106,6 +107,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
 
         try
         {
+            gcCounter++;
             // white space preserve tags
             List<XmlFilterTag> wsPreserveTags = xmlFilterTags
                     .getWhiteSpacePreserveTags();
@@ -139,9 +141,13 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR,
                     e.toString());
         }
-        
-        // call GC here to free some memory used in building rule
-        System.gc();
+
+        if (gcCounter > 100)
+        {
+            // call GC here to free some memory used in building rule
+            System.gc();
+            gcCounter = 0;
+        }
 
         return ruleMap;
     }
@@ -208,7 +214,6 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     }
                     else
                     {
-                        
                         CommentRuleItem.setSrcCommentNodeProperties(node, ruleMap);
                     }
                 }

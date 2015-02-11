@@ -20,7 +20,6 @@ package com.globalsight.everest.page.pageupdate;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +28,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
-import com.globalsight.diplomat.util.Logger;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.SynchronizationManager;
@@ -71,7 +70,6 @@ import com.globalsight.persistence.pageupdate.DeleteTuPersistenceCommand;
 import com.globalsight.persistence.pageupdate.UpdateGxmlPersistenceCommand;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
-import com.globalsight.util.UTC;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
@@ -101,8 +99,8 @@ import com.globalsight.util.mail.MailerConstants;
  */
 class ExtractedFileUpdater
 {
-    private static final org.apache.log4j.Logger CATEGORY = org.apache.log4j.Logger
-            .getLogger(PageUpdateApi.LOGGER_CATEGORY);
+    private static Logger CATEGORY = Logger
+            .getLogger(ExtractedFileUpdater.class.getName());
 
     static private final Integer s_INTONE = new Integer(1);
 
@@ -217,10 +215,6 @@ class ExtractedFileUpdater
      */
     ArrayList updateSourcePageGxml()
     {
-        Logger.writeDebugFile("updateGxml-" + m_state.getSourcePage().getId()
-                + "-" + UTC.valueOfNoSeparators(new Date()) + ".xml",
-                m_state.getGxml());
-
         // validate the gxml and update the UpdateState object
         ExtractedFileValidation validator = new ExtractedFileValidation(
                 m_state.getSourcePage(), m_state.getGxml());
@@ -1978,7 +1972,7 @@ class ExtractedFileUpdater
         L10nProfile l10nProfile = getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
-        String companyIdStr = project.getCompanyId();
+        String companyIdStr = String.valueOf(project.getCompanyId());
         String pmName = project.getProjectManagerId();
         User pm = ServerProxy.getUserManager().getUser(pmName);
 

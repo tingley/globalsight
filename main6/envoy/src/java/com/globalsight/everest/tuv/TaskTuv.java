@@ -79,7 +79,7 @@ public class TaskTuv extends PersistentObject implements Serializable
      * 
      * @return the final Tuv for the task.
      */
-    public Tuv getTuv(String companyId)
+    public Tuv getTuv(long companyId)
     {
         return getPreviousTuv(companyId);
     }
@@ -130,7 +130,7 @@ public class TaskTuv extends PersistentObject implements Serializable
         return m_previousTuvId;
     }
 
-    public Tuv getPreviousTuv(String companyId)
+    public Tuv getPreviousTuv(long companyId)
     {
         if (m_previousTuv == null && m_previousTuvId > 0)
         {

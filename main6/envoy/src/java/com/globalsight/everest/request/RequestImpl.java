@@ -54,8 +54,8 @@ public class RequestImpl extends PersistentObject implements Request,
     private static final long serialVersionUID = -6730612010738702678L;
 
     // static class variables
-    private static Logger c_logger = Logger
-            .getLogger(RequestImpl.class.getName());
+    private static Logger c_logger = Logger.getLogger(RequestImpl.class
+            .getName());
 
     // constants used for TOPLink queries - should match the values below
     public static final String ID = M_ID;
@@ -74,7 +74,7 @@ public class RequestImpl extends PersistentObject implements Request,
     }
 
     // id of the company which this activity belong to
-    private String m_companyId;
+    private long m_companyId;
 
     //
     // private data members
@@ -103,9 +103,9 @@ public class RequestImpl extends PersistentObject implements Request,
     private String m_baseHref;
     // the Job the request is associated with
     private Job m_job = null;
-    
+
     private String m_priority = null;
-    
+
     private HashMap m_editionParams = null;
 
     private long m_sourcePageId = -1;
@@ -138,8 +138,9 @@ public class RequestImpl extends PersistentObject implements Request,
      * Creates a valid localization request LOCALIZATION_REQUEST type. Package
      * specific - called by the RequestFactory.
      * 
-     * @param p_l10nProfile -
-     *            The localization profile that is associated with the request.
+     * @param p_l10nProfile
+     *            - The localization profile that is associated with the
+     *            request.
      * @param p_gxml
      *            The content to be translated
      * @param p_eventFlowXml
@@ -159,8 +160,8 @@ public class RequestImpl extends PersistentObject implements Request,
      * Creates a CXE error localization request REQUEST_WITH_CXE_ERROR type.
      * Package specific - called by the RequestFactory.
      * 
-     * @param p_l10nProfile -
-     *            The localization profile associated with this request.
+     * @param p_l10nProfile
+     *            - The localization profile associated with this request.
      * @param p_gxml
      *            The content to be translated
      * @param p_eventFlowXml
@@ -350,18 +351,17 @@ public class RequestImpl extends PersistentObject implements Request,
     {
         return m_sourcePageId;
     }
-    
+
     public Long getPageId()
     {
         Long id = null;
-        
+
         if (m_sourcePageId != -1)
         {
             id = new Long(m_sourcePageId);
         }
         return id;
     }
-    
 
     /**
      * This is a hack to let JobCreationQuery.getRequestListByJobId() fill in
@@ -371,7 +371,7 @@ public class RequestImpl extends PersistentObject implements Request,
     {
         m_sourcePageId = p_id;
     }
-    
+
     public void setPageId(Long p_id)
     {
         setSourcePageId(p_id);
@@ -521,10 +521,8 @@ public class RequestImpl extends PersistentObject implements Request,
             }
             catch (GeneralException ge)
             {
-                c_logger
-                        .error("Failed to deserialize the "
-                                + "exception xml to add to request "
-                                + this.getId(), ge);
+                c_logger.error("Failed to deserialize the "
+                        + "exception xml to add to request " + this.getId(), ge);
                 String[] args = new String[3];
                 args[0] = Long.toString(this.getId());
                 args[1] = this.getExternalPageId();
@@ -676,7 +674,7 @@ public class RequestImpl extends PersistentObject implements Request,
             m_originalSourceEncoding = getExtractedSourceFile(p_page)
                     .getOriginalCodeSet();
         }
-        
+
         setSourcePageId(p_page.getIdAsLong());
     }
 
@@ -754,7 +752,7 @@ public class RequestImpl extends PersistentObject implements Request,
     {
         List targetLocales = new ArrayList(Arrays.asList(getL10nProfile()
                 .getTargetLocales()));
-        
+
         BatchInfo info = getBatchInfo();
         if (info != null)
         {
@@ -781,7 +779,7 @@ public class RequestImpl extends PersistentObject implements Request,
                 job.getWorkflows();
             }
         }
-        
+
         Set excludeTargetLocales = getActiveTargets().keySet();
         for (Iterator i = excludeTargetLocales.iterator(); i.hasNext();)
         {
@@ -794,7 +792,7 @@ public class RequestImpl extends PersistentObject implements Request,
     /**
      * for debugging purposes
      */
-    public String toString()
+    public String toDebugString()
     {
         StringBuffer sb = new StringBuffer();
         sb.append(super.toString());
@@ -839,6 +837,11 @@ public class RequestImpl extends PersistentObject implements Request,
         return sb.toString();
     }
 
+    public String toString()
+    {
+        return getName() + getId();
+    }
+
     /**
      * Returns the extracted source file or NULL if there isn't one.
      */
@@ -852,12 +855,12 @@ public class RequestImpl extends PersistentObject implements Request,
         return esf;
     }
 
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
 
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -929,30 +932,32 @@ public class RequestImpl extends PersistentObject implements Request,
         }
     }
 
-	public String getPriority() {
-		return m_priority;
-	}
+    public String getPriority()
+    {
+        return m_priority;
+    }
 
-	public void setPriority(String mPriority) {
-		m_priority = mPriority;
-	}
-	
+    public void setPriority(String mPriority)
+    {
+        m_priority = mPriority;
+    }
+
     public void setEditionJobParams(HashMap p_editionParams)
     {
-    	m_editionParams = p_editionParams;
+        m_editionParams = p_editionParams;
     }
-    
+
     public HashMap getEditionJobParams()
     {
-    	return m_editionParams;
+        return m_editionParams;
     }
-    
+
     public long getFileProfileId()
     {
         String xml = getEventFlowXml();
         if (xml == null)
             return -1;
-        
+
         String regex = "<fileProfileId>(\\d+)</fileProfileId>";
         Pattern pattern = Pattern.compile(regex);
         Matcher match = pattern.matcher(xml);
@@ -960,7 +965,7 @@ public class RequestImpl extends PersistentObject implements Request,
         {
             return Long.parseLong(match.group(1));
         }
-        
+
         regex = "dataSourceId=\"(\\d+)\"";
         pattern = Pattern.compile(regex);
         match = pattern.matcher(xml);
@@ -968,7 +973,7 @@ public class RequestImpl extends PersistentObject implements Request,
         {
             return Long.parseLong(match.group(1));
         }
-        
+
         return -1;
     }
 }

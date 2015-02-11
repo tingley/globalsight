@@ -16,7 +16,6 @@
  */
 package com.globalsight.cxe.entity.filterconfiguration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,8 +24,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.log4j.Logger;
-
-import org.xml.sax.SAXException;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -52,7 +49,7 @@ public class BaseFilterManager
         {
             hql += " where x.companyId = :companyId";
             map = new HashMap();
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         hql += " order by x.name";
@@ -68,7 +65,8 @@ public class BaseFilterManager
         StringBuilder sb = new StringBuilder();
         sb.append("\"baseFilters\":");
         sb.append("[");
-        Iterator<BaseFilter> bfs = BaseFilterManager.getAllBaseFilters().iterator();
+        Iterator<BaseFilter> bfs = BaseFilterManager.getAllBaseFilters()
+                .iterator();
         boolean deleteComm = false;
         while (bfs.hasNext())
         {
@@ -77,7 +75,8 @@ public class BaseFilterManager
             sb.append("{");
             sb.append("\"baseFilterId\":").append(bf.getId()).append(",");
             sb.append("\"baseFilterName\":").append("\"")
-                    .append(FilterHelper.escape(bf.getFilterName())).append("\"");
+                    .append(FilterHelper.escape(bf.getFilterName()))
+                    .append("\"");
             sb.append("}");
 
             sb.append(",");
@@ -99,11 +98,13 @@ public class BaseFilterManager
         return filters;
     }
 
-    public static BaseFilter getBaseFilterByName(long companyId, String filterName)
+    public static BaseFilter getBaseFilterByName(long companyId,
+            String filterName)
     {
         StringBuffer sql = new StringBuffer();
         sql.append("from BaseFilter bf where bf.companyId =").append(companyId)
-                .append(" and bf.filterName like '%").append(filterName).append("%'");
+                .append(" and bf.filterName like '%").append(filterName)
+                .append("%'");
         List filters = HibernateUtil.search(sql.toString());
         if (filters != null && filters.size() > 0)
         {
@@ -130,8 +131,8 @@ public class BaseFilterManager
         }
     }
 
-    public static BaseFilterMapping saveBaseFilterMapping(long baseFilterId, long filterId,
-            String filterTableName)
+    public static BaseFilterMapping saveBaseFilterMapping(long baseFilterId,
+            long filterId, String filterTableName)
     {
         BaseFilterMapping bfm = getBaseFilterMapping(filterId, filterTableName);
 
@@ -155,7 +156,8 @@ public class BaseFilterManager
         return bfm;
     }
 
-    public static void deleteBaseFilterMapping(long filterId, String filterTableName)
+    public static void deleteBaseFilterMapping(long filterId,
+            String filterTableName)
     {
         BaseFilterMapping bfm = getBaseFilterMapping(filterId, filterTableName);
 
@@ -173,11 +175,13 @@ public class BaseFilterManager
         }
     }
 
-    public static BaseFilterMapping getBaseFilterMapping(long filterId, String filterTableName)
+    public static BaseFilterMapping getBaseFilterMapping(long filterId,
+            String filterTableName)
     {
         StringBuffer sql = new StringBuffer();
-        sql.append("from BaseFilterMapping bfm where bfm.filterId =").append(filterId)
-                .append(" and bfm.filterTableName = '").append(filterTableName).append("'");
+        sql.append("from BaseFilterMapping bfm where bfm.filterId =")
+                .append(filterId).append(" and bfm.filterTableName = '")
+                .append(filterTableName).append("'");
         List filters = HibernateUtil.search(sql.toString());
         if (filters != null && filters.size() > 0)
         {
@@ -188,11 +192,12 @@ public class BaseFilterManager
             return null;
         }
     }
-    
+
     public static List<BaseFilterMapping> getBaseFilterMapping(long baseFilterId)
     {
         StringBuffer sql = new StringBuffer();
-        sql.append("from BaseFilterMapping bfm where bfm.baseFilterId =").append(baseFilterId);
+        sql.append("from BaseFilterMapping bfm where bfm.baseFilterId =")
+                .append(baseFilterId);
         List filters = HibernateUtil.search(sql.toString());
         if (filters != null && filters.size() > 0)
         {
@@ -204,7 +209,8 @@ public class BaseFilterManager
         }
     }
 
-    public static BaseFilter getBaseFilterByMapping(long filterId, String filterTableName)
+    public static BaseFilter getBaseFilterByMapping(long filterId,
+            String filterTableName)
     {
         BaseFilterMapping bfm = getBaseFilterMapping(filterId, filterTableName);
         if (bfm != null)
@@ -217,7 +223,8 @@ public class BaseFilterManager
         }
     }
 
-    public static long getBaseFilterIdByMapping(long filterId, String filterTableName)
+    public static long getBaseFilterIdByMapping(long filterId,
+            String filterTableName)
     {
         BaseFilter bf = getBaseFilterByMapping(filterId, filterTableName);
 
@@ -230,8 +237,9 @@ public class BaseFilterManager
             return -2;
         }
     }
-    
-    public static List<InternalText> getInternalTexts(BaseFilter bf) throws Exception
+
+    public static List<InternalText> getInternalTexts(BaseFilter bf)
+            throws Exception
     {
         BaseFilterParser p = new BaseFilterParser(bf);
         p.parserXml();

@@ -81,6 +81,17 @@ public class SimpleUploadPageHandler extends PageHandler
                         sessionMgr, status);
                 return;
             }
+            else if (action.equals(UPLOAD_ACTION_CANCE_PROGRESS))
+            {
+                uploadPageHandlerHelper.cancelProcess(p_request, p_response, sessionMgr);
+                return;
+            }
+            else if (action.equals(UPLOAD_ACTION_CONFIRM_CONTINUE))
+            {
+                String s = p_request.getParameter("isContinue");
+                status.setIsContinue("y".equals(s));
+                return;
+            }
         }
         super.invokePageHandler(p_pageDesc, p_request, p_response, p_context);
     }

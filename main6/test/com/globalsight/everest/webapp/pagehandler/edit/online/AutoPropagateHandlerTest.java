@@ -19,40 +19,7 @@ public class AutoPropagateHandlerTest
     private AutoPropagateHandler handlerObj = new AutoPropagateHandler();
     
     @SuppressWarnings("unchecked")
-    @Test
-    public void testGetRepGroups()
-    {
-        Collection<TuImpl> tus = new ArrayList<TuImpl>();
-        
-        TuImpl tu1 = new TuImpl();
-        tu1.setId(1);
-        tu1.setRepeated(true);
-        
-        TuImpl tu2 = new TuImpl();
-        tu2.setId(2);
-        tu2.setRepetitionOfId(1);
-        
-        TuImpl tu3 = new TuImpl();
-        tu3.setId(3);
-        tu3.setRepetitionOfId(1);
-        
-        TuImpl tu4 = new TuImpl();
-        tu4.setId(4);
-        
-        tus.add(tu1);
-        tus.add(tu2);
-        tus.add(tu3);
-        tus.add(tu4);
-        
-        HashMap<Long, List<TuImpl>> repGroupsMap = new HashMap<Long, List<TuImpl>>();
-        repGroupsMap = 
-                (HashMap<Long, List<TuImpl>>) ClassUtil.testMethod(handlerObj,
-                        "getRepGroups", tus);
-        assertTrue(repGroupsMap.size()==1);
-        List<TuImpl> tuValues = repGroupsMap.get(new Long(1));
-        assertTrue(tuValues.size()==3);
-    }
-    
+   
     @Test
     public void testAdjustOriginalSegmentAttributeValues()
     {

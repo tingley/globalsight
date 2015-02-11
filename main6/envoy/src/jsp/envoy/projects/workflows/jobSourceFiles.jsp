@@ -1,0 +1,759 @@
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ page contentType="text/html; charset=UTF-8"
+    errorPage="/envoy/common/error.jsp"
+    import="com.globalsight.everest.jobhandler.Job,
+            com.globalsight.everest.permission.Permission,
+            com.globalsight.everest.permission.PermissionSet,
+            com.globalsight.everest.webapp.WebAppConstants,
+            com.globalsight.everest.util.system.SystemConfigParamNames,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
+            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
+            com.globalsight.everest.util.system.SystemConfiguration,
+            com.globalsight.everest.company.CompanyThreadLocal,
+            com.globalsight.everest.foundation.User,
+            com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.webapp.pagehandler.PageHandler,
+            java.text.MessageFormat,
+            java.util.*"
+    session="true"
+%>
+<jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobComments" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="editPages" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="addSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="editor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="sourceEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<% 
+//jobSummary child page needed started.
+   ResourceBundle bundle = PageHandler.getBundle(session);
+   String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+//jobSummary child page needed end.
+   String lb_filter_text = bundle.getString("lb_source_file_filter");// used by the pageSearch include
+   String thisFileSearch = (String) request.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+   if (thisFileSearch == null){
+	   thisFileSearch = "";
+   }
+   
+   String addSourceFilesURL = addSourceFiles.getPageURL()+ "&jobId=" + request.getAttribute("jobId");
+   String checkPageExistURL = addSourceFilesURL + "&action=" + AddSourceHandler.CHECK_PAGE_EXIST;
+   String beforeAddDeleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.CAN_ADD_DELETE_SOURCE_FILES;
+   String beforeDeleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.BEFORE_DELETE_SOURCE_FILES;
+   String deleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.DELETE_SOURCE_FILES;
+   String showDeleteProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_DELETE_PROGRESS;
+   String downloadSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.DOWNLOAD_SOURCE_FILES;
+   String uploadSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.UPLOAD_SOURCE_FILES;
+   String showUpdateProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_UPDATE_PROGRESS;
+
+   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+   User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+
+   Job jobImpl = (Job) request.getAttribute("Job");
+   boolean isIE = request.getHeader("User-Agent").indexOf("MSIE")!=-1;
+   
+   SystemConfiguration sysConfig = SystemConfiguration.getInstance();
+   boolean useSSL = sysConfig.getBooleanParameter(SystemConfigParamNames.USE_SSL);
+   String httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
+   if (useSSL == true) {
+       httpProtocolToUse = WebAppConstants.PROTOCOL_HTTPS;
+   } else {
+       httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
+   }
+   
+   StringBuffer appletcontent = new StringBuffer();
+   if(isIE) {
+       appletcontent.append("<OBJECT classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" width=\"920\" height=\"500\" ");
+       appletcontent.append("NAME = \"FSV\" codebase=\"");
+       appletcontent.append(httpProtocolToUse);
+       appletcontent.append("://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6\"> ");
+	   appletcontent.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
+   } else {
+       appletcontent.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
+       appletcontent.append("pluginspage=\"http://java.sun.com/products/plugin/index.html#download\"> ");
+   }
+   appletcontent.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
+   appletcontent.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
+   appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
+   appletcontent.append("<PARAM NAME = \"type\" VALUE=\"application/x-java-applet;version=1.6\"> ");
+   appletcontent.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
+   appletcontent.append("<PARAM NAME = \"jobId\" value=\"" + jobImpl.getJobId() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"companyId\" value=\"" + CompanyThreadLocal.getInstance().getValue() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"pageLocale\" value=\"" + bundle.getLocale() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"projectId\" value=\"" + jobImpl.getProjectId() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"userName\" value=\"" + user.getUserName() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"password\" value=\"" + user.getPassword() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"addToApplet\" value=\"MainAppletWillAddThis\"> ");
+   
+   if(isIE){
+       appletcontent.append(" </OBJECT>");
+   } else {
+       appletcontent.append(" </APPLET>");
+   }
+%>
+<html>
+<head>
+<title><%=bundle.getString("lb_SourceFiles")%></title>
+<script SRC="/globalsight/includes/setStyleSheet.js"></script>
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<%@ include file="/envoy/common/warning.jspIncl" %>
+<title><%=bundle.getString("lb_workflows")%></title>
+<style>
+#sourceFilesTbody td {
+	padding-top:3px;
+}
+
+#fullbg {
+    background-color: Gray;
+    display:none;
+    z-index:1;
+    position:absolute;
+    left:0px;
+    top:0px;
+    filter:Alpha(Opacity=30);
+    /* IE */
+    -moz-opacity:0.4;
+    /* Moz + FF */
+    opacity: 0.4;
+}
+
+#container {
+    position:absolute;
+    display: none;
+    z-index: 2;
+}
+</style>
+</head>
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="load()"; id="idBody" onunload="unload()" class="tundra">
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
+<%@ include file="/envoy/projects/workflows/pageSort.jspIncl"%>
+<div id="contentLayer"  class="standardText" style="position: absolute; z-index: 9; top: 108px; left: 20px; right: 20px;">
+<div id="includeSummaryTabs">
+	<%@ include file="/envoy/projects/workflows/includeJobSummaryTabs.jspIncl" %>
+</div>
+<div style="clear:both;padding-top:1em" ></div>
+<div id="sourceFiles" style="width:900px;">
+	<%@ include file="/envoy/projects/workflows/pageSearch.jspIncl" %>
+	<table class="standardText" cellpadding="3" cellspacing="0" style="width:900px;border:solid 1px slategray;">
+		<thead class="scroll">
+			<tr class="tableHeadingBasic" valign="bottom" width="100%">
+				<td class="scroll" style="padding-left: 0px; padding-top: 2px; padding-bottom: 2px;width:60%;height:30px;text-align:left;">
+					<c:if test="${addCheckBox}"><input type="checkbox"  name="selectAll" id="selectAll" onclick="selectAll()"/></c:if>
+					<a class="sortHREFWhite" href="${jobSourceFiles.pageURL}&pageSearchParam=${pageSearchParam}&pageSort=0"><%=bundle.getString("lb_primary_source_files")%>
+						<%=pageNameSortArrow%>
+					</a>
+				</td>
+				<td class="scroll" style="padding:2 0;width:20%;text-align:left;white-space:nowrap"  >
+					<%=bundle.getString("lb_file_profile")%>
+				</td>
+				<td class="scroll" style="padding:2 0;width:12%;text-align:center;white-space:nowrap">
+					<a class="sortHREFWhite" href="${jobSourceFiles.pageURL}&pageSearchParam=${pageSearchParam}&pageSort=2"><%=bundle.getString("lb_source_word_count")%>
+						<%=wordCountSortArrow%>
+					</a>
+				</td>
+				<td class="scroll" style="padding:2 0;width:8%;text-align:center;white-space:nowrap">
+					<%=bundle.getString("lb_source")%>
+				</td>
+			</tr>
+	    </thead>
+	    <tbody id="sourceFilesTbody">
+	    	<!-- SourcePages -->
+		    <c:forEach items="${JobSourcePageDisplayList}" var="item">
+		    	<tr>
+		    		<td style="word-wrap: break-word;word-break:break-all;text-align:left;">
+			    		<c:if test="${addCheckBox}">
+			    			<input class="checkSourceFiles" type="checkbox" name="pageIds" value="${item.sourcePage.id}"/>
+			    		</c:if>
+			    		<c:choose>
+				    		<c:when test="${item.sourcePage.primaryFileType == 2}">
+								<img src="/globalsight/images/file_unextracted.gif" title="Unextracted File" width="13" height="15"/>
+							</c:when>
+							<c:otherwise>
+								<img src="/globalsight/images/file_extracted.gif" title="Extracted File" width="13" height="15"/>
+							</c:otherwise>
+						</c:choose>
+						<c:choose>
+							<c:when test="${item.sourcePage.pageState == 'IMPORT_FAIL' || cancelledWorkflow}">
+								<span 
+									<c:if test="${item.sourcePage.pageState == 'IMPORT_FAIL'}">
+										class="warningText"
+									</c:if>
+								>
+									${item.sourcePage.displayPageName}
+								</span>
+							</c:when>
+							<c:otherwise>
+								<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
+									<c:choose>
+							    		<c:when test="${item.sourcePage.primaryFileType == 2}">
+											<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
+										</c:when>
+										<c:otherwise>
+											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event)" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
+										</c:otherwise>
+									</c:choose>
+								</amb:permission>
+									<c:if test="${shortOrFullPageNameDisplay == 'full'}">
+										${item.sourcePage.displayPageName}
+									</c:if>
+									<c:if test="${shortOrFullPageNameDisplay == 'short'}">
+										${item.sourcePage.shortPageName}
+									</c:if>
+								<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
+									</a>
+								</amb:permission>
+							</c:otherwise>
+						</c:choose>
+					</td>
+					<td style="text-align:left">
+						${item.dataSourceName}
+					</td>
+					<td style="text-align:center">
+						<span <c:if test="${item.isWordCountOverriden}">style="font-style:oblique;font-weight:bold;"
+							      <c:set value="true" var="sourcePageWordCountOverriden" scope="page"></c:set>
+							  </c:if>>${item.sourcePage.wordCount}
+						</span>
+					</td>
+					<td style="text-align:center">
+						<a href="${item.sourceLink}" target="_blank"><%=bundle.getString("lb_click_to_view")%></a>
+					</td>
+		    	</tr>
+		    </c:forEach>
+		    
+		   	<!-- AddingPages -->
+		    <c:forEach items="${JobAddingSourcePageList}" var="item">
+		    	<tr style="color:gray">
+		    		<td style="word-wrap: break-word;word-break:break-all;text-align:left;">
+			    		<c:if test="${addCheckBox}">
+			    			<input type="checkbox" name="notCheck" value="${item.id}" disabled="disabled"/>
+			    		</c:if>
+						<img src="/globalsight/images/file_update.gif" title="<%=bundle.getString("lb_file_adding")%>" width="13" height="15"/>
+						<c:if test="${shortOrFullPageNameDisplay == 'full'}">
+							${item.displayPageName}
+						</c:if>
+						<c:if test="${shortOrFullPageNameDisplay == 'short'}">
+							${item.shortPageName}
+						</c:if>
+					</td>
+					<td style="text-align:left">
+						${item.dataSource}
+					</td>
+					<td style="text-align:center">
+						--
+					</td>
+					<td style="text-align:center">
+						<%=bundle.getString("lb_adding_file_status")%>
+					</td>
+		    	</tr>
+		    </c:forEach>
+		    
+		   	<!-- UpdatedPages -->
+		    <c:forEach items="${JobUpdatedSourcePageList}" var="item">
+		    	<tr valign="top" style="color:gray">
+		    		<td style="word-wrap: break-word;word-break:break-all;text-align:left;">
+			    		<c:if test="${addCheckBox}">
+			    			<input type="checkbox" name="notCheck" value="${item.id}" disabled="disabled"/>
+			    		</c:if>
+						<img src="/globalsight/images/file_update.gif" title="<%=bundle.getString("lb_file_adding")%>" width="13" height="15"/>
+						<c:if test="${shortOrFullPageNameDisplay == 'full'}">
+							${item.displayPageName}
+						</c:if>
+						<c:if test="${shortOrFullPageNameDisplay == 'short'}">
+							${item.shortPageName}
+						</c:if>
+					</td>
+					<td style="text-align:left">
+						${item.dataSource}
+					</td>
+					<td style="text-align:center">
+						--
+					</td>
+					<td style="text-align:center">
+						<%=bundle.getString("lb_updating_file_status")%>
+					</td>
+		    	</tr>
+		    </c:forEach>
+		    
+	    </tbody>
+	    <c:if test="${atLeastOneError}">
+	    	<tr>
+	    		<td colspan="2" align="right">
+	    			<input class="standardText" type="button" name="PageError" value="<%=bundle.getString("action_view_errors")%>..." onclick="submitForm()">
+	    		</td>
+	    	</tr>
+	    </c:if>
+	    <amb:permission  name="<%=Permission.JOB_FILES_DOWNLOAD%>" >
+	    	<tr valign="top">
+	    		<td colspan="3"></td>
+	    		<td align="right">
+	    			<input type="button" <c:if test="${sourcePagesSize == 0}">disabled="disabled"</c:if> 
+	    				value="<%=bundle.getString("lb_download_files_in_job_detail")%>" onclick="location.href='${jobSourceFiles.pageURL}&action=downloadSourcePages'"/>
+	    		</td>
+	    	</tr>
+		</amb:permission>
+		<tr style="padding:3 0;">
+			<td height="1" bgcolor="000000" colspan="4" style="padding:0;">
+			</td>
+		</tr>
+		<tr valign="top">
+			<td style="word-wrap: break-word;word-break:break-all;padding:0 3px">
+				<%=bundle.getString("lb_source_word_count_total")%>
+			</td>
+			<td></td>
+			<td style="text-align:center;">
+				<span <c:if test="${wordCountOverridenAtAll || sourcePageWordCountOverriden}">style="font-style:oblique;font-weight:bold;"</c:if>>
+					${Job.wordCount}
+				</span>
+					<c:if test="${canModifyWordCount}">
+						<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
+							<amb:permission  name="<%=Permission.JOB_SOURCE_WORDCOUNT_TOTAL%>" >
+								(<a href="${editSourcePageWc.pageURL}" class="standardHREFDetail"><%=bundle.getString("lb_edit")%></a>)
+							</amb:permission>
+						</amb:permission>
+					</c:if>
+			</td>
+			<td></td>
+		</tr>
+		<tr id="fileCounts"">
+			<td style="word-wrap: break-word;word-break:break-all;padding:0 3px;">
+				<span class="standardtext"><%=bundle.getString("lb_primary_source_files_number")%></span>
+			</td>
+			<td></td>
+			<td style="text-align:center;">
+				${sourcePagesSize}
+			</td>
+			<td></td>
+		</tr>
+		<!-- text explainging about the bold and italics -->
+		<c:if test="${wordCountOverridenAtAll || sourcePageWordCountOverriden}">
+			<p>
+			<tr>
+				<td>
+					<span class="smallTextGray" style="font-style:oblique;font-weight:bold;"><%=bundle.getString("helper_text_override_word_count")%></span>
+				</td>
+				<td></td>
+			</tr>
+		</c:if>
+		<tr>
+			<td colspan="4">
+				<amb:permission  name="<%=Permission.ADD_SOURCE_FILES%>" >
+					<input class="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
+				</amb:permission>
+				<amb:permission  name="<%=Permission.DELETE_SOURCE_FILES%>" >
+					<input class="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
+				</amb:permission>
+				<amb:permission  name="<%=Permission.EDIT_SOURCE_FILES%>" >
+					<input class="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
+					<input class="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
+				</amb:permission> 
+			</td>
+	   </tr>	    
+	</table>
+	
+	<!-- popup jquery dialog instead of dojo -->
+	<div id="fullbg"></div>
+		<div id="container">
+		<div id="updateWordCountsProgressBar"></div>
+	</div>
+	
+	<div id="addSourceDiv" title="<%=bundle.getString("title_add_source_file") %>" style="display:none">
+		<div id="appletDiv" style="padding: 0px; margin: 0px; width:920px; height:500px;"></div>
+	</div>
+	
+	<div id="uploadFormDiv" title="<%=bundle.getString("title_upload_source_file") %>" style="display:none" class="standardtext">
+		<form name="uploadForm" method="post" action="<%=uploadSourceURL%>" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
+			<input type="hidden" id="jobId" name="jobId" value="${jobId}">
+			<table style="width: 650px;" class="standardText">
+				<tr>
+					<td colspan="2">&nbsp;</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center" valign="middle"
+							style="width: 600px;" class="standardText">
+						<table class="standardText" style="font-size:10pt">
+							<tr>
+								<td><%=bundle.getString("lb_file")%>:</td>
+								<td valign="middle"><input type="file" name="uploadFile" 
+									style="width: 380px; height: 27px;" size="25"
+									id="fileUploadDialog"></td>
+								<td valign="middle" style="padding-left:15px">
+									<button type="button" onclick="uploadFileDialog()"><%=bundle.getString("lb_upload")%></button>
+									<button type="button" onclick="$('#uploadFormDiv').dialog('close')"><%=bundle.getString("lb_close")%></button>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">&nbsp;</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<!-- for uploading file asynchronous -->
+	<iframe id="ajaxUpload" name="ajaxUpload" style="display:none"></iframe>
+</div>
+</div>
+
+//load script and sytle after DOM loaded
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css" />
+<script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery.progressbar.js"></script>
+<script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+var needWarning = false;
+var objectName = "";
+var guideNode = "myJobs";
+var w_viewer = null;
+var w_addSourceFileWindow = null;
+var helpFile = "<%=bundle.getString("help_job_sourcefiles")%>";
+
+function load(){
+	ContextMenu.intializeContextMenu();
+	loadGuides();
+}
+
+function unload(){
+    if (w_viewer != null && !w_viewer.closed)
+    {
+        w_viewer.close();
+    }
+    w_viewer = null;
+    
+    if (w_addSourceFileWindow != null && !w_addSourceFileWindow.closed)
+    {
+    	w_addSourceFileWindow.close();
+    }
+    w_addSourceFileWindow = null;
+}
+
+function selectAll(){
+	var selectAll = $("#selectAll").is(":checked");//判断全选框状态
+	if (selectAll) {
+	   $(".checkSourceFiles").attr("checked","true");
+	}else{
+	   $(".checkSourceFiles").removeAttr("checked");
+	}
+}
+
+function openViewerWindow(url)
+{
+	document.getElementById("idBody").focus();
+	
+	var ajaxUrl = "<%=checkPageExistURL%>" + url;
+	$.get(ajaxUrl,function(data){
+		if(data==""){
+        	if (w_viewer != null && !w_viewer.closed)
+            {
+                w_viewer.focus();
+                return;
+            }
+
+            var style = "resizable=yes,top=0,left=0,height=" + (screen.availHeight - 60) + ",width=" + (screen.availWidth - 20);
+            w_viewer = window.open('${editor.pageURL}' + url, 'Viewer', style);
+		}else{
+			alert(data);
+		}
+	});
+}
+
+function contextForPage(url, e)
+{
+    if(navigator.userAgent.indexOf("MSIE")==-1)
+    {
+	    e.preventDefault();
+	    e.stopPropagation();
+    }
+
+    var popupoptions;
+
+    var allowEditSource = eval('${allowEditSourcePage}');
+    var canEditSource = eval('${canEditSourcePage}');
+
+    if (allowEditSource)
+    {
+       popupoptions = [
+         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status") %></B>",
+           function(){ openViewerWindow(url);}),
+         new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page") %>",
+           function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
+       ];
+    }
+    else
+    {
+       popupoptions = [
+         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status") %></B>",
+           function(){ openViewerWindow(url);})
+       ];
+    }
+    
+    ContextMenu.display(popupoptions, e);
+}
+
+function submitForm(){
+	var url = "${addSourceFiles.pageURL}&action=canUpdateWorkFlow&jobId=${jobId}&t=" + new Date().getTime();
+	$.get(url,function(data){
+		if(data==""){
+			window.location = "/globalsight/ControlServlet?linkName=error&pageName=WF1&jobId=${jobId}&fromDetails=true";
+		}else{
+			alert(data);
+		}
+	});
+}
+//jobSummary child page needed started
+<amb:permission  name="<%=Permission.JOB_FILES_VIEW%>" >
+$(document).ready(function(){
+	$("#jobSourceFilesTab").removeClass("tableHeadingListOff");
+	$("#jobSourceFilesTab").addClass("tableHeadingListOn");
+	$("#jobSourceFilesTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
+	$("#jobSourceFilesTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+})
+</amb:permission>
+
+//jobSummary child page needed end.
+
+function addSourceFiles()
+{
+	$.get("<%=beforeAddDeleteSourceURL%>",function(data){
+		if(data==""){
+			openAddSourceFilesWindow();
+		}else{
+			alert(data);
+		}
+	});
+}
+
+function openAddSourceFilesWindow()
+{
+	$("#addSourceDiv").dialog({width: 930, height: 500, resizable:false});
+	document.getElementById('addSourceDiv').parentNode.style.display = "inline";
+	document.getElementById('addSourceDiv').style.display = "inline";
+	document.getElementById('appletDiv').innerHTML = '<%=appletcontent.toString()%>';
+}
+
+function removeSourceFiles()
+{	
+	var pIds = getSelectPageIds();
+	
+	if (pIds.length == 0)
+	{
+		alert('<%=bundle.getString("msg_no_file_remove")%>');
+		return;
+    }
+
+	var obj = {
+		pIds : pIds
+	}
+	
+	$.get("<%=beforeDeleteSourceURL%>",obj,function(data){
+		if(data==""){
+            if (confirm('<%=bundle.getString("msg_confirm_remove")%>')) {
+            	doRemoveFiles(pIds);
+            }
+		}
+		else {
+          	var returnData = eval(data);
+            if (returnData.error)
+            {
+            	alert(returnData.error);
+            }
+            else if (returnData.confirm && confirm(returnData.confirm))
+            {
+            	doRemoveFiles(pIds);
+            }
+		}
+	});
+}
+
+function doRemoveFiles(pIds)
+{
+	var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
+	
+	$.get("<%=deleteSourceURL%>&pageIds=" + pIds + "&randomNum=" + randomNum,function(data){
+		closeMsg2();
+		if(data==""){
+			refreshJobPage();
+		}else{
+          	var returnData = eval(data);
+        	if (returnData.discard != null){
+        		location.replace('${allStatus.pageURL}');
+	        } else {
+        		alert(data);
+	        }
+		}
+	});
+
+    showDeleteProgress(0, randomNum);
+}
+
+function getSelectPageIds()//from jobDetails.js
+{
+	var pIds = document.getElementsByName("pageIds");
+	var selectIds = "";
+	for (var i = 0; i < pIds.length; i++) {
+        if (pIds[i].checked){
+           if (selectIds.length > 0){
+           	selectIds = selectIds.concat(",");
+           }
+           
+           selectIds = selectIds.concat(pIds[i].value);
+        }
+    }
+
+    return selectIds;
+}
+
+function refreshJobPage() {
+	try {
+		window.location.href = "${jobSourceFiles.pageURL}&jobId=${jobId}";
+	} catch(ex) {
+		location.reload(true);
+	}
+}
+
+function closeMsg2() {
+	$("#msgDialog2").hide();
+}
+
+function showDeleteProgress(num, randomNum)
+{
+	var obj = {
+		number : num,
+		randomNum : randomNum
+	}
+	
+	$.get("<%=showDeleteProgressURL%>",obj,function(data){
+		if(data==""){
+			$("#fullbg").css("display","none");
+			$("#container").css("display","none");
+		} else {
+			var returnData = eval(data);
+			var scrollHeight = document.body.scrollHeight-120;
+		    var scrollWidth = document.body.scrollWidth-40;
+		    var percent = returnData.number/returnData.total;
+		    $("#fullbg").css({width:scrollWidth, height:scrollHeight, display:"block"});
+		    $("#container").css({top:"400px",left:"600px",display:"block"});
+		    if (percent <= 1) {
+				$("#updateWordCountsProgressBar").progressBar(percent*100);
+				showDeleteProgress(returnData.number, randomNum);
+		    } else {
+		    	$("#fullbg").css("display","none");
+		    	$("#container").css("display","none");
+		    }
+		}
+	});
+}
+
+function downloadFiles(){
+	var pIds = getSelectPageIds();
+	if (pIds.length == 0) {
+		alert('<%=bundle.getString("msg_no_file_remove")%>');
+		return;
+    }
+    var obj = {
+        pIds : pIds
+    }
+    
+	$.get("<%=beforeDeleteSourceURL%>",obj,function(data){
+		if(data==""){
+			doDownloadFiles(pIds);
+		} else {
+        	var returnData = eval(data);
+            if (returnData.error)
+            {
+                alert(returnData.error);
+            }
+            else 
+            {
+                doDownloadFiles(pIds);
+            }
+		}
+	});
+}
+
+function doDownloadFiles(pIds) {
+    window.location.href = '<%=downloadSourceURL%>' + "&pageIds=" + pIds;
+}
+
+function openUploadFile()
+{
+	$.get("<%=beforeAddDeleteSourceURL%>",function(data){
+		if(data==""){
+			if($.browser.msie){
+				$("#uploadFormDiv").dialog({width: 700, height: 260, resizable:false});
+			}else {
+				$("#uploadFormDiv").dialog({width: 700, height: 150, resizable:false});
+			}
+		} else {
+			alert(data);
+		}
+	});
+}
+
+function uploadFileDialog() 
+{
+	var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
+	
+	var url = "<%=uploadSourceURL%>&randomNum=" + randomNum;
+	$("#uploadForm").attr("action",url);
+	$("#uploadForm").submit();
+	$("#uploadFormDiv").dialog('close');
+	showUpdateProgress(0, randomNum);
+}
+
+function popupUploadErrorMessage()
+{
+	var popupDiv = document.getElementById("ajaxUpload").contentWindow.document.getElementById("uploadFileErroInfo");
+	if($.browser.msie){
+		$(popupDiv).dialog({width:700,height:300,title:'Message',resizable:false,buttons:{'Close':function(){$(this).dialog('close');}}});
+	} else {
+		$(popupDiv).dialog({width:700,height:250,title:'Message',resizable:false,buttons:{'Close':function(){$(this).dialog('close');}}});
+	}
+}
+
+function showUpdateProgress(num, randomNum)
+{
+	var obj = {
+		number : num,
+		randomNum : randomNum
+	}
+	
+	$.get("<%=showUpdateProgressURL%>",obj,function(data){
+		if(data==""){
+			$("#fullbg").css("display","none");
+			$("#container").css("display","none");
+		} else {
+			var returnData = eval(data);
+			var scrollHeight = document.body.scrollHeight-120;
+		    var scrollWidth = document.body.scrollWidth-40;
+		    var percent = returnData.number/returnData.total;
+		    $("#fullbg").css({width:scrollWidth, height:scrollHeight, display:"block"});
+		    $("#container").css({top:"400px",left:"600px",display:"block"});
+		    if (percent <= 1) {
+				$("#updateWordCountsProgressBar").progressBar(percent*100);
+				showUpdateProgress(returnData.number, randomNum);
+		    } else {
+		    	$("#fullbg").css("display","none");
+		    	$("#container").css("display","none");
+		    }
+		}
+	});
+}
+
+function closeDialog(){
+	document.getElementById('addSourceDiv').parentNode.style.display = "none";
+}
+</script>
+</body>
+</html>

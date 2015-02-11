@@ -16,53 +16,40 @@
  */
 package com.globalsight.cxe.adapter.copyflow;
 
-import com.globalsight.cxe.adapter.copyflow.CopyFlowSocket;
-import com.globalsight.cxe.adapter.copyflow.EventFlowXmlParser;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.StringTokenizer;
+
+import org.w3c.dom.Element;
 
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
-
 import com.globalsight.diplomat.util.Logger;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.foundation.L10nProfile;
-
-import org.w3c.dom.Element;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-
-import java.net.UnknownHostException;
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import com.globalsight.everest.servlet.util.ServerProxy;
 
 /**
- * This DesktopAppHelper converts Quark documents to Quark XPress Tags
- * using the CopyFlow converter on a server machine (Mac or Windows).
- * See http://www.napsys.com.
+ * This DesktopAppHelper converts Quark documents to Quark XPress Tags using the
+ * CopyFlow converter on a server machine (Mac or Windows). See
+ * http://www.napsys.com.
  */
 public class DesktopAppHelper
 {
     /**
-     * The name of the category in the event flow xml for any data
-     * specific to the DesktopApplicationAdapter.
+     * The name of the category in the event flow xml for any data specific to
+     * the DesktopApplicationAdapter.
      */
-    public static final String EFXML_DA_CATEGORY_NAME =
-        "DesktopApplicationAdapter";
+    public static final String EFXML_DA_CATEGORY_NAME = "DesktopApplicationAdapter";
 
     private static final String FORMAT = "CopyFlow";
 
@@ -90,11 +77,9 @@ public class DesktopAppHelper
 
         public String toString()
         {
-            return "GlobalSightXT config for " + m_description +
-                " (name=" + m_serverName +
-                ",port=" + m_serverPort +
-                ",remote dir=" + m_workingDirRemote +
-                ",locales=" + m_locales + ")";
+            return "GlobalSightXT config for " + m_description + " (name="
+                    + m_serverName + ",port=" + m_serverPort + ",remote dir="
+                    + m_workingDirRemote + ",locales=" + m_locales + ")";
         }
     }
 
@@ -123,12 +108,14 @@ public class DesktopAppHelper
 
     /**
      * Constructor.
-     *
-     * @param p_eventFlowXml -- the EventFlowXml
-     * @param p_content -- the content (whether GXML or Native)
+     * 
+     * @param p_eventFlowXml
+     *            -- the EventFlowXml
+     * @param p_content
+     *            -- the content (whether GXML or Native)
      */
     public DesktopAppHelper(CxeMessage p_cxeMessage,
-        org.apache.log4j.Logger p_logger)
+            org.apache.log4j.Logger p_logger)
     {
         m_logger = p_logger;
         m_cxeMessage = p_cxeMessage;
@@ -143,10 +130,9 @@ public class DesktopAppHelper
     //
 
     /**
-     * Gets the event flow XML. If called, after a call to
-     * convertNativeToXml() or convertXmlToNative(), then the
-     * EventFlowXml may have been modified.
-     *
+     * Gets the event flow XML. If called, after a call to convertNativeToXml()
+     * or convertXmlToNative(), then the EventFlowXml may have been modified.
+     * 
      * @return eventFlowXml
      */
     public String getEventFlowXml()
@@ -156,12 +142,12 @@ public class DesktopAppHelper
 
     /**
      * Converts the content in native format to XML.
-     *
+     * 
      * @return MessageData
      * @throws DesktopApplicationAdapterException
      */
     public MessageData convertNativeToXml()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -169,15 +155,18 @@ public class DesktopAppHelper
 
             // The current restriction is that Quark Mac can only be used with
             // l10nprofiles that are 1->1 so there is only one target locale
-            L10nProfile l10nProfile = ServerProxy.getProjectHandler().getL10nProfile(
-                m_parser.getL10nProfileId());
-            String srcLocale = l10nProfile.getSourceLocale().getLocale().toString();
+            L10nProfile l10nProfile = ServerProxy.getProjectHandler()
+                    .getL10nProfile(m_parser.getL10nProfileId());
+            String srcLocale = l10nProfile.getSourceLocale().getLocale()
+                    .toString();
             if (l10nProfile.getTargetLocales().length != 1)
                 m_logger.warn("Quark(Mac) conversion can only be done with l10nprofiles that\r\nhave one target locale. Only the first target locale is used.");
-            String trgLocale = l10nProfile.getTargetLocales()[0].getLocale().toString();
+            String trgLocale = l10nProfile.getTargetLocales()[0].getLocale()
+                    .toString();
 
-            m_config = findServerConfig(srcLocale,trgLocale);
-            m_logger.debug("On import, found server config: " + m_config.toString());
+            m_config = findServerConfig(srcLocale, trgLocale);
+            m_logger.debug("On import, found server config: "
+                    + m_config.toString());
 
             m_safeBaseFileName = createBaseFileNameForConversion();
 
@@ -199,20 +188,20 @@ public class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
-            throw new DesktopApplicationAdapterException(
-                "Import", errorArgs, e);
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
+            throw new DesktopApplicationAdapterException("Import", errorArgs, e);
         }
     }
 
     /**
      * Converts the content in XML to native format.
-     *
+     * 
      * @return MessageData
      * @throws DesktopApplicationAdapterException
      */
     public MessageData convertXmlToNative()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -220,8 +209,9 @@ public class DesktopAppHelper
 
             // Find server that writes TO target locale.
             m_config = findServerConfig(m_parser.getSourceLocale(),
-                                        m_parser.getTargetLocale());
-            m_logger.debug("On export, found server config: " + m_config.toString());
+                    m_parser.getTargetLocale());
+            m_logger.debug("On export, found server config: "
+                    + m_config.toString());
 
             modifyEventFlowXmlForExport();
 
@@ -240,9 +230,9 @@ public class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
-            throw new DesktopApplicationAdapterException(
-                "Export", errorArgs, e);
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
+            throw new DesktopApplicationAdapterException("Export", errorArgs, e);
         }
     }
 
@@ -251,14 +241,13 @@ public class DesktopAppHelper
     //
 
     /**
-     * Writes the content to the native inbox. This means that a Quark
-     * document is written to a directory on a Mac from which CopyFlow
-     * can read it.
-     *
+     * Writes the content to the native inbox. This means that a Quark document
+     * is written to a directory on a Mac from which CopyFlow can read it.
+     * 
      * @throws DesktopApplicationAdapterException
      */
     protected void writeContentToNativeInbox()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -266,29 +255,29 @@ public class DesktopAppHelper
             fileName.append(m_safeBaseFileName);
 
             String displayName = m_parser.getDisplayName();
-            m_logger.info("Converting: " + displayName + ", size: " +
-                m_cxeMessage.getMessageData().getSize() + "b, tmp file: " +
-                fileName);
+            m_logger.info("Converting: " + displayName + ", size: "
+                    + m_cxeMessage.getMessageData().getSize() + "b, tmp file: "
+                    + fileName);
 
             writeOutFileContents(fileName.toString());
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
-            throw new DesktopApplicationAdapterException(
-                "Import", errorArgs, e);
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
+            throw new DesktopApplicationAdapterException("Import", errorArgs, e);
         }
     }
 
     /**
-     * Writes the content to the xml inbox. This means that an XTG
-     * document is written to a directory that is accessible to the
-     * CopyFlow server for conversion back to Quark.
-     *
+     * Writes the content to the xml inbox. This means that an XTG document is
+     * written to a directory that is accessible to the CopyFlow server for
+     * conversion back to Quark.
+     * 
      * @throws DesktopApplicationAdapterException
      */
     protected void writeQxdToXmlInbox()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -300,21 +289,21 @@ public class DesktopAppHelper
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
-            throw new DesktopApplicationAdapterException(
-                "Export", errorArgs, e);
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
+            throw new DesktopApplicationAdapterException("Export", errorArgs, e);
         }
     }
 
     /**
-     * Writes the content to the xml inbox. This means that an XTG
-     * document is written to a directory that is accessible to the
-     * CopyFlow server for conversion back to Quark.
-     *
+     * Writes the content to the xml inbox. This means that an XTG document is
+     * written to a directory that is accessible to the CopyFlow server for
+     * conversion back to Quark.
+     * 
      * @throws DesktopApplicationAdapterException
      */
     protected void writeXtgToXmlInbox(String p_file)
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         try
         {
@@ -322,26 +311,26 @@ public class DesktopAppHelper
             fileName.append(p_file);
 
             String displayName = m_parser.getDisplayName();
-            m_logger.info("Converting: " + displayName + ", size: " +
-                m_cxeMessage.getMessageData().getSize() + "b, tmp file: " +
-                fileName);
+            m_logger.info("Converting: " + displayName + ", size: "
+                    + m_cxeMessage.getMessageData().getSize() + "b, tmp file: "
+                    + fileName);
 
             writeOutFileContents(fileName.toString());
         }
         catch (Exception e)
         {
-            String[] errorArgs = { m_parser.getDisplayName() };
-            throw new DesktopApplicationAdapterException(
-                "Export", errorArgs, e);
+            String[] errorArgs =
+            { m_parser.getDisplayName() };
+            throw new DesktopApplicationAdapterException("Export", errorArgs, e);
         }
     }
 
     /**
-     * Calls CopyFlow to convert the native Quark document to Quark
-     * XPress Tags (QXD->XTG).
+     * Calls CopyFlow to convert the native Quark document to Quark XPress Tags
+     * (QXD->XTG).
      */
     private void callConverterForNative()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         String qxdFile = m_safeBaseFileName;
         String xtgFile = removeFileExtension(m_safeBaseFileName) + ".xtg";
@@ -363,17 +352,18 @@ public class DesktopAppHelper
         }
         catch (UnknownHostException e)
         {
-            String[] errorArgs = { "unknown host/port " +
-                                   m_config.m_serverName + "/" +
-                                   m_config.m_serverPort};
-            throw new DesktopApplicationAdapterException(
-                "Conversion", errorArgs, e);
+            String[] errorArgs =
+            { "unknown host/port " + m_config.m_serverName + "/"
+                    + m_config.m_serverPort };
+            throw new DesktopApplicationAdapterException("Conversion",
+                    errorArgs, e);
         }
         catch (IOException e)
         {
-            String[] errorArgs = { e.getMessage() };
-            throw new DesktopApplicationAdapterException(
-                "Conversion", errorArgs, e);
+            String[] errorArgs =
+            { e.getMessage() };
+            throw new DesktopApplicationAdapterException("Conversion",
+                    errorArgs, e);
         }
         finally
         {
@@ -382,11 +372,11 @@ public class DesktopAppHelper
     }
 
     /**
-     * Calls CopyFlow to convert a translated XPress Tag document to
-     * native Quark (XTG->QXD).
+     * Calls CopyFlow to convert a translated XPress Tag document to native
+     * Quark (XTG->QXD).
      */
     private void callConverterForXml()
-        throws DesktopApplicationAdapterException
+            throws DesktopApplicationAdapterException
     {
         String qxdFile = m_safeBaseFileName2;
         String xtgFile = removeFileExtension(m_safeBaseFileName2) + ".xtg";
@@ -404,7 +394,7 @@ public class DesktopAppHelper
             sock.openDocument(directory, qxdFile);
             sock.autoNameBoxes(s_BOXAUTONAME_PREFIX, xtgFile);
             // Sometimes conversion works without this additional call
-            // to export. It works all the time if it's left in.  We
+            // to export. It works all the time if it's left in. We
             // may revisit this again and comment out the next line.
             sock.exportStory(directory, xtgFile);
 
@@ -420,17 +410,18 @@ public class DesktopAppHelper
         }
         catch (UnknownHostException e)
         {
-            String[] errorArgs = { "unknown host/port " +
-                                   m_config.m_serverName + "/" +
-                                   m_config.m_serverPort};
-            throw new DesktopApplicationAdapterException(
-                "Conversion", errorArgs, e);
+            String[] errorArgs =
+            { "unknown host/port " + m_config.m_serverName + "/"
+                    + m_config.m_serverPort };
+            throw new DesktopApplicationAdapterException("Conversion",
+                    errorArgs, e);
         }
         catch (IOException e)
         {
-            String[] errorArgs = { e.getMessage() };
-            throw new DesktopApplicationAdapterException(
-                "Conversion", errorArgs, e);
+            String[] errorArgs =
+            { e.getMessage() };
+            throw new DesktopApplicationAdapterException("Conversion",
+                    errorArgs, e);
         }
         finally
         {
@@ -440,11 +431,10 @@ public class DesktopAppHelper
 
     /**
      * Reads in the XTG file.
-     *
+     * 
      * @throws Exception
      **/
-    protected MessageData readXmlOutput()
-        throws Exception
+    protected MessageData readXmlOutput() throws Exception
     {
         StringBuffer fileName = new StringBuffer(m_workingDirLocal);
         fileName.append(removeFileExtension(m_safeBaseFileName));
@@ -459,11 +449,10 @@ public class DesktopAppHelper
 
     /**
      * Reads in the QXD file.
-     *
+     * 
      * @throws DesktopApplicationAdapterException
      **/
-    protected MessageData readNativeOutput()
-        throws IOException
+    protected MessageData readNativeOutput() throws IOException
     {
         // Read in the QXD file and delete it.
         StringBuffer fileName = new StringBuffer(m_workingDirLocal);
@@ -487,14 +476,13 @@ public class DesktopAppHelper
     }
 
     /**
-     * Creates a safe file name for writing the file out to a
-     * directory where other similarly named files may be.  For
-     * example, someone may import new_files\foo.doc and foo\foo.doc
-     * and both will be written to the same native inbox directory in
-     * the directory accessible to CopyFlow.
-     *
+     * Creates a safe file name for writing the file out to a directory where
+     * other similarly named files may be. For example, someone may import
+     * new_files\foo.doc and foo\foo.doc and both will be written to the same
+     * native inbox directory in the directory accessible to CopyFlow.
+     * 
      * Note that the Macintosh has a 31 character limit on filenames.
-     *
+     * 
      * @return a safe basefilename based off the display name
      */
     protected String createBaseFileNameForConversion()
@@ -505,20 +493,21 @@ public class DesktopAppHelper
         // come from unix or NT.
         int forwardSlashIndex = filename.lastIndexOf('/');
         int backwardSlashIndex = filename.lastIndexOf('\\');
-        int lastSeparatorindex = (forwardSlashIndex > backwardSlashIndex) ?
-            forwardSlashIndex : backwardSlashIndex;
+        int lastSeparatorindex = (forwardSlashIndex > backwardSlashIndex) ? forwardSlashIndex
+                : backwardSlashIndex;
 
         String baseName = filename.substring(lastSeparatorindex + 1);
 
         int hash = baseName.hashCode();
 
-        return System.currentTimeMillis() + (hash > 0 ? "-" : "") + hash + ".qxd";
+        return System.currentTimeMillis() + (hash > 0 ? "-" : "") + hash
+                + ".qxd";
     }
 
     /**
      * Creates another temporary name based on the previosly computed
      * safeBaseFileName for a conversion from XTG back to native QXD.
-     *
+     * 
      * Note that the Macintosh has a 31 character limit on filenames.
      */
     protected String createBaseFileNameForBackConversion()
@@ -528,10 +517,11 @@ public class DesktopAppHelper
     }
 
     /**
-     * Utility to return a filename without the file extension.
-     * "foo" == removeFileExtension("foo.txt")
-     *
-     * @param p_filename -- a filename
+     * Utility to return a filename without the file extension. "foo" ==
+     * removeFileExtension("foo.txt")
+     * 
+     * @param p_filename
+     *            -- a filename
      * @return the filename without the file extension
      */
     protected String removeFileExtension(String p_filename)
@@ -541,115 +531,112 @@ public class DesktopAppHelper
     }
 
     /**
-     * Writes out the file contents to the specified filename,
-     * creating any necessary sub-directories.
-     *
-     * @param p_filename -- the name of the file to write to
+     * Writes out the file contents to the specified filename, creating any
+     * necessary sub-directories.
+     * 
+     * @param p_filename
+     *            -- the name of the file to write to
      * @throws IOException
      */
-    protected void writeOutFileContents(String p_filename)
-        throws IOException
+    protected void writeOutFileContents(String p_filename) throws IOException
     {
         File file = new File(p_filename);
 
         file.getParentFile().mkdirs();
-        FileMessageData fmd = (FileMessageData)m_cxeMessage.getMessageData();
+        FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
         fmd.operatingSystemSafeCopyTo(file);
     }
 
     /**
      * Modifies the EventFlowXml during import. This does the following changes:
-     *
+     * 
      * 1) changes the postMergeEvent to be the value of this.getPostMergeEvent()
-     * 2) changes the format type to xptag
-     * 3) saves all the above data in the EventFlowXml as da/dv pairs
-     *
-     * NOTE: The specified encoding in the EventFlowXml is left intact
-     * because it will be auto-detected by the XPTag extractor (.xtg
-     * is self-describing).
-     *
+     * 2) changes the format type to xptag 3) saves all the above data in the
+     * EventFlowXml as da/dv pairs
+     * 
+     * NOTE: The specified encoding in the EventFlowXml is left intact because
+     * it will be auto-detected by the XPTag extractor (.xtg is
+     * self-describing).
+     * 
      * @throws Exception
      */
-    protected void modifyEventFlowXmlForImport()
-        throws Exception
+    protected void modifyEventFlowXmlForImport() throws Exception
     {
-        //now save all the data to the EventFlowXml
+        // now save all the data to the EventFlowXml
         saveDataToEventFlowXml();
 
-        //reconstruct the EventFlowXml String
+        // reconstruct the EventFlowXml String
         m_parser.reconstructEventFlowXmlStringFromDOM();
         m_eventFlowXml = m_parser.getEventFlowXml();
     }
 
     /**
-     * Saves some data to the event flow xml by adding it as attribute/
-     * value pairs to the category "DesktopApplicationAdapter".
-     *
+     * Saves some data to the event flow xml by adding it as attribute/ value
+     * pairs to the category "DesktopApplicationAdapter".
+     * 
      * @throws Exception
      */
-    private void saveDataToEventFlowXml()
-        throws Exception
+    private void saveDataToEventFlowXml() throws Exception
     {
-        String originalPostMergeEvent =
-            m_parser.setPostMergeEvent(getPostMergeEvent().getName());
+        String originalPostMergeEvent = m_parser
+                .setPostMergeEvent(getPostMergeEvent().getName());
         String originalFormat = m_parser.setSourceFormatType("xptag");
 
-        m_originalFileSize = (int)m_cxeMessage.getMessageData().getSize();
+        m_originalFileSize = (int) m_cxeMessage.getMessageData().getSize();
 
-        //<category name="DesktopApplicationAdapter">
-        Element categoryElement = m_parser.addCategory(
-            EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
+        // <category name="DesktopApplicationAdapter">
+        Element categoryElement = m_parser
+                .addCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
         String[] values = new String[1];
 
-        //<da name="postMergeEvent><dv>GlobalSight::FileSystemMergedEvent</dv></da>
+        // <da
+        // name="postMergeEvent><dv>GlobalSight::FileSystemMergedEvent</dv></da>
         values[0] = originalPostMergeEvent;
-        categoryElement.appendChild(
-            m_parser.makeEventFlowXmlDaElement("postMergeEvent", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "postMergeEvent", values));
 
-        //<da name="formatType"><dv>word</dv></da>
+        // <da name="formatType"><dv>word</dv></da>
         values[0] = originalFormat;
-        categoryElement.appendChild(
-            m_parser.makeEventFlowXmlDaElement("formatType", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "formatType", values));
 
-        //<da name="safeBaseFileName"><dv>12345test.doc</dv></da>
+        // <da name="safeBaseFileName"><dv>12345test.doc</dv></da>
         values[0] = m_safeBaseFileName;
-        categoryElement.appendChild(
-            m_parser.makeEventFlowXmlDaElement("safeBaseFileName", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "safeBaseFileName", values));
 
-        //<da name="originalFileSize"><dv>11574</dv></da>
+        // <da name="originalFileSize"><dv>11574</dv></da>
         values[0] = Integer.toString(m_originalFileSize);
-        categoryElement.appendChild(
-            m_parser.makeEventFlowXmlDaElement("originalFileSize", values));
+        categoryElement.appendChild(m_parser.makeEventFlowXmlDaElement(
+                "originalFileSize", values));
     }
 
     /**
-     * Modifies the EventFlowXml during export. Also restores the
-     * value of some internal data based off of values saved to the
-     * EFXML.  This restores the EventFlowXml to the way it was before
-     * coming to the DesktopApplication source adapter.
-     *
+     * Modifies the EventFlowXml during export. Also restores the value of some
+     * internal data based off of values saved to the EFXML. This restores the
+     * EventFlowXml to the way it was before coming to the DesktopApplication
+     * source adapter.
+     * 
      * @throws Exception
      */
-    protected void modifyEventFlowXmlForExport()
-        throws Exception
+    protected void modifyEventFlowXmlForExport() throws Exception
     {
-        Element categoryElement = m_parser.getCategory(
-            EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
+        Element categoryElement = m_parser
+                .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
         String originalPostMergeEvent = m_parser.getCategoryDaValue(
-            categoryElement, "postMergeEvent")[0];
+                categoryElement, "postMergeEvent")[0];
         m_parser.setPostMergeEvent(originalPostMergeEvent);
 
-        String originalFormat = m_parser.getCategoryDaValue(
-            categoryElement, "formatType")[0];
+        String originalFormat = m_parser.getCategoryDaValue(categoryElement,
+                "formatType")[0];
         m_parser.setSourceFormatType(originalFormat);
 
         // re-set the safe base file name
-        m_safeBaseFileName = m_parser.getCategoryDaValue(
-            categoryElement, "safeBaseFileName")[0];
+        m_safeBaseFileName = m_parser.getCategoryDaValue(categoryElement,
+                "safeBaseFileName")[0];
 
         // and the original file size
-        m_originalFileSize = Integer.parseInt(
-            m_parser.getCategoryDaValue(
+        m_originalFileSize = Integer.parseInt(m_parser.getCategoryDaValue(
                 categoryElement, "originalFileSize")[0]);
 
         // For Quark files generated on the Mac that had no extension,
@@ -661,7 +648,7 @@ public class DesktopAppHelper
             m_parser.setFilename(fixMacExtension(filename));
         }
 
-        //reconstruct the EventFlowXml String
+        // reconstruct the EventFlowXml String
         m_parser.reconstructEventFlowXmlStringFromDOM();
         m_eventFlowXml = m_parser.getEventFlowXml();
     }
@@ -672,11 +659,10 @@ public class DesktopAppHelper
 
     /**
      * Parses the EventFlowXml to set internal values.
-     *
+     * 
      * @throws DesktopApplicationAdapterException
      */
-    private void parseEventFlowXml()
-        throws DesktopApplicationAdapterException
+    private void parseEventFlowXml() throws DesktopApplicationAdapterException
     {
         try
         {
@@ -685,8 +671,7 @@ public class DesktopAppHelper
         catch (Exception e)
         {
             m_logger.error("Unable to parse EventFlowXml. ", e);
-            throw new DesktopApplicationAdapterException(
-                "Unexpected", null, e);
+            throw new DesktopApplicationAdapterException("Unexpected", null, e);
         }
     }
 
@@ -711,26 +696,24 @@ public class DesktopAppHelper
     }
 
     /**
-     * Returns the event to publish after doing a conversion
-     * from Native to XML.
-     *
+     * Returns the event to publish after doing a conversion from Native to XML.
+     * 
      * @return something like XML_IMPORTED_EVENT
      */
     public CxeMessageType getPostNativeToXmlConversionEvent()
     {
-        return CxeMessageType.getCxeMessageType(
-            CxeMessageType.XPTAG_IMPORTED_EVENT);
+        return CxeMessageType
+                .getCxeMessageType(CxeMessageType.XPTAG_IMPORTED_EVENT);
     }
 
     /**
-     * Returns the event to publish after doing a conversion from XML
-     * to Native. This should be an event that takes the content back
-     * to the data source adapter.
-     *
+     * Returns the event to publish after doing a conversion from XML to Native.
+     * This should be an event that takes the content back to the data source
+     * adapter.
+     * 
      * @return something like "GlobalSight::FileSystemMergedEvent"
      */
-    public CxeMessageType getPostXmlToNativeConversionEvent()
-        throws Exception
+    public CxeMessageType getPostXmlToNativeConversionEvent() throws Exception
     {
         String name = m_parser.getPostMergeEvent();
         return CxeMessageType.getCxeMessageType(name);
@@ -738,7 +721,7 @@ public class DesktopAppHelper
 
     /**
      * Returns the format name that this desktop app helper supports.
-     *
+     * 
      * @return String like "word", "frame", "quark"
      */
     public String getFormatName()
@@ -747,35 +730,34 @@ public class DesktopAppHelper
     }
 
     /**
-     * Returns the event to use as the post merge event so that after
-     * the merger merges the GXML to XML, the XML will come to the
+     * Returns the event to use as the post merge event so that after the merger
+     * merges the GXML to XML, the XML will come to the
      * DesktopApplicationAdapter
-     *
+     * 
      * @return post merge event name
      */
     protected CxeMessageType getPostMergeEvent()
     {
-        return CxeMessageType.getCxeMessageType(
-            CxeMessageType.COPYFLOW_LOCALIZED_EVENT);
+        return CxeMessageType
+                .getCxeMessageType(CxeMessageType.COPYFLOW_LOCALIZED_EVENT);
     }
 
     //
     // PRIVATE METHODS
     //
 
-    private void copyFile(String p_from, String p_to)
-        throws IOException
+    private void copyFile(String p_from, String p_to) throws IOException
     {
-        File from = new File (m_workingDirLocal + p_from);
-        File to   = new File (m_workingDirLocal + p_to);
+        File from = new File(m_workingDirLocal + p_from);
+        File to = new File(m_workingDirLocal + p_to);
 
         if (m_logger.isDebugEnabled())
         {
-            m_logger.debug("Copying file `" + m_workingDirLocal + p_from +
-                "' to `" + m_workingDirLocal + p_to + "'.");
+            m_logger.debug("Copying file `" + m_workingDirLocal + p_from
+                    + "' to `" + m_workingDirLocal + p_to + "'.");
         }
 
-        FileInputStream  in  = new FileInputStream(from);
+        FileInputStream in = new FileInputStream(from);
         FileOutputStream out = new FileOutputStream(to);
 
         byte[] buffer = new byte[32768];
@@ -791,13 +773,13 @@ public class DesktopAppHelper
     }
 
     /**
-     * For Quark files generated on the Mac that had no extension,
-     * change the filename to have .qxd at the end so they can be
-     * opened on the Mac without requiring proper resource forks.
-     *
-     * Make sure the filename has at most 31 chars. This will limit
-     * filenames to 27 characters (unless they are already longer than
-     * 31 chars or already have an extension).
+     * For Quark files generated on the Mac that had no extension, change the
+     * filename to have .qxd at the end so they can be opened on the Mac without
+     * requiring proper resource forks.
+     * 
+     * Make sure the filename has at most 31 chars. This will limit filenames to
+     * 27 characters (unless they are already longer than 31 chars or already
+     * have an extension).
      */
     private String fixMacExtension(String p_filename)
     {
@@ -832,8 +814,8 @@ public class DesktopAppHelper
         }
 
         // Otherwise we truncate to max 31 chars including QXD extension.
-        String baseName = filename.substring(0,
-            Math.min(27, filename.length()));
+        String baseName = filename
+                .substring(0, Math.min(27, filename.length()));
 
         return dir + baseName + ".qxd";
     }
@@ -861,16 +843,15 @@ public class DesktopAppHelper
      */
     private void readProperties()
     {
-        String propertyFile = SystemConfiguration
-				.getCompanyResourcePath(getPropertyFileName());
+        String propertyFile = getPropertyFileName();
 
         try
         {
             URL url = DesktopAppHelper.class.getResource(propertyFile);
             if (url == null)
             {
-                throw new FileNotFoundException("Property file " +
-                    propertyFile + " not found.");
+                throw new FileNotFoundException("Property file " + propertyFile
+                        + " not found.");
             }
 
             Properties props = new Properties();
@@ -891,12 +872,12 @@ public class DesktopAppHelper
                 ServerConfig config = new ServerConfig(server);
 
                 config.m_serverName = props.getProperty("ServerName_" + index);
-                config.m_serverPort = Integer.parseInt(
-                    props.getProperty("ServerPort_" + index));
-                config.m_workingDirRemote =
-                    props.getProperty("GlobalSightXT_Directory_" + index);
-                config.m_locales = getLocales(
-                    props.getProperty("Locales_" + index));
+                config.m_serverPort = Integer.parseInt(props
+                        .getProperty("ServerPort_" + index));
+                config.m_workingDirRemote = props
+                        .getProperty("GlobalSightXT_Directory_" + index);
+                config.m_locales = getLocales(props.getProperty("Locales_"
+                        + index));
 
                 m_configs.add(config);
 
@@ -905,15 +886,15 @@ public class DesktopAppHelper
 
             if (m_logger.isDebugEnabled())
             {
-                m_logger.debug("GlobalSightXT Server Configuration:\n" +
-                    m_configs);
+                m_logger.debug("GlobalSightXT Server Configuration:\n"
+                        + m_configs);
             }
         }
         catch (Exception e)
         {
-            m_logger.error("Problem reading properties from " +
-                propertyFile + ".", e);
-       }
+            m_logger.error("Problem reading properties from " + propertyFile
+                    + ".", e);
+        }
     }
 
     private ArrayList getLocales(String p_locales)
@@ -939,23 +920,23 @@ public class DesktopAppHelper
     }
 
     /**
-     * Finds the best server configuration given the document's
-     * desired locale (source for import, target for export).
-     * Full matches are preferred over partial matches.
+     * Finds the best server configuration given the document's desired locale
+     * (source for import, target for export). Full matches are preferred over
+     * partial matches.
      */
     private ServerConfig findServerConfig(String p_srcLocale, String p_trgLocale)
-        throws Exception
+            throws Exception
     {
         ServerConfig result = null;
 
         // First try full locales in all configs
         for (int i = 0, max = m_configs.size(); i < max; i++)
         {
-            ServerConfig config = (ServerConfig)m_configs.get(i);
+            ServerConfig config = (ServerConfig) m_configs.get(i);
 
-            if (findFullLocale(config.m_locales, p_srcLocale) &&
-                (findFullLocale(config.m_locales, p_trgLocale) ||
-                 findPartialLocale(config.m_locales, p_trgLocale)))
+            if (findFullLocale(config.m_locales, p_srcLocale)
+                    && (findFullLocale(config.m_locales, p_trgLocale) || findPartialLocale(
+                            config.m_locales, p_trgLocale)))
             {
                 return config;
             }
@@ -964,18 +945,19 @@ public class DesktopAppHelper
         // Then try partial locales in all configs
         for (int i = 0, max = m_configs.size(); i < max; i++)
         {
-            ServerConfig config = (ServerConfig)m_configs.get(i);
+            ServerConfig config = (ServerConfig) m_configs.get(i);
 
-            if (findPartialLocale(config.m_locales, p_srcLocale) &&
-                (findFullLocale(config.m_locales, p_trgLocale) ||
-                 findPartialLocale(config.m_locales, p_trgLocale)))
+            if (findPartialLocale(config.m_locales, p_srcLocale)
+                    && (findFullLocale(config.m_locales, p_trgLocale) || findPartialLocale(
+                            config.m_locales, p_trgLocale)))
             {
                 return config;
             }
         }
 
-        throw new Exception("Requested locale pair `" + p_srcLocale +
-            "," + p_trgLocale + "' not supported by any configured GlobalSightXT server.");
+        throw new Exception("Requested locale pair `" + p_srcLocale + ","
+                + p_trgLocale
+                + "' not supported by any configured GlobalSightXT server.");
     }
 
     /**
@@ -985,7 +967,7 @@ public class DesktopAppHelper
     {
         for (int i = 0, max = p_locales.size(); i < max; i++)
         {
-            String locale = (String)p_locales.get(i);
+            String locale = (String) p_locales.get(i);
 
             if (p_locale.equalsIgnoreCase(locale))
             {
@@ -1005,7 +987,7 @@ public class DesktopAppHelper
 
         for (int i = 0, max = p_locales.size(); i < max; i++)
         {
-            String locale = (String)p_locales.get(i);
+            String locale = (String) p_locales.get(i);
 
             if (p_locale.equalsIgnoreCase(locale.substring(0, 2)))
             {

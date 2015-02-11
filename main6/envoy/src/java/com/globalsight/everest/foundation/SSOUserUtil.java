@@ -89,8 +89,9 @@ public class SSOUserUtil implements Serializable
         String companyName = p_user.getCompanyName();
         Company c = CompanyWrapper.getCompanyByName(companyName);
         long companyId = c.getId();
+        String userName = p_user.getUserId();
 
-        result = getUserMapping(companyId, p_user.getUserId());
+        result = getUserMapping(companyId, userName);
 
         return result;
     }
@@ -101,8 +102,8 @@ public class SSOUserUtil implements Serializable
         SSOUserMapping result = null;
 
         String hql = "from SSOUserMapping ss where ss.companyId = :companyId and lower(ss.userId) = :userId";
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("companyId", "" + p_companyId);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("companyId", p_companyId);
         map.put("userId", p_userId.toLowerCase());
 
         Iterator<?> it = HibernateUtil.search(hql, map).iterator();
@@ -125,8 +126,8 @@ public class SSOUserUtil implements Serializable
         }
 
         String hql = "from SSOUserMapping ss where ss.companyId = :companyId and lower(ss.ssoUserId) = :ssoUserId";
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("companyId", "" + p_companyId);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("companyId", p_companyId);
         map.put("ssoUserId", p_ssoUserId.toLowerCase());
 
         Iterator<?> it = HibernateUtil.search(hql, map).iterator();
@@ -172,8 +173,8 @@ public class SSOUserUtil implements Serializable
         }
 
         String hql = "from SSOUserMapping ss where ss.companyId = :companyId and lower(ss.ssoUserId) = :ssoUserId";
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("companyId", "" + p_companyId);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("companyId", p_companyId);
         map.put("ssoUserId", p_ssoUserId.toLowerCase());
 
         Iterator<?> it = HibernateUtil.search(hql, map).iterator();

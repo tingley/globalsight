@@ -16,21 +16,21 @@
  */
 package com.globalsight.everest.taskmanager;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
-// globalsight
-import com.globalsight.everest.costing.AmountOfWork;
-import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.foundation.WorkObject;
+import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.vendormanagement.Rating;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 
 public interface Task extends WorkObject
 {
@@ -39,7 +39,7 @@ public interface Task extends WorkObject
     public static final String CREATE_DATE = "m_createDate";
     public static final String TASK_COMMENTS = "m_taskComments";
     public static final String COMPANY_ID = "m_companyId";
-    public static final String IS_UPLOADING = "m_isUploading";//for gbs-1939
+    public static final String IS_UPLOADING = "m_isUploading";// for gbs-1939
     // public static final String RATE = "m_rate";
     public static final String EXPENSE_RATE = "m_expenseRate";
     public static final String REVENUE_RATE = "m_revenueRate";
@@ -102,14 +102,14 @@ public interface Task extends WorkObject
     /**
      * Set compnay id in request. It is used to create job, workflow, taskinfo.
      */
-    public void setCompanyId(String p_companyId);
+    public void setCompanyId(long p_companyId);
 
     /**
      * Returns the company id stored in request.
      * 
      * @return
      */
-    public String getCompanyId();
+    public long getCompanyId();
 
     /**
      * Get the id of this task.
@@ -619,14 +619,15 @@ public interface Task extends WorkObject
      * @return A string like "*d *h *m" if has duration or "--".
      */
     public String getActualDuration();
-    
-    //for GBS-1939
+
+    // for GBS-1939
     /**
      * Get state of the uploading this activity belong to.
      * 
      * @return The uploading state.
      */
     public char getIsUploading();
+
     /**
      * Set state of the uploading this activity belong to.
      * 

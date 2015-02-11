@@ -1,51 +1,58 @@
 <%@ page contentType="application/vnd.ms-excel"
         errorPage="/envoy/common/error.jsp"
-        import="jxl.*,jxl.write.*,jxl.format.*,
-        com.globalsight.everest.servlet.util.ServerProxy,
-        com.globalsight.everest.jobhandler.*,
+        import="
+        com.globalsight.everest.company.CompanyThreadLocal,
+        com.globalsight.everest.company.CompanyWrapper,
         com.globalsight.everest.foundation.SearchCriteriaParameters,
-        com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
         com.globalsight.everest.foundation.User,
-        com.globalsight.everest.workflowmanager.Workflow,
-        com.globalsight.everest.workflowmanager.WorkflowOwner,     
+        com.globalsight.everest.jobhandler.*,
         com.globalsight.everest.jobhandler.Job,           
         com.globalsight.everest.page.SourcePage,
-        com.globalsight.everest.workflow.WorkflowTaskInstance,
+        com.globalsight.everest.projecthandler.Project,
+        com.globalsight.everest.servlet.util.ServerProxy,
+        com.globalsight.everest.taskmanager.Task,
+        com.globalsight.everest.taskmanager.TaskAssignee,
+        com.globalsight.everest.taskmanager.TaskInfo,
+        com.globalsight.everest.usermgr.UserLdapHelper,
+        com.globalsight.everest.util.comparator.JobComparator,
+        com.globalsight.everest.webapp.WebAppConstants,
+        com.globalsight.everest.webapp.pagehandler.PageHandler,
+        com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean,
+        com.globalsight.everest.webapp.pagehandler.administration.reports.ReportsMainHandler,
+        com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper,
+        com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
+        com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,                
+        com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
+        com.globalsight.everest.workflow.Activity,
         com.globalsight.everest.workflow.EnvoyWorkItem,
         com.globalsight.everest.workflow.WorkflowConstants,
-        com.globalsight.everest.workflow.Activity,
-        com.globalsight.everest.projecthandler.Project,
+        com.globalsight.everest.workflow.WorkflowTaskInstance,
+        com.globalsight.everest.workflowmanager.Workflow,
+        com.globalsight.everest.workflowmanager.WorkflowOwner,     
+        com.globalsight.ling.common.URLEncoder,
         com.globalsight.util.IntHolder,
-        com.globalsight.everest.taskmanager.TaskAssignee,
-        com.globalsight.everest.util.comparator.JobComparator,
-        com.globalsight.everest.taskmanager.Task,
-        com.globalsight.everest.taskmanager.TaskInfo,
-        com.globalsight.everest.company.CompanyWrapper,
-        jxl.write.Number,
+        inetsoft.sree.RepletRegistry,
+        java.io.*,
         java.text.SimpleDateFormat,
         java.util.*,
-        java.io.*,
-        com.globalsight.everest.webapp.pagehandler.PageHandler,
-                com.globalsight.everest.webapp.pagehandler.administration.reports.ReportsMainHandler,
-                com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean,
-                com.globalsight.everest.webapp.WebAppConstants,
-                inetsoft.sree.RepletRegistry,
-                java.util.Date,
-                com.globalsight.ling.common.URLEncoder,
-                java.util.Enumeration,
-                java.util.ResourceBundle,
-                java.util.ArrayList,
-                java.util.Iterator,
-                org.apache.log4j.Logger,
-                com.globalsight.everest.company.CompanyThreadLocal,
-                com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
-                com.globalsight.everest.usermgr.UserLdapHelper,
-                com.globalsight.everest.webapp.WebAppConstants" session="true" 
+        java.util.ArrayList,
+        java.util.Date,
+        java.util.Enumeration,
+        java.util.Iterator,
+        java.util.ResourceBundle,
+        java.util.concurrent.ConcurrentHashMap,
+        jxl.*,
+        jxl.write.Number,
+        jxl.write.*,
+        jxl.format.*,
+        org.apache.log4j.Logger" session="true" 
 %><%!
     //String EMEA = CompanyWrapper.getCurrentCompanyName();
     private static Logger s_logger = Logger.getLogger("Reports");
     private WritableWorkbook m_workbook = null;
-    
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
+
     /**
      * Generates the Excel report and spits it to the outputstream
      * The report consists of all in progress workflows that are
@@ -59,9 +66,12 @@
         WorkbookSettings settings = new WorkbookSettings();
         settings.setSuppressWarnings(true);
         m_workbook = Workbook.createWorkbook(p_response.getOutputStream(), settings);
-        addJobs(p_request);
-        m_workbook.write();
-        m_workbook.close();
+        addJobs(p_request, p_response);
+        if(m_workbook != null)
+        {
+            m_workbook.write();
+            m_workbook.close();
+        }
     }
 
     /**
@@ -80,7 +90,6 @@
         ArrayList stateList = new ArrayList();        
         if (paramStatus != null && "*".equals(paramStatus[0])==false)
         {
-
           for (int i=0; i < paramStatus.length; i++)
           {
             stateList.add(paramStatus[i]);
@@ -100,8 +109,8 @@
         boolean wantsAllProjects = false;
         for (int i=0; i < paramProjectIds.length; i++)
         {
-          String id = paramProjectIds[i];
-          if (id.equals("*")==false)
+         String id = paramProjectIds[i];
+         if (id.equals("*")==false)
              projectIdList.add(new Long(id));
          else
          {
@@ -198,7 +207,7 @@
      * Gets the jobs and outputs workflow information.
      * @exception Exception
      */
-    private void addJobs(HttpServletRequest p_request) throws Exception
+    private void addJobs(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
     {
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         //print out the request parameters
@@ -206,7 +215,7 @@
         String[] paramTrgLocales = p_request.getParameterValues("targetLocalesList");
         HttpSession session = p_request.getSession();
 
-        WritableSheet sheet = m_workbook.createSheet(bundle.getString("lb_sheet") + "1",0);
+        WritableSheet sheet = m_workbook.createSheet(bundle.getString("lb_sheet") + "1", 0);
         ArrayList jobs = new ArrayList();
         addHeader(sheet, bundle);
         if (paramJobId!=null && "*".equals(paramJobId[0]))
@@ -248,7 +257,21 @@
         		}
         	}
         }
-                                                                            
+          
+        String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
+		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            m_workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobs.iterator();
         IntHolder row = new IntHolder(4);
         while (jobIter.hasNext())
@@ -272,11 +295,15 @@
                 }
             }
         }
+        
+     	// Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                        null, 100, ReportsData.STATUS_FINISHED);
     }
 
     /**
     * Gets the task for the workflow and outputs page information.
-    *@exception Exception
+    * @exception Exception
     */
     private void addWorkflow(HttpServletRequest p_request, WritableSheet sheet, Job j, Workflow w, IntHolder row) throws Exception
     {
@@ -505,4 +532,5 @@ response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public"); 
 generateReport(request,response);
+out.clear();out = pageContext.pushBody();
 %>

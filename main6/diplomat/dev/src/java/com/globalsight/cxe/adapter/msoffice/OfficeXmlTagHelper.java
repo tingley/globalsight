@@ -139,7 +139,7 @@ public class OfficeXmlTagHelper
                     if (index > -1)
                     {
                         contentSB = contentSB.replace(index, index + oldLen,
-                                newStr);
+                          newStr);
                     }
                 }
             }
@@ -196,6 +196,25 @@ public class OfficeXmlTagHelper
 
         return styles;
     }
+    
+    private static int countString(String s, String s1)
+    {
+    	int n = 0;
+    	
+    	Pattern p = Pattern.compile(s1);
+    	Matcher m = p.matcher(s);
+    	while (m.find())
+    	{
+    		n++;
+    	}
+    	
+    	return n;
+    }
+    
+    private static boolean hasEmbedWr(String f1)
+    {
+    	return countString(f1, "(<w:r [^>]*>)|(<w:r>)") != countString(f1, "</w:r>");
+    }
 
     public static String getMergedTags(int filetype, String f1, String f2)
     {
@@ -205,6 +224,11 @@ public class OfficeXmlTagHelper
             {
                 return f1;
             }
+        	
+        	if (hasEmbedWr(f1) || hasEmbedWr(f2))
+        	{
+        		return f1;
+        	}
         	
             boolean isOrderChanged = false;
             boolean matched = false;

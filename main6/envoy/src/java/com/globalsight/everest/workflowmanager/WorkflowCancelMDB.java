@@ -24,13 +24,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Transaction;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.Page;
@@ -44,18 +52,25 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_CANCEL_WORKFLOW_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class WorkflowCancelMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger
-            .getLogger(JobCancelMDB.class.getName());
+    private static Logger log = Logger.getLogger(JobCancelMDB.class.getName());
 
     public WorkflowCancelMDB()
     {
@@ -67,6 +82,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
      * 
      * @param message
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message message)
     {
         Workflow wf = null;
@@ -76,7 +92,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
         Transaction tx = null;
         String oldJobState = null;
         String oldWorkflowState = null;
-        //Activity accepter
+        // Activity accepter
         String accepter = null;
 
         try
@@ -92,6 +108,8 @@ public class WorkflowCancelMDB extends GenericQueueMDB
             tx = HibernateUtil.getTransaction();
 
             wf = HibernateUtil.get(WorkflowImpl.class, workflowId);
+            long companyId = wf.getCompanyId();
+            CompanyThreadLocal.getInstance().setIdValue(companyId);
 
             if (isDispatched)
             {
@@ -102,7 +120,8 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                     tasks = activeTasks.values().toArray();
                     taskList.add(tasks);
                     updateTaskState(tasks, wf.getTasks(), Task.STATE_DEACTIVE);
-                    accepter = ((WorkflowTaskInstance) tasks[0]).getAcceptUser();
+                    accepter = ((WorkflowTaskInstance) tasks[0])
+                            .getAcceptUser();
                 }
             }
 
@@ -114,18 +133,20 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                     .getWorkflowTemplateInfo(wf.getTargetLocale());
 
             TaskEmailInfo emailInfo = new TaskEmailInfo(
-                    wf.getJob().getL10nProfile().getProject().getProjectManagerId(),
+                    wf.getJob().getL10nProfile().getProject()
+                            .getProjectManagerId(),
                     wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                     wfti.notifyProjectManager(), wf.getJob().getPriority());
             emailInfo.setJobName(wf.getJob().getJobName());
-            emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile().getProjectId()));
+            emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile()
+                    .getProjectId()));
             emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
             emailInfo.setTargetLocale(wf.getTargetLocale().toString());
-            emailInfo.setCompanyId(wf.getJob().getCompanyId());
-            if(null!=accepter)
+            emailInfo.setCompanyId(String.valueOf(companyId));
+            if (null != accepter)
             {
-            	emailInfo.setAccepterName(accepter);
-            }            
+                emailInfo.setAccepterName(accepter);
+            }
 
             getWFServer().suspendWorkflow(workflowId, emailInfo);
 
@@ -135,8 +156,12 @@ public class WorkflowCancelMDB extends GenericQueueMDB
 
             if (Job.CANCELLED.equals(job.getState()))
             {
-                WorkflowManagerLocal.cleanCorpus(jobId);
-                WorkflowManagerLocal.deleteInProgressTmData(job);
+                //WorkflowManagerLocal.cleanCorpus(jobId);
+                //WorkflowManagerLocal.deleteInProgressTmData(job);
+                // GBS-2915, discard a job to remove all job data
+                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
+                        .getCompanyId()));
+                removal.removeJob(job);
             }
 
             // now remove from user calendar
@@ -145,9 +170,9 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                 WorkflowManagerLocal.removeReservedTimes(tasks);
             }
 
-            //HibernateUtil.commit(tx);
+            // HibernateUtil.commit(tx);
             // for gbs-1302, cancel interim activities
-            TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
+            //TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Workflow " + wf.getId() + " was cancelled");
         }
         catch (Exception we)

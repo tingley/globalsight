@@ -74,6 +74,7 @@ public class BuildUtil
                 out.write(content.toString());
                 out.flush();
                 out.close();
+                in.close();
             }
             catch (Exception e)
             {

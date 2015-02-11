@@ -66,6 +66,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.Timestamp;
@@ -123,8 +124,6 @@ public class CreateJobsMainHandler extends PageHandler
     {
         // permission check
         HttpSession session = request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         if (!userPerms.getPermissionFor(Permission.CREATE_JOB))
@@ -134,14 +133,17 @@ public class CreateJobsMainHandler extends PageHandler
             return;
         }
         // get the operator
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
-        if (user != null)
+        if (user == null)
         {
-            sessionMgr.setAttribute(WebAppConstants.USER, user);
-        }
-        else
-        {
-            logger.warn("User object is null while it should not.");
+            String userName = request.getParameter("userName");
+            if (userName != null && !"".equals(userName))
+            {
+                user = ServerProxy.getUserManager().getUserByName(userName);
+                sessionMgr.setAttribute(WebAppConstants.USER, user);
+            }
         }
 
         ResourceBundle bundle = PageHandler.getBundle(session);
@@ -176,21 +178,79 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if (action.equals("createJob"))
             {
-                int result = this.createJobs(request, currentCompanyId, user);
-                if (result == SUCCEED)
+                final Map<Object, Object> dataMap = prepareDataForJob(request,
+                        currentCompanyId, user);
+                this.setPageParameter(request, bundle, user, session,
+                        currentCompanyId);
+                Runnable runnable = new Runnable()
                 {
-                    request.setAttribute("create_result",
-                            bundle.getString("msg_job_create_successful"));
-                }
-                else if (result == FAIL)
-                {
-                    request.setAttribute("create_result",
-                            bundle.getString("msg_job_create_failed"));
-                }
+                    public void run()
+                    {
+                        createJobs(dataMap);
+                    }
+                };
+                Thread t = new MultiCompanySupportedThread(runnable);
+                t.start();
+                request.setAttribute("create_result",
+                        bundle.getString("msg_job_create_successful"));
             }
         }
-        this.setPageParameter(request, bundle, user, session, currentCompanyId);
+        if (!"createJob".equals(action))
+        {
+            this.setPageParameter(request, bundle, user, session,
+                    currentCompanyId);
+        }
         super.invokePageHandler(pageDescriptor, request, response, context);
+    }
+
+    private Map<Object, Object> prepareDataForJob(HttpServletRequest request,
+            String currentCompanyId, User user)
+    {
+        Map<Object, Object> dataMap = new HashMap<Object, Object>();
+        dataMap.put("currentCompanyId", currentCompanyId);
+        dataMap.put("user", user);
+        SessionManager sessionMgr = (SessionManager) request.getSession()
+                .getAttribute(SESSION_MANAGER);
+        dataMap.put(SESSION_MANAGER, sessionMgr);
+
+        String jobName = EditUtil
+                .utf8ToUnicode(request.getParameter("jobName")).trim()
+                + "_"
+                + getRandomNumber();
+        dataMap.put("jobName", jobName);
+        String comment = request.getParameter("comment");
+        dataMap.put("comment", comment);
+        // This is where the files are uploaded
+        String tmpFolderName = request.getParameter("tmpFolderName");
+        dataMap.put("tmpFolderName", tmpFolderName);
+        // full path of files
+        String[] filePaths = request.getParameterValues("jobFilePath");
+        dataMap.put("jobFilePath", filePaths);
+        // l10n info and file profile info
+        String[] l10nAndfileProfiles = request
+                .getParameterValues("fileProfile");
+        dataMap.put("fileProfile", l10nAndfileProfiles);
+        // mapped target locales
+        String[] targetLocales = request.getParameterValues("targetLocale");
+        dataMap.put("targetLocale", targetLocales);
+        // priority
+        String priority = request.getParameter("priority");
+        dataMap.put("priority", priority);
+        // the selected folder path
+        String baseFolder = request.getParameter("baseFolder");
+        dataMap.put("baseFolder", baseFolder);
+        // mark whether the file comes from server
+        String[] isSwitched = request.getParameterValues("isSwitched");
+        dataMap.put("isSwitched", isSwitched);
+        // name of attachment
+        String attachmentName = request.getParameter("attachment");
+        dataMap.put("attachment", attachmentName);
+        String baseStorageFolder = request.getParameter("baseStorageFolder");
+        dataMap.put("baseStorageFolder", baseStorageFolder);
+        String attribute = request.getParameter("attributeString");
+        dataMap.put("attributeString", attribute);
+
+        return dataMap;
     }
 
     /**
@@ -269,11 +329,19 @@ public class CreateJobsMainHandler extends PageHandler
                 session.getAttribute("UID_" + session.getId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         String tmpFolderName = sdf.format(new Date()) + "-" + getRandomNumber();
-        request.setAttribute(
-                "lastSelectedFolder",
-                convertFilePath(
-                        getLastSelectedFolder(user.getUserId(), SELECTED_FOLDER))
-                        .replace("\\", "\\\\"));
+        if (user != null)
+        {
+            request.setAttribute(
+                    "lastSelectedFolder",
+                    convertFilePath(
+                            getLastSelectedFolder(user.getUserId(),
+                                    SELECTED_FOLDER)).replace("\\", "\\\\"));
+        }
+        else
+        {
+            request.setAttribute("lastSelectedFolder", "");
+        }
+
         request.setAttribute(
                 "baseTmpFolder",
                 convertFilePath(
@@ -587,45 +655,33 @@ public class CreateJobsMainHandler extends PageHandler
     }
 
     /**
-     * Create a job
-     * 
-     * @param request
+     * Creates a job
      */
-    private int createJobs(HttpServletRequest request, String currentCompanyId,
-            User user)
+    private int createJobs(Map<Object, Object> dataMap)
     {
         try
         {
-            String jobName = EditUtil.utf8ToUnicode(
-                    request.getParameter("jobName")).trim()
-                    + "_" + getRandomNumber();
-            String comment = request.getParameter("comment");
-            // This is where the files are uploaded
-            String tmpFolderName = request.getParameter("tmpFolderName");
-            // full path of files
-            String[] filePaths = request.getParameterValues("jobFilePath");
-            // l10n info and file profile info
-            String[] l10nAndfileProfiles = request
-                    .getParameterValues("fileProfile");
-            // mapped target locales
-            String[] targetLocales = request.getParameterValues("targetLocale");
-            // priority
-            String priority = request.getParameter("priority");
-            // the selected folder path
-            String baseFolder = request.getParameter("baseFolder");
+            User user = (User) dataMap.get("user");
+            String currentCompanyId = (String) dataMap.get("currentCompanyId");
+            String jobName = (String) dataMap.get("jobName");
+            String comment = (String) dataMap.get("comment");
+            String tmpFolderName = (String) dataMap.get("tmpFolderName");
+            String[] filePaths = (String[]) dataMap.get("jobFilePath");
+            String[] l10nAndfileProfiles = (String[]) dataMap
+                    .get("fileProfile");
+            String[] targetLocales = (String[]) dataMap.get("targetLocale");
+            String priority = (String) dataMap.get("priority");
+            String baseFolder = (String) dataMap.get("baseFolder");
             if (StringUtils.isNotEmpty(baseFolder))
             {
                 this.saveBaseFolder(user.getUserId(), SELECTED_FOLDER,
                         baseFolder);
             }
-            // mark whether the file comes from server
-            String[] isSwitched = request.getParameterValues("isSwitched");
-            // name of attachment
-            String attachmentName = request.getParameter("attachment");
-            // baseStorageFolder = current random folder + "," + companyId
-            String baseStorageFolder = request
-                    .getParameter("baseStorageFolder");
-            String attribute = request.getParameter("attributeString");
+            String[] isSwitched = (String[]) dataMap.get("isSwitched");
+            String attachmentName = (String) dataMap.get("attachment");
+            String baseStorageFolder = (String) dataMap
+                    .get("baseStorageFolder");
+            String attribute = (String) dataMap.get("attributeString");
 
             BasicL10nProfile l10Profile = getBasicL10Profile(l10nAndfileProfiles);
             // init files and file profiles infomation
@@ -633,20 +689,19 @@ public class CreateJobsMainHandler extends PageHandler
             List<String> descList = new ArrayList<String>();
             List<String> fpIdList = new ArrayList<String>();
             List<FileProfile> fileProfileList = new ArrayList<FileProfile>();
-            this.initDescAndFileProfile(descList, fpIdList, filePaths,
-                    l10nAndfileProfiles, l10Profile, tmpFolderName, jobName,
-                    isSwitched, sourceFilesList, fileProfileList);
             // init target locale infomation
             String locs = this.initTargetLocale(targetLocales);
-            // create job
             // for GBS-2137, initialize the job with "IN_QUEUE" state
-            SessionManager sessionMgr = (SessionManager) request.getSession()
-                    .getAttribute(SESSION_MANAGER);
+            SessionManager sessionMgr = (SessionManager) dataMap
+                    .get(SESSION_MANAGER);
             String uuid = sessionMgr.getAttribute("uuid") == null ? null
                     : (String) sessionMgr.getAttribute("uuid");
             Job job = JobCreationMonitor.initializeJob(jobName, uuid,
                     user.getUserId(), l10Profile.getId(), priority,
                     Job.IN_QUEUE);
+            this.initDescAndFileProfile(descList, fpIdList, filePaths,
+                    l10nAndfileProfiles, l10Profile, tmpFolderName, job,
+                    isSwitched, sourceFilesList, fileProfileList);
             Map<String, long[]> filesToFpId = excuteScriptOfFileProfile(
                     descList, fpIdList, fileProfileList);
             Set<String> fileNames = filesToFpId.keySet();
@@ -697,7 +752,7 @@ public class CreateJobsMainHandler extends PageHandler
                         + File.separator
                         + baseStorageFolder.split(",")[0];
                 SaveCommentThread sct = new SaveCommentThread(jobName, comment,
-                        attachmentName, user.getUserName(), dir);
+                        attachmentName, user.getUserId(), dir);
                 sct.start();
             }
             // Send email at the end.
@@ -1011,22 +1066,23 @@ public class CreateJobsMainHandler extends PageHandler
     {
         try
         {
-            UserParameter up = ServerProxy.getUserParameterManager()
-                    .getUserParameter(userId, parameterName);
-            if (up != null)
+            if (userId != null)
             {
-                return up.getValue();
-            }
-            else
-            {
-                return "";
+                UserParameter up = ServerProxy.getUserParameterManager()
+                        .getUserParameter(userId, parameterName);
+                if (up != null)
+                {
+                    return up.getValue();
+                }
             }
         }
         catch (Exception e)
         {
-            logger.error("Failed to get last selected folder information.", e);
+            logger.warn("Failed to get last selected folder information.", e);
             return "";
         }
+
+        return "";
     }
 
     /**
@@ -1045,7 +1101,7 @@ public class CreateJobsMainHandler extends PageHandler
     private void initDescAndFileProfile(List<String> descList,
             List<String> fpIdList, String[] filePaths,
             String[] l10nAndfileProfiles, BasicL10nProfile blp,
-            String tmpFolderName, String jobName, String[] isSwitched,
+            String tmpFolderName, Job job, String[] isSwitched,
             List<File> sourceFilesList, List<FileProfile> fileProfileList)
             throws FileNotFoundException, Exception
     {
@@ -1065,7 +1121,7 @@ public class CreateJobsMainHandler extends PageHandler
             }
 
             List<String> desc = copyTmpFilesToProperDirectory(blp, filePath,
-                    tmpFolderName, jobName, fp, isSwitched[i], sourceFilesList);
+                    tmpFolderName, job, fp, isSwitched[i], sourceFilesList);
             descList.addAll(desc);
             for (int j = 0; j < desc.size(); j++)
             {
@@ -1139,9 +1195,8 @@ public class CreateJobsMainHandler extends PageHandler
      */
     private List<String> copyTmpFilesToProperDirectory(
             BasicL10nProfile basicL10nProfile, String filePath,
-            String tmpFolderName, String jobName, FileProfile fp,
-            String isSwitched, List<File> sourceFilesList)
-            throws FileNotFoundException, Exception
+            String tmpFolderName, Job job, FileProfile fp, String isSwitched,
+            List<File> sourceFilesList) throws FileNotFoundException, Exception
     {
         try
         {
@@ -1153,7 +1208,7 @@ public class CreateJobsMainHandler extends PageHandler
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             String currentLocation = "";
             String destinationLocation = "";
-            if (isSwitched != null && isSwitched.equals("true"))
+            if ("true".equals(isSwitched))
             {
                 // the files are uploaded in advance.
                 currentLocation = filePath;
@@ -1173,7 +1228,7 @@ public class CreateJobsMainHandler extends PageHandler
                     filePath = filePath.substring(filePath
                             .indexOf(File.separator) + 1);
                     destinationLocation = sourceLocaleName + File.separator
-                            + jobName + File.separator + filePath;
+                            + job.getId() + File.separator + filePath;
                     // find old attachment path, and delete unused attachment
                     // files
                     String oldAttachmentPath = AmbFileStoragePathUtils
@@ -1210,7 +1265,7 @@ public class CreateJobsMainHandler extends PageHandler
                         + File.separator + tmpFolderName + File.separator
                         + filePath;
                 destinationLocation = sourceLocaleName + File.separator
-                        + jobName + filePath;
+                        + job.getId() + filePath;
             }
 
             // if the source file is in tmp folder,
@@ -1652,4 +1707,5 @@ public class CreateJobsMainHandler extends PageHandler
         return input.replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;");
     }
+
 }

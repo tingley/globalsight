@@ -1,37 +1,56 @@
 <?xml version="1.0"?>	
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServerImpl" table="TEAMSITE_SERVER">
+	<class
+		name="com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServerImpl"
+		table="TEAMSITE_SERVER">
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<property name="companyId" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
 
-		<property name="name" length="40" column="NAME" type="string" not-null="true" unique="false"/>
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="false" />
 
-		<property name="description" length="4000" column="DESCRIPTION" type="string" not-null="false" unique="false"/>
-			
-		<property name="operatingSystem" length="40" column="OPERATING_SYSTEM" type="string" not-null="true" unique="false"/>
-		
-		<property name="exportPort" length="8" column="EXPORT_PORT" type="int" not-null="true" unique="false"/>
-		<property name="importPort" length="8" column="IMPORT_PORT" type="int" not-null="true" unique="false"/>
-		<property name="proxyPort" length="8" column="PROXY_PORT" type="int" not-null="true" unique="false"/>
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
 
-		<property name="home" length="4000" column="HOME" type="string" not-null="true" unique="false"/>
-		
-		<property name="user" length="40" column="USER_NAME" type="string" not-null="true" unique="false"/>
-		
-		<property name="userPass" length="40" column="USER_PASS" type="string" not-null="true" unique="false"/>
-		<property name="type" length="40" column="USER_TYPE" type="string" not-null="true" unique="false"/>
-		
-		<property name="mount" length="40" column="MOUNT_DIR" type="string" not-null="true" unique="false"/>
-		<property name="allowLocaleSpecificReimport"  column="ALLOW_REIMPORT" type="yes_no" not-null="true" unique="false"/>
-		
-		<property name="timestamp"  column="TIMESTAMP" type="timestamp" not-null="true" unique="false"/>
-		
-		<set name="backingStores" table="TEAMSITE_SERVER_BACKING_STORE" cascade="all">
-			<key column="TEAMSITE_SERVER_ID"/>
-			<many-to-many class="com.globalsight.cxe.entity.cms.teamsite.store.BackingStoreImpl" column="TEAMSITE_BACKING_STORE_ID"/>
+		<property name="operatingSystem" length="40" column="OPERATING_SYSTEM"
+			type="string" not-null="true" unique="false" />
+
+		<property name="exportPort" length="8" column="EXPORT_PORT"
+			type="int" not-null="true" unique="false" />
+		<property name="importPort" length="8" column="IMPORT_PORT"
+			type="int" not-null="true" unique="false" />
+		<property name="proxyPort" length="8" column="PROXY_PORT"
+			type="int" not-null="true" unique="false" />
+
+		<property name="home" length="4000" column="HOME" type="string"
+			not-null="true" unique="false" />
+
+		<property name="user" length="40" column="USER_NAME" type="string"
+			not-null="true" unique="false" />
+
+		<property name="userPass" length="40" column="USER_PASS"
+			type="string" not-null="true" unique="false" />
+		<property name="type" length="40" column="USER_TYPE" type="string"
+			not-null="true" unique="false" />
+
+		<property name="mount" length="40" column="MOUNT_DIR" type="string"
+			not-null="true" unique="false" />
+		<property name="allowLocaleSpecificReimport" column="ALLOW_REIMPORT"
+			type="yes_no" not-null="true" unique="false" />
+
+		<property name="timestamp" column="TIMESTAMP" type="timestamp"
+			not-null="true" unique="false" />
+
+		<set name="backingStores" table="TEAMSITE_SERVER_BACKING_STORE"
+			cascade="all">
+			<key column="TEAMSITE_SERVER_ID" />
+			<many-to-many
+				class="com.globalsight.cxe.entity.cms.teamsite.store.BackingStoreImpl"
+				column="TEAMSITE_BACKING_STORE_ID" />
 		</set>
-	</class>	
+	</class>
 </hibernate-mapping>

@@ -32,66 +32,64 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
- * Performs an in-place update of existing source page data: modified
- * TUs and TUVs are updated, unmodified but reordered TUs and TUVs are
- * ordered into their new place, and template parts are re-created.
+ * Performs an in-place update of existing source page data: modified TUs and
+ * TUVs are updated, unmodified but reordered TUs and TUVs are ordered into
+ * their new place, and template parts are re-created.
  */
-public class UpdateWordCountPersistenceCommand
-    extends PersistenceCommand
+public class UpdateWordCountPersistenceCommand extends PersistenceCommand
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            "EditSourcePage" /*UpdateWordCountPersistenceCommand.class*/);
+    private static Logger s_logger = Logger
+            .getLogger(UpdateWordCountPersistenceCommand.class);
 
-//    private static final String s_UPDATE_SOURCEPAGE =
-//        "update source_page set " +
-//        "overriden_word_count=null, word_count=?, contains_gs_tag=?, " +
-//        "timestamp=SYSDATE, last_modified=SYSDATE where id=?";
-    private static final String s_UPDATE_SOURCEPAGE =
-        "update source_page set " +
-        "overriden_word_count=null, word_count=?, contains_gs_tag=?, " +
-        "timestamp=current_timestamp, last_modified=current_timestamp where id=?";
+    // private static final String s_UPDATE_SOURCEPAGE =
+    // "update source_page set " +
+    // "overriden_word_count=null, word_count=?, contains_gs_tag=?, " +
+    // "timestamp=SYSDATE, last_modified=SYSDATE where id=?";
+    private static final String s_UPDATE_SOURCEPAGE = "update source_page set "
+            + "overriden_word_count=null, word_count=?, contains_gs_tag=?, "
+            + "timestamp=current_timestamp, last_modified=current_timestamp where id=?";
 
-    private static final String s_UPDATE_TARGETPAGE =
-        "update target_page set " +
-        "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, " + 
-        "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
-        "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, " +
-        "fuzzy_hi_word_count=?, no_match_word_count=?, " +
-        "repetition_word_count=?, timestamp=CURRENT_TIMESTAMP, " +
-        "last_modified=CURRENT_TIMESTAMP where id=?";
-//    private static final String s_UPDATE_TARGETPAGE =
-//        "update target_page set " +
-//        "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, " + 
-//        "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
-//        "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, " +
-//        "fuzzy_hi_word_count=?, no_match_word_count=?, " +
-//        "repetition_word_count=?, timestamp=SYSDATE, " +
-//        "last_modified=SYSDATE where id=?";
+    private static final String s_UPDATE_TARGETPAGE = "update target_page set "
+            + "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, "
+            + "exact_context_word_count=?, exact_segment_tm_word_count=?, "
+            + "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, "
+            + "fuzzy_hi_word_count=?, no_match_word_count=?, "
+            + "repetition_word_count=?, timestamp=CURRENT_TIMESTAMP, "
+            + "last_modified=CURRENT_TIMESTAMP where id=?";
+    // private static final String s_UPDATE_TARGETPAGE =
+    // "update target_page set " +
+    // "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, "
+    // +
+    // "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
+    // "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, "
+    // +
+    // "fuzzy_hi_word_count=?, no_match_word_count=?, " +
+    // "repetition_word_count=?, timestamp=SYSDATE, " +
+    // "last_modified=SYSDATE where id=?";
 
-    private static final String s_UPDATE_JOB =
-        "update job set is_wordcount_reached='N', " +
-        "overriden_word_count=?, timestamp=CURRENT_TIMESTAMP where id=?";
-//    private static final String s_UPDATE_JOB =
-//        "update job set is_wordcount_reached='N', " +
-//        "overriden_word_count=?, timestamp=SYSDATE where id=?";
+    private static final String s_UPDATE_JOB = "update job set is_wordcount_reached='N', "
+            + "overriden_word_count=?, timestamp=CURRENT_TIMESTAMP where id=?";
+    // private static final String s_UPDATE_JOB =
+    // "update job set is_wordcount_reached='N', " +
+    // "overriden_word_count=?, timestamp=SYSDATE where id=?";
 
-    private static final String s_UPDATE_WORKFLOW =
-        "update workflow set " +
-        "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, " + 
-        "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
-        "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, " +
-        "fuzzy_hi_word_count=?, no_match_word_count=?, " +
-        "repetition_word_count=?, timestamp=CURRENT_TIMESTAMP " +
-        "where iflow_instance_id=?";
-//    final String s_UPDATE_WORKFLOW =
-//        "update workflow set " +
-//        "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, " + 
-//        "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
-//        "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, " +
-//        "fuzzy_hi_word_count=?, no_match_word_count=?, " +
-//        "repetition_word_count=?, timestamp=SYSDATE " +
-//        "where iflow_instance_id=?";
+    private static final String s_UPDATE_WORKFLOW = "update workflow set "
+            + "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, "
+            + "exact_context_word_count=?, exact_segment_tm_word_count=?, "
+            + "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, "
+            + "fuzzy_hi_word_count=?, no_match_word_count=?, "
+            + "repetition_word_count=?, timestamp=CURRENT_TIMESTAMP "
+            + "where iflow_instance_id=?";
+    // final String s_UPDATE_WORKFLOW =
+    // "update workflow set " +
+    // "total_word_count=?, sub_lev_match_word_count=?, sub_lev_repetition_word_count=?, "
+    // +
+    // "exact_context_word_count=?, exact_segment_tm_word_count=?, " +
+    // "fuzzy_low_word_count=?, fuzzy_mid_word_count=?, fuzzy_mid_hi_word_count=?, "
+    // +
+    // "fuzzy_hi_word_count=?, no_match_word_count=?, " +
+    // "repetition_word_count=?, timestamp=SYSDATE " +
+    // "where iflow_instance_id=?";
 
     //
     // Members
@@ -118,8 +116,8 @@ public class UpdateWordCountPersistenceCommand
      *
      */
     public UpdateWordCountPersistenceCommand(SourcePage p_sourcePage,
-        ArrayList p_targetPages, Job p_job, ArrayList p_workflows,
-        int p_totalWordCount, boolean p_hasGsTags)
+            ArrayList p_targetPages, Job p_job, ArrayList p_workflows,
+            int p_totalWordCount, boolean p_hasGsTags)
     {
         m_sourcePage = p_sourcePage;
         m_targetPages = p_targetPages;
@@ -135,7 +133,7 @@ public class UpdateWordCountPersistenceCommand
     //
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -157,23 +155,22 @@ public class UpdateWordCountPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
-        m_ps_sp  = p_connection.prepareStatement(s_UPDATE_SOURCEPAGE);
-        m_ps_tp  = p_connection.prepareStatement(s_UPDATE_TARGETPAGE);
+        m_ps_sp = p_connection.prepareStatement(s_UPDATE_SOURCEPAGE);
+        m_ps_tp = p_connection.prepareStatement(s_UPDATE_TARGETPAGE);
         m_ps_job = p_connection.prepareStatement(s_UPDATE_JOB);
-        m_ps_wf  = p_connection.prepareStatement(s_UPDATE_WORKFLOW);
+        m_ps_wf = p_connection.prepareStatement(s_UPDATE_WORKFLOW);
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
-        //Timestamp now = new Timestamp(System.currentTimeMillis());
+        // Timestamp now = new Timestamp(System.currentTimeMillis());
 
         m_sourcePage.setWordCount(m_totalWordCount);
         m_sourcePage.clearOverridenWordCount();
-        ExtractedSourceFile file =
-            (ExtractedSourceFile)m_sourcePage.getPrimaryFile();
+        ExtractedSourceFile file = (ExtractedSourceFile) m_sourcePage
+                .getPrimaryFile();
         file.containGsTags(m_hasGsTags);
 
         // update source_page set overriden_word_count=null, word_count=?,
@@ -196,11 +193,13 @@ public class UpdateWordCountPersistenceCommand
         {
             for (int i = 0, max = m_targetPages.size(); i < max; i++)
             {
-                TargetPage tp = (TargetPage)m_targetPages.get(i);
+                TargetPage tp = (TargetPage) m_targetPages.get(i);
 
-                // update target_page set total_word_count=?, sub_lev_match_word_count=?,
-                // sub_lev_repetition_word_count, exact_context_word_count=?, 
-                //exact_segment_tm_word_count=?, fuzzy_low_word_count=?, fuzzy_mid_word_count=?, 
+                // update target_page set total_word_count=?,
+                // sub_lev_match_word_count=?,
+                // sub_lev_repetition_word_count, exact_context_word_count=?,
+                // exact_segment_tm_word_count=?, fuzzy_low_word_count=?,
+                // fuzzy_mid_word_count=?,
                 // fuzzy_mid_hi_word_count=?, fuzzy_hi_word_count=?,
                 // no_match_word_count=?, repetition_word_count=?
                 m_ps_tp.setInt(1, m_totalWordCount);
@@ -255,12 +254,14 @@ public class UpdateWordCountPersistenceCommand
         {
             for (int i = 0, max = m_workflows.size(); i < max; i++)
             {
-                Workflow wf = (Workflow)m_workflows.get(i);
+                Workflow wf = (Workflow) m_workflows.get(i);
 
-                // update workflow set total_word_count=?, sub_lev_match_word_count=?,
-                // sub_lev_repetition_word_count=?, exact_context_word_count=?,   
-                // exact_segment_tm_word_count=?,fuzzy_low_word_count=?, fuzzy_mid_word_count=?, 
-                // fuzzy_mid_hi_word_count=?, fuzzy_hi_word_count=?, 
+                // update workflow set total_word_count=?,
+                // sub_lev_match_word_count=?,
+                // sub_lev_repetition_word_count=?, exact_context_word_count=?,
+                // exact_segment_tm_word_count=?,fuzzy_low_word_count=?,
+                // fuzzy_mid_word_count=?,
+                // fuzzy_mid_hi_word_count=?, fuzzy_hi_word_count=?,
                 // no_match_word_count=?, repetition_word_count=?,
                 // timestamp=SYSDATE where iflow_instance_id=?";
                 m_ps_wf.setInt(1, m_totalWordCount);
@@ -297,8 +298,7 @@ public class UpdateWordCountPersistenceCommand
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         m_ps_sp.executeBatch();
         m_ps_tp.executeBatch();

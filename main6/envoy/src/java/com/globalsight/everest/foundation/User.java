@@ -125,15 +125,31 @@ public interface User
 
     public void setAddress(String p_address);
 
-    /**
-     * the types of phone numbers are listed above in the CONSTANTS can only
-     * hold one of each type. Each set will overwrite a current phone number of
-     * the same type.
-     */
-    public String getPhoneNumber(int p_type);
+//    /**
+//     * the types of phone numbers are listed above in the CONSTANTS can only
+//     * hold one of each type. Each set will overwrite a current phone number of
+//     * the same type.
+//     */
+//    public String getPhoneNumber(int p_type);
+//
+//    public void setPhoneNumber(int p_type, String p_phoneNumber);
 
-    public void setPhoneNumber(int p_type, String p_phoneNumber);
+    public String getOfficePhoneNumber();
 
+	public void setOfficePhoneNumber(String officePhoneNumber);
+
+	public String getHomePhoneNumber();
+
+	public void setHomePhoneNumber(String homePhoneNumber);
+
+	public String getCellPhoneNumber();
+
+	public void setCellPhoneNumber(String cellPhoneNumber);
+
+	public String getFaxPhoneNumber();
+
+	public void setFaxPhoneNumber(String faxPhoneNumber);
+	
     public String getDefaultUILocale();
 
     public void setDefaultUILocale(String p_locale);

@@ -44,6 +44,7 @@ public class TMSearchBrowserHandler extends PageActionHandler
             String targetLocale = (String) request.getParameter("targetLocale");
             request.setAttribute("targetLocale", targetLocale);
             String searchText = (String) request.getParameter("searchText");
+            searchText = iso88591ToUtf8(searchText);
             request.setAttribute("searchText", searchText);
         }
     }

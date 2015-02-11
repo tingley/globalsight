@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +50,9 @@ import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.CurrencyThreadLocal;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ProjectWorkflowData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReviewerVendorPoReportDataAssembler;
@@ -58,13 +63,14 @@ import com.globalsight.util.IntHolder;
 
 public class ReviewerVendorPoXlsReportHelper
 {
-    private static Logger s_logger = Logger
-            .getLogger("Reports");
+    private static Logger s_logger = Logger.getLogger("ReviewerVendorPoXlsReportHelper");
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
     private XlsReportData data = null;
     private WritableWorkbook m_workbook = null;
     String EMEA = CompanyWrapper.getCurrentCompanyName();
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
 
     public ReviewerVendorPoXlsReportHelper(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -107,6 +113,8 @@ public class ReviewerVendorPoXlsReportHelper
      */
     public void generateReport() throws Exception
     {
+        String userId = (String) request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         WorkbookSettings settings = new WorkbookSettings();
         settings.setSuppressWarnings(true);
@@ -172,6 +180,20 @@ public class ReviewerVendorPoXlsReportHelper
             }
         }
 
+        List<Long> reportJobIDS = new ArrayList(data.jobIdList);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            String message = "Cancle Review Vendor Report: " + userId + ", " + reportJobIDS;
+            s_logger.info(message);
+            response.sendError(response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
+        
         // add the date criteria
         String fromMsg = getMessage(JobSearchConstants.CREATION_START,
                 JobSearchConstants.CREATION_START_OPTIONS);
@@ -182,8 +204,7 @@ public class ReviewerVendorPoXlsReportHelper
         paramsSheet.addCell(new Label(1, 1, bundle.getString("lb_from") + ":"));
         paramsSheet.addCell(new Label(1, 2, fromMsg));
         paramsSheet.setColumnView(1, 20);
-        paramsSheet
-                .addCell(new Label(2, 1, bundle.getString("lb_until") + ":"));
+        paramsSheet.addCell(new Label(2, 1, bundle.getString("lb_until") + ":"));
         paramsSheet.addCell(new Label(2, 2, untilMsg));
         paramsSheet.setColumnView(2, 20);
 
@@ -254,6 +275,10 @@ public class ReviewerVendorPoXlsReportHelper
 
         m_workbook.write();
         m_workbook.close();
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                        null, 100, ReportsData.STATUS_FINISHED);
     }
 
     private String getMessage(String creationLabel, String creationOptionLabel)
@@ -517,8 +542,7 @@ public class ReviewerVendorPoXlsReportHelper
             }
         }
 
-        theSheet.addCell(new Label(c++, 3, bundle
-                .getString("jobinfo.tradosmatches.invoice.per100matches"),
+        theSheet.addCell(new Label(c++, 3, bundle.getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
                 wordCountValueFormat));
@@ -528,8 +552,8 @@ public class ReviewerVendorPoXlsReportHelper
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
                 wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle
-                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_repetition_word_cnt"), 
+                wordCountValueFormat));
         if (data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -669,8 +693,7 @@ public class ReviewerVendorPoXlsReportHelper
                         dateFormat));
                 theSheet.setColumnView(col - 1, 15);
                 
-                theSheet
-                        .addCell(new Label(col++, row, data.currentActivityName));
+                theSheet.addCell(new Label(col++, row, data.currentActivityName));
 
                 // Accepted Reviewer Date
                 if (data.dellReviewActivityState == Task.STATE_REJECTED)
@@ -912,10 +935,8 @@ public class ReviewerVendorPoXlsReportHelper
                 theSheet.addCell(new Number(col++, row,
                         asDouble(data.trados75to84WordCountCost), moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
-                theSheet
-                        .addCell(new Number(col++, row,
-                                asDouble(data.tradosNoMatchWordCountCost),
-                                moneyFormat));
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.tradosNoMatchWordCountCost), moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
 
                 theSheet.addCell(new Number(col++, row,

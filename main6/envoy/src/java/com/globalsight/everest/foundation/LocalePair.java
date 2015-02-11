@@ -15,87 +15,71 @@
  *  
  */
 package com.globalsight.everest.foundation;
-/*
- * Copyright (c) 2000 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
 
 // Core Java classes
 import java.io.Serializable;
-// globalsight 
-import com.globalsight.util.GlobalSightLocale;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * This is source/target locales pair
- *
+ * 
  */
-public class LocalePair
-    extends PersistentObject
-    implements Serializable
+public class LocalePair extends PersistentObject implements Serializable
 {
     private static final long serialVersionUID = 6845165035619564192L;
-    
-	static public String SOURCE = "m_source";
-	static public String TARGET = "m_target";
+
+    static public String SOURCE = "m_source";
+    static public String TARGET = "m_target";
     /*
      * Member variables
      */
     private GlobalSightLocale m_source;
     private GlobalSightLocale m_target;
-    private String m_companyId;
+    private long m_companyId;
 
     public boolean useActive = true;
-    
+
     /**
-     * Default constructor to be used by TopLink only.
-     * This is here solely because the persistence mechanism that persists
-     * instances of this class is using TopLink, and TopLink requires a
-     * public default constructor for all the classes that it handles
-     * persistence for.
+     * Default constructor to be used by TopLink only. This is here solely
+     * because the persistence mechanism that persists instances of this class
+     * is using TopLink, and TopLink requires a public default constructor for
+     * all the classes that it handles persistence for.
      */
-    public LocalePair ()
+    public LocalePair()
     {
     }
-
 
     /**
      * Constructor
-     *
-     * @param p_source The source locale
-     * @param p_target The target locale
-     * @param p_companyId The company id.
+     * 
+     * @param p_source
+     *            The source locale
+     * @param p_target
+     *            The target locale
+     * @param p_companyId
+     *            The company id.
      */
-    public LocalePair(GlobalSightLocale p_source, GlobalSightLocale p_target, String p_companyId)
+    public LocalePair(GlobalSightLocale p_source, GlobalSightLocale p_target,
+            long p_companyId)
     {
-	m_source = p_source;
-	m_target = p_target;
-    m_companyId = p_companyId;
+        m_source = p_source;
+        m_target = p_target;
+        m_companyId = p_companyId;
     }
-    
 
     /*
      * Methods
      */
     /**
      * Get the source locale
-     *
+     * 
      * @return The source locale
      */
     public GlobalSightLocale getSource()
     {
-	return m_source;
+        return m_source;
     }
 
     /**
@@ -103,32 +87,32 @@ public class LocalePair
      * 
      * @return The company id.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return m_companyId;
     }
-    
+
     /**
      * Set the id of the company this locale pair belongs to.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         m_companyId = p_companyId;
     }
 
     /**
      * Get the target locale
-     *
+     * 
      * @return The target locale
-     */    
+     */
     public GlobalSightLocale getTarget()
     {
-	return m_target;
+        return m_target;
     }
 
     /**
      * Convert to displayable string
-     *
+     * 
      * return The display string
      */
     public String toString()
@@ -138,7 +122,7 @@ public class LocalePair
 
     public String getUIName()
     {
-        StringBuffer sb = new StringBuffer(); 
+        StringBuffer sb = new StringBuffer();
         sb.append(getSource().getLanguageCode());
         sb.append(" ");
         sb.append(getSource().getCountryCode());
@@ -148,37 +132,29 @@ public class LocalePair
         sb.append(getTarget().getCountryCode());
         return sb.toString();
     }
+
     /**
-     * Returns 'true' if the ids of the LocalePair objects are equal,
-     * 'false' if they aren't. 
-     *
-     *  @param p_locale  The LocalePair object to compare with
-     * 	@return 'true' or 'false'
-     */ 
+     * Returns 'true' if the ids of the LocalePair objects are equal, 'false' if
+     * they aren't.
+     * 
+     * @param p_locale
+     *            The LocalePair object to compare with
+     * @return 'true' or 'false'
+     */
     public boolean equals(LocalePair p_localePair)
     {
-        return (getSource().equals(p_localePair.getSource())
-                && getTarget().equals(p_localePair.getTarget()));
+        return (getSource().equals(p_localePair.getSource()) && getTarget()
+                .equals(p_localePair.getTarget()));
     }
 
+    public void setSource(GlobalSightLocale m_source)
+    {
+        this.m_source = m_source;
+    }
 
-	public void setSource(GlobalSightLocale m_source)
-	{
-		this.m_source = m_source;
-	}
-
-
-	public void setTarget(GlobalSightLocale m_target)
-	{
-		this.m_target = m_target;
-	}
+    public void setTarget(GlobalSightLocale m_target)
+    {
+        this.m_target = m_target;
+    }
 
 }
-
-
-
-
-
-
-
-

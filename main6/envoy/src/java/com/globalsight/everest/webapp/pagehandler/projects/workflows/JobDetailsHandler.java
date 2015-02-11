@@ -1,18 +1,18 @@
 /**
  * Copyright 2009 Welocalize, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
- * 
+ *
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
@@ -98,6 +98,7 @@ import com.globalsight.everest.page.UpdateSourcePageManager;
 import com.globalsight.everest.page.UpdatedSourcePage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -137,7 +138,6 @@ import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.modules.Modules;
@@ -247,7 +247,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Invokes this EntryPageHandler object.
-     * 
+     *
      * @param p_pageDescriptor
      *            the description of the page to be produced.
      * @param p_request
@@ -257,13 +257,14 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
      * @param p_context
      *            the Servlet context.
      */
+    @Override
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
             RemoteException, EnvoyServletException
     {
         String pageName = p_pageDescriptor.getPageName();
-        String curr = (String) p_request
+        String curr = p_request
                 .getParameter(JobManagementHandler.CURRENCY);
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
@@ -360,7 +361,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         }
 
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        if (!job.getCompanyId().equals(companyId))
+        if (!String.valueOf(job.getCompanyId()).equals(companyId))
         {
             return;
         }
@@ -485,7 +486,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         // Update the Quote PO Number.
         if (p_request.getParameter(JobManagementHandler.QUOTE_PO_NUMBER) != null)
         {
-            String quotePoNumber = (String) p_request
+            String quotePoNumber = p_request
                     .getParameter(JobManagementHandler.QUOTE_PO_NUMBER);
             if (!quotePoNumber.equals(session
                     .getAttribute(JobManagementHandler.QUOTE_PO_NUMBER)))
@@ -529,7 +530,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                         .getParameter(JobManagementHandler.QUOTE_APPROVED_DATE) != null)
         {
             String quoteApprovedDate = getDateString();
-            String dateChanged = (String) p_request
+            String dateChanged = p_request
                     .getParameter(JobManagementHandler.DATE_CHANGED);
             if (!quoteApprovedDate.equals("")
                     && !quoteApprovedDate
@@ -567,7 +568,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         // Update the Quote PO Number.
         if (p_request.getParameter(JobManagementHandler.QUOTE_PO_NUMBER) != null)
         {
-            String quotePoNumber = (String) p_request
+            String quotePoNumber = p_request
                     .getParameter(JobManagementHandler.QUOTE_PO_NUMBER);
             if (!quotePoNumber.equals(session
                     .getAttribute(JobManagementHandler.QUOTE_PO_NUMBER)))
@@ -613,7 +614,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Send GS edition files and comment data back to original GS server.
-     * 
+     *
      * @param p_editionInfo
      * @param p_job
      */
@@ -729,22 +730,22 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     {
         try
         {
-            Iterator iter = workflow.getTargetPages().iterator();
+            Iterator<TargetPage> iter = workflow.getTargetPages().iterator();
 
             while (iter.hasNext())
             {
-                TargetPage tp = (TargetPage) iter.next();
-                List lg = tp.getExtractedFile().getLeverageGroupSet();
+                TargetPage tp = iter.next();
+                List<LeverageGroup> lg = tp.getExtractedFile().getLeverageGroupSet();
 
                 for (int x = 0; x < lg.size(); x++)
                 {
-                    LeverageGroup leverageGroup = (LeverageGroup) lg.get(x);
-                    Iterator tus = leverageGroup.getTus().iterator();
+                    LeverageGroup leverageGroup = lg.get(x);
+                    Iterator<Tu> tus = leverageGroup.getTus().iterator();
                     HashMap<Long, HashMap> segComments = new HashMap<Long, HashMap>();
 
                     while (tus.hasNext())
                     {
-                        Tu tu = (Tu) tus.next();
+                        Tu tu = tus.next();
                         Tuv tuv = tu.getTuv(tp.getLocaleId(),
                                 workflow.getCompanyId());
                         CommentManagerLocal cm = new CommentManagerLocal();
@@ -948,7 +949,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Format current time as MM/dd/yyyy HH:mm;
-     * 
+     *
      * @return
      */
     private String getDateString()
@@ -961,7 +962,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     }
 
     /**
-     * 
+     *
      * @param p_job
      *            specifies the job to be updated
      * @param p_quoteDate
@@ -982,7 +983,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * For "Quote process webEx" issue Update the Quote Approved date
-     * 
+     *
      * @param p_job
      *            specifies the job to be updated
      * @param p_quoteApprovedDate
@@ -1004,7 +1005,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * For "Quote process webEx" issue Update the Quote PO Number.
-     * 
+     *
      * @param p_job
      *            specifies the job to be updated
      * @param p_quotePoNumber
@@ -1047,7 +1048,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
         if (p_request.getParameter(JobManagementHandler.QUOTE_PO_NUMBER) != null)
         {
-            newPO = (String) p_request
+            newPO = p_request
                     .getParameter(JobManagementHandler.QUOTE_PO_NUMBER);
         }
 
@@ -1055,7 +1056,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         {
             Project project = WorkflowHandlerHelper.getProjectById(p_job
                     .getL10nProfile().getProjectId());
-            String companyIdStr = project.getCompanyId();
+            String companyIdStr = String.valueOf(project.getCompanyId());
             User pm = project.getProjectManager();
             User quotePerson = null;
             if (project.getQuotePersonId() != null
@@ -1154,7 +1155,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     }
 
     /**
-     * 
+     *
      * @return the arguments of the email message.
      */
     private String[] getArguments(HttpServletRequest p_request,
@@ -1206,10 +1207,10 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Makes a link to go to job detail page directly.
-     * 
+     *
      * @param p_request
      * @param p_job
-     * 
+     *
      * @return the url
      */
     private String makeUrlToJobDetail(HttpServletRequest p_request, Job p_job)
@@ -1237,7 +1238,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Gets GlobalSight login URL.
-     * 
+     *
      * @return the URL.
      */
     private String getCapLoginUrl()
@@ -1467,9 +1468,10 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     /**
      * Overide getControlFlowHelper so we can do processing and redirect the
      * user correctly.
-     * 
+     *
      * @return the name of the link to follow
      */
+    @Override
     public ControlFlowHelper getControlFlowHelper(HttpServletRequest p_request,
             HttpServletResponse p_response)
     {
@@ -2315,7 +2317,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         if (p_request.getParameter(JobManagementHandler.DISCARD_WF_PARAM) != null)
         {
             p_sessionMgr.setAttribute(JobManagementHandler.WF_ID, wfIdParam);
-            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION, 
+            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
                     JobManagementHandler.DISCARD_WF_PARAM);
             // Discard the selected workflows
             StringTokenizer tokenizer = new StringTokenizer(wfIdParam);
@@ -2342,8 +2344,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper
                         .getWorkflowById(Long.parseLong(wfId)));
             }
-            
-            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION, 
+
+            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
                     JobManagementHandler.DISPATCH_WF_PARAM);
         }
         else if (p_request
@@ -2382,8 +2384,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                         .parseLong(wfId));
                 WorkflowHandlerHelper.archiveWorkflow(wf);
             }
-            
-            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION, 
+
+            p_sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
                     JobManagementHandler.ARCHIVE_WF_PARAM);
         }
         else if (p_request.getParameter(JobManagementHandler.ASSIGN_PARAM) != null)
@@ -2407,7 +2409,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         if (p_request.getParameter(JobManagementHandler.ADD_WF_PARAM) != null)
         {
             // Get a comma separated string of WorkflowTemplatInfo ids
-            String buf = (String) p_request
+            String buf = p_request
                     .getParameter(JobManagementHandler.ADD_WF_PARAM);
             if (isRefresh(p_sessionMgr, buf,
                     JobManagementHandler.ADDED_WORKFLOWS))
@@ -2475,7 +2477,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         }
     }
 
-    private boolean isSameAction(SessionManager p_sessionMgr, HttpServletRequest p_request, String wfIdParam)
+    private boolean isSameAction(SessionManager p_sessionMgr,
+            HttpServletRequest p_request, String wfIdParam)
     {
         String preAction = (String) p_sessionMgr
                 .getAttribute(JobManagementHandler.WF_PREVIOUS_ACTION);
@@ -2497,7 +2500,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Set the navigation beans into Request and initialize some beans.
-     * 
+     *
      * @param p_request
      * @param pageName
      */
@@ -2646,13 +2649,14 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     /**
      * Update word counts for specified workflow and target pages of this
      * workflow based on latest leverage matches.
-     * 
+     *
      * @param p_workflowId
      */
     private void updateWordCounts(final String p_workflowIds)
     {
         Runnable runnable = new Runnable()
         {
+            @Override
             public void run()
             {
                 try
@@ -2701,6 +2705,10 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 {
                     throw new EnvoyServletException(e);
                 }
+                finally
+                {
+                    SegmentTuTuvCacheManager.clearCache();
+                }
             }
         };
 
@@ -2733,7 +2741,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 String taskId = String.valueOf(task.getId());
                 Activity activity = ServerProxy.getJobHandler()
                         .getActivityByCompanyId(task.getTaskName(),
-                                task.getCompanyId());
+                                String.valueOf(task.getCompanyId()));
                 ContainerRole containerRole = ServerProxy.getUserManager()
                         .getContainerRole(activity, srcLocale, targLocale);
                 String userParam = p_request.getParameter("users" + taskId);
@@ -2820,7 +2828,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Does the skip job for the activities.
-     * 
+     *
      * @param p_request
      * @param p_sessionMgr
      * @throws EnvoyServletException
@@ -2840,6 +2848,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
         Runnable runnable = new Runnable()
         {
+            @Override
             public void run()
             {
                 // run the skip process in a new thread in order to return to
@@ -3026,12 +3035,12 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         String thisJob = job.getId() + ":" + jobName;
         StringBuffer newCookie = new StringBuffer(thisJob);
         int count = 1;
-        Cookie[] cookies = (Cookie[]) request.getCookies();
+        Cookie[] cookies = request.getCookies();
         if (cookies != null)
         {
             for (int i = 0; i < cookies.length; i++)
             {
-                Cookie cookie = (Cookie) cookies[i];
+                Cookie cookie = cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
                     String mruJobStr = cookie.getValue();
@@ -3079,12 +3088,12 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
                 + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
         StringBuffer newCookie = new StringBuffer();
-        Cookie[] cookies = (Cookie[]) request.getCookies();
+        Cookie[] cookies = request.getCookies();
         if (cookies != null)
         {
             for (int i = 0; i < cookies.length; i++)
             {
-                Cookie cookie = (Cookie) cookies[i];
+                Cookie cookie = cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
                     String mruJobStr = cookie.getValue();
@@ -3303,16 +3312,17 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         return ServerProxy.getFileProfilePersistenceManager();
     }
 
-	private int getIssueCount(Job job, HttpSession session, List<String> states)
-			throws EnvoyServletException
+    private int getIssueCount(Job job, HttpSession session, List<String> states)
+            throws EnvoyServletException
     {
-    	List<Long> targetPageIds = new ArrayList<Long>();
+        List<Long> targetPageIds = new ArrayList<Long>();
         ArrayList workflows = new ArrayList(job.getWorkflows());
         for (int i = 0; i < workflows.size(); i++)
         {
             Workflow wf = (Workflow) workflows.get(i);
-            if (wf.getState().equals(Workflow.CANCELLED)) {
-                continue;            	
+            if (wf.getState().equals(Workflow.CANCELLED))
+            {
+                continue;
             }
 
             List pages = wf.getTargetPages();
@@ -3322,18 +3332,20 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 String state = tPage.getPageState();
                 if (!PageState.IMPORT_FAIL.equals(state))
                 {
-                	targetPageIds.add(tPage.getId());
+                    targetPageIds.add(tPage.getId());
                 }
             }
         }
-        if (targetPageIds.size() == 0) {
+        if (targetPageIds.size() == 0)
+        {
             return 0;
         }
 
         try
         {
-        	CommentManager manager = ServerProxy.getCommentManager();
-            return manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds, states);
+            CommentManager manager = ServerProxy.getCommentManager();
+            return manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds,
+                    states);
         }
         catch (Exception ex)
         {
@@ -3414,7 +3426,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * The method has been moved to SourcePage.java.
-     * 
+     *
      * @param p_fileName
      * @return
      */
@@ -3425,7 +3437,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get the xml of currency options
-     * 
+     *
      * @param locale
      * @return
      */
@@ -3497,9 +3509,9 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Copy files from source converter folder to target converter folder
-     * 
+     *
      * Fix for GBS-1815
-     * 
+     *
      * @param sourcePages
      * @param targetLocales
      */
@@ -3708,7 +3720,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     * 
+     *
      * @param rootElement
      * @return
      */
@@ -3731,7 +3743,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     * 
+     *
      * @param rootElement
      * @return
      */
@@ -3760,7 +3772,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     * 
+     *
      * @param rootElement
      * @return
      */
@@ -3779,7 +3791,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     * 
+     *
      * @param rootElement
      * @return
      */
@@ -3809,7 +3821,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     * 
+     *
      * @param rootElement
      * @return
      */
@@ -3825,7 +3837,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get format type
-     * 
+     *
      * @param fileProfileId
      * @return
      */
@@ -3851,7 +3863,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get safeBaseFileName to get base directory name
-     * 
+     *
      * @param eventFlow
      * @param adapter
      * @return

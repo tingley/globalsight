@@ -197,7 +197,7 @@
     String requestParamEditor = OfflineConstants.EDITOR_SELECTOR;
     String requestParamEncoding = OfflineConstants.ENCODING_SELECTOR;
     String requestParamPtagFormat = OfflineConstants.PTAG_SELECTOR;
-    String requestParamEditExact = OfflineConstants.EDIT_EXACT_SELECTOR;
+    String requestParamTMEditType = OfflineConstants.TM_EDIT_TYPE;
     String requestParamResInsMode = OfflineConstants.RES_INS_SELECTOR;
     String requestParamAcceptDownloadRequest = OfflineConstants.DOWNLOAD_ACCEPT_DOWNLOAD;
     String requestParamDownloadAction = WebAppConstants.DOWNLOAD_ACTION;
@@ -236,9 +236,9 @@
     String downloadNamePtagFormat = 
         PageHandler.getUserParameter
         (session, UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER).getValue();
-    String downloadNameEditExact = 
-        PageHandler.getUserParameter
-        (session, UserParamNames.DOWNLOAD_OPTION_EDITEXACT).getValue();
+    String downloadNameTMEditType = 
+            PageHandler.getUserParameter
+            (session, UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE).getValue();
     String downloadNameResInsMode = 
         PageHandler.getUserParameter
         (session, UserParamNames.DOWNLOAD_OPTION_RESINSSELECT).getValue();
@@ -433,11 +433,11 @@
             totalWrdCntSortArrow = imgSortArrow;
             break;
         case WorkflowTaskDataComparator.ACCEPT_DATE:
-            if(state == stateAvailable)
+            if(state == stateAvailable || state == stateAll)
             {
                 urlABorDBorCOColLink = urlABorDBorCOColLink + reverseSortParam;
                 ABorDBorCODateSortArrow = imgSortArrow;
-            } 
+            }
             break;
         case WorkflowTaskDataComparator.DUE_DATE:
             if( state == stateInProgress || state == stateRejected )
@@ -490,8 +490,10 @@
     var wfIds = new Array();
     var jobIds = new Array();
     var taskIds = new Array();
+    var sourceLocales = new Array();
     var targetLocales = new Array();
     var l10nProfileIds = new Array();
+    var companyNames = new Array();
     var helpFile = "<%=helpFile%>";
 
     // Constructor
@@ -504,7 +506,7 @@
         this.encoding = "<%= downloadNameEncoding %>";
         this.ptagFormat = "<%= downloadNamePtagFormat %>";
         this.resInsMode = "<%= downloadNameResInsMode %>";
-        this.editExact = "<%= downloadNameEditExact %>";
+        this.tmEditType = "<%= downloadNameTMEditType %>";
     }
 
     function verifyClientDownloadOptions()
@@ -539,6 +541,7 @@
                 var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "="%>" + actionValue;
                 action += "&taskParam=" + "<%=taskParam%>";
                 ActivityForm.action = action;
+                showProgressDiv();
                 ActivityForm.submit();
             }
             else
@@ -558,7 +561,7 @@
                     + "&" + "<%= requestParamPtagFormat %>" + "=" + dwnldOpt.ptagFormat
                     + "&" + "<%= requestParamResInsMode %>" + "=" + dwnldOpt.resInsMode
                     + "&" + "<%= WebAppConstants.DOWNLOAD_ACTION %>" + "=" + "<%= WebAppConstants.DOWNLOAD_ACTION_START_DOWNLOAD %>"
-                    + "&" + "<%= requestParamEditExact %>" + "=" + dwnldOpt.editExact
+                    + "&" + "<%= requestParamTMEditType %>" + "=" + dwnldOpt.tmEditType
                     );
             }        
         }
@@ -575,55 +578,59 @@
         updateButtonState();
         
         <% if (errorMsg != null && errorMsg.length() > 0) {%>
-        alert("<%= errorMsg %>");
+        showProgressDivError();
+        // alert("<%= errorMsg %>");
         <% } %>
     }
+
     function submitForm(selectedButton)
     {
-       
-       var selectedTasks = "";
-       
-       <% if (state == stateAvailable || state == stateInProgress) {%>
-       var valuesArray;
-       var indexes = selectedIndex();
+    	// Ensuer at least one task is selected
+        if (!isRadioChecked(ActivityForm.SelectedActivity))
+        {
+            return false;
+        }
 
-       if (indexes.length == 0)
-       {
-         alert ("<%= bundle.getString("jsmsg_please_select_a_row") %>");
-         return false;
-       }
+        var selectedTasks = "";
        
-       
-       
-       if (indexes.length > 0)
-       {
-       if (ActivityForm.SelectedActivity.length)
-       {
-          for (var i = 0; i < ActivityForm.SelectedActivity.length; i++)
-          {
-             if (ActivityForm.SelectedActivity[i].checked == true)
-             {
-                if( selectedTasks != "" )
+       <% if (state == stateAvailable || state == stateInProgress) { %>
+            var valuesArray;
+            var indexes = selectedIndex();
+            if (indexes.length == 0)
+            {
+                alert ("<%= bundle.getString("jsmsg_please_select_a_row") %>");
+                return false;
+            }
+
+            if (indexes.length > 0)
+            {
+                if (ActivityForm.SelectedActivity.length)
                 {
-                   selectedTasks += " "; // must add a [white space] delimiter
+                    for (var i = 0; i < ActivityForm.SelectedActivity.length; i++)
+                    {
+                        if (ActivityForm.SelectedActivity[i].checked == true)
+                        {
+                            if( selectedTasks != "" )
+                            {
+                                selectedTasks += " "; // must add a [white space] delimiter
+                            }
+                            selectedTasks += taskIds[i];
+                        }
+                    }
                 }
-                selectedTasks += taskIds[i];
-             }
-          }
-       }
-       // If only one radio button is displayed, there is no radio button array, so
-       // just check if the single radio button is checked
-       else
-       {
-          if (ActivityForm.SelectedActivity.checked == true)
-          {
-             selectedTasks += taskIds[0];
-          }
-       }
-       }
-       
-       <% } %>
-       
+                // If only one radio button is displayed, there is no radio button array, so
+                // just check if the single radio button is checked
+                else
+                {
+                    if (ActivityForm.SelectedActivity.checked == true)
+                    {
+                        selectedTasks += taskIds[0];
+                    }
+                }
+           }
+     
+        <% } %>
+
        //Accept all tasks button
        if (selectedButton == "AcceptAll")
         {
@@ -633,7 +640,7 @@
             ActivityForm.submit();
             return;
         }
-       
+
        // Batch complete activity button
        if (selectedButton == "CompleteActivity")
        {
@@ -664,119 +671,150 @@
        {
            if(confirm('<%=bundle.getString("jsmsg_batch_complete_workflow")%>')) 
            {
-			    //for GBS-1939
-				var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
-				urlJSON += "&taskParam=" + selectedTasks;
-				$.getJSON(urlJSON, function(data) {
-					if (data.isUploadingJobName)
-					{
-						alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_workflow_uploading")%>" +"\n" + data.isUploadingJobName);
-					}
-					if (data.isFinishedTaskId)
-					{
-					   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
-					   action += "&taskParam=" + selectedTasks;
-					   ActivityForm.action = action;
-					   ActivityForm.submit();
-					}
-				});			
+                //for GBS-1939
+                var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
+                urlJSON += "&taskParam=" + selectedTasks;
+                $.getJSON(urlJSON, function(data) {
+                    if (data.isUploadingJobName)
+                    {
+                        alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_workflow_uploading")%>" +"\n" + data.isUploadingJobName);
+                    }
+                    if (data.isFinishedTaskId)
+                    {
+                       var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
+                       action += "&taskParam=" + selectedTasks;
+                       ActivityForm.action = action;
+                       ActivityForm.submit();
+                    }
+                });
            }
            return;
        }
-        
-        if(selectedButton == "DownloadAllOfflineFiles")
-        {
-            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFiles"%>";
-            action += "&taskParam=" + selectedTasks;
-            ActivityForm.action = action;
-            ActivityForm.submit();
-            return;
-        }
-        if(selectedButton == "DownloadAllOfflineFilesCombined")
-        {
-            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFilesCombined"%>";
-            action += "&taskParam=" + selectedTasks;
-            ActivityForm.action = action;
-            ActivityForm.submit();
-            return;
-        }
-        if(selectedButton == "DownloadCombined")
-        {
-            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=DownloadCombined"%>";
-            action += "&taskParam=" + selectedTasks;
-            ActivityForm.action = action;
-            ActivityForm.submit();
-            return;
-        }
-        if ( !isRadioChecked(ActivityForm.SelectedActivity) )
-        {
-        	return false;
-        }
-        
-        if (selectedButton == "WordCount")
-        {
-            var action = "<%=wordCountListUrl%>" + "&action=wclist";
-            var indexes = findSelectedButtons();
-            if (indexes != "")
-            {
-                // Get word count details for all activities
-                action += "&<%=JobManagementHandler.WF_ID%>="
-                for (var j=0;j<indexes.length;j++) {
-                   var idx = indexes[j];
-                   action += wfIds[idx] + ',';
-                }
-            }
-            ActivityForm.action = action;
-            ActivityForm.submit();
-            return;
-        }
-       
-       if (selectedButton=='Download')
+
+       // Offline download should ignore zero word-count tasks.
+       if (selectedButton == "DownloadAllOfflineFiles" 
+           || selectedButton == "DownloadAllOfflineFilesCombined" 
+           || selectedButton == "DownloadCombined" 
+           || selectedButton == "Download" )
        {
-                // Check to see if their Download options are set
-           if (verifyClientDownloadOptions() == false)
+           var urlCheckZeroWordCountTask = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=filterZeroWCTasksForOfflineDownload" %>";
+           urlCheckZeroWordCountTask += "&taskParam=" + selectedTasks;
+           $.getJSON(urlCheckZeroWordCountTask, function(data)
            {
-               return false;
-           }
+               selectedTasks = data.selectedTaskIds;
+               if (selectedTasks == "0")
+               {
+                   alert("Zero wordcount task will not be offline downloaded.");
+               }
+               else if(selectedButton == "DownloadAllOfflineFiles")
+               {
+                   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFiles"%>";
+                   action += "&taskParam=" + selectedTasks;
+                   ActivityForm.action = action;
+                   showProgressDiv();
+                   ActivityForm.submit();
+               }
+               else if(selectedButton == "DownloadAllOfflineFilesCombined")
+               {
+                   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFilesCombined"%>";
+                   action += "&taskParam=" + selectedTasks;
+                   ActivityForm.action = action;
+                   showProgressDiv();
+                   ActivityForm.submit();
+               }
+               else if(selectedButton == "DownloadCombined")
+               {
+                   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=DownloadCombined"%>";
+                   action += "&taskParam=" + selectedTasks;
+                   ActivityForm.action = action;
+                   ActivityForm.submit();
+               }
+               else if (selectedButton == "Download")
+               {
+                   // Check to see if their Download options are set
+                   if (verifyClientDownloadOptions() == false)
+                   {
+                       return false;
+                   }
+                   var indexes = findSelectedButtons();
+                   var index = indexes[0];
+                   var action = acceptAndDownloadUrls[index];
+                   action += "&taskParam=" + selectedTasks;
+                   ActivityForm.action = action;
+                   ActivityForm.submit();
+               }
+           });
+           return;
        }
+       
+       if (selectedButton == "WordCount")
+       {
+           var action = "<%=wordCountListUrl%>" + "&action=wclist";
+           var indexes = findSelectedButtons();
+           if (indexes != "")
+           {
+               // Get word count details for all activities
+               action += "&<%=JobManagementHandler.WF_ID%>="
+               for (var j=0;j<indexes.length;j++) {
+                  var idx = indexes[j];
+                  action += wfIds[idx] + ',';
+               }
+           }
+           ActivityForm.action = action;
+           ActivityForm.submit();
+           return;
+       }
+
        var indexes = findSelectedButtons();
-       var index = indexes[0];
-        if (selectedButton=='Download')
-        {
-            var action = acceptAndDownloadUrls[index];
-            action += "&taskParam=" + selectedTasks;
-            ActivityForm.action = action;
-        }
-        else if (selectedButton=='Search')
-        {
-            addHiddenSelected(indexes);
-            action = "<%=searchUrl%>" + "&search=";
-            for (var j=0;j<indexes.length;j++) {
+       if (selectedButton=='Search')
+       {
+           addHiddenSelected(indexes);
+           action = "<%=searchUrl%>" + "&search=";
+           for (var j=0;j<indexes.length;j++) {
                var idx = indexes[j];
                action += jobIds[idx] + ' ';
-            }
-            ActivityForm.action = action;
+           }
+           ActivityForm.action = action;
         }
         else
         {
             addHiddenSelected(indexes);
            <%
-              StringBuffer exportLink2 = new StringBuffer(export.getPageURL());
-              exportLink2.append("&");
-              exportLink2.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
-              exportLink2.append("=true&");
-              StringBuffer workflowIdParam= new StringBuffer(JobManagementHandler.WF_ID);
-              workflowIdParam.append("=");
+            StringBuffer exportLink2 = new StringBuffer(export.getPageURL());
+            exportLink2.append("&");
+            exportLink2.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
+            exportLink2.append("=true&");
+            StringBuffer workflowIdParam= new StringBuffer(JobManagementHandler.WF_ID);
+            workflowIdParam.append("=");
             %>
             var workflowIdParam = '<%=workflowIdParam.toString()%>';
             var action = '<%=exportLink2.toString()%>';
             for (var j=0;j<indexes.length;j++) {
-               var idx = indexes[j];
-               action += workflowIdParam + wfIds[idx] + '&';
+                var idx = indexes[j];
+                action += workflowIdParam + wfIds[idx] + '&';
             }
             ActivityForm.action = action;
         }
+
         ActivityForm.submit();
+    }
+
+    function showProgressDiv()
+    {
+        idMessagesDownload.innerHTML = "";
+        document.getElementById("idProgressDownload").innerHTML = "0%"
+        document.getElementById("idProgressBarDownload").style.width = 0;
+        document.getElementById("idProgressDivDownload").style.display = "";
+        o_intervalRefresh = window.setInterval("doProgressRefresh()", 300);
+    }
+    
+    function showProgressDivError()
+    {
+        document.getElementById("idProgressDivDownload").style.display = "";
+        doProgressRefresh();
+        
+        if (o_intervalRefresh)
+            window.clearInterval(o_intervalRefresh);
     }
     
     function enableDownloadIfAssignee()
@@ -925,20 +963,23 @@
           ActivityForm.CombinedButton.disabled = true;
         }
       <% } else { %>
-   	  // check if disable download combined 
-      // have same l10n profile and target locale
+      // check if disable download combined 
+      // have same source locale and target locale
       if (selectedIndex().length > 1)
       {
       	var allindex = selectedIndex();
       	var tlocale_0 = targetLocales[allindex[0]];
-      	var l10nProfileId_0 = l10nProfileIds[allindex[0]];
+      	var slocale_0 = sourceLocales[allindex[0]];
+      	var companyName_0 = companyNames[allindex[0]];
       	for(var i = 1; i < allindex.length; i++)
       	{
       		var cindex = allindex[i];
       		var tlocale = targetLocales[cindex];
-      		var l10nProfileId = l10nProfileIds[cindex];
+      		var slocale = sourceLocales[cindex];
+      		var companyName = companyNames[cindex];
           	
-          	if (tlocale == tlocale_0 && l10nProfileId == l10nProfileId_0)
+          	if (tlocale == tlocale_0 && slocale == slocale_0
+          			&& companyName == companyName_0)
           	{
           		if (ActivityForm.DownloadCombinedButton) 
           		{
@@ -969,13 +1010,13 @@
       
       if (selectedIndex().length == 0)
       {
-    	  if (ActivityForm.DownloadCombinedButton) 
-    	  {
-    		  ActivityForm.DownloadCombinedButton.disabled = false;
+          if (ActivityForm.DownloadCombinedButton) 
+          {
+              ActivityForm.DownloadCombinedButton.disabled = false;
           }
-    	  if (ActivityForm.CombinedButton) 
-    	  {
-    	      ActivityForm.CombinedButton.disabled = false;
+          if (ActivityForm.CombinedButton) 
+          {
+              ActivityForm.CombinedButton.disabled = false;
           }
       }
     }
@@ -1004,27 +1045,27 @@
     
     function wordcountLink(id)
     {
-		var inputElem = document.getElementById(id);
-		var id = inputElem.value;
-		var action = "<%=wordCountListUrl%>" + "&action=wclist" 
-		action += "&<%=JobManagementHandler.WF_ID%>=" + wfIds[id] ;
-		ActivityForm.action = action;
-		ActivityForm.submit();
+        var inputElem = document.getElementById(id);
+        var id = inputElem.value;
+        var action = "<%=wordCountListUrl%>" + "&action=wclist" 
+        action += "&<%=JobManagementHandler.WF_ID%>=" + wfIds[id] ;
+        ActivityForm.action = action;
+        ActivityForm.submit();
     }
 
-	//for GBS-2599
-	function handleSelectAll() {
-		if (ActivityForm && ActivityForm.selectAll) {
-			if (ActivityForm.selectAll.checked) {
-				checkAllWithName('ActivityForm', 'SelectedActivity');
-				updateButtonState();
-			}
-			else {
-				clearAll('ActivityForm');
-				updateButtonState();
-			}
-		}
-	}
+    //for GBS-2599
+    function handleSelectAll() {
+        if (ActivityForm && ActivityForm.selectAll) {
+            if (ActivityForm.selectAll.checked) {
+                checkAllWithName('ActivityForm', 'SelectedActivity');
+                updateButtonState();
+            }
+            else {
+                clearAll('ActivityForm');
+                updateButtonState();
+            }
+        }
+    }
 </SCRIPT>
 <STYLE type="text/css">
 .list {
@@ -1205,16 +1246,16 @@
     <TBODY>
         <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM" STYLE="padding-bottom: 3px;">
             <TD>
-			<% if ((state == stateInProgress || state == stateAvailable) && tasks != null && tasks.size() > 0) { %>
-				<input type="checkbox" onclick="handleSelectAll()" name="selectAll"/>
-			<% } %>			
-			</TD>
+            <% if ((state == stateInProgress || state == stateAvailable) && tasks != null && tasks.size() > 0) { %>
+                <input type="checkbox" onclick="handleSelectAll()" name="selectAll"/>
+            <% } %>         
+            </TD>
             <TD STYLE="padding-left: 3px;padding-right: 3px;" ALIGN="CENTER"><A CLASS="sortHREFWhite" HREF="<%=jobPriorityColLink%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 ALT="Priority" BORDER=0></A><%=jobPrioritySortArrow%></TD>
             <TD STYLE="padding-left: 3px;padding-right: 3px;" ALIGN="CENTER"><IMG SRC="/globalsight/images/clock.gif" HEIGHT=12 WIDTH=12 ALT="Overdue"></TD>
             <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=jobIdColLink%>"><%=labelJobId%><%=jobIdSortArrow%></A></TD>
             <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=activityColLink%>"><%=labelJobName%><%=jobSortArrow%></A></TD>
 
-            <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=totalWordCountColLink%>"><%=labelWordCount%><%=jobSortArrow%></A></TD>
+            <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=totalWordCountColLink%>"><%=labelWordCount%><%=totalWrdCntSortArrow%></A></TD>
             <TD CLASS="headerCell" ><A CLASS="sortHREFWhite" HREF="<%=urlABorDBorCOColLink%>"><%=labelABorDBorCODate%><%=ABorDBorCODateSortArrow%></A></TD>
         <%
             if (state == stateAvailable) 
@@ -1274,7 +1315,7 @@
                     pmAssigneeTableBuffer.append("<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=smallText>");
                     pmAssigneeTableBuffer.append("<TR VALIGN=TOP>");
                     pmAssigneeTableBuffer.append("<TD NOWRAP>" + labelAssignees + ":&nbsp;</TD>");
-                    pmAssigneeTableBuffer.append("<TD>" + assignees + "</TD>");
+                    pmAssigneeTableBuffer.append("<TD NOWRAP>" + assignees + "</TD>");
                     pmAssigneeTableBuffer.append("</TR>");
                     pmAssigneeTableBuffer.append("</TABLE>");
                     pmAssigneeTable = pmAssigneeTableBuffer.toString();
@@ -1366,7 +1407,9 @@
                 jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
                 taskIds[<%=javascript_array_index%>] = "<%=tsk.getId()%>";
                 targetLocales[<%=javascript_array_index%>] = "<%=targetLocale%>";
+                sourceLocales[<%=javascript_array_index%>] = "<%=sourceLocale%>";
                 l10nProfileIds[<%=javascript_array_index%>] = "<%=l10nProfileId%>";
+                companyNames[<%=javascript_array_index%>] = "<%=company%>";
 </script>
 <%                
                 // The Priority column
@@ -1521,7 +1564,7 @@
         <TD CLASS="standardText">
             <DIV ID="CheckAllLayer" STYLE="visibility: visible">
                 <!--for gbs-2599
-				A CLASS="standardHREF"
+                A CLASS="standardHREF"
                    HREF="javascript:checkAllWithName('ActivityForm', 'SelectedActivity'); updateButtonState(); ">
                    <%=bundle.getString("lb_check_all")%></A--> 
 <% if (state == stateInProgress && (canManageWorkflows || canManageProjects) && searchEnabled) { %>
@@ -1529,7 +1572,7 @@
                    HREF="javascript:checkAll('ActivityForm'); updateButtonState();"><%=bundle.getString("lb_check_all_pages")%></A> 
 <% } %>
                 <!--for gbs-2599
-				A CLASS="standardHREF"
+                A CLASS="standardHREF"
                    HREF="javascript:clearAll('ActivityForm');updateButtonState();">
                    <%=bundle.getString("lb_clear_all")%></A-->
             </DIV>
@@ -1591,14 +1634,14 @@ if (state==stateAvailable || state==stateInProgress) {
 <% } %>
 <% if (state == stateAvailable) { %>
     <amb:permission name="<%=Permission.ACTIVITIES_WORKOFFLINE%>" >
-    <amb:permission name="activities.download.combined" >
+    <amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_COMBINED%>" >
     <INPUT TYPE="BUTTON" NAME="CombinedButton" VALUE="<%=bundle.getString("lb_download_combined")%>..." onClick="submitForm('DownloadCombined');">
     </amb:permission>
     </amb:permission>
 <% } %>
 <% if (state == stateInProgress) { %>
-	<amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>" >
-    <amb:permission name="activities.download.combined" >
+    <amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>" >
+    <amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_COMBINED%>" >
     <INPUT TYPE="BUTTON" NAME="DownloadCombinedButton" VALUE="<%=bundle.getString("lb_download_combined")%>..." onClick="submitForm('DownloadAllOfflineFilesCombined');" >
     </amb:permission>
     </amb:permission>
@@ -1623,8 +1666,13 @@ while (iter.hasNext())
 
 </DIV>
 <br>
-
-<%!
+    <span id="progress_content">
+        <div id='idProgressDivDownload'
+            style='border-style: solid; border-width: 1pt; border-color: #0c1476; background-color: white; display:none; left: 300px; height: 370; width: 500px; position: absolute; top: 150px; z-index: 21'>
+            <%@ include file="/envoy/edit/offline/download/downloadProgressIncl.jsp" %>
+        </div>
+    </span>
+    <%!
 //TODO should pull up to a common util class
 private String qualifyActivity(String activity){
   int index = activity.lastIndexOf("_");

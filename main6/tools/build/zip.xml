@@ -1,28 +1,30 @@
 <!-- This file includes all the zip targets. -->
 <project name="zip" default="zip" basedir=".">
-    <!-- Deploy the project into a zip file.  -->
+	<!-- Deploy the project into a zip file.  -->
 	<!-- 
              Note: 
 	        This target only collect the files, and zip them together. 
 	        If you want to build the necessary files, please use the target "zip" in build.xml file which will build project first as dependence.
          -->
-    <target name="zip">
+	<target name="zip">
 
-        <!-- No other way to add an empty dir to the zip than to create it -->
-        <mkdir dir="${dist}/logs" />
+		<!-- No other way to add an empty dir to the zip than to create it -->
+		<mkdir dir="${dist}/logs" />
 
 		<!--      Create the distribution directory      -->
 		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}.zip">
 			<zipfileset dir="../license" prefix="${product}" includes="license.txt" />
+			<zipfileset dir="${jbossUtilDir}" prefix="${product}/${deployment}" includes="globalsight.ear.dodeploy" />
+			<zipfileset dir="${jbossUtilDir}" prefix="${product}/${deployment}" includes="ROOT.war.dodeploy" />
+			<zipfileset dir="${jbossUtilDir}" prefix="${product}/${deployment}" includes="ROOT.war/**" />
 			<zipfileset dir="${capclasses}" prefix="${product}/${deployment}" excludes="**/*.class" />
-			<zipfileset dir="${jbossUtilDir}" prefix="${product}/jboss" />
-			<zipfileset dir="${jbossServerDir}" prefix="${product}/jboss/jboss_server" />
-			<zipfileset dir="${gsjavaDir}" prefix="${product}/jboss" />
+			<zipfileset dir="${jbossUtilDir}" prefix="${product}/jboss/util" />
+			<zipfileset dir="${jbossServerDir}" prefix="${product}/jboss/server" />
             <zipfileset dir="${dist}" prefix="${product}" includes="logs"/>
 
 			<!-- The install directory -->
 			<zipfileset dir="${installclasses}" prefix="${product}/install" />
-			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh, JavaServiceWrapper/**" />
+			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh" />
             <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="commons-codec-1.3.jar" />
 
 			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
@@ -48,23 +50,20 @@
 			<!-- Command line scripts for TMX, TBX, luke etc -->
 			<zipfileset dir="${lingtools}/scripts" prefix="${product}/${deployment}/globalsight.ear/bin/" />
 
-			<!-- Jacob.dll and maybe others needs to go into the bin directory as well -->
-			<zipfileset dir="${commonJarLib}" prefix="${product}/${deployment}/globalsight.ear/bin/" includes="*.dll" />
-
 		</zip>
 	</target>
-	
+
 	<!-- Zip file for netegrity specific files -->
 	<target name="netegrity">
 		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_NetegrityIntegration.zip">
 			<zipfileset dir="../../envoy/src/netegrity" excludes="**/*Tester*" prefix="${product}/netegrity" />
 		</zip>
 	</target>
-	
+
 	<!-- Make the zip file for Teamsite Auto Import -->
 	<target name="TeamsiteAutoImport">
 		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_TeamsiteAutoImport.zip">
-                        <zipfileset dir="tsautoimport" prefix="globalsight/tsautoimport" />
-                    </zip>
+			<zipfileset dir="tsautoimport" prefix="globalsight/tsautoimport" />
+		</zip>
 	</target>
 </project>

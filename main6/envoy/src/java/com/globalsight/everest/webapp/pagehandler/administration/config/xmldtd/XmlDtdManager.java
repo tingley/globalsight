@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
@@ -63,8 +62,7 @@ import com.globalsight.util.mail.MailerConstants;
  */
 public class XmlDtdManager
 {
-    static private final Logger logger = Logger
-            .getLogger(XmlDtdManager.class);
+    static private final Logger logger = Logger.getLogger(XmlDtdManager.class);
     private static final String JOB_COMMENT_DTD_FAILED = "The following pages "
             + "failed to pass the XML DTD validation during {0}:{1}";
     public static final String OFF_LINE_IMPORT = "off-line file import";
@@ -94,9 +92,8 @@ public class XmlDtdManager
             }
 
             CommentImpl comment = new CommentImpl();
-            comment.setCommentString(MessageFormat
-                    .format(JOB_COMMENT_DTD_FAILED, operation, commentString
-                            .toString()));
+            comment.setCommentString(MessageFormat.format(
+                    JOB_COMMENT_DTD_FAILED, operation, commentString.toString()));
 
             comment.setCreateDate(new Date());
             comment.setCreatorId("System");
@@ -118,32 +115,32 @@ public class XmlDtdManager
     public static List<?> getAllXmlDtd()
     {
         String hql = "from XmlDtdImpl x";
-        HashMap<String, String> map = null;
+        HashMap<String, Long> map = null;
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql += " where x.companyId = :companyId";
-            map = new HashMap<String, String>();
-            map.put("companyId", currentId);
+            map = new HashMap<String, Long>();
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         return HibernateUtil.search(hql, map);
     }
-    
+
     public static XmlDtdImpl getXmlDtdByName(String name)
     {
         String hql = "from XmlDtdImpl x where x.name = :name";
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("name", name);
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql += " and x.companyId = :companyId";
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
-        
+
         return (XmlDtdImpl) HibernateUtil.getFirst(hql, map);
     }
 
@@ -209,7 +206,7 @@ public class XmlDtdManager
             throws Exception
     {
         Job job = sourcePage.getRequest().getJob();
-        String companyIdStr = job.getCompanyId();
+        String companyIdStr = String.valueOf(job.getCompanyId());
         L10nProfile l10nProfile = job.getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
@@ -264,7 +261,7 @@ public class XmlDtdManager
             throws Exception
     {
         Job job = targetPage.getWorkflowInstance().getJob();
-        String companyIdStr = job.getCompanyId();
+        String companyIdStr = String.valueOf(job.getCompanyId());
         L10nProfile l10nProfile = job.getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
@@ -347,7 +344,9 @@ public class XmlDtdManager
                             }
                             catch (Exception e1)
                             {
-                                logger.error("Failed to send DTD validation failure email", e1);
+                                logger.error(
+                                        "Failed to send DTD validation failure email",
+                                        e1);
                             }
                         }
                     }
@@ -379,7 +378,7 @@ public class XmlDtdManager
         pages.add(targetPage);
         validateTargetPages(pages, operation);
     }
-    
+
     /**
      * Validate a target page.
      * <p>
@@ -396,7 +395,7 @@ public class XmlDtdManager
         {
             return;
         }
-        
+
         List<String> files = new ArrayList<String>();
         Job job = null;
         for (TargetPage targetPage : targetPages)
@@ -411,7 +410,8 @@ public class XmlDtdManager
 
                 try
                 {
-                    File xml = helper.getTargetXmlPage(targetPage.getId(), CxeMessageType.XML_IMPORTED_EVENT);
+                    File xml = helper.getTargetXmlPage(targetPage.getId(),
+                            CxeMessageType.XML_IMPORTED_EVENT);
                     validateXmlFile(xmlDtd.getId(), xml);
                 }
                 catch (IOException e)
@@ -437,13 +437,15 @@ public class XmlDtdManager
                         }
                         catch (Exception e1)
                         {
-                            logger.error("Failed to send DTD validation failure email", e1);
+                            logger.error(
+                                    "Failed to send DTD validation failure email",
+                                    e1);
                         }
                     }
                 }
             }
         }
-        
+
         addComment(job, files, OFF_LINE_IMPORT);
     }
 

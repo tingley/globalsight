@@ -118,7 +118,7 @@ public class StoredProcCaller implements TuvQueryConstants
      * @throws PersistenceException
      */
     public static ResultSet findReimportMatches(Connection p_connection,
-            Vector p_numberArgs, Vector p_stringArgs, String companyId)
+            Vector p_numberArgs, Vector p_stringArgs, long companyId)
             throws PersistenceException
     {
         Collection vectors = splitParamForReimport(p_numberArgs);
@@ -150,7 +150,7 @@ public class StoredProcCaller implements TuvQueryConstants
     }
 
     private static ResultSet excuteProcFindLgemMatch(Connection p_connection,
-            Vector numberParams, Vector stringParams, String companyId)
+            Vector numberParams, Vector stringParams, long companyId)
             throws PersistenceException
     {
         Statement statement = null;
@@ -205,9 +205,9 @@ public class StoredProcCaller implements TuvQueryConstants
             ResultSet values = null;
 
             String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableName(companyId);
+                    .getTuWorkingTableName(companyId);
             String tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvTableName(companyId);
+                    .getTuvWorkingTableName(companyId);
             while (num_array_ptr < numberParams.size() - 1)
             {
                 src_tuv_id = getIntAt(numberParams, num_array_ptr);

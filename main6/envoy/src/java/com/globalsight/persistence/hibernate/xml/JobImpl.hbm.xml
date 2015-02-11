@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
 	<class name="com.globalsight.everest.jobhandler.JobImpl" table="JOB">
@@ -35,8 +33,8 @@
 			type="string" not-null="false" />
 		<property name="quoteApprovedDate" length="320"
 			column="QUOTE_APPROVED_DATE" type="string" not-null="false" />
-		<property name="companyId" column="COMPANY_ID" type="string"
-			not-null="true" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" />
 		<property name="l10nProfileId" column="L10N_PROFILE_ID" type="long"
 			not-null="false" />
 		<property name="jauId" length="80" column="AUTHORISER_USER_ID"
@@ -48,11 +46,14 @@
 		<property name="uuid" length="320" column="UUID" type="string"
 			not-null="false" />
 
-        <property name="startDate" column="START_DATE" type="timestamp"
-            not-null="false" />
-        <property name="completedDate" column="COMPLETED_DATE" type="timestamp"
-            not-null="false" />
-			
+		<property name="startDate" column="START_DATE" type="timestamp"
+			not-null="false" />
+		<property name="completedDate" column="COMPLETED_DATE" type="timestamp"
+			not-null="false" />
+
+        <property name="isMigrated" column="IS_MIGRATED"
+            type="yes_no" not-null="false" />
+
 		<set name="jobCommentSet" inverse="true" cascade="save-update">
 			<key column="COMMENT_OBJECT_ID" />
 			<one-to-many class="com.globalsight.everest.comment.CommentImpl" />

@@ -378,28 +378,28 @@ public class VendorManagementEventHandler
                 .getPhoneNumber(CommunicationInfo.CommunicationType.WORK);
         if (workNumber != null)
         {
-            p_modUser.setPhoneNumber(User.PhoneType.OFFICE, workNumber);
+            p_modUser.setOfficePhoneNumber(workNumber);
         }
 
         String homeNumber = p_vendor
                 .getPhoneNumber(CommunicationInfo.CommunicationType.HOME);
         if (homeNumber != null)
         {
-            p_modUser.setPhoneNumber(User.PhoneType.HOME, homeNumber);
+            p_modUser.setHomePhoneNumber(homeNumber);
         }
 
         String cellNumber = p_vendor
                 .getPhoneNumber(CommunicationInfo.CommunicationType.CELL);
         if (cellNumber != null)
         {
-            p_modUser.setPhoneNumber(User.PhoneType.CELL, cellNumber);
+            p_modUser.setCellPhoneNumber(cellNumber);
         }
 
         String faxNumber = p_vendor
                 .getPhoneNumber(CommunicationInfo.CommunicationType.FAX);
         if (faxNumber != null)
         {
-            p_modUser.setPhoneNumber(User.PhoneType.FAX, faxNumber);
+            p_modUser.setFaxPhoneNumber(faxNumber);
         }
 
     }

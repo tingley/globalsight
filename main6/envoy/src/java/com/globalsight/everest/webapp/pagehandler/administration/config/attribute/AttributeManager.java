@@ -46,15 +46,14 @@ public class AttributeManager
 
     public static List<?> getAllAttributes()
     {
-        String hql = "from Attribute a where a.companyId = :superCompanyId";
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("superCompanyId", CompanyWrapper.SUPER_COMPANY_ID);
+        String hql = "from Attribute a where a.companyId = 1";
+        HashMap<String, Long> map = new HashMap<String, Long>();
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql += " or a.companyId = :companyId";
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         return HibernateUtil.search(hql, map);
@@ -62,15 +61,14 @@ public class AttributeManager
 
     public static List<?> getAllAttributeSets()
     {
-        String hql = "from AttributeSet a where a.companyId = :superCompanyId";
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("superCompanyId", CompanyWrapper.SUPER_COMPANY_ID);
+        String hql = "from AttributeSet a where a.companyId = 1";
+        HashMap<String, Long> map = new HashMap<String, Long>();
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql += " or a.companyId = :companyId";
-            map.put("companyId", currentId);
+            map.put("companyId", Long.parseLong(currentId));
         }
 
         return HibernateUtil.search(hql, map);
@@ -80,9 +78,9 @@ public class AttributeManager
     {
         String currentId = CompanyThreadLocal.getInstance().getValue();
         String hql = "from AttributeSet a where a.name = :name and a.companyId = :companyId";
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("name", name);
-        map.put("companyId", currentId);
+        map.put("companyId", Long.parseLong(currentId));
 
         return (AttributeSet) HibernateUtil.getFirst(hql, map);
     }
@@ -91,9 +89,9 @@ public class AttributeManager
     {
         String currentId = CompanyThreadLocal.getInstance().getValue();
         String hql = "from Attribute a where a.displayName = :name and a.companyId = :companyId";
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("name", name);
-        map.put("companyId", currentId);
+        map.put("companyId", Long.parseLong(currentId));
 
         return (Attribute) HibernateUtil.getFirst(hql, map);
     }
@@ -132,16 +130,16 @@ public class AttributeManager
                 lp = ServerProxy.getProjectHandler().getL10nProfile(
                         fileProfile.getL10nProfileId());
                 Project p = lp.getProject();
-                
+
                 /**
-                 * Edited by Vincent. 2010-04-16.
-                 * return p.getAttributeSet().getAttributes();
+                 * Edited by Vincent. 2010-04-16. return
+                 * p.getAttributeSet().getAttributes();
                  */
                 AttributeSet set = p.getAttributeSet();
                 if (set != null)
-                	return set.getAttributes();
+                    return set.getAttributes();
                 else
-                	return new HashSet<Attribute>();
+                    return new HashSet<Attribute>();
             }
             catch (Exception e)
             {

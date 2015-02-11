@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.PageTmPersistence;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
@@ -90,9 +92,11 @@ public class Leverager
             LeverageDataCenter p_leverageDataCenter, List<Tm> tm2Tms,
             List<Tm> tm3Tms) throws LingManagerException
     {
-        String companyId = p_sourcePage.getCompanyId();
+        String companyId = String.valueOf(p_sourcePage.getCompanyId());
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             GlobalSightLocale sourceLocale = p_sourcePage
                     .getGlobalSightLocale();
 
@@ -105,8 +109,8 @@ public class Leverager
             if (!leverageOptions.isLatestLeveragingForReimport())
             {
                 PageTmLeverager ptLeverager = new PageTmLeverager();
-                levMatchResult = ptLeverager.leverage(m_session.connection(),
-                        p_sourcePage, p_leverageDataCenter);
+                levMatchResult = ptLeverager.leverage(conn, p_sourcePage,
+                        p_leverageDataCenter);
 
                 p_leverageDataCenter
                         .addLeverageResultsOfWholeSegment(levMatchResult);
@@ -116,8 +120,7 @@ public class Leverager
             }
             else
             {
-                PageTmPersistence ptPersistence = new PageTmPersistence(
-                        m_session.connection());
+                PageTmPersistence ptPersistence = new PageTmPersistence(conn);
 
                 long tmId = ptPersistence.getPageTmId(
                         p_sourcePage.getExternalPageId(), sourceLocale);
@@ -131,13 +134,13 @@ public class Leverager
             levMatchResult = new LeverageMatchResults();
             if (tm2Tms.size() > 0)
             {
-                levMatchResult = new Tm2SegmentTmInfo().leverage(m_session,
-                        tm2Tms, p_leverageDataCenter, companyId);
+                levMatchResult = new Tm2SegmentTmInfo().leverage(tm2Tms,
+                        p_leverageDataCenter, companyId);
             }
             if (tm3Tms.size() > 0)
             {
-                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(m_session,
-                        tm3Tms, p_leverageDataCenter, companyId));
+                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(tm3Tms,
+                        p_leverageDataCenter, companyId));
             }
 
             // get job infor
@@ -176,6 +179,10 @@ public class Leverager
             e.printStackTrace(System.out);
             throw new LingManagerException(e);
         }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
     }
 
     /**
@@ -194,9 +201,9 @@ public class Leverager
             throws Exception
     {
         LeverageMatches levMatches = new Tm2SegmentTmInfo().leverageSegment(
-                m_session, p_sourceTuv, p_leverageOptions, tm2Tms);
+                p_sourceTuv, p_leverageOptions, tm2Tms);
         LeverageMatches tm3Matches = new Tm3SegmentTmInfo().leverageSegment(
-                m_session, p_sourceTuv, p_leverageOptions, tm3Tms);
+                p_sourceTuv, p_leverageOptions, tm3Tms);
         if (tm3Matches != null)
         {
             levMatches.merge(tm3Matches);
@@ -216,8 +223,8 @@ public class Leverager
             j = null;
         }
 
-        String companyId = j != null ? j.getCompanyId() : CompanyWrapper
-                .getCurrentCompanyId();
+        String companyId = j != null ? String.valueOf(j.getCompanyId())
+                : CompanyWrapper.getCurrentCompanyId();
         levMatches.setJob(j);
 
         // apply leverage option.

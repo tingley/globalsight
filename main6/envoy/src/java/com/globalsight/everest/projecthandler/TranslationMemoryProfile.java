@@ -18,12 +18,10 @@
 package com.globalsight.everest.projecthandler;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -34,7 +32,6 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.util.StringUtil;
@@ -153,7 +150,7 @@ public class TranslationMemoryProfile extends PersistentObject
     // machine translation common options
     private String m_mtEngine = null;
     private boolean m_useMT = false;
-    private long m_mtConfidenceScore = 100;
+    private long m_mtConfidenceScore = 0;
     private boolean m_showInEditor = false;
     
     // for "PROMT"

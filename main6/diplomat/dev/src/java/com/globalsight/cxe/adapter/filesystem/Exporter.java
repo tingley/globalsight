@@ -393,7 +393,7 @@ public class Exporter
                 // If all the files were exported in a target folder,
                 // then execute the script on export to revert them back to
                 // original file.
-                String companyId = fp.getCompanyId();
+                String companyId = String.valueOf(fp.getCompanyId());
                 if (readyForScript(targetFolder, companyId))
                 {
                     try
@@ -508,16 +508,9 @@ public class Exporter
                 {
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
-                    
+
                     XliffFileUtil.processXliffFiles(wf);
-                    
-                    boolean isXLZFP = ServerProxy
-                            .getFileProfilePersistenceManager()
-                            .isXlzReferenceXlfFileProfile(fp.getName());
-                    if (isXLZFP)
-                    {
-                        XliffFileUtil.processXLZFiles(wf);
-                    }
+                    XliffFileUtil.processXLZFiles(wf);
                 }
             }
         }
@@ -539,7 +532,6 @@ public class Exporter
 
         return exportStatusMsg;
     }
-
 
     private String replaceFileLocale(String content, String targetLocale)
     {
@@ -1097,8 +1089,8 @@ public class Exporter
     private String determineSourceFolder(String p_companyId)
     {
         String filteredDispalyName = SourcePage.filtSpecialFile(m_displayName);
-        String sourceFolder = filteredDispalyName
-                .substring(0, filteredDispalyName.lastIndexOf(File.separator));
+        String sourceFolder = filteredDispalyName.substring(0,
+                filteredDispalyName.lastIndexOf(File.separator));
         StringBuffer sb = new StringBuffer(
                 AmbFileStoragePathUtils.getCxeDocDirPath(p_companyId));
         sb.append(File.separator).append(sourceFolder);

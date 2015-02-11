@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -315,6 +316,67 @@ public class FileUtil
             {
                 out.flush();
                 out.close();
+            }
+        }
+    }
+    
+    /**
+     * Deletes the file
+     * 
+     * @param f
+     */
+    public static void deleteFile(File f)
+    {
+    	log.info("Deleting file: " + f.getAbsolutePath());
+    	
+        if (!f.exists())
+        {
+        	log.error("Can not find the file: " + f.getAbsolutePath());
+        	 return;
+        }
+
+        if (f.isDirectory())
+        {
+            File[] fs = f.listFiles();
+            for (File cf : fs)
+            {
+                deleteFile(cf);
+            }
+        }
+
+        if (!f.delete())
+        {
+        	log.error("Can not delete file: " + f.getAbsolutePath());
+        }
+        else
+        {
+        	log.info("Deleted the file: " + f.getAbsolutePath());
+        }
+    }
+    
+    public static String readFile(File file, String encoding)
+            throws IOException
+    {
+        return readFile(new FileInputStream(file), encoding);
+    }
+
+    /**
+     * Reads the given input stream to a string content.
+     */
+    public static String readFile(InputStream in, String encoding)
+            throws IOException
+    {
+        try
+        {
+            byte[] b = new byte[in.available()];
+            in.read(b);
+            return new String(b, encoding);
+        }
+        finally
+        {
+            if (in != null)
+            {
+                in.close();
             }
         }
     }

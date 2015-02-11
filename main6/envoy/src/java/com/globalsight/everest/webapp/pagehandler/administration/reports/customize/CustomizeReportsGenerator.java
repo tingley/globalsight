@@ -23,12 +23,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.Param;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.ParamObjectPair;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.ParamObjectPairFactory;
@@ -53,6 +56,8 @@ public class CustomizeReportsGenerator
     private int contentBeginRow;
     
     private List total;
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
     
     public CustomizeReportsGenerator(Map p_paramMap, ReportWriter p_reportWriter) 
     {
@@ -91,6 +96,8 @@ public class CustomizeReportsGenerator
     public void pupulate() 
     throws JobException, IOException
     {
+        String userId = (String) paramMap.get(WebAppConstants.USER_NAME);
+        
         // Add title
         this.reportWriter.addTitleCell(this.beginColumn, 
                                        this.titleRow, 
@@ -106,6 +113,17 @@ public class CustomizeReportsGenerator
         List targetLocaleList = this.getTargetLocaleList();
         List statusList = this.getStatusList();
         ProjectWorkflowData workflowData = new ProjectWorkflowData();
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
+        
         for (Iterator jobIter = jobList.iterator(); jobIter.hasNext();)
         {
             job = (Job) jobIter.next();
@@ -129,6 +147,10 @@ public class CustomizeReportsGenerator
         
         //Add footer
         this.addFooter(row.getValue());
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                        null, 100, ReportsData.STATUS_FINISHED);
     }
     
     /**

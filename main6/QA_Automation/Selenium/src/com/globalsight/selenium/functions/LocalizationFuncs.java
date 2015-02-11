@@ -43,18 +43,18 @@ public class LocalizationFuncs extends BasicFuncs
                         "label=Manual");
             }
 
-            selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
+            //selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
             if (selenium.isAlertPresent())
             {
                 Reporter.log(selenium.getAlert());
                 clickAndWait(selenium, LocalizationElements.NEW_CANCEL_BUTTON);
                 continue;
             }
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             // attach workflow
             try
-            {
+            {/*
                 for (int j = 1; j < 100; j++)
                 {
                     selenium.select(
@@ -64,7 +64,11 @@ public class LocalizationFuncs extends BasicFuncs
                     selenium.click(LocalizationElements.ATTACH_RADIO);
                     selenium.click(LocalizationElements.ATTACH_ATTACH_BUTTON);
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-                }
+                }*/
+            	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT1, "value=1006");
+            	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT2, "value=1000");
+            	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT3, "value=1009");
+            	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT4, "value=1003");
             }
             catch (Exception e)
             {
@@ -131,23 +135,37 @@ public class LocalizationFuncs extends BasicFuncs
             }
         }
 
-        selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
-
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+//        selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
+//
+//        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         String[] targetArray = targetStr.split(";");
 
         for (String target : targetArray)
         {
             String[] temp = target.split("\\|\\|");
-            selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT,
-                    "label=" + temp[0]);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-            selectRadioButtonFromTable(selenium,
-                    LocalizationElements.Target_Locale_TABLE, temp[1]);
-            // selenium.click(LocalizationElements.ATTACH_RADIO);
-            selenium.click(LocalizationElements.ATTACH_ATTACH_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+			if (temp[0].equals("French (France) [fr_FR]")) {
+				selenium.select(
+						LocalizationElements.ATTACH_TARGET_LOCALE_SELECT1,
+						"label=" + temp[1]);
+			} else if (temp[0].equals("German (Germany) [de_DE]")) {
+				selenium.select(
+						LocalizationElements.ATTACH_TARGET_LOCALE_SELECT2,
+						"label=" + temp[1]);
+			} else if (temp[0].equals("Italian (Italy) [it_IT]")) {
+				selenium.select(
+						LocalizationElements.ATTACH_TARGET_LOCALE_SELECT3,
+						"label=" + temp[1]);
+			} else if (temp[0].equals("Spanish (Spain) [es_ES]")) {
+				selenium.select(
+						LocalizationElements.ATTACH_TARGET_LOCALE_SELECT4,
+						"label=" + temp[1]);
+			} else {
+				selenium.select(
+						LocalizationElements.ATTACH_TARGET_LOCALE_SELECT5,
+						"label=" + temp[1]);
+			}
+            
         }
 
         // attach workflow
@@ -178,24 +196,24 @@ public class LocalizationFuncs extends BasicFuncs
         }
         try
         {
-            selenium.click(LocalizationElements.Edit_BUTTON);
+            selenium.click("link=" + iLocName);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-            selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            /*selenium.click(LocalizationElements.NEW_NEXT_BUTTON);
+            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);*/
 
             // Remove selected workflow
-            boolean selectWorkflow = selectRadioButtonFromTable(selenium,
+           /* boolean selectWorkflow = selectRadioButtonFromTable(selenium,
                     LocalizationElements.Loc_Workflow_TABLE, iWFName);
             if (!selectWorkflow)
             {
                 Reporter.log("Cannot find the Workflow.");
                 return;
-            }
+            }*/
 
-            selenium.click(LocalizationElements.WF_Remove_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-            selenium.click(LocalizationElements.WF_Save_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT1, "value=-1");
+        	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT2, "value=-1");
+        	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT3, "value=-1");
+        	selenium.select(LocalizationElements.ATTACH_TARGET_LOCALE_SELECT4, "value=-1");
             // Verify if removed
             // Assert.assertEquals(this.isPresentInTable(selenium,LocalizationElements.Loc_Workflow_TABLE,
             // iWFName), false);

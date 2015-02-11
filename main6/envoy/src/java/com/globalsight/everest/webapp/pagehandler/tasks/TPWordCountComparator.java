@@ -28,6 +28,8 @@ import com.globalsight.everest.page.UnextractedFile;
  */
 public class TPWordCountComparator extends StringComparator
 {
+    private static final long serialVersionUID = 1L;
+
     //types of Task comparison
     public static final int FILE_NAME           = 0;
     public static final int EXACT               = 1;
@@ -114,6 +116,7 @@ public class TPWordCountComparator extends StringComparator
                 rv = 0;
             else
                 rv = -1;
+            break;
 
         case BAND1:
             aInt = aCounts.getHiFuzzyWordCount();
@@ -160,8 +163,8 @@ public class TPWordCountComparator extends StringComparator
             break;
 
         case NO_MATCH:  // JPF- fix when have back end
-            aInt = aCounts.getUnmatchedWordCount();
-            bInt = bCounts.getUnmatchedWordCount();
+            aInt = aCounts.getNoMatchWordCount();
+            bInt = bCounts.getNoMatchWordCount();
             if (aInt > bInt)
                 rv = 1;
             else if (aInt == bInt)
@@ -181,7 +184,7 @@ public class TPWordCountComparator extends StringComparator
                 rv = -1;
             break;
 
-        case CONTEXT:  // JPF- fix when have back end
+        case CONTEXT:
             aInt = aCounts.getContextMatchWordCount();
             bInt = bCounts.getContextMatchWordCount();
             if (aInt > bInt)
@@ -202,7 +205,7 @@ public class TPWordCountComparator extends StringComparator
                 rv = -1;
             break;
 
-        case NO_USE_IN_CONTEXT:  // JPF- fix when have back end
+        case NO_USE_IN_CONTEXT:
             aInt = aCounts.getNoUseInContextMatchWordCount();
             bInt = bCounts.getNoUseInContextMatchWordCount();
             if (aInt > bInt)
@@ -213,7 +216,7 @@ public class TPWordCountComparator extends StringComparator
                 rv = -1;
             break;
 
-        case TOTAL_EXACT:  // JPF- fix when have back end
+        case TOTAL_EXACT:
             aInt = aCounts.getTotalExactMatchWordCount();
             bInt = bCounts.getTotalExactMatchWordCount();
             if (aInt > bInt)
@@ -224,7 +227,7 @@ public class TPWordCountComparator extends StringComparator
                 rv = -1;
             break;
 
-        case IN_CONTEXT:  // JPF- fix when have back end
+        case IN_CONTEXT:
             aInt = aCounts.getInContextWordCount();
             bInt = bCounts.getInContextWordCount();
             if (aInt > bInt)
@@ -250,16 +253,12 @@ public class TPWordCountComparator extends StringComparator
             aInt = (aCounts.getLowFuzzyWordCount() + 
                         aCounts.getMedFuzzyWordCount() + 
                         aCounts.getMedHiFuzzyWordCount() +
-                        aCounts.getHiFuzzyWordCount()) - 
-                    (aCounts.getSubLevMatchWordCount() + 
-                     aCounts.getSubLevRepetitionWordCount());
+                        aCounts.getHiFuzzyWordCount());
 
             bInt = (bCounts.getLowFuzzyWordCount() + 
                     bCounts.getMedFuzzyWordCount() + 
                     bCounts.getMedHiFuzzyWordCount() +
-                    bCounts.getHiFuzzyWordCount()) - 
-                (bCounts.getSubLevMatchWordCount() + 
-                 bCounts.getSubLevRepetitionWordCount());
+                    bCounts.getHiFuzzyWordCount());
             if (aInt > bInt)
                 rv = 1;
             else if (aInt == bInt)

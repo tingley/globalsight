@@ -14,7 +14,7 @@ import com.globalsight.smartbox.util.LogUtil;
 /**
  * Main Entry for GSSmartBox
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class Main implements WrapperListener
@@ -24,8 +24,8 @@ public class Main implements WrapperListener
     private static Polling jobCreatePolling;
     private static Polling jobDownloadPolling;
 
-    private static final String VERSION = "1.0";
-    private static final String GS_VERSION = "8.2.3";
+    private static final String VERSION = "1.1";
+    private static final String GS_VERSION = "9.0";
 
     // Main entry for GSSmartBox
     public static void main(String args[])
@@ -43,6 +43,7 @@ public class Main implements WrapperListener
             return;
         }
         LogUtil.info("GSSmartBox init successfully...");
+        LogUtil.info("GSSmartBox ProcessCase is " + cpConfig.getProcessCase() + "...");
 
         inboxPolling = new InboxPolling(cpConfig);
         inboxPolling.start();
@@ -64,7 +65,6 @@ public class Main implements WrapperListener
     public Integer start(String[] arg0)
     {
         System.out.println("GSSmartBox Starting...");
-        // TODO Auto-generated method stub
         return null;
     }
 

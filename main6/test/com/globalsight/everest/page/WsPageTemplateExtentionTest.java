@@ -31,7 +31,7 @@ public class WsPageTemplateExtentionTest
         tuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
         WsPageTemplateExtention extention = new WsPageTemplateExtention(false);
         String newSkeletion = extention.processSkeleton(skeletonStr, tuv,
-                "1000");
+                1000);
 
         String shouldBeStr = replaceString(skeletonStr, PageTemplate.byLocalTM);
 
@@ -39,22 +39,22 @@ public class WsPageTemplateExtentionTest
 
         tuv.setLastModifiedUser("MS_Translator_MT");
         tu.setSourceContent(Extractor.IWS_REPETITION);
-        newSkeletion = extention.processSkeleton(skeletonStr, tuv, "1000");
+        newSkeletion = extention.processSkeleton(skeletonStr, tuv, 1000);
         shouldBeStr = replaceString(skeletonStr, "no");
         assertTrue(newSkeletion.equals(shouldBeStr));
 
         tu.setSourceContent(null);
-        newSkeletion = extention.processSkeleton(skeletonStr, tuv, "1000");
+        newSkeletion = extention.processSkeleton(skeletonStr, tuv, 1000);
         shouldBeStr = replaceString(skeletonStr, PageTemplate.byMT);
         assertTrue(newSkeletion.equals(shouldBeStr));
 
         tuv.setLastModifiedUser("walter");
-        newSkeletion = extention.processSkeleton(skeletonStr, tuv, "1000");
+        newSkeletion = extention.processSkeleton(skeletonStr, tuv, 1000);
         shouldBeStr = replaceString(skeletonStr, PageTemplate.byUser);
         assertTrue(newSkeletion.equals(shouldBeStr));
 
         tuv.setState(TuvState.NOT_LOCALIZED);
-        newSkeletion = extention.processSkeleton(skeletonStr, tuv, "1000");
+        newSkeletion = extention.processSkeleton(skeletonStr, tuv, 1000);
         shouldBeStr = replaceString(skeletonStr, "no");
         assertTrue(newSkeletion.equals(shouldBeStr));
     }

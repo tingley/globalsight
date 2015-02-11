@@ -21,6 +21,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
 
 int percentage = 0;
 boolean done   = false;
+boolean errorOccur = false;
 int counter    = 0;
 ArrayList messages = null;
 File result  = null;
@@ -32,15 +33,24 @@ ProcessStatus status =
 
 if (status !=null)
 {
- percentage = status.getPercentage();
- done   = percentage >= 100;
- counter    = status.getCounter();
- if (counter>1)
-	 counter--;
- messages = status.giveMessages();
- result  = (File)status.getResults();
- canDownload = (result != null && result.exists());
- onload="onload='doLoad()'";
+    if (status.isMultiTasks())
+    {
+        percentage = status.getTaskPercentage();
+    }
+    else
+    {
+ 		percentage = status.getPercentage();
+    }
+    
+    done = percentage >= 100;
+    messages = status.giveMessages();
+    errorOccur = status.isErrorOccured();
+    counter = status.getCounter();
+    if (counter>1)
+      	 counter--;
+    result = status.isMultiTasks() ? null : (File)status.getResults();
+    canDownload = (result != null && result.exists());
+    onload="onload='doLoad()'";
 }
 %>
 <HTML>
@@ -76,6 +86,10 @@ function doLoad()
    }
 %>
 
+  <% if (errorOccur) { %>
+  	parent.done(eval("<%= canDownload %>"));
+  <% } %>
+
   // refresh frame
   if ("<%=done%>" == "false")
   {
@@ -83,7 +97,7 @@ function doLoad()
   }
   else
   {
-    parent.done(eval("<%=canDownload%>"));
+    parent.done(eval("<%= canDownload %>"));
   }
 }
 </SCRIPT>

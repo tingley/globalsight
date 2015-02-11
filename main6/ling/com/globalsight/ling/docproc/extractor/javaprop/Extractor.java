@@ -101,14 +101,22 @@ public class Extractor
         List<InternalText> _internalTexts = null;
         try
         {
-            _internalTexts = getInternalTexts();
+            if (isDoSegBeforeInlText())
+            {
+                _internalTexts = null;
+            }
+            else
+            {
+                _internalTexts = getInternalTexts();
+            }
         }
         catch (Exception e)
         {
             logger.error("Error when getInternalTexts. ", e);
         }
-        
-        return InternalTextHelper.handleString(s, _internalTexts, FORMAT_JAVAPROP, useBptTag);
+
+        return InternalTextHelper.handleString(s, _internalTexts,
+                FORMAT_JAVAPROP, useBptTag);
     }
 
     //
@@ -244,7 +252,8 @@ public class Extractor
                 {
                     o.setDataType(FORMAT_JAVAPROP_HTML);
                 }
-                // fall through
+                getOutput().addDocumentElement(element);
+                break;
             default:
                 getOutput().addDocumentElement(element);
                 break;

@@ -39,7 +39,8 @@ public class PageJobDataRetriever
 
     private long m_sourcePageId;
     private GlobalSightLocale m_sourceLocale;
-    private String m_companyId = null;
+    private long m_companyId = -1;
+    private boolean isJobDataMigrated = false; 
     
     // If the list is changed, getter methods in
     // PageJobDataQueryResult must be changed to sync with this list.
@@ -72,14 +73,15 @@ public class PageJobDataRetriever
         + "ORDER BY tu.id";
 
     public PageJobDataRetriever(Connection p_connection, long p_sourcePageId,
-            GlobalSightLocale p_sourceLocale, String p_companyId)
-            throws Exception
+            GlobalSightLocale p_sourceLocale, long p_companyId,
+            boolean p_isJobDataMigrated) throws Exception
     {
         m_connection = p_connection;
         m_statement = null;
         m_sourcePageId = p_sourcePageId;
         m_sourceLocale = p_sourceLocale;
         m_companyId = p_companyId;
+        isJobDataMigrated = p_isJobDataMigrated;
     }
 
 
@@ -101,17 +103,17 @@ public class PageJobDataRetriever
      *
      * @param p_targetLocales Set of target locales (GlobalSightLocale)
      */
-    @SuppressWarnings("unchecked")
-    public SegmentQueryResult queryForPopulation(Set p_targetLocales)
-        throws Exception
+    public SegmentQueryResult queryForPopulation(
+            Set<GlobalSightLocale> p_targetLocales) throws Exception
     {
-        Collection localeList = new ArrayList(p_targetLocales);
+        Collection<GlobalSightLocale> localeList = new ArrayList<GlobalSightLocale>(
+                p_targetLocales);
         localeList.add(m_sourceLocale);
         String inClause = DbUtil.createLocaleInClause(localeList);
 
         String sql = SELECT_LIST + WHERE_FOR_POPULATION1 + inClause
                 + WHERE_FOR_POPULATION2;
-        sql = replaceTuTuvTablePlaceholder(sql, m_companyId);
+        sql = replaceTuTuvTablePlaceholder(sql, m_companyId, isJobDataMigrated);
         m_statement = m_connection.prepareStatement(sql);
         m_statement.setLong(1, m_sourcePageId);
 
@@ -123,7 +125,7 @@ public class PageJobDataRetriever
         throws Exception
     {
         String sql = SELECT_LIST + WHERE_FOR_LEVERAGE;
-        sql = replaceTuTuvTablePlaceholder(sql, m_companyId);
+        sql = replaceTuTuvTablePlaceholder(sql, m_companyId, isJobDataMigrated);
 
         m_statement = m_connection.prepareStatement(sql);
         m_statement.setLong(1, m_sourcePageId);
@@ -140,12 +142,15 @@ public class PageJobDataRetriever
         }
     }
 
-    private String replaceTuTuvTablePlaceholder(String sql, String companyId)
+    private String replaceTuTuvTablePlaceholder(String sql, long companyId,
+            boolean isJobDataMigrated)
     {
-        sql = sql.replace(TU_TABLE_PLACEHOLDER,
-                SegmentTuTuvCacheManager.getTuTableName(companyId));
-        sql = sql.replace(TUV_TABLE_PLACEHOLDER,
-                SegmentTuTuvCacheManager.getTuvTableName(companyId));
+        String tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(
+                companyId, isJobDataMigrated);
+        String tuvTableName = SegmentTuTuvCacheManager
+                .getTuvTableNameJobDataIn(companyId, isJobDataMigrated);
+        sql = sql.replace(TU_TABLE_PLACEHOLDER, tuTableName);
+        sql = sql.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
         
         return sql;
     }

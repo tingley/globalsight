@@ -1197,12 +1197,12 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 						tmProfileToBeDeleted);
 				clearSessionExceptTableInfo(p_request.getSession(false), TMP_KEY);
 
-				SegmentationRuleFile segRuleFile = ServerProxy
-						.getSegmentationRuleFilePersistenceManager()
-						.getSegmentationRuleFileByTmpid(id);
-				ServerProxy.getSegmentationRuleFilePersistenceManager()
-						.deleteSegmentationRuleFile(segRuleFile);
-			} 
+//				SegmentationRuleFile segRuleFile = ServerProxy
+//						.getSegmentationRuleFilePersistenceManager()
+//						.getSegmentationRuleFileByTmpid(id);
+//				ServerProxy.getSegmentationRuleFilePersistenceManager()
+//						.deleteSegmentationRuleFile(segRuleFile);
+			}
 			catch (Exception e) 
 			{
 				CATEGORY.error(e.getMessage(), e);

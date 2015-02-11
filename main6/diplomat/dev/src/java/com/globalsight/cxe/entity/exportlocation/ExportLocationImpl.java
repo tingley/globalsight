@@ -16,27 +16,14 @@
  */
 package com.globalsight.cxe.entity.exportlocation;
 
-/*
- * Copyright (c) 2002 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
 import com.globalsight.everest.persistence.PersistentObject;
 
 /** Implements an ExportLocation */
-public class ExportLocationImpl extends PersistentObject implements ExportLocation
+public class ExportLocationImpl extends PersistentObject implements
+        ExportLocation
 {
     private static final long serialVersionUID = -3036562705273046249L;
-    
+
     /**
      * Default constructor for TOPLink
      */
@@ -45,7 +32,7 @@ public class ExportLocationImpl extends PersistentObject implements ExportLocati
         m_name = null;
         m_description = null;
         m_location = null;
-        m_companyId = null;
+        m_companyId = -1;
     }
 
     /**
@@ -55,14 +42,26 @@ public class ExportLocationImpl extends PersistentObject implements ExportLocati
      * @param p_description
      * @param p_ruleText
      */
-    public ExportLocationImpl(String p_name, String p_description, String p_location, String p_companyId)
+    public ExportLocationImpl(String p_name, String p_description,
+            String p_location, String p_companyId)
+    {
+        m_name = p_name;
+        m_description = p_description;
+        m_location = p_location;
+        if (p_companyId != null)
+        {
+            m_companyId = Long.parseLong(p_companyId);
+        }
+    }
+
+    public ExportLocationImpl(String p_name, String p_description,
+            String p_location, long p_companyId)
     {
         m_name = p_name;
         m_description = p_description;
         m_location = p_location;
         m_companyId = p_companyId;
     }
-
 
     /**
      * Constructs an ExportLocationImpl from an ExportLocation
@@ -71,27 +70,32 @@ public class ExportLocationImpl extends PersistentObject implements ExportLocati
      */
     public ExportLocationImpl(ExportLocation o)
     {
-        this (o.getName(), o.getDescription(), o.getLocation(), o.getCompanyId());
+        this(o.getName(), o.getDescription(), o.getLocation(), o.getCompanyId());
     }
-
 
     /**
      * Returns the name
      */
     public String getName()
-    {return m_name;}
+    {
+        return m_name;
+    }
 
     /**
      * Returns the description
      */
     public String getDescription()
-    {return m_description;}
+    {
+        return m_description;
+    }
 
     /**
      * Returns the location
      */
     public String getLocation()
-    {return m_location;}
+    {
+        return m_location;
+    }
 
     /**
      ** Sets the name
@@ -114,33 +118,36 @@ public class ExportLocationImpl extends PersistentObject implements ExportLocati
      **/
     public void setLocation(String p_location)
     {
-	m_location = p_location;
+        m_location = p_location;
     }
-    
+
     /**
      * @return Returns the m_companyId.
      */
-    public String getCompanyId() {
+    public long getCompanyId()
+    {
         return m_companyId;
     }
+
     /**
-     * @param id The m_companyId to set.
+     * @param id
+     *            The m_companyId to set.
      */
-    public void setCompanyId(String id) {
+    public void setCompanyId(long id)
+    {
         m_companyId = id;
     }
 
-    /** Returns a string representation of the object*/
+    /** Returns a string representation of the object */
     public String toString()
     {
         return m_name;
     }
 
-    //PRIVATE MEMBERS
+    // PRIVATE MEMBERS
     private String m_name;
     private String m_description;
     private String m_location;
-    private String m_companyId;
-    
-}
+    private long m_companyId;
 
+}

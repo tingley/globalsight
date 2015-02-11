@@ -48,10 +48,11 @@ import com.util.db.DbUtilFactory;
 public class Update
 {
     private static Logger log = Logger.getLogger(Update.class);
-    private static final String LIB_PATH = "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib";
-    private static final String GLOBLASIGHT_JAR = LIB_PATH + "/globalsight.jar";
+    private static final String EAR_PATH = "/jboss/server/standalone/deployments/globalsight.ear";
+    private static final String LIB_PATH = EAR_PATH + "/lib";
+    private static final String GLOBLASIGHT_JAR = EAR_PATH + "/globalsight.jar";
     private static final String CLASS_PATH = LIB_PATH + "/classes";
-    private static final String PATCH_SQL_DIR = "/install/data/ERs";
+//    private static final String PATCH_SQL_DIR = "/install/data/ERs";
     private static final String BACKUP_FILE = "backup";
     private static final String VALIEDATE = "validate";
     private static final String STATISTIC = "statistic";
@@ -284,12 +285,17 @@ public class Update
         {
             ui.showWelcomePage();
             validate();
+            updateUtil.removeHotfix();
             ListAllFiles();
             backup();
             copy();
             updateJar();
+            updateUtil.parseAllTemplates();
             updateUtil.upgradeVerion(getProgress(DATABASE));
             updateUtil.saveSystemInfo();
+            DbUtil util = DbUtilFactory.getDbUtil();
+            util.closeExistConn();
+            
             ui.finish();
         }
         catch (Exception e)

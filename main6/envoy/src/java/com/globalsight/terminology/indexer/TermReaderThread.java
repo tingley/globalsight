@@ -17,6 +17,10 @@
 
 package com.globalsight.terminology.indexer;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.util.ObjectPool;
@@ -24,30 +28,18 @@ import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.terminology.util.SqlUtil;
-
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
-import java.util.*;
 
 /**
  * Reads entries from a termbase and produces Entry objects by putting
  * ReaderResult objects into a ReaderResultQueue.
  */
-public class TermReaderThread
-    extends Thread
+public class TermReaderThread extends Thread
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TermReaderThread.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TermReaderThread.class);
 
     private ReaderResultQueue m_results;
     private Termbase m_termbase;
@@ -69,10 +61,11 @@ public class TermReaderThread
     //
     // Thread methods
     //
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void run()
     {
         ReaderResult result = null;
-        
+
         try
         {
             if (CATEGORY.isDebugEnabled())
@@ -80,7 +73,7 @@ public class TermReaderThread
                 CATEGORY.debug("TermReaderThread: start reading TB " +
                     m_termbase.getName());
             }
-			
+
 			com.globalsight.terminology.java.Termbase tbase = 
                 HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, m_termbase.getId());
             String hql = "from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase " 
@@ -136,6 +129,8 @@ public class TermReaderThread
 
             m_results.producerDone();
             m_results = null;
+
+            HibernateUtil.closeSession();
 
             if (CATEGORY.isDebugEnabled())
             {

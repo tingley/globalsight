@@ -51,321 +51,411 @@ public class LocalizationProfile implements Serializable
     private final String NO_TARGET_LANGUAGES = "No Target Languages";
     private final String INCREMENT_JOBTEMPLATETARGETID = "Increment_JobTemplateTargetID";
     private final String NO_ROUTING_STAGES = "No Routing Stages";
-	
+
     private long m_id = 0;
     private String m_name = "";
     private int m_sourceLanguage = 0;
     private int m_characterSet = 0;
     private Vector m_languageList = null;
-	
-    /////////////////////////////////////////////////
-    public LocalizationProfile (String p_name, int p_sourceLanguage, int p_characterSet)
+
+    // ///////////////////////////////////////////////
+    public LocalizationProfile(String p_name, int p_sourceLanguage,
+            int p_characterSet)
     {
-	this ( p_name, p_sourceLanguage, p_characterSet, new Vector() );
+        this(p_name, p_sourceLanguage, p_characterSet, new Vector());
     }
-	
-    /////////////////////////////////////////////////
-    public LocalizationProfile (String p_name, int p_sourceLanguage, int p_characterSet, Vector p_languageList)
+
+    // ///////////////////////////////////////////////
+    public LocalizationProfile(String p_name, int p_sourceLanguage,
+            int p_characterSet, Vector p_languageList)
     {
-	m_name = p_name;
-	m_sourceLanguage = p_sourceLanguage;
-	m_characterSet = p_characterSet;
-	m_languageList = p_languageList;	
-		
+        m_name = p_name;
+        m_sourceLanguage = p_sourceLanguage;
+        m_characterSet = p_characterSet;
+        m_languageList = p_languageList;
+
     }
-	
-    /////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////
     // retrieve the localization profile from the database
-    public LocalizationProfile (long p_id)
+    public LocalizationProfile(long p_id)
     {
-	Connection connection = null;
-	m_id = p_id;
-	m_languageList = new Vector();
-	Statement query = null;
+        Connection connection = null;
+        m_id = p_id;
+        m_languageList = new Vector();
+        Statement query = null;
 
-	// retrieve data from the job template table
-	try
-	    {
-		connection = ConnectionPool.getConnection();
-		String sql = "SELECT * FROM " + JOB_TEMPLATE + " WHERE " + 
-		    JOB_TEMPLATE_ID + " = " + m_id;
+        // retrieve data from the job template table
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            String sql = "SELECT * FROM " + JOB_TEMPLATE + " WHERE "
+                    + JOB_TEMPLATE_ID + " = " + m_id;
 
-		query = connection.createStatement();
-		ResultSet result = query.executeQuery(sql);
-		result.next();
-		m_name = result.getString(NAME);
-		m_sourceLanguage = result.getInt(SOURCE_LANGUAGE);
-		m_characterSet = result.getInt(CHARACTER_SET);
-		query.close();
-			
-		// retrieve data from job template target table
+            query = connection.createStatement();
+            ResultSet result = query.executeQuery(sql);
+            result.next();
+            m_name = result.getString(NAME);
+            m_sourceLanguage = result.getInt(SOURCE_LANGUAGE);
+            m_characterSet = result.getInt(CHARACTER_SET);
+            query.close();
 
-		sql = "SELECT * FROM " + JOB_TEMPLATE_TARGET + " WHERE " + 
-		    JOB_TEMPLATE_ID + " = " + m_id;
-		query = connection.createStatement();
-		result = query.executeQuery(sql);
-		while ( result.next() )
-		    {
-			long targetID = result.getLong(JOB_TEMPLATE_TARGET_ID);
-			int targetLanguage = result.getInt(TARGET_LANGUAGE);
-			int languageTM = result.getInt(LANGUAGE_TM);
-                        boolean pageTM = (result.getInt(PAGE_TM) > 0 ) ? true : false;
-                        int tm_matchStyle = result.getInt(TM_MATCH_STYLE);
-			int characterSet = result.getInt(CHARACTER_SET);
-				
-			LocalizationProfileTarget target = 
-			    new LocalizationProfileTarget (targetID, targetLanguage, languageTM,
-                                                           pageTM, tm_matchStyle, characterSet);
-				
-			m_languageList.add (target);		
-		    }
-		query.close();
-		
-		// retrieve data from job template routing
-		for (int i=0; i<m_languageList.size(); ++i)
-		    {
-			LocalizationProfileTarget target = 
-			    (LocalizationProfileTarget) m_languageList.elementAt(i);
-			long targetID = target.getID();
-				
-			sql = "SELECT * FROM " + JOB_TEMPLATE_ROUTING + " WHERE " +
-			    JOB_TEMPLATE_TARGET_ID + " = " + targetID;
-				
-			query = connection.createStatement();
-			ResultSet results = query.executeQuery(sql);
-			while ( results.next() )
-			    {
-				int stage = results.getInt(STAGE);
-				int sequence = results.getInt(SEQUENCE);
-				long user = results.getLong(USER);
-				int duration = results.getInt(DURATION);	
-					
-				LocalizationProfileRouting routing =
-				    new LocalizationProfileRouting(stage,
-								   sequence, user, duration);
-				target.addRoutingEntry(routing);
-			    }		
-			query.close();
-		    }
-	    }
-	catch (ConnectionPoolException cpe) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
-	}
-	catch (SQLException e) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
-	}
-	finally {
-	    try { ConnectionPool.returnConnection(connection); }
-	    catch (ConnectionPoolException cpe) {}
-	}
+            // retrieve data from job template target table
+
+            sql = "SELECT * FROM " + JOB_TEMPLATE_TARGET + " WHERE "
+                    + JOB_TEMPLATE_ID + " = " + m_id;
+            query = connection.createStatement();
+            result = query.executeQuery(sql);
+            while (result.next())
+            {
+                long targetID = result.getLong(JOB_TEMPLATE_TARGET_ID);
+                int targetLanguage = result.getInt(TARGET_LANGUAGE);
+                int languageTM = result.getInt(LANGUAGE_TM);
+                boolean pageTM = (result.getInt(PAGE_TM) > 0) ? true : false;
+                int tm_matchStyle = result.getInt(TM_MATCH_STYLE);
+                int characterSet = result.getInt(CHARACTER_SET);
+
+                LocalizationProfileTarget target = new LocalizationProfileTarget(
+                        targetID, targetLanguage, languageTM, pageTM,
+                        tm_matchStyle, characterSet);
+
+                m_languageList.add(target);
+            }
+            query.close();
+
+            // retrieve data from job template routing
+            for (int i = 0; i < m_languageList.size(); ++i)
+            {
+                LocalizationProfileTarget target = (LocalizationProfileTarget) m_languageList
+                        .elementAt(i);
+                long targetID = target.getID();
+
+                sql = "SELECT * FROM " + JOB_TEMPLATE_ROUTING + " WHERE "
+                        + JOB_TEMPLATE_TARGET_ID + " = " + targetID;
+
+                query = connection.createStatement();
+                ResultSet results = query.executeQuery(sql);
+                while (results.next())
+                {
+                    int stage = results.getInt(STAGE);
+                    int sequence = results.getInt(SEQUENCE);
+                    long user = results.getLong(USER);
+                    int duration = results.getInt(DURATION);
+
+                    LocalizationProfileRouting routing = new LocalizationProfileRouting(
+                            stage, sequence, user, duration);
+                    target.addRoutingEntry(routing);
+                }
+                query.close();
+            }
+        }
+        catch (ConnectionPoolException cpe)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
+        }
+        catch (SQLException e)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
+        }
+        finally
+        {
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (ConnectionPoolException cpe)
+            {
+            }
+        }
     }
-	
-    /////////////////////////////////////////////////
-    public long getID() { return m_id; }
-    public String getName() { return m_name; }
-    public int getSourceLanguage() { return m_sourceLanguage; }
-    public int getCharacterSet() { return m_characterSet; }
-    public Vector getLanguageList() { return m_languageList; }
-    public void setID (long p_id) { m_id = p_id; }
-    public void setName(String p_name) { m_name = p_name; }
-    public void setSourceLanguage(int p_sourceLanguage) { m_sourceLanguage = p_sourceLanguage; }
-    public void setCharacterSet(int p_characterSet) { m_characterSet = p_characterSet; }
-    public void setLanguageList(Vector p_languageList) { m_languageList = p_languageList; }
-		
-    /////////////////////////////////////////////////
-    public int getLanguageListSize() { return m_languageList.size(); }
-	
-    /////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////
+    public long getID()
+    {
+        return m_id;
+    }
+
+    public String getName()
+    {
+        return m_name;
+    }
+
+    public int getSourceLanguage()
+    {
+        return m_sourceLanguage;
+    }
+
+    public int getCharacterSet()
+    {
+        return m_characterSet;
+    }
+
+    public Vector getLanguageList()
+    {
+        return m_languageList;
+    }
+
+    public void setID(long p_id)
+    {
+        m_id = p_id;
+    }
+
+    public void setName(String p_name)
+    {
+        m_name = p_name;
+    }
+
+    public void setSourceLanguage(int p_sourceLanguage)
+    {
+        m_sourceLanguage = p_sourceLanguage;
+    }
+
+    public void setCharacterSet(int p_characterSet)
+    {
+        m_characterSet = p_characterSet;
+    }
+
+    public void setLanguageList(Vector p_languageList)
+    {
+        m_languageList = p_languageList;
+    }
+
+    // ///////////////////////////////////////////////
+    public int getLanguageListSize()
+    {
+        return m_languageList.size();
+    }
+
+    // ///////////////////////////////////////////////
     public void addLanguageEntry(LocalizationProfileTarget target)
     {
-	m_languageList.addElement(target);		
+        m_languageList.addElement(target);
     }
-	
-    /////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////
     public boolean deleteLanguageEntry(LocalizationProfileTarget target)
     {
-	return m_languageList.removeElement( (Object)target );		
+        return m_languageList.removeElement((Object) target);
     }
-	
-    /////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////
     public void deleteEntry()
     {
-	Connection connection = null;
-	try {
-	    connection = ConnectionPool.getConnection();
-	    _deleteEntry(connection);
-	}
-	catch (ConnectionPoolException cpe) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
-	}
-	catch (SQLException e) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
-	}
-	finally {
-	    try { ConnectionPool.returnConnection(connection); }
-	    catch (ConnectionPoolException cpe) {}
-	}
+        Connection connection = null;
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            _deleteEntry(connection);
+        }
+        catch (ConnectionPoolException cpe)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
+        }
+        catch (SQLException e)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
+        }
+        finally
+        {
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (ConnectionPoolException cpe)
+            {
+            }
+        }
     }
 
-    private void _deleteEntry(Connection connection)
-	throws SQLException
+    private void _deleteEntry(Connection connection) throws SQLException
     {
-	if (m_id > 0)
-	    {
-		String sql = "DELETE FROM " + JOB_TEMPLATE + " WHERE " + JOB_TEMPLATE_ID + " = " + m_id;	
-		connection.createStatement().executeUpdate(sql); 	
-	    }	
+        if (m_id > 0)
+        {
+            connection.setAutoCommit(false);
+            String sql = "DELETE FROM " + JOB_TEMPLATE + " WHERE "
+                    + JOB_TEMPLATE_ID + " = " + m_id;
+            connection.createStatement().executeUpdate(sql);
+            connection.commit();
+        }
     }
-	
-    /////////////////////////////////////////////////
+
+    // ///////////////////////////////////////////////
     public void update() throws NoSuchFieldException
     {
-	Connection connection = null;
-	Statement query;
-	String sql;
-	ResultSet result;
-	ResultSet results;
+        Connection connection = null;
+        Statement query;
+        String sql;
+        ResultSet result;
+        ResultSet results;
 
-	try {
-	    connection = ConnectionPool.getConnection();	    
-	    connection.setAutoCommit(false);
-	    theLogger.println(Logger.DEBUG_D, "Deleting entry.");
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            connection.setAutoCommit(false);
+            theLogger.println(Logger.DEBUG_D, "Deleting entry.");
 
-	    // delete the previous localization profile if it exists
-	    _deleteEntry(connection);
+            // delete the previous localization profile if it exists
+            _deleteEntry(connection);
 
-	    // retrieve a new id
-	    if (0 == m_id)
-		{
-		    sql = "SELECT " + INCREMENT_JOBTEMPLATEID + ".NEXTVAL FROM DUAL";
-		    query = connection.createStatement();
-		    result = query.executeQuery(sql);
-		    result.next();
-		    m_id = result.getLong(1);
-		    theLogger.println(Logger.DEBUG_D, "Got new id:" + m_id);
-		    query.close();
-		}
-		
-	    // create a new row in Job_Template
-	    sql = "INSERT INTO " + JOB_TEMPLATE + " VALUES ( " + m_id + "," + Utility.quote(m_name) +
-		"," + m_sourceLanguage + "," + m_characterSet + ")";
-			
-	    connection.createStatement().executeUpdate(sql);
-	    theLogger.println(Logger.DEBUG_D, "inserted into job_template.");
+            // retrieve a new id
+            if (0 == m_id)
+            {
+                sql = "SELECT " + INCREMENT_JOBTEMPLATEID
+                        + ".NEXTVAL FROM DUAL";
+                query = connection.createStatement();
+                result = query.executeQuery(sql);
+                result.next();
+                m_id = result.getLong(1);
+                theLogger.println(Logger.DEBUG_D, "Got new id:" + m_id);
+                query.close();
+            }
 
-	    // check for entries in languageList
-	    if (m_languageList.size() == 0)
-		{
-		    theLogger.println(Logger.WARNING, "No target languages were chosen for the L10N Profile.");
-		    throw new NoSuchFieldException(NO_TARGET_LANGUAGES);
-		}
-		
-	    // create rows in job template target
-	    for (int i=0; i < m_languageList.size(); ++i)
-		{
-		    LocalizationProfileTarget target = 
-			(LocalizationProfileTarget) m_languageList.elementAt(i);
-		    // retrieve a new target id
-		    sql = "SELECT " + INCREMENT_JOBTEMPLATETARGETID + ".NEXTVAL FROM DUAL";
+            // create a new row in Job_Template
+            sql = "INSERT INTO " + JOB_TEMPLATE + " VALUES ( " + m_id + ","
+                    + Utility.quote(m_name) + "," + m_sourceLanguage + ","
+                    + m_characterSet + ")";
 
-		    query = connection.createStatement();
-		    result = query.executeQuery(sql);
-		    result.next();
-		    target.setID( result.getLong(1) );
-		    query.close();
-			
-		    sql = "INSERT INTO " + JOB_TEMPLATE_TARGET + " VALUES (" +
-			m_id + "," + target.getID() + "," + target.getLanguage() + "," +
-			target.getLanguageTM() + "," + (target.getPageTM()?1:0) + "," +
-                       target.getTM_MatchStyle() + "," +
-			target.getCharacterSet() + ")";
-		    
-		    connection.createStatement().executeUpdate(sql);
-		    theLogger.println(Logger.DEBUG_D,
-				      "inserted into job_template_target.");
-		    
-		    // create rows in job template routing
-		    Vector routing = target.getRoutingList();
+            connection.createStatement().executeUpdate(sql);
+            theLogger.println(Logger.DEBUG_D, "inserted into job_template.");
 
-		    // check for entries in languageList
-		    if (routing.size() == 0) {
-			theLogger.println(Logger.WARNING,
-					  "No workflow stages were chosen in the L10N Profile.");
-			throw new NoSuchFieldException(NO_ROUTING_STAGES);
-		    }
-			
-		    for (int j=0; j < routing.size(); ++j)
-			{
-			    LocalizationProfileRouting route = 
-				(LocalizationProfileRouting) routing.elementAt(j);
-			    sql = "INSERT INTO " + JOB_TEMPLATE_ROUTING + " VALUES ( " +
-				target.getID() + "," + route.getStage() + "," +
-				route.getSequence() + "," + route.getUser() + "," +
-				route.getDuration() + ")";
-			    connection.createStatement().executeUpdate(sql);
-			    theLogger.println(Logger.DEBUG_D, "inserted into job_template_routing");
-			}
-		}
+            // check for entries in languageList
+            if (m_languageList.size() == 0)
+            {
+                theLogger
+                        .println(Logger.WARNING,
+                                "No target languages were chosen for the L10N Profile.");
+                throw new NoSuchFieldException(NO_TARGET_LANGUAGES);
+            }
 
-	    //commit the update!
-	    connection.commit();
-	    connection.setAutoCommit(true);
-	}
-	catch (ConnectionPoolException cpe) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
-	}
-	catch (SQLException e) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
-	    //attempt a roll-back
-	    try{
-		if (connection != null)
-		    connection.rollback();
-	    }
-	    catch (SQLException sqle2)
-		{
-		    theLogger.printStackTrace(Logger.ERROR,"Could not rollback: " , sqle2);
-		}
-	}
-	finally {
-	    try { ConnectionPool.returnConnection(connection); }
-	    catch (ConnectionPoolException cpe) {}
-	}
+            // create rows in job template target
+            for (int i = 0; i < m_languageList.size(); ++i)
+            {
+                LocalizationProfileTarget target = (LocalizationProfileTarget) m_languageList
+                        .elementAt(i);
+                // retrieve a new target id
+                sql = "SELECT " + INCREMENT_JOBTEMPLATETARGETID
+                        + ".NEXTVAL FROM DUAL";
+
+                query = connection.createStatement();
+                result = query.executeQuery(sql);
+                result.next();
+                target.setID(result.getLong(1));
+                query.close();
+
+                sql = "INSERT INTO " + JOB_TEMPLATE_TARGET + " VALUES (" + m_id
+                        + "," + target.getID() + "," + target.getLanguage()
+                        + "," + target.getLanguageTM() + ","
+                        + (target.getPageTM() ? 1 : 0) + ","
+                        + target.getTM_MatchStyle() + ","
+                        + target.getCharacterSet() + ")";
+
+                connection.createStatement().executeUpdate(sql);
+                theLogger.println(Logger.DEBUG_D,
+                        "inserted into job_template_target.");
+
+                // create rows in job template routing
+                Vector routing = target.getRoutingList();
+
+                // check for entries in languageList
+                if (routing.size() == 0)
+                {
+                    theLogger
+                            .println(Logger.WARNING,
+                                    "No workflow stages were chosen in the L10N Profile.");
+                    throw new NoSuchFieldException(NO_ROUTING_STAGES);
+                }
+
+                for (int j = 0; j < routing.size(); ++j)
+                {
+                    LocalizationProfileRouting route = (LocalizationProfileRouting) routing
+                            .elementAt(j);
+                    sql = "INSERT INTO " + JOB_TEMPLATE_ROUTING + " VALUES ( "
+                            + target.getID() + "," + route.getStage() + ","
+                            + route.getSequence() + "," + route.getUser() + ","
+                            + route.getDuration() + ")";
+                    connection.createStatement().executeUpdate(sql);
+                    theLogger.println(Logger.DEBUG_D,
+                            "inserted into job_template_routing");
+                }
+            }
+
+            // commit the update!
+            connection.commit();
+            connection.setAutoCommit(true);
+        }
+        catch (ConnectionPoolException cpe)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
+        }
+        catch (SQLException e)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
+            // attempt a roll-back
+            try
+            {
+                if (connection != null)
+                    connection.rollback();
+            }
+            catch (SQLException sqle2)
+            {
+                theLogger.printStackTrace(Logger.ERROR, "Could not rollback: ",
+                        sqle2);
+            }
+        }
+        finally
+        {
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (ConnectionPoolException cpe)
+            {
+            }
+        }
     }
-	
-    /////////////////////////////////////////////////
-    static public Vector retrieveLocalizationProfile ()
+
+    // ///////////////////////////////////////////////
+    static public Vector retrieveLocalizationProfile()
     {
-	ResultSet results = null;
-	Statement query = null;
-	Connection connection = null;
-	Vector profiles = new Vector();
-	Logger theLogger = Logger.getLogger();
-		
-	try
-	    {
-		connection = ConnectionPool.getConnection();
-		query = connection.createStatement();
-		String sql = "SELECT JOB_TEMPLATE_ID FROM JOB_TEMPLATE ORDER BY JOB_TEMPLATE_ID";
-		results = query.executeQuery(sql);
-		while ( results.next() )		
-		    {
-			long id = results.getLong(1);
-			profiles.add(new LocalizationProfile(id));
-		    }
-		query.close();
-	    }
-	catch (ConnectionPoolException cpe) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
-	}
-	catch (SQLException e) {
-	    theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
-	}
-	finally {
-	    try { ConnectionPool.returnConnection(connection); }
-	    catch (ConnectionPoolException cpe) {}
-	}
-	return profiles;
+        ResultSet results = null;
+        Statement query = null;
+        Connection connection = null;
+        Vector profiles = new Vector();
+        Logger theLogger = Logger.getLogger();
+
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            query = connection.createStatement();
+            String sql = "SELECT JOB_TEMPLATE_ID FROM JOB_TEMPLATE ORDER BY JOB_TEMPLATE_ID";
+            results = query.executeQuery(sql);
+            while (results.next())
+            {
+                long id = results.getLong(1);
+                profiles.add(new LocalizationProfile(id));
+            }
+            query.close();
+        }
+        catch (ConnectionPoolException cpe)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", cpe);
+        }
+        catch (SQLException e)
+        {
+            theLogger.printStackTrace(Logger.ERROR, "LocalizationProfile", e);
+        }
+        finally
+        {
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (ConnectionPoolException cpe)
+            {
+            }
+        }
+        return profiles;
     }
-    
-    private Logger theLogger = Logger.getLogger();    
+
+    private Logger theLogger = Logger.getLogger();
 }

@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.page.pageimport;
@@ -64,14 +64,15 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
         super(p_machineTranslator, autoCommitToTm);
     }
 
+    @Override
     public Collection<TargetPage> persistObjectsWithExtractedFile(
             SourcePage p_sourcePage, Collection p_targetLocales,
             TermLeverageResult p_termMatches, boolean p_useLeveragedSegments,
             boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         List<TargetPage> targetPages = new ArrayList<TargetPage>();
         List<LeverageGroup> levertages = p_sourcePage.getExtractedFile()
@@ -155,24 +156,14 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
                         + (System.currentTimeMillis() - time_PERFORMANCE));
             }
 
-            transaction.commit();
+            HibernateUtil.commit(transaction);
         }
         catch (Exception e)
         {
-            if (transaction != null)
-            {
-                transaction.rollback();
-            }
+            HibernateUtil.rollback(transaction);
 
             s_logger.error("The target page could not be persisted", e);
             throw new PageException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                // session.close();
-            }
         }
 
         return targetPages;
@@ -217,16 +208,16 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
 
         // Assume this page contains an extracted file, otherwise
         // wouldn't have reached this place in the code.
-        Iterator it1 = getExtractedFile(p_sourcePage).getLeverageGroups()
-                .iterator();
+        Iterator<LeverageGroup> it1 = getExtractedFile(p_sourcePage)
+                .getLeverageGroups().iterator();
         while (it1.hasNext())
         {
-            LeverageGroup leverageGroup = (LeverageGroup) it1.next();
-            Collection tus = leverageGroup.getTus();
+            LeverageGroup leverageGroup = it1.next();
+            Collection<Tu> tus = leverageGroup.getTus();
 
-            for (Iterator it2 = tus.iterator(); it2.hasNext();)
+            for (Iterator<Tu> it2 = tus.iterator(); it2.hasNext();)
             {
-                Tu tu = (Tu) it2.next();
+                Tu tu = it2.next();
                 Tuv tuv = tu.getTuv(p_sourcePage.getLocaleId(),
                         p_sourcePage.getCompanyId());
 
@@ -257,7 +248,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
      * Delete XLF ALT data attached to source TUVs which were saved into DB when
      * save source TUVs. They have been moved to target TUVs, it is time to
      * delete them now.
-     * 
+     *
      * @param p_session
      *            -- Hibernate session which is used to control transaction.
      * @param p_sourcePage

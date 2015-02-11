@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
@@ -18,7 +34,7 @@ public class InddFilter implements Filter
     private boolean translateHiddenLayer = false;
     private boolean translateMasterLayer = true;
     private boolean translateFileInfo = false;
-    private boolean extractLineBreak = false;
+    private boolean extractLineBreak = true;
     private boolean replaceNonbreakingSpace = false;
 
     public boolean checkExists(String filterName, long companyId)
@@ -44,20 +60,26 @@ public class InddFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.INDD_TABLENAME + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.INDD_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"translateHiddenLayer\":").append(translateHiddenLayer).append(",");
-        sb.append("\"translateMasterLayer\":").append(translateMasterLayer).append(",");
-        sb.append("\"translateFileInfo\":").append(translateFileInfo).append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
+                .append(",");
+        sb.append("\"translateHiddenLayer\":").append(translateHiddenLayer)
+                .append(",");
+        sb.append("\"translateMasterLayer\":").append(translateMasterLayer)
+                .append(",");
+        sb.append("\"translateFileInfo\":").append(translateFileInfo)
+                .append(",");
         sb.append("\"extractLineBreak\":").append(extractLineBreak).append(",");
-        sb.append("\"replaceNonbreakingSpace\":").append(replaceNonbreakingSpace);
+        sb.append("\"replaceNonbreakingSpace\":").append(
+                replaceNonbreakingSpace);
         sb.append("}");
         return sb.toString();
     }
@@ -91,7 +113,7 @@ public class InddFilter implements Filter
     {
         this.filterDescription = filterDescription;
     }
-    
+
     public long getCompanyId()
     {
         return companyId;

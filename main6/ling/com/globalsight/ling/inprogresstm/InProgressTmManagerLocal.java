@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -178,14 +177,15 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             LeverageOptions p_leverageOptions) throws LingManagerException
     {
         DynamicLeverageResults results = null;
+        Connection conn = null;
 
         try
         {
             // leverage from in-progress TM
             if (p_leverageOptions.dynamicLeveragesFromInProgressTm())
             {
-                Session session = TmUtil.getStableSession();
-                Leverager leverager = new Leverager(session.connection());
+                conn = DbUtil.getConnection();
+                Leverager leverager = new Leverager(conn);
 
                 // Leverage from current job's in-progress TM data.
                 long jobId = getJobId(p_sourcePage);
@@ -208,11 +208,6 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                     results = leverager.leverageLocalizable(p_sourceTuv,
                             sourceLocale, p_targetLocale, p_leverageOptions,
                             jobId, jobIdsToLevFrom, tmIds);
-                }
-                // Close the DB connection and the session object finally.
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
                 }
             }
 
@@ -250,6 +245,10 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             e.printStackTrace();
             throw new LingManagerException(e);
         }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
 
         if (results == null)
         {
@@ -262,14 +261,14 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         results.serOrgSid(p_sourceTuv.getSid());
 
         boolean isTmProcedence = p_leverageOptions.isTmProcedence();
+        long companyId = p_sourcePage.getCompanyId();
         if (isTmProcedence)
         {
-            results.generalSortByTm(p_leverageOptions,
-                    p_sourcePage.getCompanyId());
+            results.generalSortByTm(p_leverageOptions, companyId);
         }
         else
         {
-            results.generalSort(p_leverageOptions, p_sourcePage.getCompanyId());
+            results.generalSort(p_leverageOptions, companyId);
         }
         return results;
     }
@@ -301,7 +300,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         try
         {
             SourcePage sourcePage = getSourcePage(p_sourcePageId);
-            String companyId = sourcePage.getCompanyId();
+            long companyId = sourcePage.getCompanyId();
             BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId,
                     companyId);
             BaseTmTuv trgTuv = TmUtil.createTmSegment(p_targetTuv, p_subId,

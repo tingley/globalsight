@@ -16,61 +16,65 @@
  */
 package com.globalsight.everest.company;
 
-
-
 // GlobalSight
 import com.globalsight.everest.persistence.PersistenceException;
 
 /**
- * This class only represent a wrapper object for the company names 
- * defined in Envoy database  and is used for defining a workflow 
- * template (template node names).
- *  
- */ 
+ * This class only represent a wrapper object for the company names defined in
+ * Envoy database and is used for defining a workflow template (template node
+ * names).
+ * 
+ */
 public class CompanyThreadLocal
 {
     // company description
     private static ThreadLocal<String> m_companyThreadLocal = null;
     private static CompanyThreadLocal m_instance = new CompanyThreadLocal();
 
-
-    //////////////////////////////////////////////////////////////////////////////////
-    //  Begin:  Constructor
-    ////////////////////////////////////////////////////////////////////////////////// 
+    // ////////////////////////////////////////////////////////////////////////////////
+    // Begin: Constructor
+    // ////////////////////////////////////////////////////////////////////////////////
     /**
      * Default Company constructor used ONLY for TopLink.
      */
     protected CompanyThreadLocal()
     {
-    	m_companyThreadLocal = new ThreadLocal<String>();    	
-    }        
-    
-    public static CompanyThreadLocal getInstance()
-    {    	
-    	return m_instance;
+        m_companyThreadLocal = new ThreadLocal<String>();
     }
-    
+
+    public static CompanyThreadLocal getInstance()
+    {
+        return m_instance;
+    }
+
     public void setIdValue(String companyId)
     {
         m_companyThreadLocal.set(companyId);
     }
 
+    public void setIdValue(long companyId)
+    {
+        setIdValue(String.valueOf(companyId));
+    }
+
     public void setValue(String companyName)
     {
-    	try {
-        	String companyId = CompanyWrapper.getCompanyIdByName(companyName);
-        	m_companyThreadLocal.set(companyId);
-    	}
-    	catch(PersistenceException e) {
-    		e.printStackTrace();
-    	}
+        try
+        {
+            String companyId = CompanyWrapper.getCompanyIdByName(companyName);
+            m_companyThreadLocal.set(companyId);
+        }
+        catch (PersistenceException e)
+        {
+            e.printStackTrace();
+        }
     }
-    
+
     public String getValue()
     {
-    	return (String)m_companyThreadLocal.get();
+        return (String) m_companyThreadLocal.get();
     }
-    
+
     public boolean fromSuperCompany()
     {
         return CompanyWrapper.SUPER_COMPANY_ID.equals(m_instance.getValue());

@@ -793,6 +793,28 @@ public class FilterHelper
                 sql, companyId);
     }
 
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getallFiltersLikeName(String param)
+    {
+        Map<String, String> filters = new HashMap<String, String>();
+        Collection<String> c= MapOfTableNameAndSpecialFilter.getAllFilter();
+        for(String filterTableName:c){
+            Filter filter = MapOfTableNameAndSpecialFilter
+                    .getFilterInstance(filterTableName);
+            String sql = "select * from " + filterTableName
+                    + " where filter_name like '%" + param + "%'";
+
+            List<Filter> fList = (List<Filter>) HibernateUtil.getSession()
+                    .createSQLQuery(sql).addEntity(filter.getClass()).list();
+            for (Filter f : fList)
+            {
+                filters.put(filterTableName + f.getId(), f.getFilterName());
+            }
+        }
+       
+        return filters;
+    }
+
     public static String getFiltersJson(String filterTableName, long companyId)
     {
         List<Filter> filters = getFiltersByTableName(filterTableName, companyId);

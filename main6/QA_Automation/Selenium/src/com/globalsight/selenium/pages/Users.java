@@ -6,7 +6,7 @@ package com.globalsight.selenium.pages;
 
 public class Users implements BasePage
 {
-    public static final String USER_LIST_TABLE = "//div[@id='contentLayer']/form/table[2]/tbody/tr[2]/td/table/tbody";
+    public static final String USER_LIST_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
 
     // Users
     public static final String USER_SEARCH_NAME_TYPE_SELECT = "nameTypeOptions";
@@ -19,7 +19,7 @@ public class Users implements BasePage
     public static final String USER_SEARCH_NAME_OPTION_END_WITH = "ends with";
     public static final String USER_SEARCH_NAME_OPTION_CONTAIN = "contains";
     
-    public static final String USER_SEARCH_NAME_TEXT = "nameField";
+    public static final String USER_SEARCH_NAME_TEXT = "uNameFilter";
     public static final String USER_ROLES_TABLE = "//div[@id='contentLayer']/table/tbody/tr[2]/td/table/tbody";
 
     // New User-Basic Information

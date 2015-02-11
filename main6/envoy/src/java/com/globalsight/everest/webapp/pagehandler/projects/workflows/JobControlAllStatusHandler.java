@@ -33,6 +33,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoAllSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class JobControlAllStatusHandler extends JobManagementHandler
@@ -65,15 +66,8 @@ public class JobControlAllStatusHandler extends JobManagementHandler
         Vector jobStates = new Vector();
         jobStates.addAll(Job.ALLSTATUSLIST);
 
-        p_request.setAttribute(
-                JOB_SCRIPTLET,
-                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
-                        .getPageURL(), null, ((NavigationBean) beanMap
-                        .get(DETAILS_BEAN)).getPageURL(),
-                        ((NavigationBean) beanMap
-                                .get(PLANNED_COMPLETION_DATE_BEAN))
-                                .getPageURL(), getExpJobListing(p_request),
-                        jobStates, false, false, true));
+        JobVoAllSearcher s = new JobVoAllSearcher();
+        s.setJobVos(p_request);
 
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(JOB_LIST_START_PARAM,
@@ -83,7 +77,7 @@ public class JobControlAllStatusHandler extends JobManagementHandler
                 getPagingText(p_request,
                         ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
                         jobStates));
-
+        
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);

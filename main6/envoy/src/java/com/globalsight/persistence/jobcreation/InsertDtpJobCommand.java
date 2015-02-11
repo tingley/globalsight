@@ -105,7 +105,7 @@ public class InsertDtpJobCommand extends PersistenceCommand
             m_ps2.setLong(6, workflow.getDuration());
             m_ps2.setDate(7, new Date(System.currentTimeMillis()));
             m_ps2.setString(8, workflow.getWorkflowType());
-            m_ps2.setLong(9, Long.parseLong(workflow.getCompanyId()));
+            m_ps2.setLong(9, workflow.getCompanyId());
             m_ps2.addBatch();
 
             // create the workflow owners for each workflow
@@ -163,7 +163,7 @@ public class InsertDtpJobCommand extends PersistenceCommand
                 }
                 m_ps3.setString(8, typeString);
                 m_ps3.setString(9, t.getTaskType());
-                m_ps3.setLong(10, Long.parseLong(t.getCompanyId()));
+                m_ps3.setLong(10, t.getCompanyId());
                 m_ps3.addBatch();
             }
         }

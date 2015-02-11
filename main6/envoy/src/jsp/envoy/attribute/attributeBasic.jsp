@@ -38,6 +38,7 @@
 	} else {
 		title = bundle.getString("lb_new_attribute_template");
 	}
+	String helper = bundle.getString("helper_text_attribute");
 
 	String name = "";
 	String displayName = "";
@@ -117,6 +118,14 @@
 <html>
 <head>
 <title><%=title%></title>
+<style type="text/css">
+.detailDivClass {
+    float: left;
+    left: 410px;
+    position: absolute;
+    width: 400px;
+}
+</style>
 <script SRC="/globalsight/includes/utilityScripts.js"></script>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
@@ -493,13 +502,13 @@ function initDiv()
 <%@ include file="/envoy/common/navigation.jspIncl"%>
 <%@ include file="/envoy/wizards/guides.jspIncl"%>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
-<amb:header title="<%=title%>" helperText="<%=bundle.getString("helper_text_attribute")%>" /> 
+<amb:header title="<%=title%>" helperText="<%=helper%>" /> 
 <span class=errorMsg></span>
 
-<div style="float: left">
+<div style="float: left;">
 <FORM name="AttributeForm" method="post" action="">
 <input type="hidden" name="id" value="<%=attributeId%>"> 
-<div style="float: left">
+<div style="float: left; width: 400;">
 <table class="standardText">
      <tr>
         <td>&nbsp;</td>
@@ -549,7 +558,7 @@ function initDiv()
 </table>
 </div>
 
-<div id="detailDiv" class="detailDiv">
+<div id="detailDiv" class="detailDivClass">
      <div class="errorMsg" id="detailMsg">&nbsp;</div>
      
 	<div id="textDiv" class="detailItemDiv">

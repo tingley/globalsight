@@ -5,7 +5,7 @@ import java.util.List;
 
 public class OnlineEditorConstants
 {
-    // Segments Filters in Popup Editor
+    // Segments Filters in Popup/Inline Editor
     public static final String SEGMENT_FILTER_ALL = "segFilterAll";
     public static final String SEGMENT_FILTER_ALL_EXCEPT_ICE = "segFilterAllExceptICE";
     public static final String SEGMENT_FILTER_ALL_EXCEPT_ICE_AND_100 = "segFilterAllExceptICEand100";
@@ -15,6 +15,7 @@ public class OnlineEditorConstants
     public static final String SEGMENT_FILTER_REPETITIONS = "segFilterRepetitions";
     public static final String SEGMENT_FILTER_MODIFIED = "segFilterModified";
     public static final String SEGMENT_FILTER_COMMENTED = "segFilterCommented";
+    public static final String SEGMENT_FILTER_MACHINETRANSLATION = "segFilterMT";
     
     public static List<String> SEGMENT_FILTERS;
     static
@@ -25,6 +26,7 @@ public class OnlineEditorConstants
         SEGMENT_FILTERS.add(SEGMENT_FILTER_ALL_EXCEPT_ICE_AND_100);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_ICE);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_100);
+        SEGMENT_FILTERS.add(SEGMENT_FILTER_MACHINETRANSLATION);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_REPEATED);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_REPETITIONS);
         SEGMENT_FILTERS.add(SEGMENT_FILTER_MODIFIED);

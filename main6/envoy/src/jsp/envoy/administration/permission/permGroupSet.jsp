@@ -61,10 +61,12 @@
     {
         edit = true;
         permGroup = (PermissionGroup)sessionMgr.getAttribute("permGroup");
-        if ("1".equals(permGroup.getCompanyId())
+        if (1 == permGroup.getCompanyId()
         	&& !WebAppConstants.SUPER_ADMINISTRATOR_NAME.equals(permGroup.getName())
         	&& !WebAppConstants.SUPER_PM_NAME.equals(permGroup.getName()))
+        {
         	isGlobalLpGroup = true;
+        }
         helpFile = bundle.getString("help_permission_edit_group_perms");
         String pgname = (String)sessionMgr.getAttribute("permGroupName");
         title = bundle.getString("lb_edit") + " " +
@@ -232,7 +234,6 @@ function submitForm(formAction)
 
 function initPermissions()
 {
-
 	<%
 		if (permGroup == null && "Transware".equals(EMEA) 
 			|| permGroup != null && isGlobalLpGroup)

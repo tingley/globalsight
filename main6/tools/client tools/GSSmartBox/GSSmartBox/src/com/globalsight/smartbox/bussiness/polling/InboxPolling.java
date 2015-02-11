@@ -22,7 +22,10 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import com.globalsight.smartbox.bo.CompanyConfiguration;
 import com.globalsight.smartbox.bo.JobInfo;
@@ -35,7 +38,7 @@ import com.globalsight.smartbox.util.WebClientHelper;
  * 
  * Polling inbox folder to get files to create job
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class InboxPolling implements Polling
@@ -79,8 +82,8 @@ public class InboxPolling implements Polling
             {
                 while (polling)
                 {
-
                     inboxPollingProcess();
+                    
                     try
                     {
                         Thread.sleep(fileCheckToCreateJobTime);
@@ -93,6 +96,7 @@ public class InboxPolling implements Polling
                 }
             }
         };
+        
         thread = new Thread(runnable);
         thread.setName("InboxPolling: " + companyName);
         thread.start();
@@ -112,32 +116,33 @@ public class InboxPolling implements Polling
      */
     private void inboxPollingProcess()
     {
-        boolean init = WebClientHelper.init(host, port, https, username,
-                password);
+        boolean init = WebClientHelper.init(host, port, https, username, password);
         if (!init)
         {
             return;
         }
 
-        List<File> filesJobCreating = BoxUtil
-                .moveFilesFromInboxToJobCreatingBox(cpConfig);
+        List<File> filesJobCreating = BoxUtil.moveFilesFromInboxToJobCreatingBox(cpConfig);
         creatingJobInfos = new ArrayList<JobInfo>();
         failedJobInfos = new ArrayList<JobInfo>();
 
         // Create job
         createJob(filesJobCreating);
-        // Write creating job info to record file
-        writeRecordFile();
         // Move files to failedBox for failed jobs
         BoxUtil.moveFilesFromCreatingBoxToFailedBox(cpConfig, failedJobInfos);
+        // Write creating job info to record file
+        writeRecordFile();
+       
         // Delete temp directory during create job
-        BoxUtil.deleteTempDir(creatingJobInfos, failedJobInfos);
+        BoxUtil.deleteSubFile(cpConfig.getTempBox());
+        //BoxUtil.deleteTempDir(creatingJobInfos, failedJobInfos);
     }
 
     /**
      * Create job
      * 
      * @param filesJobCreating
+     *            Files List for Job Creating
      */
     private void createJob(List<File> filesJobCreating)
     {
@@ -148,8 +153,7 @@ public class InboxPolling implements Polling
             JobInfo jobInfo = null;
             try
             {
-                LogUtil.info("File handing by prepare process class: "
-                        + fileName);
+                LogUtil.info("File handing by prepare process class: " + fileName);
                 Class<?> preProcess = Class.forName(preProcessClass);
                 Method processMethod = preProcess.getDeclaredMethod("process",
                         String.class, CompanyConfiguration.class);
@@ -174,6 +178,30 @@ public class InboxPolling implements Polling
             }
 
             LogUtil.info("File handing successfully: " + fileName);
+            Vector<String> sourceFiles = jobInfo.getSourceFiles();
+            HashMap<String, String> sourceMap = jobInfo.getSourceMap();
+            if (sourceMap.size() > 0 && sourceMap.size() < sourceFiles.size())
+            {
+                LogUtil.info("File find some need to be checked in: " + fileName);
+                Vector<String> failFiles = new Vector<String>();
+                JobInfo failInfo = new JobInfo();
+                failInfo.setFailedFlag(true);
+                failInfo.setJobName(jobInfo.getJobName());
+                failInfo.setOriginFile(jobInfo.getOriginFile());
+                for (Iterator it = sourceFiles.iterator(); it.hasNext();)
+                {
+                    String sf = (String) it.next();
+                    if (null == sourceMap.get(sf))
+                    {
+                        failFiles.add(sf);
+                        it.remove();
+                    }
+                }
+
+                failInfo.setSourceFiles(failFiles);
+                failedJobInfos.add(failInfo);
+            }
+            
             LogUtil.info("Starting to create job: " + fileName);
             boolean createJobSuccess = WebClientHelper.createJob(jobInfo);
             if (!createJobSuccess)
@@ -181,8 +209,7 @@ public class InboxPolling implements Polling
                 failedJobInfos.add(jobInfo);
                 continue;
             }
-            LogUtil.info("Job is in creating in GlobalSight Server: "
-                    + fileName);
+            LogUtil.info("Job is in creating in GlobalSight Server: " + fileName);
             creatingJobInfos.add(jobInfo);
         }
     }
@@ -201,8 +228,7 @@ public class InboxPolling implements Polling
             {
                 jobCreatingRecord.createNewFile();
             }
-            RandomAccessFile raf = new RandomAccessFile(jobCreatingRecord,
-                    "rws");
+            RandomAccessFile raf = new RandomAccessFile(jobCreatingRecord, "rws");
             // get the lock and lock this file
             FileLock fileLock = LockFile.getFileLock(raf);
             raf.seek(raf.length());

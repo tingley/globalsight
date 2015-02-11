@@ -626,12 +626,27 @@ public class TaskSearchUtil
         String sql = getSearchSql(user, sp, params);
 
         List result = HibernateUtil.searchWithSql(sql, params);
+        int state = (Integer) sp.getParameters().get(TaskSearchParameters.STATE);
         List<TaskVo> tasks = new ArrayList<TaskVo>();
         for (int i = 0; i < result.size(); i++)
         {
             Object[] contents = (Object[]) result.get(i);
             TaskVo taskVo = new TaskVo();
-            taskVo.setTaskId(Long.parseLong(contents[0].toString()));
+            
+            // for issue : After click on the download button in available 
+            // activity list, the activity will not go the the In Progress list
+            long taskId = Long.parseLong(contents[0].toString());
+            if (state == WorkflowConstants.TASK_ACTIVE)
+            {
+                TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
+                
+                if (TaskImpl.getStateAsInt(task.getStateAsString()) != 3)
+                {
+                    continue;
+                }
+            }
+            
+            taskVo.setTaskId(taskId);
             taskVo.setJobId(Long.parseLong(contents[1].toString()));
             taskVo.setJobName(contents[2].toString());
             taskVo.setWordCount(Integer.parseInt(contents[3].toString()));

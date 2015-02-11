@@ -223,13 +223,13 @@ public class VendorBasicHandler extends PageHandler
         vendor.setCompanyName(user.getCompanyName());
         vendor.setAddress(user.getAddress());
         vendor.setPhoneNumber(User.PhoneType.HOME,
-                        user.getPhoneNumber(User.PhoneType.HOME));
+                        user.getHomePhoneNumber());
         vendor.setPhoneNumber(User.PhoneType.OFFICE,
-                        user.getPhoneNumber(User.PhoneType.OFFICE));
+                        user.getOfficePhoneNumber());
         vendor.setPhoneNumber(User.PhoneType.CELL,
-                        user.getPhoneNumber(User.PhoneType.CELL));
+                        user.getCellPhoneNumber());
         vendor.setPhoneNumber(User.PhoneType.FAX,
-                        user.getPhoneNumber(User.PhoneType.FAX));
+                        user.getFaxPhoneNumber());
         vendor.setEmail(user.getEmail());
         vendor.setDefaultUILocale(user.getDefaultUILocale());
         copyRoles(vendor, user);

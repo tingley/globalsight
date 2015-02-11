@@ -18,6 +18,7 @@
     <param id="<%=Param.ESTIMATED_COST%>" />
     <param id="<%=Param.ESTIMATED_BILLING_CHARGES%>" />
     <param id="<%=Param.LOCALIZATION_PROFILE%>" />
+    <param id="<%=Param.FILE_PROFILE%>" />
 </category>
 <category id="<%=Param.STATUS%>" >
     <param id="<%=Param.JOB_STATUS%>" />

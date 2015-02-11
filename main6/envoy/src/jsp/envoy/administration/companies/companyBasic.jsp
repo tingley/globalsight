@@ -63,7 +63,7 @@
     String ssoIdpUrl = "";
     String sessionTime = "";
     boolean isReviewOnly = false;
-    String enableTM3Checked = "";
+    String enableTM3Checked = "checked";
     String separateLmTuTuvTablesChecked = "";
     if (company != null)
     {
@@ -100,8 +100,8 @@
         ssoIdpUrl = company.getSsoIdpUrl();
         ssoIdpUrl = ssoIdpUrl == null ? "" : ssoIdpUrl;
         
-        if (company.getTmVersion().getValue() == 3)
-            enableTM3Checked = "checked";
+        if (company.getTmVersion().getValue() != 3)
+            enableTM3Checked = "";
         
         if (company.getSeparateTmTuTuvTables() == 1){
             separateLmTuTuvTablesChecked = "checked";

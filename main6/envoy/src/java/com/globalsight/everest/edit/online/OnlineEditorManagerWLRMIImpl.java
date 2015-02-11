@@ -182,12 +182,12 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     }
 
     public void splitSegments(long p_tuv1, long p_tuv2, String p_location,
-            String companyId) throws OnlineEditorException, RemoteException
+            long companyId) throws OnlineEditorException, RemoteException
     {
         m_localReference.splitSegments(p_tuv1, p_tuv2, p_location, companyId);
     }
 
-    public void mergeSegments(long p_tuv1, long p_tuv2, String companyId)
+    public void mergeSegments(long p_tuv1, long p_tuv2, long companyId)
             throws OnlineEditorException, RemoteException
     {
         m_localReference.mergeSegments(p_tuv1, p_tuv2, companyId);
@@ -293,7 +293,7 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
             long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
-            String companyId)
+            long companyId)
     {
         return m_localReference.addSegmentMatches(p_view, p_state, p_tuId,
                 p_tuvId, p_subId, p_sourceLocaleId, p_targetLocaleId,

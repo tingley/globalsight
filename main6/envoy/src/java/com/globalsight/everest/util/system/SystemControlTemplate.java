@@ -17,43 +17,35 @@
 
 package com.globalsight.everest.util.system;
 
-import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
-import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.system.ConfigException;
 
 /**
- * This is an abstract implementation of the SystemControl interface.
- * This class provides default implementations of the startup and
- * shutdown methods.  The startup method employs the template method
- * pattern, which uses the abstract method getServerClasses method to
- * get a list of server object classes that needs to be started and
- * initialized.
+ * This is an abstract implementation of the SystemControl interface. This class
+ * provides default implementations of the startup and shutdown methods. The
+ * startup method employs the template method pattern, which uses the abstract
+ * method getServerClasses method to get a list of server object classes that
+ * needs to be started and initialized.
  */
-public abstract class SystemControlTemplate
-    implements SystemControl
+public abstract class SystemControlTemplate implements SystemControl
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            SystemControlTemplate.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(SystemControlTemplate.class.getName());
 
     private static Boolean s_areAllServerClassesLoaded = Boolean.FALSE;
 
     static final int SYSTEM_NOTSTARTED = 0;
-    static final int SYSTEM_STARTING   = 1;
-    static final int SYSTEM_STARTED    = 2;
-    static final int SYSTEM_STOPPING   = 3;
-    static final int SYSTEM_STOPPED    = 4;
+    static final int SYSTEM_STARTING = 1;
+    static final int SYSTEM_STARTED = 2;
+    static final int SYSTEM_STOPPING = 3;
+    static final int SYSTEM_STOPPED = 4;
 
-    static final int COMMAND_STARTUP   = 1;
-    static final int COMMAND_SHUTDOWN  = 2;
+    static final int COMMAND_STARTUP = 1;
+    static final int COMMAND_SHUTDOWN = 2;
 
     Vector m_serverInstances; // All the started instances
     int m_systemState;
@@ -71,19 +63,18 @@ public abstract class SystemControlTemplate
     //
 
     /**
-    * Returns true if all the RMI server classes have been loaded.
-    */
+     * Returns true if all the RMI server classes have been loaded.
+     */
     public static boolean areAllServerClassesLoaded()
     {
         return s_areAllServerClassesLoaded.booleanValue();
     }
 
     /**
-     * This method is called to start the system that is controlled
-     * by this object.
+     * This method is called to start the system that is controlled by this
+     * object.
      */
-    public void startup()
-        throws SystemStartupException
+    public void startup() throws SystemStartupException
     {
         try
         {
@@ -98,13 +89,13 @@ public abstract class SystemControlTemplate
             CATEGORY.error(e.getMessage(), e);
 
             throw new SystemStartupException(
-                SystemStartupException.EX_SERVERCLASSNAMES, e);
+                    SystemStartupException.EX_SERVERCLASSNAMES, e);
         }
     }
 
     /**
-     * This method is called to shutdown the system that is
-     * controlled by this object.
+     * This method is called to shutdown the system that is controlled by this
+     * object.
      */
     public void shutdown() throws SystemShutdownException
     {
@@ -123,7 +114,7 @@ public abstract class SystemControlTemplate
             CATEGORY.error("SystemControlTemplate::shutdown", e);
 
             throw new SystemShutdownException(
-                SystemStartupException.EX_SERVERCLASSNAMES, e);
+                    SystemStartupException.EX_SERVERCLASSNAMES, e);
         }
     }
 
@@ -136,14 +127,14 @@ public abstract class SystemControlTemplate
     //
 
     /**
-     * Get a list of the names of the server object classes.  This
-     * method is to be implemented by the subclasses.
+     * Get a list of the names of the server object classes. This method is to
+     * be implemented by the subclasses.
      */
     protected abstract String[] getServerClasses() throws ConfigException;
 
     /**
      * Get a list of the created server objects.
-     *
+     * 
      * @return A list of the created server objects.
      */
     protected Enumeration getServerInstances()
@@ -159,126 +150,129 @@ public abstract class SystemControlTemplate
     }
 
     /**
-     * Process system startup, shutdown and other commands from
-     * interface methods.  All these command are processed here so
-     * that only one command is being processed at a time.
+     * Process system startup, shutdown and other commands from interface
+     * methods. All these command are processed here so that only one command is
+     * being processed at a time.
      */
     synchronized void processCommand(int command)
-        throws SystemStartupException,
-               SystemShutdownException
+            throws SystemStartupException, SystemShutdownException
     {
         if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("processCommand " + Integer.toString(command));
         }
 
-        switch(command)
+        switch (command)
         {
-        case COMMAND_STARTUP:
-            if (m_systemState == SYSTEM_NOTSTARTED)
-            {
-                m_systemState = SYSTEM_STARTING;
-                m_serverInstances = new Vector();
-
-                String[] serverClasses = null;
-                // Instantiate the server object instances
-                try
+            case COMMAND_STARTUP:
+                if (m_systemState == SYSTEM_NOTSTARTED)
                 {
-                    serverClasses = getServerClasses();
-                }
-                catch (Exception e)
-                {
-                    CATEGORY.error("getServerClasses", e);
-                    throw new SystemStartupException(
-                        SystemStartupException.EX_SERVERCLASSNAMES, e);
-                }
+                    m_systemState = SYSTEM_STARTING;
+                    m_serverInstances = new Vector();
 
-                int cnt = serverClasses.length;
-                boolean cleanupAfterException = false;
-                Class server = null;
-                ServerObject serverInstance;
-
-                try
-                {
-                    for (int i=0; i<cnt; i++)
+                    String[] serverClasses = null;
+                    // Instantiate the server object instances
+                    try
                     {
-                        // Instantiate the server class
-                        server = Class.forName(serverClasses[i]);
-                        serverInstance = (ServerObject) server.newInstance();
-                        serverInstance.init();
-                        m_serverInstances.add(serverInstance);
+                        serverClasses = getServerClasses();
                     }
-                }
-                catch (ClassNotFoundException cnfe)
-                {
-                    cleanupAfterException = true;
-
-                    CATEGORY.error("server=" +
-                        (server != null ? server.toString() : "null"), cnfe);
-
-                    throw new SystemStartupException(
-                        SystemStartupException.EX_FAILEDTOCREATESERVER, cnfe);
-                }
-                catch (IllegalAccessException iae)
-                {
-                    cleanupAfterException = true;
-                    CATEGORY.error("server=" +
-                        (server != null ? server.toString() : "null"), iae);
-
-                    throw new SystemStartupException(
-                        SystemStartupException.EX_FAILEDTOCREATESERVER, iae);
-                }
-                catch (InstantiationException ie)
-                {
-                    cleanupAfterException = true;
-                    CATEGORY.error("server=" +
-                        (server != null ? server.toString() : "null"), ie);
-
-                    throw new SystemStartupException(
-                        SystemStartupException.EX_FAILEDTOCREATESERVER, ie);
-                }
-                catch (Exception t)
-                {
-                    cleanupAfterException = true;
-                    CATEGORY.error("server=" +
-                        (server != null ? server.toString() : "null"), t);
-
-                    throw new SystemStartupException(
-                        SystemStartupException.EX_FAILEDTOCREATESERVER, t);
-                }
-                finally
-                {
-                    if (cleanupAfterException)
+                    catch (Exception e)
                     {
-                        destroyStartedServerObjects();
-                        m_systemState = SYSTEM_STOPPED;
+                        CATEGORY.error("getServerClasses", e);
+                        throw new SystemStartupException(
+                                SystemStartupException.EX_SERVERCLASSNAMES, e);
                     }
+
+                    int cnt = serverClasses.length;
+                    boolean cleanupAfterException = false;
+                    Class server = null;
+                    ServerObject serverInstance;
+
+                    try
+                    {
+                        for (int i = 0; i < cnt; i++)
+                        {
+                            // Instantiate the server class
+                            server = Class.forName(serverClasses[i]);
+                            serverInstance = (ServerObject) server
+                                    .newInstance();
+                            serverInstance.init();
+                            m_serverInstances.add(serverInstance);
+                        }
+                    }
+                    catch (ClassNotFoundException cnfe)
+                    {
+                        cleanupAfterException = true;
+
+                        CATEGORY.error(
+                                "server="
+                                        + (server != null ? server.toString()
+                                                : "null"), cnfe);
+
+                        throw new SystemStartupException(
+                                SystemStartupException.EX_FAILEDTOCREATESERVER,
+                                cnfe);
+                    }
+                    catch (IllegalAccessException iae)
+                    {
+                        cleanupAfterException = true;
+                        CATEGORY.error(
+                                "server="
+                                        + (server != null ? server.toString()
+                                                : "null"), iae);
+
+                        throw new SystemStartupException(
+                                SystemStartupException.EX_FAILEDTOCREATESERVER,
+                                iae);
+                    }
+                    catch (InstantiationException ie)
+                    {
+                        cleanupAfterException = true;
+                        CATEGORY.error(
+                                "server="
+                                        + (server != null ? server.toString()
+                                                : "null"), ie);
+
+                        throw new SystemStartupException(
+                                SystemStartupException.EX_FAILEDTOCREATESERVER,
+                                ie);
+                    }
+                    catch (Exception t)
+                    {
+                        cleanupAfterException = true;
+                        CATEGORY.error(
+                                "server="
+                                        + (server != null ? server.toString()
+                                                : "null"), t);
+
+                        throw new SystemStartupException(
+                                SystemStartupException.EX_FAILEDTOCREATESERVER,
+                                t);
+                    }
+                    finally
+                    {
+                        if (cleanupAfterException)
+                        {
+                            destroyStartedServerObjects();
+                            m_systemState = SYSTEM_STOPPED;
+                        }
+                    }
+
+                    m_systemState = SYSTEM_STARTED;
                 }
+                break;
 
-                m_systemState = SYSTEM_STARTED;
-            }
-            break;
-
-        case COMMAND_SHUTDOWN:
-            if (m_systemState == SYSTEM_STARTED)
-            {
-                destroyStartedServerObjects();
-                // 1.After all started instances have been shut down,clean JMS
-                // messages to avoid stuck when restart server.
-                // 2.During "destroyStartedServerObjects()",if jobs are in
-                // creating,probably result in NullPointerException. That should
-                // have no relationship with this operation.
-                if (m_serverInstances == null || m_serverInstances.size() == 0)
+            case COMMAND_SHUTDOWN:
+                if (m_systemState == SYSTEM_STARTED)
                 {
-                    cleanJmsMessages();
+                    destroyStartedServerObjects();
+                    m_systemState = SYSTEM_STOPPED;
                 }
-                m_systemState = SYSTEM_STOPPED;
-            }
-            break;
+                break;
 
-        default:
-            // Just ignore invalid commands.
-            break;
+            default:
+                // Just ignore invalid commands.
+                break;
         }
     }
 
@@ -299,14 +293,14 @@ public abstract class SystemControlTemplate
             {
                 try
                 {
-                    ((ServerObject)servers.nextElement()).destroy();
+                    ((ServerObject) servers.nextElement()).destroy();
                 }
                 catch (SystemShutdownException sue)
                 {
                     // log the exception and continue
                     // ** logging code is not implemented yet **
-                    CATEGORY.error("SystemControlTemplate::" +
-                        "destroyStartedServerObjects", sue);
+                    CATEGORY.error("SystemControlTemplate::"
+                            + "destroyStartedServerObjects", sue);
 
                     allServersDestroyed = false;
                 }
@@ -318,42 +312,4 @@ public abstract class SystemControlTemplate
             }
         }
     }
-    
-    /**
-     * Clean all JMS messages in "jms_messages".
-     * This is invoked when shut down server to avoid stuck when restart server.
-     */
-    private void cleanJmsMessages()
-    {
-        try
-        {
-            // Backup JMS messages
-            String sql1 = "INSERT INTO jms_messages_debug "
-                    + "(MESSAGEID, DESTINATION, TXID, TXOP, MESSAGEBLOB, BACKUP_TIME) "
-                    + "SELECT MESSAGEID, DESTINATION, TXID, TXOP, MESSAGEBLOB, now() "
-                    + "FROM jms_messages ";
-            Session session = TmUtil.getStableSession();
-            PreparedStatement ps = null;
-            try {
-                ps = session.connection().prepareStatement(sql1);
-                ps.execute();
-            } catch (Exception e){
-                CATEGORY.warn("Fail to backup jms messages when restart server", e);
-            } finally {
-                DbUtil.silentClose(ps);
-                if (session != null){
-                    TmUtil.closeStableSession(session);
-                }
-            }
-
-            // Clear JMS messages
-            String sql2 = "delete from jms_messages";
-            HibernateUtil.executeSql(sql2);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.warn("Failed to delete remained JMS messages!");
-        }
-    }
-
 }

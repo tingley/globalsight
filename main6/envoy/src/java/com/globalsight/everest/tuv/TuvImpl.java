@@ -41,6 +41,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuvLing;
@@ -98,7 +99,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private String m_lastModifiedUser = null;
     private String m_updatedByProject = null;
     private String sid = null;
-
+    private Long m_repetitionOfId = new Long(0);
+    private boolean m_repeated = false;
+    
     private Tu m_tu = null;
     private long tuId = 0;
     private GlobalSightLocale m_globalSightLocale = null;
@@ -163,6 +166,8 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         m_updatedByProject = p_other.m_updatedByProject;
         this.sid = p_other.sid;
         this.srcComment = p_other.srcComment;
+        this.m_repeated = p_other.m_repeated;
+        this.m_repetitionOfId = p_other.m_repetitionOfId;
     }
 
     //
@@ -329,7 +334,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return Tuv DataType.
      */
-    public String getDataType(String companyId)
+    public String getDataType(long companyId)
     {
         loadTu(companyId);
         return m_tu == null ? null : m_tu.getDataType();
@@ -698,7 +703,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      *            Gxml String.
      */
     public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
-            String companyId)
+            long companyId)
     {
         setGxmlIgnoreSubflows(addTopTags(p_gxml, companyId));
     }
@@ -742,7 +747,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml, String companyId)
+    public void setGxmlExcludeTopTags(String p_gxml, long companyId)
     {
         setGxml(addTopTags(p_gxml, companyId));
     }
@@ -752,7 +757,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu(String companyId)
+    public Tu getTu(long companyId)
     {
         loadTu(companyId);
         return m_tu;
@@ -801,7 +806,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized(String companyId)
+    public boolean isExactMatchLocalized(long companyId)
     {
         if ("Xliff".equalsIgnoreCase(getLastModifiedUser()))
         {
@@ -900,7 +905,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable(String companyId)
+    public boolean isLocalizable(long companyId)
     {
         Tu tu = getTu(companyId);
         return (tu != null && tu.isLocalizable());
@@ -984,7 +989,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return a string representation of the object.
      */
-    public String toString(String companyId)
+    public String toString(long companyId)
     {
         loadTu(companyId);
 
@@ -1280,7 +1285,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * them. @param a Gxml string that is missing the top level tags. @return a
      * Gxml string with top level tags.
      */
-    private String addTopTags(String p_gxml, String companyId)
+    private String addTopTags(String p_gxml, long companyId)
     {
         String elementName = GxmlNames.SEGMENT;
 
@@ -1370,7 +1375,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return TargetPage
      */
-    public TargetPage getTargetPage(String companyId)
+    public TargetPage getTargetPage(long companyId)
     {
         String sql = "SELECT tp.* FROM "
                 + TuvQueryConstants.TUV_TABLE_PLACEHOLDER
@@ -1386,16 +1391,36 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 
         try
         {
-            sql = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
-                    SegmentTuTuvCacheManager.getTuvTableName(companyId));
-            sql = sql.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER,
-                    SegmentTuTuvCacheManager.getTuTableName(companyId));
+            String sql1 = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                    SegmentTuTuvCacheManager.getTuvWorkingTableName(companyId));
+            sql1 = sql1.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER,
+                    SegmentTuTuvCacheManager.getTuWorkingTableName(companyId));
 
             List<TargetPage> tPages = HibernateUtil.searchWithSql(
-                    TargetPage.class, sql, getId());
+                    TargetPage.class, sql1, getId());
             if (tPages.size() > 0)
             {
                 return tPages.get(0);
+            }
+            else
+            {
+                JobDataMigration.checkArchiveTables(companyId);
+                // 
+                // If can't get target page from working table, maybe this job
+                // has been migrated(data archived), try its "archived" tables.
+                String sql2 = sql.replace(
+                        TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                        SegmentTuTuvCacheManager
+                                .getTuvArchiveTableName(companyId));
+                sql2 = sql2.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER,
+                        SegmentTuTuvCacheManager
+                                .getTuArchiveTableName(companyId));
+                tPages = HibernateUtil.searchWithSql(TargetPage.class, sql2,
+                        getId());
+                if (tPages.size() > 0)
+                {
+                    return tPages.get(0);
+                }
             }
         }
         catch (Exception e)
@@ -1479,7 +1504,27 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         this.srcComment = srcComment;
     }
 
-    private void loadTu(String companyId)
+    public boolean isRepeated()
+    {
+        return m_repeated;
+    }
+
+    public void setRepeated(boolean repeated)
+    {
+        this.m_repeated = repeated;
+    }
+
+    public long getRepetitionOfId()
+    {
+        return m_repetitionOfId == null ? 0 : m_repetitionOfId.longValue();
+    }
+
+    public void setRepetitionOfId(long repetitionOfId)
+    {
+        this.m_repetitionOfId = new Long(repetitionOfId);
+    }
+
+    private void loadTu(long companyId)
     {
         if (m_tu == null && tuId > 0)
         {

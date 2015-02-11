@@ -18,6 +18,7 @@
 package com.globalsight.everest.workflowmanager;
 
 import java.io.File;
+import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,8 +31,15 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
@@ -39,6 +47,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.calendar.FluxCalendar;
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -62,6 +71,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.Activity;
@@ -70,9 +80,9 @@ import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -90,6 +100,13 @@ import com.globalsight.util.system.ConfigException;
 /**
  * This is the concrete implementation of the WorkflowAdditionListener.
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_WORKFLOW_ADDITION_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class WorkflowAdditionMDB extends GenericQueueMDB
 {
 
@@ -140,6 +157,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
      * @param p_cxeRequest
      *            The JMS message containing the request for localization.
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_cxeRequest)
     {
         Hashtable ht = null;
@@ -160,24 +178,6 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         {
             c_logger.error("Failed to get MapMessage or retrieving one "
                     + "of the parameters " + p_cxeRequest.toString(), jmse);
-
-            // Return without acknowlegding the message. The message
-            // will persist in the JMS message queue and be
-            // reprocessed after system restart.
-
-            HibernateUtil.closeSession();
-            return;
-        }
-
-        // Acknowledge the message before sending - any errors will be
-        // handled within CAP (and not kept in JMS)
-        try
-        {
-            p_cxeRequest.acknowledge();
-        }
-        catch (JMSException jmse)
-        {
-            c_logger.error("Failed to ackowledge message reception ", jmse);
             HibernateUtil.closeSession();
             return;
         }
@@ -254,17 +254,6 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         {
             HibernateUtil.closeSession();
         }
-
-        /*
-         * if (exception == null) { // no exceptions. we shall proceed to add
-         * workflow templates to l10n profile try { Iterator iwft =
-         * workflowTemplates.iterator(); while(iwft.hasNext()) {
-         * WorkflowTemplateInfo wft = (WorkflowTemplateInfo)iwft.next();
-         * l10nProfile.addWorkflowTemplateInfo(wft); }
-         * ServerProxy.getProjectHandler().modifyL10nProfile(l10nProfile); }
-         * catch (Exception e) { c_logger.error("Unable to modify L10nProfile
-         * due to the following exception" + e); } }
-         */
     }
 
     private void addWorkflowsToExistingJob(long p_workflowRequestId, Job p_job,
@@ -713,7 +702,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         List wfTaskInfos = ServerProxy.getWorkflowServer()
                 .timeDurationsInDefaultPath(null, p_workflowClone.getId(), -1);
         FluxCalendar defaultCalendar = ServerProxy.getCalendarManager()
-                .findDefaultCalendar(p_workflowClone.getCompanyId());
+                .findDefaultCalendar(
+                        String.valueOf(p_workflowClone.getCompanyId()));
 
         Hashtable tasks = p_workflowClone.getTasks();
         long translateDuration = 0l;
@@ -792,25 +782,23 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                             .leveragePage(p_sourcePage, leverageDataCenter);
 
                     // save the matches results to leverage_match table
-                    Session session = TmUtil.getStableSession();
+                    Connection conn = null;
                     try
                     {
+                        conn = DbUtil.getConnection();
                         LingServerProxy.getLeverageMatchLingManager()
-                                .saveLeverageResults(session.connection(),
-                                        p_sourcePage, leverageDataCenter);
+                                .saveLeverageResults(conn, p_sourcePage,
+                                        leverageDataCenter);
                     }
                     finally
                     {
-                        if (session != null)
-                        {
-                            TmUtil.closeStableSession(session);
-                        }
+                        DbUtil.silentReturnConnection(conn);
                     }
 
                     // retrieve exact match results
                     exactMatchedSegments = leverageDataCenter
-                            .getExactMatchedSegments(p_sourcePage
-                                    .getCompanyId());
+                            .getExactMatchedSegments(String
+                                    .valueOf(p_sourcePage.getCompanyId()));
                 }
                 catch (Exception e)
                 {
@@ -886,9 +874,10 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 }
                 else
                 {
-                    result = ServerProxy.getTermLeverageManager()
+                    result = ServerProxy
+                            .getTermLeverageManager()
                             .leverageTerms(sourceTuvs, options,
-                                    p_sourcePage.getCompanyId());
+                                    String.valueOf(p_sourcePage.getCompanyId()));
                 }
 
             }
@@ -924,7 +913,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         TermLeverageOptions options = null;
 
         Locale sourceLocale = p_l10nProfile.getSourceLocale().getLocale();
-        String companyId = p_l10nProfile.getCompanyId();
+        String companyId = String.valueOf(p_l10nProfile.getCompanyId());
 
         try
         {
@@ -1347,7 +1336,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         p_msgArgs[2] = dateformat.format(p_job.getCreateDate());
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject,
-                p_message, p_job.getCompanyId());
+                p_message, String.valueOf(p_job.getCompanyId()));
     }
 
     private void calculateNewWorkflowStatistics(Job p_job) throws Exception

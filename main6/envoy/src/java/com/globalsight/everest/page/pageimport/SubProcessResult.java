@@ -19,6 +19,8 @@ package com.globalsight.everest.page.pageimport;
 
 import java.util.ArrayList;
 
+import com.globalsight.everest.page.TemplatePart;
+
 /**
  * A SubProcessResult contains returned data fields for template
  * generation sub-process, such as
@@ -29,13 +31,13 @@ public class SubProcessResult
 {
     private int tuPointer;
     private int partOrder;
-    private ArrayList templateParts;
+    private ArrayList<TemplatePart> templateParts;
     private String rest;
 
     // used for Gxml file where tuPointer and partOrder are the same
     // except for the last part
-    public SubProcessResult(int p_tuPointer, ArrayList p_templateParts,
-        String p_rest)
+    public SubProcessResult(int p_tuPointer,
+            ArrayList<TemplatePart> p_templateParts, String p_rest)
     {
         tuPointer = p_tuPointer;
         templateParts = p_templateParts;
@@ -43,7 +45,7 @@ public class SubProcessResult
     }
 
     public SubProcessResult(int p_tuPointer, int p_partOrder,
-        ArrayList p_templateParts, String p_rest)
+            ArrayList<TemplatePart> p_templateParts, String p_rest)
     {
         tuPointer = p_tuPointer;
         partOrder = p_partOrder;
@@ -61,7 +63,7 @@ public class SubProcessResult
         tuPointer = p_tuPointer;
     }
 
-    public void setTemplateParts(ArrayList p_templateParts)
+    public void setTemplateParts(ArrayList<TemplatePart> p_templateParts)
     {
         templateParts = p_templateParts;
     }
@@ -81,7 +83,7 @@ public class SubProcessResult
         return partOrder;
     }
 
-    public ArrayList getTemplateParts()
+    public ArrayList<TemplatePart> getTemplateParts()
     {
         return templateParts;
     }

@@ -45,7 +45,7 @@ public class TestXliffProcessor
         XliffProcessor processor = new XliffProcessor();
         GlobalSightLocale p_targetLocale = new GlobalSightLocale("fr", "FR",
                 false);
-        processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale, "1000");
+        processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale, 1000);
 
         XliffAlt maxAlt = processor.getMaxScoreAlt();
         assertTrue(maxAlt.getQuality().equals("88"));

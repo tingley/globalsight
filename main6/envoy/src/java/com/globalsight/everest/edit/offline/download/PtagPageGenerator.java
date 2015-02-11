@@ -172,7 +172,8 @@ public class PtagPageGenerator
                     EditUtil.decodeXmlEntities(PTagData.getPTagSourceString()));
             }
 
-            if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF ) {
+            if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
 				p_OSD.setDisplaySourceText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplaySourceText()));
 			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {
 				//for ttx format,need extra handling
@@ -195,7 +196,8 @@ public class PtagPageGenerator
                     EditUtil.decodeXmlEntities(PTagData.getPTagSourceString()));
             }
 
-            if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF ) {
+            if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF 
+                    || params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ) {
 				p_OSD.setDisplayTargetText(TmxUtil.convertXlfToTmxFormat(p_OSD.getDisplayTargetText()));				
 			} else if (params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX) {
 				//for ttx format,need extra handling (below codes seem wrong,but they are right!!!)

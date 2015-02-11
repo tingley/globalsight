@@ -21,17 +21,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
@@ -40,13 +48,19 @@ import com.globalsight.util.GeneralException;
  * The RequestHandlerActivatorMDB is a JMS Message Driven Bean that activates
  * RequestHandler
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_IMPORTING_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class RequestHandlerActivatorMDB extends GenericQueueMDB
 {
-	private static final long serialVersionUID = -246609669279528856L;
-	
-	// for logging purposes
+    private static final long serialVersionUID = -246609669279528856L;
+
+    // for logging purposes
     private static Logger s_logger = Logger
-            .getLogger("RequestHandlerActivatorMDB");
+            .getLogger(RequestHandlerActivatorMDB.class);
 
     // ////////////////////////////////////
     // Constructor //
@@ -61,13 +75,12 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
     // Public Methods //
     // ////////////////////////////////////
 
-    private boolean onMessage(HashMap hm)
+    private void onMessage(HashMap hm)
     {
-    	boolean shouldAcknowledge = false;
         ActivityLog.Start activityStart = null;
         try
         {
-            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
                     hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
             // This is a Request.* constant
@@ -75,45 +88,39 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
                     hm.get(CxeToCapRequest.REQUEST_TYPE));
             activityArgs.put(CxeToCapRequest.CONTENT,
                     hm.get(CxeToCapRequest.CONTENT));
-            activityStart = ActivityLog.start(
-                RequestHandlerActivatorMDB.class, "onMessage", activityArgs);
+            activityStart = ActivityLog.start(RequestHandlerActivatorMDB.class,
+                    "onMessage", activityArgs);
 
             CompanyThreadLocal.getInstance().setIdValue(
                     (String) hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
 
             String contentFileName = (String) hm.get(CxeToCapRequest.CONTENT);
-            int requestType = 
-                    ((Integer) hm.get(CxeToCapRequest.REQUEST_TYPE)).intValue();
-            String eventFlowXml = 
-                    (String) hm.get(CxeToCapRequest.EVENT_FLOW_XML);
-            GeneralException exception = 
-                    (GeneralException) hm.get(CxeToCapRequest.EXCEPTION);
-            String l10nRequestXml = 
-                    (String) hm.get(CxeToCapRequest.L10N_REQUEST_XML);
-            //If jobs have not finished importing when GS server is shut down,
-            //and when restart GS server, GS will try to re-import the job.
-            //At that time "requestHandler" possibly has not been loaded by Jboss server,
-            //this will return null.
-            RequestHandlerWLRemote requestHandler = ServerProxy.getRequestHandler();
-            if (requestHandler != null) {
-            	requestHandler.prepareAndSubmitRequest(hm, contentFileName, 
-            			requestType, eventFlowXml, exception, l10nRequestXml);
-                shouldAcknowledge = true;
-            }
-        }
-        catch (RequestHandlerException re)
-        {
-            Exception orig = re.containsNestedException(PageException.class);
-            if (orig != null
-                    && PageException.MSG_PAGE_IN_UPDATING_STATE_ERROR
-                            .equals(((PageException) orig).getMessageKey()))
+            int requestType = ((Integer) hm.get(CxeToCapRequest.REQUEST_TYPE))
+                    .intValue();
+            String eventFlowXml = (String) hm
+                    .get(CxeToCapRequest.EVENT_FLOW_XML);
+            GeneralException exception = (GeneralException) hm
+                    .get(CxeToCapRequest.EXCEPTION);
+            String l10nRequestXml = (String) hm
+                    .get(CxeToCapRequest.L10N_REQUEST_XML);
+            // If jobs have not finished importing when GS server is shut down,
+            // and when restart GS server, GS will try to re-import the job.
+            // At that time "requestHandler" possibly has not been loaded by
+            // Jboss server,
+            // this will return null.
+            RequestHandlerWLRemote requestHandler = ServerProxy
+                    .getRequestHandler();
+            if (requestHandler != null)
             {
-                shouldAcknowledge = true;
+                requestHandler.prepareAndSubmitRequest(hm, contentFileName,
+                        requestType, eventFlowXml, exception, l10nRequestXml);
             }
         }
         catch (Exception e)
         {
-            s_logger.error("Failed to create and persist the request - left in JMS message queue.", e);
+            s_logger.error(
+                    "Failed to create and persist the request - left in JMS message queue.",
+                    e);
         }
         finally
         {
@@ -122,10 +129,8 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
                 activityStart.end();
             }
         }
-        
-        return shouldAcknowledge;
     }
-    
+
     /**
      * This is the JMS service activator for the RequestHandler.
      * 
@@ -133,49 +138,38 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
      *            The JMS message containing the request for localization.
      */
     @SuppressWarnings("unchecked")
-	public void onMessage(Message p_cxeRequest)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public void onMessage(Message p_cxeRequest)
     {
-    	HibernateUtil.closeSession();
+        HibernateUtil.closeSession();
         ObjectMessage msg = (ObjectMessage) p_cxeRequest;
         Serializable ob = null;
-		try 
-		{
-			ob = msg.getObject();
-		} 
-		catch (JMSException e1) 
-		{
-			s_logger.error(e1);
-			return;
-		}
-        
-        boolean shouldAcknowledge = false;
-        if (ob instanceof ArrayList)
-        {
-        	ArrayList<HashMap> msgs = (ArrayList<HashMap>) ob;
-        	for (HashMap m : msgs)
-        	{
-        		shouldAcknowledge = onMessage(m);
-        		HibernateUtil.closeSession();
-        	}
-        }
-        else
-        {
-        	HashMap hm = (HashMap) ob;
-        	shouldAcknowledge = onMessage(hm);
-        }
-        
         try
         {
-            if (shouldAcknowledge)
+            ob = msg.getObject();
+
+            if (ob instanceof ArrayList)
             {
-                p_cxeRequest.acknowledge();
+                ArrayList<HashMap> msgs = (ArrayList<HashMap>) ob;
+                for (HashMap m : msgs)
+                {
+                    onMessage(m);
+                    HibernateUtil.closeSession();
+                }
+            }
+            else
+            {
+                onMessage((HashMap) ob);
             }
         }
-        catch (Exception e)
+        catch (JMSException e1)
         {
-            s_logger.error("Failed to acknowledge the CXE request. ", e);
+            s_logger.error(e1);
+            return;
         }
-        
-        HibernateUtil.closeSession();
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
     }
 }

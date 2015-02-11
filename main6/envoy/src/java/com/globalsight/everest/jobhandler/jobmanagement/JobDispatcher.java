@@ -48,6 +48,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEventObserver;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -358,6 +359,8 @@ public class JobDispatcher
             job = p_job;
         }
 
+        c_category.info("Begin to calculate word-counts for job "
+                + p_job.getId());
         if (nextState.equals(Job.DISPATCHED))
         {
             // Calculate target page word-counts after all source pages are
@@ -386,6 +389,8 @@ public class JobDispatcher
         StatisticsService.calculateWorkflowStatistics(
                 new ArrayList(job.getWorkflows()), job.getL10nProfile()
                         .getTranslationMemoryProfile().getJobExcludeTuTypes());
+        c_category.info("Finished calculating word-counts for job "
+                + job.getId()); 
 
         calculateCost(job);
         try
@@ -406,6 +411,13 @@ public class JobDispatcher
 
     private void toReady(Job job)
     {
+        // calculateWorkflowStatistics() commits statistics to DB
+        StatisticsService.calculateWorkflowStatistics(
+                new ArrayList(job.getWorkflows()), job.getL10nProfile()
+                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
+        c_category.info("Finished calculating word-counts for job "
+                + job.getId());
+        
         try
         {
             getJobEventObserver().notifyJobReadyToBeDispatchedEvent(job);
@@ -414,11 +426,6 @@ public class JobDispatcher
         {
             c_category.error(e.getMessage(), e);
         }
-
-        // calculateWorkflowStatistics() commits statistics to DB
-        StatisticsService.calculateWorkflowStatistics(
-                new ArrayList(job.getWorkflows()), job.getL10nProfile()
-                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
 
         calculateCost(job);
         calculateEstimatedCompletionDate(job);
@@ -439,6 +446,8 @@ public class JobDispatcher
 
     private void calculateAllTargetPagesForJob(Job job)
     {
+        JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);
+        
         for (Workflow workflow : job.getWorkflows())
         {
             StatisticsService.calculateTargetPagesWordCount(workflow, job
@@ -566,7 +575,8 @@ public class JobDispatcher
                 List wfTaskInfos = ServerProxy.getWorkflowServer()
                         .timeDurationsInDefaultPath(null, wfClone.getId(), -1);
                 FluxCalendar defaultCalendar = ServerProxy.getCalendarManager()
-                        .findDefaultCalendar(wfClone.getCompanyId());
+                        .findDefaultCalendar(
+                                String.valueOf(wfClone.getCompanyId()));
 
                 Hashtable tasks = wfClone.getTasks();
                 long translateDuration = 0l;
@@ -711,11 +721,7 @@ public class JobDispatcher
 
                 if (isRepetitions)
                 {
-                    int repetitionCount = wf.getRepetitionWordCount()
-                            + wf.getSubLevRepetitionWordCount()
-                            + wf.getHiFuzzyRepetitionWordCount()
-                            + wf.getMedHiFuzzyRepetitionWordCount()
-                            + wf.getMedFuzzyRepetitionWordCount();
+                    int repetitionCount = wf.getRepetitionWordCount();
                     result.append("Repetitions: ").append(repetitionCount)
                             .append("\r\n");
                 }
@@ -738,7 +744,7 @@ public class JobDispatcher
             return;
         }
 
-        String companyIdStr = p_job.getCompanyId();
+        String companyIdStr = String.valueOf(p_job.getCompanyId());
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 p_job.getProjectId());
         GlobalSightLocale sourceLocale = p_job.getSourceLocale();
@@ -884,7 +890,7 @@ public class JobDispatcher
         p_msgArgs[2] = dateformat.format(p_job.getCreateDate());
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject,
-                p_message, p_job.getCompanyId());
+                p_message, String.valueOf(p_job.getCompanyId()));
     }
 
     private WorkflowManager getWorkflowManager() throws Exception

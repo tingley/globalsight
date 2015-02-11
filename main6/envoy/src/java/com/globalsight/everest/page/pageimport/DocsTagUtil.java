@@ -63,7 +63,7 @@ public class DocsTagUtil
     	return false;
     }
 	
-	public static TuvImpl handleSpecialTag(TuvImpl tuv, String companyId) 
+	public static TuvImpl handleSpecialTag(TuvImpl tuv, long companyId) 
 	{
 		TuImpl tu = (TuImpl) tuv.getTu(companyId);
 

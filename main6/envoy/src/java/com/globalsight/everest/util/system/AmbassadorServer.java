@@ -59,6 +59,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.modules.Modules;
@@ -71,10 +72,8 @@ import com.globalsight.util.modules.Modules;
 public class AmbassadorServer
 {
     /** The main output log */
-    public static String SYSTEM_LOG = "/GlobalSight.log"; // this gets updated
-                                                          // later
-    public static final String SYSTEM_LOG_BASENAME = "GlobalSight.log"; // never
-                                                                        // changes
+    public static String SYSTEM_LOG = "/GlobalSight.log";
+    public static final String SYSTEM_LOG_BASENAME = "GlobalSight.log";
 
     /**
      * Boolean value to tell whether GlobalSight is ready for access
@@ -82,7 +81,8 @@ public class AmbassadorServer
     private static Boolean s_isSystem4Accessible = Boolean.FALSE;
     private final static int MAX_NUM_OF_MESSAGES_PER_SESSION = 10;
     private final static long JDBCPOOL_ID = -1L;
-    private static final Logger CATEGORY = Logger.getLogger("AmbassadorServer");
+    private static final Logger CATEGORY = Logger
+            .getLogger(AmbassadorServer.class);
 
     private static DbAutoImporter s_dbAutoImporter = null;
     private static Timer s_dbTimer = null;
@@ -203,9 +203,11 @@ public class AmbassadorServer
         try
         {
             conn = ConnectionPool.getConnection();
+            conn.setAutoCommit(false);
             stmt = conn.createStatement();
             stmt.execute("UPDATE project_tm SET status='Stopped' WHERE status='Converting'");
             CATEGORY.info("Set up STOP status to running TM3 conversion");
+            conn.commit();
         }
         catch (Exception e)
         {
@@ -279,7 +281,7 @@ public class AmbassadorServer
             CATEGORY.info("MySql Database version: "
                     + metaData.getDatabaseProductVersion());
             ConnectionPool.returnConnection(c);
-            
+
             setupTM3ConversionToStop();
 
             // now initialize the permissions
@@ -294,6 +296,8 @@ public class AmbassadorServer
 
             startCxeFileSystemAutomaticImport();
             startCxeDatabaseAutomaticImport();
+            
+            WorkflowExportingHelper.cleanTable();
         }
         catch (Exception e)
         {

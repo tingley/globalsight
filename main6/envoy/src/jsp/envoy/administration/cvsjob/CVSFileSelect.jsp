@@ -22,6 +22,7 @@
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
 	ResourceBundle bundle = PageHandler.getBundle(session);
+    String fileSelect = bundle.getString("lb_cvs_job_file_select");
 %>
 <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -104,7 +105,7 @@ function submitForm(action) {
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
-  <amb:header title="<%=bundle.getString("lb_cvs_job_file_select") %>"/>
+  <amb:header title="<%=fileSelect %>"/>
 
 <form name="form1" method="post" >
   <input type="hidden" name="selectFiles" value="">

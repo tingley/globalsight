@@ -185,6 +185,12 @@ public class UploadPageHandlerHelper implements WebAppConstants
             map.put("counter", status.getCounter());
             map.put("msg", status.giveMessages());
             map.put("errMsg", errorMsg);
+            if (status.getCheckResult() != null)
+            {
+            	map.put("internalTagMiss", status.getCheckResult().getMessage(true));
+            	status.setCheckResult(null);
+            }
+            
             map.put("process", status.isUseProcess() ?  status.getProcess() + "%" : null);            
             
             PrintWriter out = p_response.getWriter();

@@ -547,7 +547,7 @@
             </amb:column>
             <amb:column label="lb_name"  width="15%" sortBy="<%=DefinedAttributeComparator.NAME%>">
                 <%
-                isSuperAtt = CompanyWrapper.SUPER_COMPANY_ID.equals(attribute.getCompanyId());
+                isSuperAtt = 1 == attribute.getCompanyId();
                 
                 if (isSuperAtt) {%>
                 <div class="superAttribute">

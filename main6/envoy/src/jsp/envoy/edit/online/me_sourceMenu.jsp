@@ -45,7 +45,8 @@ long pageId = state.getTargetPageId().longValue();
 
 String pageFormat = state.getPageFormat();
 boolean hasPreview = EditUtil.hasPreviewMode(pageFormat);
-boolean isOOO = pageFormat.startsWith("openoffice") || pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
+boolean isOOO = pageFormat.startsWith("openoffice");
+boolean isOfficeXml = pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
 boolean hasDynamicPreview = false;
 boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
 boolean isTeamsiteSource = false;
@@ -208,7 +209,7 @@ function showText()
 
 function showPreview()
 {
-	<%if (!isOOO) {%>
+	<%if (!isOOO && !isOfficeXml) {%>
     window.parent.showPreview();
     <%} else { %>
     try
@@ -264,9 +265,11 @@ function doOnload()
 
     <%if (viewPdf) {
         sessionMgr.removeElement("src_view_pdf");
-    %>
+        if (isOfficeXml) {%>
+    setTimeout(showPreview, "3000");
+    <% } else { %>
     setTimeout(showPDFPreview, "3000");
-    <% }%>
+    <% } } %>
 }
 </SCRIPT>
 </HEAD>
@@ -277,7 +280,7 @@ function doOnload()
   <TR CLASS="tableHeadingBasic">
     <TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
     <TD ALIGN="RIGHT">
-<%if(hasPDFPreview){ %>
+<%if(hasPDFPreview && !isOfficeXml){ %>
  <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
       onfocus="this.blur();"><%=lb_pdf_preview%></A> |
 <% } else if (msgPdfPreviewNotInstalled.length() > 0) {%>

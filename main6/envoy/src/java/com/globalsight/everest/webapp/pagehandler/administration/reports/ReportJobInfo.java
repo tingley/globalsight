@@ -30,17 +30,22 @@ public class ReportJobInfo
     private String jobId = "";
     private String jobName = "";
     private String jobState = "";
+
+    private String locProfile = "";
     private String projectId = "";
+
     private List<String> targetLocales = new ArrayList<String>();
     
     public ReportJobInfo(){}
 
     public ReportJobInfo(String jobId, String jobName, String jobState,
+            String locProfile,
             String projectId, List<String> targetLocales)
     {
         this.jobId = jobId;
         this.jobName = jobName;
         this.jobState = jobState;
+        this.locProfile = locProfile;
         this.projectId = projectId;
         this.targetLocales = targetLocales;
     }
@@ -73,6 +78,16 @@ public class ReportJobInfo
     public void setJobState(String jobStatus)
     {
         this.jobState = jobStatus;
+    }
+
+    public String getLocProfile()
+    {
+        return locProfile;
+    }
+
+    public void setLocProfile(String locProfile)
+    {
+        this.locProfile = locProfile;
     }
 
     public String getProjectId()

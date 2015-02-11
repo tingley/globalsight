@@ -35,7 +35,7 @@ com.globalsight.everest.webapp.pagehandler.ControlFlowHelper,
 com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper,
 com.globalsight.everest.webapp.webnavigation.WebPageDescriptor,
 com.globalsight.everest.workflowmanager.Workflow,
-com.globalsight.util.GlobalSightLocale"           
+com.globalsight.util.GlobalSightLocale"
     session="true" %>
 <%
     NavigationBean export = (NavigationBean) request.getAttribute("export");
@@ -475,65 +475,38 @@ private String getSubFileName(String p_filename)
             </TR>
             <TR>
                 <TD>
-                    <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" CLASS="standardText"
-                        STYLE="border: 1px solid #0C1476">
+                    <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" CLASS="standardText" STYLE="border: 1px solid #0C1476">
                         <TR>
-                            <TD>                                
+                            <TD>
                                 <TABLE CELLPADDING="4" CELLSPACING="0" BORDER="0"> 
                                     <% if (b_exportMultipleActivities == false) { %>
-                                    <TR CLASS="tableHeadingBasic">                                    
-                                        <% if (b_exportForUpdate==false) {%>   
+                                    <TR CLASS="tableHeadingBasic">
+                                        <% if (b_exportForUpdate==false) {%>
                                         <TD NOWRAP width="5px">
 											<input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true" style="position:relative;left:-3px;"/>
 											<IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"/>
 										</TD>
                                         <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_target_locales")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </SPAN>
+                                            <SPAN CLASS="whiteBold"><%=bundle.getString("lb_target_locales")%></SPAN>
                                         </TD>
                                         <% } else { %>
                                         <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_source_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </SPAN>
+                                            <SPAN CLASS="whiteBold"><%=bundle.getString("lb_source_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN>
                                         </TD>
                                         <%}%>
                                         <amb:permission name="<%=Permission.JOB_WORKFLOWS_EDITEXPORTLOC%>" >
                                         <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_export_locale_subdir")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </SPAN>
+                                            <SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_locale_subdir")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN>
                                         </TD>
                                         </amb:permission>
-                                        <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_export_location")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </SPAN>
-                                        </TD>
-                                        <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_localized")%>
-                                            </SPAN>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
-                                        <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_export_charencoding")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </SPAN>
-                                        </TD>
-                                        <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_utf_bom")%>
-                                            </SPAN>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                                        <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_location")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
+                                        <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_localized")%></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                                        <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_charencoding")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
+                                        <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_utf_bom")%></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                                        <TD NOWRAP><SPAN CLASS="whiteBold">Populate Source Into<br>Un-Translated Target (XLF/XLZ only)</SPAN></TD>
                                         <% if (b_exportForUpdate==true) { %>
-                                        <TD ALIGN="LEFT" NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_export_delay")%>
-                                            </SPAN>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                                        <TD ALIGN="LEFT" NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_delay")%></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
                                         <% } %>
-
                                     <% } %>
                                     </TR>
 <% if (b_exportForUpdate) {
@@ -547,7 +520,7 @@ private String getSubFileName(String p_filename)
 <% } else if (b_exportMultipleActivities) {
     %>
 <!-- export multiple activity stuff here -->
-<% 
+<%
     //first get all the workflows and group them by locale
     HashMap localeMap = new HashMap();
     String v[] = (String[]) request.getParameterValues(JobManagementHandler.WF_ID);
@@ -576,7 +549,7 @@ private String getSubFileName(String p_filename)
         String prefixTargetLocale = targetLocale.substring(0,targetLocale.indexOf('[')-1);
         String suffixTargetLocale = targetLocale.substring(targetLocale.indexOf('['));
         %>        
-        <TR CLASS="tableHeadingBasic"><TD COLSPAN=4><%=bundle.getString("lb_target_locale")%>: <%=targetLocale%></TD>
+        <TR CLASS="tableHeadingBasic"><TD COLSPAN=5><%=bundle.getString("lb_target_locale")%>: <%=targetLocale%></TD>
         <TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
         <TR CLASS="tableHeadingBasic">
         <TD NOWRAP width="5px"><input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true" style="position:relative;left:-3px;"/><IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"></TD>
@@ -591,6 +564,7 @@ private String getSubFileName(String p_filename)
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_location")%></SPAN></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_charencoding")%></SPAN></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_utf_bom")%></SPAN></TD>
+        <TD NOWRAP><SPAN CLASS="whiteBold">Populate Source Into Un-Translated Target</SPAN></TD>
         </TR>
         
         <%
@@ -634,39 +608,33 @@ private String getSubFileName(String p_filename)
     </TR>
     <TR>
         <TD>
-
-            <% if (b_exportForUpdate==true) { %>
             <!-- Export Source -->
-            <SPAN CLASS="standardText">
-            <%=bundle.getString("lb_srcpages_exported")%>
-            
-            <% if (tableSize >= 200) { %>
-            <div id="data">
-            <% } %>
-            <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
+            <% if (b_exportForUpdate==true) { %>
+                <SPAN CLASS="standardText"><%=bundle.getString("lb_srcpages_exported")%></SPAN>
+                <% if (tableSize >= 200) { %>
+                    <div id="data">
+                <% } %>
+            <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText" width="100%">
                 <COL WIDTH="20"> <!-- Spacer -->
                 <COL WIDTH="10"> <!-- Bullet -->
-                <COL WIDTH="500"> <!-- Page path -->
+                <COL WIDTH="600"> <!-- Page path -->
             <%
             Iterator iter = sourcePages.iterator();
             while (iter.hasNext())
             {
                 SourcePage sp = (SourcePage) iter.next();
                 boolean isExtracted = sp.getPrimaryFileType()== PrimaryFile.EXTRACTED_FILE;
-        String pageName = getMainFileName(sp.getExternalPageId());
-        String subName = getSubFileName(sp.getExternalPageId());
-
-        if (subName != null)
-        {
-            pageName = pageName + " " + subName;
-        }
-
+                String pageName = getMainFileName(sp.getExternalPageId());
+                String subName = getSubFileName(sp.getExternalPageId());
+                if (subName != null)
+                {
+                    pageName = pageName + " " + subName;
+                }
             %>
-
                 <TR VALIGN="TOP">
                     <TD>&nbsp;</TD>
                     <TD>&bull;</TD>
-                    <TD STYLE="word-wrap: break-word">
+                    <TD>
                         <IMG SRC="<%=isExtracted ? extractedImage : unExtractedImage%>"
                         ALT="<%=isExtracted ? extractedToolTip : unExtractedToolTip%>"
                         WIDTH=13 HEIGHT=15>&nbsp; <%=pageName%>
@@ -790,7 +758,6 @@ private String getSubFileName(String p_filename)
 
             try
             {
-
                 sb.append("<TD><SPAN CLASS=\"formFields\">\r\n");
                 sb.append("<SELECT NAME=\"");
                 sb.append(JobManagementHandler.EXPORT_WF_LOCATION_PARAM);
@@ -818,15 +785,9 @@ private String getSubFileName(String p_filename)
         
         // data encoding
         String codeset = l10nProfile.getCodeSet(sourceLocale);
-        ArrayList<FileProfile> fps = p_job.getAllFileProfiles();
-        boolean needBOMProcessing = false;
-        long knownFormatTypeId = -1;
-        for (FileProfile fp : fps) {
-            knownFormatTypeId = fp.getKnownFormatTypeId();
-            needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
-            if (needBOMProcessing)
-                break;
-        }
+        boolean needBOMProcessing = needBOMProcessing(p_job.getAllFileProfiles());
+        boolean isXlfSrcAsTrgEnabled = isXlfSrcAsTrgEnabled(p_job.getAllFileProfiles());
+
         sb.append("<TD><SPAN CLASS=");
         if (!isDatabase)
         {
@@ -872,7 +833,6 @@ private String getSubFileName(String p_filename)
         sb.append("</SPAN></TD>\r\n");
         
         //BOM Processing
-
         int BOMType = p_job.getFileProfile().getBOMType();
         sb.append("<TD><SPAN class=\"formField\">");
         sb.append("<SELECT id=\"bomType_" + p_job.getId() + "\" name=\"bomType_");
@@ -883,6 +843,13 @@ private String getSubFileName(String p_filename)
         sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
         sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
         sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
+
+        // XLF Source As Target
+        sb.append("<TD><SPAN class='formField'>");
+        sb.append("  <SELECT id='xlfSrcAsTrg_" + p_job.getId() + "' name='xlfSrcAsTrg_" + p_job.getId() + "' class='standardText' " + (isXlfSrcAsTrgEnabled?"":"disabled") + ">");
+        sb.append("    <option value='0'>No&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+        sb.append("    <option value='1'>Yes&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+        sb.append("  </SELECT>\r\n</SPAN></TD>\r\n");
 
         //job cancellation delay
         sb.append("<TD><input type=\"text\" name=\"");
@@ -897,13 +864,12 @@ private String getSubFileName(String p_filename)
     private void addInitialTableSettings(StringBuffer p_sb)
     {
         p_sb.append("<TR>\r\n");
-        p_sb.append("<TD COLSPAN=\"6\">\r\n");
-        p_sb.append("<div id=\"data\">\r\n");
-        p_sb.append("<TABLE BORDER=\"0\" CELLPADDING=0");
-        p_sb.append(" CELLSPACING=0 CLASS=\"standardText\">\r\n");
-        p_sb.append("<COL WIDTH=20>   <!-- Spacer column -->");
-        p_sb.append("<COL WIDTH=20>   <!-- Checkbox -->");
-        p_sb.append("<COL WIDTH=400>  <!-- Page path -->");
+        p_sb.append("  <TD COLSPAN=\"8\">\r\n");
+        p_sb.append("  <div id=\"data\">\r\n");
+        p_sb.append("    <TABLE BORDER='0' CELLPADDING='0' CELLSPACING='0' CLASS='standardText' WIDTH='100%'>\r\n");
+        p_sb.append("      <COL WIDTH=20>   <!-- Spacer column -->");
+        p_sb.append("      <COL WIDTH=20>   <!-- Checkbox -->");
+        p_sb.append("      <COL WIDTH='90%'>  <!-- Page path -->");
     }
 
     // add the table headings for primary/secondary target files
@@ -912,22 +878,18 @@ private String getSubFileName(String p_filename)
                                   String p_isChecked)
     {
         p_sb.append("<TR>\r\n");
-        p_sb.append("<TD COLSPAN=\"6\">\r\n");
-        p_sb.append("<TABLE BORDER=\"0\" WIDTH=\"60%\" CELLPADDING=0");
-        p_sb.append("<TR>\r\n");
-        p_sb.append("<TD>&nbsp;</TD>");
-        p_sb.append("<TD CLASS=\"tableHeadingBasic\">");
-        p_sb.append("<INPUT TYPE=RADIO NAME=RadioBtn"+p_wfId);
-        p_sb.append(" VALUE=\"" );
-        p_sb.append(p_radioValue);
-        p_sb.append("\" ");
-        p_sb.append(p_isChecked);
-        p_sb.append(" ONCLICK=\"checkPagesUnderRadioBtn(this);\">\r\n");
-        p_sb.append(p_title);
-        p_sb.append("</TD>\r\n");
-        p_sb.append("</TR>\r\n");
-        p_sb.append("</TABLE>\r\n");
-        p_sb.append("</TD>\r\n");
+        p_sb.append("  <TD COLSPAN='6'>\r\n");
+        p_sb.append("    <TABLE BORDER='0' WIDTH='80%' CELLPADDING=0");
+        p_sb.append("      <TR>\r\n");
+        p_sb.append("        <TD>&nbsp;</TD>");
+        p_sb.append("        <TD CLASS='tableHeadingBasic'>");
+        p_sb.append("          <INPUT TYPE='RADIO' NAME='RadioBtn" + p_wfId + "' VALUE='" + p_radioValue + "' " + p_isChecked);
+        p_sb.append("          ONCLICK='checkPagesUnderRadioBtn(this);'>\r\n");
+        p_sb.append(           p_title);
+        p_sb.append("        </TD>\r\n");
+        p_sb.append("      </TR>\r\n");
+        p_sb.append("    </TABLE>\r\n");
+        p_sb.append("  </TD>\r\n");
         p_sb.append("</TR>\r\n");
     }
     
@@ -938,36 +900,20 @@ private String getSubFileName(String p_filename)
                                  String p_icon, String p_toolTip,
                                  String p_displayName)
     {
-    String pageName = getMainFileName(p_displayName);
-    String subName = getSubFileName(p_displayName);
-
-    if (subName != null)
-    {
-        pageName = pageName + " " + subName;
-    }
-    
+        String pageName = getMainFileName(p_displayName);
+        String subName = getSubFileName(p_displayName);
+        if (subName != null)
+        {
+            pageName = pageName + " " + subName;
+        }
         p_sb.append("<TR VALIGN=TOP>\r\n");
-        p_sb.append("<TD>&nbsp;</TD>");
-        p_sb.append("<TD>");
-
-        // The Checkbox is of the form:
-        // NAME="page" VALUE="pageId_<pageId>_wfId_<p or s><wfId>"
-        // So the javascript can associate a page with a workflow
-        p_sb.append("<INPUT TYPE=\"checkbox\" ");
-        p_sb.append("NAME=\"page\" ");
-        p_sb.append("VALUE=\"pageId_" + p_id + "_wfId_" + p_wfValue +"\" ");
-        p_sb.append(p_checkedOrDisabled);
-        p_sb.append("></TD>\r\n");
-        // icon for extracted/unextracted
-        p_sb.append("<TD STYLE=\"word-wrap: break-word\">");
-        p_sb.append("<IMG SRC=\"");
-        p_sb.append(p_icon);
-        p_sb.append("\" ALT=\"");
-        p_sb.append(p_toolTip);
-        p_sb.append("\" WIDTH=13 HEIGHT=17> &nbsp;");
-        p_sb.append(pageName);
-        p_sb.append("</TD>\r\n");
-        p_sb.append("<TD WIDTH=\"200\">&nbsp;</TD>\r\n");
+        p_sb.append("  <TD>&nbsp;</TD>");
+        p_sb.append("  <TD>");
+        p_sb.append("    <INPUT TYPE='checkbox' NAME='page' VALUE='pageId_" + p_id + "_wfId_" + p_wfValue + "' " + p_checkedOrDisabled + ">");
+        p_sb.append("  </TD>\r\n");
+        p_sb.append("  <TD STYLE='word-wrap: break-word' WIDTH='98%'>");
+        p_sb.append("    <IMG SRC='" + p_icon + "' ALT='" + p_toolTip + "' WIDTH=13 HEIGHT=17>&nbsp;" + pageName);
+        p_sb.append("  </TD>\r\n");
         p_sb.append("</TR>\r\n");
     }
 
@@ -1185,7 +1131,7 @@ private String getSubFileName(String p_filename)
                     sb.append("></SPAN>\r\n");
                 }
 
-				String companyId = curWF.getJob().getCompanyId();
+				String companyId = String.valueOf(curWF.getJob().getCompanyId());
                 Collection c = ServerProxy.getExportLocationPersistenceManager().getAllExportLocations(companyId);
                 ExportLocation defaultExportLocation = ServerProxy.getExportLocationPersistenceManager().getDefaultExportLocation();
 
@@ -1258,14 +1204,8 @@ private String getSubFileName(String p_filename)
             //BOM Processing
             int BOMType = curWF.getJob().getFileProfile().getBOMType();
             ArrayList<FileProfile> fps = curWF.getJob().getAllFileProfiles();
-            boolean needBOMProcessing = false;
-            long knownFormatTypeId = -1;
-            for (FileProfile fp : fps) {
-                knownFormatTypeId = fp.getKnownFormatTypeId();
-                needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
-                if (needBOMProcessing)
-                    break;
-            }
+            boolean needBOMProcessing = needBOMProcessing(fps);
+            boolean isXlfSrcAsTrgEnabled = isXlfSrcAsTrgEnabled(fps);
 
             sb.append("<TD><SPAN CLASS=");
             if (!isDatabase)
@@ -1336,14 +1276,19 @@ private String getSubFileName(String p_filename)
             sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
             sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
             sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
-            
-            } //endif EXPORTLOCANDCODESET
+
+            sb.append("<TD><SPAN class=\"formField\">");
+            sb.append("  <SELECT id='xlfSrcAsTrg_" + wfId + "' name='xlfSrcAsTrg_" + wfId + "' class='standardText '" + (isXlfSrcAsTrgEnabled?"":"disabled") + ">");
+            sb.append("    <option value='0'>No&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+            sb.append("    <option value='1'>Yes&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+            sb.append("  </SELECT>\r\n</SPAN></TD>\r\n");
+            }
             else
             {
                 sb.append("<TD>");
                 sb.append(curWF.getJob().getSourceLocale().getDisplayName(p_uiLocale));
                 sb.append("</TD>\r\n");
-                
+
                 // Is Workflow Localized column
                 sb.append("<TD>");
                 if (curWF.getState().equals(Workflow.LOCALIZED) ||
@@ -1359,7 +1304,8 @@ private String getSubFileName(String p_filename)
                 sb.append("</TD>\r\n");
             }
 
-            if (b_exportMultipleActivities) {
+            if (b_exportMultipleActivities)
+            {
                 sb.append("<TD><SPAN CLASS=\"formFields\"><INPUT NAME=\"");
                 sb.append(JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM);
                 sb.append("_");
@@ -1385,14 +1331,8 @@ private String getSubFileName(String p_filename)
 
                 int BOMType = curWF.getJob().getFileProfile().getBOMType();
                 ArrayList<FileProfile> fps = curWF.getJob().getAllFileProfiles();
-                boolean needBOMProcessing = false;
-                long knownFormatTypeId = -1;
-                for (FileProfile fp : fps) {
-                    knownFormatTypeId = fp.getKnownFormatTypeId();
-                    needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
-                    if (needBOMProcessing)
-                        break;
-                }
+                boolean needBOMProcessing = needBOMProcessing(fps);
+                boolean isXlfSrcAsTrgEnabled = isXlfSrcAsTrgEnabled(fps);
                 
                 sb.append("<TD><SPAN CLASS=\"formFields\"><SELECT NAME=\"");
                 sb.append(JobManagementHandler.EXPORT_WF_CODE_PARAM);
@@ -1426,6 +1366,12 @@ private String getSubFileName(String p_filename)
                 sb.append("<option value='1'>" + p_bundle.getString("lb_utf_bom_preserve") + "</option>");
                 sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
                 sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
+                sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
+                // 
+		        sb.append("<TD><SPAN class=\"formField\">");
+                sb.append("<SELECT id='xlfSrcAsTrg_" + wfId + "' name='xlfSrcAsTrg_" + wfId + "' class='standardText'>");
+         		sb.append("<option value='0'>No&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+    	        sb.append("<option value='1'>Yes&nbsp;&nbsp;&nbsp;&nbsp;</option>");
                 sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
             }
             sb.append("</TR>\r\n");
@@ -1466,7 +1412,7 @@ private String getSubFileName(String p_filename)
 
         if (pages.size() > 0)
         {
-            wfValue = JobExportHandler.PRIMARY_PREFIX+wfId;
+            wfValue = JobExportHandler.PRIMARY_PREFIX + wfId;
 
             // heading info
             if (stfSize > 0) {
@@ -1474,7 +1420,7 @@ private String getSubFileName(String p_filename)
                              p_bundle.getString("lb_primary_target_files"),
                              "CHECKED");
             }
-            
+
             addInitialTableSettings(sb);
             
             sb.append("<thead id=scroll>");
@@ -1484,18 +1430,14 @@ private String getSubFileName(String p_filename)
                 TargetPage curPage = (TargetPage)pages.get(i);
                 boolean isUnextracted = curPage.getPrimaryFileType() ==
                                         PrimaryFile.UNEXTRACTED_FILE;
-
                 String icon = isUnextracted ?
                               p_bundle.getString("img_file_unextracted") :
                               p_bundle.getString("img_file_extracted");
-
                 String toolTip = isUnextracted ?
                                  p_bundle.getString("lb_file_unextracted") :
                                  p_bundle.getString("lb_file_extracted");
 
-                long pageId = curPage.getId();
-
-                preparePageRows(sb, pageId, wfValue,
+                preparePageRows(sb, curPage.getId(), wfValue,
                                 "CHECKED", icon, toolTip,
                                 curPage.getExternalPageId());
             }
@@ -1616,5 +1558,37 @@ private String getSubFileName(String p_filename)
     }
     
     private static final Logger c_logger = Logger
-    .getLogger(JobExportHandler.class.getName());    
+    .getLogger(JobExportHandler.class.getName());
+
+    // "UTF-8 Byte Order Mark (BOM)" option only be available for "html","xml","resx". 
+    private boolean needBOMProcessing(ArrayList<FileProfile> fps)
+    {
+        boolean needBOMProcessing = false;
+        long knownFormatTypeId = -1;
+        for (FileProfile fp : fps)
+        {
+            knownFormatTypeId = fp.getKnownFormatTypeId();
+            needBOMProcessing = (knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45);
+            if (needBOMProcessing)
+                break;
+        }
+
+        return needBOMProcessing;
+    }
+
+    // "Populate Source Into Un-Translated Target (XLF/XLZ only)
+    private boolean isXlfSrcAsTrgEnabled(ArrayList<FileProfile> fps)
+    {
+        boolean isXlfSrcAsTrgEnabled = false;
+        long knownFormatTypeId = -1;
+        for (FileProfile fp : fps)
+        {
+            knownFormatTypeId = fp.getKnownFormatTypeId();
+            isXlfSrcAsTrgEnabled = (knownFormatTypeId == 39 || knownFormatTypeId == 48);
+            if (isXlfSrcAsTrgEnabled)
+                break;
+        }
+
+        return isXlfSrcAsTrgEnabled;
+    }
 %>

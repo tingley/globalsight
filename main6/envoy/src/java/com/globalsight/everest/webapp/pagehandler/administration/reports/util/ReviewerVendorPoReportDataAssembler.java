@@ -52,24 +52,24 @@ import com.globalsight.everest.workflowmanager.Workflow;
 
 public class ReviewerVendorPoReportDataAssembler
 {
-    private static Logger s_logger = 
-        Logger.getLogger("XlsReportDataAssembler");
-    
+    private static Logger s_logger = Logger
+            .getLogger(ReviewerVendorPoReportDataAssembler.class);
+
     private HttpServletRequest request = null;
-    
+
     private XlsReportData reportData = null;
-    
+
     public ReviewerVendorPoReportDataAssembler(HttpServletRequest p_request)
     {
         this.request = p_request;
         this.reportData = new XlsReportData();
     }
-    
+
     public XlsReportData getXlsReportData()
     {
         return this.reportData;
     }
-    
+
     public void setActivityNameList()
     {
         String[] activityNameList = request.getParameterValues("activityName");
@@ -110,7 +110,7 @@ public class ReviewerVendorPoReportDataAssembler
             }
         }
     }
-    
+
     public void setJobStateList()
     {
         String[] jobStates = request.getParameterValues("status");
@@ -128,7 +128,7 @@ public class ReviewerVendorPoReportDataAssembler
             }
         }
     }
-    
+
     public void setProjectIdList()
     {
         String[] projectIds = request.getParameterValues("projectId");
@@ -146,7 +146,7 @@ public class ReviewerVendorPoReportDataAssembler
             }
         }
     }
-    
+
     public void setTargetLangList()
     {
         String[] targetLangs = request.getParameterValues("targetLang");
@@ -164,7 +164,7 @@ public class ReviewerVendorPoReportDataAssembler
             }
         }
     }
-    
+
     /**
      * Returns a list of jobs that are in a different project but should be
      * treated as if they're in this project.
@@ -177,37 +177,38 @@ public class ReviewerVendorPoReportDataAssembler
         }
         catch (Exception e)
         {
-            s_logger.error("Failed to add jobs which are in the 'wrong' project.", e);
+            s_logger.error(
+                    "Failed to add jobs which are in the 'wrong' project.", e);
         }
     }
-    
+
     /**
      * Adds data for the exported and in-progress jobs. Archived jobs are
      * ignored for now.
      */
     public void setProjectData(boolean p_recalculateFinishedWorkflow)
-    throws Exception
+            throws Exception
     {
         HashMap projectMap = new HashMap();
         Currency pivotCurrency = CurrencyThreadLocal.getCurrency();
-        
+
         JobSearchParameters searchParams = getSearchParams();
-        ArrayList queriedJobs = 
-            new ArrayList(ServerProxy.getJobHandler().getJobs(searchParams));
+        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler()
+                .getJobs(searchParams));
         ArrayList wrongJobs = getWrongJobs();
-        
+
         // now create a Set for all the jobs
         HashSet jobs = new HashSet();
         jobs.addAll(queriedJobs);
         jobs.addAll(wrongJobs);
         jobs.removeAll(reportData.ignoreJobs);
-        
+
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
         Iterator jobIter = jobs.iterator();
         reportData.headers = getHeaders(jobIter);
         jobIter = jobs.iterator();
-        
+
         while (jobIter.hasNext())
         {
             Job j = (Job) jobIter.next();
@@ -218,378 +219,411 @@ public class ReviewerVendorPoReportDataAssembler
                     continue;
                 }
             }
-            TranslationMemoryProfile tmProfile = j.getL10nProfile().getTranslationMemoryProfile();
-            //boolean isUseInContext = tmProfile.getIsContextMatchLeveraging();
-            boolean isInContextMatch = PageHandler.isInContextMatch(j, tmProfile);
-            boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(j);
+            TranslationMemoryProfile tmProfile = j.getL10nProfile()
+                    .getTranslationMemoryProfile();
+            // boolean isUseInContext = tmProfile.getIsContextMatchLeveraging();
+            boolean isInContextMatch = PageHandler.isInContextMatch(j,
+                    tmProfile);
+            boolean isDefaultContextMatch = PageHandler
+                    .isDefaultContextMatch(j);
             // only handle jobs in these states
 
             Iterator wfIter = j.getWorkflows().iterator();
             while (wfIter.hasNext())
             {
-              Workflow w = (Workflow) wfIter.next();
-               
-              // skip certain workflows
-              if (Workflow.PENDING.equals(w.getState()) || 
-                  Workflow.IMPORT_FAILED.equals(w.getState()) || 
-                  Workflow.CANCELLED.equals(w.getState()) || 
-                  Workflow.BATCHRESERVED.equals(w.getState()) || 
-                  Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
-              {
-                  continue;
-              }
-                
-              // skip workflows without special target lang
-              String targetLang = w.getTargetLocale().toString();
-              if (!(reportData.wantsAllTargetLangs ||
-                    reportData.targetLangList.contains(targetLang)))
-              {
-                  continue;
-              }
-               
-              // skip workflows without "REPORT_ACTIVITY" activity
-              Map<String,Task> dellReviewActivities = new HashMap<String, Task>();
-              Iterator tasksIterator = w.getTasks().values().iterator();
-              while (tasksIterator.hasNext())
-              {
-                  Task task = (Task) tasksIterator.next();
-                  if (reportData.activityNameList.contains(task.getTaskName()))
-                  {
-                      if(dellReviewActivities.get(task.getTaskName())==null)
-                      {
-                          dellReviewActivities.put(task.getTaskName(), task);
-                      }    
-                  }
-              }
-              Iterator it = dellReviewActivities.entrySet().iterator();
-              while(it.hasNext())
-              {
-                Entry entry = (java.util.Map.Entry) it.next();
-                Task dellReviewActivity = (Task) entry.getValue();
+                Workflow w = (Workflow) wfIter.next();
 
-                long jobId = j.getId();
-                HashMap localeAvticityMap = (HashMap)projectMap.get(Long.toString(jobId));
-                if (localeAvticityMap == null)
+                // skip certain workflows
+                if (Workflow.PENDING.equals(w.getState())
+                        || Workflow.IMPORT_FAILED.equals(w.getState())
+                        || Workflow.CANCELLED.equals(w.getState())
+                        || Workflow.BATCHRESERVED.equals(w.getState())
+                        || Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
                 {
-                    localeAvticityMap = new HashMap();
-                    projectMap.put(Long.toString(jobId), localeAvticityMap);
+                    continue;
                 }
 
-                ProjectWorkflowData data = (ProjectWorkflowData)localeAvticityMap.get(targetLang+dellReviewActivity.getTaskName());
-                if (data == null)
+                // skip workflows without special target lang
+                String targetLang = w.getTargetLocale().toString();
+                if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
+                        .contains(targetLang)))
                 {
-                    data = new ProjectWorkflowData();
-                    localeAvticityMap.put(targetLang+dellReviewActivity.getTaskName(), data);
-                    data.jobName = j.getJobName();
-                    data.jobId = jobId;
-                    data.projectDesc = getProjectDesc(j);
-                    data.targetLang = targetLang;
-                    data.creationDate = j.getCreateDate();
-                    data.dellReviewActivityState = dellReviewActivity.getState();
-                    data.acceptedReviewerDate = dellReviewActivity.getAcceptedDate();
-                    data.currentActivityName = dellReviewActivity.getTaskDisplayName();
+                    continue;
                 }
 
-                // now add or amend the data in the ProjectWorkflowData based on
-                // this next workflow
-                if (j.getCreateDate().before(data.creationDate))
+                // skip workflows without "REPORT_ACTIVITY" activity
+                Map<String, Task> dellReviewActivities = new HashMap<String, Task>();
+                Iterator tasksIterator = w.getTasks().values().iterator();
+                while (tasksIterator.hasNext())
                 {
-                    data.creationDate = j.getCreateDate();
+                    Task task = (Task) tasksIterator.next();
+                    if (reportData.activityNameList
+                            .contains(task.getTaskName()))
+                    {
+                        if (dellReviewActivities.get(task.getTaskName()) == null)
+                        {
+                            dellReviewActivities.put(task.getTaskName(), task);
+                        }
+                    }
+                }
+                Iterator it = dellReviewActivities.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    Entry entry = (java.util.Map.Entry) it.next();
+                    Task dellReviewActivity = (Task) entry.getValue();
+
+                    long jobId = j.getId();
+                    HashMap localeAvticityMap = (HashMap) projectMap.get(Long
+                            .toString(jobId));
+                    if (localeAvticityMap == null)
+                    {
+                        localeAvticityMap = new HashMap();
+                        projectMap.put(Long.toString(jobId), localeAvticityMap);
+                    }
+
+                    ProjectWorkflowData data = (ProjectWorkflowData) localeAvticityMap
+                            .get(targetLang + dellReviewActivity.getTaskName());
+                    if (data == null)
+                    {
+                        data = new ProjectWorkflowData();
+                        localeAvticityMap.put(
+                                targetLang + dellReviewActivity.getTaskName(),
+                                data);
+                        data.jobName = j.getJobName();
+                        data.jobId = jobId;
+                        data.projectDesc = getProjectDesc(j);
+                        data.targetLang = targetLang;
+                        data.creationDate = j.getCreateDate();
+                        data.dellReviewActivityState = dellReviewActivity
+                                .getState();
+                        data.acceptedReviewerDate = dellReviewActivity
+                                .getAcceptedDate();
+                        data.currentActivityName = dellReviewActivity
+                                .getTaskDisplayName();
+                    }
+
+                    // now add or amend the data in the ProjectWorkflowData
+                    // based on
+                    // this next workflow
+                    if (j.getCreateDate().before(data.creationDate))
+                    {
+                        data.creationDate = j.getCreateDate();
+                    }
+
+                    data.repetitionWordCount += w.getRepetitionWordCount();
+                    data.dellInternalRepsWordCount += w.getRepetitionWordCount();
+                    data.tradosRepsWordCount = data.dellInternalRepsWordCount;
+                    data.lowFuzzyMatchWordCount += w
+                            .getThresholdLowFuzzyWordCount();
+                    data.medFuzzyMatchWordCount += w
+                            .getThresholdMedFuzzyWordCount();
+                    data.medHiFuzzyMatchWordCount += w
+                            .getThresholdMedHiFuzzyWordCount();
+                    data.hiFuzzyMatchWordCount += w
+                            .getThresholdHiFuzzyWordCount();
+
+                    // the Dell fuzzyMatchWordCount is the sum of the top 3
+                    // categories
+                    data.dellFuzzyMatchWordCount = data.medFuzzyMatchWordCount
+                            + data.medHiFuzzyMatchWordCount
+                            + data.hiFuzzyMatchWordCount;
+                    data.trados95to99WordCount = data.hiFuzzyMatchWordCount;
+                    data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
+                    data.trados75to84WordCount = data.medFuzzyMatchWordCount;
+                    data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
+
+                    // add the lowest fuzzies and sublev match to nomatch
+                    data.noMatchWordCount += w.getNoMatchWordCount()
+                            + data.lowFuzzyMatchWordCount;
+                    data.dellNewWordsWordCount = w.getNoMatchWordCount()
+                            + w.getLowFuzzyMatchWordCount();
+                    data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
+
+                    data.segmentTmWordCount += (isInContextMatch) ? w
+                            .getSegmentTmWordCount()
+                            : (isDefaultContextMatch) ? w
+                                    .getTotalExactMatchWordCount()
+                                    - w.getContextMatchWordCount() : w
+                                    .getTotalExactMatchWordCount();
+                    data.inContextMatchWordCount += (isInContextMatch) ? w
+                            .getInContextMatchWordCount() : w
+                            .getNoUseInContextMatchWordCount();
+                    data.contextMatchWordCount += (isDefaultContextMatch) ? w
+                            .getContextMatchWordCount() : 0;
+                    data.dellExactMatchWordCount = data.segmentTmWordCount;
+                    data.dellInContextMatchWordCount = data.inContextMatchWordCount;
+                    data.trados100WordCount = data.dellExactMatchWordCount;
+                    data.tradosInContextWordCount = data.inContextMatchWordCount;
+                    data.tradosContextWordCount = data.contextMatchWordCount;
+
+                    // data.contextMatchWordCount +=
+                    // w.getContextMatchWordCount();
+                    data.totalWordCount += w.getTotalWordCount();
+
+                    data.dellTotalWordCount = w.getTotalWordCount();
+
+                    data.tradosTotalWordCount = data.trados100WordCount
+                            + data.tradosInContextWordCount
+                            + data.tradosContextWordCount
+                            + data.trados95to99WordCount
+                            + data.trados85to94WordCount
+                            + data.trados75to84WordCount
+                            + data.trados50to74WordCount
+                            + data.tradosRepsWordCount
+                            + data.tradosNoMatchWordCount;
+
+                    // Counts the total cost for dell activities in the same
+                    // workflow.
+                    // It's possible that existing mutiple activities with name
+                    // "REPORT_ACTIVITY".
+                    CostByWordCount dellReivewCostByWordCount = ServerProxy
+                            .getCostingEngine()
+                            .calculateCost(dellReviewActivity, pivotCurrency,
+                                    p_recalculateFinishedWorkflow, Cost.REVENUE)
+                            .getCostByWordCount();
+
+                    if (dellReivewCostByWordCount != null)
+                    {
+                        // repetition costs for activity "REPORT_ACTIVITY"
+                        data.repetitionWordCountCostForDellReview = add(
+                                data.repetitionWordCountCostForDellReview,
+                                dellReivewCostByWordCount.getRepetitionCost());
+
+                        data.dellInternalRepsWordCountCostForDellReview = data.repetitionWordCountCostForDellReview;
+                        data.tradosRepsWordCountCostForDellReview = data.repetitionWordCountCostForDellReview;
+
+                        // exact match costs for activity "REPORT_ACTIVITY"
+                        data.contextMatchWordCountCostForDellReview = add(
+                                data.contextMatchWordCountCostForDellReview,
+                                (isDefaultContextMatch) ? dellReivewCostByWordCount
+                                        .getContextMatchCost() : 0);
+
+                        data.inContextMatchWordCountCostForDellReview = add(
+                                data.inContextMatchWordCountCostForDellReview,
+                                (isInContextMatch) ? dellReivewCostByWordCount
+                                        .getInContextMatchCost()
+                                        : dellReivewCostByWordCount
+                                                .getNoUseInContextMatchCost());
+
+                        data.segmentTmWordCountCostForDellReview = add(
+                                data.segmentTmWordCountCostForDellReview,
+                                (isInContextMatch) ? dellReivewCostByWordCount
+                                        .getSegmentTmMatchCost()
+                                        : (isDefaultContextMatch) ? dellReivewCostByWordCount
+                                                .getDefaultContextExactMatchCost()
+                                                : dellReivewCostByWordCount
+                                                        .getNoUseExactMatchCost());
+
+                        data.dellExactMatchWordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
+                        data.trados100WordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
+
+                        data.dellInContextMatchWordCountCostForDellReview = data.inContextMatchWordCountCostForDellReview;
+                        data.dellContextMatchWordCountCostForDellReview = data.contextMatchWordCountCostForDellReview;
+                        data.tradosInContextWordCountCostForDellReview = data.inContextMatchWordCountCostForDellReview;
+                        data.tradosContextWordCountCostForDellReview = data.tradosContextWordCountCostForDellReview;
+                        // fuzzy match costs for activity "REPORT_ACTIVITY"
+                        data.lowFuzzyMatchWordCountCostForDellReview = add(
+                                data.lowFuzzyMatchWordCountCostForDellReview,
+                                dellReivewCostByWordCount
+                                        .getLowFuzzyMatchCost());
+
+                        data.medFuzzyMatchWordCountCostForDellReview = add(
+                                data.medFuzzyMatchWordCountCostForDellReview,
+                                dellReivewCostByWordCount
+                                        .getMedFuzzyMatchCost());
+
+                        data.medHiFuzzyMatchWordCountCostForDellReview = add(
+                                data.medHiFuzzyMatchWordCountCostForDellReview,
+                                dellReivewCostByWordCount
+                                        .getMedHiFuzzyMatchCost());
+
+                        data.hiFuzzyMatchWordCountCostForDellReview = add(
+                                data.hiFuzzyMatchWordCountCostForDellReview,
+                                dellReivewCostByWordCount.getHiFuzzyMatchCost());
+
+                        // Dell fuzzy match cost is the sum of the top three
+                        // fuzzy
+                        // match categories
+                        data.dellFuzzyMatchWordCountCostForDellReview = data.medFuzzyMatchWordCountCostForDellReview
+                                .add(data.medHiFuzzyMatchWordCountCostForDellReview)
+                                .add(data.hiFuzzyMatchWordCountCostForDellReview);
+
+                        // Trados breakdown for fuzzy for activity
+                        // "REPORT_ACTIVITY"
+                        data.trados95to99WordCountCostForDellReview = data.hiFuzzyMatchWordCountCostForDellReview;
+
+                        data.trados75to94WordCountCostForDellReview = data.medFuzzyMatchWordCountCostForDellReview
+                                .add(data.medHiFuzzyMatchWordCountCostForDellReview);
+
+                        data.trados1to74WordCountCostForDellReview = data.lowFuzzyMatchWordCountCostForDellReview;
+
+                        // new words, no match costs for activity
+                        // "REPORT_ACTIVITY"
+                        data.noMatchWordCountCostForDellReview = add(
+                                data.noMatchWordCountCostForDellReview,
+                                dellReivewCostByWordCount.getNoMatchCost());
+
+                        data.tradosNoMatchWordCountCostForDellReview = data.noMatchWordCountCostForDellReview;
+                        data.dellNewWordsWordCountCostForDellReview = data.noMatchWordCountCostForDellReview
+                                .add(data.lowFuzzyMatchWordCountCostForDellReview);
+
+                        // Cost totals for activity "REPORT_ACTIVITY"
+                        data.dellTotalWordCountCostForDellReview = data.dellInternalRepsWordCountCostForDellReview
+                                .add(data.dellExactMatchWordCountCostForDellReview)
+                                .add(data.dellInContextMatchWordCountCostForDellReview)
+                                .add(data.dellContextMatchWordCountCostForDellReview)
+                                .add(data.dellFuzzyMatchWordCountCostForDellReview)
+                                .add(data.dellNewWordsWordCountCostForDellReview);
+
+                        data.tradosTotalWordCountCostForDellReview = data.trados100WordCountCostForDellReview
+                                .add(data.tradosInContextWordCountCostForDellReview)
+                                .add(data.tradosContextWordCountCostForDellReview)
+                                .add(data.trados95to99WordCountCostForDellReview)
+                                .add(data.trados75to94WordCountCostForDellReview)
+                                .add(data.trados1to74WordCountCostForDellReview)
+                                .add(data.tradosRepsWordCountCostForDellReview)
+                                .add(data.tradosNoMatchWordCountCostForDellReview);
+                    }
+
+                    Cost wfCost = ServerProxy.getCostingEngine().calculateCost(
+                            w, pivotCurrency, p_recalculateFinishedWorkflow,
+                            Cost.REVENUE, p_recalculateFinishedWorkflow);
+
+                    CostByWordCount costByWordCount = wfCost
+                            .getCostByWordCount();
+                    if (costByWordCount != null)
+                    {
+                        // repetition costs
+                        data.repetitionWordCountCost = add(
+                                data.repetitionWordCountCost,
+                                costByWordCount.getRepetitionCost());
+
+                        data.dellInternalRepsWordCountCost = data.repetitionWordCountCost;
+                        data.tradosRepsWordCountCost = data.repetitionWordCountCost;
+
+                        // exact match costs
+                        data.contextMatchWordCountCost = add(
+                                data.contextMatchWordCountCost,
+                                (isDefaultContextMatch) ? costByWordCount
+                                        .getContextMatchCost() : 0);
+
+                        data.inContextMatchWordCountCost = add(
+                                data.inContextMatchWordCountCost,
+                                (isInContextMatch) ? costByWordCount
+                                        .getInContextMatchCost()
+                                        : costByWordCount
+                                                .getNoUseInContextMatchCost());
+
+                        data.segmentTmWordCountCost = add(
+                                data.segmentTmWordCountCost,
+                                (isInContextMatch) ? costByWordCount
+                                        .getSegmentTmMatchCost()
+                                        : (isDefaultContextMatch) ? costByWordCount
+                                                .getDefaultContextExactMatchCost()
+                                                : costByWordCount
+                                                        .getNoUseExactMatchCost());
+
+                        data.dellExactMatchWordCountCost = data.segmentTmWordCountCost;
+                        data.trados100WordCountCost = data.segmentTmWordCountCost;
+
+                        data.dellInContextMatchWordCountCost = data.inContextMatchWordCountCost;
+                        data.dellContextMatchWordCountCost = data.contextMatchWordCountCost;
+                        data.tradosInContextWordCountCost = data.inContextMatchWordCountCost;
+                        data.tradosContextWordCountCost = data.contextMatchWordCountCost;
+
+                        // fuzzy match costs
+                        data.lowFuzzyMatchWordCountCost = add(
+                                data.lowFuzzyMatchWordCountCost,
+                                costByWordCount.getLowFuzzyMatchCost());
+
+                        data.medFuzzyMatchWordCountCost = add(
+                                data.medFuzzyMatchWordCountCost,
+                                costByWordCount.getMedFuzzyMatchCost());
+
+                        data.medHiFuzzyMatchWordCountCost = add(
+                                data.medHiFuzzyMatchWordCountCost,
+                                costByWordCount.getMedHiFuzzyMatchCost());
+
+                        data.hiFuzzyMatchWordCountCost = add(
+                                data.hiFuzzyMatchWordCountCost,
+                                costByWordCount.getHiFuzzyMatchCost());
+
+                        // Dell fuzzy match cost is the sum of the top three
+                        // fuzzy
+                        // match categories
+                        data.dellFuzzyMatchWordCountCost = data.medFuzzyMatchWordCountCost
+                                .add(data.medHiFuzzyMatchWordCountCost).add(
+                                        data.hiFuzzyMatchWordCountCost);
+
+                        // Trados breakdown for fuzzy
+                        data.trados95to99WordCountCost = data.hiFuzzyMatchWordCountCost;
+
+                        data.trados85to94WordCountCost = data.medHiFuzzyMatchWordCountCost;
+
+                        data.trados75to84WordCountCost = data.medFuzzyMatchWordCountCost;
+
+                        data.trados50to74WordCountCost = data.lowFuzzyMatchWordCountCost;
+
+                        // new words, no match costs
+                        data.noMatchWordCountCost = add(
+                                data.noMatchWordCountCost,
+                                costByWordCount.getNoMatchCost());
+
+                        data.tradosNoMatchWordCountCost = data.noMatchWordCountCost;
+
+                        data.dellNewWordsWordCountCost = data.noMatchWordCountCost
+                                .add(data.lowFuzzyMatchWordCountCost);
+
+                        // totals
+                        data.dellTotalWordCountCost = data.dellInternalRepsWordCountCost
+                                .add(data.dellExactMatchWordCountCost)
+                                .add(data.dellInContextMatchWordCountCost)
+                                .add(data.dellContextMatchWordCountCost)
+                                .add(data.dellFuzzyMatchWordCountCost)
+                                .add(data.dellNewWordsWordCountCost);
+
+                        data.totalWordCountCost = data.dellTotalWordCountCost;
+
+                        data.tradosTotalWordCountCost = data.trados100WordCountCost
+                                .add(data.tradosInContextWordCountCost)
+                                .add(data.tradosContextWordCountCost)
+                                .add(data.trados95to99WordCountCost)
+                                .add(data.trados85to94WordCountCost)
+                                .add(data.trados75to84WordCountCost)
+                                .add(data.trados50to74WordCountCost)
+                                .add(data.tradosRepsWordCountCost)
+                                .add(data.tradosNoMatchWordCountCost);
+
+                        // transltion total
+                        data.dellTotalWordCountCostForTranslation = data.dellTotalWordCountCost
+                                .subtract(data.dellTotalWordCountCostForDellReview);
+                        data.tradosTotalWordCountCostForTranslation = data.tradosTotalWordCountCost
+                                .subtract(data.tradosTotalWordCountCostForDellReview);
+                    }
+
                 }
 
-                // get the word count used for costing which incorporates the LMT
-//                WordcountForCosting wfc = new WordcountForCosting(w);
-                
-                // add the sublev rep count to the total rep count
-                data.repetitionWordCount += w.getRepetitionWordCount()
-                            + w.getSubLevRepetitionWordCount()
-                            + w.getHiFuzzyRepetitionWordCount()
-                            + w.getMedFuzzyRepetitionWordCount()
-                            + w.getMedHiFuzzyRepetitionWordCount();
-                data.dellInternalRepsWordCount += w.getRepetitionWordCount() + 
-                                                  w.getSubLevRepetitionWordCount();
-                data.tradosRepsWordCount = data.dellInternalRepsWordCount;
-                data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
-                data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
-                data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
-                data.hiFuzzyMatchWordCount += w.getThresholdHiFuzzyWordCount();
-
-                // the Dell fuzzyMatchWordCount is the sum of the top 3 categories
-                data.dellFuzzyMatchWordCount = data.medFuzzyMatchWordCount + 
-                                               data.medHiFuzzyMatchWordCount + 
-                                               data.hiFuzzyMatchWordCount;
-                data.trados95to99WordCount = data.hiFuzzyMatchWordCount;
-                data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
-                data.trados75to84WordCount = data.medFuzzyMatchWordCount;
-                data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
-
-                // add the lowest fuzzies and sublev match to nomatch
-                data.noMatchWordCount += w.getNoMatchWordCount() + 
-                                         data.lowFuzzyMatchWordCount + 
-                                         w.getSubLevMatchWordCount();
-                data.dellNewWordsWordCount = w.getNoMatchWordCount() + 
-                                             w.getSubLevMatchWordCount();
-                data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
-
-                data.segmentTmWordCount += (isInContextMatch) 
-                    ? w.getSegmentTmWordCount() : (isDefaultContextMatch) 
-                        ? w.getTotalExactMatchWordCount() - w.getContextMatchWordCount() : w.getTotalExactMatchWordCount();
-                data.inContextMatchWordCount += (isInContextMatch) ? w.getInContextMatchWordCount() : w.getNoUseInContextMatchWordCount();
-                data.contextMatchWordCount += (isDefaultContextMatch) ? w.getContextMatchWordCount() : 0;
-                data.dellExactMatchWordCount = data.segmentTmWordCount;
-                data.dellInContextMatchWordCount = data.inContextMatchWordCount;
-                data.trados100WordCount = data.dellExactMatchWordCount;
-                data.tradosInContextWordCount = data.inContextMatchWordCount;
-                data.tradosContextWordCount = data.contextMatchWordCount;
-                
-                //data.contextMatchWordCount += w.getContextMatchWordCount();
-                data.totalWordCount += w.getTotalWordCount();
-
-                data.dellTotalWordCount = w.getTotalWordCount();
-                
-                data.tradosTotalWordCount = data.trados100WordCount + 
-                							data.tradosInContextWordCount + 
-                							data.tradosContextWordCount +
-                                            data.trados95to99WordCount + 
-                                            data.trados85to94WordCount +
-                                            data.trados75to84WordCount+
-                                            data.trados50to74WordCount+
-                                            data.tradosRepsWordCount + 
-                                            data.tradosNoMatchWordCount;
-
-                // Counts the total cost for dell activities in the same workflow. 
-                // It's possible that existing mutiple activities with name "REPORT_ACTIVITY".
-                CostByWordCount dellReivewCostByWordCount = ServerProxy
-                        .getCostingEngine().calculateCost(dellReviewActivity,
-                                pivotCurrency, p_recalculateFinishedWorkflow,
-                                Cost.REVENUE).getCostByWordCount();
-                
-                if (dellReivewCostByWordCount != null)
+                // now recalculate the job level cost if the workflow was
+                // recalculated
+                if (p_recalculateFinishedWorkflow)
                 {
-                    // repetition costs for activity "REPORT_ACTIVITY"
-                    data.repetitionWordCountCostForDellReview = 
-                        add(data.repetitionWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getRepetitionCost());
-                    
-                    data.dellInternalRepsWordCountCostForDellReview = data.repetitionWordCountCostForDellReview;
-                    data.tradosRepsWordCountCostForDellReview = data.repetitionWordCountCostForDellReview;
-
-                    // exact match costs for activity "REPORT_ACTIVITY"
-                    data.contextMatchWordCountCostForDellReview = 
-                        add(data.contextMatchWordCountCostForDellReview,
-                            (isDefaultContextMatch) ? dellReivewCostByWordCount.getContextMatchCost() : 0);
-                    
-                    data.inContextMatchWordCountCostForDellReview =
-                    	add(data.inContextMatchWordCountCostForDellReview,
-                    			(isInContextMatch) ? dellReivewCostByWordCount.getInContextMatchCost():dellReivewCostByWordCount.getNoUseInContextMatchCost());
-                    
-                    data.segmentTmWordCountCostForDellReview = 
-                        add(data.segmentTmWordCountCostForDellReview,
-                            (isInContextMatch) ? dellReivewCostByWordCount.getSegmentTmMatchCost():
-                                (isDefaultContextMatch) ? dellReivewCostByWordCount.getDefaultContextExactMatchCost() : dellReivewCostByWordCount.getNoUseExactMatchCost());
-                    
-                    data.dellExactMatchWordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
-                    data.trados100WordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
-
-                    data.dellInContextMatchWordCountCostForDellReview = data.inContextMatchWordCountCostForDellReview;
-                    data.dellContextMatchWordCountCostForDellReview = data.contextMatchWordCountCostForDellReview;
-                    data.tradosInContextWordCountCostForDellReview = data.inContextMatchWordCountCostForDellReview;
-                    data.tradosContextWordCountCostForDellReview = data.tradosContextWordCountCostForDellReview;
-                    // fuzzy match costs for activity "REPORT_ACTIVITY"
-                    data.lowFuzzyMatchWordCountCostForDellReview = 
-                        add(data.lowFuzzyMatchWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getLowFuzzyMatchCost());
-                    
-                    data.medFuzzyMatchWordCountCostForDellReview = 
-                        add(data.medFuzzyMatchWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getMedFuzzyMatchCost());
-                    
-                    data.medHiFuzzyMatchWordCountCostForDellReview = 
-                        add(data.medHiFuzzyMatchWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getMedHiFuzzyMatchCost());
-                    
-                    data.hiFuzzyMatchWordCountCostForDellReview = 
-                        add(data.hiFuzzyMatchWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getHiFuzzyMatchCost());
-
-                    // Dell fuzzy match cost is the sum of the top three fuzzy
-                    // match categories
-                    data.dellFuzzyMatchWordCountCostForDellReview = 
-                        data.medFuzzyMatchWordCountCostForDellReview
-                            .add(data.medHiFuzzyMatchWordCountCostForDellReview)
-                            .add(data.hiFuzzyMatchWordCountCostForDellReview);
-
-                    // Trados breakdown for fuzzy for activity "REPORT_ACTIVITY"
-                    data.trados95to99WordCountCostForDellReview = 
-                        data.hiFuzzyMatchWordCountCostForDellReview;
-                    
-                    data.trados75to94WordCountCostForDellReview = 
-                        data.medFuzzyMatchWordCountCostForDellReview
-                            .add(data.medHiFuzzyMatchWordCountCostForDellReview);
-                    
-                    data.trados1to74WordCountCostForDellReview = 
-                        data.lowFuzzyMatchWordCountCostForDellReview;
-
-                    // new words, no match costs for activity "REPORT_ACTIVITY"
-                    data.noMatchWordCountCostForDellReview = 
-                        add(data.noMatchWordCountCostForDellReview,
-                            dellReivewCostByWordCount.getNoMatchCost());
-                    
-                    data.tradosNoMatchWordCountCostForDellReview = 
-                        data.noMatchWordCountCostForDellReview;
-                    data.dellNewWordsWordCountCostForDellReview = 
-                        data.noMatchWordCountCostForDellReview
-                            .add(data.lowFuzzyMatchWordCountCostForDellReview);
-                    
-                    // Cost totals for activity "REPORT_ACTIVITY"
-                    data.dellTotalWordCountCostForDellReview = data.dellInternalRepsWordCountCostForDellReview
-                            .add(data.dellExactMatchWordCountCostForDellReview)
-                            .add(data.dellInContextMatchWordCountCostForDellReview)
-                            .add(data.dellContextMatchWordCountCostForDellReview)
-                            .add(data.dellFuzzyMatchWordCountCostForDellReview)
-                            .add(data.dellNewWordsWordCountCostForDellReview);
-                    
-                    data.tradosTotalWordCountCostForDellReview = data.trados100WordCountCostForDellReview
-                    		.add(data.tradosInContextWordCountCostForDellReview)
-                    		.add(data.tradosContextWordCountCostForDellReview)
-                            .add(data.trados95to99WordCountCostForDellReview)
-                            .add(data.trados75to94WordCountCostForDellReview)
-                            .add(data.trados1to74WordCountCostForDellReview)
-                            .add(data.tradosRepsWordCountCostForDellReview)
-                            .add(data.tradosNoMatchWordCountCostForDellReview);
+                    ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency,
+                            Cost.REVENUE);
                 }
 
-                Cost wfCost = ServerProxy.getCostingEngine().calculateCost(w,
-                        pivotCurrency, p_recalculateFinishedWorkflow,
-                        Cost.REVENUE, p_recalculateFinishedWorkflow);
-                
-                CostByWordCount costByWordCount = wfCost.getCostByWordCount();
-                if (costByWordCount != null)
-                {
-                    // repetition costs
-                    data.repetitionWordCountCost = 
-                        add(data.repetitionWordCountCost, 
-                            costByWordCount.getRepetitionCost());
-                    
-                    data.dellInternalRepsWordCountCost = data.repetitionWordCountCost;
-                    data.tradosRepsWordCountCost = data.repetitionWordCountCost;
-
-                    // exact match costs
-                    data.contextMatchWordCountCost = 
-                        add(data.contextMatchWordCountCost, 
-                            (isDefaultContextMatch) ? costByWordCount.getContextMatchCost() : 0);
-                    
-                    data.inContextMatchWordCountCost =
-                    	add(data.inContextMatchWordCountCost, 
-                                (isInContextMatch) ? costByWordCount.getInContextMatchCost():costByWordCount.getNoUseInContextMatchCost());
-                    
-                    data.segmentTmWordCountCost = 
-                        add(data.segmentTmWordCountCost, 
-                        		(isInContextMatch) ? costByWordCount.getSegmentTmMatchCost(): 
-                        		    (isDefaultContextMatch) ? costByWordCount.getDefaultContextExactMatchCost() : costByWordCount.getNoUseExactMatchCost());
-                    
-                    data.dellExactMatchWordCountCost = data.segmentTmWordCountCost;
-                    data.trados100WordCountCost = data.segmentTmWordCountCost;
-
-                    data.dellInContextMatchWordCountCost = data.inContextMatchWordCountCost;
-                    data.dellContextMatchWordCountCost = data.contextMatchWordCountCost;
-                    data.tradosInContextWordCountCost = data.inContextMatchWordCountCost;
-                    data.tradosContextWordCountCost = data.contextMatchWordCountCost;
-                    
-                    // fuzzy match costs
-                    data.lowFuzzyMatchWordCountCost = 
-                        add(data.lowFuzzyMatchWordCountCost, 
-                            costByWordCount.getLowFuzzyMatchCost());
-                    
-                    data.medFuzzyMatchWordCountCost = 
-                        add(data.medFuzzyMatchWordCountCost, 
-                            costByWordCount.getMedFuzzyMatchCost());
-                    
-                    data.medHiFuzzyMatchWordCountCost = 
-                        add(data.medHiFuzzyMatchWordCountCost, 
-                            costByWordCount.getMedHiFuzzyMatchCost());
-                    
-                    data.hiFuzzyMatchWordCountCost = 
-                        add(data.hiFuzzyMatchWordCountCost, 
-                            costByWordCount.getHiFuzzyMatchCost());
-
-                    // Dell fuzzy match cost is the sum of the top three fuzzy
-                    // match categories
-                    data.dellFuzzyMatchWordCountCost = 
-                        data.medFuzzyMatchWordCountCost
-                            .add(data.medHiFuzzyMatchWordCountCost)
-                            .add(data.hiFuzzyMatchWordCountCost);
-
-                    // Trados breakdown for fuzzy
-                    data.trados95to99WordCountCost = data.hiFuzzyMatchWordCountCost;
-                    
-                    data.trados85to94WordCountCost = data.medHiFuzzyMatchWordCountCost;
-                    
-                    data.trados75to84WordCountCost = data.medFuzzyMatchWordCountCost;
-                    
-                    data.trados50to74WordCountCost = data.lowFuzzyMatchWordCountCost;
-
-                    // new words, no match costs
-                    data.noMatchWordCountCost = 
-                        add(data.noMatchWordCountCost, costByWordCount.getNoMatchCost());
-                    
-                    data.tradosNoMatchWordCountCost = data.noMatchWordCountCost;
-                    
-                    data.dellNewWordsWordCountCost = 
-                        data.noMatchWordCountCost
-                        .add(data.lowFuzzyMatchWordCountCost);
-
-                    // totals
-                    data.dellTotalWordCountCost = 
-                        data.dellInternalRepsWordCountCost
-                            .add(data.dellExactMatchWordCountCost)
-                            .add(data.dellInContextMatchWordCountCost)
-                            .add(data.dellContextMatchWordCountCost)
-                            .add(data.dellFuzzyMatchWordCountCost)
-                            .add(data.dellNewWordsWordCountCost);
-                    
-                    data.totalWordCountCost = data.dellTotalWordCountCost;
-                    
-                    data.tradosTotalWordCountCost = 
-                        data.trados100WordCountCost
-                        	.add(data.tradosInContextWordCountCost)
-                        	.add(data.tradosContextWordCountCost)
-                            .add(data.trados95to99WordCountCost)
-                            .add(data.trados85to94WordCountCost)
-                            .add(data.trados75to84WordCountCost)
-                            .add(data.trados50to74WordCountCost)
-                            .add(data.tradosRepsWordCountCost)
-                            .add(data.tradosNoMatchWordCountCost);
-
-                    // transltion total
-                    data.dellTotalWordCountCostForTranslation = 
-                        data.dellTotalWordCountCost
-                            .subtract(data.dellTotalWordCountCostForDellReview);
-                    data.tradosTotalWordCountCostForTranslation = 
-                        data.tradosTotalWordCountCost
-                            .subtract(data.tradosTotalWordCountCostForDellReview);
-                }
-
-            }
-            
-            // now recalculate the job level cost if the workflow was
-            // recalculated
-            if (p_recalculateFinishedWorkflow)
-            {
-                ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency,
-                        Cost.REVENUE);
-            }
-            
             }
         }
-        
+
         reportData.projectMap = projectMap;
+        reportData.jobIdList = new ArrayList(projectMap.keySet());
     }
-    
-    /* ----------------------------------------------------------------------
-     * Below are helper methods  
-     * ---------------------------------------------------------------------- */
-    
+
+    /*
+     * ----------------------------------------------------------------------
+     * Below are helper methods
+     * ----------------------------------------------------------------------
+     */
+
     /**
      * Opens up the file "jobsInWrongDivision.txt" and returns only the jobs
      * that should be mapped to the requested projects
@@ -597,47 +631,50 @@ public class ReviewerVendorPoReportDataAssembler
     private void setWrongJobsHelper() throws Exception
     {
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        StringBuffer mapFile = 
-            new StringBuffer(sc.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY));
-        
+        StringBuffer mapFile = new StringBuffer(
+                sc.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY));
+
         mapFile.append(File.separator);
         mapFile.append("jobsInWrongDivision.txt");
-        
+
         File f = new File(mapFile.toString());
         if (!f.exists())
         {
             s_logger.warn("jobsInWrongDivision.txt file not found.");
             return;
         }
-        
+
         BufferedReader reader = new BufferedReader(new FileReader(f));
         String line = null;
 
         while ((line = reader.readLine()) != null)
         {
-            if (line.startsWith("#") || line.length() == 0) continue;
-            
+            if (line.startsWith("#") || line.length() == 0)
+                continue;
+
             String jobname = null;
             String projectname = null;
-            
+
             try
             {
                 // the format is jobname = projectname
                 String[] tokens = line.split("=");
                 jobname = tokens[0].trim();
                 projectname = tokens[1].trim();
-                
-                Project p = ServerProxy.getProjectHandler().getProjectByName(projectname);
+
+                Project p = ServerProxy.getProjectHandler().getProjectByName(
+                        projectname);
                 Long newProjectId = p.getIdAsLong();
 
                 // ISSUE: If two jobs have the same name, it goes wrong.
                 JobSearchParameters sp = new JobSearchParameters();
                 sp.setJobName(jobname);
-                ArrayList jobs = new ArrayList(ServerProxy.getJobHandler().getJobs(sp));
+                ArrayList jobs = new ArrayList(ServerProxy.getJobHandler()
+                        .getJobs(sp));
                 Job j = (Job) jobs.get(0);
 
-                if (! (reportData.wantsAllProjects || 
-                       reportData.projectIdList.contains(newProjectId)))
+                if (!(reportData.wantsAllProjects || reportData.projectIdList
+                        .contains(newProjectId)))
                 {
                     reportData.ignoreJobs.add(j);
                     continue;
@@ -647,9 +684,10 @@ public class ReviewerVendorPoReportDataAssembler
                 // are reporting on, then skip it as well
                 // if the project id list contains the old project but not the
                 // new project
-                Long oldProjectId = j.getL10nProfile().getProject().getIdAsLong();
-                if (reportData.projectIdList.contains(oldProjectId) && 
-                    !reportData.projectIdList.contains(newProjectId))
+                Long oldProjectId = j.getL10nProfile().getProject()
+                        .getIdAsLong();
+                if (reportData.projectIdList.contains(oldProjectId)
+                        && !reportData.projectIdList.contains(newProjectId))
                 {
                     reportData.ignoreJobs.add(j);
                     continue;
@@ -661,14 +699,17 @@ public class ReviewerVendorPoReportDataAssembler
             }
             catch (Exception e)
             {
-                s_logger.warn("Ignoring mapping line for " + jobname + " => " + projectname
-                                + ". Either the job doesn't exist, the project doesn't exist, or both.");
+                s_logger.warn("Ignoring mapping line for "
+                        + jobname
+                        + " => "
+                        + projectname
+                        + ". Either the job doesn't exist, the project doesn't exist, or both.");
             }
         }
-        
+
         reader.close();
     }
-    
+
     /**
      * Returns search params used to find the jobs based on state
      * (READY,EXPORTED,LOCALIZED,DISPATCHED), and creation date during the range
@@ -691,25 +732,25 @@ public class ReviewerVendorPoReportDataAssembler
         list.add(Job.EXPORTED);
         sp.setJobState(list);
 
-        String paramCreateDateStartCount = 
-            request.getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = 
-            request.getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (! "-1".equals(paramCreateDateStartOpts))
+        String paramCreateDateStartCount = request
+                .getParameter(JobSearchConstants.CREATION_START);
+        String paramCreateDateStartOpts = request
+                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
+        if (!"-1".equals(paramCreateDateStartOpts))
         {
             sp.setCreationStart(new Integer(paramCreateDateStartCount));
             sp.setCreationStartCondition(paramCreateDateStartOpts);
         }
 
-        String paramCreateDateEndCount = 
-            request.getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = 
-            request.getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+        String paramCreateDateEndCount = request
+                .getParameter(JobSearchConstants.CREATION_END);
+        String paramCreateDateEndOpts = request
+                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
         if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
         {
             sp.setCreationEnd(new java.util.Date());
         }
-        else if (! "-1".equals(paramCreateDateEndOpts))
+        else if (!"-1".equals(paramCreateDateEndOpts))
         {
             sp.setCreationEnd(new Integer(paramCreateDateEndCount));
             sp.setCreationEndCondition(paramCreateDateEndOpts);
@@ -717,9 +758,8 @@ public class ReviewerVendorPoReportDataAssembler
 
         return sp;
     }
-    
-    
-    // returns jobs in the specified criteria date range     
+
+    // returns jobs in the specified criteria date range
     private ArrayList getWrongJobs()
     {
         ArrayList wrongJobs = new ArrayList();
@@ -730,17 +770,19 @@ public class ReviewerVendorPoReportDataAssembler
             Job j = (Job) iter.next();
             cal.setTime(j.getCreateDate());
 
-            //check the job's time against the search criteria
+            // check the job's time against the search criteria
             wrongJobs.add(j);
         }
         return wrongJobs;
     }
-    
+
     // Get project description
     private String getProjectDesc(Job p_job)
     {
-        Project p = (Project) reportData.wrongJobMap.get(new Long(p_job.getId()));
-        if (p == null) p = p_job.getL10nProfile().getProject();
+        Project p = (Project) reportData.wrongJobMap
+                .get(new Long(p_job.getId()));
+        if (p == null)
+            p = p_job.getL10nProfile().getProject();
         String d = p.getDescription();
         String desc = null;
         if (d == null || d.length() == 0)
@@ -760,24 +802,29 @@ public class ReviewerVendorPoReportDataAssembler
     {
         String floatString = Float.toString(p_f);
         BigDecimal bd = new BigDecimal(floatString);
-        BigDecimal sbd = bd.setScale(ProjectWorkflowData.SCALE, BigDecimal.ROUND_HALF_UP);
+        BigDecimal sbd = bd.setScale(ProjectWorkflowData.SCALE,
+                BigDecimal.ROUND_HALF_UP);
         return p_a.add(sbd);
     }
-    
-    private String[] getHeaders(Iterator iter) {
-    	String[] headers = new String[2];
-    	while(iter.hasNext()){
-    		Job job = (Job)iter.next();
-//    		TranslationMemoryProfile tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
-    		if(PageHandler.isInContextMatch(job)){
-    			//hava tm profile contains in context match
-    			headers[0] = "In Context Match";
-    		}
-    		if(PageHandler.isDefaultContextMatch(job))
-    		{
-    		    headers[1] = "Context Match";
-    		}
-    	}
-    	return headers;
-	}
+
+    private String[] getHeaders(Iterator iter)
+    {
+        String[] headers = new String[2];
+        while (iter.hasNext())
+        {
+            Job job = (Job) iter.next();
+            // TranslationMemoryProfile tmProfile =
+            // job.getL10nProfile().getTranslationMemoryProfile();
+            if (PageHandler.isInContextMatch(job))
+            {
+                // hava tm profile contains in context match
+                headers[0] = "In Context Match";
+            }
+            if (PageHandler.isDefaultContextMatch(job))
+            {
+                headers[1] = "Context Match";
+            }
+        }
+        return headers;
+    }
 }

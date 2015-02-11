@@ -60,7 +60,7 @@ public class WordFilterTest extends BaseTestCase {
 		selenium.click(MainFrame.FILE_PROFILES_SUBMENU);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		SeleniumUtils.selectRadioButtonFromTable(selenium, FileProfile.MAIN_TABLE, fp[0]);
-		selenium.click(FileProfile.EDIT_BUTTON);
+		selenium.click("link=" + fp[0]);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		selenium.select(FileProfile.FILTER_SELECT, "label=" + wFilterName);
 		selenium.click(FileProfile.SAVE_BUTTON);
@@ -122,7 +122,7 @@ public class WordFilterTest extends BaseTestCase {
 			tmp.createJob(filterJob + i, ConfigUtil.getDataInCase(getClassName(), "SourceFile"),
 					ConfigUtil.getDataInCase(getClassName(), "fileProfileNamesStr"),
 					ConfigUtil.getDataInCase(getClassName(), "targetLocales"));
-			Thread.sleep(60000);
+			Thread.sleep(1000);
 			jobNames[i] = filterJob + i;
 
 		}

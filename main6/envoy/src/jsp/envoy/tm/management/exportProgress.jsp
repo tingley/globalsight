@@ -80,18 +80,18 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 #idLinks A:visited      { color: blue; text-decoration: none; }
 #tmxLogo       { position: absolute; left: 20; top: 310; width: 400; z-index: 1; }
 </STYLE>
-<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<%@ include file="/includes/compatibility.jspIncl" %>
-<SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT SRC="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/includes/library.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
 var objectName = "";
 var guideNode = "tm";
 var helpFile = "<%=bundle.getString("help_tm_exportprogress")%>";
-var xmlExportOptions = "<%=xmlExportOptions.trim()%>";
+var xmlExportOptions = "<%=xmlExportOptions.replace("\n","").replace("\r","").trim()%>";
 
 var WIDTH = 400;
 
@@ -121,18 +121,22 @@ function showMessage(message)
     // div.scrollIntoView(false);
 }
 
+// Show Progress Bar.
 function showProgress(entryCount, percentage, message)
 {
-  document.getElementById("idProgress").innerHTML = 
-	  entryCount.toString(10) + " <%=bundle.getString("lb_entries").toLowerCase() %> (" +
-    percentage.toString(10) + "%)";
+  $("#idProgress").html(entryCount.toString(10) + " <%=bundle.getString("lb_entries").toLowerCase() %> (" 
+		  + percentage.toString(10) + "%)");
 
-  idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
+  $("#idProgressBar").width(Math.round((percentage / 100) * WIDTH));
+  if(!$.browser.msie)
   {
-    idProgressBar.style.height = '17px';
-	idProgressBar.style.border = "0";
-	idProgressBar.style.width = parseInt(idProgressBar.style.width) + 2;
+	$("#idProgressBar").width($("#idProgressBar").width() + 2);
+	$("#idProgressBar").css({height:'17px', border:'0'});
+  }
+  else if ($.browser.version > 9) // IE 10 Version
+  {
+	$("#idProgressBar").width($("#idProgressBar").width() + 2);
+	$("#idProgressBar").css({height:'16px', border:'0'});
   }
   
   if (message != null && message != "")
@@ -143,27 +147,14 @@ function showProgress(entryCount, percentage, message)
 
 function parseExportOptions()
 {
-  var dom;
-  if(window.navigator.userAgent.indexOf("MSIE")>0)
-  {
-    dom = oExportOptions.XMLDocument;
-  }
-  else if(window.DOMParser)
-  { 
-    var parser = new DOMParser();
-    dom = parser.parseFromString(xmlExportOptions,"text/xml");
-  }
-  
-  var node = dom.selectSingleNode("/exportOptions/fileOptions");
-  g_filename = node.selectSingleNode("fileName").text;
-
+  var $xml = $( $.parseXML( xmlExportOptions ) );
+  g_filename = $xml.find("exportOptions > fileOptions > fileName").text();
   document.getElementById("idExportfile").href =
     "/globalsight/exports?file=" + g_filename;
 }
 
 function downloadFile()
 {
-  // window.open('/exports?file=' + g_filename + '&zip=true', '_blank');
   document.getElementById("idDownload").src = 
 	  '/globalsight/exports?file=' + g_filename +'&zip=true';
 }
@@ -202,7 +193,7 @@ function doContextMenu()
 
 function doOk()
 {
-    window.navigate("<%=urlOk%>");
+	window.location.href = "<%=urlOk%>";
 }
 
 function doCancel()
@@ -240,8 +231,6 @@ function doOnLoad()
  onload="doOnLoad()">
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-
-<XML id="oExportOptions"><%=xmlExportOptions%></XML>
 
 <DIV  ID="contentLayer"
  STYLE=" POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 108px; LEFT: 20px; RIGHT: 20px;">

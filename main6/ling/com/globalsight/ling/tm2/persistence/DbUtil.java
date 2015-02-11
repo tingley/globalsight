@@ -41,8 +41,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class DbUtil
 {
-    private static final Logger c_logger = Logger
-            .getLogger(DbUtil.class);
+    private static final Logger c_logger = Logger.getLogger(DbUtil.class);
 
     // maximum element number ARRAY can carry is 4095, not 4096.
     static public final int MAX_ELEM = 4095;
@@ -58,6 +57,8 @@ public class DbUtil
     static private PersistenceService s_persistence = null;
 
     public static int BATCH_INSERT_UNIT = getBatchInsertUnit();
+
+    private static final String SQL_QUERY_TABLE = "show tables like ?";
 
     private static int getBatchInsertUnit()
     {
@@ -101,9 +102,10 @@ public class DbUtil
     {
         try
         {
-        	if (p_connection != null) {
-                returnConnection(p_connection);        		
-        	}
+            if (p_connection != null)
+            {
+                returnConnection(p_connection);
+            }
         }
         catch (Exception e)
         {
@@ -131,7 +133,7 @@ public class DbUtil
     {
         ConnectionPool.silentClose(p_statement);
     }
-    
+
     public static void silentClose(Statement p_statement)
     {
         ConnectionPool.silentClose(p_statement);
@@ -285,7 +287,8 @@ public class DbUtil
         catch (SQLException e)
         {
             // try to lock again.
-        	c_logger.warn("Try to lock again for 'Lock wait timeout', sql is " + sql);
+            c_logger.warn("Try to lock again for 'Lock wait timeout', sql is "
+                    + sql);
             if (e.getMessage().indexOf("Lock wait timeout") > -1)
             {
                 execute(p_connection, sql, args);
@@ -325,7 +328,7 @@ public class DbUtil
             silentClose(stmt);
             returnConnection(conn);
         }
-        
+
         return result;
     }
 
@@ -337,12 +340,13 @@ public class DbUtil
      *            Collection of locales (GlobalSightLocale)
      * @return in clause string shown above.
      */
-    public static String createLocaleInClause(Collection p_locales)
+    public static String createLocaleInClause(
+            Collection<GlobalSightLocale> p_locales)
     {
         StringBuffer sf = new StringBuffer();
         sf.append("(");
 
-        Iterator it = p_locales.iterator();
+        Iterator<GlobalSightLocale> it = p_locales.iterator();
         while (it.hasNext())
         {
             GlobalSightLocale locale = (GlobalSightLocale) it.next();
@@ -410,5 +414,64 @@ public class DbUtil
         sb.append(")");
 
         return sb.toString();
+    }
+
+    /**
+     * Check if the specified table is existed.
+     * 
+     * @param p_tableName
+     */
+    public static boolean isTableExisted(String p_tableName)
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            return isTableExisted(conn, p_tableName);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error when check table exists.", e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the specified table is existed.
+     * 
+     * @param p_connection
+     * @param p_tableName
+     */
+    public static boolean isTableExisted(Connection p_connection,
+            String p_tableName)
+    {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            ps = p_connection.prepareStatement(SQL_QUERY_TABLE);
+            ps.setString(1, p_tableName);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error when check table exists.", e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+        }
+
+        return false;
     }
 }

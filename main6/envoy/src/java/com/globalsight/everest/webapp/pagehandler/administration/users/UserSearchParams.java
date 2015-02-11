@@ -23,9 +23,14 @@ import java.util.Vector;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+
+import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.usermgr.RoleLdapHelper;
 import com.globalsight.everest.usermgr.UserLdapHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class UserSearchParams implements Serializable
 {
@@ -72,6 +77,17 @@ public class UserSearchParams implements Serializable
     {
         // empty constructor.
     }
+    
+//    public void get()
+//    {
+//    	Session session = HibernateUtil.getSession();
+//    	Criteria c = session.createCriteria(UserImpl.class);
+//    	if (idName != null)
+//    	{
+//    		c.add(Restrictions.)
+//    	}
+//    	
+//    }
 
     /**
      * Constructs an array of Attribute objects based on the values currently
@@ -182,47 +198,47 @@ public class UserSearchParams implements Serializable
         }
     }
 
-    /**
-     * Constructs an array of Attribute objects based on the values currently
-     * stored in the sourceLocale and targetLocale members.
-     * 
-     * @return An array of Attributes containing search criteria for the locale
-     *         members.
-     */
-    public Attribute[] getRoleAttributes()
-    {
-
-        Vector vAttrs = new Vector();
-
-        if (m_sourceLocaleParam != null
-                && !(m_sourceLocaleParam.trim().equalsIgnoreCase("")))
-        {
-            Attribute sourceLocaleAttr = new BasicAttribute(
-                    RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, m_sourceLocaleParam);
-            vAttrs.addElement(sourceLocaleAttr);
-        }
-
-        if (m_targetLocaleParam != null
-                && !(m_targetLocaleParam.trim().equalsIgnoreCase("")))
-        {
-            Attribute targetLocaleAttr = new BasicAttribute(
-                    RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, m_targetLocaleParam);
-            vAttrs.addElement(targetLocaleAttr);
-        }
-
-        if (vAttrs.isEmpty())
-        {
-            return null;
-        }
-
-        Attribute[] attrs = new BasicAttribute[vAttrs.size()];
-        for (int i = 0; i < vAttrs.size(); i++)
-        {
-            attrs[i] = (Attribute) vAttrs.elementAt(i);
-        }
-       
-        return attrs;
-    }
+//    /**
+//     * Constructs an array of Attribute objects based on the values currently
+//     * stored in the sourceLocale and targetLocale members.
+//     * 
+//     * @return An array of Attributes containing search criteria for the locale
+//     *         members.
+//     */
+//    public Attribute[] getRoleAttributes()
+//    {
+//
+//        Vector vAttrs = new Vector();
+//
+//        if (m_sourceLocaleParam != null
+//                && !(m_sourceLocaleParam.trim().equalsIgnoreCase("")))
+//        {
+//            Attribute sourceLocaleAttr = new BasicAttribute(
+//                    RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, m_sourceLocaleParam);
+//            vAttrs.addElement(sourceLocaleAttr);
+//        }
+//
+//        if (m_targetLocaleParam != null
+//                && !(m_targetLocaleParam.trim().equalsIgnoreCase("")))
+//        {
+//            Attribute targetLocaleAttr = new BasicAttribute(
+//                    RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, m_targetLocaleParam);
+//            vAttrs.addElement(targetLocaleAttr);
+//        }
+//
+//        if (vAttrs.isEmpty())
+//        {
+//            return null;
+//        }
+//
+//        Attribute[] attrs = new BasicAttribute[vAttrs.size()];
+//        for (int i = 0; i < vAttrs.size(); i++)
+//        {
+//            attrs[i] = (Attribute) vAttrs.elementAt(i);
+//        }
+//       
+//        return attrs;
+//    }
     
     /**
      * Performs validation on the search parameters.

@@ -30,6 +30,7 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoExportSearcher;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
 
@@ -134,15 +135,10 @@ public class JobControlExportedHandler
         jobStates.add(Job.EXPORT_FAIL);
         p_request.setAttribute(JobManagementHandler.EXPORT_URL_PARAM, ((NavigationBean)beanMap.get(EXPORT_BEAN)).getPageURL());
         p_request.setAttribute(JobManagementHandler.JOB_ID, JobManagementHandler.JOB_ID);
-        p_request.
-            setAttribute(JOB_SCRIPTLET,
-                         getJobText(p_request,
-                                    ((NavigationBean)beanMap.get(BASE_BEAN)).getPageURL(),
-                                    ((NavigationBean)beanMap.get(MODIFY_BEAN)).getPageURL(),
-                                    ((NavigationBean)beanMap.get(DETAILS_BEAN)).getPageURL(),
-                                    ((NavigationBean)beanMap.get(PLANNED_COMPLETION_DATE_BEAN)).getPageURL(),
-                                    getExpJobListing(p_request),
-                                    jobStates, false, true));
+        
+        JobVoExportSearcher searcher = new JobVoExportSearcher();
+        searcher.setJobVos(p_request);
+        
         p_request.setAttribute(JOB_LIST_START_PARAM, 
                                p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(PAGING_SCRIPTLET, 

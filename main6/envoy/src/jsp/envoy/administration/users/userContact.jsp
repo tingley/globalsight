@@ -32,7 +32,7 @@
     SessionManager sessionMgr = (SessionManager)
              session.getAttribute(WebAppConstants.SESSION_MANAGER);
     ResourceBundle bundle = PageHandler.getBundle(session);   
-     
+    PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
     String saveURL = done.getPageURL() + "&" + WebAppConstants.USER_ACTION +
               "=" + WebAppConstants.USER_ACTION_MODIFY_USER_CONTACT;
     String prevURL = prev.getPageURL() + "&action=previous";
@@ -93,13 +93,13 @@
         wrapper = (CreateUserWrapper)
              sessionMgr.getAttribute(WebAppConstants.CREATE_USER_WRAPPER);
     } 
-    String homePhone = wrapper.getPhoneNumber(User.PhoneType.HOME);
+    String homePhone = wrapper.getHomePhoneNumber();
     if (homePhone == null||"null".equals(homePhone)) homePhone = "";
-    String workPhone = wrapper.getPhoneNumber(User.PhoneType.OFFICE);
+    String workPhone = wrapper.getOfficePhoneNumber();
     if (workPhone == null||"null".equals(workPhone)) workPhone = "";
-    String cellPhone = wrapper.getPhoneNumber(User.PhoneType.CELL);
+    String cellPhone = wrapper.getCellPhoneNumber();
     if (cellPhone == null||"null".equals(cellPhone)) cellPhone = "";
-    String fax = wrapper.getPhoneNumber(User.PhoneType.FAX);
+    String fax = wrapper.getFaxPhoneNumber();
     if (fax == null||"null".equals(fax)) fax = "";
     String address = wrapper.getAddress();
     if (address == null||"null".equals(address)) address = "";
@@ -162,6 +162,16 @@ function submitForm(btnName) {
 
 function confirmForm(formSent)
 {
+	if (formSent.address)
+	{
+		var address = formSent.address.value;
+		if (address.length > 1000)
+		{
+			alert("Please enter an address that the length less than 1000");
+			return false;
+		}
+	}
+	
 	if (formSent.homePhone)
 	{
 		var theHomephone = formSent.homePhone.value;
@@ -172,6 +182,7 @@ function confirmForm(formSent)
             return false;
 		}
 	}
+	
 	if (formSent.workPhone)
 	{
 		var theWorkPhone = formSent.workPhone.value;
@@ -354,14 +365,16 @@ function isValidEmail(mail,msg)
             <% } %>
             :</TD>
             <TD >
-            <amb:textfield  size="40" name="email" value="<%= email %>" access='<%=(String)hash.get(UserSecureFields.EMAIL_ADDRESS)%>' />
+        
+		    <INPUT TYPE='text' maxlength="1000" SIZE='40' NAME='email' VALUE='<%=email%>' >
+         
             </TD>
         </TR>
         <amb:permission  name="<%=Permission.USERS_ACCESS_CCEMAIL%>" >
 	        <TR>
 	        	<TD VALIGN="TOP"><%= lbccEmail %>:</TD>
 	        	<TD>
-	        	<amb:textfield  size="40" name="ccEmail" value="<%= ccEmail %>" access='<%=(String)hash.get(UserSecureFields.CC_EMAIL_ADDRESS)%>' />
+	        	<amb:textfield maxlength="1000" size="40" name="ccEmail" value="<%= ccEmail %>" access='<%=(String)hash.get(UserSecureFields.CC_EMAIL_ADDRESS)%>' />
 	        	</TD>
 	        </TR>
         </amb:permission>
@@ -369,7 +382,7 @@ function isValidEmail(mail,msg)
 	        <TR>
 	        	<TD VALIGN="TOP"><%= lbbccEmail %>:</TD>
 	        	<TD>
-	        	<amb:textfield  size="40" name="bccEmail" value="<%= bccEmail %>" access='<%=(String)hash.get(UserSecureFields.BCC_EMAIL_ADDRESS)%>' />
+	        	<amb:textfield maxlength="1000" size="40" name="bccEmail" value="<%= bccEmail %>" access='<%=(String)hash.get(UserSecureFields.BCC_EMAIL_ADDRESS)%>' />
 	        	</TD>
 	        </TR>
         </amb:permission>

@@ -489,7 +489,7 @@ $(document).ready(function() {
 				            out.println(" selected ");
 				        }
 				        
-				        if (attribute.getCompanyId().equals(CompanyWrapper.SUPER_COMPANY_ID))
+				        if (1 == attribute.getCompanyId())
 				        {
 				            out.println(" class=\"superAttribute\" ");
 				        }

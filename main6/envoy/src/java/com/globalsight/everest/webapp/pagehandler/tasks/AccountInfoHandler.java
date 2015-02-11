@@ -179,10 +179,10 @@ public class AccountInfoHandler extends PageHandler
             p_request.getParameter("uiLocale"));
 
         user.setAddress(address);
-        user.setPhoneNumber(User.PhoneType.HOME, homePhone);
-        user.setPhoneNumber(User.PhoneType.OFFICE, workPhone);
-        user.setPhoneNumber(User.PhoneType.CELL, cellPhone);
-        user.setPhoneNumber(User.PhoneType.FAX, fax);
+        user.setHomePhoneNumber(homePhone);
+        user.setOfficePhoneNumber(workPhone);
+        user.setCellPhoneNumber(cellPhone);
+        user.setFaxPhoneNumber(fax);
         user.setEmail(email);
         user.setCCEmail(ccEmail);
         user.setBCCEmail(bccEmail);

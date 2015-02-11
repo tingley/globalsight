@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 
 import java.rmi.RemoteException;
@@ -11,8 +27,6 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hibernate.Session;
-
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -25,7 +39,6 @@ import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
 
@@ -165,20 +178,15 @@ public class TMSearchAddEntryHandlerHelper
         Set<GlobalSightLocale> targetLocales = Collections
                 .singleton(targetLocale);
 
-        Session session = TmUtil.getStableSession();
         try
         {
             // Save the new TU
-            tm.getSegmentTmInfo().saveToSegmentTm(session, tus, sourceLocale,
-                    tm, targetLocales, TmCoreManager.SYNC_MERGE, false);
+            tm.getSegmentTmInfo().saveToSegmentTm(tus, sourceLocale, tm,
+                    targetLocales, TmCoreManager.SYNC_MERGE, false);
         }
         catch (Exception e)
         {
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
         }
 
         return "save";

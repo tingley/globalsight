@@ -42,6 +42,7 @@ public class DelayedExportRequest
     private String m_exportLocation;
     private String m_localeSubDir;
     private int m_bomType;
+    private int m_xlfSrcAsTrg;
 
     // boolean to know the content of m_pageIds
     private boolean m_isTargetPage = false;
@@ -80,6 +81,7 @@ public class DelayedExportRequest
         m_exportLocation = p_exportParams.getExportLocation();
         m_localeSubDir = p_exportParams.getLocaleSubDir();
         m_bomType = p_exportParams.getBOMType();
+        m_xlfSrcAsTrg = p_exportParams.getXlfSrcAsTrg();
         m_jobId = p_jobId;
         m_isTargetPage = p_isTargetPage;
         m_exportingUserId = p_exportingUser.getUserId();
@@ -108,9 +110,11 @@ public class DelayedExportRequest
      */
     public ExportParameters getExportParameters() throws PageException
     {
-        return new ExportParameters(null, m_codeSet, m_exportLocation,
-                m_localeSubDir, m_bomType,
+        ExportParameters ep = new ExportParameters(null, m_codeSet,
+                m_exportLocation, m_localeSubDir, m_bomType,
                 ExportConstants.EXPORT_FOR_UPDATE);
+        ep.setXlfSrcAsTrg(this.m_xlfSrcAsTrg);
+        return ep;
     }
 
     /**

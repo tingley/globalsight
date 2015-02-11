@@ -174,7 +174,7 @@ public class LeveragerLocal implements Leverager
     }
 
     private ResultSet findLevGroupExactMatches(Connection p_connection,
-            StoredProcedureParams p_params, String companyId)
+            StoredProcedureParams p_params, long companyId)
             throws LingManagerException
     {
         ResultSet results = null;
@@ -366,7 +366,8 @@ public class LeveragerLocal implements Leverager
     {
         Map tuvMap = new HashMap();
         Set sourceSegments = p_leverageDataCenter
-                .getOriginalWholeSegments(p_sourcePage.getCompanyId());
+                .getOriginalWholeSegments(String.valueOf(p_sourcePage
+                        .getCompanyId()));
 
         for (Iterator it = sourceSegments.iterator(); it.hasNext();)
         {

@@ -34,7 +34,7 @@ import com.globalsight.smartbox.util.WebClientHelper;
  * Polling jobCreating.log to get job list in creating, then polling GlobalSight
  * to check job status
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class JobCreatePolling implements Polling

@@ -839,15 +839,20 @@ public final class EditUtil
             return false;
         }
         
-        String filename = p_state.getSourcePageName();
+        String filename = p_state.getSourcePageName().toLowerCase();
 
-        if ((filename.endsWith("indd") || filename.endsWith("inx"))
+        if ((filename.endsWith(".indd") || filename.endsWith(".inx"))
                 && !filename.startsWith(AdobeHelper.XMP_DISPLAY_NAME_PREFIX))
         {
             return true;
         }
         
-        if (filename.endsWith("fm") && "mif".equals(p_state.getPageFormat()))
+        if (filename.endsWith(".fm") && "mif".equals(p_state.getPageFormat()))
+        {
+            return true;
+        }
+        
+        if (filename.endsWith(".docx") && "office-xml".equals(p_state.getPageFormat()))
         {
             return true;
         }

@@ -45,8 +45,6 @@ public final class TuImplVo extends PersistentObject implements Tu,
     private HashMap<Long, Tuv> m_tuvs = new HashMap<Long, Tuv>();
 
     private String m_sourceTmName = null;
-    private long m_repetitionOfId;
-    private boolean repeated = false;
     private String translate = null;
 
     /**
@@ -120,7 +118,7 @@ public final class TuImplVo extends PersistentObject implements Tu,
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId, String companyId)
+    public Tuv getTuv(long p_localeId, long companyId)
     {
         return (Tuv) m_tuvs.get(new Long(p_localeId));
     }
@@ -342,26 +340,6 @@ public final class TuImplVo extends PersistentObject implements Tu,
 
     public void setSourceContent(String p_sourceContent)
     {
-    }
-
-    public boolean isRepeated()
-    {
-        return repeated;
-    }
-
-    public void setRepeated(boolean repeated)
-    {
-        this.repeated = repeated;
-    }
-
-    public long getRepetitionOfId()
-    {
-        return m_repetitionOfId;
-    }
-
-    public void setRepetitionOfId(long repetitionOfId)
-    {
-        this.m_repetitionOfId = repetitionOfId;
     }
 
     public String getTranslate()

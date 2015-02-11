@@ -139,7 +139,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      * 
      * @param p_l10nProfile
      *            The localization profile to add.
-     * @return long Return the unique id of the newly addedoprofile.
+     * @return long Return the unique id of the newly added oprofile.
      * @exception RemoteException
      *                System or network related exception.
      * @exception ProjectHandlerException
@@ -541,6 +541,25 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
     }
 
+    public Collection getAllL10nProfilesData() throws RemoteException,
+            ProjectHandlerException
+    {
+        try
+        {
+            String hql = "FROM BasicL10nProfile L1 where L1.companyId="
+                    + CompanyWrapper.getCurrentCompanyId()
+                    + " order by L1.name";
+            return HibernateUtil.search(hql);
+        }
+        catch (Exception pe)
+        {
+            c_category.error(pe.getMessage(), pe);
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES,
+                    null, pe);
+        }
+    }
+
     /**
      * Returns all the localization profiles for GUI in the system.
      * <p>
@@ -576,8 +595,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
     }
 
-    public Vector getAllL10nProfilesForGUI(String[] filterParams, Locale uiLocale)
-            throws RemoteException, ProjectHandlerException
+    public Vector getAllL10nProfilesForGUI(String[] filterParams,
+            Locale uiLocale) throws RemoteException, ProjectHandlerException
     {
         Connection conn = null;
         Statement st = null;
@@ -596,14 +615,17 @@ public class ProjectHandlerLocal implements ProjectHandler
                 String companyId = rs.getString("companyid");
                 String tmpName = rs.getString("tmpname");
                 String projectName = rs.getString("project_name");
-                char isAutoDispatch = rs.getString("is_auto_dispatch").toCharArray()[0];
+                char isAutoDispatch = rs.getString("is_auto_dispatch")
+                        .toCharArray()[0];
                 String srcLocaleId = rs.getString("source_locale_id");
                 int wftCount = Integer.valueOf(rs.getString("countwft"));
-                BasicL10nProfileInfo basicL10nProfileInfo = new BasicL10nProfileInfo(id, name, description, companyId);
+                BasicL10nProfileInfo basicL10nProfileInfo = new BasicL10nProfileInfo(
+                        id, name, description, companyId);
                 basicL10nProfileInfo.setTmProfileName(tmpName);
                 basicL10nProfileInfo.setProjectName(projectName);
                 basicL10nProfileInfo.setIsAutoDispatch(isAutoDispatch);
-                basicL10nProfileInfo.setSrcLocaleName(CacheData.getLocaleDisplayNameById(srcLocaleId, uiLocale));
+                basicL10nProfileInfo.setSrcLocaleName(CacheData
+                        .getLocaleDisplayNameById(srcLocaleId, uiLocale));
                 basicL10nProfileInfo.setWFTCount(wftCount);
                 v.add(basicL10nProfileInfo);
             }
@@ -616,7 +638,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                     ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI,
                     null, pe);
         }
-        finally{
+        finally
+        {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(st);
             DbUtil.silentReturnConnection(conn);
@@ -626,7 +649,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     private String getQueryL10nProfileInfoSql(String[] filterParams)
     {
         Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
-        StringBuffer sql = new StringBuffer("select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME, p.PROJECT_NAME,l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
+        StringBuffer sql = new StringBuffer(
+                "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME, p.PROJECT_NAME,l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
         sql.append(" from l10n_profile l10n, l10n_profile_tm_profile lptp, tm_profile tmp, project p, company c,l10n_profile_wftemplate_info lpwi");
         sql.append(" where 1 = 1");
         sql.append(" and l10n.IS_ACTIVE = 'Y'");
@@ -635,27 +659,30 @@ public class ProjectHandlerLocal implements ProjectHandler
         sql.append(" and l10n.ID =  (select max(l10n2.ID) from l10n_profile l10n2 where l10n2.NAME = l10n.NAME and l10n2.COMPANYID = l10n.COMPANYID)");
         sql.append(" and l10n.COMPANYID >= " + args.get(0));
         sql.append(" and l10n.COMPANYID <= " + args.get(1));
-        if(filterParams[0] != null && filterParams[0].trim().length() > 0){
+        if (filterParams[0] != null && filterParams[0].trim().length() > 0)
+        {
             sql.append(" and l10n.NAME LIKE '%" + filterParams[0] + "%'");
         }
         sql.append(" and l10n.COMPANYID = c.ID");
-        if(filterParams[1] != null && filterParams[1].trim().length() > 0){
+        if (filterParams[1] != null && filterParams[1].trim().length() > 0)
+        {
             sql.append(" and c.NAME LIKE '%" + filterParams[1] + "%'");
         }
         sql.append(" and l10n.ID = lptp.l10n_profile_id");
         sql.append(" and lptp.tm_profile_id = tmp.ID ");
-        if(filterParams[2] != null && filterParams[2].trim().length() > 0){
+        if (filterParams[2] != null && filterParams[2].trim().length() > 0)
+        {
             sql.append(" and tmp.NAME LIKE '%" + filterParams[2] + "%'");
         }
         sql.append(" and l10n.PROJECT_ID = p.PROJECT_SEQ");
-        if(filterParams[3] != null && filterParams[3].trim().length() > 0){
+        if (filterParams[3] != null && filterParams[3].trim().length() > 0)
+        {
             sql.append(" and p.PROJECT_NAME LIKE '%" + filterParams[3] + "%'");
         }
         sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, l10n.COMPANYID");
         sql.append(" order by l10n.NAME ");
         return sql.toString();
     }
-    
 
     /**
      * Get the names (and primary keys) of all the localization profiles. The
@@ -855,7 +882,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setQuotePerson(null);
             clone.setTermbaseName(originalProject.getTermbaseName());
             clone.setUserIds(originalProject.getUserIds());
-            clone.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+            clone.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                    .getValue()));
             clone.setAttributeSet(originalProject.getAttributeSet());
             clone.setPMCost(originalProject.getPMCost());
             clone.setPoRequired(originalProject.getPoRequired());
@@ -1004,7 +1032,8 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
-                hql = hql + " and project.companyId =" + currentId;
+                hql = hql + " and project.companyId ="
+                        + Long.parseLong(currentId);
             }
 
             List queryResult = HibernateUtil.search(hql);
@@ -1074,28 +1103,28 @@ public class ProjectHandlerLocal implements ProjectHandler
     {
         return getAllProjectInfosForGUIbyCondition("");
     }
-    
-    public List getAllProjectInfosForGUIbyCondition(String condition) throws RemoteException,
-    ProjectHandlerException
-        {
+
+    public List getAllProjectInfosForGUIbyCondition(String condition)
+            throws RemoteException, ProjectHandlerException
+    {
         try
         {
             String hql = "select new com.globalsight.everest.projecthandler.ProjectInfo"
-                    + "(p.id,p.name,p.description,p.companyId,p.managerUserId,p.termbase)"
+                    + "( p )"
                     + " from ProjectImpl p ,Company c where p.isActive = 'Y' and c.id=p.companyId";
             Session session = HibernateUtil.getSession();
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
-                hql += " and p.companyId = "+currentId;
+                hql += " and p.companyId = " + Long.parseLong(currentId);
             }
-        
+
             hql += condition;
-        
-            List queryResult =session.createQuery(hql).list();
+
+            List queryResult = session.createQuery(hql).list();
             List projectInfos = new ArrayList();
-            List allUsers=(List)lookupUserManager().getUsers();
-            HashMap<String,String> idViewName=new HashMap();
+            List allUsers = (List) lookupUserManager().getUsers();
+            HashMap<String, String> idViewName = new HashMap();
             for (Iterator iter = allUsers.iterator(); iter.hasNext();)
             {
                 User user = (User) iter.next();
@@ -1104,11 +1133,11 @@ public class ProjectHandlerLocal implements ProjectHandler
             for (int i = 0; i < queryResult.size(); i++)
             {
                 ProjectInfo pi = (ProjectInfo) queryResult.get(i);
-        
+
                 if (pi != null && pi.getProjectManagerName() == null)
                 {
                     String usrName = idViewName.get(pi.getProjectManagerId());
-                   
+
                     if (usrName != null)
                     {
                         pi.setProjectManagerName(usrName);
@@ -1120,7 +1149,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     projectInfos.add(pi);
                 }
             }
-        
+
             return projectInfos;
         }
         catch (Exception pe)
@@ -1130,7 +1159,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS_FOR_GUI,
                     null, pe);
         }
-        }
+    }
 
     /**
      * Get the names (and primary keys) of all the projects. The key in the
@@ -1407,7 +1436,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and p.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
             Collection result = HibernateUtil.search(hql, map);
 
@@ -2337,7 +2366,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and p.companyId=:company_id";
-                map.put("company_id", currentCompanyId);
+                map.put("company_id", Long.parseLong(currentCompanyId));
             }
             List queryResult = HibernateUtil.search(hql, map);
 
@@ -2864,7 +2893,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and w.companyId=:companyId";
-                map.put("companyId", currentCompanyId);
+                map.put("companyId", Long.parseLong(currentCompanyId));
             }
             List queryResult = HibernateUtil.search(hql, map);
             return queryResult;
@@ -3016,8 +3045,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 .setCodeSet(p_origWorkflowTemplateInfo.getCodeSet());
         workflowTemplateInfo.setDescription(p_origWorkflowTemplateInfo
                 .getDescription());
-        workflowTemplateInfo.setCompanyId(CompanyThreadLocal.getInstance()
-                .getValue());
+        workflowTemplateInfo.setCompanyId(Long.parseLong(CompanyThreadLocal
+                .getInstance().getValue()));
         LeverageLocales leverageLocales = null;
 
         Set<LeverageLocales> lls = new HashSet<LeverageLocales>();
@@ -3082,8 +3111,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         wfti.setWorkflowType(WorkflowTypeConstants.TYPE_TRANSLATION);
 
         // Sets company.
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-        wfti.setCompanyId(companyId);
+        wfti.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
 
         leverageLocale.setBackPointer(wfti);
 
@@ -3114,8 +3143,10 @@ public class ProjectHandlerLocal implements ProjectHandler
                     {
                         String activityName = workflowTask.getActivityName();
                         Activity activity = ServerProxy.getJobHandler()
-                                .getActivityByCompanyId(activityName,
-                                        p_localePair.getCompanyId());
+                                .getActivityByCompanyId(
+                                        activityName,
+                                        String.valueOf(p_localePair
+                                                .getCompanyId()));
                         String[] containerRole =
                         { getContainerRole(activity, p_localePair.getSource()
                                 .toString(), p_localePair.getTarget()
@@ -3627,7 +3658,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql += " and pt.companyId=:company_id and pt.status=:status";
-                map.put("company_id", currentCompanyId);
+                map.put("company_id", Long.parseLong(currentCompanyId));
                 map.put("status", "");
             }
             if (!StringUtil.isEmpty(cond))
@@ -3684,11 +3715,10 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (company.getTmVersion().equals(TmVersion.TM3))
             {
                 // We need to create the tm3 storage. Use the shared TM pool for
-                // this
-                // company.
+                // this company.
                 TM3Manager mgr = DefaultManager.create();
                 TM3Tm<GSTuvData> tm3tm = mgr.createMultilingualSharedTm(
-                        HibernateUtil.getSession(), new GSDataFactory(),
+                        new GSDataFactory(),
                         SegmentTmAttribute.inlineAttributes(), company.getId());
                 p_projectTM.setTm3Id(tm3tm.getId());
             }
@@ -3751,7 +3781,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql += " and p.companyId = :companyId";
-                map.put("companyId", currentCompanyId);
+                map.put("companyId", Long.parseLong(currentCompanyId));
             }
 
             projectTM = (ProjectTM) HibernateUtil.getFirst(hql, map);
@@ -3961,6 +3991,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             connection = ConnectionPool.getConnection();
+            connection.setAutoCommit(false);
             String sql = "delete from tm_profile_project_tm_info where tm_profile_id = "
                     + tmprofile.getId();
             query = connection.prepareStatement(sql);
@@ -3970,6 +4001,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     + tmprofile.getId();
             query = connection.prepareStatement(sql);
             query.execute();
+            connection.commit();
 
             HibernateUtil.delete(tmprofile);
         }

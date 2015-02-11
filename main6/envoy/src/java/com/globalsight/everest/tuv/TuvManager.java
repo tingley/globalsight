@@ -124,7 +124,7 @@ public interface TuvManager
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, String companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
             throws TuvException, RemoteException;
 
     /**
@@ -182,7 +182,7 @@ public interface TuvManager
      *             when a communication-related error occurs.
      */
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            String companyId) throws TuvException, RemoteException;
+            long companyId) throws TuvException, RemoteException;
 
     /**
      * Get the Tuv for the segment editor for the specified Tu, in the specified
@@ -200,7 +200,7 @@ public interface TuvManager
      *             when a communication-related error occurs.
      */
     public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            String companyId) throws TuvException, RemoteException;
+            long companyId) throws TuvException, RemoteException;
 
     /**
      * Get the Tuv for the segment editor for the specified Tuv identifier..
@@ -213,10 +213,10 @@ public interface TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_TuvId, String companyId)
+    public Tuv getTuvForSegmentEditor(long p_TuvId, long companyId)
             throws TuvException, RemoteException;
 
-    public Tu getTuForSegmentEditor(long p_TuId, String companyId)
+    public Tu getTuForSegmentEditor(long p_TuId, long companyId)
             throws TuvException, RemoteException;
 
     /**
@@ -246,8 +246,8 @@ public interface TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuv(Tuv p_tuv, String companyId) throws TuvException,
-            RemoteException;
+    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+            throws TuvException, RemoteException;
 
     /**
      * Get source locale Tuvs for Statistics based on the SourcePage.
@@ -286,26 +286,6 @@ public interface TuvManager
      */
     public Collection<TuImpl> getTus(Long p_sourcePageId) throws TuvException,
             RemoteException;
-
-    /**
-     * Retrieves the list of repetition TUs belonging to a source page.
-     * 
-     * @param p_sourcePageId
-     *            - the id of the source page
-     * @return Collection a unsorted list of TUs from the source page.
-     */
-    public Collection<TuImpl> getRepTusBySourcePageId(Long p_sourcePageId);
-
-    /**
-     * Return all TUs which belong to the same repetition group by TuID.
-     * 
-     * @param p_repTuId
-     *            - This Tu may be not repeated or repetition.
-     * 
-     * @return - List<TuImpl>.
-     */
-    public List<TuImpl> getRepTusByTuId(Long p_repTuId, String companyId)
-            throws TuvException, RemoteException;
 
     /**
      * Computes and updates the exact match keys for a set of tuvs. This

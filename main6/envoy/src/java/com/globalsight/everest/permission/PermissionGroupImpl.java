@@ -15,20 +15,21 @@
  *  
  */
 package com.globalsight.everest.permission;
+
 import com.globalsight.everest.persistence.PersistentObject;
 
 /**
-* TopLink mapped object that implements a PermissionGroup 
-*/
-public class PermissionGroupImpl
-    extends PersistentObject implements PermissionGroup
+ * TopLink mapped object that implements a PermissionGroup
+ */
+public class PermissionGroupImpl extends PersistentObject implements
+        PermissionGroup
 {
     private static final long serialVersionUID = -2806261345378016420L;
 
-    //PRIVATE MEMBERS
+    // PRIVATE MEMBERS
     private String m_description;
     private PermissionSet m_permissionSet;
-    private String m_companyId;
+    private long m_companyId;
 
     /** Default constructor */
     public PermissionGroupImpl()
@@ -36,7 +37,7 @@ public class PermissionGroupImpl
         super();
         m_description = null;
         m_permissionSet = null;
-        m_companyId = null;
+        m_companyId = -1;
     }
 
     /**
@@ -46,21 +47,20 @@ public class PermissionGroupImpl
      * @param p_description
      * @param p_permissionSetString
      */
-    public PermissionGroupImpl(String p_name,
-                               String p_description,
-                               String p_permissionSetString,
-                               String p_companyId)
+    public PermissionGroupImpl(String p_name, String p_description,
+            String p_permissionSetString, String p_companyId)
     {
         super();
         setName(p_name);
         m_description = p_description;
         setPermissionSetAsString(p_permissionSetString);
-        m_companyId = p_companyId;
+        m_companyId = Long.parseLong(p_companyId);
     }
 
     /**
      ** Return the description of the PermissionGroup
-     ** @return String
+     ** 
+     * @return String
      **/
     public String getDescription()
     {
@@ -69,18 +69,21 @@ public class PermissionGroupImpl
 
     /**
      ** Return the PermissionSet as a String
-     ** @return 
+     ** 
+     * @return
      **/
     public String getPermissionSetAsString()
     {
         return m_permissionSet.toString();
     }
-    
-    public String getCompanyId() {
+
+    public long getCompanyId()
+    {
         return m_companyId;
     }
-    
-    public void setCompanyId(String p_companyId) {
+
+    public void setCompanyId(long p_companyId)
+    {
         m_companyId = p_companyId;
     }
 
@@ -91,7 +94,9 @@ public class PermissionGroupImpl
 
     /**
      ** Sets the Permission set from a String representation
-     ** @param p_permissionSet -- string represenation
+     ** 
+     * @param p_permissionSet
+     *            -- string represenation
      ** @see PermissionSet
      **/
     public void setPermissionSetAsString(String p_permissionSetString)
@@ -99,25 +104,24 @@ public class PermissionGroupImpl
         m_permissionSet = new PermissionSet(p_permissionSetString);
     }
 
-    /** Gets the PermissionSet for this PermissionGroup*/
+    /** Gets the PermissionSet for this PermissionGroup */
     public PermissionSet getPermissionSet()
     {
         return m_permissionSet;
     }
 
-    /** Sets the PermissionSet for this PermissionGroup
-    * The string should be of the format "|1|2|3|" where
-    * 1,2,and 3 are permissions that the use has.
-    */
-    public void setPermissionSet (String p_permissionSetString)
+    /**
+     * Sets the PermissionSet for this PermissionGroup The string should be of
+     * the format "|1|2|3|" where 1,2,and 3 are permissions that the use has.
+     */
+    public void setPermissionSet(String p_permissionSetString)
     {
         setPermissionSetAsString(p_permissionSetString);
     }
 
     /**
-     * Returns a string representation for debugging.
-     * It contains the id, name,and permission set as
-     * a string
+     * Returns a string representation for debugging. It contains the id,
+     * name,and permission set as a string
      * 
      * @return String
      */
@@ -131,4 +135,3 @@ public class PermissionGroupImpl
         return sb.toString();
     }
 }
-

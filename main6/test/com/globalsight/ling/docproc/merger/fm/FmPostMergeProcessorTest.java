@@ -16,11 +16,12 @@ public class FmPostMergeProcessorTest
         FmPostMergeProcessor p = new FmPostMergeProcessor();
         p.setTargetLocale(targetLocale);
 
+        FontMappingHelper helper = new FontMappingHelper();
         String processed = p.process(content, null);
-        System.out.println("FontMappingList : " + FontMappingHelper.getFontMappingList());
+        System.out.println("FontMappingList : " + helper.getFontMappingList());
         System.out.println(processed);
 
-        if (FontMappingHelper.isLocaleWithFonts(targetLocale))
+        if (helper.isLocaleWithFonts(targetLocale))
         {
             Assert.assertEquals("<FPlatformName `W.MingLiU.R.400'>\n" + "<FFamily `MingLiU'>\n"
                     + "<FPlatformName `W.MingLiU.R.500'>\n", processed);

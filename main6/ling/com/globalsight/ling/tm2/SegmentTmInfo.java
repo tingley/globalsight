@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.hibernate.Session;
-
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
@@ -49,7 +47,7 @@ import com.globalsight.util.progress.ProgressReporter;
 public interface SegmentTmInfo
 {
 
-    public TuvMappingHolder saveToSegmentTm(Session p_session,
+    public TuvMappingHolder saveToSegmentTm(
             Collection<? extends BaseTmTu> p_segmentsToSave,
             GlobalSightLocale p_sourceLocale, Tm p_tm,
             Set<GlobalSightLocale> p_targetLocales, int p_mode,
@@ -65,21 +63,19 @@ public interface SegmentTmInfo
      * 
      * @throws LingManagerException
      */
-    public void updateSegmentTmTuvs(Session p_session, Tm p_tm,
-            Collection<SegmentTmTuv> p_tuvs) throws LingManagerException;
+    public void updateSegmentTmTuvs(Tm p_tm, Collection<SegmentTmTuv> p_tuvs)
+            throws LingManagerException;
 
     /**
      * leverage a page from Segment Tm
      * 
-     * @param p_session
-     *            Hibernate session
      * @param p_tms
      *            tms to leverage
      * @param p_leverageDataCenter
      *            LeverageDataCenter that contains segments that are leveraged.
      * @return LeverageMatchResults that contains leverage results
      */
-    public LeverageMatchResults leverage(Session p_session, List<Tm> p_tms,
+    public LeverageMatchResults leverage(List<Tm> p_tms,
             LeverageDataCenter p_leverageDataCenter, String companyId)
             throws Exception;
 
@@ -94,81 +90,76 @@ public interface SegmentTmInfo
      *            list of tms to leverage
      * @return LeverageMatches object
      */
-    public LeverageMatches leverageSegment(Session pSession,
-            BaseTmTuv p_sourceTuv, LeverageOptions p_leverageOptions,
-            List<Tm> p_tms) throws Exception;
+    public LeverageMatches leverageSegment(BaseTmTuv p_sourceTuv,
+            LeverageOptions p_leverageOptions, List<Tm> p_tms) throws Exception;
 
     // These are called for individual segment deletion (TmSegmentDeleteHandler)
-    public void deleteSegmentTmTus(Session pSession, Tm p_tm,
-            Collection<SegmentTmTu> p_tus) throws Exception;
+    public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus)
+            throws Exception;
 
-    public void deleteSegmentTmTuvs(Session pSession, Tm p_tm,
-            Collection<SegmentTmTuv> p_tus) throws Exception;
+    public void deleteSegmentTmTuvs(Tm p_tm, Collection<SegmentTmTuv> p_tus)
+            throws Exception;
 
     //
     // Refactored stuff
     //
 
     // TM removal (TmRemover / RemoveTmHandler)
-    public boolean removeTmData(Session pSession, Tm pTm,
-            ProgressReporter pReporter, InterruptMonitor pMonitor)
-            throws LingManagerException;
+    public boolean removeTmData(Tm pTm, ProgressReporter pReporter,
+            InterruptMonitor pMonitor) throws LingManagerException;
 
     // TM removal (TmRemover / RemoveTmHandler) - if "Remove by locale" is being
     // used
-    public boolean removeTmData(Session pSession, Tm pTm,
-            GlobalSightLocale pLocale, ProgressReporter pReporter,
-            InterruptMonitor pMonitor) throws LingManagerException;
-
-    public StatisticsInfo getStatistics(Session session, Tm pTm,
-            Locale pUILocale, boolean p_includeProjects)
+    public boolean removeTmData(Tm pTm, GlobalSightLocale pLocale,
+            ProgressReporter pReporter, InterruptMonitor pMonitor)
             throws LingManagerException;
 
-    public List<SegmentTmTu> getSegmentsById(Session session, Tm tm,
-            List<Long> tuIds) throws LingManagerException;
+    public StatisticsInfo getStatistics(Tm pTm, Locale pUILocale,
+            boolean p_includeProjects) throws LingManagerException;
 
-    public SegmentResultSet getAllSegments(Session session, Tm tm,
+    public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
+            throws LingManagerException;
+
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter) throws LingManagerException;
+
+    public SegmentResultSet getAllSegments(Tm tm, long startTUId)
+            throws LingManagerException;
+
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter)
             throws LingManagerException;
 
-    public SegmentResultSet getAllSegments(Session session, Tm tm,
-            long startTUId) throws LingManagerException;
-
-    public SegmentResultSet getSegmentsByLocale(Session session, Tm tm,
-            String locale, String createdBefore, String createdAfter)
-            throws LingManagerException;
-
-    public SegmentResultSet getSegmentsByProjectName(Session session, Tm tm,
-            String projectName, String createdBefore, String createdAfter)
-            throws LingManagerException;
-
-    public int getAllSegmentsCount(Session session, Tm tm,
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
             String createdBefore, String createdAfter)
             throws LingManagerException;
 
-    public int getAllSegmentsCount(Session session, Tm tm, long startTUId)
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter) throws LingManagerException;
+
+    public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
 
-    public int getSegmentsCountByLocale(Session session, Tm tm, String locale,
+    public int getSegmentsCountByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter)
             throws LingManagerException;
 
-    public int getSegmentsCountByProjectName(Session session, Tm tm,
-            String projectName, String createdBefore, String createdAfter)
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter)
             throws LingManagerException;
 
     public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,
             GlobalSightLocale sourceLocale, GlobalSightLocale targetLocale,
             Connection connection) throws LingManagerException;
 
-    public Set<GlobalSightLocale> getLocalesForTm(Session session, Tm tm)
+    public Set<GlobalSightLocale> getLocalesForTm(Tm tm)
             throws LingManagerException;
 
     /**
      * Get the number of segments in this TM that need to be reindexed. In many
      * cases, this will be the same as the total number of segments.
      */
-    public int getSegmentCountForReindex(Session session, Tm tm);
+    public int getSegmentCountForReindex(Tm tm);
 
     /**
      * Reindex a single TM. Implementations should call
@@ -176,8 +167,6 @@ public interface SegmentTmInfo
      * periodically check reindexer.getInterrupted() to see if the user has
      * cancelled the operation.
      * 
-     * @param session
-     *            Session to use for this operation
      * @param tm
      *            TM to reindex
      * @param reindexer
@@ -185,25 +174,24 @@ public interface SegmentTmInfo
      *            incrementCounter()
      * @return true if reindexing was successful
      */
-    public boolean reindexTm(Session session, Tm tm, Reindexer reindexer);
+    public boolean reindexTm(Tm tm, Reindexer reindexer);
 
     /**
      * Gross hacks in support of prior legacy hacks. See
      * TmCoreManager.getSidByTuvId() et al
      */
-    public String getSidByTuvId(Session session, Tm tm, long tuvId);
+    public String getSidByTuvId(Tm tm, long tuvId);
 
-    public String getCreatingUserByTuvId(Session session, Tm tm, long tuvId);
+    public String getCreatingUserByTuvId(Tm tm, long tuvId);
 
-    public Date getModifyDateByTuvId(Session session, Tm tm, long tuvId);
+    public Date getModifyDateByTuvId(Tm tm, long tuvId);
 
     /**
      * This one is particularly egregious. It's not clear to me if srcLocaleId
      * is ever the locale *other* than the one attached to the specified tuv. If
      * not, then we can do away with the parameter altogether.
      */
-    public String getSourceTextByTuvId(Session session, Tm tm, long tuvId,
-            long srcLocaleId);
+    public String getSourceTextByTuvId(Tm tm, long tuvId, long srcLocaleId);
 
     /**
      * This method is used for get TUV basic information
@@ -215,8 +203,7 @@ public interface SegmentTmInfo
      * @throws RemoteException
      * @throws LingManagerException
      */
-    public TuvBasicInfo getTuvBasicInfoByTuvId(Session session, Tm tm,
-            long tuvId);
+    public TuvBasicInfo getTuvBasicInfoByTuvId(Tm tm, long tuvId);
 
     public void setJob(Job job);
 

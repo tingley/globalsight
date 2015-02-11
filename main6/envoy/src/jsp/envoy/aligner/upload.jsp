@@ -217,7 +217,7 @@ function doOnLoad()
 
 <FORM NAME="oDummyForm">
 <DIV class="standardText"><%=bundle.getString("lb_select_tm_to_import_into") %>:
-<select name="tmName">
+<select name="tmName" id="tmName">
   <%
   for (int i = 0, max = tms.size(); i < max; i++)
   {

@@ -15,6 +15,7 @@
  *  
  */
 package com.globalsight.everest.webapp.javabean;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -23,37 +24,36 @@ import org.apache.log4j.Logger;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 /**
- * Bean to provide skin values, such as logo, colors, images, and fonts.
- * The skin values is stored in /properties/skin.properties.
+ * Bean to provide skin values, such as logo, colors, images, and fonts. The
+ * skin values is stored in /properties/skin.properties.
  */
 public class SkinBean
 {
-    public static Logger s_category = Logger.getLogger("Skin");
+    public static Logger s_category = Logger.getLogger(SkinBean.class);
     private ResourceBundle m_skinProperties = null;
-
 
     /**
      * Creates a SkinBean
      */
     public SkinBean()
     {
-        try 
+        try
         {
-            m_skinProperties = SystemResourceBundle.getInstance().getResourceBundle(
-                    "properties/skin", Locale.ROOT);
+            m_skinProperties = SystemResourceBundle.getInstance()
+                    .getResourceBundle("properties/skin", Locale.ROOT);
         }
         catch (Exception e)
         {
-            s_category.error("Could not load skin properties.",e);
+            s_category.error("Could not load skin properties.", e);
         }
     }
 
     /**
-     * Looks up a skin property value from skin.properties
-     * and handles any exceptions
+     * Looks up a skin property value from skin.properties and handles any
+     * exceptions
      * 
      * @param p_propertyName
-     *               skin property to lookup
+     *            skin property to lookup
      * @return property value or "" for non-existant properties
      */
     public String getProperty(String p_propertyName)
@@ -61,16 +61,16 @@ public class SkinBean
         String v = "";
         if (m_skinProperties != null)
         {
-            try 
+            try
             {
                 v = m_skinProperties.getString(p_propertyName);
             }
             catch (Exception e)
             {
-                s_category.error("Could not get skin property " + p_propertyName, e);
+                s_category.error("Could not get skin property "
+                        + p_propertyName, e);
             }
         }
         return v;
     }
 }
-

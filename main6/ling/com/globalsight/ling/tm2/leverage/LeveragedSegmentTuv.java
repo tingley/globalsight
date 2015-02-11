@@ -85,7 +85,7 @@ public class LeveragedSegmentTuv extends SegmentTmTuv implements LeveragedTuv
         m_order = p_order;
     }
 
-    public String getOrgSid(String companyId)
+    public String getOrgSid(long companyId)
     {
         return orgSid;
     }
@@ -98,6 +98,6 @@ public class LeveragedSegmentTuv extends SegmentTmTuv implements LeveragedTuv
     @Override
     public String getOrgSid()
     {
-        return getOrgSid(null);
+        return getOrgSid(-1);
     }
 }

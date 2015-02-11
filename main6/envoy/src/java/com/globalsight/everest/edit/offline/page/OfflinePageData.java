@@ -40,6 +40,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -177,6 +179,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     // This is the state of the download-edit-all button.
     private String m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
     private int m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+    
+    private String displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_BOTH;
+    private int TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH;
 
     private String m_startSignature = AmbassadorDwUpConstants.SIGNATURE;
     private String m_endSignature = AmbassadorDwUpConstants.END_SIGNATURE;
@@ -196,6 +201,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String m_loadConversionLineBreak = null;
     private long jobId = -1;
     private String jobName = null;
+    private String m_instanceID = null;
 
     // **MUST** start false to properly load an upload file.
     private boolean m_isSource = false;
@@ -256,6 +262,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         m_uploadedReplyIssuesMap.clear();
         jobName = null;
         jobId = -1;
+        m_instanceID = null;
 
         // NOTE: do not clear the following
         // m_loadConversionLineBreak - ;
@@ -474,7 +481,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     /*
      * 
      */
-    public HashMap<Long, HashMap> getTUVIssueMap(String companyId)
+    public HashMap<Long, HashMap> getTUVIssueMap(long companyId)
     {
         HashMap<Long, HashMap> newMap = new HashMap<Long, HashMap>();
 
@@ -835,6 +842,47 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 // force to unauthorized state
                 m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
                 m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+                break;
+        }
+    }
+
+    /**
+     * The state of the download-edit-all button which will be displayed in the
+     * header of the download file. This is a tri-state button. If it is not
+     * enabled for the user it is in the unauthorized-state. If it is enabled
+     * for the user, they may choose to enable or disable the function.
+     * 
+     * NOTE: currently the download edit-all button is only used to determine
+     * protection during the creation of the download file. On upload we ignore
+     * the value in the header and use the Match type string on to determine
+     * what was protected for download.
+     * 
+     * @param p_TMEditType
+     *            - the tri-state of the users choice.
+     */
+    public void setTMEditType(int p_TMEditType)
+    {
+        m_stateDownloadEditAll = p_TMEditType;
+        TMEditType = p_TMEditType;
+
+        // set display string.
+        switch (p_TMEditType)
+        {
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_BOTH;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_ICE;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_100:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_100;
+                break;
+            case AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY:
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_DENY;
+                break;
+            default:
+                TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
+                displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE;
                 break;
         }
     }
@@ -1741,26 +1789,74 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
      */
     public void handleEditAll(String s)
     {
-        m_displayDownloadEditAll = s.trim();
+//        m_displayDownloadEditAll = s.trim();
+//
+//        if (m_displayDownloadEditAll
+//                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_YES))
+//        {
+//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
+//        }
+//        else if (m_displayDownloadEditAll
+//                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_NO))
+//        {
+//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO;
+//        }
+//        else
+//        {
+//            // force to unauthorized
+//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+//            m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
+//        }
+        
+        //Redirect the calling to new method
+        handleTMEditType(s);
+    }
+    
+    /**
+     * Parser TM edit type.
+     * 
+     * Reads the TMEditType display value from the file and sets the state
+     * accordingly. The default is not to allow locked segments
+     * 
+     * @param s
+     *            - the text following the TMEditType label
+     */
+    public void handleTMEditType(String s)
+    {
+        displayTMEditType = s.trim();
 
-        if (m_displayDownloadEditAll
-                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_YES))
+        if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE
+                .equals(displayTMEditType))
         {
-            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
         }
-        else if (m_displayDownloadEditAll
-                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_NO))
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_BOTH
+                .equals(displayTMEditType))
         {
-            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO;
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_ICE
+                .equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_100
+                .equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_100;
+        }
+        else if (AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_DENY
+                .equals(displayTMEditType))
+        {
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY;
         }
         else
         {
-            // force to unauthorized
-            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-            m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
+            TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
+            displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE;
         }
     }
-
+    
     public void handleJobID(String s)
     {
         if (s != null && s.trim().length() > 0)
@@ -1996,11 +2092,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     .write(AmbassadorDwUpConstants.HEADER_NOMATCH_COUNT_KEY
                             + " " + m_noMatchWordCount + p_lineBreak);
 
-            if (!m_displayDownloadEditAll
-                    .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED))
+            if (!displayTMEditType
+                    .equals(AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE))
             {
                 p_outputStream.write(AmbassadorDwUpConstants.HEADER_EDITALL_KEY
-                        + " " + m_displayDownloadEditAll + p_lineBreak);
+                        + " " + displayTMEditType + p_lineBreak);
             }
 
             p_outputStream.write(p_lineBreak);
@@ -2157,7 +2253,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public ArrayList<String> getSourceTargetText(OfflineSegmentData osd,
             LeverageMatch match, String sourceText, String targetText,
             String userId, boolean isFromXliff, String sourceLocal,
-            String targetLocal, boolean changeCreationId, String companyId)
+            String targetLocal, boolean changeCreationId, long companyId)
     {
         int altFlag = -100;
         targetText = match.getLeveragedTargetString();
@@ -2382,7 +2478,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     "Null output stream.");
         }
 
-        String companyId = String.valueOf(p_params.getRightJob().getCompanyId());
+        long companyId = p_params.getRightJob().getCompanyId();
+        int omegaT = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT;
+        boolean isOmegaT = (omegaT == p_params.getFileFormatId());
 
         try
         {
@@ -2484,7 +2582,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                 .stripRootTag(targetText));
                     }
 
-                    if (m_isConvertLf)
+                    if (isOmegaT)
+                    {
+                        tempSource = convertOmegaT(tempSource);
+                        tempTarget = convertOmegaT(tempTarget);
+                    }
+                    else if (m_isConvertLf)
                     {
                         tempSource = convertLf(tempSource, p_tmxLevel);
                         tempTarget = convertLf(tempTarget, p_tmxLevel);
@@ -2493,13 +2596,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     translateTuString = TmxUtil.composeTu(tempSource,
                             m_sourceLocaleName, tempTarget, m_targetLocaleName,
                             userId, osd.getTargetTuvModifyDate(companyId),
-                            p_tmxLevel, null);
+                            p_tmxLevel, null, p_params);
 
                     p_outputStream.write(translateTuString);
                 }
 
                 // write TM matches into tmx(from "leverage_match" table).
-                if (osd.hasTMMatches())
+                if (osd.hasTMMatches() || osd.hasMTMatches())
                 {
                     List<LeverageMatch> matchList = osd
                             .getOriginalFuzzyLeverageMatchList();
@@ -2517,9 +2620,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                 .getTargetPage(companyId);
                         if (!tpIdsTuvsHaveLoaded.contains(myTp.getIdAsLong()))
                         {
-                            SegmentTuvUtil.getExportTuvs(Long
-                                    .parseLong(companyId), myTp.getLocaleId(),
-                                    myTp.getSourcePage().getId());
+                            SegmentTuvUtil.getExportTuvs(companyId, myTp
+                                    .getLocaleId(), myTp.getSourcePage()
+                                    .getId());
                             tpIdsTuvsHaveLoaded.add(myTp.getIdAsLong());
                         }
                     }
@@ -2573,7 +2676,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         targetText = array.get(1);
                         userId = array.get(2);
 
-                        if (m_isConvertLf)
+                        if (isOmegaT)
+                        {
+                            sourceText = convertOmegaT(sourceText);
+                            targetText = convertOmegaT(targetText);
+                        }
+                        else if (m_isConvertLf)
                         {
                             sourceText = convertLf(sourceText, p_tmxLevel);
                             targetText = convertLf(targetText, p_tmxLevel);
@@ -2584,7 +2692,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             tuString = TmxUtil.composeFirstMatch(sourceText,
                                     m_sourceLocaleName, targetText,
                                     m_targetLocaleName, userId, null,
-                                    p_tmxLevel, match.getMatchedSid());
+                                    p_tmxLevel, match.getMatchedSid(), p_params);
                             isAddTail = true;
                         }
                         else
@@ -2593,7 +2701,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     m_sourceLocaleName, targetText,
                                     m_targetLocaleName, userId,
                                     osd.getTargetTuvModifyDate(companyId),
-                                    p_tmxLevel, match.getMatchedSid());
+                                    p_tmxLevel, match.getMatchedSid(), p_params);
 
                             isAddTail = false;
                         }
@@ -2623,8 +2731,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             if (sid != null
                                     && sid.equals(match.getMatchedSid()))
                             {
-                                tuString += TmxUtil.composeTargetTu(targetText,
-                                        m_targetLocaleName, p_tmxLevel);
+                                tuString += TmxUtil.composeTmTuv(
+                                        m_targetLocaleName, targetText,
+                                        p_tmxLevel, p_params);
                                 isAddTail = true;
                             }
                             else
@@ -2639,7 +2748,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                                 m_sourceLocaleName, targetText,
                                                 m_targetLocaleName, userId,
                                                 null, p_tmxLevel,
-                                                match.getMatchedSid());
+                                                match.getMatchedSid(), p_params);
                                 isAddTail = true;
                                 sid = match.getMatchedSid();
                             }
@@ -2655,7 +2764,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                     m_sourceLocaleName, targetText,
                                     m_targetLocaleName, userId,
                                     osd.getTargetTuvModifyDate(companyId),
-                                    p_tmxLevel, match.getMatchedSid());
+                                    p_tmxLevel, match.getMatchedSid(), p_params);
 
                             isAddTail = false;
                         }
@@ -2680,6 +2789,39 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_WRITE_ERROR, ex);
         }
+    }
+
+    /**
+     * Convert TMX tags to OmegaT tags
+     * @param tempSource
+     * @return
+     */
+    private String convertOmegaT(String tempSource)
+    {
+        /**
+         * ignore now
+        if (tempSource != null && tempSource.contains("<"))
+        {
+            int index = 0;
+            String re = "<([^\\s]+)[^<>]+/>|<([^\\s]+)[^<>/]+>[^<>]*</[^<>/]+>";
+            Pattern p = Pattern.compile(re);
+            Matcher m = p.matcher(tempSource);
+
+            while (m.find())
+            {
+                String ori = m.group();
+                String tagName = m.group(1);
+                tagName = tagName == null ? m.group(2) : tagName;
+                String omegaTag = "&lt;" + tagName.substring(0, 1) + index
+                        + "/&gt;";
+
+                tempSource = tempSource.replace(ori, omegaTag);
+                ++index;
+            }
+        }
+       **/
+
+        return tempSource;
     }
 
     private boolean isExists(String originalSourceText, List originalSourceTexts)
@@ -2953,11 +3095,36 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     public void setIsRepetitions(boolean isRepetitons)
     {
-        m_isRepetitons  = isRepetitons;
+        m_isRepetitons = isRepetitons;
     }
     
     public boolean getIsRepetitons()
     {
         return m_isRepetitons ;
+    }
+
+    public int getTMEditType()
+    {
+        return TMEditType;
+    }
+
+    public String getDisplayTMEditType()
+    {
+        return displayTMEditType;
+    }
+
+    public void setDisplayTMEditType(String displayTMEditType)
+    {
+        this.displayTMEditType = displayTMEditType;
+    }
+
+    public String getServerInstanceID()
+    {
+        return m_instanceID;
+    }
+
+    public void setServerInstanceID(String p_instanceID)
+    {
+        m_instanceID = p_instanceID;
     }
 }

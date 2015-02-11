@@ -34,6 +34,7 @@ import java.util.ResourceBundle;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.foundation.Timestamp;
+import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.ReportsPackage;
 
 /**
@@ -42,7 +43,8 @@ import com.globalsight.reports.util.ReportsPackage;
 public class TermAuditReplet extends GlobalSightReplet
 {
     private static final String MY_TEMPLATE = "/templates/basicFlowReport.srt";
-    private static final String MY_MESSAGES = "messages/termAudit";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "termAudit";
     private static final long MILLISECONDS_IN_A_DAY = (24 * 60 * 60 * 1000);
 
     private static final String QUERY_TERM_AUDIT = "select event_date, "
@@ -59,7 +61,7 @@ public class TermAuditReplet extends GlobalSightReplet
     private Date m_startDate = null;
     private Date m_endDate = null;
 
-//    private static final String ALL = "ALL";
+    // private static final String ALL = "ALL";
 
     public TermAuditReplet()
     {
@@ -154,8 +156,8 @@ public class TermAuditReplet extends GlobalSightReplet
             // this widget just does not work in the current inetsoft version
             // with the DHTML viewer (ok for java viewer)
             // So, we're stuck with giving the user one value to choose.
-            theParameters.addChoice("selectedLang", m_bundle.getString("all"), termbaseLangs
-                    .toArray());
+            theParameters.addChoice("selectedLang", m_bundle.getString("all"),
+                    termbaseLangs.toArray());
             theParameters.setAlias("selectedLang", "Language");
         }
         finally

@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class
-		name="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
+	<class name="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
 		table="WORKFLOW_TEMPLATE">
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
@@ -14,19 +13,17 @@
 			type="string" not-null="false" unique="false" />
 
 		<many-to-one name="project" column="PROJECT_ID"
-			class="com.globalsight.everest.projecthandler.ProjectImpl"
-			not-null="true" lazy="false" />
+			class="com.globalsight.everest.projecthandler.ProjectImpl" not-null="true"
+			lazy="false" />
 
 		<many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID"
-			class="com.globalsight.util.GlobalSightLocale" not-null="true"
-			lazy="false" />
+			class="com.globalsight.util.GlobalSightLocale" not-null="true" lazy="false" />
 
 		<many-to-one name="targetLocale" column="TARGET_LOCALE_ID"
-			class="com.globalsight.util.GlobalSightLocale" not-null="true"
-			lazy="false" />
+			class="com.globalsight.util.GlobalSightLocale" not-null="true" lazy="false" />
 
-		<property name="encoding" length="30" column="CHAR_SET"
-			type="string" not-null="false" unique="false" />
+		<property name="encoding" length="30" column="CHAR_SET" type="string"
+			not-null="false" unique="false" />
 
 		<property name="workflowTemplateId" column="IFLOW_TEMPLATE_ID"
 			type="long" not-null="true" unique="false" />
@@ -37,23 +34,21 @@
 		<property name="notifyPm" column="NOTIFY_PM" type="yes_no"
 			not-null="true" unique="false" />
 
-		<property name="workflowType" length="20" column="TYPE"
-			type="string" not-null="true" unique="false" />
-
-		<property name="companyId" column="COMPANYID" type="string"
+		<property name="workflowType" length="20" column="TYPE" type="string"
 			not-null="true" unique="false" />
 
-		<set name="leveragingLocalesSet" cascade="save-update"
-			inverse="true">
+		<property name="companyId" column="COMPANYID" length="20"
+			type="long" not-null="true" unique="false" />
+
+		<set name="leveragingLocalesSet" cascade="save-update" inverse="true">
 			<key column="WORKFLOW_INFO_ID" />
-			<one-to-many
-				class="com.globalsight.everest.foundation.LeverageLocales" />
+			<one-to-many class="com.globalsight.everest.foundation.LeverageLocales" />
 		</set>
 
 		<bag name="workflowManagerIds" table="WF_TEMPLATE_WF_MANAGER"
 			cascade="save-update">
 			<key column="WORKFLOW_TEMPLATE_ID" />
-			<element column="WORKFLOW_MANAGER_ID" type="string" not-null="true"/>
+			<element column="WORKFLOW_MANAGER_ID" type="string" not-null="true" />
 		</bag>
 	</class>
 </hibernate-mapping>

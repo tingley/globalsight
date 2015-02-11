@@ -21,7 +21,6 @@ package com.globalsight.everest.foundation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -30,8 +29,8 @@ import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * This type defines the interface to the Localization Profile data
- * type used in Envoy to specify workflow and project attributes.
+ * This type defines the interface to the Localization Profile data type used in
+ * Envoy to specify workflow and project attributes.
  */
 public interface L10nProfile
 {
@@ -39,31 +38,31 @@ public interface L10nProfile
     public static final int NO_TM = 0;
     public static final int REGULAR_TM = 1;
     public static final int REGULAR_TM_WITH_PAGE_TM = 2;
-    
+
     /**
-     * Set compnay id in request. It is used to create job, workflow,
-     * taskinfo.
+     * Set compnay id in request. It is used to create job, workflow, taskinfo.
      */
-    public void setCompanyId(String p_companyId); 
-    
+    public void setCompanyId(long p_companyId);
+
     /**
      * Returns the company id stored in request.
+     * 
      * @return
      */
-    public String getCompanyId();
+    public long getCompanyId();
 
     /**
      * Get the identification of the main translation memory for this
-     * localization profile.  This is the TM associated with the
-     * project.
-     *
-     * @return The identification of the main translation memory for
-     * this localization profile.
+     * localization profile. This is the TM associated with the project.
+     * 
+     * @return The identification of the main translation memory for this
+     *         localization profile.
      */
     long getMainTmId();
 
     /**
-     * @param p_description for this localization profile
+     * @param p_description
+     *            for this localization profile
      */
     void setDescription(String p_description);
 
@@ -74,173 +73,190 @@ public interface L10nProfile
 
     /**
      * Set dispatch criteria for this localization profile.
-     *
-     * @param p_dispatch_criteria The Criteria for dispatching this
-     * profile.
+     * 
+     * @param p_dispatch_criteria
+     *            The Criteria for dispatching this profile.
      */
     void setDispatchCriteria(DispatchCriteria p_dispatch_criteria);
 
-
     /**
      * Set the project id for this localization profile.
-     *
-     * @param p_projectId The project id that this profile is
-     * associated with.
+     * 
+     * @param p_projectId
+     *            The project id that this profile is associated with.
      */
     void setProjectId(long p_projectId);
 
     /**
      * Set the TM Choice for this localization profile
-     * @param p_tmChoice 0, 1 or 2 are the permitted values
+     * 
+     * @param p_tmChoice
+     *            0, 1 or 2 are the permitted values
      */
     void setTmChoice(int p_tmChoice);
 
     /**
-     * The value for TM choice will be returned-no TM, regular TM or
-     * regular TM + page TM
-     * @return int 0,1,2 will be returned - see statics at top of
-     * interface
+     * The value for TM choice will be returned-no TM, regular TM or regular TM
+     * + page TM
+     * 
+     * @return int 0,1,2 will be returned - see statics at top of interface
      */
     int getTmChoice();
 
     /**
-     * @return the code set that the particular target locale is
-     * associated with.
+     * @return the code set that the particular target locale is associated
+     *         with.
      */
     String getCodeSet(GlobalSightLocale p_targetLocale);
 
     /**
-    * @return the leveraging locales for all the locales
-    */
+     * @return the leveraging locales for all the locales
+     */
     LeveragingLocales getLeveragingLocales();
 
     /**
      * Set a new name for this localization profile.
-     *
-     * @param p_name The new name for this localization profile.
+     * 
+     * @param p_name
+     *            The new name for this localization profile.
      */
     void setName(String p_name);
 
     /**
      * Set the source locale of this localization profile.
-     * @param p_locale The source locale.
+     * 
+     * @param p_locale
+     *            The source locale.
      */
     void setSourceLocale(GlobalSightLocale p_locale);
 
     /**
      * Set the priority of this L10nProfile.
-     *
-     * @param p_priority A number specifying the priority of jobs that
-     * are associated with this L10nProfile.
+     * 
+     * @param p_priority
+     *            A number specifying the priority of jobs that are associated
+     *            with this L10nProfile.
      */
     void setPriority(int p_priority);
 
     /**
      * Get the priority of this L10nProfile.
-     *
+     * 
      * @return The priority
      */
     int getPriority();
 
     /**
-     * Add a target locale and its workflow information to this
-     * localization profile.
-     * @param p_locale The target locale.
-     * @param p_workflowInfo The workflow information which contains
-     * the template ID and user assignment of each task.
+     * Add a target locale and its workflow information to this localization
+     * profile.
+     * 
+     * @param p_locale
+     *            The target locale.
+     * @param p_workflowInfo
+     *            The workflow information which contains the template ID and
+     *            user assignment of each task.
      */
     void addWorkflowTemplateInfo(WorkflowTemplateInfo p_workflowTemplateInfo);
 
     /**
      * Remove a target locale and its workflow information from this
      * localization profile.
-     * @param p_locale The target locale.
+     * 
+     * @param p_locale
+     *            The target locale.
      * @return WorkflowInfo The workflow object that was removed.
      */
-    WorkflowTemplateInfo removeWorkflowTemplateInfo(GlobalSightLocale p_targetLocale);
+    WorkflowTemplateInfo removeWorkflowTemplateInfo(
+            GlobalSightLocale p_targetLocale);
 
     /**
-     * Put workflow information into this localization profile,
-     * removing any workflow information having the same target
-     * locale.
-     * @param p_workflowInfo The workflow information which contains
-     * the template ID and user assignment of each task.
+     * Put workflow information into this localization profile, removing any
+     * workflow information having the same target locale.
+     * 
+     * @param p_workflowInfo
+     *            The workflow information which contains the template ID and
+     *            user assignment of each task.
      */
     void putWorkflowTemplateInfo(WorkflowTemplateInfo p_workflowTemplateInfo);
 
     /**
-     * Set whether the workflows driven by this localization profile
-     * are to be dispatched automatically.
-     *
-     * @param p_automatic True if the workflows are to be dispatched
-     * automatically; false otherwise.
+     * Set whether the workflows driven by this localization profile are to be
+     * dispatched automatically.
+     * 
+     * @param p_automatic
+     *            True if the workflows are to be dispatched automatically;
+     *            false otherwise.
      */
     void setAutomaticDispatch(boolean p_automatic);
 
     /**
      * Get the source locale of this localization profile.
+     * 
      * @return The source locale.
      */
     GlobalSightLocale getSourceLocale();
 
     /**
      * Get the list of target locales in this localization profile.
-     *
-     * @return A list of target locales in this localization profile.
-     * Each element in the array is a GlobalSightLocale
+     * 
+     * @return A list of target locales in this localization profile. Each
+     *         element in the array is a GlobalSightLocale
      */
     GlobalSightLocale[] getTargetLocales();
 
     /**
-     * Get the list of leveraging locales in this localization
-     * profile. Leveraging locales are target locales and groups of
-     * extra locales users selected from which segments are leveraged.
-     *
-     * @return LeveragingLocales object */
-    //LeveragingLocales getLeveragingLocales();
+     * Get the list of leveraging locales in this localization profile.
+     * Leveraging locales are target locales and groups of extra locales users
+     * selected from which segments are leveraged.
+     * 
+     * @return LeveragingLocales object
+     */
+    // LeveragingLocales getLeveragingLocales();
 
     /**
      * Get the workflow template id of the specified target locale.
-     *
-     * @param p_targetLocale The target locale.
-     * @return WorkflowInfo The workflow information of the specified
-     * target locale.
+     * 
+     * @param p_targetLocale
+     *            The target locale.
+     * @return WorkflowInfo The workflow information of the specified target
+     *         locale.
      */
-    WorkflowTemplateInfo getWorkflowTemplateInfo(GlobalSightLocale p_targetLocale);
-    
-    /**
-     * Get the Dtp workflow template id of the specified target locale.
-     *
-     * @param p_targetLocale The target locale.
-     * @return Dtp WorkflowInfo The workflow information of the specified
-     * target locale.
-     */
-    WorkflowTemplateInfo getDtpWorkflowTemplateInfo(GlobalSightLocale p_targetLocale);
+    WorkflowTemplateInfo getWorkflowTemplateInfo(
+            GlobalSightLocale p_targetLocale);
 
     /**
-     * Check whether the workflows created from templates in this
-     * localization profile are to be dispatched automatically.
-     *
-     * @return True if workflows are to be dispatched automatically;
-     * false otherwise.
+     * Get the Dtp workflow template id of the specified target locale.
+     * 
+     * @param p_targetLocale
+     *            The target locale.
+     * @return Dtp WorkflowInfo The workflow information of the specified target
+     *         locale.
+     */
+    WorkflowTemplateInfo getDtpWorkflowTemplateInfo(
+            GlobalSightLocale p_targetLocale);
+
+    /**
+     * Check whether the workflows created from templates in this localization
+     * profile are to be dispatched automatically.
+     * 
+     * @return True if workflows are to be dispatched automatically; false
+     *         otherwise.
      */
     boolean dispatchIsAutomatic();
 
-
     /**
      * Get the internal identification of this localization profile
-     *
+     * 
      * @return The internal identification of this localization profile.
      */
     long getId();
 
     /**
      * Get dispatch criteria for this localization profile.
-     *
+     * 
      * @return the Criteria for dispatching this profile.
      */
     DispatchCriteria getDispatchCriteria();
-
 
     /**
      * Get the project id of this localization profile.
@@ -248,8 +264,7 @@ public interface L10nProfile
     long getProjectId();
 
     /**
-     * Get the project that this localization profile
-     * is associated with.
+     * Get the project that this localization profile is associated with.
      */
     Project getProject();
 
@@ -270,42 +285,42 @@ public interface L10nProfile
 
     /**
      * Set to turn off/on running a script at job creation.
-     *
-     * @param p_runScript True - to run script
-     *                    False - to not run a script
+     * 
+     * @param p_runScript
+     *            True - to run script False - to not run a script
      */
     void setRunScriptAtJobCreation(boolean p_runScript);
 
     /**
      * Return the name of the job creation script - including the path.
-     *
+     * 
      * @return The script name or NULL if running the script isn't set.
      */
     String getNameOfJobCreationScript();
 
     /**
      * Set the script name to run at job creation.
-     *
-     * @param p_scriptName The name of the script including the path.
+     * 
+     * @param p_scriptName
+     *            The name of the script including the path.
      */
     void setJobCreationScriptName(String p_scriptName);
 
     /**
-     * Returns if exact match editing can be used on jobs associated
-     * with this profile.
-     *
-     * @return 'true' if exact match editing can be used, 'false' if
-     * not.
+     * Returns if exact match editing can be used on jobs associated with this
+     * profile.
+     * 
+     * @return 'true' if exact match editing can be used, 'false' if not.
      */
-    boolean isExactMatchEditing();
+//    boolean isExactMatchEditing();
 
     /**
      * Set if exact match editing should or should not be used.
-     *
-     * @param m_exactMatchEdit 'true' if it should be used.  'false'
-     * if it shouldn't be used.
+     * 
+     * @param m_exactMatchEdit
+     *            'true' if it should be used. 'false' if it shouldn't be used.
      */
-    void setExactMatchEditing(boolean p_exactMatchEdit);
+//    void setExactMatchEditing(boolean p_exactMatchEdit);
 
     Collection getWorkflowTemplateInfos();
 
@@ -315,13 +330,16 @@ public interface L10nProfile
 
     public List<Long> getUnActivelocaleIds();
 
-	public List<GlobalSightLocale> getUnActiveLocales();
-	
-	void removeWfInfo(GlobalSightLocale p_targetLocale);
-	
-	void clearWorkflowTemplateInfo(GlobalSightLocale targetLocale);
-	
-	public Set getFileProfiles();
-	
-	public void setFileProfiles(Set fileprofiles);
+    public List<GlobalSightLocale> getUnActiveLocales();
+
+    void removeWfInfo(GlobalSightLocale p_targetLocale);
+
+    void clearWorkflowTemplateInfo(GlobalSightLocale targetLocale);
+
+    public Set getFileProfiles();
+
+    public void setFileProfiles(Set fileprofiles);
+    
+    public int getTMEditType();
+    public void setTMEditType(int TMEditType);
 }

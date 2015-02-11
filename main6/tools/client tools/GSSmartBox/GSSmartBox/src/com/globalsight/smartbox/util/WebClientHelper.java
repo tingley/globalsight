@@ -472,12 +472,12 @@ public class WebClientHelper
 
     private static String replaceHostUrl(String root, String server)
     {
-        int indexOfGS = root.indexOf("globalsight");
+        int indexOfGS = root.indexOf("/globalsight/");
 
         StringBuffer url = new StringBuffer(root);
         if (indexOfGS != -1)
         {
-            url.replace(0, indexOfGS, server);
+            url.replace(0, indexOfGS + 1, server);
         }
 
         return url.toString();

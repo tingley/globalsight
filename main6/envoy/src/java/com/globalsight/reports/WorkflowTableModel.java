@@ -82,7 +82,8 @@ public class WorkflowTableModel extends AbstractTableModel
 
     private static final Object EMPTY = new String("");
     private static final String NOT_ACCEPTED_YET = "notAcceptedYet";
-    private static final String MY_MESSAGES = "messages/workflowTable";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "workflowTable";
 
     private boolean useInContext = false;
     private boolean useDefaultContext = false;
@@ -475,7 +476,7 @@ public class WorkflowTableModel extends AbstractTableModel
                     count += wordCounts.getHiFuzzyWordCount();
                     break;
                 case UNMATCHED_TYPE:
-                    count += wordCounts.getUnmatchedWordCount();
+                    count += wordCounts.getNoMatchWordCount();
                     break;
                 case REPETITIONS:
                     count += wordCounts.getRepetitionWordCount();

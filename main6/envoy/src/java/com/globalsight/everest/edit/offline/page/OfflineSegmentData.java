@@ -1055,7 +1055,7 @@ public class OfflineSegmentData implements Serializable
         m_sourceTuv = tuv;
     }
 
-    public Date getTargetTuvModifyDate(String companyId)
+    public Date getTargetTuvModifyDate(long companyId)
     {
         if (m_targetTuv != null)
         {

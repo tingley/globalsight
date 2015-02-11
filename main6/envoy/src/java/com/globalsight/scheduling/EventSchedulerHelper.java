@@ -301,7 +301,7 @@ public class EventSchedulerHelper
 
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 projectId.longValue());
-        String companyId = project.getCompanyId();
+        String companyId = String.valueOf(project.getCompanyId());
         // convert string representation of a locale to Locale object
         Locale srcLocale = convertToLocale(sourceLocale);
         Locale trgtLocale = convertToLocale(targetLocale);

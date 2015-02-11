@@ -17,7 +17,12 @@
 
 package com.globalsight.everest.costing;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -73,12 +78,10 @@ public class Cost extends PersistentObject
 
     public boolean isUseInContext = false;
     public boolean isDefaultInContext = false;
-    
-    private HashMap<Long, Cost> workflowCost = 
-            new HashMap<Long, Cost>();
 
-    private HashMap<Long, Cost> taskCost = 
-            new HashMap<Long, Cost>();
+    private HashMap<Long, Cost> workflowCost = new HashMap<Long, Cost>();
+
+    private HashMap<Long, Cost> taskCost = new HashMap<Long, Cost>();
 
     /**
      * Constructor.
@@ -223,10 +226,11 @@ public class Cost extends PersistentObject
         {
             if (m_estimatedCost != null && m_noUseEstimatedCost != null)
             {
-                m = new Money((isUseInContext) ? m_estimatedCost.floatValue()
-                        : (isDefaultInContext) ? m_defaultContextEstimatedCost
-                                .floatValue() : m_noUseEstimatedCost
-                                .floatValue(), m_currency);
+                m = new Money(
+                        (isUseInContext) ? m_estimatedCost.floatValue()
+                                : (isDefaultInContext) ? m_defaultContextEstimatedCost.floatValue()
+                                        : m_noUseEstimatedCost.floatValue(),
+                        m_currency);
             }
         }
 
@@ -441,9 +445,9 @@ public class Cost extends PersistentObject
     {
         if (m_costByWordCount == null)
         {
-            m_costByWordCount = (CostByWordCount) HibernateUtil
-                    .getFirst("from CostByWordCount cwc where cwc.cost = ?",
-                            this.getId());
+            m_costByWordCount = (CostByWordCount) HibernateUtil.getFirst(
+                    "from CostByWordCount cwc where cwc.cost.id = ?",
+                    this.getId());
         }
         return m_costByWordCount;
     }
@@ -465,10 +469,12 @@ public class Cost extends PersistentObject
      */
     public Collection<Surcharge> getSurcharges()
     {
-        if(m_surcharges == null) {
+        if (m_surcharges == null)
+        {
             return new ArrayList();
         }
-        else {
+        else
+        {
             return new ArrayList(m_surcharges);
         }
     }
@@ -498,12 +504,11 @@ public class Cost extends PersistentObject
             Money amount = fs.getAmount();
             if (!amount.getCurrency().equals(this.getCurrency()))
             {
-                fs
-                        .setAmount(Cost.convert(amount.getAmount(), amount
-                                .getCurrency(), this.getCurrency()), this
-                                .getCurrency());
+                fs.setAmount(Cost.convert(amount.getAmount(),
+                        amount.getCurrency(), this.getCurrency()), this
+                        .getCurrency());
             }
-            
+
             m_surcharges.add(fs);
         }
         else
@@ -527,16 +532,17 @@ public class Cost extends PersistentObject
     public void modifySurcharge(String p_surchargeOldName, Surcharge p_surcharge)
     {
         Iterator<Surcharge> ite = m_surcharges.iterator();
-        
-        while(ite.hasNext())
+
+        while (ite.hasNext())
         {
             Surcharge surcharge = ite.next();
-            if(surcharge.getName().equals(p_surchargeOldName)) {
+            if (surcharge.getName().equals(p_surchargeOldName))
+            {
                 m_surcharges.remove(surcharge);
                 surcharge.setCost(null);
 
                 addSurcharge(p_surcharge);
-                
+
                 return;
             }
         }
@@ -645,9 +651,9 @@ public class Cost extends PersistentObject
                     getCurrency(), p_requestedCurrency);
             this.setEstimatedCost(estimatedAmount);
             this.setNoUseEstimatedCost(noUseEstimatedAmount);
-            
+
             this.setDefaultContextEstimatedCost(defaultContextEstimatedAmount);
-            
+
             this.setActualCost(actualAmount);
 
             // if there is an override cost convert it too.
@@ -712,8 +718,8 @@ public class Cost extends PersistentObject
 
         // tempCost includes actualCost & all flat surcharges.
         // tempCost will used to calculate the percentage surcharges.
-        Money tempCost = new Money(totalCost.getAmount(), totalCost
-                .getCurrency());
+        Money tempCost = new Money(totalCost.getAmount(),
+                totalCost.getCurrency());
 
         // 2nd, calculate the percentage surcharge base on total cost.
         for (Iterator<Surcharge> i = getSurcharges().iterator(); i.hasNext();)
@@ -760,8 +766,8 @@ public class Cost extends PersistentObject
                     m_currency, p_requestedCurrency));
             cost.setInContextMatchCost(convert(cost.getInContextMatchCost(),
                     m_currency, p_requestedCurrency));
-            cost.setNoUseInContextMatchCost(convert(cost
-                    .getNoUseInContextMatchCost(), m_currency,
+            cost.setNoUseInContextMatchCost(convert(
+                    cost.getNoUseInContextMatchCost(), m_currency,
                     p_requestedCurrency));
             cost.setNoUseExactMatchCost(convert(cost.getNoUseExactMatchCost(),
                     m_currency, p_requestedCurrency));
@@ -810,20 +816,24 @@ public class Cost extends PersistentObject
     {
         m_finalCost = cost;
     }
-    
-    public HashMap<Long, Cost> getWorkflowCost() {
+
+    public HashMap<Long, Cost> getWorkflowCost()
+    {
         return this.workflowCost;
     }
-    
-    public void addworkflowCost(long wfId, Cost c) {
+
+    public void addworkflowCost(long wfId, Cost c)
+    {
         workflowCost.put(wfId, c);
     }
-    
-    public HashMap<Long, Cost> getTaskCost() {
+
+    public HashMap<Long, Cost> getTaskCost()
+    {
         return this.taskCost;
     }
-    
-    public void addTaskCost(long taskId, Cost c) {
+
+    public void addTaskCost(long taskId, Cost c)
+    {
         taskCost.put(taskId, c);
     }
 }

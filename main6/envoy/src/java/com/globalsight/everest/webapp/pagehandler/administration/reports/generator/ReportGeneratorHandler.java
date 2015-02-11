@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,26 +34,26 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.javabean.ErrorBean;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportSearchOptions;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * Generate Report handle. The handle can be used for generating reports,
- * getting the percent of reports, canceling the reports.
+ * Generate Report handler. The handle can be used for generating reports,
+ * getting the percent of reports, cancelling the reports.
  */
 public class ReportGeneratorHandler extends PageHandler implements
         ReportConstants
@@ -62,9 +61,12 @@ public class ReportGeneratorHandler extends PageHandler implements
     static private final Logger logger = Logger
             .getLogger(ReportGeneratorHandler.class);
 
-    private static Map<String, ReportsData> m_reportsDataMap = new ConcurrentHashMap<String, ReportsData>();
-    private static Map<String, ReportGenerator> m_generatorMap = new ConcurrentHashMap<String, ReportGenerator>();
-    private static Map<String, ReportInfo> m_reportResultMap = new ConcurrentHashMap<String, ReportInfo>();
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
+    private static Map<String, ReportGenerator> m_generatorMap = 
+            new ConcurrentHashMap<String, ReportGenerator>();
+    private static Map<String, ReportInfo> m_reportResultMap = 
+            new ConcurrentHashMap<String, ReportInfo>();
 
     @ActionHandler(action = ACTION_CANCEL_REPORT, formClass = "")
     public void cancelGenerateReport(HttpServletRequest p_request,
@@ -75,8 +77,9 @@ public class ReportGeneratorHandler extends PageHandler implements
                 .getAttribute(WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
                 .getParameter(ReportConstants.JOB_IDS));
+        String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
         
-        String key = getReportInfoKey(userId, reportJobIDS, p_request.getParameter(ReportConstants.REPORT_TYPE));
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportGenerator generator = m_generatorMap.get(key);
         
         if (generator != null)
@@ -86,13 +89,8 @@ public class ReportGeneratorHandler extends PageHandler implements
         }
     }
     
-    private String getReportInfoKey(String userId, List<Long> reportJobIDS, String reportType)
-    {
-    	return getKey(userId, reportJobIDS) + reportType;
-    }
-    
     /**
-     * Generate Reports
+     * Gets Reports
      */
     @ActionHandler(action = GET_REPORT, formClass = "")
     public void getReport(HttpServletRequest p_request,
@@ -103,13 +101,9 @@ public class ReportGeneratorHandler extends PageHandler implements
                 .getAttribute(WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
                 .getParameter(ReportConstants.JOB_IDS));
-        List<GlobalSightLocale> reportTargetLocales = ReportHelper
-                .getTargetLocaleList(p_request
-                        .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
-                        null);
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
         
-        String key = getReportInfoKey(userId, reportJobIDS, p_request.getParameter(ReportConstants.REPORT_TYPE));
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportInfo info = m_reportResultMap.get(key);
     	if (info != null)
     	{
@@ -136,14 +130,14 @@ public class ReportGeneratorHandler extends PageHandler implements
                         null);
         String reportType = p_request.getParameter(ReportConstants.REPORT_TYPE);
         
-        String key = getReportInfoKey(userId, reportJobIDS, p_request.getParameter(ReportConstants.REPORT_TYPE));
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
         ReportInfo info = new ReportInfo();
     	m_reportResultMap.put(key, info);
     	
         try 
         {
-	        ReportGenerator generator = ReportGeneratorFactory.getReportGenerator(reportType,
-	                p_request, p_response);
+            ReportGenerator generator = ReportGeneratorFactory
+                    .getReportGenerator(reportType, p_request, p_response);
 	        
 	        if (generator instanceof Cancelable) 
 	        {
@@ -180,9 +174,19 @@ public class ReportGeneratorHandler extends PageHandler implements
                 p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
         ReportGenerator generator;
 
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, reportTypeList))
+        {
+            String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
+                    + userId + ", " + reportTypeList + ", " + reportJobIDS;
+            logger.debug(message);
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
         // Initial Reports percent and status for m_reportsDataMap.
-        setReportsMap(userId, reportJobIDS, reportTypeList, 0,
-                ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                reportTypeList, 0, ReportsData.STATUS_INPROGRESS);
 
         List<File> reports = new ArrayList<File>();
         String zipFileName = null;
@@ -192,9 +196,9 @@ public class ReportGeneratorHandler extends PageHandler implements
             generator = ReportGeneratorFactory.getReportGenerator(reportType,
                     p_request, p_response);
             
-            if (generator instanceof Cancelable) 
+            if (generator instanceof Cancelable)  
             {
-				String key = getKey(userId, reportJobIDS) + reportTypeList.get(0);
+				String key = ReportHelper.getKey(userId, reportJobIDS, reportType);
 				m_generatorMap.put(key, generator);
 			}
             
@@ -206,7 +210,7 @@ public class ReportGeneratorHandler extends PageHandler implements
         {
             for (String reportType : reportTypeList)
             {
-                if (isCancelled(userId, reportJobIDS))
+                if (isCancelled(userId, reportJobIDS, reportType))
                 {
                     logger.debug("cancelGenerateReports:" + userId
                             + reportJobIDS);
@@ -223,9 +227,18 @@ public class ReportGeneratorHandler extends PageHandler implements
         }
 
         // Set Reports percent and status for m_reportsDataMap.
-        setReportsMap(userId, reportJobIDS, reportTypeList, 100,
-                ReportsData.STATUS_FINISHED);
-        generator = null;
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                reportTypeList, 100, ReportsData.STATUS_FINISHED);
+        generator = null;        
+        if (reports == null || reports.size() == 0)
+        {
+            StringBuffer msg = new StringBuffer();
+            msg.append("Can't create the report. Please check the options.");
+            ErrorBean errorBean = new ErrorBean(0, msg.toString());
+            p_request.setAttribute(WebAppConstants.ERROR_BEAN_NAME, errorBean);
+            p_request.getRequestDispatcher(ReportConstants.ERROR_PAGE).forward(p_request, p_response);
+        }
+        
         ReportHelper.sendFiles(reports, zipFileName, p_response);
     }
     
@@ -245,6 +258,33 @@ public class ReportGeneratorHandler extends PageHandler implements
     }
 
     /**
+     * Gets the ReportsData.
+     */
+    @ActionHandler(action = ACTION_GET_REPORTSDATA, formClass = "")
+    public void getReportsData(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
+    {
+        HttpSession userSession = p_request.getSession();
+        String userId = (String) userSession
+                .getAttribute(WebAppConstants.USER_NAME);
+        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
+                .getParameter(ReportConstants.JOB_IDS));
+        List<String> reportTypeList = ReportHelper.getListOfStr(
+                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
+
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
+        ReportsData data = m_reportsDataMap.get(key);
+        String json = "";
+        if (data != null)
+        {
+            json = data.toJSON();
+            logInfo("GETPERCENT METHOD:" + json);
+        }
+        
+        p_response.getWriter().write(json);
+    }
+    
+    /**
      * Gets the percent of Reports.
      */
     @ActionHandler(action = ACTION_GET_PERCENT, formClass = "")
@@ -256,8 +296,10 @@ public class ReportGeneratorHandler extends PageHandler implements
                 .getAttribute(WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
                 .getParameter(ReportConstants.JOB_IDS));
+        List<String> reportTypeList = ReportHelper.getListOfStr(
+                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
 
-        String key = getKey(userId, reportJobIDS);
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
         ReportsData data = m_reportsDataMap.get(key);
         if (data != null)
         {
@@ -283,21 +325,71 @@ public class ReportGeneratorHandler extends PageHandler implements
                 .getAttribute(WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
                 .getParameter(ReportConstants.JOB_IDS));
+        List<String> reportTypeList = ReportHelper.getListOfStr(
+                p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
 
-        String key = getKey(userId, reportJobIDS);
+        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
         ReportsData data = m_reportsDataMap.get(key);
         if (data != null)
         {
             data.setStatus(ReportsData.STATUS_CANCEL);
-            logger.debug("cancelReports:" + data);
+            logInfo("cancelReports:" + data + ", key:" + key);
+            logInfo("cancelReports: , mapKey:" + m_reportsDataMap.keySet());
+        }
+    }
+
+
+    /**
+     * Set the Report percent by Report Generator.
+     */
+    public static void setReportsMapByGenerator(String p_userId,
+            List<Long> p_reportJobIDS, double p_percent, String p_reportType)
+    {
+        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType);
+        ReportsData data = m_reportsDataMap.get(key);
+
+        if (data != null)
+        {
+            double percent = p_percent / data.getReportTypeList().size();
+            data.addPercent(percent);
+            m_reportsDataMap.put(key, data);
         }
     }
 
     /**
+     * Gets ReportsData from m_reportsDataMap, for detect whether canceled the
+     * reports.
+     */
+    public static ReportsData getReportsMap(String p_userId,
+            List<Long> p_reportJobIDS, String p_reportType)
+    {
+        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType);
+        ReportsData data = m_reportsDataMap.get(key);
+        return data;
+    }
+
+    public static boolean isCancelled(String p_userId, List<Long> p_reportJobIDS, String p_reportType)
+    {
+        ReportsData data = getReportsMap(p_userId, p_reportJobIDS, p_reportType);
+        
+        if (data != null)
+        {
+            return data.isCancle();
+        }
+        else
+        {
+            logInfo("Handler-->isCancelled, mapKey:" + m_reportsDataMap.keySet());
+            logInfo("Handler-->isCancelled, reportKey:" + ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType));
+        }
+
+        return false;
+    }
+    
+    /**
      * Invokes this PageHandler
      * 
      * @param p_pageDescriptor
-     *            the page desciptor
+     *            the page descriptor
      * @param p_request
      *            the original request sent from the browser
      * @param p_response
@@ -330,6 +422,10 @@ public class ReportGeneratorHandler extends PageHandler implements
         String action = p_request.getParameter("action");
         if (action == null)
         {
+            //Job Details Page rewrite.Job Summary need.
+            JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+            Job job = jobSummaryHelper.getJobByRequest(p_request);
+            jobSummaryHelper.packJobSummaryInfoView(p_request, job);
             return;
         }
 
@@ -382,84 +478,9 @@ public class ReportGeneratorHandler extends PageHandler implements
             return ReportConstants.REPORTS_NAME;
         }
     }
-
-    /**
-     * Sets the data for m_reportsDataMap, which used for report percent and
-     * status. The key of m_reportsDataMap is p_userId + p_reportJobIDS. The
-     * value of m_reportsDataMap is ReportsData.
-     */
-    public static void setReportsMap(String p_userId,
-            List<Long> p_reportJobIDS, List<String> p_reportTypeList,
-            double p_percent, String p_status)
+    
+    private static void logInfo(String p_msg)
     {
-        String key = getKey(p_userId, p_reportJobIDS);
-        ReportsData data = m_reportsDataMap.get(key);
-        if (data == null)
-        {
-            data = new ReportsData();
-            User user = UserUtil.getUserById(p_userId);
-            data.setUser(user);
-            data.setReportJobIDS(p_reportJobIDS);
-            data.setReportTypeList(p_reportTypeList);
-        }
-
-        data.setPercent(p_percent);
-        data.setStatus(p_status);
-        m_reportsDataMap.put(key, data);
-    }
-
-    /**
-     * Set the Report percent by Report Generator.
-     */
-    public static void setReportsMapByGenerator(String p_userId,
-            List<Long> p_reportJobIDS, double p_percent)
-    {
-        String key = getKey(p_userId, p_reportJobIDS);
-        ReportsData data = m_reportsDataMap.get(key);
-
-        if (data != null)
-        {
-            double percent = p_percent / data.getReportTypeList().size();
-            data.addPercent(percent);
-            m_reportsDataMap.put(key, data);
-        }
-    }
-
-    /**
-     * Gets ReportsData from m_reportsDataMap, for detect whether canceled the
-     * reports.
-     */
-    public static ReportsData getReportsMap(String p_userId,
-            List<Long> p_reportJobIDS)
-    {
-        String key = getKey(p_userId, p_reportJobIDS);
-        ReportsData data = m_reportsDataMap.get(key);
-        return data;
-    }
-
-    private boolean isCancelled(String p_userId, List<Long> p_reportJobIDS)
-    {
-        ReportsData data = getReportsMap(p_userId, p_reportJobIDS);
-        if (data != null)
-        {
-            return data.isCancle();
-        }
-
-        return false;
-    }
-
-    /**
-     * Gets key of the Map(m_reportsDataMap).
-     */
-    public static String getKey(String p_userId, List<Long> p_reportJobIDS)
-    {
-        if (p_reportJobIDS == null)
-        {
-            return p_userId;
-        }
-
-        List<Long> reportJobIDS = new ArrayList<Long>(p_reportJobIDS);
-        Collections.sort(reportJobIDS);
-        return p_userId + reportJobIDS;
+        //logger.info(p_msg);
     }
 }

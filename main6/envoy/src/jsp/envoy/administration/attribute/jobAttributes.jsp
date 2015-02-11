@@ -1,4 +1,5 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,
@@ -26,6 +27,7 @@
     com.globalsight.cxe.entity.customAttribute.DateCondition,
     com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
     com.globalsight.everest.webapp.WebAppConstants,
+    java.text.MessageFormat,
     java.util.Locale,java.util.ResourceBundle" 
          session="true" %>
 
@@ -33,6 +35,9 @@
 <jsp:useBean id="jobDetails" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager) session
@@ -55,9 +60,7 @@
     String deleteFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DELETE_FILES;
     String downloadFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DOWNLOAD_FILES;
     
-    String jobCommentsURL = jobComments.getPageURL() 
-    		+ "&" + JobManagementHandler.JOB_ID 
-    		+ "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+    String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
 	String jobReportsURL = jobReports.getPageURL() 
 			+ "&" + JobManagementHandler.JOB_ID 
 			+ "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
@@ -69,8 +72,7 @@
     String labelComments = bundle.getString("lb_comments");
 
     String labelJobName = bundle.getString("lb_job") + bundle.getString("lb_colon");
-    String jobName = (String) sessionMgr.getAttribute("jobName");
-    JobImpl job =  (JobImpl)request.getAttribute(JobAttributeConstant.JOB);
+    JobImpl job =  (JobImpl)request.getAttribute("Job");
     Map<AttributeClone, JobAttribute> attributeMap = job.getAttriguteMap();
 
     boolean isSuperAtt = false;
@@ -95,6 +97,7 @@
 	padding: 0 0.3em;
 }
 </style>
+<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
@@ -112,12 +115,6 @@
     dojo.require("dijit.form.FilteringSelect");
     dojo.require("dijit.form.TextBox");
     dojo.require("dojo.io.iframe");
-
-	dojo.addOnLoad(
-			function(){    
-				dojo.byId("contentTable").style.display="";
-			}	   	  
-	);
 
     function editListValue(obj)
     {
@@ -494,6 +491,18 @@
        cal1.time_comp = true;
        cal1.popup();
    }
+   
+//jobSummary child page needed started
+<amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
+$(document).ready(function(){
+	$("#jobAttributesTab").removeClass("tableHeadingListOff");
+	$("#jobAttributesTab").addClass("tableHeadingListOn");
+	$("#jobAttributesTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
+	$("#jobAttributesTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+})
+</amb:permission>
+
+//jobSummary child page needed end.
 </SCRIPT>
 </head>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -502,38 +511,12 @@
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
-    <SPAN CLASS="mainHeading">
-    <%=labelJobName%> <%=jobName%>
-    </SPAN>
-
-<p>
-<!-- Tabs table -->
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-    <TR>
-    
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=jobDetailsURL%>"><%=labelDetails%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-        <amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=jobCommentsURL%>"><%=labelComments%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>                
-        <TD WIDTH="2"></TD>
-        </amb:permission>
-        <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=selfIdUrl%>"><%=bundle.getString("lb_job_attributes") %></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>  
-        
-        <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
-	    <TD WIDTH="2"></TD>
-	    <TD CLASS="tableHeadingListOff">
-		    <IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
-		    <A CLASS="sortHREFWhite" HREF="<%=jobReportsURL%>"><%=bundle.getString("lb_reports") %></A>
-		    <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
-	    </TD>
-	    </amb:permission>     
-    </TR>
-</TABLE>
-<!-- End Tabs table -->
-
+<div id="includeSummaryTabs">
+	<%@ include file="/envoy/projects/workflows/includeJobSummaryTabs.jspIncl" %>
+</div>
 <form name="CommentForm" method="post">
 <!-- Comments data table -->
-    <table cellpadding=2 cellspacing=2 border=0 id="contentTable" style="display: none" class="standardText" width="650px;">
+    <table cellpadding=2 cellspacing=2 border=0 id="contentTable" class="standardText" width="650px;">
         <tr><td>&nbsp;</td></tr>
         <tr>
             <td><b><%=bundle.getString("lb_job_attributes") %>

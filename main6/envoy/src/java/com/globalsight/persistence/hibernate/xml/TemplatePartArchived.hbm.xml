@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <class name="com.globalsight.everest.page.TemplatePartArchived"
+        table="TEMPLATE_PART_ARCHIVED">
+
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+
+        <property name="order" length="22" column="ORDER_NUM"
+            type="integer" not-null="true" />
+
+        <property name="skeletonClob" 
+            column="SKELETON_CLOB" type="text" />
+
+        <property name="skeletonString" length="4000"
+            column="SKELETON_STRING" type="string" />
+
+        <many-to-one name="pageTemplate" column="TEMPLATE_ID" not-null="true"
+            class="com.globalsight.everest.page.PageTemplate"/>
+        <!-- 
+        <many-to-one name="tu" column="TU_ID"
+            class="com.globalsight.everest.tuv.TuImpl" />
+         -->
+        <property name="tuId" length="20" type="long" column="TU_ID"
+            not-null="false" />
+
+    </class>
+
+</hibernate-mapping>

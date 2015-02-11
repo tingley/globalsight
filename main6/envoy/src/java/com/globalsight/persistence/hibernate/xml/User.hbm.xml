@@ -1,0 +1,29 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.everest.foundation.UserImpl" table="USER">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>		
+		
+		<property name="userId" column="USER_ID" type="string"/>
+		<property name="state" column="STATE" type="int" not-null="true"/>
+		<property name="userName" column="USER_NAME" type="string"/>
+		<property name="firstName" column="FIRST_NAME" type="string"/>
+		<property name="lastName" column="LAST_NAME" type="string"/>
+		<property name="title" column="TITLE" type="string"/>
+		<property name="companyName" column="COMPANY_NAME" type="string"/>
+		<property name="password" column="PASSWORD" type="string"/>
+		<property name="email" column="EMAIL" type="string"/>
+		<property name="ccEmail" column="CC_EMAIL" type="string"/>
+		<property name="bccEmail" column="BCC_EMAIL" type="string"/>
+		<property name="address" column="ADDRESS" type="string"/>
+		<property name="defaultLocale" column="DEFAULT_LOCALE" type="string"/>
+		<property name="type" column="TYPE" type="int"/>
+		<property name="m_isInAllProjects" column="IN_ALL_PROJECTS" type="yes_no" access="field"/>
+		<property name="officePhoneNumber" column="OFFICE_PHONE_NUMBER" type="string"/>
+		<property name="homePhoneNumber" column="HOME_PHONE_NUMBER" type="string"/>
+		<property name="cellPhoneNumber" column="CELL_PHONE_NUMBER" type="string"/>
+		<property name="faxPhoneNumber" column="FAX_PHONE_NUMBER" type="string"/>
+	</class>
+</hibernate-mapping>

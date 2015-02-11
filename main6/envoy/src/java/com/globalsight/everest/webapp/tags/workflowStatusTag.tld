@@ -11,7 +11,7 @@
 	<tag>
 		<name>create</name>
 		<tag-class>com.globalsight.everest.webapp.tags.WorkflowStatusTag</tag-class>
-		<body-content>jsp</body-content>
+		<body-content>JSP</body-content>
 		<attribute>
 	  		<name>type</name>
 	  		<required>true</required>

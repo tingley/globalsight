@@ -112,9 +112,19 @@ public class LeverageOptions
     @SuppressWarnings("unchecked")
 	public Collection<Long> getTmsToLeverageFrom()
     {
-        Collection tms = m_tmProfile.getProjectTMsToLeverageFrom();
-        Collection<Long> tmIds = new ArrayList<Long>(tms.size());
-        Iterator itTms = tms.iterator();
+        Collection<LeverageProjectTM> tms = m_tmProfile.getProjectTMsToLeverageFrom();
+        List<LeverageProjectTM> tms2 = new ArrayList<LeverageProjectTM>(tms);
+        Collections.sort(tms2, new Comparator<LeverageProjectTM>()
+                {
+                    @Override
+                    public int compare(LeverageProjectTM o1,
+                            LeverageProjectTM o2)
+                    {
+                        return o1.getProjectTmIndex() - o2.getProjectTmIndex();
+                    }
+                });
+        Collection<Long> tmIds = new ArrayList<Long>(tms2.size());
+        Iterator<LeverageProjectTM> itTms = tms2.iterator();
         while(itTms.hasNext())
         {
             LeverageProjectTM tm = (LeverageProjectTM)itTms.next();

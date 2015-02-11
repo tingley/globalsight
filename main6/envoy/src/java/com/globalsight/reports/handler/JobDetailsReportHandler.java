@@ -68,7 +68,7 @@ import com.globalsight.util.date.DateHelper;
 
 public class JobDetailsReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/jobDetails";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION + "jobDetails";
 
     private static final String JOB_QUERY = "select job.id, job.name, job.state from job "
             + "where job.company_id = ? and (job.state='LOCALIZED' or job.state='EXPORTED' "
@@ -118,7 +118,6 @@ public class JobDetailsReportHandler extends BasicReportHandler
     private HashMap jobstatus_map = null;
     private HashMap<String, String> jobsLists_map = null;
 
-
     // values for accessing completed activity information
     private static final int CA_TASK_USER = 2;
 
@@ -165,16 +164,18 @@ public class JobDetailsReportHandler extends BasicReportHandler
         {
             cleanSession(theSession);
             addMoreReportParameters(req);
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_PREP), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_PREP), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
         {
             super.setUseInContext(false);
             // the web page is first created .
             createReport(req);
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act))
         {
@@ -211,8 +212,9 @@ public class JobDetailsReportHandler extends BasicReportHandler
 
             reportDataWrap.setCurrentPageNum(pageNum);
 
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
     }
 
@@ -281,7 +283,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
                 else if (state.equals(ARCHIVED))
                     m_archivedJobs.add(lvh);
             }
-            
+
             Collections.sort(m_dispatchedJobs,
                     new LabeledValueHolderComparator(Locale.getDefault()));
             Collections.sort(m_localizedJobs, new LabeledValueHolderComparator(
@@ -322,10 +324,10 @@ public class JobDetailsReportHandler extends BasicReportHandler
         if (m_dispatchedJobs.size() > 0)
         {
             states.add(dispatched);
-            jobRadioLabelMap.put(DISPATCHED, ReportsPackage.getMessage(
-                    m_bundle, DISPATCHED));
-            jobSelectLabelMap.put(DISPATCHED, ReportsPackage.getMessage(
-                    m_bundle, DISPATCHED_JOBS_MSG));
+            jobRadioLabelMap.put(DISPATCHED,
+                    ReportsPackage.getMessage(m_bundle, DISPATCHED));
+            jobSelectLabelMap.put(DISPATCHED,
+                    ReportsPackage.getMessage(m_bundle, DISPATCHED_JOBS_MSG));
             jobSelectNameMap.put(DISPATCHED, DISPATCHED_JOBS_MSG);
             jobstatus_map.put(DISPATCHED, dispatched);
         }
@@ -333,10 +335,10 @@ public class JobDetailsReportHandler extends BasicReportHandler
         if (m_localizedJobs.size() > 0)
         {
             states.add(localized);
-            jobRadioLabelMap.put(LOCALIZED, ReportsPackage.getMessage(m_bundle,
-                    LOCALIZED));
-            jobSelectLabelMap.put(LOCALIZED, ReportsPackage.getMessage(
-                    m_bundle, LOCALIZED_JOBS_MSG));
+            jobRadioLabelMap.put(LOCALIZED,
+                    ReportsPackage.getMessage(m_bundle, LOCALIZED));
+            jobSelectLabelMap.put(LOCALIZED,
+                    ReportsPackage.getMessage(m_bundle, LOCALIZED_JOBS_MSG));
             jobSelectNameMap.put(LOCALIZED, LOCALIZED_JOBS_MSG);
             jobstatus_map.put(LOCALIZED, localized);
         }
@@ -344,10 +346,10 @@ public class JobDetailsReportHandler extends BasicReportHandler
         if (m_exportedJobs.size() > 0)
         {
             states.add(exported);
-            jobRadioLabelMap.put(EXPORTED, ReportsPackage.getMessage(m_bundle,
-                    EXPORTED));
-            jobSelectLabelMap.put(EXPORTED, ReportsPackage.getMessage(m_bundle,
-                    EXPORTED_JOBS_MSG));
+            jobRadioLabelMap.put(EXPORTED,
+                    ReportsPackage.getMessage(m_bundle, EXPORTED));
+            jobSelectLabelMap.put(EXPORTED,
+                    ReportsPackage.getMessage(m_bundle, EXPORTED_JOBS_MSG));
             jobSelectNameMap.put(EXPORTED, EXPORTED_JOBS_MSG);
             jobstatus_map.put(EXPORTED, exported);
         }
@@ -355,10 +357,10 @@ public class JobDetailsReportHandler extends BasicReportHandler
         if (m_archivedJobs.size() > 0)
         {
             states.add(archived);
-            jobRadioLabelMap.put(ARCHIVED, ReportsPackage.getMessage(m_bundle,
-                    ARCHIVED));
-            jobSelectLabelMap.put(ARCHIVED, ReportsPackage.getMessage(m_bundle,
-                    ARCHIVED_JOBS_MSG));
+            jobRadioLabelMap.put(ARCHIVED,
+                    ReportsPackage.getMessage(m_bundle, ARCHIVED));
+            jobSelectLabelMap.put(ARCHIVED,
+                    ReportsPackage.getMessage(m_bundle, ARCHIVED_JOBS_MSG));
             jobSelectNameMap.put(ARCHIVED, ARCHIVED_JOBS_MSG);
             jobstatus_map.put(ARCHIVED, archived);
         }
@@ -370,8 +372,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             req.setAttribute(Constants.JOB_SELECT_LABEL_MAP, jobSelectLabelMap);
             req.setAttribute(Constants.JOB_SELECT_NAME_MAP, jobSelectNameMap);
 
-            req.setAttribute(Constants.JOB_STATUS_LABEL, ReportsPackage
-                    .getMessage(m_bundle, JOBS_STATUS_MSG));
+            req.setAttribute(Constants.JOB_STATUS_LABEL,
+                    ReportsPackage.getMessage(m_bundle, JOBS_STATUS_MSG));
 
             // Set the "jobstatu_map" HashMap into "SESSEION"
             // in order to get the Object in the next page for different
@@ -401,17 +403,15 @@ public class JobDetailsReportHandler extends BasicReportHandler
             {
                 currentLvh = (LabeledValueHolder) iter.next();
                 String jobDisplayName = currentLvh.getLabel();
-                jobDisplayName = jobDisplayName.substring(0, jobDisplayName
-                        .lastIndexOf(LEFT_PARENTHESES));
+                jobDisplayName = jobDisplayName.substring(0,
+                        jobDisplayName.lastIndexOf(LEFT_PARENTHESES));
                 jobsLists_map.put(currentLvh.getValue().toString(),
                         jobDisplayName);
                 // job id list for getting job name from JOB_LIST_MAP
                 dispatchedJobsId.add(currentLvh.getValue().toString());
             }
 
-            req
-                    .setAttribute(Constants.DISPATCHED_JOBID_ARRAY,
-                            dispatchedJobsId);
+            req.setAttribute(Constants.DISPATCHED_JOBID_ARRAY, dispatchedJobsId);
         }
 
         if (m_localizedJobs.size() > 0)
@@ -421,8 +421,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             {
                 currentLvh = (LabeledValueHolder) iter.next();
                 String jobDisplayName = currentLvh.getLabel();
-                jobDisplayName = jobDisplayName.substring(0, jobDisplayName
-                        .lastIndexOf(" ("));
+                jobDisplayName = jobDisplayName.substring(0,
+                        jobDisplayName.lastIndexOf(" ("));
                 jobsLists_map.put(currentLvh.getValue().toString(),
                         jobDisplayName);
                 localizedJobsId.add(currentLvh.getValue().toString());
@@ -438,8 +438,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             {
                 currentLvh = (LabeledValueHolder) iter.next();
                 String jobDisplayName = currentLvh.getLabel();
-                jobDisplayName = jobDisplayName.substring(0, jobDisplayName
-                        .lastIndexOf(LEFT_PARENTHESES));
+                jobDisplayName = jobDisplayName.substring(0,
+                        jobDisplayName.lastIndexOf(LEFT_PARENTHESES));
                 jobsLists_map.put(currentLvh.getValue().toString(),
                         jobDisplayName);
                 exportedJobsId.add(currentLvh.getValue().toString());
@@ -455,8 +455,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             {
                 currentLvh = (LabeledValueHolder) iter.next();
                 String jobDisplayName = currentLvh.getLabel();
-                jobDisplayName = jobDisplayName.substring(0, jobDisplayName
-                        .lastIndexOf(" ("));
+                jobDisplayName = jobDisplayName.substring(0,
+                        jobDisplayName.lastIndexOf(" ("));
                 jobsLists_map.put(currentLvh.getValue().toString(),
                         jobDisplayName);
                 archivedJobsId.add(currentLvh.getValue().toString());
@@ -531,8 +531,9 @@ public class JobDetailsReportHandler extends BasicReportHandler
     {
         // add a form at the top to show the criteria that was selected for the
         // report
-        HashMap<?, ?> jobstatus_hashmap = (HashMap<?, ?>) this.getSessionAttribute(
-                theSession, Constants.JOB_STATUS_SESSION_MAP);
+        HashMap<?, ?> jobstatus_hashmap = (HashMap<?, ?>) this
+                .getSessionAttribute(theSession,
+                        Constants.JOB_STATUS_SESSION_MAP);
         if (jobstatus_hashmap == null)
         {
             jobstatus_hashmap = new HashMap<Object, Object>();
@@ -559,8 +560,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
 
         String chosenState = (String) chosenStateHolder.getValue();
         String jobSelectedId = null;
-        HashMap<?, ?> jobslists_map = (HashMap<?, ?>) this.getSessionAttribute(theSession,
-                Constants.JOB_LIST_MAP);
+        HashMap<?, ?> jobslists_map = (HashMap<?, ?>) this.getSessionAttribute(
+                theSession, Constants.JOB_LIST_MAP);
         if (chosenState.equals(DISPATCHED))
         {
             // get "dispatchedJobs" from selection of parameter page
@@ -585,7 +586,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
         addCriteriaFormAtTop((String) chosenStateHolder.getLabel(), jobName);
 
         Job job = ServerProxy.getJobHandler().getJobById(jobId.longValue());
-        
+
         super.setUseInContext(job);
 
         Collection<Workflow> c = ServerProxy.getJobReportingManager()
@@ -614,10 +615,10 @@ public class JobDetailsReportHandler extends BasicReportHandler
     /**
      * Adds a form at the top with the selected job state and job name <br>
      * 
-     * @param p_jobstate --
-     *            the selected job status
-     * @param p_jobname --
-     *            the selected job name
+     * @param p_jobstate
+     *            -- the selected job status
+     * @param p_jobname
+     *            -- the selected job name
      */
     private void addCriteriaFormAtTop(String p_jobstate, String p_jobname)
     {
@@ -655,12 +656,12 @@ public class JobDetailsReportHandler extends BasicReportHandler
     /**
      * Adds a form to the report containing the job information <br>
      * 
-     * @param p_table --
-     *            a table model
-     * @param r --
-     *            the current row
-     * @param p_job --
-     *            the current job
+     * @param p_table
+     *            -- a table model
+     * @param r
+     *            -- the current row
+     * @param p_job
+     *            -- the current job
      */
     private void addJobForm(TableModel p_table, int r, Job p_job)
     {
@@ -705,7 +706,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
         this.reportDataWrap.setJobFormValue(fields);
 
         // pagination
-        LinkedHashMap<String, Object> tmpLinkMap = this.gainLinkMapOfPage(labels);
+        LinkedHashMap<String, Object> tmpLinkMap = this
+                .gainLinkMapOfPage(labels);
         tmpLinkMap.put(Constants.JOB_FORM, labels);
         tmpLinkMap = null;
     }
@@ -725,15 +727,15 @@ public class JobDetailsReportHandler extends BasicReportHandler
 
         if (super.isUseInContext())
         {
-            subcolSize ++;   
+            subcolSize++;
         }
-        if(super.isUseDefaultContext())
+        if (super.isUseDefaultContext())
         {
-            subcolSize ++;
+            subcolSize++;
         }
         if (isJobCostingOn())
         {
-            subcolSize ++;
+            subcolSize++;
         }
 
         subcols = new int[subcolSize];
@@ -741,10 +743,12 @@ public class JobDetailsReportHandler extends BasicReportHandler
         subcols[i++] = WorkflowTableModel.TRGLOCALE;
         subcols[i++] = WorkflowTableModel.WFSTATE;
         subcols[i++] = WorkflowTableModel.SEGMENT_TM_WC;
-        if(super.isUseInContext()){
+        if (super.isUseInContext())
+        {
             subcols[i++] = WorkflowTableModel.IN_CONTEXT_WC;
         }
-        if(super.isUseDefaultContext()){
+        if (super.isUseDefaultContext())
+        {
             subcols[i++] = WorkflowTableModel.CONTEXT_WC;
         }
         subcols[i++] = WorkflowTableModel.FUZZY_HI_WC;
@@ -787,8 +791,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
     /**
      * Outputs a table containing the activities for each workflow <br>
      * 
-     * @param long
-     *            p_jobId -- the id for this job
+     * @param long p_jobId -- the id for this job
      * @param WorkflowTableModel
      *            p_wtm -- the WorkflowTableModel
      * @param ArrayList
@@ -800,7 +803,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             WorkflowTableModel p_wtm, ArrayList<Workflow> p_workflows)
             throws Exception
     {
-        Object[] columnNames = new Object[] { HIDDEN_ACTIVITY_ID,
+        Object[] columnNames = new Object[]
+        { HIDDEN_ACTIVITY_ID,
                 ReportsPackage.getMessage(m_bundle, ACTIVITY_NAME_MSG),
                 ReportsPackage.getMessage(m_bundle, ACCEPTER_MSG),
                 ReportsPackage.getMessage(m_bundle, ASSIGNEE_ROLE_MSG),
@@ -818,10 +822,11 @@ public class JobDetailsReportHandler extends BasicReportHandler
             Workflow w = (Workflow) p_workflows.get(i);
             WorkflowInstance wfi = ServerProxy.getWorkflowServer()
                     .getWorkflowInstanceById(w.getId());
-            ArrayList<WorkflowTaskInstance> wfiTasks = new ArrayList<WorkflowTaskInstance>(wfi.getWorkflowInstanceTasks());
+            ArrayList<WorkflowTaskInstance> wfiTasks = new ArrayList<WorkflowTaskInstance>(
+                    wfi.getWorkflowInstanceTasks());
             List<Long> defaultTasks = findDefaultTaskIds(w.getId());
-            Comparator<WorkflowTaskInstance> comparator = new InnerTaskComparator(defaultTasks,
-                    completedActivities);
+            Comparator<WorkflowTaskInstance> comparator = new InnerTaskComparator(
+                    defaultTasks, completedActivities);
             Collections.sort(wfiTasks, comparator);
 
             Hashtable<?, ?> tasks = w.getTasks();
@@ -847,8 +852,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
                 if (wfTask.getTaskState() == Task.STATE_ACTIVE)
                 {
                     Map<?, ?> activeTasks = ServerProxy.getWorkflowServer()
-                            .getActiveTasksForWorkflow(
-                                    w.getId());
+                            .getActiveTasksForWorkflow(w.getId());
                     WorkflowTaskInstance thisTask = (WorkflowTaskInstance) activeTasks
                             .get(taskId);
                     if (thisTask != null)
@@ -888,14 +892,15 @@ public class JobDetailsReportHandler extends BasicReportHandler
                 }
                 else
                 {
-                    completedDate = DateHelper.getFormattedDateAndTime(task
-                            .getCompletedDate(), theUiLocale);
+                    completedDate = DateHelper.getFormattedDateAndTime(
+                            task.getCompletedDate(), theUiLocale);
                 }
 
                 int k = 0;
-                table.setValueAt(taskId, jcol, k++);                
+                table.setValueAt(taskId, jcol, k++);
                 /* The displayed name of the activity */
-                table.setValueAt(wfTask.getActivity().getDisplayName(), jcol, k++);
+                table.setValueAt(wfTask.getActivity().getDisplayName(), jcol,
+                        k++);
                 table.setValueAt(accepter, jcol, k++);
                 table.setValueAt(wfTask.getRolesAsString(), jcol, k++);
                 table.setValueAt(task.getActualDuration(), jcol, k++);
@@ -939,8 +944,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
      * taskname, and responsible user for each completed activity for all the
      * workflows for the specified job <br>
      * 
-     * @param p_jobid --
-     *            the ID of the job
+     * @param p_jobid
+     *            -- the ID of the job
      * @return HashMap of Activities
      * @throws Exception
      */
@@ -1016,7 +1021,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
     // taskId, activityName, userResponsible
     // };
     // map.put(taskId, values);
-    //    			
+    //
     // }
     // }
     // JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
@@ -1044,8 +1049,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
      * Prints out a two column table containing the pagename and the source word
      * count. <br>
      * 
-     * @param p_job --
-     *            the Job
+     * @param p_job
+     *            -- the Job
      */
     private void addTableWithPageNames(Job p_job)
     {
@@ -1057,8 +1062,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             private static final long serialVersionUID = -5062562368047083672L;
 
             Object[][] data = new Object[numRows][2];
-            String[] columnNames = {
-                    ReportsPackage.getMessage(m_bundle, "pageName"),
+            String[] columnNames =
+            { ReportsPackage.getMessage(m_bundle, "pageName"),
                     ReportsPackage.getMessage(m_bundle, "srcWordCount") };
 
             public int getRowCount()
@@ -1126,8 +1131,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
         }
     }
 
-    private LinkedHashMap<String, Object> gainLinkMapOfPage(TableModel curTableModel,
-            String tableCategory)
+    private LinkedHashMap<String, Object> gainLinkMapOfPage(
+            TableModel curTableModel, String tableCategory)
     {
         // '1' is the head row of this table model .
         int rows = curTableModel.getRowCount() + 1;
@@ -1194,7 +1199,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
             m_completedActivities = p_completedActivities;
         }
 
-        public int compare(WorkflowTaskInstance a_wfTask, WorkflowTaskInstance b_wfTask)
+        public int compare(WorkflowTaskInstance a_wfTask,
+                WorkflowTaskInstance b_wfTask)
         {
             Long a_taskId = new Long(a_wfTask.getTaskId());
             Long b_taskId = new Long(b_wfTask.getTaskId());

@@ -20,7 +20,6 @@ package com.globalsight.everest.request.reimport;
 // globalsight
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -740,7 +739,7 @@ public class ActivePageReimporter
             SystemConfiguration config = SystemConfiguration.getInstance();
             String capLoginUrl = config
                     .getStringParameter(SystemConfiguration.CAP_LOGIN_URL);
-            String companyIdStr = p_job.getCompanyId();
+            String companyIdStr = String.valueOf(p_job.getCompanyId());
             // there is an order to these arguments
             // activity name, job name, priority, page name, time, comments,
             // url)

@@ -17,31 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.aligner;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-
-import com.globalsight.everest.webapp.pagehandler.aligner.FileUploadHelper;
-
-import com.globalsight.everest.aligner.AlignerManager;
-import com.globalsight.everest.aligner.AlignerPackageUploadOptions;
-
-import com.globalsight.everest.projecthandler.ProjectTM;
-import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
-
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.everest.util.comparator.StringComparator;
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.company.CompanyThreadLocal;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -50,27 +25,44 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.rmi.RemoteException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.naming.NamingException;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.aligner.AlignerManager;
+import com.globalsight.everest.aligner.AlignerPackageUploadOptions;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.edit.EditUtil;
 
 /**
- * <p>This page handler is responsible for creating aligner packages,
- * downloading and uploading them..</p>
+ * <p>
+ * This page handler is responsible for creating aligner packages, downloading
+ * and uploading them..
+ * </p>
  */
-
-public class AlignerPackageUploadPageHandler
-    extends PageHandler
-    implements WebAppConstants
+public class AlignerPackageUploadPageHandler extends PageHandler implements
+        WebAppConstants
 {
-    static private final Logger CATEGORY =
-        Logger.getLogger(
-            AlignerPackageUploadPageHandler.class);
+    static private final Logger CATEGORY = Logger
+            .getLogger(AlignerPackageUploadPageHandler.class);
 
     static public String UPLOADDIR = "/_AlignerUploads_";
 
@@ -98,36 +90,38 @@ public class AlignerPackageUploadPageHandler
             }
         }
     }
-    
+
     //
     // Interface Methods: PageHandler
     //
 
     /**
      * Invoke this PageHandler.
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(
-            WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        Locale uiLocale = (Locale)session.getAttribute(
-            WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         String userId = getUser(session).getUserId();
-        String action = (String)p_request.getParameter(GAP_ACTION);
-        String options = (String)p_request.getParameter(GAP_OPTIONS);
+        String action = (String) p_request.getParameter(GAP_ACTION);
+        String options = (String) p_request.getParameter(GAP_OPTIONS);
 
         if (options != null)
         {
@@ -137,8 +131,8 @@ public class AlignerPackageUploadPageHandler
 
         try
         {
-            AlignerPackageUploadOptions gapOptions =
-                (AlignerPackageUploadOptions)sessionMgr.getAttribute(GAP_OPTIONS);
+            AlignerPackageUploadOptions gapOptions = (AlignerPackageUploadOptions) sessionMgr
+                    .getAttribute(GAP_OPTIONS);
 
             if (gapOptions != null)
             {
@@ -156,8 +150,8 @@ public class AlignerPackageUploadPageHandler
 
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("package upload options = " + 
-                    gapOptions.getXml());
+                CATEGORY.debug("package upload options = "
+                        + gapOptions.getXml());
             }
 
             if (action == null)
@@ -170,7 +164,7 @@ public class AlignerPackageUploadPageHandler
                     // plain names, or TmComparator for Tm objects (Tm
                     // is an interface implemented by ProjectTm).
                     Collections.sort(tms, new StringComparator(uiLocale));
-                    
+
                     sessionMgr.setAttribute(GAP_TMS, tms);
                 }
             }
@@ -182,16 +176,16 @@ public class AlignerPackageUploadPageHandler
                 o_upload.doUpload(p_request);
 
                 gapOptions.init(o_upload.getFieldValue(GAP_OPTIONS));
-                
+
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Uploading alignment package " + 
-                        o_upload.getSavedFilepath() + " using options\n" +
-                        gapOptions.getXml());
+                    CATEGORY.debug("Uploading alignment package "
+                            + o_upload.getSavedFilepath() + " using options\n"
+                            + gapOptions.getXml());
                 }
-                
-                s_manager.uploadPackage(gapOptions, 
-                    o_upload.getSavedFilepath(), getUser(session));
+
+                s_manager.uploadPackage(gapOptions,
+                        o_upload.getSavedFilepath(), getUser(session));
             }
 
             // clean up performed in AlignerPageHandler.
@@ -204,14 +198,15 @@ public class AlignerPackageUploadPageHandler
             sessionMgr.setAttribute(GAP_ERROR, ex.toString());
         }
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
      * Get TMs this user can access
      * 
-     * @param userId User's id
+     * @param userId
+     *            User's id
      * @return
      * @throws Exception
      * 
@@ -226,15 +221,16 @@ public class AlignerPackageUploadPageHandler
         boolean enableTMAccessControl = currentCompany
                 .getEnableTMAccessControl();
         ArrayList<String> tmListOfUser = new ArrayList<String>();
-        if(enableTMAccessControl)
+        if (enableTMAccessControl)
         {
-            boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
+            boolean isAdmin = UserUtil.isInPermissionGroup(userId,
+                    "Administrator");
             boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
             boolean isSuperPM = UserUtil.isSuperPM(userId);
             if (!isAdmin && !isSuperAdmin)
             {
                 ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
-                
+
                 if (isSuperPM)
                 {
                     List tmIdList = projectTMTBUsers.getTList(userId, "TM");
@@ -244,14 +240,19 @@ public class AlignerPackageUploadPageHandler
                         ProjectTM tm = null;
                         try
                         {
-                            tm = ServerProxy.getProjectHandler().getProjectTMById(
-                                    ((BigInteger) it.next()).longValue(), false);
+                            tm = ServerProxy
+                                    .getProjectHandler()
+                                    .getProjectTMById(
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
+                                            false);
                         }
                         catch (Exception e)
                         {
                             throw new EnvoyServletException(e);
                         }
-                        if (tm.getCompanyId().equals(currentCompanyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(
+                                currentCompanyId))
                         {
                             tmListOfUser.add(tm.getName());
                         }
@@ -266,8 +267,12 @@ public class AlignerPackageUploadPageHandler
                         ProjectTM tm = null;
                         try
                         {
-                            tm = ServerProxy.getProjectHandler().getProjectTMById(
-                                    ((BigInteger) it.next()).longValue(), false);
+                            tm = ServerProxy
+                                    .getProjectHandler()
+                                    .getProjectTMById(
+                                            ((BigInteger) it.next())
+                                                    .longValue(),
+                                            false);
                         }
                         catch (Exception e)
                         {
@@ -280,12 +285,14 @@ public class AlignerPackageUploadPageHandler
             else
             {
                 // result is an unordered collection of TM objects.
-                Collection tmp = ServerProxy.getProjectHandler().getAllProjectTMs();
+                Collection tmp = ServerProxy.getProjectHandler()
+                        .getAllProjectTMs();
 
                 for (Iterator it = tmp.iterator(); it.hasNext();)
                 {
                     ProjectTM tm = (ProjectTM) it.next();
-                    if (tm.getCompanyId().equals(currentCompanyId))
+                    if (String.valueOf(tm.getCompanyId()).equals(
+                            currentCompanyId))
                     {
                         tmListOfUser.add(tm.getName());
                     }
@@ -300,14 +307,13 @@ public class AlignerPackageUploadPageHandler
             for (Iterator it = tmp.iterator(); it.hasNext();)
             {
                 ProjectTM tm = (ProjectTM) it.next();
-                if (tm.getCompanyId().equals(currentCompanyId))
+                if (String.valueOf(tm.getCompanyId()).equals(currentCompanyId))
                 {
                     tmListOfUser.add(tm.getName());
                 }
             }
-            
+
         }
         return tmListOfUser;
     }
 }
-

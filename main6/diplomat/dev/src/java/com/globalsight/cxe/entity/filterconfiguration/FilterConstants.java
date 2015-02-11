@@ -41,6 +41,7 @@ public class FilterConstants
     public final static String PO_TABLENAME = "po_filter";
     public final static String BASE_TABLENAME = "base_filter";
     public final static String FM_TABLENAME = "frame_maker_filter";
+    public final static String PLAINTEXT_TABLENAME = "plain_text_filter";
     
 
     public final static ArrayList<String> ALL_FILTER_TABLE_NAMES = new ArrayList<String>();
@@ -61,6 +62,7 @@ public class FilterConstants
         ALL_FILTER_TABLE_NAMES.add(PO_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(BASE_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(FM_TABLENAME);
+        ALL_FILTER_TABLE_NAMES.add(PLAINTEXT_TABLENAME);
         
         FILTER_TABLE_NAMES_FORMAT.put(HTML_TABLENAME, IFormatNames.FORMAT_HTML);
         FILTER_TABLE_NAMES_FORMAT.put(MSOFFICEDOC_TABLENAME, IFormatNames.FORMAT_WORD_HTML);
@@ -73,7 +75,7 @@ public class FilterConstants
         FILTER_TABLE_NAMES_FORMAT.put(MSOFFICEPPT_TABLENAME,IFormatNames.FORMAT_POWERPOINT_HTML);
         FILTER_TABLE_NAMES_FORMAT.put(OFFICE2010_TABLENAME,IFormatNames.FORMAT_OFFICE_XML);
         FILTER_TABLE_NAMES_FORMAT.put(PO_TABLENAME,IFormatNames.FORMAT_PO);
-        FILTER_TABLE_NAMES_FORMAT.put(BASE_TABLENAME,IFormatNames.FORMAT_PLAINTEXT);
+        FILTER_TABLE_NAMES_FORMAT.put(PLAINTEXT_TABLENAME,IFormatNames.FORMAT_PLAINTEXT);
         FILTER_TABLE_NAMES_FORMAT.put(FM_TABLENAME, IFormatNames.FORMAT_MIF);
     }
 }

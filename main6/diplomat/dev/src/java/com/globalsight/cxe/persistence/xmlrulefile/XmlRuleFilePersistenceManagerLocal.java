@@ -52,8 +52,8 @@ public class XmlRuleFilePersistenceManagerLocal implements
     {
         try
         {
-            p_xmlRuleFile.setCompanyId(CompanyThreadLocal.getInstance()
-                    .getValue());
+            p_xmlRuleFile.setCompanyId(Long.parseLong(CompanyThreadLocal
+                    .getInstance().getValue()));
             HibernateUtil.save((XmlRuleFileImpl) p_xmlRuleFile);
             return readXmlRuleFile(p_xmlRuleFile.getId());
         }
@@ -136,11 +136,11 @@ public class XmlRuleFilePersistenceManagerLocal implements
             {
                 hql += " where x.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
-            
+
             hql += " order by x.name";
-            
+
             return HibernateUtil.search(hql, map);
         }
         catch (Exception e)

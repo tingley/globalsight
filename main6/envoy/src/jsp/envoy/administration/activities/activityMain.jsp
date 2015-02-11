@@ -25,24 +25,36 @@
 <jsp:useBean id="activities" scope="request" class="java.util.ArrayList" />
 <% 
     ResourceBundle bundle = PageHandler.getBundle(session);
-    SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+    SessionManager sessionMgr = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
  
     String confirmRemove = bundle.getString("msg_confirm_activity_removal");
     String newURL = new1.getPageURL() + "&action=" + ActivityConstants.CREATE;
     String modifyURL = modify.getPageURL() + "&action=" + ActivityConstants.EDIT;
     String removeURL = remove.getPageURL() + "&action=" + ActivityConstants.REMOVE;
+    String selfURL = self.getPageURL();
     String title = bundle.getString("lb_activity_types");
     String helperText= bundle.getString("helper_text_activity_types");
 
     String deps = (String)sessionMgr.getAttribute(ActivityConstants.DEPENDENCIES);
     
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
+ 
+    PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+
+    String actNameFilterValue = (String) sessionMgr.getAttribute(ActivityConstants.FILTER_ACTIVITY_NAME);
+    if (actNameFilterValue == null || actNameFilterValue.trim().length() == 0) {
+        actNameFilterValue = "";
+    }
+    String actCompanyNameFilterValue = (String) sessionMgr.getAttribute(ActivityConstants.FILTER_COMPANY_NAME);
+    if (actCompanyNameFilterValue == null || actCompanyNameFilterValue.trim().length() == 0) {
+        actCompanyNameFilterValue = "";
+    }
 %>
 <HTML>
 <HEAD>
 <TITLE><%=title%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -51,42 +63,86 @@ var objectName = "";
 var guideNode = "activityType";
 var helpFile = "<%=bundle.getString("help_activity_types_main_screen")%>";
 
-function submitForm(button)
+function newActivity()
 {
-    if (button == "New")
-    {
-        activityForm.action = "<%=newURL%>";
-    }
-    else 
-    {
-        value = getRadioValue(activityForm.radioBtn);
-        if (button == "Edit")
-        {
-            activityForm.action = "<%=modifyURL%>" + "&name=" + value;
-        }
-        else if (button == "Remove")
-        {
-            if (!confirm('<%=confirmRemove%>')) return false;
-            activityForm.action = "<%=removeURL%>" + "&name=" + value;
-        }
-    }
+    activityForm.action = "<%=newURL%>";
     activityForm.submit();
-    return;
 }
 
-function enableButtons()
+function modifyActivity(activityName)
 {
-    if (activityForm.removeBtn)
-        activityForm.removeBtn.disabled = false;
-    if (activityForm.editBtn)
-        activityForm.editBtn.disabled = false;
+    activityForm.action = "<%=modifyURL%>" + "&name=" + activityName;
+    activityForm.submit();
+}
+
+function removeActivity()
+{
+    var value = getSelectedActivity();
+    if (!confirm('<%=confirmRemove%>'))
+    {
+        return false;
+    }
+    activityForm.action = "<%=removeURL%>" + "&name=" + value;
+    activityForm.submit();
+}
+
+// Find selected activities
+// Actually there is only one in current implementation.
+function getSelectedActivity()
+{
+    var selectedActNames = "";
+    $("input[name='checkboxBtn']:checked").each(function ()
+    {
+        selectedActNames += $(this).val() + ",";
+    });
+    if (selectedActNames != "")
+        selectedActNames = selectedActNames.substring(0, selectedActNames.length - 1);
+
+    return selectedActNames;
+}
+
+function buttonManagement()
+{
+    var count = $("input[name='checkboxBtn']:checked").length;
+    if (count == 1)
+    {
+        $("#removeBtn").attr("disabled", false);
+    }
+    else
+    {
+        $("#removeBtn").attr("disabled", true);
+    }
+}
+
+function handleSelectAll() {
+    var ch = $("#selectAll").attr("checked");
+    if (ch == "checked")
+    {
+        $("[name='checkboxBtn']").attr("checked", true);
+    }
+    else
+    {
+        $("[name='checkboxBtn']").attr("checked", false);
+    }
+
+    buttonManagement();
+}
+
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+        activityForm.action = "<%=selfURL%>";
+        activityForm.submit();
+    }
 }
 
 </SCRIPT>
 
 </HEAD>
-<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides()">
+<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
@@ -99,12 +155,11 @@ function enableButtons()
     <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 <% }  %>
 
-<form name="activityForm" method="post">
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<form name="activityForm" id="activityForm" method="post">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" style="min-width:1024px;" >
   <tr valign="top">
     <td align="right">
-      <amb:tableNav bean="activities" key="<%=ActivityConstants.ACTIVITY_KEY%>"
-       pageUrl="self" />
+      <amb:tableNav bean="activities" key="<%=ActivityConstants.ACTIVITY_KEY%>" pageUrl="self" />
     </td>
   </tr>
   <tr>
@@ -112,59 +167,62 @@ function enableButtons()
       <amb:table bean="activities" id="activity"
        key="<%=ActivityConstants.ACTIVITY_KEY%>"
        dataClass="com.globalsight.everest.workflow.Activity" pageUrl="self"
-       emptyTableMsg="msg_no_activity_types" >
-      <amb:column label="">
-      <input type="radio" name="radioBtn" value="<%=activity.getName()%>"
-       onclick="enableButtons()">
+       hasFilter="true" emptyTableMsg="msg_no_activity_types" >
+      <amb:column label="checkbox" width="2%">
+        <input type="checkbox" name="checkboxBtn" id="checkboxBtn" value="<%=activity.getName()%>" onclick="buttonManagement()">
       </amb:column>
-      <amb:column label="lb_name" sortBy="<%=ActivityComparator.NAME%>"
-       width="150px">
-      <%= activity.getDisplayName() %>
+      <amb:column label="lb_name" sortBy="<%=ActivityComparator.NAME%>" width="15%" filter="<%=ActivityConstants.FILTER_ACTIVITY_NAME%>" filterValue="<%=actNameFilterValue%>">
+      <%  if (userPermissions.getPermissionFor(Permission.ACTIVITY_TYPES_EDIT)) { %>
+          <a href="javascript:void(0);" onclick="modifyActivity('<%=activity.getName()%>');"><%=activity.getDisplayName()%></a>
+      <%  } else { %>
+          <%=activity.getDisplayName()%>
+      <%
+          }
+      %>
       </amb:column>
-      <amb:column label="lb_description" sortBy="<%=ActivityComparator.DESC%>"
-       width="250px">
+      <amb:column label="lb_description" sortBy="<%=ActivityComparator.DESC%>" width="40%">
       <% out.print(activity.getDescription() == null ?
        "" : activity.getDescription()); %>
       </amb:column>
 
-      <amb:column label="lb_review_editable" width="100px">
+      <amb:column label="lb_review_editable" width="15%">
       <%
       if (activity.isType(Activity.TYPE_REVIEW) && activity.getIsEditable())
        out.println("<img src=/globalsight/images/checkmark.gif height=9 width=13 hspace=10 vspace=3>");
       %>
       </amb:column>
-      <amb:column label="lb_review_notEditable" width="120px">
+      <amb:column label="lb_review_notEditable" width="15%">
       <%
       if (activity.isType(Activity.TYPE_REVIEW) && !activity.getIsEditable())
        out.println("<img src=/globalsight/images/checkmark.gif height=9 width=13 hspace=10 vspace=3>");
       %>
       </amb:column>
-      <amb:column label="lb_use_type" sortBy="<%=ActivityComparator.USE_TYPE%>" width="80px">
+      <amb:column label="lb_use_type" sortBy="<%=ActivityComparator.USE_TYPE%>" width="">
       <%String useType = bundle.getString(activity.getUseType());
       out.print(useType);
       %>
       </amb:column>
       <% if (isSuperAdmin) { %>
-      <amb:column label="lb_company_name" sortBy="<%=ActivityComparator.ASC_COMPANY%>" width="120">
+      <amb:column label="lb_company_name" sortBy="<%=ActivityComparator.ASC_COMPANY%>" width="140" 
+          filter="<%=ActivityConstants.FILTER_COMPANY_NAME%>" filterValue="<%=actCompanyNameFilterValue%>" >
           <%=CompanyWrapper.getCompanyNameById(activity.getCompanyId())%>
       </amb:column>
       <% } %>
       </amb:table>
     </td>
   </tr>
+  <tr valign="top">
+    <td align="right">
+      <amb:tableNav bean="activities" key="<%=ActivityConstants.ACTIVITY_KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>
+    </td>
+  </tr>
   <tr>
-    <td style="padding-top:5px" align="right">
+    <td style="padding-top:5px" align="left">
     <amb:permission name="<%=Permission.ACTIVITY_TYPES_REMOVE%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-       name="removeBtn" disabled onclick="submitForm('Remove');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.ACTIVITY_TYPES_EDIT%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
-       name="editBtn" disabled onclick="submitForm('Edit');">
+      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>" name="removeBtn" id="removeBtn" disabled onclick="removeActivity();">
     </amb:permission>
     <amb:permission name="<%=Permission.ACTIVITY_TYPES_NEW%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
-       onclick="submitForm('New');">
+      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..." name="newBtn" id="newBtn" onclick="newActivity();">
     </amb:permission>
     </td>
   </tr>

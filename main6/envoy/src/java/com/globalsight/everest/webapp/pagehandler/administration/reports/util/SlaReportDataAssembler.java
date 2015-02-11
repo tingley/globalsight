@@ -44,24 +44,24 @@ import com.globalsight.util.date.DateHelper;
 
 public class SlaReportDataAssembler
 {
-    private static Logger s_logger = 
-        Logger.getLogger("SlaReportDataAssembler");
-    
+    private static Logger s_logger = Logger
+            .getLogger(SlaReportDataAssembler.class);
+
     private HttpServletRequest request = null;
-    
+
     private XlsReportData reportData = null;
-    
+
     public SlaReportDataAssembler(HttpServletRequest p_request)
     {
         this.request = p_request;
         this.reportData = new XlsReportData();
     }
-    
+
     public XlsReportData getXlsReportData()
     {
         return this.reportData;
     }
-    
+
     public void setJobIdList()
     {
         String[] jobIds = request.getParameterValues("jobId");
@@ -79,7 +79,7 @@ public class SlaReportDataAssembler
             }
         }
     }
-    
+
     public void setProjectIdList()
     {
         String[] projectIds = request.getParameterValues("projectId");
@@ -97,7 +97,7 @@ public class SlaReportDataAssembler
             }
         }
     }
-    
+
     public void setStatusList()
     {
         String[] status = request.getParameterValues("status");
@@ -111,13 +111,13 @@ public class SlaReportDataAssembler
         }
         else
         {
-            for (int i = 0; i < status.length; i++) 
+            for (int i = 0; i < status.length; i++)
             {
                 reportData.statusList.add(status[i]);
             }
         }
     }
-    
+
     public void setTargetLangList()
     {
         String[] targetLangs = request.getParameterValues("targetLocalesList");
@@ -135,28 +135,29 @@ public class SlaReportDataAssembler
             }
         }
     }
-    
+
     public void setDateFormat()
     {
         String dateFormat = request.getParameter("dateFormat");
         reportData.dateFormat = new SimpleDateFormat(dateFormat);
     }
-    
+
     public void setProjectData() throws Exception
     {
         HashMap projectMap = new HashMap();
-        
+
         JobSearchParameters searchParams = getSearchParams();
-        ArrayList queriedJobs = 
-            new ArrayList(ServerProxy.getJobHandler().getJobs(searchParams));
-        
+        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler()
+                .getJobs(searchParams));
+
         HashSet jobs = new HashSet(queriedJobs);
-        
+
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        
-        BaseFluxCalendar calendar = ServerProxy.getCalendarManager().findDefaultCalendar(companyId);
+
+        BaseFluxCalendar calendar = ServerProxy.getCalendarManager()
+                .findDefaultCalendar(companyId);
         EventScheduler eventScheduler = ServerProxy.getEventScheduler();
-        
+
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
         Iterator jobIter = jobs.iterator();
@@ -164,96 +165,97 @@ public class SlaReportDataAssembler
         {
             Job j = (Job) jobIter.next();
 
-            if (!reportData.wantsAllJobs && 
-                !reportData.jobIdList.contains(Long.toString(j.getId())))
+            if (!reportData.wantsAllJobs
+                    && !reportData.jobIdList.contains(Long.toString(j.getId())))
             {
                 continue;
             }
-            
+
             Iterator wfIter = j.getWorkflows().iterator();
             while (wfIter.hasNext())
             {
                 Workflow w = (Workflow) wfIter.next();
-                
+
                 // skip certain workflows
-                if (Workflow.PENDING.equals(w.getState()) || 
-                    Workflow.IMPORT_FAILED.equals(w.getState()) || 
-                    Workflow.CANCELLED.equals(w.getState()) || 
-                    Workflow.BATCHRESERVED.equals(w.getState()) || 
-                    Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
+                if (Workflow.PENDING.equals(w.getState())
+                        || Workflow.IMPORT_FAILED.equals(w.getState())
+                        || Workflow.CANCELLED.equals(w.getState())
+                        || Workflow.BATCHRESERVED.equals(w.getState())
+                        || Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
                 {
                     continue;
                 }
-                
+
                 // skip workflows without special target lang
                 String targetLang = w.getTargetLocale().toString();
-                if (!(reportData.wantsAllTargetLangs ||
-                      reportData.targetLangList.contains(targetLang)))
+                if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
+                        .contains(targetLang)))
                 {
                     continue;
                 }
-                     
+
                 long jobId = j.getId();
-                    L10nProfile l10nProfile = j.getL10nProfile();
-                
-                HashMap localeMap = (HashMap)projectMap.get(Long.toString(jobId));
+                L10nProfile l10nProfile = j.getL10nProfile();
+
+                HashMap localeMap = (HashMap) projectMap.get(Long
+                        .toString(jobId));
                 if (localeMap == null)
                 {
                     localeMap = new HashMap();
                     projectMap.put(Long.toString(jobId), localeMap);
                 }
 
-                ProjectWorkflowData data = (ProjectWorkflowData)localeMap.get(targetLang);
+                ProjectWorkflowData data = (ProjectWorkflowData) localeMap
+                        .get(targetLang);
                 if (data == null)
                 {
                     data = new ProjectWorkflowData();
                     localeMap.put(targetLang, data);
-                    
+
                     data.jobName = j.getJobName();
-                    
+
                     data.jobId = jobId;
-                    
+
                     data.targetLang = targetLang;
-                    
-                    data.workflowName = 
-                        l10nProfile.getWorkflowTemplateInfo(w.getTargetLocale()).getName();
-                    
+
+                    data.workflowName = l10nProfile.getWorkflowTemplateInfo(
+                            w.getTargetLocale()).getName();
+
                     data.totalWordCount = w.getTotalWordCount();
-                    
+
                     data.creationDate = j.getCreateDate();
-                    
+
                     data.currentActivityName = getCurrentActivityName(w);
-                    
+
                     // For sla report issue
-                    // There are lots of original workflows while applying the sla patch.
+                    // There are lots of original workflows while applying the
+                    // sla patch.
                     // And this workflows have not translation completed dates.
-                    // So, it needs to calculate this dates. 
+                    // So, it needs to calculate this dates.
                     w.updateTranslationCompletedDates();
-                    
-                    data.estimatedTranslateCompletionDate = 
-                        w.getEstimatedTranslateCompletionDate();
-                    
-                    if (data.estimatedTranslateCompletionDate != null) 
+
+                    data.estimatedTranslateCompletionDate = w
+                            .getEstimatedTranslateCompletionDate();
+
+                    if (data.estimatedTranslateCompletionDate != null)
                     {
-                        // Get days and hours of leadtime 
+                        // Get days and hours of leadtime
                         data.leadtime = getBusinessIntervals(data.creationDate,
-                                             data.estimatedTranslateCompletionDate,
-                                             calendar,
-                                             eventScheduler,
-                                             calendar.getHoursPerDay());
+                                data.estimatedTranslateCompletionDate,
+                                calendar, eventScheduler,
+                                calendar.getHoursPerDay());
                     }
-                    
-                    data.actualTranslateCompletionDate = 
-                        w.getTranslationCompletedDate();
-                    
+
+                    data.actualTranslateCompletionDate = w
+                            .getTranslationCompletedDate();
+
                     if (data.actualTranslateCompletionDate != null)
                     {
-                        // Get days and hours of actualPerformance 
-                        data.actualPerformance = getBusinessIntervals(data.creationDate, 
-                                             data.actualTranslateCompletionDate, 
-                                             calendar, 
-                                             eventScheduler,
-                                             calendar.getHoursPerDay());
+                        // Get days and hours of actualPerformance
+                        data.actualPerformance = getBusinessIntervals(
+                                data.creationDate,
+                                data.actualTranslateCompletionDate, calendar,
+                                eventScheduler, calendar.getHoursPerDay());
                     }
                 }
 
@@ -265,15 +267,17 @@ public class SlaReportDataAssembler
                 }
 
             }
-            
+
         }
-        
+
         reportData.projectMap = projectMap;
     }
-    
-    /* ----------------------------------------------------------------------
-     * Below are helper methods  
-     * ---------------------------------------------------------------------- */
+
+    /*
+     * ----------------------------------------------------------------------
+     * Below are helper methods
+     * ----------------------------------------------------------------------
+     */
 
     /**
      * Returns search params used to find the jobs based on state
@@ -284,7 +288,7 @@ public class SlaReportDataAssembler
     private JobSearchParameters getSearchParams()
     {
         JobSearchParameters sp = new JobSearchParameters();
-        
+
         if (!reportData.wantsAllProjects)
         {
             sp.setProjectId(reportData.projectIdList);
@@ -292,25 +296,25 @@ public class SlaReportDataAssembler
 
         sp.setJobState(reportData.statusList);
 
-        String paramCreateDateStartCount = 
-            request.getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = 
-            request.getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (! "-1".equals(paramCreateDateStartOpts))
+        String paramCreateDateStartCount = request
+                .getParameter(JobSearchConstants.CREATION_START);
+        String paramCreateDateStartOpts = request
+                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
+        if (!"-1".equals(paramCreateDateStartOpts))
         {
             sp.setCreationStart(new Integer(paramCreateDateStartCount));
             sp.setCreationStartCondition(paramCreateDateStartOpts);
         }
 
-        String paramCreateDateEndCount = 
-            request.getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = 
-            request.getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+        String paramCreateDateEndCount = request
+                .getParameter(JobSearchConstants.CREATION_END);
+        String paramCreateDateEndOpts = request
+                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
         if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
         {
             sp.setCreationEnd(new java.util.Date());
         }
-        else if (! "-1".equals(paramCreateDateEndOpts))
+        else if (!"-1".equals(paramCreateDateEndOpts))
         {
             sp.setCreationEnd(new Integer(paramCreateDateEndCount));
             sp.setCreationEndCondition(paramCreateDateEndOpts);
@@ -318,20 +322,18 @@ public class SlaReportDataAssembler
 
         return sp;
     }
-    
-    private String getCurrentActivityName(Workflow w) 
+
+    private String getCurrentActivityName(Workflow w)
     {
         String result = null;
 
         Map activeTasks = null;
-        try 
+        try
         {
-            activeTasks = 
-                ServerProxy.getWorkflowServer()
-                           .getActiveTasksForWorkflow(
-                                w.getId());
-        } 
-        catch (Exception e) 
+            activeTasks = ServerProxy.getWorkflowServer()
+                    .getActiveTasksForWorkflow(w.getId());
+        }
+        catch (Exception e)
         {
             activeTasks = null;
             s_logger.error("Failed to get active tasks for workflow "
@@ -339,13 +341,13 @@ public class SlaReportDataAssembler
         }
 
         // for now we'll only have one active task
-        Object[] tasks = 
-            (activeTasks == null) ? null : activeTasks.values().toArray();
-        
+        Object[] tasks = (activeTasks == null) ? null : activeTasks.values()
+                .toArray();
+
         if ((tasks == null) || (tasks.length <= 0))
         {
             String state = w.getState();
-            
+
             if (state.equals(Workflow.LOCALIZED))
             {
                 result = "Localised";
@@ -358,14 +360,14 @@ public class SlaReportDataAssembler
             {
                 result = "Not Yet Dispatched";
             }
-        } 
-        else 
+        }
+        else
         {
             // assume just one active task for now
             Activity a = ((WorkflowTaskInstance) tasks[0]).getActivity();
             result = (a == null) ? null : a.getDisplayName();
         }
-        
+
         if (result == null)
         {
             result = "Unknown";
@@ -373,44 +375,41 @@ public class SlaReportDataAssembler
 
         return result;
     }
-    
-    private String getBusinessIntervals(Date startDate, 
-                                        Date endDate, 
-                                        BaseFluxCalendar calendar, 
-                                        EventScheduler eventScheduler,
-                                        int workingHoursPerDay)
-    throws Exception
+
+    private String getBusinessIntervals(Date startDate, Date endDate,
+            BaseFluxCalendar calendar, EventScheduler eventScheduler,
+            int workingHoursPerDay) throws Exception
     {
         long MILLIS_PER_MIN = DateHelper.milliseconds(0, 0, 1);
         long MILLIS_PER_HOUR = DateHelper.milliseconds(0, 1, 0);
         long MILLIS_PER_DAY = DateHelper.milliseconds(1, 0, 0);
-                        
+
         // Keep the result of business intervals.
         int intervalDays = -1;
         int intervalHours = -1;
-        
+
         long durations = 0l;
         Date determineDate = null;
-        
+
         int intervalDays_min = 0;
-        int intervalDays_max = 
-            DateHelper.convertMillisecondsToDays(endDate.getTime() - startDate.getTime());
+        int intervalDays_max = DateHelper.convertMillisecondsToDays(endDate
+                .getTime() - startDate.getTime());
         int intervalDays_temp = 0;
-        
-        // Determine date at day-level. 
+
+        // Determine date at day-level.
         while (true)
         {
             intervalDays_temp = (intervalDays_max + intervalDays_min) / 2;
             durations = intervalDays_temp * MILLIS_PER_DAY;
-            determineDate = 
-                eventScheduler.determineDate(startDate, calendar, durations);
-            
+            determineDate = eventScheduler.determineDate(startDate, calendar,
+                    durations);
+
             if (intervalDays_max - intervalDays_min <= 1)
             {
                 intervalDays = intervalDays_min;
-                break; 
+                break;
             }
-            
+
             if (endDate.compareTo(determineDate) > 0)
             {
                 // endDate > determineDate
@@ -429,33 +428,27 @@ public class SlaReportDataAssembler
                 break;
             }
         }
-        
+
         // Determine date at hour-level.
         if (intervalHours == -1)
         {
-            // Fix the date to working hours. 
-            startDate = eventScheduler
-                            .determineDate(startDate, 
-                                           calendar, 
-                                           intervalDays * MILLIS_PER_DAY + MILLIS_PER_MIN);
-            
+            // Fix the date to working hours.
+            startDate = eventScheduler.determineDate(startDate, calendar,
+                    intervalDays * MILLIS_PER_DAY + MILLIS_PER_MIN);
+
             int intervalHours_max = workingHoursPerDay;
             int intervalHours_min = 0;
             int intervalHours_temp = 0;
-            
+
             if (endDate.compareTo(startDate) <= 0)
             {
-                // Outside working time. 
+                // Outside working time.
                 intervalHours = 0;
             }
-            else if (endDate
-                        .compareTo(eventScheduler
-                                       .determineDate(startDate, 
-                                                      calendar, 
-                                                      workingHoursPerDay * MILLIS_PER_HOUR)) 
-                         >= 0)
+            else if (endDate.compareTo(eventScheduler.determineDate(startDate,
+                    calendar, workingHoursPerDay * MILLIS_PER_HOUR)) >= 0)
             {
-                // Outside working time. 
+                // Outside working time.
                 intervalHours = workingHoursPerDay;
             }
             else
@@ -463,12 +456,9 @@ public class SlaReportDataAssembler
                 while (true)
                 {
                     intervalHours_temp = (intervalHours_min + intervalHours_max) / 2;
-                    determineDate = 
-                        eventScheduler
-                        .determineDate(startDate, 
-                                       calendar, 
-                                       intervalHours_temp * MILLIS_PER_HOUR);
-                    
+                    determineDate = eventScheduler.determineDate(startDate,
+                            calendar, intervalHours_temp * MILLIS_PER_HOUR);
+
                     if (endDate.compareTo(determineDate) > 0)
                     {
                         // endDate > determineDate
@@ -485,22 +475,22 @@ public class SlaReportDataAssembler
                         intervalHours = intervalHours_temp;
                         break;
                     }
-                    
+
                     if (intervalHours_max - intervalHours_min <= 1)
                     {
                         intervalHours = intervalHours_max;
-                        break; 
+                        break;
                     }
                 } // end while (true)
             } // end if (endDate.compareTo(determineDate) > 0)
         } // end if (resultHours == null)
-        
+
         if (intervalHours >= workingHoursPerDay)
         {
             intervalDays = intervalDays + (intervalHours / workingHoursPerDay);
             intervalHours = intervalHours % workingHoursPerDay;
         }
-        
+
         return intervalDays + "d " + intervalHours + "h";
-    } 
+    }
 }

@@ -57,8 +57,9 @@ public class DiplomatSegmenter
     //
     // Member Variables
     //
-    
-    private static final Logger logger = Logger.getLogger(DiplomatSegmenter.class);
+
+    private static final Logger logger = Logger
+            .getLogger(DiplomatSegmenter.class);
 
     private boolean m_preserveWhitespace = false;
 
@@ -539,7 +540,7 @@ public class DiplomatSegmenter
                 String seg = m_segment.substring(iStart, iEnd);
                 result.add(seg);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.error("substring error, segment: " + m_segment);
                 logger.error("iStart " + iStart + " iEnd " + iEnd);

@@ -103,7 +103,7 @@ public class EditSourceApplet extends Applet
     private String companyId = null; // @jve:decl-index=0:
     private String projectId = null;
     private String pageLocale = null;
-    private String userId = null;
+    private String userName = null;
     private String password = null;
     private JPanel jPanel1 = null;
     private AuthenticationPrompter s_authPrompter = new AuthenticationPrompter();
@@ -146,14 +146,14 @@ public class EditSourceApplet extends Applet
         return jobId;
     }
 
-    public String getUserId()
+    public String getUserName()
     {
-        if (userId == null)
+        if (userName == null)
         {
-            userId = getParameter("userId");
+            userName = getParameter("userName");
         }
-        
-        return userId;
+
+        return userName;
     }
     
     public String getPassword()
@@ -420,8 +420,7 @@ public class EditSourceApplet extends Applet
                     {
                         getAppletContext()
                                 .showDocument(
-                                        new URL(
-                                                "javascript:dijit.byId('addSourceDiv').hide()"));
+                                        new URL("javascript:closeDialog()"));
                     }
                     catch (MalformedURLException e1)
                     {
@@ -1107,13 +1106,6 @@ public class EditSourceApplet extends Applet
     private void uploadFileViaWebService(String addFileTmpSavingPathName, File file)
             throws Exception
     {
-        MySecurityManager mySM = new MySecurityManager();
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
-        {
-            System.setSecurityManager(mySM);
-        }
-
         if (!file.exists())
         {
             throw new Exception("File(" + file.getPath() + ") does not exist.");
@@ -1148,8 +1140,8 @@ public class EditSourceApplet extends Applet
 
             Ambassador2 ambassador = WebService2ClientHelper
                     .getClientAmbassador2(hostName, String.valueOf(port),
-                            getUserId(), getPassword(), enableHttps);
-            String fullAccessToken = ambassador.dummyLogin(getUserId(),
+                            getUserName(), getPassword(), enableHttps);
+            String fullAccessToken = ambassador.dummyLogin(getUserName(),
                     getPassword());
             for (int i = 0; i < fileByteList.size(); i++)
             {
@@ -1167,18 +1159,6 @@ public class EditSourceApplet extends Applet
             {
                 inputStream.close();
             }
-        }
-    }
-
-    private class MySecurityManager extends SecurityManager
-    {
-        MySecurityManager()
-        {
-            super();
-        }
-
-        public void checkPermission(Permission permission)
-        {
         }
     }
     

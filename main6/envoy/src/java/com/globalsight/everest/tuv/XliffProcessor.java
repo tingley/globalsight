@@ -48,7 +48,7 @@ public class XliffProcessor implements IXliffProcessor
 
     @SuppressWarnings("unchecked")
     public void addAltTrans(Tuv tuv, Tuv p_sourceTuv,
-            GlobalSightLocale p_targetLocale, String companyId)
+            GlobalSightLocale p_targetLocale, long companyId)
     {
         String xlfOrPoTargetLan = getTargetLanguage(
                 (TuImpl) p_sourceTuv.getTu(companyId),

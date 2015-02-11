@@ -136,8 +136,9 @@ public class TmSearchHandler
         {
             manager = (SearchReplaceManager)sessionMgr.getAttribute(
                 TM_CONCORDANCE_MANAGER);
-
-            manager.detachListener((IProcessStatusListener)status);
+            if (manager != null) {
+                manager.detachListener((IProcessStatusListener)status);            	
+            }
 
             sessionMgr.removeElement(TM_TM_STATUS);
             sessionMgr.removeElement(TM_CONCORDANCE_MANAGER);

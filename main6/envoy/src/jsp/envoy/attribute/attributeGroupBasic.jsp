@@ -40,6 +40,7 @@
 	} else {
 		title = bundle.getString("lb_new_attribute_group");
 	}
+	String helper = bundle.getString("helper_text_attribute_group_basic");
 	
 	List<Attribute> selectedAttributes = (List<Attribute>)request.getAttribute("selectedAttributes");
 	List<Attribute> allAttributes = (List<Attribute>)request.getAttribute("allAttributes");
@@ -224,7 +225,7 @@ function checkName()
 <%@ include file="/envoy/common/navigation.jspIncl"%>
 <%@ include file="/envoy/wizards/guides.jspIncl"%>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
-<amb:header title="<%=title%>" helperText="<%=bundle.getString("helper_text_attribute_group_basic")%>" /> 
+<amb:header title="<%=title%>" helperText="<%=helper%>" /> 
 <span class=errorMsg></span>
 
 <div style="float: left">
@@ -267,7 +268,7 @@ function checkName()
 		    <div class="wrap1">
 			    <div dojoType="dojo.dnd.Source"  id="selected" class="dndContainer">
 			    <%for (Attribute att : selectedAttributes){
-			        boolean isSuperAtt = CompanyWrapper.SUPER_COMPANY_ID.equals(att.getCompanyId());
+			        boolean isSuperAtt = 1 == att.getCompanyId();
 			    %>
 			       <div class="dojoDndItem" id='<%=att.getId()%>'>
 			            <%if (isSuperAtt) {%>
@@ -287,7 +288,7 @@ function checkName()
 		    <div class="wrap1">
 			    <div dojoType="dojo.dnd.Source" class="dndContainer">
 			    <%for (Attribute att : allAttributes){
-			          boolean isSuperAtt = CompanyWrapper.SUPER_COMPANY_ID.equals(att.getCompanyId());
+			          boolean isSuperAtt = 1 == att.getCompanyId();
 			          if (!selectedAttributes.contains(att)){%>
 			       		<div class="dojoDndItem" id='<%=att.getId()%>'>
 				       		<%if (isSuperAtt) {%>

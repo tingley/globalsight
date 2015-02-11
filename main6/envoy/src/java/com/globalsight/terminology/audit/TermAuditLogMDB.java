@@ -16,76 +16,85 @@
  */
 package com.globalsight.terminology.audit;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.util.jms.JmsHelper;
-import com.globalsight.everest.util.jms.GenericTopicMDB;
-
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.UTC;
-import com.globalsight.ling.common.Text;
-
-import com.globalsight.diplomat.util.database.ConnectionPool;
-
-import org.apache.log4j.spi.LoggingEvent;
-
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.StringTokenizer;
-import javax.jms.JMSException;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
+
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
+import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.ling.common.Text;
+import com.globalsight.util.UTC;
+
 /**
- * The TermAuditLogMDB receives JMS messages based on the use of
- * the term audit log4j logging category (TermAuditLog.AUDIT_LOG_NAME)
- *
- * These JMS messages are parsed and then a record is inserted into
- * the tb_audit_log table for each message.
+ * The TermAuditLogMDB receives JMS messages based on the use of the term audit
+ * log4j logging category (TermAuditLog.AUDIT_LOG_NAME)
+ * 
+ * These JMS messages are parsed and then a record is inserted into the
+ * tb_audit_log table for each message.
  */
-public class TermAuditLogMDB extends GenericTopicMDB
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
 {
-    private static final String SQL_INSERT =
-        "insert into tb_audit_log(event_date,username,termbase,target,languages,action,details) values(?,?,?,?,?,?,?)";
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + EventTopicMap.JMS_PREFIX + EventTopicMap.FOR_TERM_AUDIT_LOG),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
+public class TermAuditLogMDB extends GenericQueueMDB
+{
+    private static final String SQL_INSERT = "insert into tb_audit_log(event_date,username,termbase,target,languages,action,details) values(?,?,?,?,?,?,?)";
 
     // for logging purposes
-    private static Logger s_logger =
-        Logger.getLogger(TermAuditLogMDB.class);
+    private static Logger s_logger = Logger.getLogger(TermAuditLogMDB.class);
 
-    private static final int MAX_DETAILS_LEN=3999;
+    private static final int MAX_DETAILS_LEN = 3999;
 
-    //////////////////////////////////////
-    // Constructor                      //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Constructor //
+    // ////////////////////////////////////
     public TermAuditLogMDB()
     {
         super(s_logger);
     }
 
-    //////////////////////////////////////
-    // Public Methods                   //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Public Methods //
+    // ////////////////////////////////////
 
     /**
-     * This method gets invoked each time a terminology audit message
-     * is sent through JMS. This MDB updates the database table
-     * for terminology audit purposes.
-     *
+     * This method gets invoked each time a terminology audit message is sent
+     * through JMS. This MDB updates the database table for terminology audit
+     * purposes.
+     * 
      * The String message is assumed to be of the format:
      * event_date|username|termbase|target|languages|action|details
-     *
+     * 
      * Dates are in UTC.
-     *
+     * 
      * For example:
      * 2000-02-16T15:56:00|joe|myTB|entry1|English,French|create|created tb myTB
-     *
-     * @param p_msg The JMS message containing the audit message
-     *
+     * 
+     * @param p_msg
+     *            The JMS message containing the audit message
+     * 
      * @see com.globalsight.util.UTC
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_msg)
     {
         Connection c = null;
@@ -93,8 +102,8 @@ public class TermAuditLogMDB extends GenericTopicMDB
 
         try
         {
-            ObjectMessage msg = (ObjectMessage)p_msg;
-            LoggingEvent le = (LoggingEvent)msg.getObject();
+            ObjectMessage msg = (ObjectMessage) p_msg;
+            LoggingEvent le = (LoggingEvent) msg.getObject();
             String s = (String) le.getMessage();
 
             if (s_logger.isDebugEnabled())
@@ -102,21 +111,22 @@ public class TermAuditLogMDB extends GenericTopicMDB
                 s_logger.debug("Received jms msg: " + s);
             }
 
-            //we expect to parse the string into 7 fields
-            String toks[] = s.split(TermAuditLog.REGEXP_SEP,7);
+            // we expect to parse the string into 7 fields
+            String toks[] = s.split(TermAuditLog.REGEXP_SEP, 7);
             String eventDate = toks[0];
             String username = toks[1];
             String termbase = toks[2];
             String item = toks[3];
             String langs = toks[4];
-            String action= toks[5];
+            String action = toks[5];
             String details = toks[6];
 
-            //truncate details if it is too long for the column
+            // truncate details if it is too long for the column
             if (Text.getUTF8Len(details) > MAX_DETAILS_LEN)
-                details = details.substring(0,MAX_DETAILS_LEN -1);
-            
+                details = details.substring(0, MAX_DETAILS_LEN - 1);
+
             c = ConnectionPool.getConnection();
+            c.setAutoCommit(false);
             pst = c.prepareStatement(SQL_INSERT);
             Date date = UTC.parse(eventDate);
             pst.setTimestamp(1, new Timestamp(date.getTime()));
@@ -133,7 +143,13 @@ public class TermAuditLogMDB extends GenericTopicMDB
         {
             if (c != null)
             {
-                try { c.rollback(); } catch (Throwable ignore) {}
+                try
+                {
+                    c.rollback();
+                }
+                catch (Throwable ignore)
+                {
+                }
             }
 
             s_logger.error("Problem handling term audit:", e);
@@ -145,4 +161,3 @@ public class TermAuditLogMDB extends GenericTopicMDB
         }
     }
 }
-

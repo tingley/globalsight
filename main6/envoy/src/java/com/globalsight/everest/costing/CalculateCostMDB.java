@@ -20,22 +20,38 @@ package com.globalsight.everest.costing;
 import java.rmi.RemoteException;
 import java.util.Hashtable;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
 /**
  * This MessageDrivenBean is responsible for calculating costs asynchronously
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_CALCULATE_COST_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class CalculateCostMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
@@ -56,9 +72,10 @@ public class CalculateCostMDB extends GenericQueueMDB
      * not a public API and is ONLY invoked by it's consumer for calculating the
      * cost
      * 
-     * @param p_message -
-     *            The message to be passed.
+     * @param p_message
+     *            - The message to be passed.
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         try

@@ -18,7 +18,7 @@ public class Attributes
     public static final String Type_SELECT = "type";
     public static final String DESCRIPTION_TEXT = "description";
 
-    public static final String SAVE_BUTTON = "saveBtn";
+    public static final String SAVE_BUTTON = "//input[@value='Save']";
     public static final String CANCEL_BUTTON = "return";
     //Remove Attribute
     public static final String REMOVE_BUTTON="remBtn";

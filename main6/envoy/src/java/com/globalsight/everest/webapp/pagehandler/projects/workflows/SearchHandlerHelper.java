@@ -73,7 +73,7 @@ public class SearchHandlerHelper
     /**
      * Persist the replaces segments.
      */
-    public static void replace(List tuvInfos, String companyId)
+    public static void replace(List tuvInfos, long companyId)
         throws EnvoyServletException
     {
         try

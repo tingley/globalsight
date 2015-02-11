@@ -241,7 +241,7 @@ public class OfflineEditHelper
 
             endTime = System.currentTimeMillis();
             duration = new Long(endTime - startTime);
-            s_category.info("TuvMgr::getPageSegments() for srcPageId="
+            s_category.debug("TuvMgr::getPageSegments() for srcPageId="
                     + Long.toString(m_srcPage.getId()) + " took " + duration
                     + "ms");
 

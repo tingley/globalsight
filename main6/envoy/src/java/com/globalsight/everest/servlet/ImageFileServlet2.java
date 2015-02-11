@@ -38,7 +38,7 @@ import com.sun.jndi.toolkit.url.UrlUtil;
 public class ImageFileServlet2 extends UncacheableFileServlet
 {
     private static final long serialVersionUID = -555209420906242066L;
-    public Logger CATEGORY = Logger.getLogger("Images");
+    public Logger CATEGORY = Logger.getLogger(ImageFileServlet2.class);
 
     /**
      * Write out the image to the response's buffered stream.

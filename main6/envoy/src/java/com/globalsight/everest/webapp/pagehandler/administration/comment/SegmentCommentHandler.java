@@ -17,25 +17,17 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
-import com.globalsight.everest.comment.CommentException;
-import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
-import com.globalsight.util.GlobalSightLocale;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,8 +36,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import java.rmi.RemoteException;
 
 /**
  * PageHandler for showing segment comments from the job details comments page.
@@ -133,7 +123,7 @@ public class SegmentCommentHandler
         }
     }
 
-    private List getIssues(HttpServletRequest p_request, SessionManager p_sessionMgr)
+    private List<IssueImpl> getIssues(HttpServletRequest p_request, SessionManager p_sessionMgr)
             throws EnvoyServletException
     {
         // First check to see if user has a filter selected.
@@ -143,10 +133,10 @@ public class SegmentCommentHandler
             p_request.setAttribute("segmentSelectedStatus", status);
         }
             
-        String targPageId = (String)p_request.getParameter(WebAppConstants.TARGET_PAGE_ID);
+        String targPageId = (String) p_request.getParameter(WebAppConstants.TARGET_PAGE_ID);
         if (targPageId == null)
         {
-            targPageId = (String)p_sessionMgr.getAttribute(WebAppConstants.TARGET_PAGE_ID);
+            targPageId = (String) p_sessionMgr.getAttribute(WebAppConstants.TARGET_PAGE_ID);
         }
         else
         {
@@ -155,7 +145,7 @@ public class SegmentCommentHandler
         try
         {
             return ServerProxy.getCommentManager().getIssues(
-                        Issue.TYPE_SEGMENT, targPageId+"\\_");
+                        Issue.TYPE_SEGMENT, Long.parseLong(targPageId));
         }
         catch (Exception e)
         {

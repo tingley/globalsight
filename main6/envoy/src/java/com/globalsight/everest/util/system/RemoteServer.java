@@ -19,32 +19,25 @@ package com.globalsight.everest.util.system;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import org.apache.log4j.Logger;
-//import java.rmi.server.UnicastRemoteObject;
-
-// envoy
-import com.globalsight.everest.util.system.ServerObject;
-import com.globalsight.everest.util.system.SystemShutdownException;
-import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.everest.util.server.RegistryLocator;
-
-//core java
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.util.server.RegistryLocator;
+
 /**
- * This is a base class for remote server classes.  Remote server
- * objects are ones that must be registered in the ServerRegistry
- * (@see com.globalsight.everest.util.server.ServerRegistry),
- * started at system startup, and destroyed at system shutdown
- * (@see com.globalsight.everest.util.system.ServerObject).
- * Derived classes must set m_serviceName in their constructors.
+ * This is a base class for remote server classes. Remote server objects are
+ * ones that must be registered in the ServerRegistry (@see
+ * com.globalsight.everest.util.server.ServerRegistry), started at system
+ * startup, and destroyed at system shutdown (@see
+ * com.globalsight.everest.util.system.ServerObject). Derived classes must set
+ * m_serviceName in their constructors.
  */
 public abstract class RemoteServer
-/*    extends UnicastRemoteObject  */
-    implements ServerObject
+/* extends UnicastRemoteObject */
+implements ServerObject
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger("Startup");
+    private static final Logger CATEGORY = Logger.getLogger(RemoteServer.class);
 
     // Name to bind in the ServerRegistry
     protected String m_serviceName = null;
@@ -52,17 +45,14 @@ public abstract class RemoteServer
     /**
      * Constructor - pass in the service name to use for binding
      */
-    protected RemoteServer(String p_serviceName)
-        throws RemoteException
+    protected RemoteServer(String p_serviceName) throws RemoteException
     {
         super();
 
         m_serviceName = p_serviceName;
     }
 
-
-    protected RemoteServer()
-        throws RemoteException
+    protected RemoteServer() throws RemoteException
     {
         super();
 
@@ -71,11 +61,12 @@ public abstract class RemoteServer
 
     /**
      * Determine an appropriate JNDI service name from a class.
-     * @param p_class Class to determine an appropriate JNDI service
-     * name from.
-     * @return an appropriate JNDI service name.  Objects that are not
-     * bound in JDNI with the service name returned from this method
-     * will not be found.
+     * 
+     * @param p_class
+     *            Class to determine an appropriate JNDI service name from.
+     * @return an appropriate JNDI service name. Objects that are not bound in
+     *         JDNI with the service name returned from this method will not be
+     *         found.
      */
     public static String getServiceName(Class p_class)
     {
@@ -83,54 +74,51 @@ public abstract class RemoteServer
         return name.substring(name.lastIndexOf('.') + 1);
     }
 
-
     public String getServiceName()
     {
         return m_serviceName;
     }
 
-
     /**
      * Bind the remote server to the ServerRegistry.
-     * @throws SystemStartupException when a NamingException
-     * or other Exception occurs.
+     * 
+     * @throws SystemStartupException
+     *             when a NamingException or other Exception occurs.
      */
-    public void init()
-        throws SystemStartupException
+    public void init() throws SystemStartupException
     {
         try
         {
-            RegistryLocator.getRegistry().bind(m_serviceName,
-                (Remote)this);
+            RegistryLocator.getRegistry().bind(m_serviceName, (Remote) this);
 
-            CATEGORY.info(m_serviceName +
-                    " start up successful and bound to registry.");
+            CATEGORY.info(m_serviceName
+                    + " start up successful and bound to registry.");
         }
         catch (NamingException ne)
         {
-            CATEGORY.error("Error binding " + m_serviceName +
-                " to the registry", ne);
+            CATEGORY.error("Error binding " + m_serviceName
+                    + " to the registry", ne);
 
             throw new SystemStartupException(
-                SystemStartupException.EX_SERVERCLASSNAMES, ne);
+                    SystemStartupException.EX_SERVERCLASSNAMES, ne);
         }
         catch (Exception e)
         {
-            CATEGORY.error("Error binding " + m_serviceName +
-                " to the registry", e);
+            CATEGORY.error("Error binding " + m_serviceName
+                    + " to the registry", e);
 
             throw new SystemStartupException(
-                SystemStartupException.EX_FAILEDTOINITSERVER, e);
+                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }
     }
 
     /**
      * Unbind the remote server from the ServerRegistry.
-     * @throws SystemShutdownException when a NamingException
-     * or other Exception occurs.
+     * 
+     * @throws SystemShutdownException
+     *             when a NamingException or other Exception occurs.
      */
-    public void destroy()
-        throws SystemShutdownException
+    public void destroy() throws SystemShutdownException
     {
         try
         {
@@ -145,13 +133,13 @@ public abstract class RemoteServer
         {
             CATEGORY.error("unbind error", ne);
             throw new SystemShutdownException(
-                SystemStartupException.EX_SERVERCLASSNAMES, ne);
+                    SystemStartupException.EX_SERVERCLASSNAMES, ne);
         }
         catch (Exception e)
         {
             CATEGORY.error("unbind error", e);
             throw new SystemShutdownException(
-                SystemStartupException.EX_SERVERCLASSNAMES, e);
+                    SystemStartupException.EX_SERVERCLASSNAMES, e);
         }
     }
 }

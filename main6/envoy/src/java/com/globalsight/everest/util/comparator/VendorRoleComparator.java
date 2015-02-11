@@ -80,12 +80,14 @@ public class VendorRoleComparator extends StringComparator
             if (br != null) 
                 bValue = ar.getCurrency().getDisplayName();
 			rv = this.compareStrings(aValue,bValue);
+	         break;
 		case RATE_TYPE:
             ar = a.getRate();
             aValue = getRateType(ar);
             br = b.getRate();
             bValue = getRateType(br);
 			rv = this.compareStrings(aValue,bValue);
+			break;
 		default:
 			aValue = a.getActivity().getName();
 			bValue = b.getActivity().getName();

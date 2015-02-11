@@ -22,11 +22,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -44,6 +52,7 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
@@ -56,6 +65,13 @@ import com.globalsight.util.GlobalSightLocale;
  * PageSaverMDB is a message driven bean responsible for saving modified tuvs
  * (target tuvs) and then indexing the source tuvs during upload.
  */
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
+{
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_UPLOAD_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
 public class PageSaverMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = -4276547556612098118L;
@@ -83,6 +99,7 @@ public class PageSaverMDB extends GenericQueueMDB
      *            id) 3. The source locale object. 4. The user object 5. The
      *            file name. 6. The target page id (as string).
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         User user = null;
@@ -243,7 +260,7 @@ public class PageSaverMDB extends GenericQueueMDB
                 specTus = specTus + tuv.getTuId() + ",";
             }
         }
-        saveTuvs(modifiedTuvs, companyIdStr);
+        saveTuvs(modifiedTuvs, Long.parseLong(companyIdStr));
 
         specTus = ""; // do not do  Auto-Propagate from don's email 
         if (specTus != null && specTus.length() > 0)
@@ -300,7 +317,7 @@ public class PageSaverMDB extends GenericQueueMDB
      * @param p_tuvsToBeSaved
      * @throws UploadPageSaverException
      */
-    private void saveTuvs(List<TuvImplVo> p_tuvsToBeSaved, String companyId)
+    private void saveTuvs(List<TuvImplVo> p_tuvsToBeSaved, long companyId)
             throws UploadPageSaverException
     {
         try
@@ -340,7 +357,7 @@ public class PageSaverMDB extends GenericQueueMDB
 
             SourcePage sp = pageMgr.getTargetPage(p_targetPageId)
                     .getSourcePage();
-            String companyId = String.valueOf(sp.getCompanyId());
+            long companyId = sp.getCompanyId();
             long sourcePageId = sp.getId();
             for (Iterator it = p_modifiedTuvs.iterator(); it.hasNext();)
             {

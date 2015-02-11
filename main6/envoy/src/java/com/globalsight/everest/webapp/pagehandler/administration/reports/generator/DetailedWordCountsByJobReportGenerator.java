@@ -8,7 +8,6 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +17,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -31,12 +32,15 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
 import com.csvreader.CsvWriter;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerException;
+import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -45,7 +49,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -58,6 +61,8 @@ import com.globalsight.util.IntHolder;
  */
 public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 {
+    static private final Logger logger = Logger
+            .getLogger(DetailedWordCountsByJobReportGenerator.class);
     private WritableWorkbook m_workbook = null;
     private CsvWriter csvWriter = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat(
@@ -95,6 +100,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
         List<Long> jobIds = new ArrayList<Long>();
 
+        boolean inludeMtColumn = false;
     };
 
     public DetailedWordCountsByJobReportGenerator(HttpServletRequest p_request,
@@ -113,6 +119,12 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         setStates(p_request);
         setExportFormat(p_request);
         String dateFormatString = p_request.getParameter("dateFormat");
+        String includeMtColumn = p_request.getParameter("includeMtColumn");
+        if ("on".equalsIgnoreCase(includeMtColumn)) {
+        	data.inludeMtColumn = true;
+        } else {
+        	data.inludeMtColumn = false;
+        }
         if (dateFormatString != null && !dateFormatString.equals(""))
         {
             dateFormat = new SimpleDateFormat(dateFormatString);
@@ -159,10 +171,17 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             settings.setSuppressWarnings(true);
             file = ReportHelper.getXLSReportFile(getReportType(), null);
             m_workbook = Workbook.createWorkbook(file, settings);
-            addJobs(jobs, p_targetLocales);
-            addCriteriaSheet(m_request);
-            m_workbook.write();
-            m_workbook.close();
+            addJobsForXls(jobs, p_targetLocales);
+            if (m_workbook != null)
+            {
+                addCriteriaSheet(m_request);
+                m_workbook.write();
+                m_workbook.close();
+            }
+            else
+            {
+                return new File[0];
+            }
         }
         else
         {
@@ -170,7 +189,14 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             OutputStream out = new FileOutputStream(file);
             csvWriter = new CsvWriter(out, ',', Charset.forName("UTF-8"));
             addJobsForCsv(jobs, p_targetLocales);
-            csvWriter.close();
+            if (csvWriter != null)
+            {
+                csvWriter.close();
+            }
+            else
+            {
+                return new File[0];
+            }
         }
 
         return new File[]{ file };
@@ -306,7 +332,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                 data.jobStateList.clear();
                 data.workflowStateList.clear();
                 String[] states = p_request.getParameterValues("jobStatus");
-                List lst = new ArrayList();
+                List<String> lst = new ArrayList<String>();
                 if (states != null)
                 {
                     lst = Arrays.asList(states);
@@ -518,7 +544,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private JobSearchParameters getSearchParams(HttpServletRequest p_request)
             throws Exception
     {
-
         JobSearchParameters sp = new JobSearchParameters();
 
         sp.setJobState(data.jobStateList);
@@ -560,7 +585,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * 
      * @param p_sheet
      */
-    private void addHeader(WritableSheet p_sheet, ResourceBundle bundle)
+    private void addHeaderForXls(WritableSheet p_sheet, ResourceBundle bundle)
             throws Exception
     {
         // title font is black bold on white
@@ -670,6 +695,16 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         p_sheet.setColumnView(col, 25);
         p_sheet.mergeCells(col, 2, col, 3);
         col++;
+//        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_loc_profile"),
+//                headerFormat));
+//        p_sheet.setColumnView(col, 20);
+//        p_sheet.mergeCells(col, 2, col, 3);
+//        col++;
+//        p_sheet.addCell(new Label(col, 2, bundle.getString("lb_file_profile"),
+//                headerFormat));
+//        p_sheet.setColumnView(col, 20);
+//        p_sheet.mergeCells(col, 2, col, 3);
+//        col++;
         p_sheet.addCell(new Label(col, 2, bundle.getString("reportDesc"),
                 headerFormat));
         p_sheet.setColumnView(col, 30);
@@ -677,7 +712,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         col++;
         p_sheet.addCell(new Label(col, 2, bundle.getString("lb_creation_date"),
                 headerFormat));
-        p_sheet.setColumnView(col, 20);
+        p_sheet.setColumnView(col, 25);
         p_sheet.mergeCells(col, 2, col, 3);
         col++;
         p_sheet.addCell(new Label(col, 2, bundle.getString("lb_lang"),
@@ -695,6 +730,10 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         else if (useDefaultContext || useInContext)
         {
             span += 1;
+        }
+        if (data.inludeMtColumn)
+        {
+        	span += 1;
         }
 
         p_sheet.mergeCells(col, 2, col + span, 2);
@@ -735,11 +774,26 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                     .getString("lb_in_context_tm"), wordCountValueFormat));
         }
 
+        if (data.inludeMtColumn)
+        {
+        	col++;
+        	p_sheet.addCell(new Label(col, 3, "MT", wordCountValueFormat));
+        }
+
         if (useDefaultContext || useInContext)
             col++;
         p_sheet.addCell(new Label(col, 3, bundle.getString("lb_total"),
                 wordCountValueRightFormat));
 
+        if (data.inludeMtColumn)
+        {
+            col++;
+            p_sheet.addCell(new Label(col, 2, bundle
+                    .getString("lb_tm_mt_confidence_score"),
+                    wordCountValueFormat));
+            p_sheet.mergeCells(col, 2, col, 3);
+            p_sheet.setColumnView(col, 20);
+        }
     }
 
     /**
@@ -754,6 +808,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         csvWriter.write(bundle.getString("lb_job_name"));
         csvWriter.write(bundle.getString("lb_file_path"));
         csvWriter.write(bundle.getString("lb_file_name"));
+//        csvWriter.write(bundle.getString("lb_loc_profile"));
+//        csvWriter.write(bundle.getString("lb_file_profile"));
         csvWriter.write(bundle.getString("reportDesc"));
         csvWriter.write(bundle.getString("lb_creation_date"));
         csvWriter.write(bundle.getString("lb_lang"));
@@ -772,7 +828,15 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         {
             csvWriter.write(bundle.getString("lb_in_context_tm"));
         }
+        if (data.inludeMtColumn)
+        {
+            csvWriter.write("MT");            
+        }
         csvWriter.write(bundle.getString("lb_total"));
+        if (data.inludeMtColumn)
+        {
+            csvWriter.write(bundle.getString("lb_tm_mt_confidence_score"));
+        }
         csvWriter.endRecord();
     }
 
@@ -781,7 +845,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * 
      * @exception Exception
      */
-    private void addJobs(ArrayList<Job> p_jobs,
+    private void addJobsForXls(ArrayList<Job> p_jobs,
             List<GlobalSightLocale> p_targetLocales) throws Exception
     {
         WritableSheet sheet = m_workbook.createSheet(
@@ -792,25 +856,25 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
         getUseInContextInfos(p_jobs, data.wantsAllLocales, data.trgLocaleList);
 
-        addHeader(sheet, m_bundle);
+        addHeaderForXls(sheet, m_bundle);
 
-        Iterator jobIter = p_jobs.iterator();
         IntHolder row = new IntHolder(4);
         int finishedJobNum = 0;
-        while (jobIter.hasNext())
+        for (Job j : p_jobs)
         {
             // Cancel generate reports.
             if (isCancelled())
+            {
+                m_workbook = null;
+                printMsg("Cancelled Report Generator. " + j);
                 return;
+            }
+                
             // Sets Reports Percent.
             setPercent(++finishedJobNum);
 
-            Job j = (Job) jobIter.next();
-            Collection c = j.getWorkflows();
-            Iterator wfIter = c.iterator();
-            while (wfIter.hasNext())
+            for (Workflow w : j.getWorkflows())
             {
-                Workflow w = (Workflow) wfIter.next();
                 String state = w.getState();
                 // skip certain workflow whose target locale is not selected
                 if (!p_targetLocales.contains(w.getTargetLocale()))
@@ -826,9 +890,10 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                         || Workflow.ARCHIVED.equals(state)
                         || Workflow.LOCALIZED.equals(state))
                 {
-                    addWorkflow(sheet, j, w, row);
+                    addWorkflowForXls(sheet, j, w, row);
                 }
             }
+            printMsg("Finished Job: " + j);
         }
 
         row.inc();
@@ -850,23 +915,21 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
         addHeaderForCsv(m_bundle);
 
-        Iterator jobIter = p_jobs.iterator();
-        IntHolder row = new IntHolder(4);
         int finishedJobNum = 0;
-        while (jobIter.hasNext())
+        for (Job j : p_jobs)
         {
             // Cancel generate reports.
             if (isCancelled())
+            {
+                csvWriter = null;
+                printMsg("Cancelled Report Generator. " + j);
                 return;
+            }
             // Sets Reports Percent.
             setPercent(++finishedJobNum);
 
-            Job j = (Job) jobIter.next();
-            Collection c = j.getWorkflows();
-            Iterator wfIter = c.iterator();
-            while (wfIter.hasNext())
+            for (Workflow w : j.getWorkflows())
             {
-                Workflow w = (Workflow) wfIter.next();
                 String state = w.getState();
                 // skip certain workflow whose target locale is not selected
                 if (!p_targetLocales.contains(w.getTargetLocale()))
@@ -885,6 +948,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                     addWorkflowForCsv(j, w);
                 }
             }
+            
+            printMsg("Finished Job: " + j);
         }
     }
 
@@ -917,7 +982,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         // For "Add Job Id into online job report" issue
         char sumStartCellCol = 'H';
         int c = 7;
-
         p_sheet.addCell(new Label(0, row, title, subTotalFormat));
         p_sheet.mergeCells(0, row, sumStartCellCol - 'B', row);
         int lastRow = p_row.getValue() - 1;
@@ -957,10 +1021,24 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                     + "5:" + sumStartCellCol + lastRow + ")", subTotalFormat));
             sumStartCellCol++;
         }
+
+        if (data.inludeMtColumn)
+        {
+            p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
+                    + sumStartCellCol + lastRow + ")", subTotalFormat)); // MT
+            sumStartCellCol++;
+        }
+
         p_sheet.addCell(new Formula(c++, row, "SUM(" + sumStartCellCol + "5:"
                 + sumStartCellCol + lastRow + ")", subTotalFormat)); // Total
         sumStartCellCol++;
 
+        // Add empty black sum line for MT Confidence Score.
+        if (data.inludeMtColumn)
+        {
+            p_sheet.addCell(new jxl.write.Blank(c++, row, subTotalFormat));
+            sumStartCellCol++;
+        }
     }
 
     /**
@@ -1014,6 +1092,11 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                 }
             }
         }
+
+        if (!useInContext && !useDefaultContext)
+        {
+            useInContext = true;
+        }
     }
 
     private String getProjectDesc(Job p_job)
@@ -1033,19 +1116,34 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * 
      * @exception Exception
      */
-    private void addWorkflow(WritableSheet p_sheet, Job p_job,
+    private void addWorkflowForXls(WritableSheet p_sheet, Job p_job,
             Workflow p_workflow, IntHolder p_row) throws Exception
     {
-
+        int threshold = p_job.getLeverageMatchThreshold();
+        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
         // write word count and file info
         for (TargetPage tg : p_workflow.getTargetPages())
         {
             // write job id, job name, description, creation date, creation
             // time, language
-            p_sheet.addCell(new Label(0, p_row.value, "" + p_job.getId())); // job
-            // id
-            p_sheet.addCell(new Label(1, p_row.value, p_job.getJobName())); // job
-            // name
+            p_sheet.addCell(new Label(0, p_row.value, "" + p_job.getId())); // job id
+            p_sheet.addCell(new Label(1, p_row.value, p_job.getJobName())); // job name
+
+            // file path 2 & file name 3
+            try
+            {
+                String[] pathName = getFilePathName(tg);
+                p_sheet.addCell(new Label(2, p_row.value, pathName[0]));
+                p_sheet.addCell(new Label(3, p_row.value, pathName[1]));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+//            p_sheet.addCell(new Label(4, p_row.value, p_job.getL10nProfile()
+//                    .getName())); // getL10nProfile
+//            p_sheet.addCell(new Label(5, p_row.value,
+//                    getFileProfileNameForDisplay(tg)));
             p_sheet.addCell(new Label(4, p_row.value, getProjectDesc(p_job))); // description
             p_sheet.addCell(new Label(5, p_row.value, dateFormat.format(p_job
                     .getCreateDate()))); // creation date
@@ -1054,7 +1152,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
             try
             {
-                addWordCount(tg, p_row, p_sheet);
+                addWordCountForXls(tg, p_row, p_sheet, threshold,
+                        mtConfidenceScore);
             }
             catch (Exception e)
             {
@@ -1063,7 +1162,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
             p_row.inc();
         }
-
     }
 
     /**
@@ -1075,181 +1173,40 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private void addWorkflowForCsv(Job p_job, Workflow p_workflow)
             throws Exception
     {
+        int threshold = p_job.getLeverageMatchThreshold();
+        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
         // write word count and file info
         for (TargetPage tg : p_workflow.getTargetPages())
         {
-            boolean isInContextMatch = PageHandler.isInContextMatch(tg
-                    .getSourcePage().getRequest().getJob());
-            boolean isDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(tg.getSourcePage().getRequest()
-                            .getJob());
-            // 100% match
-            int segmentTmWordCount = 0;
-            // in context word match
-            int inContextWordCount = 0;
-            boolean isUseDefaultContextMatch = PageHandler
-                    .isDefaultContextMatch(tg);
-            int contextMatchWC = tg.getWordCount().getContextMatchWordCount();
-            if (isInContextMatch)
-            {
-                // 100% match
-                segmentTmWordCount = tg.getWordCount().getSegmentTmWordCount();
-                // in context word match
-                inContextWordCount = tg.getWordCount().getInContextWordCount();
-                contextMatchWC = 0;
-            }
-            else
-            {
-                if (isUseDefaultContextMatch)
-                {
-                    segmentTmWordCount = tg.getWordCount()
-                            .getTotalExactMatchWordCount() - contextMatchWC;
-                }
-                else
-                {
-                    // 100% match
-                    segmentTmWordCount = tg.getWordCount()
-                            .getTotalExactMatchWordCount();
-                    contextMatchWC = 0;
-                }
-            }
-            // 95% match
-            int hiFuzzyWordCount = tg.getWordCount().getHiFuzzyWordCount();
-            // 85% match
-            int medHiFuzzyWordCount = tg.getWordCount()
-                    .getMedHiFuzzyWordCount();
-            // 85% match
-            int medFuzzyWordCount = tg.getWordCount().getMedFuzzyWordCount();
-            // 50% match
-            int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();
-            // no match
-            int unmatchedWordCount = tg.getWordCount().getUnmatchedWordCount();
-            int lb_repetition_word_cnt = tg.getWordCount()
-                    .getRepetitionWordCount();
-            // int lb_sub_levmatch_repetition_word_cnt = tg.getWordCount()
-            // .getSubLevRepetitionWordCount();
-            int totalWords = tg.getWordCount().getTotalWordCount();
-
-            String fileFullName = tg.getSourcePage().getExternalPageId();
-            String filePath = fileFullName;
-            String fileName = " ";
-            if (fileFullName.indexOf("/") > -1)
-            {
-                fileName = fileFullName.substring(
-                        fileFullName.lastIndexOf("/") + 1,
-                        fileFullName.length());
-                filePath = fileFullName.substring(0,
-                        fileFullName.lastIndexOf("/"));
-            }
-            else if (fileFullName.indexOf("\\") > -1)
-            {
-                fileName = fileFullName.substring(
-                        fileFullName.lastIndexOf("\\") + 1,
-                        fileFullName.length());
-                filePath = fileFullName.substring(0,
-                        fileFullName.lastIndexOf("\\"));
-            }
-
             // write job id, job name, description, creation date, creation
             // time, language
             csvWriter.write(String.valueOf(p_job.getId()));
             csvWriter.write(p_job.getJobName());
-            csvWriter.write(filePath);
-            csvWriter.write(fileName);
+            String[] filePathName = getFilePathName(tg);
+            csvWriter.write(filePathName[0]);
+            csvWriter.write(filePathName[1]);
+//            csvWriter.write(p_job.getL10nProfile().getName());
+//            csvWriter.write(getFileProfileNameForDisplay(tg));
             csvWriter.write(getProjectDesc(p_job));
             csvWriter.write(dateFormat.format(p_job.getCreateDate()));
-            // date
             csvWriter.write(p_workflow.getTargetLocale().toString());
-            // write the information of word count
-            csvWriter.write(String.valueOf(segmentTmWordCount));
-            csvWriter.write(String.valueOf(hiFuzzyWordCount));
-            csvWriter.write(String.valueOf(medHiFuzzyWordCount));
-            csvWriter.write(String.valueOf(medFuzzyWordCount));
-            csvWriter.write(String.valueOf(unmatchedWordCount
-                    + lowFuzzyWordCount));
-            csvWriter.write(String.valueOf(lb_repetition_word_cnt));
-            if (useDefaultContext)
+
+            try
             {
-                if (isDefaultContextMatch)
-                {
-                    csvWriter.write(String.valueOf(contextMatchWC));
-                }
-                else
-                {
-                    csvWriter.write(String.valueOf(0));
-                }
+                addWordCountForCsv(tg, threshold, mtConfidenceScore);
             }
-            if (useInContext)
+            catch (Exception e)
             {
-                if (isInContextMatch)
-                {
-                    csvWriter.write(String.valueOf(inContextWordCount));
-                }
-                else
-                {
-                    csvWriter.write(String.valueOf(0));
-                }
+                e.printStackTrace();
             }
-            csvWriter.write(String.valueOf(totalWords));
+
             csvWriter.endRecord();
         }
     }
 
-    /**
-     * Add word count for Excel File
-     * 
-     * @param tg
-     * @param p_row
-     * @param p_sheet
-     * @return
-     * @throws Exception
-     */
-    public int addWordCount(TargetPage tg, IntHolder p_row,
-            WritableSheet p_sheet) throws Exception
+    private String[] getFilePathName(TargetPage tg) throws Exception
     {
-        boolean isInContextMatch = PageHandler.isInContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        // 100% match
-        int segmentTmWordCount = 0;
-        // in context word match
-        int inContextWordCount = 0;
-        boolean isUseDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(tg);
-        int contextMatchWC = tg.getWordCount().getContextMatchWordCount();
-        if (isInContextMatch)
-        {
-            // 100% match
-            segmentTmWordCount = tg.getWordCount().getSegmentTmWordCount();
-            // in context word match
-            inContextWordCount = tg.getWordCount().getInContextWordCount();
-
-            contextMatchWC = 0;
-        }
-        else
-        {
-            if (isUseDefaultContextMatch)
-            {
-                segmentTmWordCount = tg.getWordCount()
-                        .getTotalExactMatchWordCount() - contextMatchWC;
-            }
-            else
-            {
-                segmentTmWordCount = tg.getWordCount()
-                        .getTotalExactMatchWordCount();
-                contextMatchWC = 0;
-            }
-        }
-        int hiFuzzyWordCount = tg.getWordCount().getThresholdHiFuzzyWordCount();
-        int medHiFuzzyWordCount = tg.getWordCount()
-                .getThresholdMedHiFuzzyWordCount();
-        int medFuzzyWordCount = tg.getWordCount()
-                .getThresholdMedFuzzyWordCount();
-        int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();
-        int unmatchedWordCount = tg.getWordCount().getUnmatchedWordCount();
-        int lb_repetition_word_cnt = tg.getWordCount().getRepetitionWordCount();
-        int totalWords = tg.getWordCount().getTotalWordCount();
+        String[] filePathName = new String[2];
 
         String fileFullName = tg.getSourcePage().getExternalPageId();
         String filePath = fileFullName;
@@ -1268,19 +1225,109 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                     .substring(0, fileFullName.lastIndexOf("\\"));
         }
 
-        p_sheet.addCell(new Label(2, p_row.value, filePath));
-        p_sheet.addCell(new Label(3, p_row.value, fileName));
+        filePathName[0] = filePath;
+        filePathName[1] = fileName;
+
+        return filePathName;
+    }
+
+    /**
+     * Add word count for Excel File
+     */
+    private int addWordCountForXls(TargetPage tg, IntHolder p_row,
+            WritableSheet p_sheet, int threshold, int mtConfidenceScore)
+            throws Exception
+    {
+        boolean isInContextMatch = PageHandler.isInContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isUseDefaultContextMatch = PageHandler.isDefaultContextMatch(tg);
+        PageWordCounts pageWC = tg.getWordCount();
+
+        // 100% match
+        int _100MatchWordCount = 0;
+        // in context word match
+        int inContextWordCount = 0;
+        // Context match
+        int contextMatchWC = pageWC.getContextMatchWordCount();
+        if (isInContextMatch)
+        {
+            inContextWordCount = pageWC.getInContextWordCount();
+            _100MatchWordCount = pageWC.getSegmentTmWordCount();
+            contextMatchWC = 0;
+        }
+        else
+        {
+            if (isUseDefaultContextMatch)
+            {
+                _100MatchWordCount = pageWC
+                        .getTotalExactMatchWordCount() - contextMatchWC;
+            }
+            else
+            {
+                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
+                contextMatchWC = 0;
+            }
+        }
+
+        int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();
+        int medHiFuzzyWordCount = pageWC.getThresholdMedHiFuzzyWordCount();
+        int medFuzzyWordCount = pageWC.getThresholdMedFuzzyWordCount();
+        int lowFuzzyWordCount = pageWC.getThresholdLowFuzzyWordCount();
+        int noMatchWordCount = pageWC.getThresholdNoMatchWordCount();
+        int repetitionsWordCount = pageWC.getRepetitionWordCount();
+        int totalWords = pageWC.getTotalWordCount();
+        // MT
+        int mtTotalWordCount = pageWC.getMtTotalWordCount();
+        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
+        int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
+        int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
+
+        int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+        // If include MT column, need adjust word count according to threshold
+        // and MT confidence score.
+        if (data.inludeMtColumn)
+        {
+            if (mtConfidenceScore == 100)
+            {
+                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
+            }
+            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
+            {
+                if (mtConfidenceScore >= 95)
+                {
+                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
+                {
+                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
+                {
+                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 75)
+                {
+                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                }
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+            else if (mtConfidenceScore < threshold)
+            {
+                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+        }
 
         // write the information of word count
         int cursor = wordCountCol;
-        p_sheet.addCell(new Number(cursor, p_row.value, segmentTmWordCount)); // 100%
+        p_sheet.addCell(new Number(cursor, p_row.value, _100MatchWordCount)); // 100%
         p_sheet.addCell(new Number(++cursor, p_row.value, hiFuzzyWordCount)); // 95-99%
         p_sheet.addCell(new Number(++cursor, p_row.value, medHiFuzzyWordCount)); // 85-94%
         p_sheet.addCell(new Number(++cursor, p_row.value, medFuzzyWordCount)); // 75-84%
-        p_sheet.addCell(new Number(++cursor, p_row.value, unmatchedWordCount
-                + lowFuzzyWordCount)); // no match
-        p_sheet.addCell(new Number(++cursor, p_row.value,
-                lb_repetition_word_cnt));
+        p_sheet.addCell(new Number(++cursor, p_row.value, noMatchWorcCountForDisplay)); // no match + low fuzzy
+        p_sheet.addCell(new Number(++cursor, p_row.value, repetitionsWordCount)); // repetitions
         cursor++;
         if (useDefaultContext)
         {
@@ -1309,30 +1356,207 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             }
         }
 
+        if (data.inludeMtColumn)
+        {
+        	cursor++;
+        	p_sheet.addCell(new Number(cursor, p_row.value, mtTotalWordCount));
+        }
+
         if (useDefaultContext || useInContext)
             cursor++;
 
         p_sheet.addCell(new Number(cursor, p_row.value, totalWords));
 
-        return totalWords;
+        if (data.inludeMtColumn)
+        {
+            cursor++;
+            p_sheet.addCell(new Number(cursor, p_row.value, mtConfidenceScore));
+        }
 
+        return totalWords;
     }
 
+    private void addWordCountForCsv(TargetPage tg, int threshold,
+            int mtConfidenceScore) throws Exception
+    {
+        boolean isInContextMatch = PageHandler.isInContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
+                .getSourcePage().getRequest().getJob());
+        boolean isUseDefaultContextMatch = PageHandler
+                .isDefaultContextMatch(tg);
+
+        PageWordCounts pageWC = tg.getWordCount();
+        // 100% match
+        int _100MatchWordCount = 0;
+        // in context word match
+        int inContextWordCount = 0;
+        // Context match
+        int contextMatchWC = pageWC.getContextMatchWordCount();
+        
+        if (isInContextMatch)
+        {
+            inContextWordCount = pageWC.getInContextWordCount();
+            _100MatchWordCount = pageWC.getSegmentTmWordCount();
+            contextMatchWC = 0;
+        }
+        else
+        {
+            if (isUseDefaultContextMatch)
+            {
+                _100MatchWordCount = pageWC
+                        .getTotalExactMatchWordCount() - contextMatchWC;
+            }
+            else
+            {
+                _100MatchWordCount = pageWC.getTotalExactMatchWordCount();
+                contextMatchWC = 0;
+            }
+        }
+
+        // 95% match
+        int hiFuzzyWordCount = pageWC.getThresholdHiFuzzyWordCount();
+        // 85% match
+        int medHiFuzzyWordCount = pageWC.getThresholdMedHiFuzzyWordCount();
+        // 85% match
+        int medFuzzyWordCount = pageWC.getThresholdMedFuzzyWordCount();
+        // 50% match
+        int lowFuzzyWordCount = pageWC.getThresholdLowFuzzyWordCount();
+        // no match
+        int noMatchWordCount = pageWC.getThresholdNoMatchWordCount();
+        // repetition
+        int repetitionsWordCount = pageWC.getRepetitionWordCount();
+        int totalWords = pageWC.getTotalWordCount();
+        // MT
+        int mtTotalWordCount = pageWC.getMtTotalWordCount();
+        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
+        int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
+        int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
+
+        int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+        // If include MT column, need adjust word count according to threshold
+        // and MT confidence score.
+        if (data.inludeMtColumn)
+        {
+            if (mtConfidenceScore == 100)
+            {
+                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
+            }
+            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
+            {
+                if (mtConfidenceScore >= 95)
+                {
+                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
+                {
+                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
+                {
+                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtConfidenceScore < 75)
+                {
+                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                }
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+            else if (mtConfidenceScore < threshold)
+            {
+                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+        }
+
+        // write the information of word count
+        csvWriter.write(String.valueOf(_100MatchWordCount));
+        csvWriter.write(String.valueOf(hiFuzzyWordCount));
+        csvWriter.write(String.valueOf(medHiFuzzyWordCount));
+        csvWriter.write(String.valueOf(medFuzzyWordCount));
+        csvWriter.write(String.valueOf(noMatchWorcCountForDisplay));
+        csvWriter.write(String.valueOf(repetitionsWordCount));
+        if (useDefaultContext)
+        {
+            if (isDefaultContextMatch)
+            {
+                csvWriter.write(String.valueOf(contextMatchWC));
+            }
+            else
+            {
+                csvWriter.write(String.valueOf(0));
+            }
+        }
+        if (useInContext)
+        {
+            if (isInContextMatch)
+            {
+                csvWriter.write(String.valueOf(inContextWordCount));
+            }
+            else
+            {
+                csvWriter.write(String.valueOf(0));
+            }
+        }
+
+        if (data.inludeMtColumn)
+        {
+            csvWriter.write(String.valueOf(mtTotalWordCount));
+        }
+
+        csvWriter.write(String.valueOf(totalWords));
+        
+        if (data.inludeMtColumn)
+        {
+            csvWriter.write(String.valueOf(mtConfidenceScore));
+        }
+    }
+    
     @Override
     public void setPercent(int p_finishedJobNum)
     {
         ReportGeneratorHandler.setReportsMapByGenerator(m_userId, data.jobIds,
-                100 * p_finishedJobNum / data.jobIds.size());
+                100 * p_finishedJobNum / data.jobIds.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        ReportsData rData = ReportGeneratorHandler.getReportsMap(m_userId,
-                data.jobIds);
-        if (rData != null)
-            return rData.isCancle();
+        return ReportGeneratorHandler.isCancelled(m_userId, null, getReportType());
+    }
 
-        return false;
+    private void printMsg(String p_msg)
+    {
+        //logger.info(p_msg);
+    }
+    
+    private String getFileProfileNameForDisplay(TargetPage targetPage)
+    {
+        FileProfile fp = null;
+
+        try
+        {
+            long fpId = targetPage.getSourcePage().getRequest()
+                    .getFileProfileId();
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
+            fp = fpManager.readFileProfile(fpId);
+            boolean isRef = fpManager
+                    .isXlzReferenceXlfFileProfile(fp.getName());
+            if (isRef)
+            {
+                String tmp = fp.getName().substring(0,
+                        fp.getName().length() - 4);
+                fp = fpManager.getFileProfileByName(tmp);// active
+                if (fp == null)
+                    fp = fpManager.getFileProfileByName(tmp, false);// inactive
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        return (fp == null ? "" : fp.getName());
     }
 }

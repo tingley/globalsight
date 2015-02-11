@@ -141,8 +141,13 @@ public class TerminologyFuncs extends BasicFuncs
                 "pro.indexOf('100%')!=-1;";
         
         // type in import file directory
-        selenium.type(TerminologyElements.IMP_FILE_TEXT, filePath
-                + File.separator + dir + File.separator + fileName);
+        if (dir != ""){
+        	selenium.type(TerminologyElements.IMP_FILE_TEXT, filePath
+                    + File.separator + dir + File.separator + fileName);
+        }
+        else 
+        	selenium.type(TerminologyElements.IMP_FILE_TEXT, filePath
+                    + File.separator + fileName);
         if (fileName.toLowerCase().endsWith(".xml")
                 || fileName.toLowerCase().endsWith(".tbx"))
         {
@@ -361,10 +366,10 @@ public class TerminologyFuncs extends BasicFuncs
    {
 	   //Check if Termbase Maintenance is the current page
 	   boolean found = selenium.isElementPresent(TerminologyElements.SEARCHFOR_FIELD);
-	   boolean selected = selectRadioButtonFromTable(selenium, TerminologyElements.MAIN_TABLE, iTBName);
-
+	   
 	   if (!found)
 	   {
+		   boolean selected = selectRadioButtonFromTable(selenium, TerminologyElements.MAIN_TABLE, iTBName);
 		   if (selected)
 		   clickAndWait(selenium, TerminologyElements.MAIN_MAINTENANCE_BUTTON);
 		   else

@@ -33,54 +33,97 @@
     String deps = (String)sessionMgr.getAttribute(LocalePairConstants.DEPENDENCIES);
     
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
+
+    String companyFilterValue = (String) sessionMgr.getAttribute(LocalePairConstants.FILTER_COMPANY);
+    if (companyFilterValue == null || companyFilterValue.trim().length() == 0)
+    {
+        companyFilterValue = "";
+    }
 %>
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 
-    var needWarning = false;
-    var objectName = "";
-    var guideNode = "localePairs";
-    var helpFile = "<%=bundle.getString("help_locale_pairs_main_screen")%>";
+var needWarning = false;
+var objectName = "";
+var guideNode = "localePairs";
+var helpFile = "<%=bundle.getString("help_locale_pairs_main_screen")%>";
 
-function submitForm(button)
+function newLocalePair()
 {
-    if (button == "New")
-    {
-        lpForm.action = "<%=newURL%>";
-    }
-    else if (button == "newLocale")
-    {
-        lpForm.action = "<%=newLocaleURL%>"
-    }
-    else 
-    {
-        if (!confirm('<%=confirmRemove%>')) return false;
-        value = getRadioValue(lpForm.radioBtn);
-        lpForm.action = "<%=removeURL%>" + "&id=" + value;
-    }
+    lpForm.action = "<%=newURL%>";
     lpForm.submit();
-    return;
-    
 }
 
-function enableRemove()
+function addLocale()
 {
-    if (lpForm.removeBtn)
-        lpForm.removeBtn.disabled = false;
+    lpForm.action = "<%=newLocaleURL%>";
+    lpForm.submit();
+}
+
+function removeLocalePair()
+{
+    if (!confirm('<%=confirmRemove%>'))
+    {
+        return false;
+    }
+    // Actually there is only one (remove one by one)
+    var value = findSelectedLocalePair();
+    lpForm.action = "<%=removeURL%>" + "&id=" + value;
+    lpForm.submit();
+}
+
+// Find selected locale pair Ids
+function findSelectedLocalePair()
+{
+    var ids = "";
+    $("input[name='checkboxBtn']:checked").each(function ()
+    {
+        ids += $(this).val() + ",";
+    });
+    if (ids != "")
+        ids = ids.substring(0, ids.length - 1);
+
+    return ids;
+}
+
+function buttonManagement()
+{
+    var count = $("input[name='checkboxBtn']:checked").length;
+    if (count == 1)
+    {
+        $("#removeBtn").attr("disabled", false);
+    }
+    else
+    {
+        $("#removeBtn").attr("disabled", true);
+    }
+}
+
+function handleSelectAll() {
+    var ch = $("#selectAll").attr("checked");
+    if (ch == "checked")
+    {
+        $("[name='checkboxBtn']").attr("checked", true);
+    }
+    else
+    {
+        $("[name='checkboxBtn']").attr("checked", false);
+    }
+
+    buttonManagement();
 }
 
 </SCRIPT>
 
 </HEAD>
-<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides()">
+<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
@@ -94,59 +137,78 @@ function enableRemove()
 <% }  %>
 
 <form name="lpForm" method="post">
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table name="test" border=0 width="1024px">
+      <tr><td align="center"></td></tr>
+    </table>
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" style="min-width:1024px;">
         <tr valign="top">
           <td align="right">
-            <amb:tableNav bean="lps" key="<%=LocalePairConstants.LP_KEY%>"
-                 pageUrl="self" />
+            <amb:tableNav bean="lps" key="<%=LocalePairConstants.LP_KEY%>" pageUrl="self" />
           </td>
         </tr>
         <tr>
-          <td>
-              <amb:table bean="lps" id="lp"
-                     key="<%=LocalePairConstants.LP_KEY%>"
-                     dataClass="com.globalsight.everest.foundation.LocalePair" pageUrl="self"
-                     emptyTableMsg="msg_no_locale_pairs" >
-                <amb:column label="">
-                    <input type="radio" name="radioBtn" onclick="enableRemove()"
-                        value="<%=lp.getId()%>">
-                </amb:column>
-                <amb:column label="lb_source_locale" width="250"
-                     sortBy="<%=LocalePairComparator.SRC%>">
-                    <%= lp.getSource().getDisplayName(uiLocale) %>
-                </amb:column>
-                <amb:column label="lb_target_locale" width="250px"
-                     sortBy="<%=LocalePairComparator.TARG%>">
-                    <%= lp.getTarget().getDisplayName(uiLocale) %>
-                </amb:column>
+            <td>
                 <% if (isSuperAdmin) { %>
-    					  <amb:column label="lb_company_name" width="120" 
-    					       sortBy="<%=LocalePairComparator.ASC_COMPANY%>">
-				 <%=CompanyWrapper.getCompanyNameById(lp.getCompanyId())%>
-                </amb:column>
+                <amb:table bean="lps" id="lp" key="<%=LocalePairConstants.LP_KEY%>" 
+                    dataClass="com.globalsight.everest.foundation.LocalePair" 
+                    pageUrl="self" hasFilter="true"
+                    emptyTableMsg="msg_no_locale_pairs">
+                    <amb:column label="checkbox" width="2%">
+                        <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
+                    </amb:column>
+                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                        <%= lp.getSource().getDisplayName(uiLocale) %>
+                    </amb:column>
+                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                        <%= lp.getTarget().getDisplayName(uiLocale) %>
+                    </amb:column>
+                    <amb:column label="lb_company_name" width="120" sortBy="<%=LocalePairComparator.ASC_COMPANY%>"
+                        filter="<%=LocalePairConstants.FILTER_COMPANY%>" filterValue="<%=companyFilterValue%>">
+                        <%=CompanyWrapper.getCompanyNameById(lp.getCompanyId())%>
+                    </amb:column>
+                    <amb:column label="" width="55%" sortBy="">&nbsp;</amb:column>
+                </amb:table>
+                <% } else { %>
+                <amb:table bean="lps" id="lp" key="<%=LocalePairConstants.LP_KEY%>" 
+                    dataClass="com.globalsight.everest.foundation.LocalePair" 
+                    pageUrl="self" 
+                    emptyTableMsg="msg_no_locale_pairs">
+                    <amb:column label="checkbox" width="2%">
+                        <input type="checkbox" name="checkboxBtn" id="checkboxBtn" onclick="buttonManagement()" value="<%=lp.getId()%>">
+                    </amb:column>
+                    <amb:column label="lb_source_locale" width="22%" sortBy="<%=LocalePairComparator.SRC%>">
+                        <%= lp.getSource().getDisplayName(uiLocale) %>
+                    </amb:column>
+                    <amb:column label="lb_target_locale" width="23%" sortBy="<%=LocalePairComparator.TARG%>">
+                        <%= lp.getTarget().getDisplayName(uiLocale) %>
+                    </amb:column>
+                    <amb:column label="" width="55%" sortBy="">&nbsp;</amb:column>
+                </amb:table>
                 <% } %>
-              </amb:table>
             </td>
-         </tr>
-         <tr>
-    <td style="padding-top:5px" align="right">
-    <amb:permission name="<%=Permission.LOCALE_NEW%>" >
-        <input type="button" value="<%=bundle.getString("lb_new_locale")%>"
-            name="newLocale" onClick="submitForm('newLocale');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.LOCALE_PAIRS_REMOVE%>" >
-        <input type="button" value="<%=bundle.getString("lb_remove")%>"
-            name="removeBtn" disabled onClick="submitForm('Remove');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.LOCALE_PAIRS_NEW%>" >
-        <input type="button" value="<%=bundle.getString("lb_new")%>..."     
-            onClick="submitForm('New');">
-    </amb:permission>
-    </td>
-</TR>
-</TABLE>
-</TD>
-</TR>
-</TABLE>
+        </tr>
+        <tr valign="top">
+            <td align="right">
+                <amb:tableNav bean="lps" key="<%=LocalePairConstants.LP_KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top:5px" align="left">
+                <amb:permission name="<%=Permission.LOCALE_NEW%>" >
+                    <input type="button" value="<%=bundle.getString("lb_new_locale")%>" 
+                    name="newLocale" id="newLocale" onClick="addLocale();">
+                </amb:permission>
+                <amb:permission name="<%=Permission.LOCALE_PAIRS_REMOVE%>" >
+                    <input type="button" value="<%=bundle.getString("lb_remove")%>" 
+                    name="removeBtn" id="removeBtn" disabled onClick="removeLocalePair();">
+                </amb:permission>
+                <amb:permission name="<%=Permission.LOCALE_PAIRS_NEW%>" >
+                    <input type="button" value="<%=bundle.getString("lb_new")%>..." 
+                    name="newBtn" id="newBtn" onClick="newLocalePair();">
+                </amb:permission>
+            </td>
+        </TR>
+    </TABLE>
 </FORM>
+</DIV>
 </BODY>

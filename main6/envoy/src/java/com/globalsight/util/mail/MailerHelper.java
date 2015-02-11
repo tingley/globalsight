@@ -36,52 +36,56 @@ import com.globalsight.util.GlobalSightLocale;
 // Mail Help Class
 public class MailerHelper
 {
-    private static final Logger s_logger =
-        Logger.getLogger(MailerHelper.class.getName());
-    
-    MailerHelper(){}
-    
+    private static final Logger s_logger = Logger.getLogger(MailerHelper.class
+            .getName());
+
+    MailerHelper()
+    {
+    }
+
     /**
-     * Gets the Email HTML body. 
+     * Gets the Email HTML body.
      */
     public static String getHTMLContext(String p_message)
     {
         StringBuffer result = new StringBuffer();
         result.append("<html><head>")
-              .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">")
-              .append("<style type=\"text/css\">")
-              .append("body {font-family: Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 15pt;}")
-              .append(".classBold{font-weight:bold; font-size: 10.5pt;}")
-              .append("table { border-collapse: collapse; }")
-              .append("table, th, td {border: 1px solid black; padding:3px;}")
-              .append("</style>")
-              .append("</head><body>")
-              .append(p_message.replace("\r\n", "<br/>").replace("\n", "<br/>"))
-              .append("</body></html>");
+                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">")
+                .append("<style type=\"text/css\">")
+                .append("body {font-family: Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 15pt;}")
+                .append(".classBold{font-weight:bold; font-size: 10.5pt;}")
+                .append("table { border-collapse: collapse; }")
+                .append("table, th, td {border: 1px solid black; padding:3px;}")
+                .append("</style>")
+                .append("</head><body>")
+                .append(p_message.replace("\r\n", "<br/>").replace("\n",
+                        "<br/>")).append("</body></html>");
 
         return result.toString();
     }
-    
+
     /**
-     * Gets the Email text/plain body. 
+     * Gets the Email text/plain body.
      */
     public static String getTextContext(String p_message)
     {
         String result = p_message.replace("<span class=\"classBold\">", "")
-                                 .replace("</span>", "");
+                .replace("</span>", "");
         result = replaceURL(result);
         return result;
     }
-    
+
     /**
-     * For HTML Email body, URL looks like 
-     * "<a href="http://www.welocalize.com" target="_blank">http://www.welocalize.com</a>",
-     * But Plain/text just need URL, like "http://www.welocalize.com".
+     * For HTML Email body, URL looks like
+     * "<a href="http://www.welocalize.com" target="
+     * _blank">http://www.welocalize.com</a>", But Plain/text just need URL,
+     * like "http://www.welocalize.com".
      */
     public static String replaceURL(String p_message)
     {
         String urlRegex = "((http|https)://([\\w-]+\\.)+[\\w-]+[:\\d]*(/[\\w- ./?%&=]*)?)";
-        String regex = "<a href=\"" + urlRegex + "\" target=\"_blank\">" + urlRegex + "</a>";
+        String regex = "<a href=\"" + urlRegex + "\" target=\"_blank\">"
+                + urlRegex + "</a>";
         Pattern pattern = Pattern.compile(regex);
         Matcher m = pattern.matcher(p_message);
         while (m.find())
@@ -91,20 +95,20 @@ public class MailerHelper
                 p_message = p_message.replace(m.group(), m.group(1));
             }
         }
-        
+
         return p_message;
     }
-    
+
     public static String getSendFrom(String p_comId)
     {
-        return getSendFrom(p_comId, (String)null);
+        return getSendFrom(p_comId, (String) null);
     }
-    
+
     public static String getSendFrom(String p_comId, User p_user)
     {
         return getSendFrom(p_comId, p_user.getUserName());
     }
-    
+
     public static String getSendFrom(String p_comId, String p_userName)
     {
         Company com = null;
@@ -112,24 +116,26 @@ public class MailerHelper
         {
             com = CompanyWrapper.getCompanyById(p_comId);
         }
-        
+
         EmailInformation user = null;
         try
         {
             if (p_userName != null && p_userName.trim().length() > 0)
             {
-                user = ServerProxy.getUserManager().getEmailInformationForUser(p_userName);
+                user = ServerProxy.getUserManager().getEmailInformationForUser(
+                        p_userName);
             }
         }
         catch (Exception e)
         {
-            s_logger.error("There is an Exception in MailerHelper.getSendFrom " 
-                     + "with username:"+p_userName+" and companyId:"+p_comId);
+            s_logger.error("There is an Exception in MailerHelper.getSendFrom "
+                    + "with username:" + p_userName + " and companyId:"
+                    + p_comId);
         }
-        
+
         return getSendFrom(com, user);
     }
-    
+
     public static String getSendFrom(String p_comId, EmailInformation p_user)
     {
         Company com = null;
@@ -137,23 +143,25 @@ public class MailerHelper
         {
             com = CompanyWrapper.getCompanyById(p_comId);
         }
-        
+
         return getSendFrom(com, p_user);
     }
-    
+
     /**
      * Get FROM Address of Email, by Company and User
-     * @param p_com Company
-     * @param p_user User
      * 
-     * IF result != null && p_user != null
-     *      @return [<Firstname> <Lastname>] <Company Email Address>
-     * IF result != null && p_user == null
-     *      @return <Company Email Address>
-     * IF result == null && p_user != null
-     *      @return Company Email Address which the user belongs to
-     * IF result == null && p_user == null
-     *      @return Super Company Email Address       
+     * @param p_com
+     *            Company
+     * @param p_user
+     *            User
+     * 
+     *            IF result != null && p_user != null
+     * @return [<Firstname> <Lastname>] <Company Email Address> IF result !=
+     *         null && p_user == null
+     * @return <Company Email Address> IF result == null && p_user != null
+     * @return Company Email Address which the user belongs to IF result == null
+     *         && p_user == null
+     * @return Super Company Email Address
      */
     public static String getSendFrom(Company p_com, EmailInformation p_user)
     {
@@ -170,7 +178,7 @@ public class MailerHelper
         {
             result = getSuperAdminEmail();
         }
-        
+
         return result;
     }
 
@@ -193,13 +201,13 @@ public class MailerHelper
         }
         return getCompanyEmail(companyName);
     }
-    
+
     public static String getCompanyEmail(String p_companyName)
     {
         Company com = CompanyWrapper.getCompanyByName(p_companyName);
         return getCompanyEmail(com);
     }
-    
+
     public static String getCompanyEmail(Company p_com)
     {
         String result = p_com.getEmail();
@@ -208,9 +216,10 @@ public class MailerHelper
             result = getSuperAdminEmail();
         }
 
-        return (result == null || result.trim().length()==0) ? null : result.trim();
+        return (result == null || result.trim().length() == 0) ? null : result
+                .trim();
     }
-    
+
     // Get compnayId String from TaskEmailInfo
     public static String getCompanyId(TaskEmailInfo p_emailInfo)
     {
@@ -219,15 +228,16 @@ public class MailerHelper
         {
             return companyIdStr;
         }
-        
+
         String projectName = p_emailInfo.getProjectName();
-        
+
         if (projectName != null && projectName.length() > 0)
         {
             try
             {
-                Project proj = ServerProxy.getProjectHandler().getProjectByName(projectName);
-                companyIdStr = proj.getCompanyId(); 
+                Project proj = ServerProxy.getProjectHandler()
+                        .getProjectByName(projectName);
+                companyIdStr = String.valueOf(proj.getCompanyId());
                 if (companyIdStr != null)
                 {
                     return companyIdStr;
@@ -235,17 +245,18 @@ public class MailerHelper
             }
             catch (Exception e)
             {
-                s_logger.error("There is an Exception in getCompanyId, by Project", e);
+                s_logger.error(
+                        "There is an Exception in getCompanyId, by Project", e);
             }
         }
-        
+
         String jobName = p_emailInfo.getJobName();
         if (jobName != null && jobName.length() > 0)
         {
             try
             {
                 Job job = ServerProxy.getJobHandler().getJobByJobName(jobName);
-                companyIdStr = job.getCompanyId(); 
+                companyIdStr = String.valueOf(job.getCompanyId());
                 if (companyIdStr != null)
                 {
                     return companyIdStr;
@@ -253,27 +264,29 @@ public class MailerHelper
             }
             catch (Exception e)
             {
-                s_logger.error("There is an Exception in getCompanyId, by Job", e);
+                s_logger.error("There is an Exception in getCompanyId, by Job",
+                        e);
             }
         }
-        
+
         return companyIdStr;
     }
-    
+
     public static String getSuperAdminEmail()
     {
         String result = null;
         try
         {
-            result = ServerProxy.getSystemParameterPersistenceManager()
-                .getAdminSystemParameter(SystemConfigParamNames.ADMIN_EMAIL)
-                .getValue();
+            result = ServerProxy
+                    .getSystemParameterPersistenceManager()
+                    .getAdminSystemParameter(SystemConfigParamNames.ADMIN_EMAIL)
+                    .getValue();
         }
         catch (Exception e)
         {
             s_logger.error("Fail to get super 'admin.email'.", e);
         }
-        
+
         if (result != null && result.trim().length() > 0)
         {
             return result;
@@ -283,7 +296,7 @@ public class MailerHelper
             return "globalsight@domain.com";
         }
     }
-    
+
     public static String getLocalePair(GlobalSightLocale p_srcLocale,
             GlobalSightLocale p_trgLocale, Locale p_uiLocale)
     {

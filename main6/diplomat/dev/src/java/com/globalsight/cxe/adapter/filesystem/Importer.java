@@ -109,7 +109,7 @@ public class Importer
             jobName = job.getJobName();
             jobUuid = ((JobImpl) job).getUuid();
             m_importInitiatorId = job.getCreateUserId();
-            companyId = job.getCompanyId();
+            companyId = String.valueOf(job.getCompanyId());
             m_jobId = jobId;
             // update the job to "EXTRACTING" state
             if (Job.IN_QUEUE.equals(job.getState()))

@@ -70,7 +70,7 @@ public class HeaderTag extends TagSupport {
             if (helperText != null)
             {
                 out.println("<table cellspacing=0 cellpadding=0 border=0 class=standardText>");
-                out.println("<tr><td width=600>" +  helperText + "</td></tr></table><br>");
+                out.println("<tr><td width=100%>" +  helperText + "</td></tr></table><br>");
             }
         }
         catch (IOException ioe)

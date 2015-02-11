@@ -314,7 +314,7 @@ function filterSelectItems(e) {
       %>
 	  </amb:column>
       <% if (isSuperAdmin) { %>
-      <amb:column label="lb_company_name" sortBy="<%=WorkflowTemplateInfoComparator.ASC_COMPANY%>"  filter="companyName" filterValue="<%=companyNameFilter%>" width="8%">
+      <amb:column label="lb_company_name" sortBy="<%=WorkflowTemplateInfoComparator.ASC_COMPANY%>"  filter="workflowPageCompanyName" filterValue="<%=companyNameFilter%>" width="8%">
           <%=CompanyWrapper.getCompanyNameById(wft.getCompanyId())%>
       </amb:column>
       <% } %>

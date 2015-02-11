@@ -152,7 +152,7 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, String companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
             throws TuvException, RemoteException
     {
         m_tuvManagerLocal.saveTuvsFromOffline(p_tuvs, companyId);
@@ -220,7 +220,7 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      *             when a communication-related error occurs.
      */
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            String companyId) throws TuvException, RemoteException
+            long companyId) throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuvsForOnlineEditor(p_tuIds, p_localeId,
                 companyId);
@@ -242,7 +242,7 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      *             when a communication-related error occurs.
      */
     public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            String companyId) throws TuvException, RemoteException
+            long companyId) throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuvForSegmentEditor(p_tuId, p_localeId,
                 companyId);
@@ -259,13 +259,13 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuvId, String companyId)
+    public Tuv getTuvForSegmentEditor(long p_tuvId, long companyId)
             throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuvForSegmentEditor(p_tuvId, companyId);
     }
 
-    public Tu getTuForSegmentEditor(long p_tuId, String companyId)
+    public Tu getTuForSegmentEditor(long p_tuId, long companyId)
             throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuForSegmentEditor(p_tuId, companyId);
@@ -301,10 +301,10 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuv(Tuv p_tuv, String companyId) throws TuvException,
-            RemoteException
+    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+            throws TuvException, RemoteException
     {
-        m_tuvManagerLocal.updateTuv(p_tuv, companyId);
+        m_tuvManagerLocal.updateTuvToLocalizedState(p_tuv, companyId);
     }
 
     /**
@@ -352,32 +352,6 @@ public final class TuvManagerWLImpl extends RemoteServer implements
             RemoteException
     {
         return m_tuvManagerLocal.getTus(p_sourcePageId);
-    }
-
-    /**
-     * Retrieves the list of repetition TUs belonging to a source page.
-     * 
-     * @param p_sourcePageId
-     *            - the id of the source page
-     * @return Collection a unsorted list of TUs from the source page.
-     */
-    public Collection<TuImpl> getRepTusBySourcePageId(Long p_sourcePageId)
-    {
-        return m_tuvManagerLocal.getRepTusBySourcePageId(p_sourcePageId);
-    }
-
-    /**
-     * Return all TUs which belong to the same repetition group by TuID.
-     * 
-     * @param p_repTuId
-     *            - This Tu may be not repeated or repetition.
-     * 
-     * @return - List<TuImpl>.
-     */
-    public List<TuImpl> getRepTusByTuId(Long p_repTuId, String companyId)
-            throws TuvException, RemoteException
-    {
-        return m_tuvManagerLocal.getRepTusByTuId(p_repTuId, companyId);
     }
 
     /**

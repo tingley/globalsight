@@ -95,17 +95,18 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String m_orgState;
     private String m_jobName;
     private int m_priority = 3;
-    private int m_leverageMatchThreshold = 0;
+    private int m_leverageMatchThreshold = 75;
     private GlobalSightLocale m_sourceLocale;
     private boolean m_isWordCountReached = false;
     private String m_dispatchType;
     private Date m_createDate = null;
     private String m_dataSourceName;
     private L10nProfile m_l10nProfile = null;
+    private String m_fProfileNames = "";
     private Collection<Request> m_requestList = new ArrayList<Request>();
     private Collection m_workflowRequestList = new ArrayList();
     private Set<Workflow> m_wfInstances = new HashSet<Workflow>();
-    private Collection m_sourcePages = new ArrayList();
+    private Collection<SourcePage> m_sourcePages = new ArrayList<SourcePage>();
     private List m_jobComments = new ArrayList();
     // holds the overriden word count.
     // is NULL if the word count is not overriden
@@ -123,7 +124,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String m_createUserId = null;
 
     // id of the company which this activity belong to
-    private String m_companyId;
+    private long m_companyId;
 
     private String leverageOption = Job.IN_CONTEXT;
 
@@ -131,9 +132,11 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private AttributeSet attributeSet;
 
     private Map<AttributeClone, JobAttribute> attriguteMap;
-    
+
     private Date startDate = null;
     private Date completedDate = null;
+
+    private boolean isMigrated = false;
 
     public JobImpl()
     {
@@ -151,7 +154,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -161,7 +164,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
@@ -340,7 +343,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     /**
      * @see Job.getSourcePages()
      */
-    public Collection getSourcePages()
+    public Collection<SourcePage> getSourcePages()
     {
         try
         {
@@ -411,6 +414,49 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         return -1;
     }
 
+    public String getFProfileNames()
+    {
+        if (!"".equals(m_fProfileNames))
+        {
+            return m_fProfileNames;
+        }
+        Set<FileProfile> set = new HashSet<FileProfile>();
+        set.addAll(getAllFileProfiles());
+        for (FileProfile fp : set)
+        {
+            try
+            {
+                FileProfilePersistenceManager fpManager = ServerProxy
+                        .getFileProfilePersistenceManager();
+                boolean isRef = fpManager.isXlzReferenceXlfFileProfile(fp
+                        .getName());
+                if (isRef)
+                {
+                    String tmp = fp.getName().substring(0,
+                            fp.getName().length() - 4);
+                    fp = fpManager.getFileProfileByName(tmp);
+                    if (fp == null)
+                        fp = fpManager.getFileProfileByName(tmp, false);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            if ("".equals(m_fProfileNames))
+            {
+                m_fProfileNames += fp.getName();
+            }
+            else
+            {
+                m_fProfileNames += "," + fp.getName();
+            }
+        }
+
+        return m_fProfileNames;
+    };
+
     public L10nProfile getL10nProfile()
     {
         if (m_l10nProfile == null)
@@ -455,7 +501,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public int getWordCount()
     {
         int totalWordCount = 0;
-
         if (m_overridenWordCount != null)
         {
             totalWordCount = m_overridenWordCount.intValue();
@@ -464,14 +509,15 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             try
             {
-                m_sourcePages = ServerProxy.getJobHandler()
-                        .getSourcePageByJobId(getId());
-
-                for (Iterator it = m_sourcePages.iterator(); it.hasNext();)
+                m_sourcePages = getSourcePages();
+                for (SourcePage sp : m_sourcePages)
                 {
-                    SourcePage sp = (SourcePage) it.next();
-                    int wordCount = sp.getWordCount();
-                    totalWordCount += wordCount;
+                    totalWordCount += sp.getWordCount();
+                    // WRONG!! Can't use 'totalWordCount' overwrite
+                    // 'm_overridenWordCount'.
+                    // Source page word count and job word count can be edited
+                    // on job details UI.
+//                    m_overridenWordCount = totalWordCount;
                 }
             }
             catch (Exception e)
@@ -638,6 +684,11 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             defaultName = "Leveraging";
             propertyKey = "lb_state_leveraging";
         }
+        else if (m_state.equals(Job.CALCULATING_WORD_COUNTS))
+        {
+            defaultName = "Calculating Word Counts";
+            propertyKey = "lb_state_CalculatingWordCounts";
+        }
         else if (m_state.equals(Job.PROCESSING))
         {
             long fileCount = 0;
@@ -777,7 +828,6 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     //
     // Private Methods
     //
-
     private String getCurrentDataSourceName(String p_dataSourceType,
             long p_dataSourceId) throws Exception
     {
@@ -901,15 +951,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         return null;
     }
 
-    /**
-     * Return a string representation of the object.
-     * 
-     * @return a string representation of the object.
-     */
-    public String toString()
+    public String toDebugString()
     {
-        m_requestList.size();
-        m_wfInstances.size();
         return "\nJob "
                 + getIdAsLong().toString()
                 + " toString start:\n"
@@ -950,6 +993,11 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                 + (getSourcePages() != null ? getSourcePages().toString()
                         : "null") + "\nJob " + getIdAsLong().toString()
                 + " toString end\n";
+    }
+
+    public String toString()
+    {
+        return getName() + getId();
     }
 
     /**
@@ -1161,7 +1209,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         m_wfInstances = new HashSet<Workflow>(instances);
     }
 
-    public void setSourcePages(Collection pages)
+    public void setSourcePages(Collection<SourcePage> pages)
     {
         m_sourcePages = pages;
     }
@@ -1190,9 +1238,9 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     }
 
     @Override
-    public ArrayList getAllFileProfiles()
+    public ArrayList<FileProfile> getAllFileProfiles()
     {
-        ArrayList prifiles = new ArrayList();
+        ArrayList<FileProfile> prifiles = new ArrayList<FileProfile>();
         try
         {
             m_sourcePages = ServerProxy.getJobHandler().getSourcePageByJobId(
@@ -1200,9 +1248,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
             if (m_sourcePages.size() > 0)
             {
-                Iterator it = m_sourcePages.iterator();
-
-                while (it.hasNext())
+                for (Iterator it = m_sourcePages.iterator(); it.hasNext();)
                 {
                     long dataSourceId = ((SourcePage) it.next()).getRequest()
                             .getDataSourceId();
@@ -1362,6 +1408,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         this.uuid = uuid;
     }
 
+    @SuppressWarnings(
+    { "unchecked", "rawtypes", "unused" })
     public boolean hasSetCostCenter()
     {
         synchronized (AddJobAttributeThread.getLock(uuid))
@@ -1376,7 +1424,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
         List<JobAttribute> atts = (List<JobAttribute>) HibernateUtil.search(
                 hql, map);
-        if (atts == null)
+        if (atts == null || atts.size() == 0)
             return true;
 
         CostCenterAction action = new CostCenterAction();
@@ -1513,5 +1561,20 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public void setStartDate(Date startDate)
     {
         this.startDate = startDate;
+    }
+
+    public void setIsMigrated(boolean p_isMigrated)
+    {
+        this.isMigrated = p_isMigrated;
+    }
+
+    public boolean getIsMigrated()
+    {
+        return isMigrated;
+    }
+
+    public boolean isMigrated()
+    {
+        return isMigrated;
     }
 }

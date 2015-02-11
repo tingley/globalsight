@@ -215,12 +215,12 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
     }
 
     /**
-     * @see CommentManager.getIssues(int, String);
+     * @see CommentManager.getIssues(int, long);
      */
-    public ArrayList getIssues(int p_levelObjectType, String p_logicalKey)
-            throws RemoteException, CommentException
+    public ArrayList<IssueImpl> getIssues(int p_levelObjectType,
+            long p_targetPageId) throws RemoteException, CommentException
     {
-        return m_localInstance.getIssues(p_levelObjectType, p_logicalKey);
+        return m_localInstance.getIssues(p_levelObjectType, p_targetPageId);
     }
 
     /**

@@ -33,9 +33,9 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -64,6 +64,7 @@ import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm2.segmenttm.TmRemoveHelper;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.ling.util.GlobalSightCrc;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -77,7 +78,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     // object to lock for synchronizing tm population process (due to deadlocks)
     private Boolean m_tmPopulationLock = new Boolean(true);
 
-    private static final Logger c_logger = Logger
+    private static final Logger LOGGER = Logger
             .getLogger(TmCoreManagerLocal.class);
 
     /**
@@ -96,10 +97,9 @@ public class TmCoreManagerLocal implements TmCoreManager
             LeverageOptions p_options) throws LingManagerException
     {
         TuvMappingHolder mappingHolder = null;
-        Session session = TmUtil.getStableSession();
         try
         {
-            TmPopulator tmPopulator = new TmPopulator(session);
+            TmPopulator tmPopulator = new TmPopulator();
             mappingHolder = tmPopulator.populatePageForAllLocales(p_page,
                     p_options);
         }
@@ -111,13 +111,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
         return mappingHolder;
     }
@@ -142,12 +135,11 @@ public class TmCoreManagerLocal implements TmCoreManager
     {
         TuvMappingHolder mappingHolder = null;
 
-        Session session = TmUtil.getStableSession();
         try
         {
             synchronized (m_tmPopulationLock)
             {
-                TmPopulator tmPopulator = new TmPopulator(session);
+                TmPopulator tmPopulator = new TmPopulator();
                 mappingHolder = tmPopulator.populatePageByLocale(p_page,
                         p_options, p_locale);
             }
@@ -160,10 +152,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
         }
 
         return mappingHolder;
@@ -194,6 +182,8 @@ public class TmCoreManagerLocal implements TmCoreManager
 
             GlobalSightLocale sourceLocale = p_sourcePage
                     .getGlobalSightLocale();
+            boolean isJobDataMigrated = SegmentTuTuvCacheManager
+                    .isJobDataMigrated(p_sourcePage.getId());
 
             // prepare a repository of original segments (source
             // segments in translation_unit_variant)
@@ -205,7 +195,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             // translation_unit table
             pageJobDataRetriever = new PageJobDataRetriever(conn,
                     p_sourcePage.getId(), sourceLocale,
-                    p_sourcePage.getCompanyId());
+                    p_sourcePage.getCompanyId(), isJobDataMigrated);
             SegmentQueryResult result = pageJobDataRetriever.queryForLeverage();
 
             BaseTmTu tu = null;
@@ -310,7 +300,7 @@ public class TmCoreManagerLocal implements TmCoreManager
         SortedTms sortedTms = sortTmsByImplementation(leverageOptions
                 .getLeverageTms());
 
-        Session session = TmUtil.getStableSession();
+        Session session = HibernateUtil.getSession();
 
         try
         {
@@ -335,13 +325,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
     }
 
@@ -372,10 +355,9 @@ public class TmCoreManagerLocal implements TmCoreManager
         }
 
         TuvMappingHolder holder = null;
-        Session session = TmUtil.getStableSession();
         try
         {
-            TmPopulator tmPopulator = new TmPopulator(session);
+            TmPopulator tmPopulator = new TmPopulator();
             holder = tmPopulator.saveSegmentToSegmentTm(p_segments, tm, p_mode);
         }
         catch (LingManagerException le)
@@ -386,13 +368,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
 
         return holder;
@@ -441,10 +416,9 @@ public class TmCoreManagerLocal implements TmCoreManager
 
         TuvMappingHolder holder = null;
 
-        Session session = TmUtil.getStableSession();
         try
         {
-            TmPopulator tmPopulator = new TmPopulator(session);
+            TmPopulator tmPopulator = new TmPopulator();
             holder = tmPopulator.saveSegmentToSegmentTm(goodSegments, tm,
                     p_mode, p_sourceTmName);
         }
@@ -456,13 +430,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
 
         if (errs.size() > 0)
@@ -491,50 +458,13 @@ public class TmCoreManagerLocal implements TmCoreManager
             return;
         }
 
-        Session session = TmUtil.getStableSession();
-        Transaction tx = null;
         try
         {
-            tx = session.beginTransaction();
-            tm.getSegmentTmInfo().updateSegmentTmTuvs(session, tm, p_tuvs);
-            tx.commit();
-        }
-        catch (LingManagerException le)
-        {
-            le.printStackTrace();
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
-            throw le;
+            tm.getSegmentTmInfo().updateSegmentTmTuvs(tm, p_tuvs);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
     }
 
@@ -569,35 +499,13 @@ public class TmCoreManagerLocal implements TmCoreManager
             return;
         }
 
-        Session session = TmUtil.getStableSession();
-        Transaction tx = null;
         try
         {
-            tx = session.beginTransaction();
-            p_tm.getSegmentTmInfo().deleteSegmentTmTuvs(session, p_tm, p_tuvs);
-            tx.commit();
+            p_tm.getSegmentTmInfo().deleteSegmentTmTuvs(p_tm, p_tuvs);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
     }
 
@@ -615,36 +523,13 @@ public class TmCoreManagerLocal implements TmCoreManager
             return;
         }
 
-        Session session = TmUtil.getStableSession();
-        Transaction tx = null;
         try
         {
-            tx = session.beginTransaction();
-            p_tm.getSegmentTmInfo().deleteSegmentTmTus(session, p_tm, p_tus);
-            tx.commit();
+            p_tm.getSegmentTmInfo().deleteSegmentTmTus(p_tm, p_tus);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
     }
 
@@ -662,10 +547,10 @@ public class TmCoreManagerLocal implements TmCoreManager
             LingManagerException
     {
 
-        Session session = TmUtil.getStableSession();
-        Transaction tx = null;
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             // WARNING: About transactions and this bit.
             // Everything here is kept in a single transaction except for this
             // statement.
@@ -679,41 +564,24 @@ public class TmCoreManagerLocal implements TmCoreManager
             // our transaction.
             // For now, we just do this stuff in its own (bad) individual
             // transactions.
-            TmRemoveHelper
-                    .removeCorpus(session.connection(), pTm.getId(), null);
+            TmRemoveHelper.removeCorpus(conn, pTm.getId(), null);
 
-            tx = session.beginTransaction();
-            boolean success = pTm.getSegmentTmInfo().removeTmData(session, pTm,
+            boolean success = pTm.getSegmentTmInfo().removeTmData(pTm,
                     pReporter, pMonitor);
             if (success)
             {
                 String tmName = pTm.getName();
                 TmRemoveHelper.removeTm(pTm);
             }
-            tx.commit();
             return success;
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
             throw new LingManagerException(e);
         }
         finally
         {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -731,41 +599,24 @@ public class TmCoreManagerLocal implements TmCoreManager
         // "Removing Corpus Tm...");
         // pReporter.setPercentage(10);
 
-        Session session = TmUtil.getStableSession();
-        Transaction tx = null;
+        Connection conn = null;
         try
         {
+            conn = DbUtil.getConnection();
             // NOTE: this statement is outside the transaction. See the comment
             // above.
-            TmRemoveHelper.removeCorpus(session.connection(), pTm.getId(),
-                    pLocale.getId());
-            tx = session.beginTransaction();
-            boolean b = pTm.getSegmentTmInfo().removeTmData(session, pTm,
-                    pLocale, pReporter, pMonitor);
-            tx.commit();
+            TmRemoveHelper.removeCorpus(conn, pTm.getId(), pLocale.getId());
+            boolean b = pTm.getSegmentTmInfo().removeTmData(pTm, pLocale,
+                    pReporter, pMonitor);
             return b;
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            if (tx != null && tx.isActive())
-            {
-                try
-                {
-                    tx.rollback();
-                }
-                catch (Exception e2)
-                { /* preserve original exception */
-                }
-            }
             throw new LingManagerException(e);
         }
         finally
         {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -773,19 +624,8 @@ public class TmCoreManagerLocal implements TmCoreManager
     public StatisticsInfo getTmStatistics(Tm pTm, Locale pUiLocale,
             boolean p_includeProjects)
     {
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            return pTm.getSegmentTmInfo().getStatistics(session, pTm,
-                    pUiLocale, p_includeProjects);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
+        return pTm.getSegmentTmInfo().getStatistics(pTm, pUiLocale,
+                p_includeProjects);
     }
 
     @Override
@@ -794,7 +634,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             LingManagerException
     {
         SortedTms sortedTms = sortTmsByImplementation(pOptions.getLeverageTms());
-        Session session = TmUtil.getStableSession();
+        Session session = HibernateUtil.getSession();
         try
         {
             Leverager lv = new Leverager(session);
@@ -810,13 +650,6 @@ public class TmCoreManagerLocal implements TmCoreManager
 
             throw new LingManagerException(e);
         }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
     }
 
     /**
@@ -829,7 +662,6 @@ public class TmCoreManagerLocal implements TmCoreManager
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
             String companyId) throws RemoteException, LingManagerException
     {
-
         LeverageDataCenter leverageDataCenter = new LeverageDataCenter(
                 p_srcLocale, p_tgtLocales, p_options);
         for (BaseTmTuv tuv : p_tuvs)
@@ -841,18 +673,17 @@ public class TmCoreManagerLocal implements TmCoreManager
         SortedTms sortedTms = sortTmsByImplementation(p_options
                 .getLeverageTms());
 
-        Session session = TmUtil.getStableSession();
         try
         {
             LeverageMatchResults levMatchResult = new LeverageMatchResults();
             if (sortedTms.tm2Tms.size() > 0)
             {
-                levMatchResult = new Tm2SegmentTmInfo().leverage(session,
+                levMatchResult = new Tm2SegmentTmInfo().leverage(
                         sortedTms.tm2Tms, leverageDataCenter, companyId);
             }
             if (sortedTms.tm3Tms.size() > 0)
             {
-                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(session,
+                levMatchResult.merge(new Tm3SegmentTmInfo().leverage(
                         sortedTms.tm3Tms, leverageDataCenter, companyId));
             }
             leverageDataCenter
@@ -867,13 +698,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             throw new LingManagerException(e);
         }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
         return leverageDataCenter;
     }
 
@@ -881,7 +705,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     public List<SegmentTmTu> getSegmentsById(List<TMidTUid> tuIds)
             throws LingManagerException
     {
-        Session session = TmUtil.getStableSession();
+        Session session = HibernateUtil.getSession();
         try
         {
             Map<Long, List<Long>> tuIdsByTmId = new HashMap<Long, List<Long>>();
@@ -901,7 +725,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             {
                 Tm tm = ph.getProjectTMById(e.getKey(), false);
                 List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(
-                        session, tm, e.getValue());
+                        tm, e.getValue());
                 for (SegmentTmTu tu : tus)
                 {
                     result.put(new TMidTUid(tm.getId(), tu.getId()), tu);
@@ -920,10 +744,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             throw new LingManagerException(e);
         }
-        finally
-        {
-            TmUtil.closeStableSession(session);
-        }
     }
 
     /**
@@ -935,9 +755,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        return getInfo(tm).getAllSegments(session, tm, createdBefore,
-                createdAfter);
+        return getInfo(tm).getAllSegments(tm, createdBefore, createdAfter);
     }
 
     /**
@@ -950,9 +768,8 @@ public class TmCoreManagerLocal implements TmCoreManager
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        return getInfo(tm).getSegmentsByLocale(session, tm, locale,
-                createdBefore, createdAfter);
+        return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
+                createdAfter);
     }
 
     /**
@@ -965,8 +782,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        return getInfo(tm).getSegmentsByProjectName(session, tm, projectName,
+        return getInfo(tm).getSegmentsByProjectName(tm, projectName,
                 createdBefore, createdAfter);
     }
 
@@ -974,19 +790,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     public int getAllSegmentsCount(Tm tm, String createdBefore,
             String createdAfter) throws RemoteException, LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            return getInfo(tm).getAllSegmentsCount(session, tm, createdBefore,
-                    createdAfter);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
+        return getInfo(tm).getAllSegmentsCount(tm, createdBefore, createdAfter);
     }
 
     @Override
@@ -994,19 +798,8 @@ public class TmCoreManagerLocal implements TmCoreManager
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            return getInfo(tm).getSegmentsCountByLocale(session, tm, locale,
-                    createdBefore, createdAfter);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
+        return getInfo(tm).getSegmentsCountByLocale(tm, locale, createdBefore,
+                createdAfter);
     }
 
     @Override
@@ -1014,19 +807,8 @@ public class TmCoreManagerLocal implements TmCoreManager
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException
     {
-        Session session = TmUtil.getStableSession();
-        try
-        {
-            return getInfo(tm).getSegmentsCountByProjectName(session, tm,
-                    projectName, createdBefore, createdAfter);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
-        }
+        return getInfo(tm).getSegmentsCountByProjectName(tm, projectName,
+                createdBefore, createdAfter);
     }
 
     // TODO: this needs to have session handling code added
@@ -1060,18 +842,25 @@ public class TmCoreManagerLocal implements TmCoreManager
         // Could batch up by TM implementation, but it's more complex and
         // probably no faster currently
         List<TMidTUid> result = new ArrayList<TMidTUid>();
-        Session session = TmUtil.getStableSession();
-        Connection conn = session.connection();
-
-        for (Tm tm : sortedTms)
+        Connection conn = null;
+        try
         {
-            result.addAll(tm.getSegmentTmInfo().tmConcordanceQuery(
-                    Collections.singletonList(tm), query, sourceLocale,
-                    targetLocale, conn));
+            conn = DbUtil.getConnection();
+            for (Tm tm : sortedTms)
+            {
+                result.addAll(tm.getSegmentTmInfo().tmConcordanceQuery(
+                        Collections.singletonList(tm), query, sourceLocale,
+                        targetLocale, conn));
+            }
         }
-        if (session != null)
+        catch (Exception e)
         {
-            TmUtil.closeStableSession(session);
+            e.printStackTrace();
+            throw new LingManagerException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
         }
         // Fix for GBS-2381, order by score
         Collections.sort(result, new TMidTUidComparator(Locale.getDefault()));
@@ -1082,22 +871,14 @@ public class TmCoreManagerLocal implements TmCoreManager
     public Set<GlobalSightLocale> getTmLocales(Tm tm)
             throws LingManagerException
     {
-        Session session = TmUtil.getStableSession();
         try
         {
-            return getInfo(tm).getLocalesForTm(session, tm);
+            return getInfo(tm).getLocalesForTm(tm);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
         }
     }
 
@@ -1128,13 +909,8 @@ public class TmCoreManagerLocal implements TmCoreManager
     public Reindexer getReindexer(Collection<ProjectTM> tms)
             throws LingManagerException
     {
-        if (tms.size() == 0)
-        {
-            throw new IllegalArgumentException();
-        }
-
         // Leak this session to Reindexer, which runs in its own thread
-        Session session = TmUtil.getStableSession();
+        Session session = HibernateUtil.getSession();
         try
         {
             // Weed out any remote tms, since they don't get reindexed
@@ -1156,22 +932,13 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
-
-            Session session = TmUtil.getStableSession();
             try
             {
-                return getInfo(tm).getCreatingUserByTuvId(session, tm, tuvId);
+                return getInfo(tm).getCreatingUserByTuvId(tm, tuvId);
             }
             catch (Exception e)
             {
                 throw new LingManagerException(e);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
             }
         }
         catch (NamingException e)
@@ -1189,21 +956,13 @@ public class TmCoreManagerLocal implements TmCoreManager
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
 
-            Session session = TmUtil.getStableSession();
             try
             {
-                return getInfo(tm).getModifyDateByTuvId(session, tm, tuvId);
+                return getInfo(tm).getModifyDateByTuvId(tm, tuvId);
             }
             catch (Exception e)
             {
                 throw new LingManagerException(e);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
             }
         }
         catch (NamingException e)
@@ -1219,31 +978,25 @@ public class TmCoreManagerLocal implements TmCoreManager
     {
         try
         {
-            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId, false);
+            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
+                    false);
             if (tm == null)
             {
-            	if (c_logger.isDebugEnabled()) {
-					c_logger.debug("Can not find TM by tmId " + tmId
-							+ ", perhaps it has been deleted.");
-            	}
-            	return null;
-//              throw new IllegalArgumentException("No such tmId " + tmId);
+                if (LOGGER.isDebugEnabled())
+                {
+                    LOGGER.debug("Can not find TM by tmId " + tmId
+                            + ", perhaps it has been deleted.");
+                }
+                return null;
+                // throw new IllegalArgumentException("No such tmId " + tmId);
             }
-            Session session = TmUtil.getStableSession();
             try
             {
-                return getInfo(tm).getSidByTuvId(session, tm, tuvId);
+                return getInfo(tm).getSidByTuvId(tm, tuvId);
             }
             catch (Exception e)
             {
                 throw new LingManagerException(e);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
             }
         }
         catch (NamingException e)
@@ -1262,22 +1015,13 @@ public class TmCoreManagerLocal implements TmCoreManager
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
 
-            Session session = TmUtil.getStableSession();
             try
             {
-                return getInfo(tm).getSourceTextByTuvId(session, tm, tuvId,
-                        srcLocaleId);
+                return getInfo(tm).getSourceTextByTuvId(tm, tuvId, srcLocaleId);
             }
             catch (Exception e)
             {
                 throw new LingManagerException(e);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
             }
         }
         catch (NamingException e)
@@ -1326,21 +1070,14 @@ public class TmCoreManagerLocal implements TmCoreManager
             {
                 throw new IllegalArgumentException("No such tmId " + tmId);
             }
-            Session session = TmUtil.getStableSession();
+
             try
             {
-                return getInfo(tm).getTuvBasicInfoByTuvId(session, tm, tuvId);
+                return getInfo(tm).getTuvBasicInfoByTuvId(tm, tuvId);
             }
             catch (Exception e)
             {
                 throw new LingManagerException(e);
-            }
-            finally
-            {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
             }
         }
         catch (NamingException e)

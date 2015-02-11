@@ -62,6 +62,7 @@ String str_error =
 sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 %>
 <HTML XMLNS:gs>
+<!-- This is envoy/tm/management/newTm.jsp -->
 <HEAD>
 <TITLE><%=bundle.getString("lb_tm")%></TITLE>
 <link rel="stylesheet" type="text/css" href="/globalsight/envoy/tm/management/tm.css"/>
@@ -118,8 +119,6 @@ if (strTMAtts != null)
 		arrayTMAtts[arrayTMAtts.length] = tmAtt;
 	}
 }
-
-//alert(strAvailableAttnames + " = " + strTMAtts);
 
 function doAddAttribute()
 {
@@ -313,7 +312,7 @@ function validName() {
 	    var lowerName = name.toLowerCase();
 	    existNames = existNames.toLowerCase();
 
-	    if (existNames.indexOf(lowerName + ",") != -1) {
+	    if (existNames.indexOf("," + lowerName + ",") != -1) {
 	        alert(name + " is exist. Please input another new translation memory name.");
 	        form.<%=WebAppConstants.TM_TM_NAME%>.focus();
 	        return false;
@@ -338,39 +337,25 @@ function buildDefinition()
 
 function parseDefinition()
 {
-    var dom;
-    //Mozilla compatibility
-    var xmlStr = "<%=xmlDefinition%>";
+    var xmlStr = "<%=xmlDefinition.replace("\n","").replace("\r","").trim()%>";
+    var $xml = $( $.parseXML( xmlStr ) );
 
-    if(ie)
-    {
-      dom = oDefinition.XMLDocument;
-    }
-    else if(window.DOMParser)
-    {
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-
-    var nameNode = dom.selectSingleNode("/tm/name");
-    if (nameNode != null && nameNode.text != "")
+    var nameNode = $xml.find("tm > name");
+    if (nameNode != null && nameNode.text() != "")
     {
       // for update, set ID, for clone don't
-      form.<%=WebAppConstants.TM_TM_ID%>.value =
-        dom.selectSingleNode("/tm").getAttribute("id");
+      form.<%=WebAppConstants.TM_TM_ID%>.value = $xml.find("tm").attr("id");
+      isModify = true;
     }
-    form.<%=WebAppConstants.TM_TM_NAME%>.value =
-      dom.selectSingleNode("/tm/name").text;
-    form.<%=WebAppConstants.TM_TM_DOMAIN%>.value =
-      dom.selectSingleNode("/tm/domain").text;
-    form.<%=WebAppConstants.TM_TM_ORGANIZATION%>.value =
-      dom.selectSingleNode("/tm/organization").text;
+    form.<%=WebAppConstants.TM_TM_NAME%>.value = $xml.find("tm > name").text();
+    form.<%=WebAppConstants.TM_TM_DOMAIN%>.value = $xml.find("tm > domain").text();
+    form.<%=WebAppConstants.TM_TM_ORGANIZATION%>.value = $xml.find("tm > organization").text();
 
 	//for bug GBS-2547,by fan
-	var desc = dom.selectSingleNode("/tm/description").text.replace(new RegExp("<br/>","gm"),"\n");
+	var desc = $xml.find("tm > description").text().replace(new RegExp("<br/>","gm"),"\n");
     form.<%=WebAppConstants.TM_TM_DESCRIPTION%>.value = desc;
 
-    var isRemoteTm = dom.selectSingleNode("/tm/isRemoteTm").text;
+    var isRemoteTm = $xml.find("tm > isRemoteTm").text();
     var objIsRemoteTm = document.getElementById('idRemoteTm');
 	var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
     if (isRemoteTm == "true")
@@ -396,26 +381,10 @@ function doOnLoad()
     }
 
     parseDefinition();
-
-    var dom;
-    //Mozilla compatibility
-    var xmlStr = "<%=xmlDefinition%>";
-
-    if(ie)
+    if (isModify)
     {
-      dom = oDefinition.XMLDocument;
-    }
-    else if(window.DOMParser)
-    {
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-
-    var nameNode = dom.selectSingleNode("/tm/name");
-    if (nameNode != null && nameNode.text != "")
-    {
-      isModify = true;
-      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("lb_edit") + " " + bundle.getString("lb_tm"))%>" + " " + nameNode.text;
+      tmName = form.<%=WebAppConstants.TM_TM_NAME%>.value;
+      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("lb_edit") + " " + bundle.getString("lb_tm"))%>" + " " + tmName;
 
       // can't rename for now
       form.<%=WebAppConstants.TM_TM_NAME%>.disabled = true;
@@ -424,7 +393,6 @@ function doOnLoad()
     }
     else
     {
-      isModify = false;
       idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("lb_new") + " " + bundle.getString("lb_tm"))%>";
 
       form.<%=WebAppConstants.TM_TM_NAME%>.select();
@@ -522,9 +490,7 @@ function getAllRemoteTmProfiles(data)
 
     remoteTmProfile.disabled = false;
 }
-
 </SCRIPT>
-
 </HEAD>
 <BODY onload="doOnLoad();" LEFTMARGIN="0" RIGHTMARGIN="0"
       TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
@@ -535,8 +501,6 @@ function getAllRemoteTmProfiles(data)
 <DIV ID="contentLayer"
  STYLE="POSITION: absolute; Z-INDEX: 0; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 <DIV CLASS="mainHeading" id="idHeading">&nbsp;</DIV>
-
-<XML id="oDefinition" style="display:none"><%=xmlDefinition%></XML>
 
 <FORM NAME="form" METHOD="POST" action="<%=urlOK%>">
 <INPUT TYPE="hidden" NAME="<%=WebAppConstants.TM_ACTION%>"

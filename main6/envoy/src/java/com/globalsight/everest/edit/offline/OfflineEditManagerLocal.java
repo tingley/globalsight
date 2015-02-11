@@ -20,6 +20,7 @@ package com.globalsight.everest.edit.offline;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -52,6 +53,7 @@ import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.rtf.ParaViewWorkDocWriter;
 import com.globalsight.everest.edit.offline.ttx.TTXParser;
+import com.globalsight.everest.edit.offline.upload.CheckResult;
 import com.globalsight.everest.edit.offline.upload.FormatTwoEncodingSniffer;
 import com.globalsight.everest.edit.offline.upload.UploadApi;
 import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
@@ -122,6 +124,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     private UploadApi api = null;
     private boolean cancel = false;
+    private List<String> m_canceledFiles = null;
 
     static private REProgram createProgram(String p_pattern)
     {
@@ -291,6 +294,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     downloadApi.makeEmbeddedWordClientPackage(p_params,
                             m_status);
                 }
+                else if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
+                {
+                    m_status.speak(0, m_resource
+                            .getString("msg_dnld_create_omegat_package"));
+
+                    downloadApi.makeOmegaTPackage(p_params,
+                            m_status);
+                }
                 else
                 {
                     // This method will create either a normal RTF or
@@ -455,6 +466,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     public void runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,
             String p_fileName) throws AmbassadorDwUpException
     {
+        m_canceledFiles = new ArrayList<String>();
         if (p_fileName != null && p_fileName.endsWith(".zip"))
         {
             // It needs to extract the zip file first when the file type is zip,
@@ -498,6 +510,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             XmlDtdManager.validateTargetPage(page,
                     XmlDtdManager.OFF_LINE_IMPORT);
         }
+        
+        try
+        {
+            p_tmpFile.deleteOnExit();
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     /**
@@ -513,6 +533,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
     private TargetPage processUploadSingleFile(File p_tmpFile, User p_user,
             Task p_task, String p_fileName)
     {
+        OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
+        
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
                 .getDefaultUILocale()));
 
@@ -530,6 +552,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             e.printStackTrace();
         }
         long taskId = p_task == null ? -1 : p_task.getId();
+        long oriTaskId = taskId;
         
         p_task = TaskHelper.getTask(taskId);
 
@@ -539,10 +562,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         {
             taskId = -1;
         }
+
+        String errorString = null;
         try
         {
-            String errorString = null;
-
             List excludedTus = null;
             if (p_task != null)
             {
@@ -555,6 +578,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
             int processedCounter = m_status.getCounter() + 1;
             UploadApi api = new UploadApi();
+            api.setStatus(m_status);
 
             switch (detect.m_type)
             {
@@ -571,7 +595,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             m_resource.getString("msg_upld_format_unicode_txt"));
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_errchk_in_progress"));
-                    m_status.setResults(errorString);
+                    processUploadResult(errorString, processedCounter);
                     break;
                 }
 
@@ -588,7 +612,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             m_resource.getString("msg_upld_format_unicode_txt"));
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_errchk_in_progress"));
-                    m_status.setResults(errorString);
+                    processUploadResult(errorString, processedCounter);
                     break;
                 }
 
@@ -606,7 +630,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             m_resource.getString("msg_upld_format_unicode_txt"));
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_errchk_in_progress"));
-                    m_status.setResults(errorString);
+                    processUploadResult(errorString, processedCounter);
                     break;
                 }
 
@@ -621,7 +645,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             .getString("msg_upld_format_rtf_paraview"));
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_errchk_in_progress"));
-                    m_status.setResults(errorString);
+                    processUploadResult(errorString, processedCounter);
                     break;
                 }
 
@@ -636,7 +660,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                             .getString("msg_upld_format_rtf_listview"));
                     m_status.speak(processedCounter,
                             m_resource.getString("msg_upld_errchk_in_progress"));
-                    m_status.setResults(errorString);
+                    processUploadResult(errorString, processedCounter);
                     break;
                 }
 
@@ -693,6 +717,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             OfflinePageData data = api.getUploadPageData();
             if (data != null)
             {
+                taskId = Long.valueOf(data.getTaskId());
                 String pageId = data.getPageId();
                 if (!data.isConsolated() && pageId != null 
                         && pageId.contains(","))
@@ -705,6 +730,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 {
                     data.setConsolated(false);
                 }
+                
+                status.addFileState(taskId, p_fileName, "Handled");
                 
                 if (data.isConsolated())
                 {
@@ -721,16 +748,62 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 data.getTargetLocaleName());
                     }
                 }
+            } else {
+                status.addFileState(p_task.getId(), p_fileName,
+                        "Failed. Error:Cannot generate offline page data successfully.");
             }
-
+            
             return null;
         }
         catch (Exception ex)
         {
+            status.addFileState(oriTaskId, p_fileName, "Failed. Error:"
+                    + (errorString != null ? errorString : ex.getMessage()));
             s_category.error("processUploadSingleFile error", ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
         }
+    }
+
+    private void processUploadResult(String errorString, int processedCounter)
+            throws IOException
+    {
+        if (m_status.getIsContinue() != null
+                && m_status.getIsContinue().equals(Boolean.FALSE)
+                && "IsContinue=fasle".equals(errorString))
+        {
+            m_canceledFiles.add(errorString);
+
+            CheckResult checkResult = m_status.getCheckResultCopy();
+            String rrr = checkResult.getMessage(false);
+            m_status.setIsContinue(null);
+            m_status.setCheckResultCopy(null);
+            if (processedCounter == 1 && m_status.getTotalFiles() == 1)
+            {
+                rrr = "<div class='headingError'>"
+                        + "Page is cancelled for missing following internal tags"
+                        + rrr + "</div>";
+                m_status.setResults(rrr);
+            }
+            else if (processedCounter == m_status.getTotalFiles()
+                    && m_canceledFiles.size() == m_status.getTotalFiles())
+            {
+                rrr = "<div class='headingError'><bold>"
+                        + "Page is cancelled for missing following internal tags</bold>"
+                        + rrr + "</div>";
+                m_status.speak(processedCounter, rrr);
+                m_status.setResults("<bold>All pages are cancelled for missing internal tags</bold>");
+            }
+            else
+            {
+                rrr = "<div class='headingError'><bold>"
+                        + "Page is cancelled for missing following internal tags</bold>"
+                        + rrr + "</div>";
+                m_status.speak(processedCounter, rrr);
+            }
+        }
+        else
+            m_status.setResults(errorString);
     }
 
     /****** END: PROCESS UPLOAD PAGE ******/
@@ -1345,13 +1418,13 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
      */
     private void addComment(Document doc, User p_user)
     {
-        String companyId = null;
+        long companyId = -1;
         String taskId = XliffFileUtil.getTaskId(doc);
         if (taskId != null)
         {
             Task task = TaskHelper.getTask(Long.parseLong(taskId));
-            companyId = task != null ? task.getCompanyId() : CompanyWrapper
-                    .getCurrentCompanyId();
+            companyId = task != null ? task.getCompanyId() : Long
+                    .parseLong(CompanyWrapper.getCurrentCompanyId());
         }
         TargetPage tPage = null;
         XmlEntities entity = new XmlEntities();

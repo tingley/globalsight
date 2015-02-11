@@ -17,34 +17,40 @@
 package com.globalsight.everest.usermgr;
 
 import java.rmi.RemoteException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TimeZone;
 import java.util.Vector;
 
-import javax.naming.NameAlreadyBoundException;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
-import javax.naming.directory.AttributeInUseException;
 import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InvalidAttributesException;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.NoSuchAttributeException;
 import javax.naming.directory.SchemaViolationException;
 import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
 
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.ContainerRole;
@@ -58,6 +64,7 @@ import com.globalsight.everest.foundation.UserRoleImpl;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionException;
 import com.globalsight.everest.permission.PermissionGroup;
+import com.globalsight.everest.persistence.project.ProjectUnnamedQueries;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.securitymgr.FieldSecurity;
@@ -65,8 +72,10 @@ import com.globalsight.everest.securitymgr.UserFieldSecurity;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.vendormanagement.UpdatedDataEvent;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserSearchParams;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * UserManagerLocal implements UserManager and is responsible for managing user
@@ -84,7 +93,11 @@ public class UserManagerLocal implements UserManager
     private UserManagerEventHandler m_eventHandler = null;
 
     // for calculate users that logged in.
-    private Map m_userMap = null;
+    private Map<String, String> m_userMap = null;
+    
+    static final String LDAP_PWD_MD5 = "MD5";
+
+    static final String LDAP_PREFIX_MD5 = "{MD5}";
 
     //
     // Constructor
@@ -92,7 +105,7 @@ public class UserManagerLocal implements UserManager
 
     public UserManagerLocal() throws UserManagerException
     {
-        m_userMap = new Hashtable(20);
+        m_userMap = new Hashtable<String, String>(20);
 
         String errorMsgKey = UserManagerException.MSG_INIT_SERVER_ERROR;
         try
@@ -168,69 +181,26 @@ public class UserManagerLocal implements UserManager
             throw new UserManagerException(errorMsgKey, errorMsgArg, null);
         }
 
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-        // generate a LDAP entry for the Role
-        Attributes entry = RoleLdapHelper.convertRoleToLdapEntry(p_role);
-        String roleId = p_role.getName();
-        String tmpDN = RoleLdapHelper.getRoleDN(roleId);
-        try
-        {
-            // add to LDAP
-            dirContext.createSubcontext(tmpDN, entry);
-        }
-        catch (NameAlreadyBoundException ex)
-        {
-            try
-            {
-                reactivateRole(dirContext, p_role);
-                errorMsgArg = new String[]
-                { UserManagerException.ARG_ROLE_ALREADY_EXIST };
-            }
-            catch (NamingException lde)
-            {
-                errorMsgArg = new String[]
-                { UserManagerException.ARG_FAILED_TO_REACTIVATE_ROLE };
-            }
-        }
-        catch (InvalidAttributesException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_INVALID_ATTRIBUTE };
-            CATEGORY.error(
-                    "UserManagerException is thrown from: "
-                            + "UserManagerLocal::addRole(): " + "(Role name= "
-                            + p_role.toString() + ")" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error(
-                    "UserManagerException is thrown from: "
-                            + "UserManagerLocal::addRole(): " + "(Role name= "
-                            + p_role.toString() + ")" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+        HibernateUtil.saveOrUpdate(p_role);
     }
 
-    public void removeRole(String p_roleName) throws RemoteException,
+    public void removeRole(Role role) throws RemoteException,
             UserManagerException
     {
-        if (p_roleName == null || "".equals(p_roleName.trim()))
+        if (role == null)
         {
             return;
         }
 
-        // modify the role status
-        String roleDN = RoleLdapHelper.getRoleDN(p_roleName);
-        removeRoleByDn(roleDN);
+        try 
+        {
+			HibernateUtil.delete(role);
+		} 
+        catch (Exception e) 
+        {
+        	CATEGORY.error(e);
+        	throw new UserManagerException(e);
+		}
     }
 
     /**
@@ -239,27 +209,17 @@ public class UserManagerLocal implements UserManager
     public void removeRoleFromLDAP(String roleName) throws RemoteException,
             UserManagerException
     {
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        String roleDN = RoleLdapHelper.getRoleDN(roleName);
-
-        try
-        {
-            dirContext.destroySubcontext(roleDN);
-        }
-        catch (NamingException e)
-        {
-            CATEGORY.error("Failed to delete role " + roleName + " from LDAP.",
-                    e);
-            throw new UserManagerException(
-                    UserManagerException.MSG_DELETE_ROLE_ERROR, null, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+    	try 
+    	{
+			HibernateUtil.delete(RoleDatabaseHelper.getContainerRoleByName(roleName));
+			HibernateUtil.delete(RoleDatabaseHelper.getUserRoleByName(roleName));
+		} 
+    	catch (Exception e) 
+    	{
+    		 CATEGORY.error(e);
+    		 throw new UserManagerException(e);
+		}
+    	
     }
 
     /**
@@ -292,26 +252,14 @@ public class UserManagerLocal implements UserManager
     public void removeUserFromLDAP(String userId) throws RemoteException,
             UserManagerException
     {
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        String userDN = UserLdapHelper.getUserDN(userId);
-
-        try
-        {
-            dirContext.destroySubcontext(userDN);
-        }
-        catch (NamingException e)
-        {
-            CATEGORY.error("Failed to delete user " + userId + " from LDAP.", e);
-            throw new UserManagerException(
-                    UserManagerException.MSG_DELETE_USER_ERROR, null, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+    	try 
+    	{
+			HibernateUtil.delete(getUser(userId));
+		} 
+    	catch (Exception e) 
+    	{
+    		 CATEGORY.error(e);
+		}
     }
 
     /**
@@ -358,38 +306,24 @@ public class UserManagerLocal implements UserManager
         }
         // remove the user from all the projects
         associateUserWithProjectsById(p_uid, new ArrayList());
-
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        // modify the user status
-        ModificationItem[] modSet = new ModificationItem[1];
-        modSet[0] = UserLdapHelper.getLDAPModificationForDeleteUser();
-
-        String userDN = UserLdapHelper.getUserDN(p_uid);
-
-        // delete the user from the roles that contains the user
-        try
+        
+        List<ContainerRoleImpl> crs = RoleDatabaseHelper.getContainerRoleByUserId(p_uid);
+        for (ContainerRoleImpl cr : crs)
         {
-            removeUserFromRoles(p_uid, dirContext);
-            // remove user from ldap
-            dirContext.destroySubcontext(userDN);
+        	RoleDatabaseHelper.removeUserFromContainerRole(cr, p_uid);
         }
-        catch (NamingException e)
+        
+        UserRoleImpl ur = RoleDatabaseHelper.getUserRoleByUserId(p_uid);
+        try 
         {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_DELETE_USER_FROM_ROLES };
-
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeUser(): " + "(User Id = "
-                    + p_uid + ")\n" + errorMsgArg[0], e);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, e);
-        }
-        finally
+			HibernateUtil.delete(ur);
+			HibernateUtil.delete(u);
+		} 
+        catch (Exception e1) 
         {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+        	CATEGORY.error(e1);
+        	throw new UserManagerException(e1);
+		}
 
         removeUserCalendar(p_uid);
         try
@@ -435,59 +369,27 @@ public class UserManagerLocal implements UserManager
             return null;
         }
 
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-        try
+        String hql = "from UserRoleImpl u where u.user = :user and u.state = :state";
+        Map map = new HashMap();
+        map.put("user", p_uid);
+        map.put("state", User.State.DEACTIVE);
+        
+        List<UserRoleImpl> urs = (List<UserRoleImpl>) HibernateUtil.search(hql, map);
+        for (UserRoleImpl ur : urs)
         {
-            // activate the user's roles
-            activateUserRoles(p_uid, dirContext);
+        	ur.setState(User.State.ACTIVE);
+        	
+        	//add to ContainerRole
+        	String name = ur.getName();
+        	int index = name.indexOf(p_uid);
+        	if (index > 0)
+        	{
+				name = name.substring(0, index - 1);
+				String uids[] = { p_uid };
+				addUsersToRole(uids, name);
+        	}
         }
-        catch (NamingException ex)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_DEACTIVATE_USER_ROLES };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::deactivateUser(): " + "(User Id = "
-                    + p_uid + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        if (p_projectIds != null && p_projectIds.size() > 0)
-        {
-            // add the user to the specified projects.
-            associateUserWithProjectsById(p_uid, p_projectIds);
-        }
-
-        // check out a connection from the pool with a system defined user bond.
-        dirContext = checkOutConnection(true);
-
-        // modify the user status
-        ModificationItem[] modSet = new ModificationItem[1];
-        modSet[0] = UserLdapHelper.getLDAPModificationForActivateUser();
-        String userDN = UserLdapHelper.getUserDN(p_uid);
-
-        try
-        {
-            dirContext.modifyAttributes(userDN, modSet);
-        }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::reactivateUser(): " + "(User Id = "
-                    + p_uid + "):\n", ex);
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
+        
         return getUser(p_uid);
     }
 
@@ -525,12 +427,12 @@ public class UserManagerLocal implements UserManager
         associateUserWithProjectsById(p_uid, new ArrayList());
 
         // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
+//        DirContext dirContext = checkOutConnection(true);
 
         try
         {
             // deactivate the user's roles
-            deactivateUserRoles(p_uid, dirContext);
+            deactivateUserRoles(p_uid);
         }
         catch (NamingException e)
         {
@@ -545,7 +447,7 @@ public class UserManagerLocal implements UserManager
         finally
         {
             // return the connection to the pool
-            checkInConnection(dirContext);
+//            checkInConnection(dirContext);
         }
 
         try
@@ -558,43 +460,11 @@ public class UserManagerLocal implements UserManager
         { /* exception is logged in TaskManager */
         }
 
-        // modify the user status
-        ModificationItem[] modSet = new ModificationItem[1];
-        modSet[0] = UserLdapHelper.getLDAPModificationForDeactiveUser();
+        User user = getUser(p_uid);
+        user.setState(User.State.DEACTIVE);
+        HibernateUtil.saveOrUpdate(user);
 
-        String userDN = UserLdapHelper.getUserDN(p_uid);
-
-        dirContext = checkOutConnection(true);
-        // mark the user as deactive
-        try
-        {
-            dirContext.modifyAttributes(userDN, modSet);
-        }
-        catch (NoSuchAttributeException ex)
-        {
-            checkInConnection(dirContext);
-            CATEGORY.error("deleteUser " + p_uid + " " + ex.toString(), ex);
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_USER_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::deleteUser(): " + "(User Id = "
-                    + p_uid + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-            CATEGORY.error("deleteUser " + p_uid + " " + ex.toString(), ex);
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::deleteUser(): " + "(User Id = "
-                    + p_uid + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-
-        return getUser(p_uid);
+        return user;
     }
 
     /**
@@ -648,50 +518,12 @@ public class UserManagerLocal implements UserManager
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
         }
 
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        // generate a ModificationItem[] to hold the attributes to be modified
-        ModificationItem[] modSet = UserLdapHelper
-                .convertUserToModificationSet(p_user);
-        try
+        String password = p_user.getPassword();
+        if (!password.startsWith("{MD5}"))
         {
-            // Modify the entry
-            dirContext.modifyAttributes(
-                    UserLdapHelper.getUserDN(p_user.getUserId()), modSet);
+        	p_user.setPassword(encyptMD5Password(password));
         }
-        catch (NoSuchAttributeException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_USER_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
-                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (InvalidAttributesException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_INVALID_ATTRIBUTE };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
-                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
-                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+        HibernateUtil.saveOrUpdate(p_user);
 
         // assign the user to the appropriate projects
         associateUserWithProjectsById(p_user.getUserId(), p_projectIds);
@@ -720,56 +552,11 @@ public class UserManagerLocal implements UserManager
     public User getUser(String p_uid) throws RemoteException,
             UserManagerException
     {
-        String errorMsgKey = UserManagerException.MSG_GET_USER_ERROR;
         if (p_uid == null || p_uid.trim().equals(""))
             return null;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-
-        setConnectionOptions(dirContext);
-        User outUser = null;
-        Attributes userEntry = null;
-        try
-        {
-            if (p_uid != null)
-            {
-                String userDN = UserLdapHelper.getUserDN(p_uid);
-                userEntry = dirContext.getAttributes(userDN);
-            }
-            // if a user was found
-            if (userEntry != null)
-            {
-                outUser = UserLdapHelper.getUserFromLDAPEntry(userEntry);
-            }
-            else
-            {
-                CATEGORY.info("User " + p_uid + " does not exist in LDAP!");
-                String[] args =
-                { UserManagerException.ARG_USER_NOT_EXIST };
-                throw new UserManagerException(errorMsgKey, args, null);
-            }
-        }
-        catch (NameNotFoundException ex)
-        {
-            CATEGORY.info("User " + p_uid
-                    + " does not exist or has been deleted from LDAP.");
-            String[] args =
-            { UserManagerException.ARG_USER_NOT_EXIST };
-            throw new UserManagerException(errorMsgKey, args, ex);
-        }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("LDAPException finding user " + p_uid, ex);
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return outUser;
+        
+        String hql = "from UserImpl u where u.userId = ?";
+    	return (User) HibernateUtil.getFirst(hql, p_uid);
     }
 
     /**
@@ -801,31 +588,29 @@ public class UserManagerLocal implements UserManager
     public List getUserInfos(String[] p_userIds) throws RemoteException,
             UserManagerException
     {
-        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
-        Vector userInfos = null;
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        // creates the filter for search for users that are not deleted or
-        // active and have one of the user ids specified
-        String filter = UserLdapHelper.getSearchFilterOnUIDs(p_userIds);
-        try
-        {
-            userInfos = getUserInfos(filter, null, dirContext);
-        }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUserInfos(String[]): ", ex);
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return new ArrayList(userInfos);
+    	List uIds = new ArrayList();
+    	for (String uId : p_userIds)
+    	{
+    		uIds.add(uId);
+    	}
+    	
+        Session session = HibernateUtil.getSession();
+    	
+    	boolean filterUser = false;
+    	
+    	Criteria c = session.createCriteria(UserImpl.class);
+    	c.add(Restrictions.in("userId", uIds));
+    	c.add(Restrictions.not(Restrictions.eq("state", User.State.DEACTIVE)));
+    	c.add(Restrictions.not(Restrictions.eq("state", User.State.DELETED)));
+    	
+    	List<UserImpl> us = c.list();
+    	List userInfos = new ArrayList();
+    	for (UserImpl u : us)
+    	{
+    		userInfos.add(u.toUserInfo());
+    	}
+    	
+    	return userInfos;
     }
 
     /**
@@ -835,51 +620,22 @@ public class UserManagerLocal implements UserManager
             String p_targetLocale) throws RemoteException, UserManagerException
     {
 
-        Attribute activityAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ACTIVITY, p_activityName);
-        Attribute sourceAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, p_sourceLocale);
-        Attribute targetAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, p_targetLocale);
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-
-        Attribute[] roleAttrs =
-        { typeAttr, activityAttr, sourceAttr, targetAttr };
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        String[] userIds = null;
-        try
-        {
-            userIds = getUserIdsFromRole(roleAttrs, dirContext);
-        }
-        catch (Exception e)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY.error("failed to get usernames from role: "
-                    + p_activityName + ", " + p_sourceLocale + ", "
-                    + p_targetLocale, e);
-
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        if (userIds == null || userIds.length == 0)
-        {
-            return null;
-        }
-
-        return getUserInfos(userIds);
-
+    	List<ContainerRoleImpl> crs = getContainerRoles(p_activityName, p_sourceLocale, p_targetLocale);
+    	Set<String> ids = new HashSet<String>();
+    	
+    	for (ContainerRoleImpl c : crs)
+    	{
+    		ids.addAll(c.getUserIds());
+    	}
+    	
+    	List result = new ArrayList();
+    	for (String userId : ids)
+    	{
+    		UserImpl u = (UserImpl) getUser(userId);
+    		result.add(u.toUserInfo());
+    	}
+    	
+    	return result;
     }
 
     /**
@@ -906,68 +662,54 @@ public class UserManagerLocal implements UserManager
         }
 
     }
+    
+    private static TimeZone getUserTimeZone(String p_userId)
+    {
+        TimeZone timeZone = null;
+        try
+        {
+            timeZone = ServerProxy.getCalendarManager().findUserTimeZone(
+                    p_userId);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to get user time zone. ", e);
+            timeZone = TimeZone.getDefault();
+        }
 
+        return timeZone;
+    }
+    
     /**
      * @see UserManager.getEmailInformationForUser(String)
      */
     public EmailInformation getEmailInformationForUser(String p_userId)
             throws RemoteException, UserManagerException
     {
-        EmailInformation emailInfo = null;
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
+        User user = getUser(p_userId);
+        if (user == null)
+        	return null;
+        
+        StringBuffer sb = new StringBuffer();
 
-        String[] attrs = new String[]
-        { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
-                UserLdapHelper.LDAP_ATTR_LAST_NAME,
-                UserLdapHelper.LDAP_ATTR_EMAIL,
-                UserLdapHelper.LDAP_ATTR_CC_EMAIL,
-                UserLdapHelper.LDAP_ATTR_BCC_EMAIL,
-                UserLdapHelper.LDAP_ATTR_DEFAULT_UI_LOCALE };
+        sb.append(user.getFirstName());
+        sb.append(" ");
+        sb.append(user.getLastName());
+        String email = user.getEmail();
+        String ccEmail = user.getCCEmail();
+        String bccEmail = user.getBCCEmail();
+        String uiLocale = user.getDefaultUILocale();
+        String companyName = user.getCompanyName();
 
-        // Search User entries based on the uids
-        try
-        {
-            String[] uids =
-            { p_userId };
-            String filter = UserLdapHelper.getSearchFilterOnUIDs(uids);
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            if (res.hasMoreElements())
-            {
-                SearchResult tmpSearchResult = (SearchResult) res.nextElement();
-                Attributes entry = tmpSearchResult.getAttributes();
-
-                emailInfo = UserLdapHelper.getUserEmailInfo(p_userId, entry);
-
-            }
-            res.close();
-        }
-        catch (NamingException ex)
-        {
-            String[] errorMsgArg =
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY.error("getEmailInformationForUser :: " + errorMsgArg[0],
-                    ex);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_EMAILS_FORUSERS_ERROR,
-                    errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return emailInfo;
+        // return new EmailInformation(p_userId, sb.toString(), email,
+        // uiLocale, getUserTimeZone(p_userId));
+        EmailInformation eInfor = new EmailInformation(p_userId, sb.toString(),
+                email, uiLocale, getUserTimeZone(p_userId));
+        eInfor.setCCEmailAddress(ccEmail);
+        eInfor.setBCCEmailAddress(bccEmail);
+        eInfor.setCompanyName(companyName);
+        
+        return eInfor;
     }
 
     /**
@@ -976,46 +718,19 @@ public class UserManagerLocal implements UserManager
     public List getEmailInformationForUsers(String[] p_userIds)
             throws RemoteException, UserManagerException
     {
-
-        String errorMsgKey = UserManagerException.MSG_GET_EMAILS_FORUSERS_ERROR;
-        String[] errorMsgArg;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        String[] attrs = new String[]
-        { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
-                UserLdapHelper.LDAP_ATTR_LAST_NAME,
-                UserLdapHelper.LDAP_ATTR_EMAIL,
-                UserLdapHelper.LDAP_ATTR_CC_EMAIL,
-                UserLdapHelper.LDAP_ATTR_BCC_EMAIL,
-                UserLdapHelper.LDAP_ATTR_DEFAULT_UI_LOCALE,
-                UserLdapHelper.LDAP_ATTR_USERID };
-
-        List emails = null;
-
-        // Search User entries based on the uids
-        try
-        {
-            emails = getListOfEmailInfo(p_userIds, attrs, dirContext);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { p_userIds.toString() };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getEmailInformationForUsers(): "
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return emails;
+    	List result = new ArrayList();
+    	
+    	for (String uId : p_userIds)
+    	{
+    		EmailInformation e = getEmailInformationForUser(uId);
+    		
+    		if (e != null)
+    		{
+    			result.add(e);
+    		}
+    	}
+    	
+    	return result;
     }
 
     /**
@@ -1032,90 +747,43 @@ public class UserManagerLocal implements UserManager
     public String[] getUserNamesFromCurrentAndSuperCompany()
             throws RemoteException, UserManagerException
     {
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        String[] userNames = null;
-        setConnectionOptions(dirContext);
-        // Search User names
-        try
+    	String companyId = CompanyThreadLocal.getInstance().getValue();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String superCompanyName = CompanyWrapper
+                .getCompanyNameById(CompanyWrapper.SUPER_COMPANY_ID);
+        
+        if (companyName.equals(superCompanyName))
         {
-            String filter = UserLdapHelper.getSearchFilter();
-            String[] attrs = new String[]
-            { UserLdapHelper.LDAP_ATTR_USER_NAME };
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            userNames = UserLdapHelper.getNamesFromSearchResults(res);
+        	return getUserNamesFromAllCompanies();
         }
-        catch (NamingException ex)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-
-            CATEGORY.error(
-                    "UserManagerException is thrown from: "
-                            + "UserManagerLocal::getUserNamesFromCurrentAndSuperCompany(): "
-                            + errorMsgArg[0], ex);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return userNames;
+        
+        Vector<UserImpl> us = getUsers();
+    	
+    	List names = new ArrayList();
+    	for (UserImpl u : us)
+    	{
+    		if (u.getCompanyName().equals(companyName) || u.getCompanyName().equals(superCompanyName))
+    		{
+    			names.add(u.getUserName());
+    		}
+    	}
+    	
+    	return (String[]) names.toArray();
     }
 
     public String[] getUserNamesFromAllCompanies() throws RemoteException,
             UserManagerException
     {
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        String[] userNames = null;
-        setConnectionOptions(dirContext);
-        // Search User names
-        try
-        {
-            String filter = UserLdapHelper.getSearchFilterForAllCompanies();
-            String[] attrs = new String[]
-            { UserLdapHelper.LDAP_ATTR_USER_NAME };
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            userNames = UserLdapHelper.getNamesFromSearchResults(res);
-        }
-        catch (NamingException ex)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUserNamesFromAllCompanies(): "
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return userNames;
+    	Vector<UserImpl> us = getUsersFromAllCompany();
+    	
+    	List names = new ArrayList();
+    	for (UserImpl u : us)
+    	{
+    		names.add(u.getUserName());
+    	}
+    	
+    	String[] result = new String[us.size()];
+    	return (String[]) names.toArray(result);
     }
 
     /**
@@ -1124,59 +792,88 @@ public class UserManagerLocal implements UserManager
     public Vector getVendorlessUsers() throws RemoteException,
             UserManagerException
     {
-
-        DirContext dirContext = checkOutConnection(false);
-        Vector users = null;
-
-        try
+    	String companyId = CompanyThreadLocal.getInstance().getValue();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String superCompanyName = CompanyWrapper
+                .getCompanyNameById(CompanyWrapper.SUPER_COMPANY_ID);
+        
+        Vector<User> us = null;
+        Vector<User> us2 = new Vector<User>();
+        
+        if (companyName.equals(superCompanyName))
         {
-            // get all active and created user ids
-            String filter = UserLdapHelper.getSearchFilter();
-            String[] attrs = new String[]
-            { UserLdapHelper.LDAP_ATTR_USERID };
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            Vector userNames = UserLdapHelper
-                    .getUIDsVectorFromSearchResults(res);
-            // now remove the user ids that are already vendors
-            Collection usersWithVendors = ServerProxy.getVendorManagement()
-                    .getUserIdsOfVendors();
-            for (Iterator ui = usersWithVendors.iterator(); ui.hasNext();)
+        	us = getUsers();
+        }
+        else
+        {
+        	us = getUsersFromCompany(companyId);
+        }
+        
+        Collection usersWithVendors = ServerProxy.getVendorManagement()
+                .getUserIdsOfVendors();
+        for (User u : us)
+        {
+            if (!usersWithVendors.contains(u.getUserId()))
             {
-                String userId = (String) ui.next();
-                if (userNames.contains(userId))
-                {
-                    userNames.remove(userId);
-                }
+            	us2.add(u);
             }
-
-            // get all the users specified by the user ids in the list
-            String[] userNamesArray = new String[userNames.size()];
-            userNamesArray = (String[]) userNames.toArray(userNamesArray);
-            users = getUsers(userNamesArray, null, dirContext);
         }
-        catch (Exception ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getVendorlessUsers().", ex);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_VENDORLESS_USERS_ERROR, null,
-                    ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return users;
+        
+        return us2;
+//        
+//    	
+//        DirContext dirContext = checkOutConnection(false);
+//        Vector users = null;
+//
+//        try
+//        {
+//            // get all active and created user ids
+//            String filter = UserLdapHelper.getSearchFilter();
+//            String[] attrs = new String[]
+//            { UserLdapHelper.LDAP_ATTR_USERID };
+//
+//            SearchControls constraints = new SearchControls();
+//            constraints.setReturningObjFlag(true);
+//            constraints.setCountLimit(0);
+//            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+//            constraints.setReturningAttributes(attrs);
+//            NamingEnumeration res = dirContext.search(
+//                    UserLdapHelper.USER_BASE_DN, filter, constraints);
+//
+//            Vector userNames = UserLdapHelper
+//                    .getUIDsVectorFromSearchResults(res);
+//            // now remove the user ids that are already vendors
+//            Collection usersWithVendors = ServerProxy.getVendorManagement()
+//                    .getUserIdsOfVendors();
+//            for (Iterator ui = usersWithVendors.iterator(); ui.hasNext();)
+//            {
+//                String userId = (String) ui.next();
+//                if (userNames.contains(userId))
+//                {
+//                    userNames.remove(userId);
+//                }
+//            }
+//
+//            // get all the users specified by the user ids in the list
+//            String[] userNamesArray = new String[userNames.size()];
+//            userNamesArray = (String[]) userNames.toArray(userNamesArray);
+//            users = getUsers(userNamesArray, null, dirContext);
+//        }
+//        catch (Exception ex)
+//        {
+//            CATEGORY.error("UserManagerException is thrown from: "
+//                    + "UserManagerLocal::getVendorlessUsers().", ex);
+//            throw new UserManagerException(
+//                    UserManagerException.MSG_GET_VENDORLESS_USERS_ERROR, null,
+//                    ex);
+//        }
+//        finally
+//        {
+//            // return the connection to the pool
+//            checkInConnection(dirContext);
+//        }
+//
+//        return users;
     }
 
     /**
@@ -1189,29 +886,45 @@ public class UserManagerLocal implements UserManager
 
         if (p_roleName != null)
         {
-            // check out a connection from the connection pool
-            DirContext dirContext = checkOutConnection(false);
-            setConnectionOptions(dirContext);
-            try
-            {
-                userIds = getUserIdsFromRole(p_roleName, dirContext);
-            }
-            catch (Exception e)
-            {
-                String[] errorMsgArg = new String[]
-                { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-                CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::getUserNamesByRole(): "
-                        + errorMsgArg[0], e);
-                throw new UserManagerException(
-                        UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg,
-                        e);
-            }
-            finally
-            {
-                // return the connection to the pool
-                checkInConnection(dirContext);
-            }
+//            // check out a connection from the connection pool
+//            DirContext dirContext = checkOutConnection(false);
+//            setConnectionOptions(dirContext);
+//            try
+//            {
+//                userIds = getUserIdsFromRole(p_roleName, dirContext);
+//            }
+//            catch (Exception e)
+//            {
+//                String[] errorMsgArg = new String[]
+//                { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+//                CATEGORY.error("UserManagerException is thrown from: "
+//                        + "UserManagerLocal::getUserNamesByRole(): "
+//                        + errorMsgArg[0], e);
+//                throw new UserManagerException(
+//                        UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg,
+//                        e);
+//            }
+//            finally
+//            {
+//                // return the connection to the pool
+//                checkInConnection(dirContext);
+//            }
+        	List<String> allIds = new ArrayList<String>();
+        	
+        	ContainerRoleImpl c = RoleDatabaseHelper.getContainerRoleByName(p_roleName);
+    		if (c != null)
+    		{
+    			allIds.addAll(c.getUserIds());
+    		}
+    		
+    		UserRoleImpl ur = RoleDatabaseHelper.getUserRoleByName(p_roleName);
+    		if (ur != null)
+    		{
+    			allIds.add(ur.getUser());
+    		}
+    		
+    		userIds = new String[allIds.size()];
+    		userIds = (String[]) allIds.toArray(userIds);
         }
         else
         {
@@ -1252,36 +965,69 @@ public class UserManagerLocal implements UserManager
         {
             return null;
         }
-
-        String[] userIds = null;
-        // get the users associated with the given project.
+        
+        List<String> ids = new ArrayList<String>();
+        List<String> allIds = new ArrayList<String>();
+        
         Set projectUserIds = p_project == null ? null : p_project.getUserIds();
-
-        // String errorMsgKey = UserManagerException.MSG_GET_ROLES_ERROR;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        try
-        {
-            userIds = getUserIdsFromRoles(p_roleNames, projectUserIds,
-                    dirContext);
-        }
-        catch (Exception ex)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
-        }
-        finally
-        {
-            checkInConnection(dirContext);
-        }
-
-        return userIds;
+        
+        for (String name : p_roleNames)
+    	{
+    		ContainerRoleImpl c = RoleDatabaseHelper.getContainerRoleByName(name);
+    		if (c != null)
+    		{
+    			allIds.addAll(c.getUserIds());
+    		}
+    		
+    		UserRoleImpl ur = RoleDatabaseHelper.getUserRoleByName(name);
+    		if (ur != null)
+    		{
+    			allIds.add(ur.getUser());
+    		}
+    	}
+        
+        for (String userId : allIds)
+		{
+			if (projectUserIds == null
+                    || projectUserIds.contains(userId))
+            {
+				ids.add(userId);
+            }
+		}
+        
+        String[] finalIdsArray = new String[ids.size()];
+        finalIdsArray = ids.toArray(finalIdsArray);
+        return finalIdsArray;
+//
+//        String[] userIds = null;
+//        // get the users associated with the given project.
+//        
+//
+//        // String errorMsgKey = UserManagerException.MSG_GET_ROLES_ERROR;
+//
+//        // check out a connection from the connection pool
+//        DirContext dirContext = checkOutConnection(false);
+//        setConnectionOptions(dirContext);
+//
+//        try
+//        {
+//            userIds = getUserIdsFromRoles(p_roleNames, projectUserIds,
+//                    dirContext);
+//        }
+//        catch (Exception ex)
+//        {
+//            String[] errorMsgArg = new String[]
+//            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+//
+//            throw new UserManagerException(
+//                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
+//        }
+//        finally
+//        {
+//            checkInConnection(dirContext);
+//        }
+//
+//        return userIds;
     }
 
     /**
@@ -1291,64 +1037,73 @@ public class UserManagerLocal implements UserManager
             throws RemoteException, UserManagerException
     {
         String[] userIds = getUserIdsByFilter(p_roleName, p_project);
+        List users = new ArrayList();
+        for (String id : userIds)
+        {
+        	users.add(id);
+        }
+        
+        Criteria c = HibernateUtil.getSession().createCriteria(UserImpl.class);
+        c.add(Restrictions.in("userId", users));
+        return c.list();
 
         // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        List users = null;
-        try
-        {
-            users = getUsers(userIds, null, dirContext);
-        }
-        catch (NamingException ldp)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY.error(
-                    "Failed to get all the users that match the filter - Role: "
-                            + p_roleName + ", Project: " + p_project.getName()
-                            + p_roleName + ", Project: " + p_project.getName(),
-                    ldp);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ldp);
-        }
-        finally
-        {
-            checkInConnection(dirContext);
-        }
-        return users;
+//        DirContext dirContext = checkOutConnection(false);
+//        setConnectionOptions(dirContext);
+//        List users = null;
+//        try
+//        {
+//            users = getUsers(userIds, null, dirContext);
+//        }
+//        catch (NamingException ldp)
+//        {
+//            String[] errorMsgArg = new String[]
+//            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+//            CATEGORY.error(
+//                    "Failed to get all the users that match the filter - Role: "
+//                            + p_roleName + ", Project: " + p_project.getName()
+//                            + p_roleName + ", Project: " + p_project.getName(),
+//                    ldp);
+//            throw new UserManagerException(
+//                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ldp);
+//        }
+//        finally
+//        {
+//            checkInConnection(dirContext);
+//        }
+//        return users;
     }
 
-    /**
-     * get users from ldap follow the filter
-     */
-    public List getUsersByFilter(String p_filter) throws RemoteException,
-            UserManagerException
-    {
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        List users = null;
-        try
-        {
-            users = getUsers(p_filter, null, dirContext);
-        }
-        catch (NamingException ldp)
-        {
-            String[] errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY.error(
-                    "Failed to get all the users that match the filter - filter: "
-                            + p_filter, ldp);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ldp);
-        }
-        finally
-        {
-            checkInConnection(dirContext);
-        }
-        return users;
-    }
+//    /**
+//     * get users from ldap follow the filter
+//     */
+//    public List getUsersByFilter(String p_filter) throws RemoteException,
+//            UserManagerException
+//    {
+//        // check out a connection from the connection pool
+//        DirContext dirContext = checkOutConnection(false);
+//        setConnectionOptions(dirContext);
+//        List users = null;
+//        try
+//        {
+//            users = getUsers(p_filter, null, dirContext);
+//        }
+//        catch (NamingException ldp)
+//        {
+//            String[] errorMsgArg = new String[]
+//            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+//            CATEGORY.error(
+//                    "Failed to get all the users that match the filter - filter: "
+//                            + p_filter, ldp);
+//            throw new UserManagerException(
+//                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ldp);
+//        }
+//        finally
+//        {
+//            checkInConnection(dirContext);
+//        }
+//        return users;
+//    }
 
     /**
      * @see UserManager.getUsersFromEmail(String)
@@ -1357,12 +1112,17 @@ public class UserManagerLocal implements UserManager
     public List getUsersByEmail(String p_email) throws UserManagerException,
             RemoteException
     {
-
-        List result = new ArrayList();
-        String filter = UserLdapHelper.getSearchFilterForEmail(p_email);
-        result = getUsersByFilter(filter);
-
-        return result;
+        List users = new ArrayList();
+        
+        String hql = "from UserImpl u where u.state != :state1 and u.state != :state2 and u.email = :email";
+    	Map map = new HashMap();
+    	map.put("state1", User.State.DELETED);
+    	map.put("state2", User.State.DEACTIVE);
+    	map.put("email", p_email);
+    	
+    	users.addAll(HibernateUtil.search(hql, map));
+    	
+    	return users;
     }
 
     /**
@@ -1379,10 +1139,99 @@ public class UserManagerLocal implements UserManager
      * @exception java.rmi.RemoteException
      *                - Network related exception.
      */
-    public Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
+    public Vector getUsers(UserSearchParams p_searchParams,
             Project p_project) throws RemoteException, UserManagerException
     {
-        return getUsers(p_userAttrs, p_roleAttrs, null, p_project);
+    	Session session = HibernateUtil.getSession();
+    	
+    	boolean filterUser = false;
+    	Vector<UserImpl> us = new Vector<UserImpl>();
+    	
+    	Criteria c = session.createCriteria(UserImpl.class);
+    	String userId = p_searchParams.getIdName();
+    	if (userId != null && userId.length() > 0)
+    	{
+    		filterUser = true;
+    		c.add(Restrictions.or(Restrictions.ilike("userId", "%" + userId + "%"), Restrictions.ilike("userName", "%" + userId + "%")));
+    	}
+    	
+    	String firstName = p_searchParams.getFirstName();
+    	if (firstName != null && firstName.length() > 0)
+    	{
+    		filterUser = true;
+    		c.add(Restrictions.eq("firstName", firstName));
+    	}
+    	
+    	String lastName = p_searchParams.getLastName();
+    	if (lastName != null && lastName.length() > 0)
+    	{
+    		filterUser = true;
+    		c.add(Restrictions.eq("lastName", lastName));
+    	}
+    	
+    	String email = p_searchParams.getEmail();
+    	if (email != null && email.length() > 0)
+    	{
+    		filterUser = true;
+    		c.add(Restrictions.eq("email", email));
+    	}
+    	
+    	if (filterUser)
+    	{
+    		us.addAll(c.list());
+    	}
+
+    	boolean filterRole = false;
+    	Criteria cc = session.createCriteria(ContainerRoleImpl.class);
+    	Criteria uc = session.createCriteria(UserRoleImpl.class);
+    	
+    	String sourceLocale = p_searchParams.getSourceLocaleParam();
+    	if (sourceLocale != null && sourceLocale.length() > 0)
+    	{
+    		filterRole = true;
+    		cc.add(Restrictions.eq("sourceLocale", sourceLocale));
+    		uc.add(Restrictions.eq("sourceLocale", sourceLocale));
+    	}
+    	
+    	String targetLocale = p_searchParams.getTargetLocaleParam();
+    	if (targetLocale != null && targetLocale.length() > 0)
+    	{
+    		filterRole = true;
+    		cc.add(Restrictions.eq("targetLocale", targetLocale));
+    		uc.add(Restrictions.eq("targetLocale", targetLocale));
+    	}
+    	
+    	if (filterRole)
+    	{
+    		List uids = new ArrayList();
+    		
+    		cc.add(Restrictions.eq("state", User.State.ACTIVE));
+    		uc.add(Restrictions.eq("state", User.State.ACTIVE));
+    		
+    		List<ContainerRoleImpl> crs = cc.list();
+    		List<UserRoleImpl> urs = uc.list();
+    		
+    		for (ContainerRoleImpl cr : crs)
+    		{
+    			uids.addAll(cr.getUserIds());
+    		}
+    		
+    		for (UserRoleImpl ur : urs)
+    		{
+    			uids.add(ur.getUser());
+    		}
+    		
+    		if (uids.size() > 0)
+    		{
+    			c = session.createCriteria(UserImpl.class);
+        		c.add(Restrictions.in("userId", uids));
+        		
+        		us.addAll(c.list());
+    		}
+    	}
+    	
+    	return us;
+//        return getUsers(p_userAttrs, p_roleAttrs, null, p_project);
     }
 
     /**
@@ -1394,32 +1243,80 @@ public class UserManagerLocal implements UserManager
      * @exception java.rmi.RemoteException
      *                - Network related exception.
      */
+    public Vector getUsersFromAllCompany() throws RemoteException, UserManagerException
+    {
+        Vector users = new Vector();
+        
+        String hql = "from UserImpl u where u.state != :state1 and u.state != :state2 and u.type != :type";
+    	Map map = new HashMap();
+    	map.put("state1", User.State.DELETED);
+    	map.put("state2", User.State.DEACTIVE);
+    	map.put("type", User.UserType.ANONYMOUS);
+    	
+    	users.addAll(HibernateUtil.search(hql, map));
+    	return users;
+    }
+    
+    /**
+     * Get all active and created users.
+     * 
+     * @return a Vector of User objects
+     * @exception UserManagerException
+     *                - Component related exception.
+     * @exception java.rmi.RemoteException
+     *                - Network related exception.
+     */
     public Vector getUsers() throws RemoteException, UserManagerException
     {
-        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
-
-        Vector users = null;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        String filter = UserLdapHelper.getSearchFilter();
-        try
+    	String companyId = CompanyThreadLocal.getInstance().getValue();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String superCompanyName = CompanyWrapper
+                .getCompanyNameById(CompanyWrapper.SUPER_COMPANY_ID);
+    	
+        Vector users = new Vector();
+        
+        String hql = "from UserImpl u where u.state != :state1 and u.state != :state2 and u.type != :type";
+    	Map map = new HashMap();
+    	map.put("state1", User.State.DELETED);
+    	map.put("state2", User.State.DEACTIVE);
+    	map.put("type", User.UserType.ANONYMOUS);
+    	
+    	if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
-            users = getUsers(filter, null, dirContext);
+    		hql += " and (u.companyName = :companyName or u.companyName = :superCompanyName)";
+    		map.put("companyName", companyName);
+    		map.put("superCompanyName", superCompanyName);
         }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsers(): ", ex);
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+    	
+    	users.addAll(HibernateUtil.search(hql, map));
+    	return users;
+    }
 
+    public Vector getUsers(String condition) throws RemoteException,
+            UserManagerException
+    {
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String superCompanyName = CompanyWrapper
+                .getCompanyNameById(CompanyWrapper.SUPER_COMPANY_ID);
+
+        Vector users = new Vector();
+
+        String hql = "from UserImpl u where u.state != :state1 and u.state != :state2 and u.type != :type";
+        Map map = new HashMap();
+        map.put("state1", User.State.DELETED);
+        map.put("state2", User.State.DEACTIVE);
+        map.put("type", User.UserType.ANONYMOUS);
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            hql += " and (u.companyName = :companyName or u.companyName = :superCompanyName)";
+            map.put("companyName", companyName);
+            map.put("superCompanyName", superCompanyName);
+        }
+        hql += condition;
+
+        users.addAll(HibernateUtil.search(hql, map));
         return users;
     }
 
@@ -1435,33 +1332,8 @@ public class UserManagerLocal implements UserManager
     public Vector getUsersForCurrentCompany() throws RemoteException,
             UserManagerException
     {
-        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
-
-        Vector users = null;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        String filter = UserLdapHelper.getSearchFilterForCurrentCompany();
-
-        try
-        {
-            users = getUsers(filter.toString(), null, dirContext);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsersForCudrrentCompany(): ", e);
-            throw new UserManagerException(errorMsgKey, null, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return users;
+    	 String companyId = CompanyWrapper.getCurrentCompanyId();
+    	 return getUsersFromCompany(companyId);
     }
 
     /**
@@ -1470,33 +1342,21 @@ public class UserManagerLocal implements UserManager
     public Vector<User> getUsersFromCompany(String companyId)
             throws RemoteException, UserManagerException
     {
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        
         String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
 
-        Vector<User> users = new Vector<User>();
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(true);
-        setConnectionOptions(dirContext);
-
-        String filter = UserLdapHelper.getSearchFilterForUsersFromCompany(
-                companyId, true);
-        try
-        {
-            users = getUsers(filter.toString(), null, dirContext);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to get users from company with id: "
-                    + companyId, e);
-            throw new UserManagerException(errorMsgKey, null, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return users;
+        Vector users = new Vector();
+        
+        String hql = "from UserImpl u where u.state != :state1 and u.state != :state2 and u.type != :type and u.companyName = :companyName";
+    	Map map = new HashMap();
+    	map.put("state1", User.State.DELETED);
+    	map.put("state2", User.State.DEACTIVE);
+    	map.put("type", User.UserType.ANONYMOUS);
+    	map.put("companyName", companyName);
+    	
+    	users.addAll(HibernateUtil.search(hql, map));
+    	return users;
     }
 
     /**
@@ -1506,32 +1366,8 @@ public class UserManagerLocal implements UserManager
             throws RemoteException, UserManagerException
     {
         List<Role> roles = new ArrayList<Role>();
-
-        String filter = RoleLdapHelper.getSearchFilterForAllRoles(true);
-        Vector<Role> allRoles = getRoles(filter.toString(), null, false,
-                companyId);
-        if (allRoles != null)
-        {
-            for (Role r : allRoles)
-            {
-                Activity a = r.getActivity();
-                if (a == null)
-                {
-                    roles.add(r);
-                    continue;
-                }
-                String activityName = a.getActivityName();
-                int index = activityName.lastIndexOf("_");
-                if (index > 0)
-                {
-                    String companyIdStr = activityName.substring(index + 1);
-                    if (companyIdStr.equalsIgnoreCase(companyId))
-                    {
-                        roles.add(r);
-                    }
-                }
-            }
-        }
+        roles.addAll(RoleDatabaseHelper.getContainerRoleByCompanyId(companyId));
+        roles.addAll(RoleDatabaseHelper.getUserRoleByCompanyId(companyId));
         return roles;
     }
 
@@ -1542,29 +1378,13 @@ public class UserManagerLocal implements UserManager
     {
         String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
 
-        Vector userInfos = null;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-        String filter = UserLdapHelper.getSearchFilter();
-
-        try
+        Vector userInfos = new Vector();
+        Vector<UserImpl> us = getUsers();
+        for (UserImpl u : us)
         {
-            userInfos = getUserInfos(filter, null, dirContext);
+        	userInfos.add(u.toUserInfo());
         }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsers(): ", ex);
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
+        
         return userInfos;
     }
 
@@ -1582,12 +1402,8 @@ public class UserManagerLocal implements UserManager
     public Collection getUserRoles(User p_user) throws RemoteException,
             UserManagerException
     {
-        String userId = p_user.getUserId();
-        String filter = RoleLdapHelper
-                .getSearchFilterForUserRolesOnUserId(userId);
-        String[] attrs = RoleLdapHelper.getSearchAttributeNames();
-
-        return (Collection) getRoles(filter, attrs, true);
+    	String hql = "from UserRoleImpl u where u.user = ? and (u.state = ? or u.state = ?)";
+    	return HibernateUtil.search(hql, p_user.getUserId(), User.State.ACTIVE, User.State.CREATED);
     }
 
     /**
@@ -1604,12 +1420,8 @@ public class UserManagerLocal implements UserManager
     public Collection getContainerRoles(User p_user) throws RemoteException,
             UserManagerException
     {
-        String userId = p_user.getUserId();
-        String filter = RoleLdapHelper
-                .getSearchFilterForContainerRolesOnUserId(userId);
-        String[] attrs = RoleLdapHelper.getSearchAttributeNames();
-
-        return (Collection) getRoles(filter, attrs, true);
+    	String hql = "from ContainerRoleImpl c where c.userIds = ?";
+    	return HibernateUtil.search(hql, p_user.getUserId());
     }
 
     /**
@@ -1634,29 +1446,14 @@ public class UserManagerLocal implements UserManager
             throws RemoteException, UserManagerException
     {
 
-        Attribute activityAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ACTIVITY, p_activityName);
-        Attribute sourceAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, p_sourceLocale);
-        Attribute targetAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, p_targetLocale);
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE, "U");
-
-        Attribute[] ldapAttrs =
-        { typeAttr, activityAttr, sourceAttr, targetAttr };
-        String filter = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-        String[] attrs = RoleLdapHelper.getSearchAttributeNames();
-
-        return (Collection) getRoles(filter, attrs, true);
+    	String hql = "from UserRoleImpl u where u.activity.name= :activityName " +
+    			"and u.sourceLocale = :sourceLocale and u.targetLocale = :targetLocale and u.state = " + User.State.ACTIVE;
+    	Map map = new HashMap();
+    	map.put("activityName", p_activityName);
+    	map.put("sourceLocale", p_sourceLocale);
+    	map.put("targetLocale", p_targetLocale);
+    	
+    	return HibernateUtil.search(hql, map);
     }
 
     /**
@@ -1680,35 +1477,18 @@ public class UserManagerLocal implements UserManager
      *             returned. suggest to use method getContainerRole(String
      *             p_activityName, String p_sourceLocale, String p_targetLocale)
      */
-    public Collection getContainerRoles(String p_activityName,
+    public List getContainerRoles(String p_activityName,
             String p_sourceLocale, String p_targetLocale)
             throws RemoteException, UserManagerException
     {
-
-        Attribute activityAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ACTIVITY, p_activityName);
-        Attribute sourceAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, p_sourceLocale);
-        Attribute targetAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, p_targetLocale);
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-
-        Attribute[] ldapAttrs =
-        { typeAttr, activityAttr, sourceAttr, targetAttr };
-        String filter = null;
-        String[] attrs = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-            attrs = RoleLdapHelper.getSearchAttributeNames();
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-        return (Collection) getRoles(filter, attrs, true);
+    	String hql = "from ContainerRoleImpl u where u.activity.name= :activityName " +
+    			"and u.sourceLocale = :sourceLocale and u.targetLocale = :targetLocale and u.state = " + User.State.ACTIVE;
+    	Map map = new HashMap();
+    	map.put("activityName", p_activityName);
+    	map.put("sourceLocale", p_sourceLocale);
+    	map.put("targetLocale", p_targetLocale);
+    	
+    	return HibernateUtil.search(hql, map);
     }
 
     /**
@@ -1718,30 +1498,14 @@ public class UserManagerLocal implements UserManager
     public Collection getContainerRoles(String p_sourceLocale,
             String p_targetLocale) throws RemoteException, UserManagerException
     {
-
-        Attribute sourceAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, p_sourceLocale);
-        Attribute targetAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, p_targetLocale);
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-        Attribute[] ldapAttrs =
-        { typeAttr, sourceAttr, targetAttr };
-
-        String filter = null;
-        String[] attrs = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-            attrs = RoleLdapHelper.getSearchAttributeNames();
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-
-        return (Collection) getRoles(filter, attrs, true);
+		String hql = "from ContainerRoleImpl u where u.sourceLocale = :sourceLocale "
+				+ "and u.targetLocale = :targetLocale and u.state = "
+				+ User.State.ACTIVE;
+    	Map map = new HashMap();
+    	map.put("sourceLocale", p_sourceLocale);
+    	map.put("targetLocale", p_targetLocale);
+    	
+    	return HibernateUtil.search(hql, map);
     }
 
     /**
@@ -1769,6 +1533,26 @@ public class UserManagerLocal implements UserManager
     {
         return getContainerRole(p_activity, p_sourceLocale, p_targetLocale, -1);
     }
+    
+    /**
+     * Returns true if at least one user is in the project with the given id.
+     * Otherwise, returns false.
+     */
+    private static boolean usersInProject(List p_userIds, long p_projectId)
+    {
+        boolean usersInProject = false;
+        if (p_projectId > 0)
+        {
+            String sql = ProjectUnnamedQueries.countUsersInProject(p_userIds,
+                    p_projectId);
+            int count = HibernateUtil.countWithSql(sql, null);
+            if (count > 0)
+            {
+                usersInProject = true;
+            }
+        }
+        return usersInProject;
+    }
 
     /**
      * @see UserManager.getContainerRole(String, String, String, long)
@@ -1777,39 +1561,26 @@ public class UserManagerLocal implements UserManager
             String p_sourceLocale, String p_targetLocale, long p_projectId)
             throws RemoteException, UserManagerException
     {
-        StringBuffer buf = new StringBuffer();
-        buf.append(p_activity.getId()).append(" ").append(p_activity.getName())
-                .append(" ").append(p_sourceLocale).append(" ")
-                .append(p_targetLocale);
-        Attribute cnAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_NAME, buf.toString());
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-        Attribute[] ldapAttrs =
-        { typeAttr, cnAttr };
-        String filter = null;
-        String[] attrs = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-            attrs = RoleLdapHelper.getSearchAttributeNames();
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-
-        Vector cRoles = getRoles(filter, attrs, true, p_projectId);
-
-        if (cRoles == null || cRoles.size() == 0)
-        {
-            return null;
-        }
-        else
-        {
-            return (ContainerRole) cRoles.get(0);
-        }
+    	String hql = "from ContainerRoleImpl c where c.state = :state " +
+    			"and  c.activity.id = :activityId and c.sourceLocale = :sourceLocale " +
+    			"and c.targetLocale = :targetLocale";
+    	Map map = new HashMap();
+    	map.put("state", User.State.ACTIVE);
+    	map.put("activityId", p_activity.getId());
+    	map.put("sourceLocale", p_sourceLocale);
+    	map.put("targetLocale", p_targetLocale);
+    	
+    	List<ContainerRoleImpl> crs = (List<ContainerRoleImpl>) HibernateUtil.search(hql, map);
+    	for (ContainerRoleImpl cr : crs)
+    	{
+    		List uIds = cr.getUserIds();
+    		if (p_projectId < 0 || usersInProject(uIds, p_projectId))
+    		{
+    			return cr;
+    		}
+    	}
+    	
+    	return null;
     }
 
     /**
@@ -1819,40 +1590,26 @@ public class UserManagerLocal implements UserManager
             String p_sourceLocale, String p_targetLocale, long p_projectId)
             throws RemoteException, UserManagerException
     {
-        Attribute activityAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ACTIVITY, p_activityName);
-        Attribute sourceAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_SOURCE_LOCALE, p_sourceLocale);
-        Attribute targetAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_TARGET_LOCALE, p_targetLocale);
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-
-        Attribute[] ldapAttrs =
-        { typeAttr, activityAttr, sourceAttr, targetAttr };
-        String filter = null;
-        String[] attrs = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-            attrs = RoleLdapHelper.getSearchAttributeNames();
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-
-        Vector cRoles = getRoles(filter, attrs, true, p_projectId);
-
-        if (cRoles == null || cRoles.size() == 0)
-        {
-            return null;
-        }
-        else
-        {
-            return (ContainerRole) cRoles.get(0);
-        }
+    	String hql = "from ContainerRoleImpl c where c.state = :state " +
+    			"and  c.activity.name = :activityName and c.sourceLocale = :sourceLocale " +
+    			"and c.targetLocale = :targetLocale";
+    	Map map = new HashMap();
+    	map.put("state", User.State.ACTIVE);
+    	map.put("activityName", p_activityName);
+    	map.put("sourceLocale", p_sourceLocale);
+    	map.put("targetLocale", p_targetLocale);
+    	
+    	List<ContainerRoleImpl> crs = (List<ContainerRoleImpl>) HibernateUtil.search(hql, map);
+    	for (ContainerRoleImpl cr : crs)
+    	{
+    		List uIds = cr.getUserIds();
+    		if (uIds.size() > 0 && usersInProject(uIds, p_projectId))
+    		{
+    			return cr;
+    		}
+    	}
+    	
+    	return null;
     }
 
     /**
@@ -1861,36 +1618,8 @@ public class UserManagerLocal implements UserManager
     public ContainerRole getContainerRole(Rate p_rate, boolean p_withRates)
             throws RemoteException, UserManagerException
     {
-
-        Attribute rateIdAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_RATES, Long.toString(p_rate.getId()));
-        Attribute typeAttr = new BasicAttribute(
-                RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
-                ContainerRole.ROLE_TYPE_VALUE);
-
-        Attribute[] ldapAttrs =
-        { typeAttr, rateIdAttr };
-        String filter = null;
-        String[] attrs = null;
-        try
-        {
-            filter = RoleLdapHelper.getSearchFilter(ldapAttrs);
-            attrs = RoleLdapHelper.getSearchAttributeNames();
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-
-        Vector cRoles = getRoles(filter, attrs, p_withRates);
-        if (cRoles == null || cRoles.size() == 0)
-        {
-            return null;
-        }
-        else
-        {
-            return (ContainerRole) cRoles.get(0);
-        }
+    	 String hql = "select c from ContainerRoleImpl c join c.rateSet u where u.id = ? and c.state = " + User.State.ACTIVE;
+    	return (ContainerRole) HibernateUtil.getFirst(hql, p_rate.getId());
     }
 
     /**
@@ -1932,54 +1661,24 @@ public class UserManagerLocal implements UserManager
             throw new UserManagerException(errorMsgKey, errorMsgArg, null);
         }
 
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
+        ContainerRoleImpl cr = RoleDatabaseHelper.getContainerRoleByName(p_roleName);
+        
+        if (cr == null)
+        {
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ROLE_NAME };
 
-        // generate a ModificationItem[] to hold the attributes to be modified
-        ModificationItem[] modSet = RoleLdapHelper
-                .deleteUsersModificationSet(p_uids);
+            CATEGORY.error("Can not find the container role with name: " + p_roleName);
 
-        try
-        {
-            // Modify the entry
-            dirContext.modifyAttributes(RoleLdapHelper.getRoleDN(p_roleName),
-                    modSet);
+            throw new UserManagerException(errorMsgKey, errorMsgArg, null);
         }
-        catch (NameNotFoundException ex)
+        
+        List<String> uIds = new ArrayList<String>();
+        for (String s : p_uids)
         {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_ROLE_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeUsersFromRole(): "
-                    + "(role name = " + p_roleName + ", users = " + p_uids
-                    + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
+        	uIds.add(s);
         }
-        catch (InvalidAttributesException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_USERS_NOT_IN_ROLE };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeUsersFromRole(): "
-                    + "(role name = " + p_roleName + ", users = " + p_uids
-                    + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeUsersFromRole(): "
-                    + "(role name = " + p_roleName + ", users = " + p_uids
-                    + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+        RoleDatabaseHelper.removeUserFromContainerRole(cr, uIds);
 
     }
 
@@ -2020,79 +1719,34 @@ public class UserManagerLocal implements UserManager
 
             throw new UserManagerException(errorMsgKey, errorMsgArg, null);
         }
-
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        try
+        
+        Role role = RoleDatabaseHelper.getRoleByName(p_roleName);
+        if (role == null)
         {
-            // validate the users
-            if (!areUsersExist(p_uids, dirContext))
-            {
-                errorMsgArg = new String[]
-                { UserManagerException.ARG_USERS_NOT_EXIST };
-
-                CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::addUsersToRole(): "
-                        + "(role name = " + p_roleName + ", users = " + p_uids
-                        + ")\n" + errorMsgArg[0], null);
-                throw new UserManagerException(errorMsgKey, errorMsgArg, null);
-            }
+        	CATEGORY.error("Can not find the role with name: " + p_roleName);
+        	return;
         }
-        catch (NamingException e)
-        { // failed to validate these users
-          // return the connection to the pool
-            checkInConnection(dirContext);
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_VALIDATE_USERS };
-
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addUsersToRole(): " + "(role name = "
-                    + p_roleName + ", users = " + p_uids + ")\n"
-                    + errorMsgArg[0], null);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, null);
+        
+        if (role instanceof ContainerRoleImpl) 
+        {
+			ContainerRoleImpl cRole = (ContainerRoleImpl) role;
+			List ids = cRole.getUserIds();
+			
+			for (String id : p_uids)
+	        {
+				if (!ids.contains(id))
+				{
+					ids.add(id);
+				}
+	        }
+		}
+        else if (role instanceof UserRoleImpl)
+        {
+        	UserRoleImpl uRole = (UserRoleImpl) role;
+        	uRole.setUser(p_uids[0]);
         }
 
-        // Generate a ModificationItem[] to hold the attributes to be
-        // modified.
-        ModificationItem[] modSet = RoleLdapHelper
-                .addUsersModificationSet(p_uids);
-
-        try
-        {
-            // Modify the entry
-            dirContext.modifyAttributes(RoleLdapHelper.getRoleDN(p_roleName),
-                    modSet);
-        }
-        catch (NameNotFoundException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_ROLE_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addUsersToRole(): " + "(role name = "
-                    + p_roleName + ", users = " + p_uids + ")\n"
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (AttributeInUseException ex)
-        {
-            // ignorance.
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addUsersToRole(): " + "(role name = "
-                    + p_roleName + ", users = " + p_uids + ")\n"
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
+        HibernateUtil.saveOrUpdate(role);
     }
 
     /**
@@ -2109,18 +1763,19 @@ public class UserManagerLocal implements UserManager
     public Role getRole(String p_roleName) throws RemoteException,
             UserManagerException
     {
-
-        String filter = RoleLdapHelper
-                .getSearchFilterForRoleOnRoleName(p_roleName);
-        String[] attrs = RoleLdapHelper.getSearchAttributeNames();
-        Collection roles = (Collection) getRoles(filter, attrs, true);
-
-        if (roles != null && !roles.isEmpty())
-        {
-            return (Role) roles.iterator().next();
-        }
-
-        return null;
+    	return RoleDatabaseHelper.getRoleByName(p_roleName);
+    }
+    
+    private List user2userInfo(List<UserImpl> users)
+    {
+    	List userInfos = new ArrayList();
+    	
+    	for (UserImpl u : users)
+    	{
+    		userInfos.add(u.toUserInfo());
+    	}
+    	
+    	return userInfos;
     }
 
     /**
@@ -2129,33 +1784,21 @@ public class UserManagerLocal implements UserManager
     public List getUserInfosInAllProjects() throws RemoteException,
             UserManagerException
     {
-        List userInfos = new ArrayList();
-        String filter = UserLdapHelper
-                .getSearchFilterForActiveUsersInAllProjects();
-        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        try
+    	String companyId = CompanyThreadLocal.getInstance().getValue();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        
+    	String hql = "from UserImpl u where u.isInAllProjects = 'Y' and u.state = :state";
+    	Map map = new HashMap();
+    	map.put("state", User.State.ACTIVE);
+    	
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
-            // retrieve all the user ids that are in all projects
-            userInfos = getUserInfos(filter, null, dirContext);
+        	hql += " u.companyName = :companyName";
+        	map.put("companyName", companyName);
         }
-        catch (NamingException e)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUserInfosInAllProjects(): ", e);
-            throw new UserManagerException(errorMsgKey, null, e);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return userInfos;
+        
+        List<UserImpl> users = (List<UserImpl>) HibernateUtil.search(hql, map);
+    	return user2userInfo(users);
     }
 
     public boolean containsPermissionGroup(String p_uid, String p_permGroupName)
@@ -2184,56 +1827,24 @@ public class UserManagerLocal implements UserManager
         return false;
     }
 
-    //
-    // Package Methods
-    //
-
-    /**
-     * Get users based on the search filter and target attributes
-     * 
-     * @return a Vector of User objects
-     */
-    Vector<User> getUsers(String p_filter, String[] p_targetAttrs,
-            DirContext dirContext) throws NamingException
-    {
-
-        SearchControls constraints = new SearchControls();
-        constraints.setReturningObjFlag(true);
-        constraints.setCountLimit(0);
-        constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        constraints.setReturningAttributes(p_targetAttrs);
-        NamingEnumeration res = dirContext.search(UserLdapHelper.USER_BASE_DN,
-                p_filter, constraints);
-
-        return UserLdapHelper.getUsersFromSearchResults(res);
-    }
-
-    /**
-     * Get UserInfos based on the search filter and target attributes
-     * 
-     * @return a Vector of UserInfo objects
-     */
-    Vector getUserInfos(String p_filter, String[] p_targetAttrs,
-            DirContext dirContext) throws NamingException
-    {
-
-        Vector userInfos = null;
-
-        SearchControls constraints = new SearchControls();
-        constraints.setReturningObjFlag(true);
-        constraints.setCountLimit(0);
-        constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        constraints.setReturningAttributes(p_targetAttrs);
-        NamingEnumeration res = dirContext.search(UserLdapHelper.USER_BASE_DN,
-                p_filter, constraints);
-
-        userInfos = UserLdapHelper.getUserInfosFromSearchResults(res);
-
-        return userInfos;
-    }
-
     // --------------------- private methods -----------------------
 
+    static String encyptMD5Password(String passwd)
+    {
+        try
+        {
+            byte[] md5Msg = MessageDigest.getInstance(LDAP_PWD_MD5).digest(
+                    passwd.getBytes());
+            return LDAP_PREFIX_MD5 + new String(new Base64().encode(md5Msg));
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            CATEGORY.error("The system didn't support the Md5 ALGORITHM", e);
+        }
+
+        return passwd;
+    }
+    
     /**
      * Add the user's basic info which includes the field security and projects
      * too - but not roles.
@@ -2265,43 +1876,14 @@ public class UserManagerLocal implements UserManager
             {
                 p_user.setState(User.State.ACTIVE);
             }
-
-            // check out a connection from the pool with a system defined user
-            // bond.
-            DirContext dirContext = checkOutConnection(true);
-
-            // generate a LDAP entry for the user
-            Attributes entry = UserLdapHelper.convertUserToLDAPEntry(p_user,
-                    needEncodePwd);
-            String tmpDN = UserLdapHelper.getUserDN(p_user.getUserId());
-            try
+            
+            String pass = p_user.getPassword();
+            if (pass != null && !pass.startsWith("{MD5}"))
             {
-                // add to LDAP
-                dirContext.createSubcontext(tmpDN, entry);
+                pass = encyptMD5Password(pass);
             }
-            catch (SchemaViolationException ex)
-            {
-                errorMsgArg = new String[]
-                { UserManagerException.ARG_INVALID_ATTRIBUTE };
-                CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::addUser(): " + "(User Name = "
-                        + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
-                throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-            }
-            catch (NamingException ex)
-            {
-                errorMsgArg = new String[]
-                { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-                CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::addUser(): " + "(User Name = "
-                        + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
-                throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-            }
-            finally
-            {
-                // return the connection to the pool
-                checkInConnection(dirContext);
-            }
+            p_user.setPassword(pass);
+            HibernateUtil.saveOrUpdate(p_user);
 
             // add the user to the appropriate projects
             associateUserWithProjectsById(p_user.getUserId(), p_projectIds);
@@ -2466,7 +2048,7 @@ public class UserManagerLocal implements UserManager
                                     removeUsersFromRole(uids, cRole1.getName());
                                 }
                                 // remove the user role
-                                removeRole(oldRole1.getName());
+                                removeRole(oldRole1);
                             }
                             else
                             {
@@ -2503,10 +2085,11 @@ public class UserManagerLocal implements UserManager
                             if (p_user.isActive() && !unchangedRole.isActive())
                             {
                                 // remove the user role
-                                removeRole(unchangedRole.getName());
+//                                removeRole(unchangedRole);
                                 // set to false to add it back with correct
                                 // state
                                 found = false;
+                                HibernateUtil.getSession().evict(unchangedRole);
                             }
                         }
                     }
@@ -2564,45 +2147,6 @@ public class UserManagerLocal implements UserManager
         }
     }
 
-    /**
-     * Activates all the user roles associated with the specified user. And adds
-     * the user to the appropriate container roles.
-     */
-    private void activateUserRoles(String p_uid, DirContext dirContext)
-            throws NamingException, UserManagerException, RemoteException
-    {
-        // Validate the parameters
-        if (p_uid == null || p_uid.length() == 0)
-        {
-            return;
-        }
-
-        Vector roleDNs = getInactiveRoleDNs(p_uid, dirContext);
-        if (roleDNs != null)
-        {
-            for (int i = 0; i < roleDNs.size(); i++)
-            {
-                String roleDn = (String) roleDNs.elementAt(i);
-                // if contains the userid in name then it is a user role
-                int index = roleDn.indexOf(p_uid);
-                if (index > 0)
-                {
-                    // activate the role
-                    ModificationItem[] modSet = new ModificationItem[1];
-                    modSet[0] = RoleLdapHelper
-                            .getLDAPModificationForReactivateRole();
-                    dirContext.modifyAttributes(roleDn, modSet);
-
-                    // strip off just the name - from "cn=" to the "userid"
-                    String containerRole = roleDn.substring(3, index - 1);
-                    String uids[] =
-                    { p_uid };
-                    addUsersToRole(uids, containerRole);
-                }
-            } // end for
-        }
-
-    }
 
     /**
      * Deactiavte the user roles the user is associated with and remove the user
@@ -2617,7 +2161,7 @@ public class UserManagerLocal implements UserManager
      *                Network related exception.
      */
 
-    private void deactivateUserRoles(String p_uid, DirContext dirContext)
+    private void deactivateUserRoles(String p_uid)
             throws NamingException, UserManagerException, RemoteException
     {
         // Validate the parameters
@@ -2627,32 +2171,18 @@ public class UserManagerLocal implements UserManager
             return;
         }
 
-        // get all the roles the user is part of
-        // if a container role - remove the user from them
-        // if a user role mark them as DEACTIVE
-        Vector roleDNs = getRoleDNs(p_uid, dirContext);
-        if (roleDNs != null)
+        UserRoleImpl ur = RoleDatabaseHelper.getUserRoleByUserId(p_uid);
+        if (ur != null)
         {
-            for (int i = 0; i < roleDNs.size(); i++)
-            {
-                String roleDn = (String) roleDNs.elementAt(i);
-                // this is a user role - it contains the user's id
-                // within the name
-                if (roleDn.indexOf(p_uid) > 0)
-                {
-                    // deactivate the role
-                    ModificationItem[] modSet = new ModificationItem[1];
-                    modSet[0] = RoleLdapHelper
-                            .getLDAPModificationForDeactivateRole();
-                    dirContext.modifyAttributes(roleDn, modSet);
-                }
-                else
-                {
-                    // removes the user from the particular container role
-                    removeUserFromRole(p_uid, roleDn, dirContext);
-                }
-            }// end for
+        	ur.setState(User.State.DEACTIVE);
         }
+        
+        List<ContainerRoleImpl> crs = RoleDatabaseHelper.getContainerRoleByUserId(p_uid);
+        for (ContainerRoleImpl cr : crs)
+        {
+        	RoleDatabaseHelper.removeUserFromContainerRole(cr, p_uid);
+        }
+        
     }
 
     /**
@@ -2694,360 +2224,6 @@ public class UserManagerLocal implements UserManager
         }
     }
 
-    /**
-     * Get email info of users based on the search filter and target attributes
-     * 
-     * @return a List of EmailInformation objects.
-     */
-    private List getListOfEmailInfo(String[] p_uids, String[] p_targetAttrs,
-            DirContext dirContext) throws NamingException
-    {
-
-        // make sure we have a valid array of uids
-        if ((p_uids == null) || (p_uids.length == 0))
-        {
-            return null;
-        }
-
-        String filter = UserLdapHelper.getSearchFilterOnUIDs(p_uids);
-        SearchControls constraints = new SearchControls();
-        constraints.setReturningObjFlag(true);
-        constraints.setCountLimit(0);
-        constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        constraints.setReturningAttributes(p_targetAttrs);
-        NamingEnumeration res = dirContext.search(UserLdapHelper.USER_BASE_DN,
-                filter, constraints);
-
-        return UserLdapHelper.getListOfEmailInfo(res);
-    }
-
-    private String getLDAPLoginDN()
-    {
-        return UserLdapHelper.getUserDN(LdapHelper.LDAP_LOGIN);
-    }
-
-    /**
-     * This reactivates a role. However it doesn't keep around the old members
-     * and rates that are part of it. It removes all the members and rates and
-     * then looks at the new role passed in (that happens to have the same name)
-     * and sets the members and rates to be the one from the new role.
-     * <p>
-     * Reactivating a role is used when adding a role that already exists in
-     * LDAP but is marked as deleted. The information on the role is not removed
-     * on deletion, but rather on reactivation. This is needed since some of the
-     * deletion code is reused by some areas that need access to the information
-     * after deletion.
-     */
-    private void reactivateRole(DirContext dirContext, Role p_role)
-            throws NamingException, UserManagerException, RemoteException
-    {
-        // get the unique key (DN) of the role
-        String roleDN = RoleLdapHelper.getRoleDN(p_role.getName());
-
-        // --------- handle rates (delete old ones and add from new role)----
-        ModificationItem[] deleteRates = new ModificationItem[1];
-        deleteRates[0] = RoleLdapHelper.deleteAllRatesModification();
-        try
-        {
-            dirContext.modifyAttributes(roleDN, deleteRates);
-        }
-        catch (NamingException lde)
-        {
-            // don't do anything, will throw an exception if there aren't any
-            // rates to delete
-        }
-        String[] rateIds = null;
-        if (p_role instanceof UserRole)
-        {
-            String rateId = ((UserRole) p_role).getRate();
-            if (rateId != null && rateId.length() > 0)
-            {
-                rateIds = new String[1];
-                rateIds[0] = rateId;
-            }
-        }
-        else
-        // container role
-        {
-            Collection rates = p_role.getRates();
-            if (rates != null && rates.size() > 0)
-            {
-                rateIds = new String[rates.size()];
-                int index = 0;
-                for (Iterator i = rates.iterator(); i.hasNext();)
-                {
-                    Rate r = (Rate) i.next();
-                    rateIds[index] = Long.toString(r.getId());
-                    index++;
-                }
-            }
-        }
-        // now add the new ones in LDAP
-        if (rateIds != null && rateIds.length > 0)
-        {
-            ModificationItem[] addRates = RoleLdapHelper
-                    .addRatesModificationSet(rateIds);
-            dirContext.modifyAttributes(roleDN, addRates);
-        }
-
-        // ------ handle members/user ids (delete old ones and add from new
-        // role)--
-        ModificationItem[] deleteMembers = new ModificationItem[1];
-        deleteMembers[0] = RoleLdapHelper.deleteAllRoleMembers();
-        try
-        {
-            dirContext.modifyAttributes(roleDN, deleteMembers);
-        }
-        catch (NamingException ldex)
-        {
-            // don't do anything, will throw an exception if there aren't
-            // any members to delete
-        }
-
-        String[] userIds = null;
-        if (p_role instanceof UserRole)
-        {
-            String userId = ((UserRole) p_role).getUser();
-            if (userId != null && userId.length() > 0)
-            {
-                userIds = new String[1];
-                userIds[0] = userId;
-            }
-        }
-        else
-        // container role
-        {
-            Vector users = ((ContainerRole) p_role).getUsers();
-            if (users != null && users.size() > 0)
-            {
-                userIds = new String[users.size()];
-                int index = 0;
-                for (Iterator i = users.iterator(); i.hasNext();)
-                {
-                    User u = (User) i.next();
-                    userIds[index] = u.getUserId();
-                    index++;
-                }
-            }
-        }
-        // now add the new user ids in LDAP
-        if (userIds != null && userIds.length > 0)
-        {
-            ModificationItem[] addUsers = RoleLdapHelper
-                    .addUsersModificationSet(userIds);
-            try
-            {
-                dirContext.modifyAttributes(roleDN, addUsers);
-            }
-            catch (AttributeInUseException aiuex)
-            {
-                // ignorance.
-            }
-        }
-
-        // finally reactivate the role since all the other modifications
-        // finished successfully
-        ModificationItem[] reactivateMod = new ModificationItem[1];
-        reactivateMod[0] = RoleLdapHelper
-                .getLDAPModificationForReactivateRole();
-        dirContext.modifyAttributes(roleDN, reactivateMod);
-    }
-
-    /**
-     * Just deactivates the role - but leaves all other information in the role
-     * the same.
-     */
-    private void removeRoleByDn(String p_roleDN) throws UserManagerException
-    {
-        String errorMsgKey = UserManagerException.MSG_DELETE_ROLE_ERROR;
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        ModificationItem[] mod = new ModificationItem[1];
-        mod[0] = RoleLdapHelper.getLDAPModificationForDeleteRole();
-
-        String[] errorMsgArg;
-        try
-        {
-            dirContext.modifyAttributes(p_roleDN, mod);
-        }
-        catch (NameNotFoundException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_ROLE_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::deleteRole(): " + "(role name = "
-                    + p_roleDN + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::deleteRole(): " + "(role name = "
-                    + p_roleDN + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-    }
-
-    /**
-     * To judge if the user exists in LDAP directories.
-     */
-    private boolean isUserExist(String p_uid, DirContext dirContext)
-            throws NamingException
-    {
-
-        String[] attrs = new String[]
-        { UserLdapHelper.LDAP_ATTR_USERID };
-        try
-        {
-            dirContext.getAttributes(UserLdapHelper.getUserDN(p_uid), attrs);
-        }
-        catch (NameNotFoundException ex)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * To judge if the users exist in LDAP directories
-     */
-    private boolean areUsersExist(String[] p_uids, DirContext p_connection)
-            throws NamingException
-    {
-        boolean result = true;
-
-        for (int i = 0; i < p_uids.length; i++)
-        {
-            result = isUserExist(p_uids[i], p_connection);
-
-            if (!result)
-            {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Remove a user from the roles that has him as a memeber. If this is a user
-     * role then remove the entire role since the user is the only member. This
-     * is NOT a deactivation but rather a true removal of a user role.
-     * 
-     * Called by removeUser(...)
-     */
-    private void removeUserFromRoles(String p_uid, DirContext dirContext)
-            throws NamingException, UserManagerException, RemoteException
-    {
-
-        Vector roleDNs = getRoleDNs(p_uid, dirContext);
-
-        if (roleDNs != null)
-        {
-            for (int i = 0; i < roleDNs.size(); i++)
-            {
-                String roleDn = (String) roleDNs.elementAt(i);
-                // this is a user role - it contains the user's id
-                // within the name
-                // roleDn.split(" ").length > 4 to ensure removing this group
-                // "1001 activity sourceLocale targetLocale userId"
-                if (roleDn.indexOf(p_uid) > 0 && roleDn.split(" ").length > 4)
-                {
-                    // deletes the role and all of its contents
-                    dirContext.destroySubcontext(roleDn);
-                }
-                else
-                {
-                    // removes the user from the particular container role
-                    removeUserFromRole(p_uid, roleDn, dirContext);
-                }
-            }
-        }
-    }
-
-    /**
-     * Remove a user from a role.
-     */
-    private void removeUserFromRole(String p_uid, String p_roleDN,
-            DirContext dirContext) throws NamingException
-    {
-
-        // generate a ModificationItem[] to hold the attributes to be modified
-        ModificationItem[] modSet = RoleLdapHelper
-                .deleteUsersModificationSet(new String[]
-                { p_uid });
-        // Modify the entry
-        dirContext.modifyAttributes(p_roleDN, modSet);
-    }
-
-    public Vector<Role> getRoles(String p_filter, String[] p_attrs,
-            boolean p_withRates) throws UserManagerException
-    {
-        return getRoles(p_filter, p_attrs, p_withRates, null, -1);
-    }
-
-    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
-            boolean p_withRates, String companyId) throws UserManagerException
-    {
-        return getRoles(p_filter, p_attrs, p_withRates, companyId, -1);
-    }
-
-    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
-            boolean p_withRates, long p_projectId) throws UserManagerException
-    {
-        return getRoles(p_filter, p_attrs, p_withRates, null, p_projectId);
-    }
-
-    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
-            boolean p_withRates, String companyId, long p_projectId)
-            throws UserManagerException
-    {
-        String errorMsgKey = UserManagerException.MSG_GET_ROLES_ERROR;
-        Vector<Role> outputRoles = null;
-
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        try
-        {
-            // Search LDAP
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(p_attrs);
-            NamingEnumeration res = dirContext.search(
-                    RoleLdapHelper.ROLE_BASE_DN, p_filter, constraints);
-
-            // generate role objects
-            outputRoles = RoleLdapHelper.getRolesFromSearchResults(res,
-                    p_withRates, companyId, p_projectId);
-
-        }
-        catch (NamingException ex)
-        {
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getRoles():" + "(Filter = " + p_filter
-                    + ", attributes = " + p_attrs + ")\n", ex);
-
-            throw new UserManagerException(errorMsgKey, null, ex);
-        }
-        finally
-        {
-            checkInConnection(dirContext);
-        }
-
-        return outputRoles;
-    }
 
     /**
      * @see UserManager.addRateToRole(Rate, Activity, String, String)
@@ -3061,7 +2237,9 @@ public class UserManagerLocal implements UserManager
                 p_targetLocale);
         if (cr != null)
         {
-            addRateToRole(p_rate, cr);
+//            addRateToRole(p_rate, cr);
+        	cr.addRate(p_rate);
+        	HibernateUtil.saveOrUpdate(cr);
         }
         else
         {
@@ -3084,7 +2262,20 @@ public class UserManagerLocal implements UserManager
 
         if (cr != null)
         {
-            removeRateFromRole(p_rate, cr);
+        	List<Rate> removedRate = new ArrayList<Rate>();
+        	Collection rs = cr.getRates();
+        	for (Object o : rs)
+        	{
+        		Rate r = (Rate) o;
+        		if (r.getId() == p_rate.getId())
+        		{
+        			removedRate.add(r);
+        		}
+        	}
+        	
+        	rs.removeAll(removedRate);
+        	HibernateUtil.saveOrUpdate(cr);
+//            removeRateFromRole(p_rate, cr);
         }
     }
 
@@ -3117,448 +2308,6 @@ public class UserManagerLocal implements UserManager
         return isDup;
     }
 
-    // -----------------------private methods--------------------------
-
-    /**
-     * Get the UserIds of the User entry that match the given LDAP attributes.
-     * Return empty array if search is performed but no match found.
-     */
-    private String[] getUserNames(Attribute[] p_userAttrs, DirContext dirContext)
-            throws NamingException
-    {
-
-        String[] userNames = null;
-
-        if (p_userAttrs != null && p_userAttrs.length != 0)
-        {
-            String[] attrs = new String[]
-            { UserLdapHelper.LDAP_ATTR_USER_NAME };
-            String filter = UserLdapHelper.getSearchFilter(p_userAttrs);
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            userNames = UserLdapHelper.getNamesFromSearchResults(res);
-        }
-
-        return userNames;
-    }
-
-    /**
-     * Get the UserIds of the Role entries that match the LDAP attributes.
-     * Return empty array if search is performed but no match found.
-     */
-    private String[] getUserIdsFromRole(Attribute[] p_roleAttrs,
-            DirContext dirContext) throws NamingException
-    {
-
-        String[] uids = null;
-
-        if (p_roleAttrs != null && p_roleAttrs.length != 0)
-        {
-            String[] attrs = new String[]
-            { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
-            String filter = RoleLdapHelper.getSearchFilter(p_roleAttrs);
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    RoleLdapHelper.ROLE_BASE_DN, filter, constraints);
-
-            uids = RoleLdapHelper.getUIDsFromSearchResults(res);
-        }
-
-        return uids;
-    }
-
-    /**
-     * Get the UserIds of the Role entries that match the LDAP attributes.
-     * Return empty array if search is performed but no match found.
-     */
-    private String[] getUserIdsFromRole(String p_roleName, DirContext dirContext)
-            throws NamingException
-    {
-
-        String[] uids = null;
-        String[] attrs = new String[]
-        { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
-
-        if (p_roleName != null && p_roleName.trim().length() != 0)
-        {
-            try
-            {
-                Attributes roleEntry = dirContext.getAttributes(
-                        RoleLdapHelper.getRoleDN(p_roleName), attrs);
-                Attribute attr = roleEntry
-                        .get(RoleLdapHelper.LDAP_ATTR_MEMBERSHIP);
-
-                if (attr != null)
-                {
-                    String[] userDns = new String[attr.size()];
-                    NamingEnumeration tmpValue = attr.getAll();
-                    for (int i = 0; tmpValue.hasMoreElements(); i++)
-                    {
-                        userDns[i] = tmpValue.nextElement().toString();
-                    }
-                    tmpValue.close();
-
-                    uids = UserLdapHelper.parseUserIdsFromDns(userDns);
-                }
-            }
-            catch (NameNotFoundException ex)
-            {
-                uids = new String[0];
-            }
-            catch (NamingException ex)
-            {
-                // ignorance.
-            }
-        }
-
-        return uids;
-    }
-
-    /**
-     * Get the UserIds of the Role entries that match the LDAP attributes.
-     * Return empty array if search is performed but no match found.
-     */
-    private String[] getUserIdsFromRoles(String[] p_roleNames,
-            Set p_projectUserId, DirContext dirContext) throws NamingException
-    {
-        String filter = RoleLdapHelper
-                .getSearchFilterForRolesOnRoleNames(p_roleNames);
-
-        String[] attrs = new String[]
-        { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
-
-        Set userIds = new TreeSet();
-
-        try
-        {
-            // Search LDAP
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    RoleLdapHelper.ROLE_BASE_DN, filter, constraints);
-
-            while (res.hasMoreElements())
-            {
-                SearchResult tmpSearchResult = (SearchResult) res.nextElement();
-                Attributes entry = tmpSearchResult.getAttributes();
-                Attribute attr = entry.get(RoleLdapHelper.LDAP_ATTR_MEMBERSHIP);
-
-                if (attr != null)
-                {
-                    NamingEnumeration userDnsEnu = attr.getAll();
-                    String[] userDns = new String[attr.size()];
-                    int i = 0;
-                    while (userDnsEnu.hasMoreElements())
-                    {
-                        String userDn = userDnsEnu.nextElement().toString();
-                        userDns[i] = userDn;
-                        i++;
-                    }
-                    userDnsEnu.close();
-                    userIds.addAll(RoleLdapHelper.filterRoleMembers(userDns,
-                            p_projectUserId));
-                }
-            }
-            res.close();
-        }
-        catch (NameNotFoundException ex)
-        {
-            return new String[0];
-        }
-        catch (NamingException ex)
-        {
-            // ignorance.
-        }
-
-        String[] finalIdsArray = new String[userIds.size()];
-        finalIdsArray = (String[]) userIds.toArray(finalIdsArray);
-        return finalIdsArray;
-    }
-
-    /**
-     * Get users based on the given uids
-     * 
-     * @return a Vector of User objects
-     */
-    private Vector getUsers(String[] p_uids, String[] p_targetAttrs,
-            DirContext dirContext) throws NamingException
-    {
-
-        Vector users = new Vector();
-
-        if ((p_uids != null) && (p_uids.length != 0))
-        {
-            String filter = UserLdapHelper.getSearchFilterOnUIDs(p_uids);
-            users = getUsers(filter, p_targetAttrs, dirContext);
-        }
-
-        return users;
-    }
-
-    /**
-     * Get users matched the specified criteria with the specified attributes
-     */
-    private Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
-            String[] p_targetUserAttrs, Project p_project)
-            throws UserManagerException
-    {
-        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
-
-        String[] nameSet = null;
-        String[] uidSet = null;
-        String[] commonUidSet = null;
-
-        Vector result = null;
-        String[] errorMsgArg;
-
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        setConnectionOptions(dirContext);
-
-        // Search names from the User branch
-        try
-        {
-            nameSet = getUserNames(p_userAttrs, dirContext);
-        }
-        catch (NamingException e)
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_USER };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsers(): " + errorMsgArg[0], e);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, e);
-        }
-
-        // Search the uids from the Role branch
-        try
-        {
-            uidSet = getUserIdsFromRole(p_roleAttrs, dirContext);
-        }
-        catch (NamingException e)
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_ROLE };
-
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsers(): " + errorMsgArg[0], e);
-
-            throw new UserManagerException(errorMsgKey, errorMsgArg, e);
-        }
-        // get the common set of user ids
-        commonUidSet = LdapHelper.getCommonSet(
-                UserUtil.convertUserNamesToUserIds(nameSet), uidSet);
-
-        // filter out the users that are in the specified project
-        if (p_project != null)
-        {
-            commonUidSet = filterUsersByProject(commonUidSet, p_project);
-        }
-
-        // Search User entries based on the common set of uids
-        try
-        {
-            result = getUsers(commonUidSet, p_targetUserAttrs, dirContext);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::getUsers(): " + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return result;
-    }
-
-    /**
-     * Add the rate to the specified role.
-     */
-    private void addRateToRole(Rate p_rate, Role p_role)
-            throws UserManagerException, RemoteException
-    {
-        String errorMsgKey = UserManagerException.MSG_ADD_RATE_TO_ROLE_ERROR;
-        String[] errorMsgArg =
-        { Long.toString(p_rate.getId()), p_role.getName() };
-
-        // if the rate being added has a duplicate name - this is an error
-        if (isDuplicateRateName(p_rate.getName(), p_role))
-        {
-            throw new UserManagerException(errorMsgKey, errorMsgArg, null);
-        }
-
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        // generate a ModificationItem[] to hold the attributes to be modified
-        String rates[] =
-        { Long.toString(p_rate.getId()) };
-        ModificationItem[] modSet = RoleLdapHelper
-                .addRatesModificationSet(rates);
-        try
-        {
-            // Modify the entry
-            dirContext.modifyAttributes(
-                    RoleLdapHelper.getRoleDN(p_role.getName()), modSet);
-        }
-        catch (NameNotFoundException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_ROLE_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addRateToRole(): " + "(role name = "
-                    + p_role.getName() + ", rate = " + rates + ")\n"
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addRateToRole(): " + "(role name = "
-                    + p_role.getName() + ", rate = " + rates + ")\n"
-                    + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-    }
-
-    /**
-     * Remove the rate from the specified role.
-     */
-    private void removeRateFromRole(Rate p_rate, Role p_role)
-            throws UserManagerException
-    {
-        String errorMsgKey = UserManagerException.MSG_REMOVE_RATE_FROM_ROLE_ERROR;
-        String[] errorMsgArg =
-        { Long.toString(p_rate.getId()), p_role.getName() };
-
-        // check out a connection from the pool with a system defined user bond.
-        DirContext dirContext = checkOutConnection(true);
-
-        // generate a ModificationItem[] to hold the attributes to be modified
-        String rates[] =
-        { Long.toString(p_rate.getId()) };
-        ModificationItem[] modSet = RoleLdapHelper
-                .deleteRatesModificationSet(rates);
-
-        try
-        {
-            // Modify the entry
-            dirContext.modifyAttributes(
-                    RoleLdapHelper.getRoleDN(p_role.getName()), modSet);
-        }
-        catch (NameNotFoundException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_ROLE_NOT_EXIST };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeRateFromRole(): "
-                    + "(role name = " + p_role.getName() + ", rate = " + rates
-                    + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        catch (NoSuchAttributeException ex)
-        {
-            // ignorance.
-        }
-        catch (NamingException ex)
-        {
-            errorMsgArg = new String[]
-            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::removeRateFromRole(): "
-                    + "(role name = " + p_role.getName() + ", rate = " + rates
-                    + ")\n" + errorMsgArg[0], ex);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-    }
-
-    /**
-     * Get the role DNs of which containes the specified user
-     */
-    private Vector getRoleDNs(String p_uid, DirContext dirContext)
-            throws NamingException
-    {
-        Vector roleDNs = null;
-        String[] attrs = new String[]
-        { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
-        String filter = RoleLdapHelper.getSearchFilterOnUserId(p_uid);
-        // search
-        SearchControls constraints = new SearchControls();
-        constraints.setReturningObjFlag(true);
-        constraints.setCountLimit(0);
-        constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        constraints.setReturningAttributes(attrs);
-        NamingEnumeration res = dirContext.search(RoleLdapHelper.ROLE_BASE_DN,
-                filter, constraints);
-
-        // generate the DNs
-        roleDNs = RoleLdapHelper.getRoleDNsFromSearchResults(res);
-
-        return roleDNs;
-    }
-
-    /**
-     * Get the role DNs that are deactive and contain the specified user.
-     */
-    private Vector getInactiveRoleDNs(String p_uid, DirContext dirContext)
-            throws NamingException
-    {
-        String[] attrs = new String[]
-        { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
-        String filter = RoleLdapHelper
-                .getSearchFilterForInactiveRolesOnUserId(p_uid);
-
-        // search
-        SearchControls constraints = new SearchControls();
-        constraints.setReturningObjFlag(true);
-        constraints.setCountLimit(0);
-        constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        constraints.setReturningAttributes(attrs);
-        NamingEnumeration res = dirContext.search(RoleLdapHelper.ROLE_BASE_DN,
-                filter, constraints);
-
-        // generate the DNs
-        Vector roleDNs = RoleLdapHelper.getRoleDNsFromSearchResults(res);
-        return roleDNs;
-    }
 
     /**
      * Filter the list of user ids passed in and just return the ones that are
@@ -3639,44 +2388,6 @@ public class UserManagerLocal implements UserManager
         }
     }
 
-    /**
-     * Checks out an DirContext object from the connection pool. Also binds a
-     * System defined user to the connection by demand.
-     */
-    private DirContext checkOutConnection(boolean p_bindUser)
-            throws UserManagerException
-    {
-        String errorMsgKey = UserManagerException.MSG_AUTHENTICATE_BINDING_USER_ERROR;
-
-        // NOTE:
-        // for right now bind at all times - we are having problems
-        // with many users on searches - but binding at all times seems to
-        // fix the problem. Leave until we have a better solution
-        //
-        DirContext dirContext = null;
-        try
-        {
-            // check out a connection from the connection pool
-            dirContext = dirContextPool.getDirContext();
-            // bind a user to the connection
-            UserLdapHelper.bindUser(dirContext, getLDAPLoginDN(),
-                    LdapHelper.LDAP_PASSWORD);
-        }
-        catch (NamingException ne)
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-
-            String[] errorMsgArg =
-            { "(binding user id =" + getLDAPLoginDN() + ")\n" };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::bindUserToConnection(): "
-                    + errorMsgArg[0], ne);
-            throw new UserManagerException(errorMsgKey, errorMsgArg, ne);
-        }
-
-        return dirContext;
-    }
 
     /**
      * Create the proper exception for an error with user role
@@ -3762,17 +2473,17 @@ public class UserManagerLocal implements UserManager
     /**
      * Calculates the users that logged in the system.
      * 
-     * @param p_userName
-     *            - the user name.
+     * @param p_userId
+     *            - the user ID.
      * @param p_sessionId
      *            - the session id of the user.
      */
-    public void loggedInUsers(String p_userName, String p_sessionId)
+    public void loggedInUsers(String p_userId, String p_sessionId)
     {
         if (p_sessionId != null)
         {
-            m_userMap.put(p_sessionId, p_userName);
-            CATEGORY.info("Logging in user: " + p_userName + ". Total users="
+            m_userMap.put(p_sessionId, p_userId);
+            CATEGORY.info("Logging in user: " + p_userId + ". Total users="
                     + m_userMap.size());
         }
     }
@@ -3780,18 +2491,23 @@ public class UserManagerLocal implements UserManager
     /**
      * Calculates the users after logging out the system.
      * 
-     * @param p_userName
-     *            - the user name.
+     * @param p_userId
+     *            - the user ID.
      * @param p_sessionId
      *            - the session id of the user.
      */
-    public void loggedOutUsers(String p_userName, String p_sessionId)
+    public void loggedOutUsers(String p_userId, String p_sessionId)
     {
         if (p_sessionId != null)
         {
             m_userMap.remove(p_sessionId);
-            CATEGORY.info("Logging out user: " + p_userName + ". Total users="
+            CATEGORY.info("Logging out user: " + p_userId + ". Total users="
                     + m_userMap.size());
         }
+    }
+
+    public Map<String, String> getLoggedInUsers()
+    {
+        return m_userMap;
     }
 }

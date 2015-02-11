@@ -57,7 +57,7 @@
         title = bundle.getString("lb_edit") + " " + bundle.getString("lb_comment");
     if(wo != null)
     {
-        String companyId = null;
+        long companyId = -1;
         if( wo instanceof Task )
         {
             doneUrl = done.getPageURL()+ 
@@ -101,7 +101,7 @@
             companyId = ((Workflow)wo).getCompanyId();
         }
 
-        CompanyThreadLocal.getInstance().setIdValue(companyId);
+        CompanyThreadLocal.getInstance().setIdValue(String.valueOf(companyId));
     }
 
     String attachUrl = attach.getPageURL();

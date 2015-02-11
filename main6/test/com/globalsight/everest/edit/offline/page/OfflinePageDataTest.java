@@ -42,11 +42,11 @@ public class OfflinePageDataTest
 
         ArrayList arr = opd.getSourceTargetText(null, match, sourceText,
                 targetText, userId, isFromXliff, sourceLocal, targetLocal,
-                true, "1000");
+                true, 1000);
         Assert.assertSame("MT!", (String) arr.get(2));
 
         arr = opd.getSourceTargetText(null, match, sourceText, targetText,
-                userId, isFromXliff, sourceLocal, targetLocal, false, "1000");
+                userId, isFromXliff, sourceLocal, targetLocal, false, 1000);
         Assert.assertSame("Google_MT", (String) arr.get(2));
     }
 

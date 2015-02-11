@@ -210,7 +210,7 @@ public class TaskDbAccessor
     /* Read the language and character set for the localization profile on the */
     /* given task */
     private static void readLanguageCharset(Task p_task)
-    throws DbAccessException
+            throws DbAccessException
     {
         try
         {
@@ -220,19 +220,20 @@ public class TaskDbAccessor
             ResultSet rs = ps.executeQuery();
             if (rs.next())
             {
-		//the database now stores country and lang separately
-		//but System3 stored them together like "en_US"
-		String sourceLanguage = rs.getString(LANG_CODE) + "_"
-		    + rs.getString(COUNTRY_CODE);
+                //the database now stores country and lang separately
+                //but System3 stored them together like "en_US"
+                String sourceLanguage = rs.getString(LANG_CODE) + "_"
+                        + rs.getString(COUNTRY_CODE);
                 p_task.setSourceLanguage(sourceLanguage);
                 p_task.setCharset(rs.getString(CODE_SET));
-		p_task.setLocalizationProfileId(rs.getLong(L10N_PROFILE_ID));
+                p_task.setLocalizationProfileId(rs.getLong(L10N_PROFILE_ID));
             }
             else
             {
-                throw new DbAccessException("No language/charset data found for " +
-                                            "customer db access profile id " + 
-                                            p_task.getRecordProfileId() , null);
+                throw new DbAccessException(
+                        "No language/charset data found for "
+                                + "customer db access profile id "
+                                + p_task.getRecordProfileId(), null);
             }
             rs.close();
             ps.close();

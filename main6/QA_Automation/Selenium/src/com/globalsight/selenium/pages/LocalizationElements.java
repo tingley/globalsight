@@ -2,7 +2,7 @@ package com.globalsight.selenium.pages;
 
 public class LocalizationElements
 {
-    public static final String MAIN_NEW_BUTTON = "//input[@value='New...']";
+    public static final String MAIN_NEW_BUTTON = "//input[@id='newButton']";
     public static final String Localization_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
     public static final String Edit_BUTTON = "editBtn";
     public static final String Remove_BUTTON = "removeBtn";
@@ -21,6 +21,11 @@ public class LocalizationElements
        
     // attach page
     public static final String ATTACH_TARGET_LOCALE_SELECT = "targetLocale";
+    public static final String ATTACH_TARGET_LOCALE_SELECT1 = "TargetLocaleId_57";
+    public static final String ATTACH_TARGET_LOCALE_SELECT2 = "TargetLocaleId_25";
+    public static final String ATTACH_TARGET_LOCALE_SELECT3 = "TargetLocaleId_64";
+    public static final String ATTACH_TARGET_LOCALE_SELECT4 = "TargetLocaleId_41";
+    public static final String ATTACH_TARGET_LOCALE_SELECT5 = "TargetLocaleId_22";
     public static final String ATTACH_RADIO = "//input[@id='checkbox_0']";
     public static final String ATTACH_ATTACH_BUTTON = "add_remove";
     public static final String ATTACH_SAVE_BUTTON = "Save";

@@ -38,7 +38,6 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
@@ -46,10 +45,10 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.util.comparator.TuvSourceContentComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -163,9 +162,11 @@ public class StatisticsService
 
                     // update TU table for repetition information.
                     Map<Long, TuImpl> cachedTus = getTusMapBySourcePage(sourcePage);
+                    // touch to load target TUVs
+                    SegmentTuvUtil.getTargetTuvs(targetPage);
                     updateRepetitionInfoToTu(splittedTuvs, matches,
                             uniqueSegments2, cachedTus,
-                            Long.parseLong(sourcePage.getCompanyId()));
+                            sourcePage.getCompanyId(), targetLocaleId);
                 }
             }
         }
@@ -240,16 +241,16 @@ public class StatisticsService
             ArrayList<BaseTmTuv> sTuvs, MatchTypeStatistics p_matches,
             Vector<String> p_excludedTuTypes)
     {
+        // 100% cases
         int contextMatchWordCount = 0;
         int segmentTmWordCount = 0;
-        int mtExactMatchWordCount = 0;
         int xliffMatchWordCount = 0;
         // below 50%
-        int repetitionWordCount = 0;
+        int noMatchRepetitionWordCount = 0;
         int noMatchWordCount = 0;
         // 50%--75%
-        int subLevRepetitionWordCount = 0;
-        int subLevMatchWordCount = 0;
+        int lowFuzzyRepetitionWordCount = 0;
+        int lowFuzzyWordCount = 0;
         // 75%--84%
         int medFuzzyRepetitionWordCount = 0;
         int medFuzzyWordCount = 0;
@@ -261,6 +262,12 @@ public class StatisticsService
         int highFuzzyWordCount = 0;
         // go through all segments
         int totalWordCount = 0;
+
+        // MT relevant word counts
+//        int mtTotalWordCount = 0;
+        int mtExactMatchWordCount = 0;
+        int mtFuzzyNoMatchWordCount = 0;
+        int mtRepetitionsWordCount = 0;
 
         int thresholdHiFuzzyWordCount = 0;
         int thresholdMedHiFuzzyWordCount = 0;
@@ -283,11 +290,11 @@ public class StatisticsService
             totalWordCount += wordCount;
             Types types = p_matches.getTypes(tuv.getId(),
                     ((SegmentTmTu) tuv.getTu()).getSubId());
-
+            boolean isMtTranslation = isMtTranslation(types);
+            // Calculate threshold non-related word counts
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
             String sourceContent = tuv.getTu().getSourceContent();
-            // increment the word count according to the match type
             switch (matchType)
             {
                 case MatchTypeStatistics.CONTEXT_EXACT:
@@ -306,11 +313,15 @@ public class StatisticsService
                     if (sourceContent != null
                             && sourceContent.equals("repetition"))
                     {
-                        subLevRepetitionWordCount += wordCount;
+                        lowFuzzyRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     else
                     {
-                        subLevMatchWordCount += wordCount;
+                        lowFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.MED_FUZZY:
@@ -318,10 +329,14 @@ public class StatisticsService
                             && sourceContent.equals("repetition"))
                     {
                         medFuzzyRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     else
                     {
                         medFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.MED_HI_FUZZY:
@@ -329,10 +344,14 @@ public class StatisticsService
                             && sourceContent.equals("repetition"))
                     {
                         medHighFuzzyRepetionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     else
                     {
                         medHighFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.HI_FUZZY:
@@ -340,10 +359,14 @@ public class StatisticsService
                             && sourceContent.equals("repetition"))
                     {
                         highFuzzyRepetionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     else
                     {
                         highFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.NO_MATCH:
@@ -351,11 +374,15 @@ public class StatisticsService
                     if (sourceContent != null
                             && sourceContent.equals("repetition"))
                     {
-                        repetitionWordCount += wordCount;
+                        noMatchRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     else
                     {
                         noMatchWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     break;
             }
@@ -416,37 +443,39 @@ public class StatisticsService
         }
 
         PageWordCounts pageWordCounts = new PageWordCounts();
+        // total word count
+        pageWordCounts.setTotalWordCount(totalWordCount);
+        // all 100% cases
         pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
         pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
-        pageWordCounts.setMTExtractMatchWordCount(mtExactMatchWordCount);
+//        pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
         pageWordCounts.setXliffExtractMatchWordCount(xliffMatchWordCount);
-        pageWordCounts.setRepetitionWordCount(repetitionWordCount
-                + highFuzzyRepetionWordCount + medHighFuzzyRepetionWordCount
-                + medFuzzyRepetitionWordCount + subLevRepetitionWordCount);
-        pageWordCounts.setUnmatchedWordCount(noMatchWordCount);
-        pageWordCounts.setSubLevMatchWordCount(subLevMatchWordCount);
-        pageWordCounts.setSubLevRepetitionWordCount(subLevRepetitionWordCount);
-        pageWordCounts
-                .setHiFuzzyRepetitionWordCount(highFuzzyRepetionWordCount);
-        pageWordCounts
-                .setMedHighFuzzyRepetitionWordCount(medHighFuzzyRepetionWordCount);
-        pageWordCounts
-                .setMedFuzzyRepetitionWordCount(medFuzzyRepetitionWordCount);
-        pageWordCounts.setTotalWordCount(totalWordCount);
+        // all repetitions
+        pageWordCounts.setRepetitionWordCount(highFuzzyRepetionWordCount
+                + medHighFuzzyRepetionWordCount + medFuzzyRepetitionWordCount
+                + lowFuzzyRepetitionWordCount + noMatchRepetitionWordCount);
+        // fuzzy and no match
         pageWordCounts.setHiFuzzyWordCount(highFuzzyWordCount);
         pageWordCounts.setMedHiFuzzyWordCount(medHighFuzzyWordCount);
         pageWordCounts.setMedFuzzyWordCount(medFuzzyWordCount);
-        pageWordCounts.setLowFuzzyWordCount(subLevMatchWordCount);
-
+        pageWordCounts.setLowFuzzyWordCount(lowFuzzyWordCount);
+        pageWordCounts.setNoMatchWordCount(noMatchWordCount);
+        // threshold related
         pageWordCounts.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
         pageWordCounts
-                .setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
+                .setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
         pageWordCounts
                 .setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
         pageWordCounts
-                .setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
+                .setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
         pageWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
-
+        // MT related
+        pageWordCounts.setMtTotalWordCount(mtExactMatchWordCount
+                + mtFuzzyNoMatchWordCount + mtRepetitionsWordCount);
+        pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
+        pageWordCounts.setMtFuzzyNoMatchWordCount(mtFuzzyNoMatchWordCount);
+        pageWordCounts.setMtRepetitionsWordCount(mtRepetitionsWordCount);
+        
         return pageWordCounts;
     }
 
@@ -459,17 +488,17 @@ public class StatisticsService
             Vector<String> p_excludedTuTypes,
             Map<SegmentTmTuv, List<SegmentTmTuv>> m_uniqueSegments)
     {
+        // 100 cases
         int contextMatchWordCount = 0;
         int segmentTmWordCount = 0;
-        int mtExactMatchWordCount = 0;
         int xliffMatchWordCount = 0;
         int poMatchWordCount = 0;
         // below 50%
-        int repetitionWordCount = 0;
+        int noMatchRepetitionWordCount = 0;
         int noMatchWordCount = 0;
         // 50%--75%
-        int subLevRepetitionWordCount = 0;
-        int subLevMatchWordCount = 0;
+        int lowFuzzyRepetitionWordCount = 0;
+        int lowFuzzyWordCount = 0;
         // 75%--84%
         int medFuzzyRepetitionWordCount = 0;
         int medFuzzyWordCount = 0;
@@ -481,6 +510,12 @@ public class StatisticsService
         int highFuzzyWordCount = 0;
         // go through all segments
         int totalWordCount = 0;
+
+        // MT relevant word counts
+//        int mtTotalWordCount = 0;
+        int mtExactMatchWordCount = 0;
+        int mtFuzzyNoMatchWordCount = 0;
+        int mtRepetitionsWordCount = 0;
 
         int thresholdHiFuzzyWordCount = 0;
         int thresholdMedHiFuzzyWordCount = 0;
@@ -506,11 +541,11 @@ public class StatisticsService
             totalWordCount += wordCount;
             Types types = p_matches.getTypes(tuv.getId(),
                     ((SegmentTmTu) tuv.getTu()).getSubId());
-
+            boolean isMtTranslation = isMtTranslation(types);
+            // Calculate threshold non-related word counts
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
             ArrayList<SegmentTmTuv> identicalSegments = null;
-            // increment the word count according to the match type
             switch (matchType)
             {
                 case MatchTypeStatistics.CONTEXT_EXACT:
@@ -536,11 +571,15 @@ public class StatisticsService
                         identicalSegments = new ArrayList<SegmentTmTuv>();
                         m_uniqueSegments.put(tuv, identicalSegments);
                         identicalSegments.add(tuv);
-                        subLevMatchWordCount += wordCount;
+                        lowFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     else
                     {
-                        subLevRepetitionWordCount += wordCount;
+                        lowFuzzyRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.MED_FUZZY:
@@ -552,10 +591,14 @@ public class StatisticsService
                         m_uniqueSegments.put(tuv, identicalSegments);
                         identicalSegments.add(tuv);
                         medFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     else
                     {
                         medFuzzyRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.MED_HI_FUZZY:
@@ -567,10 +610,14 @@ public class StatisticsService
                         m_uniqueSegments.put(tuv, identicalSegments);
                         identicalSegments.add(tuv);
                         medHighFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     else
                     {
                         medHighFuzzyRepetionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     break;
                 case MatchTypeStatistics.HI_FUZZY:
@@ -582,10 +629,14 @@ public class StatisticsService
                         m_uniqueSegments.put(tuv, identicalSegments);
                         identicalSegments.add(tuv);
                         highFuzzyWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     else
                     {
                         highFuzzyRepetionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     break;
                 case LeverageMatchLingManager.NO_MATCH:
@@ -600,10 +651,14 @@ public class StatisticsService
                         m_uniqueSegments.put(tuv, identicalSegments);
                         identicalSegments.add(tuv);
                         noMatchWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtFuzzyNoMatchWordCount += wordCount;
                     }
                     else
                     {
-                        repetitionWordCount += wordCount;
+                        noMatchRepetitionWordCount += wordCount;
+                        if (isMtTranslation)
+                            mtRepetitionsWordCount += wordCount;
                     }
                     break;
             }
@@ -684,37 +739,39 @@ public class StatisticsService
             }
         }
 
-        PageWordCounts tpWordCounts = new PageWordCounts();
-        tpWordCounts.setContextMatchWordCount(contextMatchWordCount);
-        tpWordCounts.setSegmentTmWordCount(segmentTmWordCount);
-        tpWordCounts.setMTExtractMatchWordCount(mtExactMatchWordCount);
-        tpWordCounts.setXliffExtractMatchWordCount(xliffMatchWordCount);
-        tpWordCounts.setPoExactMatchWordCount(poMatchWordCount);
-        tpWordCounts.setRepetitionWordCount(repetitionWordCount
-                + highFuzzyRepetionWordCount + medHighFuzzyRepetionWordCount
-                + medFuzzyRepetitionWordCount + subLevRepetitionWordCount);
-        tpWordCounts.setUnmatchedWordCount(noMatchWordCount);
-        tpWordCounts.setSubLevMatchWordCount(subLevMatchWordCount);
-        tpWordCounts.setSubLevRepetitionWordCount(subLevRepetitionWordCount);
-        tpWordCounts.setHiFuzzyRepetitionWordCount(highFuzzyRepetionWordCount);
-        tpWordCounts
-                .setMedHighFuzzyRepetitionWordCount(medHighFuzzyRepetionWordCount);
-        tpWordCounts
-                .setMedFuzzyRepetitionWordCount(medFuzzyRepetitionWordCount);
-        tpWordCounts.setTotalWordCount(totalWordCount);
-        tpWordCounts.setHiFuzzyWordCount(highFuzzyWordCount);
-        tpWordCounts.setMedHiFuzzyWordCount(medHighFuzzyWordCount);
-        tpWordCounts.setMedFuzzyWordCount(medFuzzyWordCount);
-        tpWordCounts.setLowFuzzyWordCount(subLevMatchWordCount);
-
-        tpWordCounts.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
-        tpWordCounts.setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
-        tpWordCounts.setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
-        tpWordCounts
+        PageWordCounts pageWordCounts = new PageWordCounts();
+        // total word count
+        pageWordCounts.setTotalWordCount(totalWordCount);
+        // all 100% cases
+        pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
+        pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
+        pageWordCounts.setXliffExtractMatchWordCount(xliffMatchWordCount);
+        pageWordCounts.setPoExactMatchWordCount(poMatchWordCount);
+        // all repetitions
+        pageWordCounts.setRepetitionWordCount(highFuzzyRepetionWordCount
+                + medHighFuzzyRepetionWordCount + medFuzzyRepetitionWordCount
+                + lowFuzzyRepetitionWordCount + noMatchRepetitionWordCount);
+        // fuzzy and no match
+        pageWordCounts.setHiFuzzyWordCount(highFuzzyWordCount);
+        pageWordCounts.setMedHiFuzzyWordCount(medHighFuzzyWordCount);
+        pageWordCounts.setMedFuzzyWordCount(medFuzzyWordCount);
+        pageWordCounts.setLowFuzzyWordCount(lowFuzzyWordCount);
+        pageWordCounts.setNoMatchWordCount(noMatchWordCount);
+        // threshold related
+        pageWordCounts.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
+        pageWordCounts
                 .setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
-        tpWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
+        pageWordCounts.setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
+        pageWordCounts.setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
+        pageWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
+        // MT related
+        pageWordCounts.setMtTotalWordCount(mtExactMatchWordCount
+                + mtFuzzyNoMatchWordCount + mtRepetitionsWordCount);
+        pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
+        pageWordCounts.setMtFuzzyNoMatchWordCount(mtFuzzyNoMatchWordCount);
+        pageWordCounts.setMtRepetitionsWordCount(mtRepetitionsWordCount);
 
-        return tpWordCounts;
+        return pageWordCounts;
     }
 
     /**
@@ -737,7 +794,7 @@ public class StatisticsService
         // All 100% match word-count
         int totalExactMatchWordCount = pageWordCount.getSegmentTmWordCount()
                 + pageWordCount.getContextMatchWordCount()
-                + pageWordCount.getMTExtractMatchWordCount()
+                + pageWordCount.getMtExactMatchWordCount()
                 + pageWordCount.getXliffExtractMatchWordCount()
                 + pageWordCount.getPoExactMatchWordCount();
         pageWordCount.setTotalExactMatchWordCount(totalExactMatchWordCount);
@@ -746,7 +803,8 @@ public class StatisticsService
         // Set ICE word-count
         int inContextMatchWordCount = onePageInContextMatchWordCounts(
                 pageWordCount, p_splittedSourceTuvs, p_matches,
-                p_excludedTuTypes, p_targetPage.getSourcePage().getCompanyId());
+                p_excludedTuTypes,
+                p_targetPage.getSourcePage().getCompanyId());
         pageWordCount.setInContextWordCount(inContextMatchWordCount);
 
         // Count "context-match word counts" into "segment-TM word counts"
@@ -759,31 +817,31 @@ public class StatisticsService
     }
 
     /**
-     * This method is used to update TU table, and set repeated flag and
-     * repetition flag.
-     * 
-     * @param sTuvs
-     * @param p_matches
-     * @param p_uniqueSegments
-     * @param p_cachedTus
-     *            :<Long, TuImpl>:<tuId, TuImpl>.
+     * This method is used to update TUV table, and set repeated and repetition
+     * flag.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static void updateRepetitionInfoToTu(ArrayList<BaseTmTuv> sTuvs,
             MatchTypeStatistics p_matches, Map p_uniqueSegments,
-            Map<Long, TuImpl> p_cachedTus, long p_companyId)
+            Map<Long, TuImpl> p_cachedTus, long p_companyId,
+            long p_targetLocaleId)
     {
-        Set<TuImpl> repetitionSet = new HashSet<TuImpl>();
-        Set<TuImpl> unRepetitionSet = new HashSet<TuImpl>();
+        Set<TuvImpl> repetitionTuvSet = new HashSet<TuvImpl>();
+        Set<TuvImpl> unRepetitionTuvSet = new HashSet<TuvImpl>();
         for (int i = 0; i < sTuvs.size(); i++)
         {
-            SegmentTmTuv tuv = (SegmentTmTuv) sTuvs.get(i);
-            Types types = p_matches.getTypes(tuv.getId(),
-                    ((SegmentTmTu) tuv.getTu()).getSubId());
+            SegmentTmTuv curSrcTuv = (SegmentTmTuv) sTuvs.get(i);
+            Types types = p_matches.getTypes(curSrcTuv.getId(),
+                    ((SegmentTmTu) curSrcTuv.getTu()).getSubId());
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
-            ArrayList<SegmentTmTuv> identicalSegments = null;
+            long tuId = curSrcTuv.getTu().getId();
+            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId,
+                    p_companyId);
+            TuvImpl curTrgTuv = (TuvImpl) currentTu.getTuv(
+                    p_targetLocaleId, p_companyId);
 
+            ArrayList<SegmentTmTuv> identicalSegments = null;
             switch (matchType)
             {
                 case MatchTypeStatistics.CONTEXT_EXACT:
@@ -791,6 +849,12 @@ public class StatisticsService
                 case MatchTypeStatistics.SEGMENT_MT_EXACT:
                 case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
                 case MatchTypeStatistics.SEGMENT_PO_EXACT:
+                    // If current target TUV has repetition flag, after
+                    // "update leverage" and "update word counts" to get 100
+                    // match, its REP flag should be removed.
+                    curTrgTuv.setRepeated(false);
+                    curTrgTuv.setRepetitionOfId(0);
+                    unRepetitionTuvSet.add(curTrgTuv);
                     break;
                 case MatchTypeStatistics.LOW_FUZZY:
                 case MatchTypeStatistics.MED_FUZZY:
@@ -798,76 +862,58 @@ public class StatisticsService
                 case MatchTypeStatistics.HI_FUZZY:
                 case MatchTypeStatistics.NO_MATCH:
                 default:
-                    long tuId = tuv.getTu().getId();
-                    TuImpl tu = null;
-                    if (p_cachedTus != null && p_cachedTus.size() > 0)
-                    {
-                        tu = p_cachedTus.get(tuId);
-                    }
-                    if (tu == null)
-                    {
-                        try
-                        {
-                            tu = SegmentTuUtil.getTuById(tuId,
-                                    String.valueOf(p_companyId));
-                        }
-                        catch (Exception e)
-                        {
-                            c_logger.error(e.getMessage(), e);
-                        }
-                    }
-
                     // WorldServer XLF files are special,
                     // get repeated and repetition information from TU.
                     // Because the TU list is sorted, all repeated TUs are in
                     // front of the list
-                    if ("worldserver".equalsIgnoreCase(tu.getGenerateFrom())
-                            && "xlf".equalsIgnoreCase(tu.getDataType()))
+                    if ("worldserver".equalsIgnoreCase(currentTu.getGenerateFrom())
+                            && "xlf".equalsIgnoreCase(currentTu.getDataType()))
                     {
-                        if ("repeated".equalsIgnoreCase(tu.getSourceContent()))
+                        if ("repeated".equalsIgnoreCase(currentTu.getSourceContent()))
                         {
-                            tu.setRepeated(true);
-                            tu.setRepetitionOfId(0);
-                            p_uniqueSegments.put(tuv.getExactMatchKey(), tuId);
-                            repetitionSet.add(tu);
+                            curTrgTuv.setRepeated(true);
+                            curTrgTuv.setRepetitionOfId(0);
+                            p_uniqueSegments.put(curSrcTuv.getExactMatchKey(),
+                                    curTrgTuv.getId());
+                            repetitionTuvSet.add(curTrgTuv);
                         }
-                        else if ("repetition".equalsIgnoreCase(tu
+                        else if ("repetition".equalsIgnoreCase(currentTu
                                 .getSourceContent()))
                         {
-                            long repeatedId = p_uniqueSegments.get(tuv
-                                    .getExactMatchKey()) == null ? 0
-                                    : (Long) p_uniqueSegments.get(tuv
-                                            .getExactMatchKey());
+                            long repeatedTrgTuvId = 0;
+                            Object obj = p_uniqueSegments.get(curSrcTuv.getExactMatchKey());
+                            if (obj != null && obj instanceof Long)
+                            {
+                                repeatedTrgTuvId = (Long) obj;
+                            }
+
                             /*
                              * Sometimes, World Server XLF files don't have
                              * repeated segments for repetition segments. In
                              * this case, we should treat the first repetition
                              * as repeated.
                              */
-                            if (repeatedId == 0)
+                            if (repeatedTrgTuvId == 0)
                             {
-                                tu.setRepeated(true);
-                                tu.setRepetitionOfId(0);
-                                p_uniqueSegments.put(tuv.getExactMatchKey(),
-                                        tuId);
-                                repetitionSet.add(tu);
+                                curTrgTuv.setRepeated(true);
+                                curTrgTuv.setRepetitionOfId(0);
+                                p_uniqueSegments.put(
+                                        curSrcTuv.getExactMatchKey(),
+                                        curTrgTuv.getId());
+                                repetitionTuvSet.add(curTrgTuv);
                             }
                             else
                             {
-                                tu.setRepeated(false);
-                                tu.setRepetitionOfId(repeatedId);
-                                repetitionSet.add(tu);
+                                curTrgTuv.setRepeated(false);
+                                curTrgTuv.setRepetitionOfId(repeatedTrgTuvId);
+                                repetitionTuvSet.add(curTrgTuv);
                             }
-                        }
-                        else
-                        {
-                            // do nothing
                         }
                     }
                     else
                     {
                         identicalSegments = (ArrayList) p_uniqueSegments
-                                .get(tuv);
+                                .get(curSrcTuv);
                         /*
                          * If identicalSegments is not null, that means current
                          * TU has a same segment before, then we should get the
@@ -880,50 +926,58 @@ public class StatisticsService
                          * Considering files can be added and removed from jobs,
                          * all TUs must update.
                          */
-                        SegmentTmTuv latestTuv = null;
+                        SegmentTmTuv latestPreSrcTuv = null;
                         if (identicalSegments != null)
                         {
-                            latestTuv = (SegmentTmTuv) identicalSegments.get(0);
+                            latestPreSrcTuv = (SegmentTmTuv) identicalSegments.get(0);
                         }
                         if (identicalSegments != null
-                                && latestTuv.getExactMatchKey() == tuv
+                                && latestPreSrcTuv.getExactMatchKey() == curSrcTuv
                                         .getExactMatchKey()
-                                && isFullSegmentRepitition(tu, tuv, latestTuv,
-                                        String.valueOf(p_companyId)))
+                                && isFullSegmentRepitition(currentTu,
+                                        curSrcTuv, latestPreSrcTuv,
+                                        p_companyId))
                         {
-                            long repeatedTuId = latestTuv.getTu().getId();
-                            TuImpl repeatedTu = null;
+                            TuvImpl preTrgTuv = null;
                             try
                             {
-                                repeatedTu = SegmentTuUtil.getTuById(
-                                        repeatedTuId,
-                                        String.valueOf(p_companyId));
+                                long preTuId = latestPreSrcTuv.getTu().getId();
+                                TuImpl preTu = SegmentTuUtil.getTuById(preTuId,
+                                        p_companyId);
+                                preTrgTuv = (TuvImpl) preTu.getTuv(
+                                        p_targetLocaleId, p_companyId);
                             }
                             catch (Exception e)
                             {
                                 c_logger.error(e.getMessage(), e);
                             }
-                            repeatedTu.setRepeated(true);
-                            repeatedTu.setRepetitionOfId(0);
-                            // remove repeated TU from unRepetitionSet and
-                            // add it to repetitionSet
-                            repetitionSet.add(repeatedTu);
-                            unRepetitionSet.remove(repeatedTu);
-                            tu.setRepetitionOfId(repeatedTuId);
-                            tu.setRepeated(false);
-                            repetitionSet.add(tu);
+
+                            // Set "preTrgTuv" as repeated.
+                            preTrgTuv.setRepeated(true);
+                            preTrgTuv.setRepetitionOfId(0);
+                            // Remove "preTrgTuv" from unRepetitionSet
+                            unRepetitionTuvSet.remove(preTrgTuv);
+                            // Add "preTrgTuv" to repetitionSet
+                            repetitionTuvSet.add(preTrgTuv);
+                            // Set "currentTargetTuv" as repetition.
+                            curTrgTuv.setRepetitionOfId(preTrgTuv.getId());
+                            curTrgTuv.setRepeated(false);
+                            // Add "currentTargetTuv" to repetitionSet too.
+                            repetitionTuvSet.add(curTrgTuv);
                         }
                         else
                         {
-                            if (!repetitionSet.contains(tu))
+                            if (!repetitionTuvSet.contains(curTrgTuv))
                             {
+                                // Add the target TUV into unRepetitionSet
+                                curTrgTuv.setRepetitionOfId(0);
+                                curTrgTuv.setRepeated(false);
+                                unRepetitionTuvSet.add(curTrgTuv);
+
+                                // Record this "srcTuv" into identicalSegments
                                 identicalSegments = new ArrayList<SegmentTmTuv>();
-                                p_uniqueSegments.put(tuv, identicalSegments);
-                                identicalSegments.add(tuv);
-                                // add the TU to unRepetitionSet
-                                tu.setRepetitionOfId(0);
-                                tu.setRepeated(false);
-                                unRepetitionSet.add(tu);
+                                identicalSegments.add(curSrcTuv);
+                                p_uniqueSegments.put(curSrcTuv, identicalSegments);
                             }
                         }
                     }
@@ -933,13 +987,15 @@ public class StatisticsService
 
         try
         {
-            if (unRepetitionSet.size() != 0)
+            if (unRepetitionTuvSet.size() != 0)
             {
-                SegmentTuUtil.updateTus(unRepetitionSet, p_companyId);
+                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
+                        unRepetitionTuvSet), p_companyId);
             }
-            if (repetitionSet.size() != 0)
+            if (repetitionTuvSet.size() != 0)
             {
-                SegmentTuUtil.updateTus(repetitionSet, p_companyId);
+                SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
+                        repetitionTuvSet), p_companyId);
             }
         }
         catch (Exception e)
@@ -948,780 +1004,69 @@ public class StatisticsService
         }
     }
 
+    private static TuImpl getTuFromCache(Map<Long, TuImpl> p_cachedTus,
+            long tuId, long p_companyId)
+    {
+        TuImpl tu = null;
+
+        if (p_cachedTus != null && p_cachedTus.size() > 0)
+        {
+            tu = p_cachedTus.get(tuId);
+        }
+        // Ensure TU is returned, this will not be executed ideally.
+        if (tu == null)
+        {
+            try
+            {
+                tu = SegmentTuUtil.getTuById(tuId, p_companyId);
+            }
+            catch (Exception e)
+            {
+                c_logger.error(e.getMessage(), e);
+            }
+        }
+
+        return tu;
+    }
+    
     /**
      * Compare if current TUV has the same exact match key (white space ignored)
-     * with that from latest TUV.
+     * with that from latest previous TUV.
      * 
      * Only when the full segment (including sub segments) has the same
      * exactMatchKey, take it as repetition.
      */
+    @SuppressWarnings("rawtypes")
     private static boolean isFullSegmentRepitition(TuImpl currentTu,
-            SegmentTmTuv currentTuv, SegmentTmTuv latestTuv, String companyId)
+            SegmentTmTuv currentSrcTuv, SegmentTmTuv latestPreSrcTuv,
+            long companyId)
     {
         // If current TUV has no sub segments, no need continue to check, return
         // true;
-        Tuv tuv = currentTu.getTuv(currentTuv.getLocale().getId(), companyId);
-        List subEle = tuv.getSubflowsAsGxmlElements();
+        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(), companyId);
+        List subEle = tuv1.getSubflowsAsGxmlElements();
         if (subEle == null || subEle.size() == 0)
         {
             return true;
         }
 
-        long currentTuvExactMatchKey = tuv.getExactMatchKey();
-
-        long repeatedTuId = latestTuv.getTu().getId();
-        TuImpl repeatedTu = null;
+        // Compare 2 TuvImpl objects exact match key.
+        long currentTuvExactMatchKey = tuv1.getExactMatchKey();
+        long latestTuvExactMatchkey = 0;
         try
         {
-            repeatedTu = SegmentTuUtil.getTuById(repeatedTuId, companyId);
+            TuImpl tu2 = SegmentTuUtil.getTuById(latestPreSrcTuv.getTu()
+                    .getId(), companyId);
+            Tuv tuv2 = tu2.getTuv(latestPreSrcTuv.getLocale().getId(),
+                    companyId);
+            latestTuvExactMatchkey = tuv2.getExactMatchKey();
         }
         catch (Exception e)
         {
             c_logger.error(e.getMessage(), e);
         }
-        long latestTuvExactMatchkey = repeatedTu.getTuv(
-                latestTuv.getLocale().getId(), companyId).getExactMatchKey();
 
         return (currentTuvExactMatchKey == latestTuvExactMatchkey);
-    }
-
-    /**
-     * Calculates the statistics for the workflows passed in. Adds the word
-     * count to the workflows and commits to the database.
-     * 
-     * @param p_workflows
-     *            - a List of workflows of which the statistics are calculated.
-     *            All workflows must belong to the same job.
-     */
-    static public void calculateWorkflowStatistics(List<Workflow> p_workflows,
-            Vector<String> p_excludedTuTypes) throws StatisticsException
-    {
-        if (p_workflows == null || p_workflows.size() < 1)
-        {
-            return;
-        }
-
-        Session session = null;
-        Transaction transaction = null;
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // calculate statistics per work flow
-            for (Workflow wf : p_workflows)
-            {
-                wf = (WorkflowImpl) session.get(WorkflowImpl.class,
-                        wf.getIdAsLong());
-
-                ArrayList<BaseTmTuv> splitSourceTuvs = getAllSplitSourceTuvs(wf);
-                ArrayList<BaseTmTuv> wsSplitSourceTuvs = getAllWorldServerSplitSourceTuvs(wf);
-                // get the job's leverage match threshold
-                SegmentRepetition segmentRepetition = new SegmentRepetition(
-                        splitSourceTuvs);
-                SegmentRepetition wsSegmentRepetition = new SegmentRepetition(
-                        wsSplitSourceTuvs);
-
-                // get match types for all target segments in a workflow
-                int levMatchThreshold = wf.getJob().getLeverageMatchThreshold();
-                MatchTypeStatistics matches = getMatchTypeStatistics(wf,
-                        levMatchThreshold);
-
-                PageWordCounts commonWfWordCount = calculateWorkflowWordCounts(
-                        segmentRepetition, matches, p_excludedTuTypes);
-                PageWordCounts worldServerWordCount = calculateWorldServerWorkflowWordCounts(
-                        wsSegmentRepetition, matches, p_excludedTuTypes);
-
-                updateExtraColumnWordCountsForWorkflow(commonWfWordCount,
-                        worldServerWordCount, wf.getAllTargetPages());
-                PageWordCounts wordCount = mergeWordCounts(commonWfWordCount,
-                        worldServerWordCount);
-
-                wf.setInContextMatchWordCount(wordCount.getInContextWordCount());
-                wf.setNoUseInContextMatchWordCount(wordCount
-                        .getNoUseInContextMatchWordCount());
-                wf.setTotalExactMatchWordCount(wordCount
-                        .getTotalExactMatchWordCount());
-                wf.setContextMatchWordCount(wordCount
-                        .getContextMatchWordCount());
-                wf.setSegmentTmWordCount(wordCount.getSegmentTmWordCount());
-                wf.setSubLevMatchWordCount(wordCount.getSubLevMatchWordCount());
-                wf.setSubLevRepetitionWordCount(wordCount
-                        .getSubLevRepetitionWordCount());
-                wf.setLowFuzzyMatchWordCount(wordCount.getLowFuzzyWordCount());
-                wf.setMedFuzzyMatchWordCount(wordCount.getMedFuzzyWordCount());
-                wf.setMedHiFuzzyMatchWordCount(wordCount
-                        .getMedHiFuzzyWordCount());
-                wf.setHiFuzzyMatchWordCount(wordCount.getHiFuzzyWordCount());
-                wf.setRepetitionWordCount(wordCount.getRepetitionWordCount());
-                wf.setNoMatchWordCount(wordCount.getUnmatchedWordCount());
-                wf.setTotalWordCount(wordCount.getTotalWordCount());
-
-                wf.setHiFuzzyRepetitionWordCount(wordCount
-                        .getHiFuzzyRepetitionWordCount());
-                wf.setMedHiFuzzyRepetitionWordCount(wordCount
-                        .getMedHighFuzzyRepetitionWordCount());
-                wf.setMedFuzzyRepetitionWordCount(wordCount
-                        .getMedFuzzyRepetitionWordCount());
-
-                wf.setThresholdHiFuzzyWordCount(wordCount
-                        .getThresholdHiFuzzyWordCount());
-                wf.setThresholdLowFuzzyWordCount(wordCount
-                        .getThresholdLowFuzzyWordCount());
-                wf.setThresholdMedFuzzyWordCount(wordCount
-                        .getThresholdMedFuzzyWordCount());
-                wf.setThresholdMedHiFuzzyWordCount(wordCount
-                        .getThresholdMedHiFuzzyWordCount());
-                wf.setThresholdNoMatchWordCount(wordCount
-                        .getThresholdNoMatchWordCount());
-
-                session.update(wf);
-            }
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null)
-            {
-                transaction.rollback();
-            }
-
-            String[] args = new String[1];
-            Workflow wf = (Workflow) p_workflows.get(0);
-            String jobName = wf.getJob().getJobName();
-            args[0] = jobName;
-
-            throw new StatisticsException(
-                    StatisticsException.MSG_FAILED_TO_GENERATE_STATISTICS_WORKFLOW,
-                    args, e);
-        }
-    }
-
-    /**
-     * Calculates the workflow word counts from the match types and source TUVs
-     * passed in. The word count calculation for a workflow is done differently
-     * from a target page since a workflow could have more than one target page
-     * and passing the Tuvs to the SegmentRepetition could result in have
-     * multiple repetitions from different pages. This will cause the HashMap of
-     * unique segments to be different from when each page was calculated
-     * separately and therefore the end result will be very different from
-     * adding up the total of each word count category of a list of target pages
-     * that were processed separately.
-     * 
-     * @param p_sourceTuvs
-     *            Collection of subflow separated source Tuvs. Type of elements
-     *            is SegmentTmTuv. @param p_matches MatchTypeStatistics object
-     */
-    static private PageWordCounts calculateWorkflowWordCounts(
-            SegmentRepetition p_segmentRepetition,
-            MatchTypeStatistics p_matches, Vector<String> p_excludedTuTypes)
-    {
-        int contextMatchWordCount = 0;
-        int segmentTmWordCount = 0;
-
-        int subLevMatchWordCount = 0;
-        int subLevMatchRepWordCount = 0;
-        // subLevMatchWordCount+subLevMatchRepWordCount
-        // int lowFuzzyWordCount = 0;
-
-        int medFuzzyWordCount = 0;
-        int medFuzzyRepetitionWordCount = 0;
-
-        int medHiFuzzyWordCount = 0;
-        int medHiFuzzyRepetitionWordCount = 0;
-
-        int hiFuzzyWordCount = 0;
-        int hiFuzzyRepetitionWordCount = 0;
-
-        int unmatchedWordCount = 0;
-        int repetitionWordCount = 0;
-        int mtExactMatchWordCount = 0;
-        int xliffMatchWordCount = 0;
-        int poMatchWordCount = 0;
-
-        int thresholdHiFuzzyWordCount = 0;
-        int thresholdMedHiFuzzyWordCount = 0;
-        int thresholdMedFuzzyWordCount = 0;
-        int thresholdLowFuzzyWordCount = 0;
-        int thresholdNoMatchWordCount = 0;
-
-        // go through all unique segments in p_sourceTuvs
-        for (Iterator si = p_segmentRepetition.iterator(); si.hasNext();)
-        {
-            SegmentTmTuv key = (SegmentTmTuv) si.next();
-            List tuvs = p_segmentRepetition.getIdenticalSegments(key);
-            int size = tuvs == null ? 0 : tuvs.size();
-
-            int lowFuzzyCounter1 = 0;
-            int lowFuzzyCounter2 = 0;
-            int medFuzzyCounter1 = 0;
-            int medFuzzyCounter2 = 0;
-            int medHighFuzzyCounter1 = 0;
-            int medHighFuzzyCounter2 = 0;
-            int highFuzzyCounter1 = 0;
-            int highFuzzyCounter2 = 0;
-            int noMatchCounter1 = 0;
-            int noMatchCounter2 = 0;
-            for (int i = 0; i < size; i++)
-            {
-                SegmentTmTuv source = (SegmentTmTuv) tuvs.get(i);
-                int wordCount = source.getWordCount();
-
-                // Don't count excluded items.
-                if (p_excludedTuTypes != null
-                        && p_excludedTuTypes.contains(source.getTu().getType()))
-                {
-                    wordCount = 0;
-                }
-
-                Types types = p_matches.getTypes(source.getId(),
-                        ((SegmentTmTu) source.getTu()).getSubId());
-
-                int statisticsMatchType = types == null ? MatchTypeStatistics.NO_MATCH
-                        : types.getStatisticsMatchType();
-                // increment the word count according to the match type
-                switch (statisticsMatchType)
-                {
-                    case MatchTypeStatistics.CONTEXT_EXACT:
-                        contextMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_TM_EXACT:
-                        segmentTmWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_MT_EXACT:
-                        mtExactMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
-                        xliffMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_PO_EXACT:
-                        poMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.LOW_FUZZY:
-                        if (lowFuzzyCounter1 < 1)
-                        {
-                            subLevMatchWordCount += wordCount;
-                        }
-                        else
-                        {
-                            subLevMatchRepWordCount += wordCount;
-                        }
-                        lowFuzzyCounter1++;
-                        break;
-                    case MatchTypeStatistics.MED_FUZZY:
-                        if (medFuzzyCounter1 < 1)
-                        {
-                            medFuzzyWordCount += wordCount;
-                        }
-                        else
-                        {
-                            medFuzzyRepetitionWordCount += wordCount;
-                        }
-                        medFuzzyCounter1++;
-                        break;
-                    case MatchTypeStatistics.MED_HI_FUZZY:
-                        if (medHighFuzzyCounter1 < 1)
-                        {
-                            medHiFuzzyWordCount += wordCount;
-                        }
-                        else
-                        {
-                            medHiFuzzyRepetitionWordCount += wordCount;
-                        }
-                        medHighFuzzyCounter1++;
-                        break;
-                    case MatchTypeStatistics.HI_FUZZY:
-                        if (highFuzzyCounter1 < 1)
-                        {
-                            hiFuzzyWordCount += wordCount;
-                        }
-                        else
-                        {
-                            hiFuzzyRepetitionWordCount += wordCount;
-                        }
-                        highFuzzyCounter1++;
-                        break;
-                    case LeverageMatchLingManager.NO_MATCH:
-                    default:
-                        if (noMatchCounter1 < 1)
-                        {
-                            unmatchedWordCount += wordCount;
-                        }
-                        else
-                        {
-                            repetitionWordCount += wordCount;
-                        }
-                        noMatchCounter1++;
-                        break;
-                }
-
-                /*
-                 * This part is used to calculate the word counts relative to
-                 * threshold, they
-                 * are:thresholdHiFuzzyWordCount,thresholdLowFuzzyWordCount
-                 * ,thresholdMedFuzzyWordCount,
-                 * thresholdMedHiFuzzyWordCount,thresholdNoMatchWordCount
-                 */
-                int statisticsMatchTypeByThreshold = MatchTypeStatistics.THRESHOLD_NO_MATCH;
-                if (types != null)
-                {
-                    statisticsMatchTypeByThreshold = types
-                            .getStatisticsMatchTypeByThreshold();
-                }
-                switch (statisticsMatchTypeByThreshold)
-                {
-                    case MatchTypeStatistics.THRESHOLD_HI_FUZZY:
-                        if (highFuzzyCounter2 < 1)
-                        {
-                            thresholdHiFuzzyWordCount += wordCount;
-                        }
-                        highFuzzyCounter2++;
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_MED_HI_FUZZY:
-                        if (medHighFuzzyCounter2 < 1)
-                        {
-                            thresholdMedHiFuzzyWordCount += wordCount;
-                        }
-                        medHighFuzzyCounter2++;
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_MED_FUZZY:
-                        if (medFuzzyCounter2 < 1)
-                        {
-                            thresholdMedFuzzyWordCount += wordCount;
-                        }
-                        medFuzzyCounter2++;
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_LOW_FUZZY:
-                        if (lowFuzzyCounter2 < 1)
-                        {
-                            thresholdLowFuzzyWordCount += wordCount;
-                        }
-                        lowFuzzyCounter2++;
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_NO_MATCH:
-                        if (noMatchCounter2 < 1)
-                        {
-                            thresholdNoMatchWordCount += wordCount;
-                        }
-                        noMatchCounter2++;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        PageWordCounts result = new PageWordCounts();
-        result.setSubLevMatchWordCount(subLevMatchWordCount);
-        result.setSubLevRepetitionWordCount(subLevMatchRepWordCount);
-        result.setContextMatchWordCount(contextMatchWordCount);
-        result.setSegmentTmWordCount(segmentTmWordCount);
-        result.setUnmatchedWordCount(unmatchedWordCount);
-        result.setLowFuzzyWordCount(subLevMatchWordCount
-                + subLevMatchRepWordCount);
-        result.setMedFuzzyWordCount(medFuzzyWordCount);
-        result.setMedFuzzyRepetitionWordCount(medFuzzyRepetitionWordCount);
-        result.setMedHiFuzzyWordCount(medHiFuzzyWordCount);
-        result.setMedHighFuzzyRepetitionWordCount(medHiFuzzyRepetitionWordCount);
-        result.setHiFuzzyWordCount(hiFuzzyWordCount);
-        result.setHiFuzzyRepetitionWordCount(hiFuzzyRepetitionWordCount);
-        result.setRepetitionWordCount(repetitionWordCount);
-        result.setMTExtractMatchWordCount(mtExactMatchWordCount);
-        result.setXliffExtractMatchWordCount(xliffMatchWordCount);
-        result.setPoExactMatchWordCount(poMatchWordCount);
-
-        result.setTotalWordCount(contextMatchWordCount + segmentTmWordCount
-                + mtExactMatchWordCount + xliffMatchWordCount
-                + poMatchWordCount + subLevMatchWordCount
-                + subLevMatchRepWordCount + medFuzzyWordCount
-                + medHiFuzzyWordCount + hiFuzzyWordCount + unmatchedWordCount
-                + repetitionWordCount + hiFuzzyRepetitionWordCount
-                + medHiFuzzyRepetitionWordCount + medFuzzyRepetitionWordCount);
-
-        result.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
-        result.setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
-        result.setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
-        result.setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
-        result.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
-
-        return result;
-    }
-
-    /**
-     * Calculates the workflow word counts from the match types and source TUVs
-     * passed in. The word count calculation for a workflow is done differently
-     * from a target page since a workflow could have more than one target page
-     * and passing the Tuvs to the SegmentRepetition could result in have
-     * multiple repetitions from different pages. This will cause the HashMap of
-     * unique segments to be different from when each page was calculated
-     * separately and therefore the end result will be very different from
-     * adding up the total of each word count category of a list of target pages
-     * that were processed separately.
-     * 
-     * @param p_sourceTuvs
-     *            Collection of subflow separated source Tuvs. Type of elements
-     *            is SegmentTmTuv. @param p_matches MatchTypeStatistics object
-     */
-    private static PageWordCounts calculateWorldServerWorkflowWordCounts(
-            SegmentRepetition p_segmentRepetition,
-            MatchTypeStatistics p_matches, Vector<String> p_excludedTuTypes)
-    {
-        int contextMatchWordCount = 0;
-        int segmentTmWordCount = 0;
-
-        int subLevMatchWordCount = 0;
-        int subLevMatchRepWordCount = 0;
-
-        int medFuzzyWordCount = 0;
-        int medFuzzyRepetitionWordCount = 0;
-
-        int medHiFuzzyWordCount = 0;
-        int medHiFuzzyRepetitionWordCount = 0;
-
-        int hiFuzzyWordCount = 0;
-        int hiFuzzyRepetitionWordCount = 0;
-
-        int unmatchedWordCount = 0;
-        int repetitionWordCount = 0;
-        int mtExactMatchWordCount = 0;
-        int xliffMatchWordCount = 0;
-        int poMatchWordCount = 0;
-
-        int thresholdHiFuzzyWordCount = 0;
-        int thresholdMedHiFuzzyWordCount = 0;
-        int thresholdMedFuzzyWordCount = 0;
-        int thresholdLowFuzzyWordCount = 0;
-        int thresholdNoMatchWordCount = 0;
-
-        for (Iterator si = p_segmentRepetition.iterator(); si.hasNext();)
-        {
-            SegmentTmTuv key = (SegmentTmTuv) si.next();
-            List tuvs = p_segmentRepetition.getIdenticalSegments(key);
-            int size = tuvs == null ? 0 : tuvs.size();
-
-            for (int i = 0; i < size; i++)
-            {
-                SegmentTmTuv tmTuv = (SegmentTmTuv) tuvs.get(i);
-                int wordCount = tmTuv.getWordCount();
-
-                // Don't count excluded items.
-                if (p_excludedTuTypes != null
-                        && p_excludedTuTypes.contains(tmTuv.getTu().getType()))
-                {
-                    wordCount = 0;
-                }
-
-                Types types = p_matches.getTypes(tmTuv.getId(),
-                        ((SegmentTmTu) tmTuv.getTu()).getSubId());
-
-                int matchType = types == null ? MatchTypeStatistics.NO_MATCH
-                        : types.getStatisticsMatchType();
-                String sourceContent = tmTuv.getTu().getSourceContent();
-
-                switch (matchType)
-                {
-                    case MatchTypeStatistics.CONTEXT_EXACT:
-                        contextMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_TM_EXACT:
-                        segmentTmWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_MT_EXACT:
-                        mtExactMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
-                        xliffMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.SEGMENT_PO_EXACT:
-                        poMatchWordCount += wordCount;
-                        break;
-                    case MatchTypeStatistics.LOW_FUZZY:
-                        if (sourceContent != null
-                                && sourceContent.equals("repetition"))
-                        {
-                            subLevMatchRepWordCount += wordCount;
-                        }
-                        else
-                        {
-                            subLevMatchWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.MED_FUZZY:
-                        if (sourceContent != null
-                                && sourceContent.equals("repetition"))
-                        {
-                            medFuzzyRepetitionWordCount += wordCount;
-                        }
-                        else
-                        {
-                            medFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.MED_HI_FUZZY:
-                        if (sourceContent != null
-                                && sourceContent.equals("repetition"))
-                        {
-                            medHiFuzzyRepetitionWordCount += wordCount;
-                        }
-                        else
-                        {
-                            medHiFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.HI_FUZZY:
-                        if (sourceContent != null
-                                && sourceContent.equals("repetition"))
-                        {
-                            hiFuzzyRepetitionWordCount += wordCount;
-                        }
-                        else
-                        {
-                            hiFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case LeverageMatchLingManager.NO_MATCH:
-                    default:
-                        // no-match is counted only once and the rest are
-                        // repetitions
-                        if (sourceContent != null
-                                && sourceContent.equals("repetition"))
-                        {
-                            repetitionWordCount += wordCount;
-                        }
-                        else
-                        {
-                            unmatchedWordCount += wordCount;
-                        }
-                        break;
-                }
-
-                /*
-                 * This part is used to calculate the word counts relative to
-                 * threshold, they
-                 * are:thresholdHiFuzzyWordCount,thresholdLowFuzzyWordCount
-                 * ,thresholdMedFuzzyWordCount,
-                 * thresholdMedHiFuzzyWordCount,thresholdNoMatchWordCount
-                 */
-                int statisticsMatchTypeByThreshold = MatchTypeStatistics.THRESHOLD_NO_MATCH;
-                if (types != null)
-                {
-                    statisticsMatchTypeByThreshold = types
-                            .getStatisticsMatchTypeByThreshold();
-                }
-                switch (statisticsMatchTypeByThreshold)
-                {
-                    case MatchTypeStatistics.THRESHOLD_HI_FUZZY:
-                        if (sourceContent == null
-                                || !sourceContent.equals("repetition"))
-                        {
-                            thresholdHiFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_MED_HI_FUZZY:
-                        if (sourceContent == null
-                                || !sourceContent.equals("repetition"))
-                        {
-                            thresholdMedHiFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_MED_FUZZY:
-                        if (sourceContent == null
-                                || !sourceContent.equals("repetition"))
-                        {
-                            thresholdMedFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_LOW_FUZZY:
-                        if (sourceContent == null
-                                || !sourceContent.equals("repetition"))
-                        {
-                            thresholdLowFuzzyWordCount += wordCount;
-                        }
-                        break;
-                    case MatchTypeStatistics.THRESHOLD_NO_MATCH:
-                        if (sourceContent == null
-                                || !sourceContent.equals("repetition"))
-                        {
-                            thresholdNoMatchWordCount += wordCount;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        PageWordCounts result = new PageWordCounts();
-        result.setSubLevMatchWordCount(subLevMatchWordCount);
-        result.setSubLevRepetitionWordCount(subLevMatchRepWordCount);
-        result.setContextMatchWordCount(contextMatchWordCount);
-        result.setSegmentTmWordCount(segmentTmWordCount);
-        result.setUnmatchedWordCount(unmatchedWordCount);
-        result.setLowFuzzyWordCount(subLevMatchWordCount
-                + subLevMatchRepWordCount);
-        result.setMedFuzzyWordCount(medFuzzyWordCount);
-        result.setMedFuzzyRepetitionWordCount(medFuzzyRepetitionWordCount);
-        result.setMedHiFuzzyWordCount(medHiFuzzyWordCount);
-        result.setMedHighFuzzyRepetitionWordCount(medHiFuzzyRepetitionWordCount);
-        result.setHiFuzzyWordCount(hiFuzzyWordCount);
-        result.setHiFuzzyRepetitionWordCount(hiFuzzyRepetitionWordCount);
-        result.setRepetitionWordCount(repetitionWordCount);
-        result.setMTExtractMatchWordCount(mtExactMatchWordCount);
-        result.setXliffExtractMatchWordCount(xliffMatchWordCount);
-        result.setPoExactMatchWordCount(poMatchWordCount);
-
-        result.setTotalWordCount(contextMatchWordCount + segmentTmWordCount
-                + mtExactMatchWordCount + xliffMatchWordCount
-                + poMatchWordCount + subLevMatchWordCount
-                + subLevMatchRepWordCount + medFuzzyWordCount
-                + medHiFuzzyWordCount + hiFuzzyWordCount + unmatchedWordCount
-                + repetitionWordCount + hiFuzzyRepetitionWordCount
-                + medHiFuzzyRepetitionWordCount + medFuzzyRepetitionWordCount);
-
-        result.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
-        result.setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
-        result.setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
-        result.setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
-        result.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
-
-        return result;
-    }
-
-    /**
-     * Update extra columns' word-counts for workflow. They are:
-     * totalExactMatchWordCounts(originally "NoUseExactMatchWordCounts",
-     * inContextWordCount segmentTmWordCount defaultContextMatchWordCount
-     */
-    private static void updateExtraColumnWordCountsForWorkflow(
-            PageWordCounts wordCount, PageWordCounts worldServerWordCount,
-            Vector<TargetPage> targetPages)
-    {
-        int inContextWordCount = 0;
-        int defaultContextMatchWordCount = 0;
-        int all100MatchWordCount = 0;
-
-        int worldServerInContextWordCount = 0;
-        int worldServerDefaultContextMatchWordCount = 0;
-        int worldServerAll100WordCount = 0;
-
-        try
-        {
-            for (int i = 0; i < targetPages.size(); i++)
-            {
-                TargetPage tp = (TargetPage) targetPages.get(i);
-
-                boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
-                        .isWorldServerXliffSourceFile(
-                                tp.getSourcePage().getIdAsLong());
-                if (isWSXlfSourceFile)
-                {
-                    worldServerInContextWordCount += tp.getWordCount()
-                            .getInContextWordCount();
-                    worldServerDefaultContextMatchWordCount += tp
-                            .getWordCount().getContextMatchWordCount();
-                    worldServerAll100WordCount += tp.getWordCount()
-                            .getTotalExactMatchWordCount();
-                }
-                else
-                {
-                    inContextWordCount += tp.getWordCount()
-                            .getInContextWordCount();
-                    defaultContextMatchWordCount += tp.getWordCount()
-                            .getContextMatchWordCount();
-                    all100MatchWordCount += tp.getWordCount()
-                            .getTotalExactMatchWordCount();
-                }
-            }
-
-            wordCount.setInContextWordCount(inContextWordCount);
-            wordCount.setContextMatchWordCount(defaultContextMatchWordCount);
-            wordCount.setTotalExactMatchWordCount(all100MatchWordCount);
-            wordCount.setSegmentTmWordCount(all100MatchWordCount
-                    - wordCount.getInContextWordCount());
-
-            worldServerWordCount
-                    .setInContextWordCount(worldServerInContextWordCount);
-            worldServerWordCount
-                    .setContextMatchWordCount(worldServerDefaultContextMatchWordCount);
-            worldServerWordCount
-                    .setTotalExactMatchWordCount(worldServerAll100WordCount);
-            worldServerWordCount
-                    .setSegmentTmWordCount(worldServerAll100WordCount
-                            - worldServerWordCount.getInContextWordCount());
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Query worldserver files error", e);
-        }
-    }
-
-    /**
-     * Merge common wordcounts and worldserver xlf wordcounts together
-     * 
-     * @param commonWordcounts
-     * @param worldserverWordcounts
-     * @return
-     */
-    private static PageWordCounts mergeWordCounts(PageWordCounts wc,
-            PageWordCounts wwc)
-    {
-        PageWordCounts result = new PageWordCounts();
-        result.setContextMatchWordCount(wc.getContextMatchWordCount()
-                + wwc.getContextMatchWordCount());
-        result.setHiFuzzyRepetitionWordCount(wc.getHiFuzzyRepetitionWordCount()
-                + wwc.getHiFuzzyRepetitionWordCount());
-        result.setHiFuzzyWordCount(wc.getHiFuzzyWordCount()
-                + wwc.getHiFuzzyWordCount());
-        result.setInContextWordCount(wc.getInContextWordCount()
-                + wwc.getInContextWordCount());
-        result.setLowFuzzyWordCount(wc.getLowFuzzyWordCount()
-                + wwc.getLowFuzzyWordCount());
-        result.setMedFuzzyRepetitionWordCount(wc
-                .getMedFuzzyRepetitionWordCount()
-                + wwc.getMedFuzzyRepetitionWordCount());
-        result.setMedFuzzyWordCount(wc.getMedFuzzyWordCount()
-                + wwc.getMedFuzzyWordCount());
-        result.setMedHiFuzzyWordCount(wc.getMedHiFuzzyWordCount()
-                + wwc.getMedHiFuzzyWordCount());
-        result.setMedHighFuzzyRepetitionWordCount(wc
-                .getMedHighFuzzyRepetitionWordCount()
-                + wwc.getMedHighFuzzyRepetitionWordCount());
-        result.setMTExtractMatchWordCount(wc.getMTExtractMatchWordCount()
-                + wwc.getMTExtractMatchWordCount());
-        result.setTotalExactMatchWordCount(wc.getTotalExactMatchWordCount()
-                + wwc.getTotalExactMatchWordCount());
-        result.setNoUseInContextMatchWordCount(wc
-                .getNoUseInContextMatchWordCount()
-                + wwc.getNoUseInContextMatchWordCount());
-        result.setPoExactMatchWordCount(wc.getPoExactMatchWordCount()
-                + wwc.getPoExactMatchWordCount());
-        result.setRepetitionWordCount(wc.getRepetitionWordCount()
-                + wwc.getRepetitionWordCount());
-        result.setSegmentTmWordCount(wc.getSegmentTmWordCount()
-                + wwc.getSegmentTmWordCount());
-        result.setSubLevMatchWordCount(wc.getSubLevMatchWordCount()
-                + wwc.getSubLevMatchWordCount());
-        result.setSubLevRepetitionWordCount(wc.getSubLevRepetitionWordCount()
-                + wwc.getSubLevRepetitionWordCount());
-        result.setThresholdHiFuzzyWordCount(wc.getThresholdHiFuzzyWordCount()
-                + wwc.getThresholdHiFuzzyWordCount());
-        result.setThresholdLowFuzzyWordCount(wc.getThresholdLowFuzzyWordCount()
-                + wwc.getThresholdLowFuzzyWordCount());
-        result.setThresholdMedFuzzyWordCount(wc.getThresholdMedFuzzyWordCount()
-                + wwc.getThresholdMedFuzzyWordCount());
-        result.setThresholdMedHiFuzzyWordCount(wc
-                .getThresholdMedHiFuzzyWordCount()
-                + wwc.getThresholdMedHiFuzzyWordCount());
-        result.setThresholdNoMatchWordCount(wc.getThresholdNoMatchWordCount()
-                + wwc.getThresholdNoMatchWordCount());
-        result.setTotalWordCount(wc.getTotalWordCount()
-                + wwc.getTotalWordCount());
-        result.setUnmatchedWordCount(wc.getUnmatchedWordCount()
-                + wwc.getUnmatchedWordCount());
-        result.setXliffExtractMatchWordCount(wc.getXliffExtractMatchWordCount()
-                + wwc.getXliffExtractMatchWordCount());
-        return result;
     }
 
     /**
@@ -1736,9 +1081,9 @@ public class StatisticsService
      * @return The in context match
      */
     private static int onePageInContextMatchWordCounts(
-            PageWordCounts wordCount, ArrayList splitSourceTuvs,
+            PageWordCounts wordCount, ArrayList<BaseTmTuv> splitSourceTuvs,
             MatchTypeStatistics matches, Vector<String> p_excludedTuTypes,
-            String companyId)
+            long companyId)
     {
         int inContextMatchWordCount = 0;
 
@@ -1755,6 +1100,14 @@ public class StatisticsService
         return inContextMatchWordCount;
     }
 
+    private static boolean isMtTranslation(Types types)
+    {
+        if (types == null)
+            return false;
+
+        return types.isMtTranslation();
+    }
+
     /**
      * Takes a collection of original source Tuvs (type Tuv) and splits
      * subflows. Returns a collection of SegmentTmTuv.
@@ -1762,7 +1115,7 @@ public class StatisticsService
     @SuppressWarnings("unchecked")
     static public ArrayList<BaseTmTuv> splitSourceTuvs(
             ArrayList<Tuv> p_sourceTuvs, GlobalSightLocale p_sourceLocale,
-            String companyId) throws Exception
+            long companyId) throws Exception
     {
         // sort the list first, put all tuvs whose source content equals
         // "repeated" in front of the list. it will affect worldserver xlf
@@ -1810,115 +1163,6 @@ public class StatisticsService
         }
 
         return splittedTuvs;
-    }
-
-    /**
-     * Split segments from workflow
-     * 
-     * @param p_workflow
-     * @return
-     * @throws Exception
-     */
-    static private ArrayList<BaseTmTuv> getAllSplitSourceTuvs(
-            Workflow p_workflow) throws Exception
-    {
-        ArrayList<BaseTmTuv> splitTuvs = new ArrayList<BaseTmTuv>();
-        List<TargetPage> targetPages = p_workflow.getAllTargetPages();
-
-        for (TargetPage targetPage : targetPages)
-        {
-            SourcePage sourcePage = targetPage.getSourcePage();
-            if (sourcePage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
-            {
-                boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
-                        .isWorldServerXliffSourceFile(sourcePage.getIdAsLong());
-                if (!isWSXlfSourceFile)
-                {
-                    // As here don't need XliffAlt data, don't load them to
-                    // improve performance.
-                    boolean needLoadExtraInfo = false;
-                    ArrayList<Tuv> sTuvs = SegmentTuvUtil.getSourceTuvs(
-                            sourcePage, needLoadExtraInfo);
-                    splitTuvs.addAll(splitSourceTuvs(sTuvs,
-                            sourcePage.getGlobalSightLocale(),
-                            p_workflow.getCompanyId()));
-                }
-            }
-        }
-
-        return splitTuvs;
-    }
-
-    /**
-     * Split segments from workflow, used for worldserver xlf files
-     * 
-     * @param p_workflow
-     * @return
-     * @throws Exception
-     */
-    static private ArrayList<BaseTmTuv> getAllWorldServerSplitSourceTuvs(
-            Workflow p_workflow) throws Exception
-    {
-        ArrayList<BaseTmTuv> wsSplitTuvs = new ArrayList<BaseTmTuv>();
-        List<TargetPage> targetPages = p_workflow.getAllTargetPages();
-
-        for (TargetPage targetPage : targetPages)
-        {
-            SourcePage sourcePage = targetPage.getSourcePage();
-
-            if (sourcePage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
-            {
-                boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
-                        .isWorldServerXliffSourceFile(sourcePage.getIdAsLong());
-                if (isWSXlfSourceFile)
-                {
-                    // As here don't need XliffAlt data, don't load them to
-                    // improve performance.
-                    boolean needLoadExtraInfo = false;
-                    ArrayList<Tuv> sTuvs = SegmentTuvUtil.getSourceTuvs(
-                            sourcePage, needLoadExtraInfo);
-                    wsSplitTuvs.addAll(splitSourceTuvs(sTuvs,
-                            sourcePage.getGlobalSightLocale(),
-                            p_workflow.getCompanyId()));
-                }
-            }
-        }
-
-        return wsSplitTuvs;
-    }
-
-    static private MatchTypeStatistics getMatchTypeStatistics(
-            Workflow p_workflow, int p_levMatchThreshold) throws Exception
-    {
-        MatchTypeStatistics result = new MatchTypeStatistics(
-                p_levMatchThreshold);
-
-        Long targetLocaleId = p_workflow.getTargetLocale().getIdAsLong();
-
-        // get match types for all target segments in a workflow
-        List<TargetPage> targetPages = p_workflow.getAllTargetPages();
-        for (TargetPage targetPage : targetPages)
-        {
-            if (targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
-            {
-                // If the source file is WorldServer xliff file,MT translations
-                // should NOT impact the word-count statistics.
-                boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
-                        .isWorldServerXliffSourceFile(
-                                targetPage.getSourcePage().getIdAsLong());
-                LeverageMatchLingManager lmLingManager = getLeverageMatchLingManager();
-                if (isWSXlfSourceFile)
-                {
-                    lmLingManager.setIncludeMtMatches(false);
-                }
-                MatchTypeStatistics pageMatches = lmLingManager
-                        .getMatchTypesForStatistics(targetPage.getSourcePage()
-                                .getIdAsLong(), targetLocaleId,
-                                p_levMatchThreshold);
-                result.merge(pageMatches);
-            }
-        }
-        return result;
     }
 
     static private LeverageMatchLingManager getLeverageMatchLingManager()
@@ -2029,7 +1273,7 @@ public class StatisticsService
         {
             return flag;
         }
-        String companyId = source.getCompanyId();
+        long companyId = source.getCompanyId();
 
         ArrayList<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
         ArrayList<BaseTmTuv> targetTuvs = new ArrayList<BaseTmTuv>();
@@ -2074,32 +1318,225 @@ public class StatisticsService
         return flag;
     }
 
+    /**
+     * Get cached TUs in map<TuID,TuImpl> to improve performance.
+     */
     private static Map<Long, TuImpl> getTusMapBySourcePage(
-            SourcePage p_sourcePage)
+            SourcePage p_sourcePage) throws Exception
     {
         Map<Long, TuImpl> result = new HashMap<Long, TuImpl>();
 
-        ExtractedFile ef = (ExtractedFile) p_sourcePage.getPrimaryFile();
-        for (Iterator lgIt = ef.getLeverageGroups().iterator(); lgIt.hasNext();)
+        List<TuImpl> tus = SegmentTuUtil.getTusBySourcePageId(p_sourcePage
+                .getId());
+        for (TuImpl tu : tus)
         {
-            LeverageGroup lg = (LeverageGroup) lgIt.next();
-            Collection tus = lg.getTus();
-            for (Iterator it = tus.iterator(); it.hasNext();)
-            {
-                TuImpl tu = (TuImpl) it.next();
-                result.put(tu.getIdAsLong(), tu);
-            }
+            result.put(tu.getIdAsLong(), tu);
         }
 
         return result;
     }
 
     /**
+     * Calculates the statistics for the workflows passed in. Adds the word
+     * count to the workflows and commits to the database.
+     * 
+     * @param p_workflows
+     *            - a List of workflows of which the statistics are calculated.
+     *            All workflows must belong to the same job.
+     */
+    static public void calculateWorkflowStatistics(List<Workflow> p_workflows,
+            Vector<String> p_excludedTuTypes) throws StatisticsException
+    {
+        if (p_workflows == null || p_workflows.size() < 1)
+        {
+            return;
+        }
+
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            // calculate statistics per work flow
+            for (Workflow wf : p_workflows)
+            {
+                wf = (WorkflowImpl) session.get(WorkflowImpl.class,
+                        wf.getIdAsLong());
+                PageWordCounts wfWordCounts = sumTargetPageWordCount(wf);
+
+                wf.setTotalWordCount(wfWordCounts.getTotalWordCount());
+
+                wf.setRepetitionWordCount(wfWordCounts.getRepetitionWordCount());
+
+                wf.setTotalExactMatchWordCount(wfWordCounts
+                        .getTotalExactMatchWordCount());
+                wf.setContextMatchWordCount(wfWordCounts
+                        .getContextMatchWordCount());
+                wf.setSegmentTmWordCount(wfWordCounts.getSegmentTmWordCount());
+                wf.setInContextMatchWordCount(wfWordCounts.getInContextWordCount());
+                wf.setMtExactMatchWordCount(wfWordCounts
+                        .getMtExactMatchWordCount());
+                wf.setNoUseInContextMatchWordCount(wfWordCounts
+                        .getNoUseInContextMatchWordCount());
+
+                wf.setNoMatchWordCount(wfWordCounts.getNoMatchWordCount());
+                wf.setLowFuzzyMatchWordCount(wfWordCounts.getLowFuzzyWordCount());
+                wf.setMedFuzzyMatchWordCount(wfWordCounts.getMedFuzzyWordCount());
+                wf.setMedHiFuzzyMatchWordCount(wfWordCounts
+                        .getMedHiFuzzyWordCount());
+                wf.setHiFuzzyMatchWordCount(wfWordCounts.getHiFuzzyWordCount());
+
+                wf.setThresholdHiFuzzyWordCount(wfWordCounts
+                        .getThresholdHiFuzzyWordCount());
+                wf.setThresholdLowFuzzyWordCount(wfWordCounts
+                        .getThresholdLowFuzzyWordCount());
+                wf.setThresholdMedFuzzyWordCount(wfWordCounts
+                        .getThresholdMedFuzzyWordCount());
+                wf.setThresholdMedHiFuzzyWordCount(wfWordCounts
+                        .getThresholdMedHiFuzzyWordCount());
+                wf.setThresholdNoMatchWordCount(wfWordCounts
+                        .getThresholdNoMatchWordCount());
+
+                session.update(wf);
+            }
+
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            if (transaction != null)
+            {
+                transaction.rollback();
+            }
+
+            String[] args = new String[1];
+            Workflow wf = (Workflow) p_workflows.get(0);
+            String jobName = wf.getJob().getJobName();
+            args[0] = jobName;
+
+            throw new StatisticsException(
+                    StatisticsException.MSG_FAILED_TO_GENERATE_STATISTICS_WORKFLOW,
+                    args, e);
+        }
+    }
+
+    /**
+     * Sum all target pages' word counts to get workflow word counts.The
+     * workflow's word counts should be based on its target pages' word counts.
+     * 
+     * @param workflow
+     * @return
+     */
+    private static PageWordCounts sumTargetPageWordCount(Workflow workflow)
+    {
+        if (workflow == null) return null;
+
+        int totalWordCount = 0;
+
+        int totalExactMatchWordCount = 0;
+        int inContextMatchWordCount = 0;
+        int contextMatchWordCount = 0;
+        int segmentTmWordCount = 0;
+        int mtExactMatchWordCount = 0;
+        int noUseInContextMatchWordCount = 0;
+        
+        int totalRepetitionWoreCount = 0;
+
+        // below 50%
+        int noMatchWordCount = 0;
+        // 50%--75%
+        int lowFuzzyWordCount = 0;
+        // 75%--84%
+        int medFuzzyWordCount = 0;
+        // 85%--94%
+        int medHighFuzzyWordCount = 0;
+        // 95%--99%
+        int highFuzzyWordCount = 0;
+
+        int thresholdHiFuzzyWordCount = 0;
+        int thresholdMedHiFuzzyWordCount = 0;
+        int thresholdMedFuzzyWordCount = 0;
+        int thresholdLowFuzzyWordCount = 0;
+        int thresholdNoMatchWordCount = 0;
+
+        PageWordCounts pageWordCounts = new PageWordCounts();
+        List<TargetPage> targetPages = getAllTargetPagesForWorkflow(workflow);
+        for (TargetPage targetPage : targetPages)
+        {
+            PageWordCounts tpWordCount = targetPage.getWordCount();
+            if (tpWordCount != null)
+            {
+                totalWordCount += tpWordCount.getTotalWordCount();
+
+                totalExactMatchWordCount += tpWordCount
+                        .getTotalExactMatchWordCount();
+                inContextMatchWordCount += tpWordCount.getInContextWordCount();
+                contextMatchWordCount += tpWordCount.getContextMatchWordCount();
+                segmentTmWordCount += tpWordCount.getSegmentTmWordCount();
+                mtExactMatchWordCount += tpWordCount.getMtExactMatchWordCount();
+                noUseInContextMatchWordCount += tpWordCount
+                        .getNoUseInContextMatchWordCount();
+
+                totalRepetitionWoreCount += tpWordCount
+                        .getRepetitionWordCount();
+
+                noMatchWordCount += tpWordCount.getNoMatchWordCount();
+                lowFuzzyWordCount += tpWordCount.getLowFuzzyWordCount();
+                medFuzzyWordCount += tpWordCount.getMedFuzzyWordCount();
+                medHighFuzzyWordCount += tpWordCount.getMedHiFuzzyWordCount();
+                highFuzzyWordCount += tpWordCount.getHiFuzzyWordCount();
+
+                thresholdHiFuzzyWordCount += tpWordCount
+                        .getThresholdHiFuzzyWordCount();
+                thresholdMedHiFuzzyWordCount += tpWordCount
+                        .getThresholdMedHiFuzzyWordCount();
+                thresholdMedFuzzyWordCount += tpWordCount
+                        .getThresholdMedFuzzyWordCount();
+                thresholdLowFuzzyWordCount += tpWordCount
+                        .getThresholdLowFuzzyWordCount();
+                thresholdNoMatchWordCount += tpWordCount
+                        .getThresholdNoMatchWordCount();
+            }
+        }
+
+        // total word count
+        pageWordCounts.setTotalWordCount(totalWordCount);
+        // all 100% cases
+        pageWordCounts.setTotalExactMatchWordCount(totalExactMatchWordCount);
+        pageWordCounts.setInContextWordCount(inContextMatchWordCount);
+        pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
+        pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
+        pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
+        pageWordCounts.setNoUseInContextMatchWordCount(noUseInContextMatchWordCount);
+        // all repetitions
+        pageWordCounts.setRepetitionWordCount(totalRepetitionWoreCount);
+        // fuzzy and no match
+        pageWordCounts.setHiFuzzyWordCount(highFuzzyWordCount);
+        pageWordCounts.setMedHiFuzzyWordCount(medHighFuzzyWordCount);
+        pageWordCounts.setMedFuzzyWordCount(medFuzzyWordCount);
+        pageWordCounts.setLowFuzzyWordCount(lowFuzzyWordCount);
+        pageWordCounts.setNoMatchWordCount(noMatchWordCount);
+        // threshold related
+        pageWordCounts.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
+        pageWordCounts
+                .setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
+        pageWordCounts
+                .setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
+        pageWordCounts
+                .setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
+        pageWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
+
+        return pageWordCounts;
+    }
+
+    
+    /**
      * Calculate word-counts for all target pages and workflows in current job.
      * 
      * @param job
      */
-    @SuppressWarnings("unchecked")
     public static void calculateWordCountsForJob(Job job)
     {
         c_logger.info("Start calculating word counts for job " + job.getId());
@@ -2116,5 +1553,4 @@ public class StatisticsService
         }
         c_logger.info("Done calculating word counts for job " + job.getId());
     }
-
 }

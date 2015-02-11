@@ -20,6 +20,7 @@ package com.globalsight.everest.foundation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -27,15 +28,26 @@ import com.globalsight.everest.workflow.Activity;
 
 public class RoleImpl extends PersistentObject implements Role
 {
+    private static final long serialVersionUID = 4305908032791819351L;
+
     private Activity m_activity = null;
     private String m_sourceLocale = null;
     private String m_targetLocale = null;
-    private Collection m_rates = null;
+    private List m_rates = new ArrayList();
     private int m_state = User.State.CREATED;
 
     public RoleImpl()
     {
-        m_rates = new ArrayList();
+    }
+    
+    public List getRateSet()
+    {
+    	return m_rates;
+    }
+    
+    public void setRateSet(List rates)
+    {
+    	m_rates = rates;
     }
 
     public boolean isActive()
@@ -97,6 +109,7 @@ public class RoleImpl extends PersistentObject implements Role
             case User.State.DEACTIVE:
             case User.State.DELETED:
                 m_state = p_state;
+                break;
             default:
                 // just leave as it is since the
                 // passed in state isn't recognized
@@ -112,7 +125,8 @@ public class RoleImpl extends PersistentObject implements Role
     {
         if (p_rates != null)
         {
-            m_rates = p_rates;
+            m_rates = new ArrayList();
+            m_rates.addAll(p_rates);
         }
     }
 

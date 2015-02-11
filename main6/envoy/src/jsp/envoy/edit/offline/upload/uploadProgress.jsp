@@ -80,6 +80,9 @@
     String urlCancelProcess =  refresh.getPageURL() + "&"
             + WebAppConstants.UPLOAD_ACTION + "="
             + WebAppConstants.UPLOAD_ACTION_CANCE_PROGRESS;
+    String urlConfirmContinue =  refresh.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_CONFIRM_CONTINUE;
     String errorPageUrl = errorPage.getPageURL();
 
     OEMProcessStatus status = (OEMProcessStatus) sessionMgr
@@ -102,7 +105,9 @@
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/protocol.js"></SCRIPT>
-<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css" />
+<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js" type="text/javascript"></script>
 <STYLE type="text/css">
 #idProgressContainer { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; z-index: 1; 
                  position: absolute; top: 42; left: 20; width: 400; }
@@ -157,6 +162,11 @@ if(!isIE()){ //firefox innerText define
     ); 
 }
 
+function closeDialog()
+{
+	document.getElementById('uploadFormDiv').parentNode.style.display = "none";
+}
+
 function showMessage(message)
 {
 	var reg = /[0-9]+%$/;
@@ -191,55 +201,110 @@ function showProgress(entryCount, percentage, message)
   }
 }
 
+function doContinue()
+{
+	closeDialog();
+
+	var url = "<%=urlConfirmContinue%>&isContinue=y";
+	$.ajax({
+	     type: "GET",
+	     url: url,
+	     cache:false,
+			   success: function(data, textStatus){
+				   setTimeout('callServer("<%=urlRefresh%>")',100);
+			   }
+	});
+}
+
+function doNotContinue()
+{
+	closeDialog();
+	var url = "<%=urlConfirmContinue%>&isContinue=n";
+	$.ajax({
+		type: "GET",
+		url: url,
+		cache: false,
+		success: function(data, textStatus){
+//		cancelProcess = true;
+ 	   
+ 	   var div = document.createElement("DIV");
+ 	   if (idMessages.hasChildNodes)
+	       {
+	          var x = idMessages.lastChild;
+		      var content = x.innerHTML;
+		      var reg = /[0-9]+%$/;
+		      var isInt = reg.test(content);
+
+		      if (isInt)
+		      {
+			    content = content.replace(reg, "");
+			    content += "100%";
+			    x.innerHTML = content;
+		      }					  
+	       }
+ 	   
+ 	   div.innerHTML = "<P class='headingError' >" + "<%=bundle.getString("msg_internal_moved_cancel")%>" + $("#internalMsg")[0].innerHTML;
+        //idMessages.appendChild(div);
+        setTimeout('callServer("<%=urlRefresh%>")',100);
+        //div.scrollIntoView(false); 
+        
+        //idPleaseWait.style.visibility = 'hidden';
+
+        //idCancelOk.value = "<%=lb_back%>";
+        //idCancelOk.onclick = doBack;
+
+        //idRefreshResult.value = "<%=lb_done%>";
+        //idRefreshResult.onclick = doDone;
+        //idRefreshResult.disabled = false;
+		}
+	});
+	
+}
+
 function doCancel()
 {
 	var obj = {
 			inputJobIDS : "<%=task == null ? -1 :task.getJobId()%>"
 	}
+	  $.ajax({
+		     type: "POST",
+		     url: "<%=urlCancelProcess%>",
+		     dataType:'json',
+		     cache:false,
+		     data: obj,
+				   success: function(json){
+					   cancelProcess = true;
+			    	   
+			    	   var div = document.createElement("DIV");
+			    	   if (idMessages.hasChildNodes)
+			   	       {
+			   	          var x = idMessages.lastChild;
+			   		      var content = x.innerHTML;
+			   		      var reg = /[0-9]+%$/;
+			   		      var isInt = reg.test(content);
 
-    dojo.xhrPost(
-    {
-       url:"<%=urlCancelProcess%>",
-       handleAs: "text", 
-       content:obj,
-       load:function(data)
-       {
-    	   cancelProcess = true;
-    	   
-    	   var div = document.createElement("DIV");
-    	   if (idMessages.hasChildNodes)
-   	       {
-   	          var x = idMessages.lastChild;
-   		      var content = x.innerHTML;
-   		      var reg = /[0-9]+%$/;
-   		      var isInt = reg.test(content);
+			   		      if (isInt)
+			   		      {
+			   			    content = content.replace(reg, "");
+			   			    content += "100%";
+			   			    x.innerHTML = content;
+			   		      }					  
+			   	       }
+			    	   
+			    	   div.innerHTML = "<P class='headingError' >" + "<%=cancelMsg%>";
+			           idMessages.appendChild(div);
+			           div.scrollIntoView(false); 
+			           
+			           idPleaseWait.style.visibility = 'hidden';
 
-   		      if (isInt)
-   		      {
-   			    content = content.replace(reg, "");
-   			    content += "100%";
-   			    x.innerHTML = content;
-   		      }					  
-   	       }
-    	   
-    	   div.innerHTML = "<P class='headingError' >" + "<%=cancelMsg%>";
-           idMessages.appendChild(div);
-           div.scrollIntoView(false); 
-           
-           idPleaseWait.style.visibility = 'hidden';
+			           idCancelOk.value = "<%=lb_back%>";
+			           idCancelOk.onclick = doBack;
 
-           idCancelOk.value = "<%=lb_back%>";
-           idCancelOk.onclick = doBack;
-
-           idRefreshResult.value = "<%=lb_done%>";
-           idRefreshResult.onclick = doDone;
-           idRefreshResult.disabled = false;
-       },
-       error:function(error)
-       {
-           alert(error.message);
-       }
-   });
+			           idRefreshResult.value = "<%=lb_done%>";
+			           idRefreshResult.onclick = doDone;
+			           idRefreshResult.disabled = false;
+				   }
+		     });
 }
 
 function doBack()
@@ -284,7 +349,8 @@ function showFinalPassFailMessage(state, message)
     }
     else if(state==3) // fail
     {
-        div.innerHTML = "<br><span align='left' class='headingError'><%=bigRedErrorTitle%><BR><BR>" + message + "</span>";
+        div.innerHTML = "<br><span align='left' class='headingError'><%=bigRedErrorTitle%><BR><BR>"
+             + message + "</span>" + "<p style='color:black'>For further information on how to resolve this issue, please refer to <a href='http://www.globalsight.com/wiki/index.php/Troubleshooting_translation_problems' class='standardHREF' target='_blank'>GlobalSight troubleshooting documentation</a>.</p>";
         idMessages.appendChild(div);
         div.scrollIntoView(false);
     }
@@ -375,6 +441,29 @@ function doOnLoad()
 
 </DIV>
 
+<div id="uploadFormDiv" title="<%=bundle.getString("msg_internal_moved_title") %>"
+    style="display:none" class="standardText">
+  <table style="width: 650px;" >
+    <tr>
+      <td colspan="2">
+          <div CLASS="standardText">
+              <div style="padding-bottom: 6px; " CLASS="standardText"><%=bundle.getString("msg_internal_moved_continue") %></div>
+              <div id="internalMsg" CLASS="standardText">
+              </div>
+          </div>      		  
+	  </td>
+    </tr>
+    <tr>
+      <td colspan="2">&nbsp;</td>     
+    </tr>
+    <tr class="standardText">
+      <td colspan="2"  align="center" valign="middle" >
+          <button type="button" onclick="doContinue()" style="width: 50px;" class="standardText"><%=bundle.getString("lb_yes") %></button>
+          <button type="button" onclick="doNotContinue();"  style="width: 50px;" ><%=bundle.getString("lb_no") %></button>
+      </td>
+    </tr>
+  </table>
+</div>
 </BODY>
 </HTML>         
 
@@ -400,6 +489,7 @@ function callServer(url)
   xmlHttp.onreadystatechange = updatePage;
   xmlHttp.send(null);
 }
+
 function updatePage() 
 {
 	if (xmlHttp.readyState == 4) 
@@ -421,6 +511,15 @@ function updatePage()
             	upldState = 2 ;
             	if(percentage >= 100)
             	{
+            		var msg = result.msg;
+            		if (msg != null){
+            			for (var i = 0; i < msg.length; i++)
+                       	{
+    						var m = msg[i];
+    						showProgress(counter, percentage, m);
+                       	}
+            		}
+            		
 					showProgress(counter, percentage, "");
 					var message = "";
 					if (result.errMsg != null && result.errMsg.length > 0){
@@ -438,12 +537,21 @@ function updatePage()
     						var m = msg[i];
     						showProgress(counter, percentage, m);
                        	}
-            		}
-            		
+            		}           		
                		
             		if (result.process != null && result.process.length > 0)
             		{
             			showProgress(counter, percentage, result.process);
+            		}
+
+            		if (result.internalTagMiss != null && result.internalTagMiss.length > 0)
+            		{
+            			 $("#internalMsg")[0].innerHTML = result.internalTagMiss;
+            			 $("#internalMsg")[0].className = "standardText";
+                		$("#uploadFormDiv").dialog({width: 675, resizable:true});
+                		document.getElementById('uploadFormDiv').parentNode.style.display = "inline";
+                		document.getElementById('uploadFormDiv').style.display = "inline";
+            			 return;
             		}
             		
 			   		setTimeout('callServer("<%=urlRefresh%>")',100);

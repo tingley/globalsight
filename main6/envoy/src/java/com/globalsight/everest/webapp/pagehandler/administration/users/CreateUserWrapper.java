@@ -308,15 +308,7 @@ public class CreateUserWrapper
     {
         m_user.setCompanyName(p_companyName);
     }
-
-    /**
-     * Set the phone number field on the user object.
-     */
-    public void setPhoneNumber(int p_type, String p_phone)
-    {
-        m_user.setPhoneNumber(p_type, p_phone);
-    }
-
+    
     /**
      * Sets the userId field on the User object.
      */
@@ -460,14 +452,6 @@ public class CreateUserWrapper
     }
 
     /**
-     * Gets the phone number field on the user object.
-     */
-    public String getPhoneNumber(int p_phoneType)
-    {
-        return m_user.getPhoneNumber(p_phoneType);
-    }
-
-    /**
      * Gets the title.
      */
     public String getTitle()
@@ -554,4 +538,44 @@ public class CreateUserWrapper
     {
         this.curCompanyId = curCompanyId;
     }
+    
+    public String getOfficePhoneNumber() 
+	{
+		return m_user.getOfficePhoneNumber();
+	}
+
+	public void setOfficePhoneNumber(String officePhoneNumber) 
+	{
+		m_user.setOfficePhoneNumber(officePhoneNumber);
+	}
+
+	public String getHomePhoneNumber() 
+	{
+		return m_user.getHomePhoneNumber();
+	}
+
+	public void setHomePhoneNumber(String homePhoneNumber) 
+	{
+		m_user.setHomePhoneNumber(homePhoneNumber);
+	}
+
+	public String getCellPhoneNumber() 
+	{
+		return m_user.getCellPhoneNumber();
+	}
+
+	public void setCellPhoneNumber(String cellPhoneNumber) 
+	{
+		m_user.setCellPhoneNumber(cellPhoneNumber);
+	}
+
+	public String getFaxPhoneNumber() 
+	{
+		return m_user.getFaxPhoneNumber();
+	}
+
+	public void setFaxPhoneNumber(String faxPhoneNumber) 
+	{
+		m_user.setFaxPhoneNumber(faxPhoneNumber);
+	}
 }

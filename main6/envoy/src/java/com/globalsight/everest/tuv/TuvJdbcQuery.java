@@ -51,7 +51,7 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 			+ "tuv.segment_string segment_string, tuv.word_count word_count, "
 			+ "tuv.exact_match_key exact_match_key, tuv.state state, "
 			+ "tuv.merge_state merge_state, tuv.last_modified last_modified, "
-	        + "tuv.timestamp timestamp, tuv.modify_user, tuv.sid ";
+	        + "tuv.timestamp timestamp, tuv.modify_user, tuv.sid, tuv.repetition_of_id, tuv.is_repeated ";
 
 	private static final String CONDITION_BY_SOURCE_PAGE_AND_LOCALE = "FROM "
 	        + TU_TABLE_PLACEHOLDER + " tu, "
@@ -91,8 +91,10 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 				+ DbUtil.createLocaleInClause(localeRepository.getAllLocales())
 				+ ORDER_BY_TU_ORDER;
 
-		String tuTableName = getTuTableName(p_sourcePage.getCompanyId());
-		String tuvTableName = getTuvTableName(p_sourcePage.getCompanyId());
+        String tuTableName = SegmentTuTuvCacheManager
+                .getTuTableNameJobDataIn(p_sourcePage.getId());
+        String tuvTableName = SegmentTuTuvCacheManager
+                .getTuvTableNameJobDataIn(p_sourcePage.getId());
 		query = query.replace(TU_TABLE_PLACEHOLDER, tuTableName);
 		query = query.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
 
@@ -178,7 +180,13 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 		tuv.setLastModifiedUser(p_rs.getString("modify_user"));
 		tuv.setTimestamp(p_rs.getTimestamp("timestamp"));
 		tuv.setSid(p_rs.getString("sid"));
-		
+		tuv.setRepetitionOfId(p_rs.getLong("repetition_of_id"));
+		String isRepeated = p_rs.getString("is_repeated");
+		if ("Y".equals(isRepeated))
+		{
+	        tuv.setRepeated(true);
+		}
+
 		long localeId = p_rs.getLong("locale_id");
 		tuv.setGlobalSightLocale(p_localeRepository.getLocale(localeId));
 
@@ -210,9 +218,10 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 			m_locales.put(p_locale.getIdAsLong(), p_locale);
 		}
 
-		private void addLocales(Collection p_locales)
+		private void addLocales(Collection<GlobalSightLocale> p_locales)
 		{
-			for (Iterator it = p_locales.iterator(); it.hasNext();)
+            for (Iterator<GlobalSightLocale> it = p_locales.iterator(); it
+                    .hasNext();)
 			{
 				GlobalSightLocale locale = (GlobalSightLocale) it.next();
 				m_locales.put(locale.getIdAsLong(), locale);
@@ -224,7 +233,7 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 			return (GlobalSightLocale) m_locales.get(new Long(p_localeId));
 		}
 
-		private Collection getAllLocales()
+		private Collection<GlobalSightLocale> getAllLocales()
 		{
 			return m_locales.values();
 		}

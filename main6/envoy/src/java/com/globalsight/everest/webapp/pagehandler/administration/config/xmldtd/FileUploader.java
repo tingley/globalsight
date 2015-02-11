@@ -24,19 +24,18 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
-
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
 
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.StringUtil;
 
 public class FileUploader
 {
-    private static final Logger log = Logger
-            .getLogger(FileUploader.class.getName());
+    private static final Logger log = Logger.getLogger(FileUploader.class
+            .getName());
 
     private final static String REG_FILE_NAME = ".*[\\\\/]";
     private Hashtable<String, String> fields = new Hashtable<String, String>();
@@ -64,7 +63,7 @@ public class FileUploader
     {
         this.path = path;
     }
-    
+
     public void addListener(ProcessStatus listener)
     {
         listeners.add(listener);
@@ -72,16 +71,12 @@ public class FileUploader
 
     public File upload(HttpServletRequest request) throws Exception
     {
-        log.info("Uploading files...");
-
         DiskFileItemFactory factory = new DiskFileItemFactory();
         factory.setSizeThreshold(1024000);
         ServletFileUpload upload = new ServletFileUpload(factory);
         @SuppressWarnings("unchecked")
         List<DiskFileItem> fileItems = upload.parseRequest(request);
         outFile = saveTmpFile(fileItems);
-
-        log.info("Uploading files finished.");
 
         return outFile;
     }
@@ -110,12 +105,12 @@ public class FileUploader
                 uploadTotalSize += item.getSize();
             }
         }
-        
+
         for (ProcessStatus status : listeners)
         {
             status.setTotalSize(uploadTotalSize);
         }
-        
+
         log.debug("File size: " + uploadTotalSize);
 
         for (DiskFileItem item : fileItems)
@@ -130,7 +125,7 @@ public class FileUploader
                 fields.put(item.getFieldName(), item.getString("utf-8"));
             }
         }
-        
+
         for (ProcessStatus status : listeners)
         {
             status.finished();

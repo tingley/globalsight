@@ -1,4 +1,5 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/error.jsp"
          import="com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -15,12 +16,15 @@
                  java.util.Date,
                  java.util.Iterator,
                  java.util.Locale,
+                 java.text.MessageFormat,
                  java.util.ResourceBundle" session="true" 
 %>
 <jsp:useBean id="jobComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobDetails" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobAttributes" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
     //colors to use for the table background
     private static final String WHITE_BG         = "#FFFFFF";
@@ -52,21 +56,9 @@
     String labelDetails = bundle.getString("lb_details");
     String labelComments = bundle.getString("lb_comments");
 	String labelJobName =  bundle.getString("lb_job") + bundle.getString("lb_colon");
-    String jobName = (String)sessionMgr.getAttribute("jobName");
     long jobId = Long.valueOf(request.getParameter(JobManagementHandler.JOB_ID));
     
-    String jobDetailsURL = jobDetails.getPageURL()
-    		+ "&" + JobManagementHandler.JOB_ID
-    		+ "=" + jobId;
-	String jobAttributesURL = jobAttributes.getPageURL() 
-    		+ "&" + JobManagementHandler.JOB_ID 
-    		+ "=" + jobId;
-	String jobCommentsURL = jobComments.getPageURL()
-    		+ "&" + JobManagementHandler.JOB_ID
-    		+ "=" + jobId;
-	String jobReportsURL = jobReports.getPageURL() 
-			+ "&" + JobManagementHandler.JOB_ID 
-			+ "=" + jobId;
+    String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
 	
 	String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=";
 	String generateAction = basicAction + ReportConstants.GENERATE_REPORTS;
@@ -191,6 +183,18 @@ function fnGenerateReport(obj)
 	document.getElementsByName(reportTypeElemName)[0].value = reportType;
 	ReportsForm.submit();
 }
+
+//jobSummary child page needed started
+<amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+$(document).ready(function(){
+	$("#jobReportsTab").removeClass("tableHeadingListOff");
+	$("#jobReportsTab").addClass("tableHeadingListOn");
+	$("#jobReportsTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
+	$("#jobReportsTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+})
+</amb:permission>
+
+//jobSummary child page needed end.
 </script>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -200,36 +204,10 @@ function fnGenerateReport(obj)
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
 
-<SPAN CLASS="mainHeading"><%=labelJobName%> <%=jobName%></SPAN>   
-<p>
-<!-- Tabs table -->
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-    <TR>
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=jobDetailsURL%>"><%=labelDetails%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=jobCommentsURL%>"><%=labelComments%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-	    <TD CLASS="tableHeadingListOff">
-		    <amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
-		    <IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
-		    <A CLASS="sortHREFWhite" HREF="<%=jobAttributesURL%>"><%=bundle.getString("lb_job_attributes") %></A>
-		    <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
-		    </amb:permission>
-	    </TD>
-	    
-	    <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
-	    <TD WIDTH="2"></TD>
-	    <TD CLASS="tableHeadingListOn">
-		    <IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0">
-		    <A CLASS="sortHREFWhite" HREF="<%=jobReportsURL%>"><%=bundle.getString("lb_reports") %></A>
-		    <IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0">
-	    </TD>
-	    </amb:permission>
-    </TR>
-</TABLE>
-<!-- End Tabs table -->
-    
-<P>
+<div id="includeSummaryTabs" class="standardText">
+	<%@ include file="/envoy/projects/workflows/includeJobSummaryTabs.jspIncl" %>
+</div>
+<div style="clear:both"></div>
 <form name="ReportsForm" method="post" action="<%=generateAction%>">
 <input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
 <input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="*">
@@ -238,7 +216,7 @@ function fnGenerateReport(obj)
 <input type="hidden" name="reportStyle" value="trados">
 <p></p>
 <SPAN CLASS="standardText"><B><%=bundle.getString("lb_available_reports")%></B></SPAN>
-<TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" BORDER="0">
+<TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
 <% if (userPerms.getPermissionFor(Permission.REPORTS_MAIN)) { %>
 		<TR>
 			<TD CLASS="tableHeadingBasic"><input type="checkbox" id="checkAll"></TD>
@@ -260,7 +238,7 @@ function fnGenerateReport(obj)
 				</A>
             </TD>
             <TD>XLS</TD>
-            <TD><%=bundle.getString("online_jobs_desc")%></TD>
+            <TD><%=bundle.getString("online_jobs_desc_in_jobDetails")%></TD>
         </TR>
 	<% } 
 

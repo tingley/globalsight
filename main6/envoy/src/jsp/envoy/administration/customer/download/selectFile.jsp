@@ -40,12 +40,12 @@
     String fromJobDetail = request.getParameter("fromJobDetail");
     if ("true".equals(fromJobDetail))
     {
-    	downloadAppletURL += "&fromJobDetail=true";
-    	selectFileURL += "&fromJobDetail=true";
+        downloadAppletURL += "&fromJobDetail=true";
+        selectFileURL += "&fromJobDetail=true";
     }
     else
     {
-    	String fromTaskDetail = request.getParameter("fromTaskDetail");
+        String fromTaskDetail = request.getParameter("fromTaskDetail");
         if ("true".equals(fromTaskDetail))
         {
             downloadAppletURL += "&fromTaskDetail=true";
@@ -53,12 +53,12 @@
         }
         else
         {
-        	String from = request.getParameter("from");
-        	if (from != null && from.length() > 0)
-        	{
-        		downloadAppletURL += "&from=" + from;
-        		selectFileURL += "&from=" + from;
-        	}
+            String from = request.getParameter("from");
+            if (from != null && from.length() > 0)
+            {
+                downloadAppletURL += "&from=" + from;
+                selectFileURL += "&from=" + from;
+            }
         }
     }
     
@@ -295,11 +295,10 @@
         }
 
         String fileNameValue = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
-        // Escape Javascript special characters, such as "\", "'".
+        // Escape the backslashes for javascript
         String fileNameValueEscaped =
             replace(DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document),
                     "\\", "\\\\");
-        fileNameValueEscaped = fileNameValueEscaped.replace("\'", "\\'");
         String displayNameValue =
             DownloadFileHandler.getRelativePath(p_document.getParentFile(), p_document);
         out.println("<TR VALIGN=TOP>\n");
@@ -319,7 +318,6 @@
     throws IOException
     {
         String fileName = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
-        fileName = URLEncoder.encode(fileName);
         out.println("<TR VALIGN=TOP>\n");
         out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + fileName + "\"></TD>");
         out.println("<TD STYLE=\"padding-top: 2px\"><IMG SRC=\"/globalsight/images/file.gif\" HEIGHT=15 WIDTH=13></TD>");
@@ -372,24 +370,24 @@ function submitForm(action)
     {
         //Fix for GBS-1570  
         form = document.selectedFilesForm;
-    	var file = "";
-    	if (form.file.length)
-    	{
-    	   for (i = 0; i < form.file.length; i++)
-    	   {
-    	      if (form.file[i].checked == true)
-    	      {
-    	         if(file != "")
-    	         {
-    	            file += ","; // must add a [white space] delimiter
-    	         }
-    	         file += encodeURIComponent(form.file[i].value).replace(/%C2%A0/g, "%20");
-    	      }
-    	   }
-    	}
-    	form = document.downloadFilesForm;
-    	form.selectedFileList.value = file;
-    	   
+        var file = "";
+        if (form.file.length)
+        {
+           for (i = 0; i < form.file.length; i++)
+           {
+              if (form.file[i].checked == true)
+              {
+                 if(file != "")
+                 {
+                    file += ","; // must add a [white space] delimiter
+                 }
+                 file += encodeURIComponent(form.file[i].value).replace(/%C2%A0/g, "%20");
+              }
+           }
+        }
+        form = document.downloadFilesForm;
+        form.selectedFileList.value = file;
+           
         // Go to the Download Applet screen
         form.action = "<%=downloadAppletURL%>" + "&action=download";
     }
@@ -444,6 +442,11 @@ function addRemoveFiles(fileAction)
       }
    }
 
+   if (fileAction == "add")
+   {
+      file = file.replace(/\+/g,"%2B");
+   }
+
    form.file.value = file;
    form.submit();
 }
@@ -456,13 +459,25 @@ function navigateDirectories (folder)
 
 //for GBS-2599
 function handleSelectAll(selectAll,theForm) {
-	if (theForm) {
-		if (selectAll.checked) {
-			checkAll(theForm);
-	    }
-	    else {
-			clearAll(theForm); 
-	    }
+    if (theForm) {
+        if (selectAll.checked) {
+            checkAll(theForm);
+        }
+        else {
+            clearAll(theForm); 
+        }
+    }
+}
+
+function cancelButton(){
+	if (location.search.indexOf("redirectToWorkflow") > -1)
+	{
+		var jobId = location.search.split("&")[6].split("=")[1];
+		location.href = "/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=" + jobId;
+	}
+	else
+	{
+		history.go(-1);
 	}
 }
 </script>
@@ -473,7 +488,7 @@ function handleSelectAll(selectAll,theForm) {
     height: 300px;
     overflow-y: auto;
     overflow-x: auto;
-    border: solid silver 1px;
+        border: solid silver 1px;
     padding: 0px;
 }
 </STYLE>
@@ -614,7 +629,7 @@ DIV ID="AvailableCheckAllLayer"
     {
         String curDoc = (String)importFileList.get(i);
         out.println("<TR VALIGN=TOP>");
-        out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + URLEncoder.encode(curDoc) + "\"></TD>");
+        out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + curDoc + "\"></TD>");
         out.println("<TD STYLE=\"padding-top: 2px\"><IMG SRC=\"/globalsight/images/file.gif\" HEIGHT=15 WIDTH=13></TD>");
         out.println("<TD STYLE=\"word-wrap: break-word;\">" + curDoc + "</TD>");
         out.println("</TR>");
@@ -651,7 +666,7 @@ DIV ID="ImportCheckAllLayer" CLASS="standardText"
 <FORM METHOD="post" NAME="downloadFilesForm">
 <INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
 <INPUT NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
-<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_cancel")%>" ONCLICK="javascript:history.go(-1);">
+<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_cancel")%>" ONCLICK="cancelButton();">
 <INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_download")%>" ONCLICK="submitForm('download');"
 <%
   if (importFileList.size() == 0) out.print(" DISABLED");

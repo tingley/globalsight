@@ -28,7 +28,7 @@ public interface ResourceBundleConstants
     /**
      * The location where all the message resource bundles are located.
      */
-    static final String BUNDLE_LOCATION = "com/globalsight/resources/messages/";
+    public static final String BUNDLE_LOCATION = "com/globalsight/resources/messages/";
     public static final String LOCALE_RESOURCE_NAME = BUNDLE_LOCATION
             + "LocaleResource";
     public static final String EMAIL_RESOURCE_NAME = BUNDLE_LOCATION

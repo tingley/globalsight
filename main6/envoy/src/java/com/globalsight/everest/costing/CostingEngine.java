@@ -136,7 +136,7 @@ public interface CostingEngine extends SystemParameterChangeListener
      *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-    Currency getCurrency(String p_isoCode, String p_companyId)
+    Currency getCurrency(String p_isoCode, long p_companyId)
             throws RemoteException, CostingException;
 
     Currency getCurrency(String p_isoCodes) throws RemoteException,

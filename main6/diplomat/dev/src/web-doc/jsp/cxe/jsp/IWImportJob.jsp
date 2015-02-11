@@ -40,7 +40,7 @@
     while(e.hasMoreElements())
     {
         FileProfile fileProfile = (FileProfile) e.nextElement();
-        String companyId = fileProfile.getCompanyId();
+        long companyId = fileProfile.getCompanyId();
         
         ArrayList companyFps = (ArrayList)companyFpMap.get(companyId);
         if (companyFps == null) companyFps = new ArrayList();

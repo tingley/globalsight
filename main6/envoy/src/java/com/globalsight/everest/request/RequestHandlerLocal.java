@@ -74,7 +74,8 @@ import com.globalsight.util.mail.MailerConstants;
 public class RequestHandlerLocal implements RequestHandler
 {
     // for logging purposes
-    private static Logger c_logger = Logger.getLogger("RequestHandlerLocal");
+    private static Logger c_logger = Logger
+            .getLogger(RequestHandlerLocal.class);
 
     // used for email messages - keys into property file
     // subject and message keys for all import failures
@@ -181,7 +182,7 @@ public class RequestHandlerLocal implements RequestHandler
             }
 
             sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments,
-                    req.getCompanyId());
+                    String.valueOf(req.getCompanyId()));
             throw rhe;
         }
         catch (Exception e)
@@ -238,7 +239,8 @@ public class RequestHandlerLocal implements RequestHandler
     {
         // just sends the request onto the job creator this imports all the page
         // content and adds it to a job.
-        CompanyThreadLocal.getInstance().setIdValue(p_request.getCompanyId());
+        CompanyThreadLocal.getInstance().setIdValue(
+                String.valueOf(p_request.getCompanyId()));
         JobCreator jc = getJobCreator();
         try
         {
@@ -1061,7 +1063,7 @@ public class RequestHandlerLocal implements RequestHandler
         String[] messageArgs = getMessageArgs(p_r, null);
 
         L10nProfile l10nProfile = p_r.getL10nProfile();
-        String companyIdStr = l10nProfile.getCompanyId();
+        String companyIdStr = String.valueOf(l10nProfile.getCompanyId());
         GlobalSightLocale[] targetLocales = p_r.getTargetLocalesToImport();
         boolean shouldNotifyPm = false;
         for (int i = 0; i < targetLocales.length; i++)

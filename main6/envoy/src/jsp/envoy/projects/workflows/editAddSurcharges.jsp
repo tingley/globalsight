@@ -173,15 +173,15 @@
      if (jobForm.surchargeType.options[jobForm.surchargeType.selectedIndex].value == 0)
      {
         // 
-        costUnits.innerText = "";
+        costUnits.innerHTML = "";
      }
      else if (jobForm.surchargeType.options[jobForm.surchargeType.selectedIndex].value == 1)
      {
-        costUnits.innerText = "<%=currentCurrency%>";
+        costUnits.innerHTML = "<%=currentCurrency%>";
      }
      else 
      {
-        costUnits.innerText = "%";
+        costUnits.innerHTML = "%";
      }
   }
 

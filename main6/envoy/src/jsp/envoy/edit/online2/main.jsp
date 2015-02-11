@@ -1,7 +1,12 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
+   			com.globalsight.everest.edit.online.OnlineEditorConstants,
+   			com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
+   			com.globalsight.everest.permission.Permission,
+   			com.globalsight.everest.permission.PermissionSet,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
@@ -51,6 +56,9 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
+String pageName = state.getSourcePageName().toLowerCase();
+boolean isWord = pageName.endsWith(".docx") || pageName.endsWith(".pptx");
+EditorState.Layout layout = state.getLayout();
 
 String str_userId =
   ((User)sessionMgr.getAttribute(WebAppConstants.USER)).getUserId();
@@ -127,8 +135,10 @@ String currenttuv = (String)request.getAttribute("currenttuv");
 String taskId = (String)request.getParameter(WebAppConstants.TASK_ID);
 // Get task info
 Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+//Above variable taskId will lost when using File Navigation 
+String taskIdForUpdateLeverage = Long.toString(task.getId());
 int task_state = task.getState();
-String companyId = task.getCompanyId();
+long companyId = task.getCompanyId();
 
 String closeUrl = close.getPageURL() +
    "&" + WebAppConstants.TASK_ACTION +
@@ -152,6 +162,21 @@ if (newStatus != null)
       syncMessage = bundle.getString("jsmsg_editor_srcpage_is_being_edited");
       syncClose = true;
     }
+}
+
+//Determine if show "Auto-Propagate" link
+boolean b_showAutoPropagateLink = true;
+if (state.isReadOnly() || state.getIsReviewActivity()
+     || (layout.isSinglePage() && layout.singlePageIsSource() ) )
+{
+    b_showAutoPropagateLink = false;
+}
+
+//Determine if show "Update Leverage" link
+PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+boolean b_updateLeverage = true;
+if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)){
+    b_updateLeverage = false;
 }
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -213,6 +238,7 @@ if (newStatus != null)
           font-size: 8pt;
           cursor: hand; cursor: pointer;
           float: right;
+          padding-top:3px;
         }
 
 #idSegments P { display: inline;
@@ -242,6 +268,11 @@ if (newStatus != null)
         }
 /* <% } %> */
 
+.standardtext {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
+.editorComment { cursor: hand;cursor:pointer; }
 </style>
 
 <SCRIPT type="text/javascript">
@@ -290,6 +321,10 @@ var w_options = null;
 var w_concordance = null;
 var w_progress = null;
 var w_search = null;
+var w_termbases = null;
+var w_autoPropagate = null;
+var w_updateLeverage = null;
+var w_editor = null;
 
 var g_canShowMt = eval("<%=b_canShowMt%>");
 var g_showMt = eval("<%=b_showMt%>");
@@ -315,6 +350,7 @@ var verbose = "<%=str_ptags%>";
 var g_ptagsVerbose = <%=b_ptagsVerbose%>;
 var isMF = navigator.userAgent.indexOf("Firefox") != -1;
 var s_ptagstring = "";
+var inlineEditorPage = true;
 
 // Menus
 
@@ -328,10 +364,11 @@ MenuButton.prototype.subMenuDirection = "vertical";
 
 // Main Menu
 var actionMenu = new Menu();
-actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_unlock_segments")%>", unlockSegments));
-tmp.mnemonic = "u";
-<% if (!b_canEditAll) { %>
-tmp.disabled = true;
+actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_termbases")%>...", showTermbases));
+tmp.mnemonic = "t";
+<% if (b_updateLeverage) { %>
+	actionMenu.add(tmp = new MenuItem("<%=bundle.getString("permission.activities.updateLeverage")%>...", updateLeverage));
+	tmp.mnemonic = "u";
 <% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_search") %>...", searchByUserSid));
 tmp.mnemonic = "s";
@@ -451,7 +488,17 @@ function doKeyDown()
   {
     // Shortcut for text in frame
     var el = document.getElementById("idEditor2");
-	if (key == 66 && fnIsSelection()) // "B"
+    if (key == 56 && fnIsSelection()) //8
+    {
+    	el.setSub();
+  	    return cancelEvent();
+    }
+    if (key == 57 && fnIsSelection()) //9
+    {
+    	makeSup();  
+  	    return cancelEvent();
+    }
+    else if (key == 66 && fnIsSelection()) // "B"
 	{
       //makeBold();
       if (el.formattingKeys) el.setBold();
@@ -932,6 +979,8 @@ function Close()
   fnImageSetGrayColorAndListener();
 }
 
+var internalTagMsg = "";
+
 function checkError(ptagstring)
 {
     var message;
@@ -941,6 +990,18 @@ function checkError(ptagstring)
         o_textbox.frameWindow.focus();
         return 1;
     }
+    if (internalTagMsg != null && internalTagMsg != "")
+    {
+    	var rrr = confirm("<%=bundle.getString("msg_internal_moved_continue")%>" + "\n\r\t" + internalTagMsg);
+    	if (rrr == true)
+    		return 0;
+    	else
+    	{
+    		o_textbox.frameWindow.focus();
+    		return 1;
+    	}
+    }
+    
     return 0;
 }
 
@@ -949,6 +1010,7 @@ function doErrorCheck(ptagstring)
     applet.setUntranslateStyle(<%="\"" + SegmentUtil2.getTAGS() + "\""%>);
     var msg = applet.errorCheck(ptagstring, g_sourceGxml,
       max_segment_len, gsa_encoding, db_segment_len, db_encoding);
+    internalTagMsg = applet.getInternalErrMsg();
 
     if (msg == "" || msg == null || msg == "null")
     {
@@ -1036,9 +1098,19 @@ function closeEditor()
   try { w_search.close(); } catch (e) {};
 }
 
+function HasOfficeTags()
+{
+	return <%=isWord%> || "mif" == g_datatype;
+}
+
 // Formatting tags are B/I/U
 function HasFormattingTags()
 {
+  if (<%=isWord%> || "mif" == g_datatype)
+  {
+	  return true;
+  }
+	
   if (HasPTags() && g_itemtype == "text")
   {
     return true;
@@ -1091,6 +1163,9 @@ function setButtonState()
     idButCr.setEnabled(true);
 	idBrackets.setEnabled(true);
 
+	idButSub.setEnabled(HasOfficeTags());
+	idButSup.setEnabled(HasOfficeTags());
+	
     if (HasFormattingTags())
     {
       idButBold.setEnabled(true);
@@ -1146,6 +1221,8 @@ function setButtonState()
     idButMt.setEnabled(false);
     idButMerge.setEnabled(false);
     idButSplit.setEnabled(false);
+    idButSub.setEnabled(false);
+    idButSup.setEnabled(false);
   }
 }
 
@@ -1171,6 +1248,24 @@ function makeBold()
   
   //o_textbox.setBold();
   o_textbox.makeBold();
+  o_textbox.frameWindow.focus();
+}
+
+function makeSub()
+{
+  if (!g_target) return;
+  
+  //o_textbox.setBold();
+  o_textbox.makeSub();
+  o_textbox.frameWindow.focus();
+}
+
+function makeSup()
+{
+  if (!g_target) return;
+  
+  //o_textbox.setBold();
+  o_textbox.makeSup();
   o_textbox.frameWindow.focus();
 }
 
@@ -1570,8 +1665,12 @@ function doConcordance()
    'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
 }
 
-function unlockSegments()
+function unlockSegments(self)
 {
+	if(self){
+		$(self).css('display','none');
+		$('#lbLock').css('display','inline');
+	}
   var current = idSegments.firstChild;
 
   while (current)
@@ -1954,11 +2053,11 @@ function doInit()
   for (var i = 0; i < cells.length; i++)
   {
     // 6,19,22 are spacer cells (6,19,22 for bidi)
-    if (i == 6 || i == 19 || i == 22) continue;
+    if (i == 6 || i == 21 || i == 24) continue;
     createButton(cells[i]);
   }
   // cell 23 is the TM button (23 for bidi)
-  cells[23].setToggle(true);
+  cells[25].setToggle(true);
   setButtonState();
 
   /* GS can always spellcheck
@@ -2002,12 +2101,6 @@ function doInit()
   {
       closeEditor();
   }
-
-  if(!isIE)
-  {
-	  idSegments.style.width = idBody.clientWidth - 40;
-	  idSegments.style.height = idBody.clientHeight - 95;
-  }  
 }
 
 function doExit()
@@ -2026,6 +2119,10 @@ function doExit()
   try { w_options.close(); } catch (e) {};
   try { w_concordance.close(); } catch (e) {};
   try { w_progress.close(); } catch (e) {};
+  try { w_termbases.close(); } catch (e) {};
+  try { w_autoPropagate.close(); } catch (e) {};
+  try { w_updateLeverage.close(); } catch (e) {};
+  try { w_editor.close(); } catch (e) {};
 }
 
 // MT interface
@@ -2276,7 +2373,9 @@ function fnImageChangeWrapper()
   fnImageChange("idImgMerge");
   fnImageChange("idImgSplit");
   fnImageChange("idImgLtr");
-  fnImageChange("idImgRtl")
+  fnImageChange("idImgRtl");
+  fnImageChange("idImgSub");
+  fnImageChange("idImgSup")
 }
 
 function fnImageChange(id)
@@ -2401,6 +2500,9 @@ function doOnLoad()
 
   updateFileNavigationArrow();
   updatePageNavigationArrow();
+  
+  doInit();
+  initSize();
 }
 
 function updateFileNavigationArrow()
@@ -2446,7 +2548,172 @@ function updatePageNavigationArrow()
 	}
 }
 
+function showTermbases()
+{
+    w_termbases = window.open("/globalsight/ControlServlet?linkName=termbases&pageName=ED2", "METermbases",
+       "height=400,width=500,resizable=yes,scrollbars=yes");
+}
+
+function updateLeverage()
+{
+	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
+	$.getJSON(url, 
+		function(data) { 
+			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
+			{
+				alert("<%=bundle.getString("jsmsg_my_activities_cannotupdateleverage_uploading")%>");
+				return;
+			}
+			else
+			{
+				w_updateLeverage = window.open("/globalsight/ControlServlet?linkName=updateLeverage&pageName=TK2&taskId=<%=taskIdForUpdateLeverage%>&action=getAvailableJobsForTask", "UpdateLeverage",
+					       "height=550,width=700,resizable=no,scrollbars=no");
+			}
+	});
+}
+
+function openAutoPropagate()
+{
+    w_autoPropagate = window.open("/globalsight/ControlServlet?linkName=autoPropagate&pageName=ED2&action=default&targetPageId=<%=state.getTargetPageId()%>", "AutoPropagate",
+    	"resizable=yes,scrollbars=no,width=350,height=350");
+}
+
+function refresh(direction)
+{
+	location.href = location.href + "&refresh=0";
+}
+
+function doSegmentFilter(segmentFilter)
+{
+	location.href = "${refresh.pageURL}&segmentFilter=" + segmentFilter;
+}
+
+function SE(tuId, tuvId, subId)
+{
+	<% if(b_readonly) { %>
+	return;
+	<% } %>
+	var url = "/globalsight/ControlServlet?linkName=commentEditor&pageName=ED8" +
+     "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId + "&refresh=0";
+
+    w_editor = window.open(url, "CommentEditor",
+     "width=570,height=610,top=100,left=100"); //resizable,	
+}
+
+function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, share, overwrite)
+{
+	var o_form = document.CommentForm;
+
+    o_form.tuId.value = tuId;
+    o_form.tuvId.value = tuvId;
+    o_form.subId.value = subId;
+    o_form.cmtAction.value = action;
+    o_form.cmtTitle.value = title;
+    o_form.cmtComment.value = comment;
+    o_form.cmtPriority.value = priority;
+    o_form.cmtStatus.value = status;
+    o_form.cmtCategory.value = category;
+    o_form.cmtShare.value = share;
+    o_form.cmtOverwrite.value = overwrite;
+
+    o_form.submit();
+}
+
+function initSize()
+{
+	var headerHeight = $(".header").css("height").replace("px","");
+	var idMenuBarDivHeight = $("#idMenuBarDiv").css("height").replace("px","");
+	if($.browser.msie){ 
+ 	    $("#idSegments").css("height",document.body.clientHeight - headerHeight - idMenuBarDivHeight - 10 + "px");
+ 	    $("#idSegments").css("width",document.body.clientWidth - 10 + "px");
+	} else if($.browser.webkit) {
+ 	    $("#idSegments").css("height",window.innerHeight - headerHeight - idMenuBarDivHeight - 45 + "px");
+	} 
+	else {
+ 	    $("#idSegments").css("height",window.innerHeight - headerHeight - idMenuBarDivHeight - 35 + "px");
+	}
+}
+
+function refresh(direction)
+{
+    var str_url;
+    str_url = "/globalsight/ControlServlet?linkName=refresh&pageName=EDN1&refresh=" + direction;
+    window.location.href = str_url;
+}
 </SCRIPT>
+<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<style type="text/css">
+.wrapper-dropdown-5 {
+    /* Size & position */
+    position: relative;
+    padding:0 10px;
+    /* Styles */
+    cursor: pointer;
+    outline: none;
+}
+ 
+.wrapper-dropdown-5:after { /* Little arrow */
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: #BBBEC0 transparent;
+}
+
+.wrapper-dropdown-5 .dropdown {
+    /* Size & position */
+    position: absolute;
+    left:-120px;
+    right: 0;
+    margin:10px 5px;
+    padding:0px 5px;
+    z-index:100;
+    /* Styles */
+    background: #BBBEC0;
+    list-style: none;
+    /* Hiding */
+    max-height: 0;
+    overflow: hidden;
+}
+
+.wrapper-dropdown-5 .dropdown li a {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    padding: 4px 0;
+    border-bottom: 1px solid #0C1476;
+}
+ 
+.wrapper-dropdown-5 .dropdown li:last-of-type a {
+    border: none;
+}
+ 
+.wrapper-dropdown-5 .dropdown li i {
+    margin-right: 5px;
+    color: inherit;
+    vertical-align: middle;
+}
+ 
+/* Hover state */
+ 
+.wrapper-dropdown-5 .dropdown li:hover a {
+    color: white;
+}
+
+/* Active state */
+ 
+.wrapper-dropdown-5.active {
+    background: #BBBEC0;
+}
+ 
+.wrapper-dropdown-5.active .dropdown {
+    border: 1px solid rgba(0,0,0,0.2);
+    max-height: 400px;
+}
+</style>
 <style type="text/css">
       #menu1  {display:block; width:400px; height:400px; 
                 background:white; position:absolute; 
@@ -2455,7 +2722,7 @@ function updatePageNavigationArrow()
 </head>
 
 <body id="idBody" return onkeydown='doKeyDown()' onkeypress='return doKeyPress()'
- onkeyup="doKeyUp()"  onbeforeunload="doExit()" scroll="no" onload="doOnLoad()">
+ onkeyup="doKeyUp()"  onbeforeunload="doExit()" scroll="no" onload="doOnLoad()" style="margin:0px;" onresize="initSize();">
 
 <div id="idLoading" style="position: absolute; top: 100; left: 200;
 background-color: lightgrey; color: black; text-align: center;
@@ -2476,34 +2743,42 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 <input type="hidden" name="segment" value="">
 </form>
 
-<div class="header" style="position: absolute; top: 0; left: 0; right: 0;
- width: expression(idBody.clientWidth); height: 40;
- padding-left: 10px; padding-top: 6px;">
-    <SPAN id="idHelpViewer" onclick="showHelp()" class="help"
-     style="margin-right: 10px;"><%=bundle.getString("lb_help") %></SPAN>
-    <SPAN class="help">&nbsp;|&nbsp;</SPAN>
-    <SPAN id="idCloseEditor" class="help" onclick="closeEditor()"><%=bundle.getString("lb_close") %></SPAN>
-	<script>
+<div class="header" style="width:expression(idBody.clientWidth);padding:0px 5px">
+<!-- Right Links Start -->
+    <span id="idHelpViewer" onclick="showHelp()" class="help" style="margin-right: 10px;"><%=bundle.getString("lb_help") %></span>
+    <span class="help">&nbsp;|&nbsp;</span>
+    <span id="idCloseEditor" class="help" onclick="closeEditor()"><%=bundle.getString("lb_close") %></span>
+    
+    <div id="actionDropDown" class="help wrapper-dropdown-5" style="display:none" onclick="$(this).toggleClass('active');"><%=bundle.getString("lb_actions") %>
+	    <ul class="dropdown" style="font-family:Arial,Helvetica,sans-serif; font-size:9pt;">
+	        <li><a href="javascript:showTermbases();"><%=bundle.getString("lb_termbases")%>...</a></li>
+	        <% if (b_updateLeverage) { %>
+	        	<li><a href="javascript:updateLeverage();"><%=bundle.getString("permission.activities.updateLeverage")%>...</a></li>
+	        <% } %>
+	        
+	        <li><a href="javascript:searchByUserSid();"><%=bundle.getString("lb_search")%>...</a></li>
+	        <li><a href="javascript:showProgressWindow();"><%=bundle.getString("lb_progress") %>...</a></li>
+	        <% if (b_corpus) { %>
+	        	<li><a href="javascript:doConcordance();"><%=bundle.getString("lb_concordance") %>...</a></li>
+	        <% } %>
+	        <li><a href="javascript:showPageInfo();"><%=bundle.getString("lb_page_info") %>...</a></li>
+	        <li><a href="javascript:showOptions();"><%=bundle.getString("lb_options") %>...</a></li>
+	    </ul>
+	</div>
+    <script>
 	if (document.recalc)
 	{
-		document.write("<SPAN class=\"help\" style=\"position:relative; top:-4;\" onclick=\"showMenu();\" >");
+		document.write("<span class=\"help\" style=\"position:relative; top:-4;\" onclick=\"showMenu();\" >");
+    	menuBar.write();
+    	document.write("&nbsp;&nbsp;&nbsp;</span>");
 	}
 	else
 	{
-		document.write("<SPAN id=\"idAction\" class=\"help\" style=\"position:relative; top:-0;\" onclick=\"showMenu();\" >");
+		$("#actionDropDown").css("display","inline");
 	}
 	</script>
-    <!-- <SPAN class="help" style="position:relative; top:-4;" onclick="showMenu();" >  -->
-    <script>
-    if(document.recalc)
-	{
-    	menuBar.write();
-    }
-    else
-    {
-       document.write("Action");
-    }
-    </script>&nbsp;&nbsp;&nbsp;</SPAN>
+    
+<!-- Right Links End -->
 <%--
     <P>Page: <span id="idPagename"><%=str_pageName%></span>
 --%>
@@ -2516,11 +2791,36 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
      </SPAN>
      <SPAN>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;</SPAN>
      <!-- Page Navigation -->
-     <SPAN><%=lb_pageNavigation%>&nbsp;( <%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%> )
+     <SPAN style="white-space:nowrap;"><%=lb_pageNavigation%>&nbsp;( <%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%> )
         <label id="pageNavPre"><%=lb_prevPage%></label>
         <label id="pageNavNext"><%=lb_nextPage%></label>
      </SPAN>
-
+     <% if (b_canEditAll) { %>
+     	<span onclick="unlockSegments(this);" style="cursor:hand;cursor:pointer;">&nbsp;&nbsp;|&nbsp;&nbsp;<%=bundle.getString("lb_unlock") %></span>
+     	<span id="lbLock" onclick="refresh(0);" style="cursor:hand;cursor:pointer;display:none;">&nbsp;&nbsp;|&nbsp;&nbsp;<%=bundle.getString("lb_lock") %></span>
+	 <% } %>
+     <% if (b_showAutoPropagateLink) { %>
+     	<span onclick="openAutoPropagate();" style="cursor:hand;cursor:pointer;white-space:nowrap;">&nbsp;&nbsp;|&nbsp;&nbsp;<%=bundle.getString("lb_automatic_propagate") %></span>
+	 <% } %>
+	 
+  	<span style="white-space:nowrap;">&nbsp;&nbsp;|&nbsp;&nbsp;Filter:&nbsp;&nbsp;
+	  	<select id="segmentFilter" onchange="doSegmentFilter(this[this.selectedIndex].value)" style="font-size: 8pt;">
+			<%
+				String selectedFilter = (String)request.getAttribute("segmentFilter");
+				for(String segmentFilter : OnlineEditorConstants.SEGMENT_FILTERS)
+				{
+				    out.write("<option ");
+				    if (segmentFilter.equals(selectedFilter))
+				    {
+				        out.write("selected ");
+				    }
+				    out.write("value=\"" + segmentFilter + "\">");
+				    out.write(bundle.getString(segmentFilter));
+				    out.write("</option>");
+				}
+			%>
+	  	</select>
+  	</span>
 </div>
 <style type="text/css">
 #b_g_date tr{ 
@@ -2536,28 +2836,8 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
   font-size:12px;
 } 
 </style>
-<!--
-		<div id = "menu1" onclick = "hideMenu();">
-    		<span onclick ="unlockSegments();" onmouseover="ffmenuOver(event)" onmouseout="ffmenuOut(event)">Unlock Segments</span><br>
-    		<span onclick ="showProgressWindow();" onmouseover="ffmenuOver(event)" onmouseout="ffmenuOut(event)">Progress...</span><br>
-    		<span onclick ="doConcordance();" onmouseover="ffmenuOver(event)" onmouseout="ffmenuOut(event)" >Concordance...</span><br>
-    		<span onclick ="showPageInfo();" onmouseover="ffmenuOver(event)" onmouseout="ffmenuOut(event)" >Page Info...</span><br>
-    		<span onclick ="showOptions();" onmouseover="ffmenuOver(event)" onmouseout="ffmenuOut(event)" >Options...</span><br>
- 		</div>
-		-->
-		<div id = "menu1" onclick = "hideMenu();">
-			<table width="120px" id="b_g_date" border=0>
-				<tr><td onclick="unlockSegments();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_unlock_segments")%></td></tr>
-				<tr><td onclick="searchByUserSid();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_search")%>...</td></tr>
-				<tr><td onclick="showProgressWindow();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_progress") %>...</td></tr>
-				<tr><td onclick="doConcordance();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_concordance") %>...</td></tr>
-				<tr><td onclick="showPageInfo();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_page_info") %>...</td></tr>
-				<tr><td onclick="showOptions();">&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_options") %>...</td></tr>
-			</table>
-		</div>
 		
-<div id='idMenuBarDiv' class='toolBar' style='position: absolute; top: 30; left: 0; 
-												width:100%; width:expression(idBody.clientWidth);'>
+<div id='idMenuBarDiv' class='toolBar' style='width:100%; width:expression(idBody.clientWidth);'>
 <table id="idMenuBar" cellspacing="0" cellpadding="0" cellspacing="0">
   <tr>
     <td onaction="openNext(true);" title="<%=bundle.getString("lb_editor_segment_open_tran")%>"
@@ -2579,6 +2859,10 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
       ><img src="/globalsight/envoy/edit/online2/Undo.gif" id="idImgUndo"></td>
     <td id="idButRedo" onaction="makeRedo()" title="<%=bundle.getString("lb_redo") %>"
       ><img src="/globalsight/envoy/edit/online2/Redo.gif" id="idImgRedo"></td>
+    <td id="idButSub" onaction="makeSub()" title="<%=bundle.getString("lb_subscript") %>"
+      ><img src="/globalsight/envoy/edit/online2/subscript.gif" id="idImgSub"></td>  
+    <td id="idButSup" onaction="makeSup()" title="<%=bundle.getString("lb_superscript") %>"
+      ><img src="/globalsight/envoy/edit/online2/superscript.gif" id="idImgSup"></td>  
     <td id="idButBold" onaction="makeBold()" title="<%=bundle.getString("lb_bold") %>"
       ><img src="/globalsight/envoy/edit/online2/Bold.gif" id="idImgBold"></td>
     <td id="idButItalic" onaction="makeItalic()" title="<%=bundle.getString("lb_italic") %>"
@@ -2643,14 +2927,10 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 </table>
 </div>
 
-<div id="idSegments" style="position: absolute;
-  top: 70; left: 10;
-  width: expression(idBody.clientWidth - 20);
-  height: expression(idBody.clientHeight - 75);
-  border: 1px solid black; overflow: auto; padding: 8px;">
+<div id="idSegments" style="
+  border: 1px solid black; overflow: auto; padding: 8px;margin:5px;">
 <%=str_pageHtml%>
-</DIV>
-
+</div>
 <APPLET
   style="display:inline"
   archive="/globalsight/applet/lib/online.jar"
@@ -2699,9 +2979,18 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
  	</div>
 
 <form name="frmSC"><input type="hidden" name="language" value=""></form>
-<script>
-doInit();
-</script>
-
+<FORM name="CommentForm" METHOD="POST" action="${refresh.pageURL}&reviewMode=true">
+<input type="hidden" name="tuId"        value="">
+<input type="hidden" name="tuvId"       value="">
+<input type="hidden" name="subId"       value="">
+<input type="hidden" name="cmtAction"   value="">
+<input type="hidden" name="cmtTitle"    value="">
+<input type="hidden" name="cmtComment"  value="">
+<input type="hidden" name="cmtPriority" value="">
+<input type="hidden" name="cmtStatus"   value="">
+<input type="hidden" name="cmtCategory" value="">
+<input type="hidden" name="cmtShare"   value="">
+<input type="hidden" name="cmtOverwrite"   value="">
+</FORM>
 </body>
 </html>

@@ -37,7 +37,7 @@ import com.globalsight.smartbox.util.WebClientHelper;
  * Polling jobCreateSuccessful.log to get successful job list, then polling
  * GlobalSight to check job status
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class JobDownloadPolling implements Polling
@@ -147,8 +147,7 @@ public class JobDownloadPolling implements Polling
 
     private void updateSuccessfulJobRecord()
     {
-        boolean init = WebClientHelper.init(host, port, https, username,
-                password);
+        boolean init = WebClientHelper.init(host, port, https, username, password);
         if (!init)
         {
             return;
@@ -166,7 +165,7 @@ public class JobDownloadPolling implements Polling
                 String record = raf.readLine();
                 String[] jobRecord = record.split(",");
                 JobInfo jobInfo = new JobInfo();
-                jobInfo.setJobName(jobRecord[0]);
+                jobInfo.setId(jobRecord[0]);
                 jobInfo.setJobName(jobRecord[1]);
                 jobInfo.setOriginFile(jobRecord[2]);
                 successfulJobRecords.add(jobInfo);

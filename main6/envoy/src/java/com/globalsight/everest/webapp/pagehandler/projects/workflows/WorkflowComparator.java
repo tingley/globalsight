@@ -33,17 +33,15 @@ public class WorkflowComparator extends StringComparator
     public static final int TARG_LOCALE         = 0;
     public static final int COMPLETE            = 1;
     public static final int PLANNED_DATE        = 2;
-    public static final int EXACT               = 3;
-    public static final int BAND1               = 4;
-    public static final int BAND2               = 5;
-    public static final int BAND3               = 6;
-    public static final int BAND4               = 7;
-    public static final int NO_MATCH            = 8;
-    public static final int REPETITIONS         = 9;
+    public static final int EXACT               = 3;// 100%
+    public static final int BAND1               = 4;// 95%-99%
+    public static final int BAND2               = 5;// 85%-94%
+    public static final int BAND3               = 6;// 75%-84%
+    public static final int BAND4               = 7;// 50%-74%
+    public static final int NO_MATCH            = 8;// no match
+    public static final int REPETITIONS         = 9;// all repetitions that covers not all 100% segments
     public static final int CONTEXT             = 10;
     public static final int WC_TOTAL            = 11;
-    public static final int SUBLEVMATCH         = 12;
-    public static final int SUBLEVREP           = 13;
     public static final int TOTAL_FUZZY         = 14;
 
     // For sla report issue
@@ -126,7 +124,7 @@ public class WorkflowComparator extends StringComparator
                 }
                 
                 break;
-            case EXACT:  // JPF- fix when have back end
+            case EXACT:
                 aInt = a.getSegmentTmWordCount();
                 bInt = b.getSegmentTmWordCount();
                 if (aInt > bInt)
@@ -176,7 +174,7 @@ public class WorkflowComparator extends StringComparator
                 else
                     rv = -1;
                 break;
-            case NO_MATCH:  // JPF- fix when have back end
+            case NO_MATCH:
                 aInt = a.getNoMatchWordCount();
                 bInt = b.getNoMatchWordCount();
                 if (aInt > bInt)
@@ -196,7 +194,7 @@ public class WorkflowComparator extends StringComparator
                 else
                     rv = -1;
                 break;
-            case CONTEXT:  // JPF- fix when have back end
+            case CONTEXT:
                 aInt = a.getContextMatchWordCount();
                 bInt = b.getContextMatchWordCount();
                 if (aInt > bInt)
@@ -217,8 +215,8 @@ public class WorkflowComparator extends StringComparator
                     rv = -1;
                 break;
             case IN_CONTEXT:  
-                aInt = a.getContextMatchWordCount();
-                bInt = b.getContextMatchWordCount();
+                aInt = a.getInContextMatchWordCount();
+                bInt = b.getInContextMatchWordCount();
                 if (aInt > bInt)
                     rv = 1;
                 else if (aInt == bInt)
@@ -246,27 +244,6 @@ public class WorkflowComparator extends StringComparator
                 else
                     rv = -1;
                 break;
-            case SUBLEVREP:  // JPF- fix when have back end
-                aInt = a.getSubLevRepetitionWordCount();
-                bInt = b.getSubLevRepetitionWordCount();
-                if (aInt > bInt)
-                    rv = 1;
-                else if (aInt == bInt)
-                    rv = 0;
-                else
-                    rv = -1;
-                break;
-            case SUBLEVMATCH:  // JPF- fix when have back end
-                aInt = a.getSubLevMatchWordCount();
-                bInt = b.getSubLevMatchWordCount();
-                if (aInt > bInt)
-                    rv = 1;
-                else if (aInt == bInt)
-                    rv = 0;
-                else
-                    rv = -1;
-                break;
-
             case WC_TOTAL:
                 aInt = a.getTotalWordCount();
                 bInt = b.getTotalWordCount();
@@ -282,16 +259,12 @@ public class WorkflowComparator extends StringComparator
                 aInt = (a.getLowFuzzyMatchWordCount() + 
                         a.getMedFuzzyMatchWordCount() + 
                         a.getMedHiFuzzyMatchWordCount() +
-                        a.getHiFuzzyMatchWordCount()) - 
-                    (a.getSubLevMatchWordCount() + 
-                     a.getSubLevRepetitionWordCount());
+                        a.getHiFuzzyMatchWordCount());
 
                 bInt = (b.getLowFuzzyMatchWordCount() + 
                         b.getMedFuzzyMatchWordCount() + 
                         b.getMedHiFuzzyMatchWordCount() +
-                        b.getHiFuzzyMatchWordCount()) - 
-                    (b.getSubLevMatchWordCount() + 
-                     b.getSubLevRepetitionWordCount());
+                        b.getHiFuzzyMatchWordCount());
                 if (aInt > bInt)
                     rv = 1;
                 else if (aInt == bInt)

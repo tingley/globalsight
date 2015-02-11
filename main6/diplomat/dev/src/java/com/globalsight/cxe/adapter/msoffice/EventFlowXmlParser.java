@@ -22,7 +22,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.NoSuchElementException;
 
-//DOM,SAX
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -32,7 +31,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-//GlobalSight
 import com.globalsight.diplomat.util.XmlUtil;
 
 /**
@@ -291,7 +289,7 @@ public class EventFlowXmlParser
      */
     public void reconstructEventFlowXmlStringFromDOM() throws IOException
     {
-        OutputFormat oformat = new OutputFormat(m_document, "UTF8", true);
+        OutputFormat oformat = new OutputFormat(m_document, "UTF-8", true);
         oformat.setOmitDocumentType(true);
         oformat.setOmitComments(false);
         oformat.setOmitXMLDeclaration(true);

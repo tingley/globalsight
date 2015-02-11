@@ -133,6 +133,8 @@ public interface ProjectHandler
     Collection getAllL10nProfiles() throws RemoteException,
             ProjectHandlerException;
 
+    Collection getAllL10nProfilesData() throws RemoteException,
+            ProjectHandlerException;
     /**
      * Get the names (and primary keys) of all the localization profiles. The
      * key in the hashtable is the primary key.

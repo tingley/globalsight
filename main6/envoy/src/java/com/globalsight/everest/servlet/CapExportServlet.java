@@ -23,14 +23,18 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +45,9 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.filesystem.Exporter;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.page.PageManagerLocal;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -49,16 +55,24 @@ import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.ProjectHandlerException;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.workflow.WorkflowMailerConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.mail.MailerConstants;
 
 
 /**
@@ -423,7 +437,7 @@ public class CapExportServlet
                 ExportConstants.ORIG_CXE_REQUEST_TYPE);
     
             long pageId = Long.parseLong(p_pageId);
-            PageManagerLocal.EXPORTING_TARGET_PAGE.remove(pageId);
+//            PageManagerLocal.EXPORTING_TARGET_PAGE.remove(pageId);
             
             String responseType = p_request.getParameter(
                 ExportConstants.RESPONSE_TYPE);
@@ -492,7 +506,7 @@ public class CapExportServlet
                             String p_responseType)
         throws Exception
     {
-        String state = null;
+
         if (p_responseType.equals(ExportConstants.FAILURE))
         {
             ServerProxy.getSecondaryTargetFileManager().
@@ -525,9 +539,10 @@ public class CapExportServlet
     {
         TargetPage tp = ServerProxy.getPageManager().
             getTargetPage(p_pageId);
-
+        String state = null;
         if (p_responseType.equals(ExportConstants.FAILURE))
         {
+            state = Workflow.EXPORT_FAILED;
             // details will always be a GeneralException
             String details =
                 p_request.getParameter(ExportConstants.RESPONSE_DETAILS);
@@ -547,12 +562,12 @@ public class CapExportServlet
 
             // Id > 0 means it is because xml dtd validation failed.
             ServerProxy.getPageEventObserver().notifyExportFailEvent(tp,
-                    details, id < 1);           
+                    details, id < 1);
         }
         else if (p_responseType.equals(ExportConstants.SUCCESS))
         {
             
-            String workflowState = tp.getWorkflowInstance().getState();
+            state = Workflow.EXPORTED;
             // an interim export can happen during dispatch without
             // updating any states.
             // so only update the target page if it is marked in the
@@ -563,8 +578,44 @@ public class CapExportServlet
                     notifyExportSuccessEvent(tp);
             }
         }
+        snedEmail(tp, state);
     }
 
+
+    private void snedEmail(TargetPage targetPage, String state)
+            throws ProjectHandlerException, RemoteException, GeneralException,
+            NamingException
+    {
+        Job job = targetPage.getWorkflowInstance().getJob();
+        ServerProxy.getWorkflowServer().advanceWorkFlowNotification(
+                targetPage.getWorkflowInstance().getId() + job.getJobName(),
+                state);
+    }
+
+    private Collection<? extends User> getWorkflowManagers(TargetPage targetPage)
+    {
+        List wfManagerIds = targetPage.getWorkflowInstance()
+                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
+        int size = wfManagerIds.size();
+
+        Set<User> users = new HashSet<User>();
+
+        // notify all workflow managers (if any)
+        for (int i = 0; i < size; i++)
+        {
+            try
+            {
+                User user = ServerProxy.getUserManager().getUser(
+                        (String) wfManagerIds.get(i));
+                users.add(user);
+            }
+            catch (Exception e)
+            {
+                c_logger.error(e.getMessage(), e);
+            }
+        }
+        return users;
+    }
 
     // Let the export event observer set the state of the exported page to either
     // successful or failed.

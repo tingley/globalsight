@@ -30,23 +30,24 @@ import com.globalsight.ling.tm2.leverage.MatchState;
 public class Types
 {
     static private final Logger logger = Logger.getLogger(Types.class);
-    private boolean isSubLevMatch = false;
+
     private int statisticsType;// Threshold not-related
     private int statisticsTypeByThreshold;// Adjusted by threshold
     private int lingManagerMatchType;
     private MatchState matchState;
+    private boolean isMtTranslation = false;
     private String sid;
 
     // Constructor
-    public Types(boolean p_isSubLevMatch, int p_statisticsType,
-            int p_statisticsTypeByThreshold, int p_lingManagerMatchType,
-            MatchState p_matchState)
+    public Types(int p_statisticsType, int p_statisticsTypeByThreshold,
+            int p_lingManagerMatchType, MatchState p_matchState,
+            boolean p_isMtTranslation)
     {
-        isSubLevMatch = p_isSubLevMatch;
         statisticsType = p_statisticsType;
         statisticsTypeByThreshold = p_statisticsTypeByThreshold;
         lingManagerMatchType = p_lingManagerMatchType;
         matchState = p_matchState;
+        isMtTranslation = p_isMtTranslation;
     }
 
     public void setStatisticsMatchType(int p_statisticsType)
@@ -80,17 +81,6 @@ public class Types
         return lingManagerMatchType;
     }
 
-    /**
-     * @deprecated -- this means current leverage match score is between
-     *             50(included) and 75(excluded),no special purpose,so no need
-     *             to keep one special flag for this.
-     * @author YorkJin
-     */
-    public boolean isSubLevMatch()
-    {
-        return isSubLevMatch;
-    }
-
     public String getSid()
     {
         return sid;
@@ -111,6 +101,16 @@ public class Types
         this.matchState = matchState;
     }
 
+    public void setIsMtTranslation(boolean p_isMtTranslation)
+    {
+        this.isMtTranslation = p_isMtTranslation;
+    }
+
+    public boolean isMtTranslation()
+    {
+        return this.isMtTranslation;
+    }
+
     /**
      * There are four kinds of format to show exact match, judge use which one.
      * It is also used to count in-context match.
@@ -121,7 +121,7 @@ public class Types
      *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
      *         segments).
      */
-    public boolean isExactMatchLocalized(long p_tuvId, String companyId)
+    public boolean isExactMatchLocalized(long p_tuvId, long companyId)
     {
         // Judge if it is "XLIFF_EXACT_MATCH" and "isXliffLocked" first.
         if (MatchState.XLIFF_EXACT_MATCH.equals(matchState))

@@ -14,6 +14,7 @@ import com.globalsight.everest.unittest.util.FileUtil;
 
 public class FontMappingHelperTest
 {
+    FontMappingHelper helper = new FontMappingHelper();
     private String inddXml = null;
 
     @Before
@@ -34,7 +35,7 @@ public class FontMappingHelperTest
         fm2.setTargetLocale("zh_CN");
         fms.add(fm1);
         fms.add(fm2);
-        FontMappingHelper.initForDebug(fms);
+        helper.initForDebug(fms);
     }
 
     @Test
@@ -46,7 +47,7 @@ public class FontMappingHelperTest
     @Test
     public void testProcessInddXml()
     {
-        String processed = FontMappingHelper.processInddXml("zh_CN", inddXml);
+        String processed = helper.processInddXml("zh_CN", inddXml);
         Assert.assertTrue(processed.contains("InddFontFamily=\"MingLiU\""));
         Assert.assertTrue(processed.contains("InddFontFamily=\"MS Mincho\""));
         Assert.assertTrue(processed.contains("[Medium-10-MingLiU]"));

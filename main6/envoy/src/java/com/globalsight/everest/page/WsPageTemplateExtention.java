@@ -45,7 +45,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
     }
 
     @Override
-    public String processSkeleton(String skeletonStr, Tuv tuv, String companyId)
+    public String processSkeleton(String skeletonStr, Tuv tuv, long companyId)
     {
         Tu tu = tuv.getTu(companyId);
         boolean isLocalized = isTuvLocalized(tuv);
@@ -130,7 +130,8 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
     }
 
     @Override
-    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, String companyId)
+    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, long companyId,
+            boolean isJobDataMigrated)
     {
         String altStr = new String();
         Tu tu = sourceTuv.getTu(companyId);
@@ -140,17 +141,19 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 && tu.getGenerateFrom().equals(TuImpl.FROM_WORLDSERVER))
         {
             LeverageMatchLingManagerLocal lmm = new LeverageMatchLingManagerLocal();
-            SortedSet lms = lmm.getTuvMatches(sourceTuv.getIdAsLong(),
-                    targetTuv.getLocaleId(), "0", false, companyId);
+            SortedSet<LeverageMatch> lms = lmm.getTuvMatches(
+                    sourceTuv.getIdAsLong(), targetTuv.getLocaleId(), "0",
+                    false, companyId, isJobDataMigrated);
 
-            List list = new ArrayList(lms);
+            List<LeverageMatch> list = new ArrayList<LeverageMatch>(lms);
             altStr = getAltTransOfMatch(list, companyId);
         }
 
         return altStr;
     }
 
-    private String getAltTransOfMatch(List<LeverageMatch> p_list, String p_companyId)
+    private String getAltTransOfMatch(List<LeverageMatch> p_list,
+            long p_companyId)
     {
         String altStr = new String();
         ListViewWorkXLIFFWriter lvwx = new ListViewWorkXLIFFWriter();
@@ -165,7 +168,9 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
 
                 if (judgeIfneedAdd(leverageMatch))
                 {
-                    altStr = altStr + lvwx.getAltByMatch(leverageMatch, null, p_companyId);
+                    altStr = altStr
+                            + lvwx.getAltByMatch(leverageMatch, null,
+                                    p_companyId);
                 }
             }
         }
@@ -200,18 +205,18 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
         {
             SourcePage sp = ServerProxy.getPageManager().getSourcePage(
                     lm.getSourcePageId());
-            String companyId = sp != null ? sp.getCompanyId() : CompanyWrapper
-                    .getCurrentCompanyId();
+            long companyId = sp != null ? sp.getCompanyId() : Long
+                    .parseLong(CompanyWrapper.getCurrentCompanyId());
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
                     lm.getOriginalSourceTuvId(), companyId);
             Tuv targetTuv = sourceTuv.getTu(companyId).getTuv(
                     lm.getTargetLocaleId(), sp.getCompanyId());
-            boolean isWSXlf = false;
-            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
-                    companyId).getGenerateFrom()))
-            {
-                isWSXlf = true;
-            }
+//            boolean isWSXlf = false;
+//            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
+//                    companyId).getGenerateFrom()))
+//            {
+//                isWSXlf = true;
+//            }
 
             String targetContent = targetTuv.getGxml();
             String originalTarget = sourceTuv.getTu(companyId)

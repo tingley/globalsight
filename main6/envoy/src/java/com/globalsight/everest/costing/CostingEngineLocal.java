@@ -19,10 +19,12 @@ package com.globalsight.everest.costing;
 
 // globalsight
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -80,11 +82,6 @@ public class CostingEngineLocal implements CostingEngine
     // for logging purposes
     private static final Logger c_logger = Logger
             .getLogger(CostingEngineLocal.class.getName());
-
-    // holds the collection of currencies - can also get
-    // from DB and cache
-    // FIXME This field need to be removed when multicompany finished.
-    // private Collection m_currencies = new ArrayList(180);
 
     // holds the collection of iso currency codes
     private Vector m_isoCurrencies = new Vector(180);
@@ -261,7 +258,7 @@ public class CostingEngineLocal implements CostingEngine
             {
                 hql += " where c.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             currencies = HibernateUtil.search(hql, map);
@@ -280,7 +277,7 @@ public class CostingEngineLocal implements CostingEngine
     /**
      * @see CostingEngine.getCurrency(String)
      */
-    public Currency getCurrency(String p_isoCode, String p_companyId)
+    public Currency getCurrency(String p_isoCode, long p_companyId)
             throws RemoteException, CostingException
     {
         Currency cur = null;
@@ -289,7 +286,7 @@ public class CostingEngineLocal implements CostingEngine
             String hql = "from Currency c where c.isoCurrency.code = :code and c.companyId = :cId";
             Map map = new HashMap();
             map.put("code", p_isoCode);
-            map.put("cId", new Long(p_companyId));
+            map.put("cId", p_companyId);
             Collection currencies = HibernateUtil.search(hql, map);
             Iterator i = currencies.iterator();
             cur = i.hasNext() ? (Currency) i.next() : null;
@@ -310,7 +307,7 @@ public class CostingEngineLocal implements CostingEngine
             CostingException
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        return getCurrency(p_isoCode, companyId);
+        return getCurrency(p_isoCode, Long.parseLong(companyId));
     }
 
     /**
@@ -319,7 +316,8 @@ public class CostingEngineLocal implements CostingEngine
     public Currency getPivotCurrency() throws RemoteException, CostingException
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        Currency c = (Currency) Currency.getPivotCurrencies().get(companyId);
+        Currency c = (Currency) Currency.getPivotCurrencies().get(
+                Long.parseLong(companyId));
         if (c == null)
         {
             c = HibernateUtil.get(Currency.class, 1);
@@ -361,8 +359,8 @@ public class CostingEngineLocal implements CostingEngine
             if (!isSuper)
             {
                 hql += " where c.companyId = :companyId";
-                query = session.createQuery(hql).setString("companyId",
-                        currentId);
+                query = session.createQuery(hql).setLong(companyId,
+                        Long.parseLong(currentId));
             }
             else
             {
@@ -406,7 +404,7 @@ public class CostingEngineLocal implements CostingEngine
 
             // change the static pivot currency that is already set.
             Map pivotCurrencies = Currency.getPivotCurrencies();
-            pivotCurrencies.put(companyId, cloneNewPivot);
+            pivotCurrencies.put(Long.parseLong(currentId), cloneNewPivot);
             Currency.setPivotCurrencies(pivotCurrencies);
         }
         catch (Exception e)
@@ -461,11 +459,9 @@ public class CostingEngineLocal implements CostingEngine
                     throw new RuntimeException(
                             "Need to be modified after made system parameter company sensitive");
                 }
-                String companyId = null;
                 for (Iterator iter = companies.iterator(); iter.hasNext();)
                 {
-                    companyId = ((Company) iter.next()).getIdAsLong()
-                            .toString();
+                    long companyId = ((Company) iter.next()).getId();
                     Currency cur = getCurrency(p_systemParameterValue,
                             companyId);
                     if (cur != null)
@@ -525,9 +521,10 @@ public class CostingEngineLocal implements CostingEngine
                 .getStringParameter(SystemConfigParamNames.PIVOT_CURRENCY);
 
         IsoCurrency iso = getIsoCurrency(pivotCurCode);
-        Currency pivot = new Currency(iso, 1, p_companyId);
+        long companyId = Long.parseLong(p_companyId);
+        Currency pivot = new Currency(iso, 1, companyId);
         pivot = addOrModifyCurrency(pivot);
-        Currency.getPivotCurrencies().put(p_companyId, pivot);
+        Currency.getPivotCurrencies().put(companyId, pivot);
 
         return pivot;
     }
@@ -761,7 +758,7 @@ public class CostingEngineLocal implements CostingEngine
             {
                 hql += " and r.activity.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
             rates = HibernateUtil.search(hql, map);
         }
@@ -863,6 +860,12 @@ public class CostingEngineLocal implements CostingEngine
                     args, ume);
         }
 
+        
+        if (cr == null)
+        {
+        	c_logger.error("Can not find the role for activity: " + p_activity.getActivityName() + " with locale " +  p_targetLocale.toString());
+        }
+        
         // use the rate ids to
         // retrieve the rates.
         return cr.getRates();
@@ -906,11 +909,29 @@ public class CostingEngineLocal implements CostingEngine
             {
                 Role r = (Role) i.next();
                 Activity a = r.getActivity();
+                
+                if (a == null)
+                {
+                	c_logger.error("Can not find the activity for role: " + r.getName());
+                	continue;
+                }
+                
+                Collection<Rate> rs = r.getRates();
+                List<Rate> rRs = new ArrayList<Rate>();
+                for (Rate r1 : rs)
+                {
+                	if (!r1.isActive())
+                	{
+                		rRs.add(r1);
+                	}
+                }
+                rs.removeAll(rRs);
+                
                 if (ratesOnActivity.containsKey(a.getActivityName()))
                 {
                     Vector rates = (Vector) ratesOnActivity.get(a
                             .getActivityName());
-                    rates.addAll(r.getRates());
+                    rates.addAll(rs);
                     // override what was previously there with the new
                     // collection
                     ratesOnActivity.put(a.getActivityName(), rates);
@@ -918,7 +939,7 @@ public class CostingEngineLocal implements CostingEngine
                 else
                 // activity not in hashtable yet
                 {
-                    Vector rates = new Vector(r.getRates());
+                    Vector rates = new Vector(rs);
                     ratesOnActivity.put(a.getActivityName(), rates);
                 }
             }
@@ -1689,13 +1710,13 @@ public class CostingEngineLocal implements CostingEngine
                         session, p_costType, p_recalcFinishedWorkflow);
                 // commit the entire transaction
                 // uow.commit();
-                tx.commit();
             }
             else if (p_workflow.getState().equals(Workflow.IMPORT_FAILED))
             {
                 totalCost = new Cost(p_workflow, Cost.ZERO_COST,
                         Cost.ZERO_COST, Cost.ZERO_COST, p_currency, p_costType);
             }
+            tx.commit();
         }
         catch (Exception e)
         {
@@ -1797,8 +1818,8 @@ public class CostingEngineLocal implements CostingEngine
         Cost totalCost = getCost(p_job, p_costType);
         totalCost = (Cost) p_session.get(Cost.class, totalCost.getIdAsLong());
 
-        p_currency = (Currency) p_session.get(
-                Currency.class, p_currency.getIdAsLong());
+        p_currency = (Currency) p_session.get(Currency.class,
+                p_currency.getIdAsLong());
         totalCost = totalCost.convert(p_currency);
 
         totalCost.isUseInContext = PageHandler.isInContextMatch(p_job);
@@ -1832,12 +1853,12 @@ public class CostingEngineLocal implements CostingEngine
                     totalCost.addworkflowCost(w.getId(), workflowCost);
 
                     totalCost = totalCost.add(workflowCost);
-                    totalCost.isUseInContext =
-                            PageHandler.isInContextMatch(p_job);
-                    totalCost.isDefaultInContext =
-                            PageHandler.isDefaultContextMatch(p_job);
-                    CostByWordCount workflowCostByWordCount = 
-                            workflowCost.getCostByWordCount();
+                    totalCost.isUseInContext = PageHandler
+                            .isInContextMatch(p_job);
+                    totalCost.isDefaultInContext = PageHandler
+                            .isDefaultContextMatch(p_job);
+                    CostByWordCount workflowCostByWordCount = workflowCost
+                            .getCostByWordCount();
                     if (workflowCostByWordCount != null)
                     {
                         hasWordCountCostBreakdown = true;
@@ -1876,7 +1897,7 @@ public class CostingEngineLocal implements CostingEngine
         {
             // else :: the cost is fine, only load workflow cost for usage.
             for (Iterator wfIter = p_job.getWorkflows().iterator(); wfIter
-                    .hasNext();) 
+                    .hasNext();)
             {
                 Workflow wf = (Workflow) wfIter.next();
                 Cost wfCost = getCost(wf, p_costType);
@@ -2246,16 +2267,11 @@ public class CostingEngineLocal implements CostingEngine
         {
             // get word counts
             // Note: the adjusted workflow word counts (which include cross-file
-            // repetition anaylisis) are stored on the workflow.
+            // repetition analysis) are stored on the workflow.
             // These adjusted word counts are what we want to cost off of.
-            int subLevRepetitionCount = p_workflow
-                    .getSubLevRepetitionWordCount();
-            // The no match category
-            int repetitionCount = p_workflow.getRepetitionWordCount()
-                    + subLevRepetitionCount
-                    + p_workflow.getHiFuzzyRepetitionWordCount()
-                    + p_workflow.getMedHiFuzzyRepetitionWordCount()
-                    + p_workflow.getMedFuzzyRepetitionWordCount();
+
+            // all repetitions
+            int repetitionCount = p_workflow.getRepetitionWordCount();
             // The fuzzy match category
             int inContextMatchCount = p_workflow.getInContextMatchWordCount();
             int noUseInContextMatchCount = p_workflow
@@ -2482,7 +2498,7 @@ public class CostingEngineLocal implements CostingEngine
             {
                 String companyId = CompanyThreadLocal.getInstance().getValue();
                 Currency privot = (Currency) Currency.getPivotCurrencies().get(
-                        companyId);
+                        Long.parseLong(companyId));
                 c = new Cost(p_obj, Cost.ZERO_COST, Cost.ZERO_COST,
                         Cost.ZERO_COST, privot, p_costType);
                 HibernateUtil.save(c);

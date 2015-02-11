@@ -70,7 +70,6 @@ import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -314,10 +313,12 @@ public class StandardExtractor
 
             TranslationMemoryProfile tmp = l10nProfile
                     .getTranslationMemoryProfile();
-            long tmpId = tmp.getId();
-
-            srf = ServerProxy.getSegmentationRuleFilePersistenceManager()
-                    .getSegmentationRuleFileByTmpid(String.valueOf(tmpId));
+            if (tmp != null)
+            {
+                srf = ServerProxy.getSegmentationRuleFilePersistenceManager()
+                        .getSegmentationRuleFileByTmpid(
+                                String.valueOf(tmp.getId()));
+            }
 
             diplomat.setFileProfileId(fpId);
             diplomat.setFilterId(fp.getFilterId());
@@ -1620,10 +1621,9 @@ public class StandardExtractor
                 {
                     try
                     {
-                        String fileName = SystemConfiguration
-                                .getCompanyResourcePath("/properties/ResxRule.properties");
-                        m_ruleFile = FileUtils.read(StandardExtractor.class
-                                .getResourceAsStream(fileName));
+                        m_ruleFile = FileUtils
+                                .read(StandardExtractor.class
+                                        .getResourceAsStream("/properties/ResxRule.properties"));
                     }
                     catch (Exception e)
                     {

@@ -704,33 +704,31 @@ public class CommentManagerLocal implements CommentManager
     }
 
     /**
-     * @see CommentManager.getIssues(int, String);
+     * @see CommentManager.getIssues(int, long);
      */
-    public ArrayList getIssues(int p_levelObjectType, String p_logicalKey)
-            throws RemoteException, CommentException
+    @SuppressWarnings("unchecked")
+    public ArrayList<IssueImpl> getIssues(int p_levelObjectType,
+            long p_targetPageId) throws RemoteException, CommentException
     {
         try
         {
             String hql = "from IssueImpl i where i.levelObjectTypeAsString = ? "
-                    + " and i.logicalKey like ? ";
+                    + " and i.targetPageId = ? ";
 
             String levelType = IssueImpl
                     .getLevelTypeAsString(p_levelObjectType);
             levelType = levelType == null ? "" : levelType;
 
-            p_logicalKey = p_logicalKey.endsWith("%") ? p_logicalKey
-                    : p_logicalKey + "%";
-
-            return (ArrayList) HibernateUtil.search(hql, levelType,
-                    p_logicalKey);
+            return (ArrayList<IssueImpl>) HibernateUtil.search(hql, levelType,
+                    p_targetPageId);
         }
         catch (Exception ex)
         {
             CATEGORY.error("Failed to get issues for object type "
-                    + p_levelObjectType + " with logical key " + p_logicalKey,
-                    ex);
+                    + p_levelObjectType + " with targetPageId "
+                    + p_targetPageId, ex);
             String msgArgs[] =
-            { String.valueOf(p_levelObjectType), p_logicalKey };
+            { String.valueOf(p_levelObjectType), String.valueOf(p_targetPageId) };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_ISSUES, msgArgs, ex);
         }

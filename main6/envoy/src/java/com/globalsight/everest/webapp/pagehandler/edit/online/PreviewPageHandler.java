@@ -20,7 +20,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -87,7 +86,8 @@ public class PreviewPageHandler extends PageHandler
 
     private static final String LOCALE_POST_CONVERTED = "he_IL";
 
-    static private final String[] PROPERTY_FILES = { "/properties/Logger.properties",
+    static private final String[] PROPERTY_FILES =
+    { "/properties/Logger.properties",
             "/properties/OpenOfficeAdapter.properties" };
 
     private String sourceLocale;
@@ -104,9 +104,10 @@ public class PreviewPageHandler extends PageHandler
     private String m_convDir = null;
     private String formatType = null;
 
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context) throws ServletException,
-            IOException, EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(true);
         sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
@@ -126,14 +127,14 @@ public class PreviewPageHandler extends PageHandler
         m_job = getJobById(Long.valueOf(jobId).longValue());
         if (m_job != null)
         {
-            m_company_id = m_job.getCompanyId();
+            m_company_id = String.valueOf(m_job.getCompanyId());
         }
         else
         {
             m_company_id = CompanyThreadLocal.getInstance().getValue();
             CATEGORY.warn("Get company id from ThreadLocal for openoffice preview.");
         }
-        
+
         Object userobj = sessionMgr.getAttribute(WebAppConstants.USER);
         UserImpl user = null;
         if (userobj != null)
@@ -141,12 +142,13 @@ public class PreviewPageHandler extends PageHandler
             user = (UserImpl) userobj;
         }
         String userid = user == null ? null : user.getUserId();
-        EditorState state = (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
 
         sourceLocale = m_job.getSourceLocale().toString();
 
-        String action = p_request.getParameter("action") == null ? "" : (String) p_request
-                .getParameter("action");
+        String action = p_request.getParameter("action") == null ? ""
+                : (String) p_request.getParameter("action");
         File preFile = getPreviewFile(p_request, userid);
         File pdfFile = getPreviewPdfFile(p_request, userid);
         File preFileInWAR = getPreviewFileInWar(p_request, p_context, userid);
@@ -160,30 +162,36 @@ public class PreviewPageHandler extends PageHandler
                 {
                     if (!preFile.exists() || !preFileInWAR.exists())
                     {
-                    	 File srcFile = getSourceFile(p_request);
-                    	 
-                        if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(formatType))
+                        File srcFile = getSourceFile(p_request);
+
+                        if (IFormatNames.FORMAT_OPENOFFICE_XML
+                                .equals(formatType))
                         {
-                        	OpenOfficeConverter ooConv = new OpenOfficeConverter();
-                           
+                            OpenOfficeConverter ooConv = new OpenOfficeConverter();
+
                             ooConv.convertOdToHtml(srcFile, preFile);
                         }
-                        else if (IFormatNames.FORMAT_OFFICE_XML.equals(formatType))
+                        else if (IFormatNames.FORMAT_OFFICE_XML
+                                .equals(formatType))
                         {
-                        	MsOffice2010Converter converter = new MsOffice2010Converter();
-                        	
-                        	if (srcFile.getPath().toLowerCase().endsWith(".docx"))
-                        	{
-                        	    converter.convertToHtml(srcFile, preFile, pdfFile, sourceLocale, false, true);
-                        	}
-                        	else
-                        	{
-                        	    converter.convertToHtml(srcFile, preFile, pdfFile, sourceLocale, false, false);
-                        	}
+                            MsOffice2010Converter converter = new MsOffice2010Converter();
+
+                            if (srcFile.getPath().toLowerCase()
+                                    .endsWith(".docx"))
+                            {
+                                converter.convertToHtml(srcFile, preFile,
+                                        pdfFile, sourceLocale, false, true);
+                            }
+                            else
+                            {
+                                converter.convertToHtml(srcFile, preFile,
+                                        pdfFile, sourceLocale, false, false);
+                            }
                         }
-                        
+
                         preFileInWAR.getParentFile().mkdirs();
-                        FileCopier.copyDir(preFile.getParentFile(), preFileInWAR.getParent());
+                        FileCopier.copyDir(preFile.getParentFile(),
+                                preFileInWAR.getParent());
                     }
                 }
                 else if (action.equals("previewTar"))
@@ -192,16 +200,17 @@ public class PreviewPageHandler extends PageHandler
                     if (!preFile.exists())
                     {
                         String targetPageName = getFilePathFromRequest(p_request);
-                        int index = Math.max(targetPageName.indexOf("/"), targetPageName
-                                .indexOf("\\"));
+                        int index = Math.max(targetPageName.indexOf("/"),
+                                targetPageName.indexOf("\\"));
                         targetLocale = targetPageName.substring(0, index);
                         if (LOCALE_PRE_CONVERTED.equals(targetLocale))
                         {
-                            targetPageName = targetPageName.replaceFirst(targetLocale,
-                                    LOCALE_POST_CONVERTED);
+                            targetPageName = targetPageName.replaceFirst(
+                                    targetLocale, LOCALE_POST_CONVERTED);
                             targetLocale = LOCALE_POST_CONVERTED;
                         }
-                        String converterDir = m_convDir + File.separator + targetLocale;
+                        String converterDir = m_convDir + File.separator
+                                + targetLocale;
                         new File(converterDir).mkdirs();
 
                         File odFile = new File(converterDir, m_safeBaseFileName);
@@ -210,42 +219,50 @@ public class PreviewPageHandler extends PageHandler
                             copyFilesToNewTargetLocale();
                         }
 
-                        String xmlFilePath = converterDir + File.separator + m_relSafeName;
-                        File zipDir = getZipDir(new File(xmlFilePath), m_safeBaseFileName);
+                        String xmlFilePath = converterDir + File.separator
+                                + m_relSafeName;
+                        File zipDir = getZipDir(new File(xmlFilePath),
+                                m_safeBaseFileName);
 
                         if (IFormatNames.FORMAT_OFFICE_XML.equals(formatType))
                         {
-                        	writeXMLFileForOffice(p_request, userid, state);
-                        	OfficeXmlRepairer.repair(zipDir.getPath());
-                        	MsOffice2010Converter converter = new MsOffice2010Converter();
-                        	converter.convertXmlToOffice(odFile.getName(), zipDir.getPath());
-                        	if (odFile.getPath().toLowerCase().endsWith(".docx"))
+                            writeXMLFileForOffice(p_request, userid, state);
+                            OfficeXmlRepairer.repair(zipDir.getPath());
+                            MsOffice2010Converter converter = new MsOffice2010Converter();
+                            converter.convertXmlToOffice(odFile.getName(),
+                                    zipDir.getPath());
+                            if (odFile.getPath().toLowerCase()
+                                    .endsWith(".docx"))
                             {
-                        	    converter.convertToHtml(odFile, preFile, pdfFile, targetLocale, true, true);
+                                converter.convertToHtml(odFile, preFile,
+                                        pdfFile, targetLocale, true, true);
                             }
-                        	else
-                        	{
-                        	    converter.convertToHtml(odFile, preFile, pdfFile, targetLocale, false, false);
-                        	}
+                            else
+                            {
+                                converter.convertToHtml(odFile, preFile,
+                                        pdfFile, targetLocale, false, false);
+                            }
                         }
                         else
                         {
-                        	// write xml file
-                            writeXMLFileToConvertDir(p_request, xmlFilePath, targetPageName);
-                        	OpenOfficeConverter ooConv = new OpenOfficeConverter();
-                       	    // convert xml to OD
-                            ooConv.convertXmlToOd(odFile.getName(), zipDir.getPath());
+                            // write xml file
+                            writeXMLFileToConvertDir(p_request, xmlFilePath,
+                                    targetPageName);
+                            OpenOfficeConverter ooConv = new OpenOfficeConverter();
+                            // convert xml to OD
+                            ooConv.convertXmlToOd(odFile.getName(),
+                                    zipDir.getPath());
                             // convert od to html
                             ooConv.convertOdToHtml(odFile, preFile);
                         }
-                        
+
                         newConved = true;
                     }
 
                     if (newConved || !preFileInWAR.exists())
                     {
                         File predir = preFile.getParentFile();
-                        
+
                         // copy all files into war
                         preFileInWAR.getParentFile().mkdirs();
                         FileCopier.copyDir(predir, preFileInWAR.getParent());
@@ -256,7 +273,8 @@ public class PreviewPageHandler extends PageHandler
                 {
                     try
                     {
-                        File viewFile = PreviewPDFPageHandler.setCopyOnlyPermission(pdfFile);
+                        File viewFile = PreviewPDFPageHandler
+                                .setCopyOnlyPermission(pdfFile);
 
                         p_response.setContentType("application/pdf");
                         if (p_request.isSecure())
@@ -268,11 +286,14 @@ public class PreviewPageHandler extends PageHandler
                             p_response.setHeader("Cache-Control", "no-cache");
                         }
 
-                        // filename, maybe we need to handle some specail character,
+                        // filename, maybe we need to handle some specail
+                        // character,
                         // like &
                         String filename = pdfFile.getName();
-                        p_response.setHeader("Content-Disposition", "inline; filename=\"" + filename + "\"");
-                        PreviewPDFPageHandler.writeOutFile(viewFile, p_response, action);
+                        p_response.setHeader("Content-Disposition",
+                                "inline; filename=\"" + filename + "\"");
+                        PreviewPDFPageHandler.writeOutFile(viewFile,
+                                p_response, action);
                         FileUtils.deleteSilently(viewFile.getAbsolutePath());
                     }
                     catch (DocumentException e)
@@ -295,7 +316,8 @@ public class PreviewPageHandler extends PageHandler
         else
         {
             CATEGORY.error("action is null.");
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                    p_context);
         }
     }
 
@@ -333,37 +355,78 @@ public class PreviewPageHandler extends PageHandler
     {
         L10nProfile lp = m_job.getL10nProfile();
         GlobalSightLocale[] existedLocales = lp.getTargetLocales();
-        String existedLocale = existedLocales[0].toString();
-        if (LOCALE_PRE_CONVERTED.equals(existedLocale))
-            existedLocale = LOCALE_POST_CONVERTED;
-        copyOpenOfficeFiles(existedLocale);
+        copyOpenOfficeFiles(existedLocales);
     }
 
-    private void copyOpenOfficeFiles(String p_existedLocale)
+    private void copyOpenOfficeFiles(GlobalSightLocale[] p_existedLocales)
     {
-        String conDir = m_convDir;
+        if (p_existedLocales != null)
+        {
+            boolean copied = false;
+            String conDir = m_convDir;
+            String tgtDir = conDir + File.separator + targetLocale;
+            StringBuffer existsLocales = new StringBuffer();
+            for (GlobalSightLocale gsLocale : p_existedLocales)
+            {
+                String existedLocale = gsLocale.toString();
+                if (LOCALE_PRE_CONVERTED.equals(existedLocale))
+                    existedLocale = LOCALE_POST_CONVERTED;
 
-        StringBuffer odFile = new StringBuffer(conDir);
-        odFile.append(p_existedLocale).append(File.separator).append(m_safeBaseFileName);
+                existsLocales.append(existedLocale).append(" ");
+                StringBuffer odFile = new StringBuffer(conDir);
+                odFile.append(File.separator).append(existedLocale)
+                        .append(File.separator).append(m_safeBaseFileName);
 
-        File relSafeFile = new File(conDir, m_relSafeName);
-        File parent = relSafeFile.getParentFile();
-        String tgtDir = conDir + File.separator + targetLocale;
+                String existsPDir = conDir + File.separator + existedLocale;
+                File relSafeFile = new File(existsPDir, m_relSafeName);
+                File parent = relSafeFile.getParentFile();
+                File srcFile = new File(odFile.toString());
 
-        FileCopier.copy(new File(odFile.toString()), tgtDir);
-        FileCopier.copyDir(parent, tgtDir);
+                if (srcFile.exists())
+                {
+                    if (!parent.getName().contains("."))
+                    {
+                        parent = parent.getParentFile();
+                    }
+                    
+                    String newPDir = tgtDir + File.separator + parent.getName();
+                    File newPDirFile = new File(newPDir);
+                    if (!newPDirFile.exists())
+                    {
+                        newPDirFile.mkdirs();
+                    }
+                    FileCopier.copy(srcFile, tgtDir);
+                    FileCopier.copyDir(parent, newPDir);
+                    copied = true;
+                }
+                
+                if (copied)
+                {
+                    break;
+                }
+            }
+            
+            if (!copied)
+            {
+                String msg = "Cannot copy files to " + tgtDir
+                        + ". p_existedLocales: " + existsLocales.toString();
+                CATEGORY.error(msg);
+            }
+        }
     }
 
     private void determineConversionParameters()
     {
-        String sourcePageId = (String) sessionMgr.getAttribute(WebAppConstants.SOURCE_PAGE_ID);
+        String sourcePageId = (String) sessionMgr
+                .getAttribute(WebAppConstants.SOURCE_PAGE_ID);
         long pageId = Long.parseLong(sourcePageId);
         SourcePage sourcePage = null;
         try
         {
             sourcePage = ServerProxy.getPageManager().getSourcePage(pageId);
 
-            m_eventFlow = new EventFlow(sourcePage.getRequest().getEventFlowXml());
+            m_eventFlow = new EventFlow(sourcePage.getRequest()
+                    .getEventFlowXml());
             formatType = m_eventFlow.getSourceFormatType();
             if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(formatType))
             {
@@ -373,8 +436,10 @@ public class PreviewPageHandler extends PageHandler
             {
                 m_convDir = OfficeXmlHelper.getConversionDir();
             }
-            m_relSafeName = m_eventFlow.getDiplomatAttribute("relSafeName").getValue();
-            m_safeBaseFileName = m_eventFlow.getDiplomatAttribute("safeBaseFileName").getValue();
+            m_relSafeName = m_eventFlow.getDiplomatAttribute("relSafeName")
+                    .getValue();
+            m_safeBaseFileName = m_eventFlow.getDiplomatAttribute(
+                    "safeBaseFileName").getValue();
         }
         catch (Exception e)
         {
@@ -382,9 +447,10 @@ public class PreviewPageHandler extends PageHandler
         }
     }
 
-    private void writeFile(SourcePage sourcePage, String userid, EditorState state)
+    private void writeFile(SourcePage sourcePage, String userid,
+            EditorState state)
     {
-    	long tpgId = 0;
+        long tpgId = 0;
 
         for (Workflow wf : m_job.getWorkflows())
         {
@@ -396,7 +462,8 @@ public class PreviewPageHandler extends PageHandler
                 while (tgsIterator.hasNext())
                 {
                     TargetPage tpg = (TargetPage) tgsIterator.next();
-                    if (tpg.getSourcePage().getExternalPageId().equals(sourcePage.getExternalPageId()))
+                    if (tpg.getSourcePage().getExternalPageId()
+                            .equals(sourcePage.getExternalPageId()))
                     {
                         tpgId = tpg.getId();
                         isBreak = true;
@@ -409,32 +476,38 @@ public class PreviewPageHandler extends PageHandler
         }
 
         String converterDir = m_convDir + File.separator + targetLocale;
-        EventFlow eventFlow = new EventFlow(sourcePage.getRequest().getEventFlowXml());
-        String relSafeName = eventFlow.getDiplomatAttribute("relSafeName").getValue();
+        EventFlow eventFlow = new EventFlow(sourcePage.getRequest()
+                .getEventFlowXml());
+        String relSafeName = eventFlow.getDiplomatAttribute("relSafeName")
+                .getValue();
         String path = converterDir + File.separator + relSafeName;
         ExportHelper ex = new ExportHelper();
         try
         {
             if (tpgId == 0)
             {
-                throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_XML,
+                throw new EnvoyServletException(
+                        EnvoyServletException.MSG_FAILED_TO_PREVIEW_XML,
                         "No target page found");
             }
             String xml = null;
-            
+
             if (IFormatNames.FORMAT_OFFICE_XML.equals(formatType))
             {
                 ex.setUserId(userid);
                 ex.setEditorState(state);
-                xml = ex.getTargetXmlContent(tpgId, CxeMessageType.XML_LOCALIZED_EVENT, true);
+                xml = ex.getTargetXmlContent(tpgId,
+                        CxeMessageType.XML_LOCALIZED_EVENT, true);
             }
             else
             {
                 xml = ex.exportForPdfPreview(tpgId, "UTF-8", false);
             }
             xml = fixOfficePreviewXml(xml);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-            		path.toString()), ExportConstants.UTF8), xml.length());
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(
+                            new FileOutputStream(path.toString()),
+                            ExportConstants.UTF8), xml.length());
             writer.write(xml);
             writer.close();
         }
@@ -443,22 +516,25 @@ public class PreviewPageHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
     }
-    
+
     /**
      * Writes xml file to convert directory
      * 
      * @param p_request
      */
-    private void writeXMLFileForOffice(HttpServletRequest p_request, String userid, EditorState state) throws Exception
+    private void writeXMLFileForOffice(HttpServletRequest p_request,
+            String userid, EditorState state) throws Exception
     {
         String sourceLocale = m_job.getSourceLocale().toString();
-        String sourcePageId = (String) sessionMgr.getAttribute(WebAppConstants.SOURCE_PAGE_ID);
+        String sourcePageId = (String) sessionMgr
+                .getAttribute(WebAppConstants.SOURCE_PAGE_ID);
         long pageId = Long.parseLong(sourcePageId);
-        
-        SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(pageId);
+
+        SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(
+                pageId);
         List<SourcePage> pages = new ArrayList<SourcePage>();
         File file = sourcePage.getFile();
-        
+
         for (Object ob : m_job.getSourcePages())
         {
             SourcePage page = (SourcePage) ob;
@@ -466,31 +542,34 @@ public class PreviewPageHandler extends PageHandler
 
             if (file.getPath().equals(f.getPath()))
             {
-            	writeFile(page, userid, state);
+                writeFile(page, userid, state);
             }
         }
     }
-    
+
     /**
      * Writes xml file to convert directory
      * 
      * @param p_request
      */
-    private void writeXMLFileToConvertDir(HttpServletRequest p_request, String p_xmlFilePath,
-            String p_tarFileName) throws Exception
+    private void writeXMLFileToConvertDir(HttpServletRequest p_request,
+            String p_xmlFilePath, String p_tarFileName) throws Exception
     {
         String sourceLocale = m_job.getSourceLocale().toString();
         String sourcePageName = null;
         if (sessionMgr.getAttribute(WebAppConstants.SOURCE_PAGE_ID) != null)
         {
-            String sourcePageId = (String) sessionMgr.getAttribute(WebAppConstants.SOURCE_PAGE_ID);
+            String sourcePageId = (String) sessionMgr
+                    .getAttribute(WebAppConstants.SOURCE_PAGE_ID);
             long pageId = Long.parseLong(sourcePageId);
-            SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(pageId);
+            SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(
+                    pageId);
             sourcePageName = sourcePage.getExternalPageId();
         }
         else
         {
-            int index = Math.max(p_tarFileName.indexOf("/"), p_tarFileName.indexOf("\\"));
+            int index = Math.max(p_tarFileName.indexOf("/"),
+                    p_tarFileName.indexOf("\\"));
             sourcePageName = sourceLocale + p_tarFileName.substring(index);
         }
 
@@ -506,7 +585,8 @@ public class PreviewPageHandler extends PageHandler
                 while (tgsIterator.hasNext())
                 {
                     TargetPage tpg = (TargetPage) tgsIterator.next();
-                    if (tpg.getSourcePage().getExternalPageId().equals(sourcePageName))
+                    if (tpg.getSourcePage().getExternalPageId()
+                            .equals(sourcePageName))
                     {
                         tpgId = tpg.getId();
                         isBreak = true;
@@ -523,13 +603,15 @@ public class PreviewPageHandler extends PageHandler
         {
             if (tpgId == 0)
             {
-                throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_XML,
+                throw new EnvoyServletException(
+                        EnvoyServletException.MSG_FAILED_TO_PREVIEW_XML,
                         "No target page found");
             }
             String xml = ex.exportForPdfPreview(tpgId, "UTF-8", false);
             xml = fixOpenOfficeXml(xml);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                    p_xmlFilePath.toString()), ExportConstants.UTF8), xml.length());
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(p_xmlFilePath.toString()),
+                    ExportConstants.UTF8), xml.length());
             writer.write(xml);
             writer.close();
         }
@@ -538,8 +620,6 @@ public class PreviewPageHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
     }
-    
-    
 
     /**
      * Fix issues in open office files
@@ -551,21 +631,22 @@ public class PreviewPageHandler extends PageHandler
             if (m_relSafeName.endsWith(OpenOfficeHelper.XML_CONTENT)
                     && m_relSafeName.toLowerCase().contains(".ods.1"))
             {
-                String oriXmlPath = OpenOfficeHelper.getConversionDir() + File.separator
-                        + sourceLocale + File.separator + m_relSafeName;
+                String oriXmlPath = OpenOfficeHelper.getConversionDir()
+                        + File.separator + sourceLocale + File.separator
+                        + m_relSafeName;
                 File oriXmlFile = new File(oriXmlPath);
                 if (oriXmlFile.exists())
                 {
                     String oriXml = FileUtils.read(oriXmlFile, "UTF-8");
-                    return OpenOfficeHelper.fixContentXmlForOds(p_content, oriXml, sourceLocale,
-                            targetLocale, m_relSafeName);
+                    return OpenOfficeHelper.fixContentXmlForOds(p_content,
+                            oriXml, sourceLocale, targetLocale, m_relSafeName);
                 }
             }
         }
 
         return p_content;
     }
-    
+
     private String fixOfficePreviewXml(String p_content) throws Exception
     {
         if (m_relSafeName != null && m_relSafeName.length() > 0)
@@ -595,8 +676,9 @@ public class PreviewPageHandler extends PageHandler
         }
     }
 
-    private void handleException(HttpSession p_session, HttpServletResponse p_response,
-            Exception ex, String action) throws IOException
+    private void handleException(HttpSession p_session,
+            HttpServletResponse p_response, Exception ex, String action)
+            throws IOException
     {
         CATEGORY.error(ex);
 
@@ -610,7 +692,8 @@ public class PreviewPageHandler extends PageHandler
                     + modeId;
             menuLocation = "/globalsight/ControlServlet?linkName=sourceMenu&pageName=ED4&srcViewMode="
                     + modeId;
-            menuStr = "parent.sourceMenu.document.location=\"" + menuLocation + "\";";
+            menuStr = "parent.sourceMenu.document.location=\"" + menuLocation
+                    + "\";";
         }
         else if (action != null && action.equals("previewTar"))
         {
@@ -618,7 +701,8 @@ public class PreviewPageHandler extends PageHandler
                     + modeId;
             menuLocation = "/globalsight/ControlServlet?linkName=targetMenu&pageName=ED7&trgViewMode="
                     + modeId;
-            menuStr = "parent.targetMenu.document.location=\"" + menuLocation + "\";";
+            menuStr = "parent.targetMenu.document.location=\"" + menuLocation
+                    + "\";";
         }
 
         ResourceBundle rb = PageHandler.getBundle(p_session);
@@ -628,15 +712,15 @@ public class PreviewPageHandler extends PageHandler
 
         if (errorMsg != null)
         {
-        	if (errorMsg.contains("officeHome"))
-        	{
-        		msg1 = rb.getString("lb_filter_msg_oopreview_error_oohome");
-        	}
-        	else if (errorMsg.endsWith(" converter is not started"))
-        	{
-        		String s = errorMsg.replace(" converter is not started", "");
-        		msg1 = rb.getString("lb_filter_msg_convert_start_" + s);
-        	}
+            if (errorMsg.contains("officeHome"))
+            {
+                msg1 = rb.getString("lb_filter_msg_oopreview_error_oohome");
+            }
+            else if (errorMsg.endsWith(" converter is not started"))
+            {
+                String s = errorMsg.replace(" converter is not started", "");
+                msg1 = rb.getString("lb_filter_msg_convert_start_" + s);
+            }
         }
 
         StringBuffer sb = new StringBuffer("<SCRIPT>");
@@ -656,7 +740,8 @@ public class PreviewPageHandler extends PageHandler
     private File getPreviewFile(HttpServletRequest p_request, String userId)
     {
         String filePath = getFilePathFromRequest(p_request);
-        String htmlRoot = AmbFileStoragePathUtils.getPdfPreviewDir(m_company_id).getPath();
+        String htmlRoot = AmbFileStoragePathUtils
+                .getPdfPreviewDir(m_company_id).getPath();
 
         StringBuffer fullPath = new StringBuffer(htmlRoot);
         fullPath.append(File.separator);
@@ -670,11 +755,12 @@ public class PreviewPageHandler extends PageHandler
         File file = new File(fullPath.toString());
         return file;
     }
-    
+
     private File getPreviewPdfFile(HttpServletRequest p_request, String userId)
     {
         String filePath = getFilePathFromRequest(p_request);
-        String htmlRoot = AmbFileStoragePathUtils.getPdfPreviewDir(m_company_id).getPath();
+        String htmlRoot = AmbFileStoragePathUtils
+                .getPdfPreviewDir(m_company_id).getPath();
 
         StringBuffer fullPath = new StringBuffer(htmlRoot);
         fullPath.append(File.separator);
@@ -689,9 +775,10 @@ public class PreviewPageHandler extends PageHandler
         return file;
     }
 
-    private File getPreviewFileInWar(HttpServletRequest p_request, ServletContext p_context, String userId)
+    private File getPreviewFileInWar(HttpServletRequest p_request,
+            ServletContext p_context, String userId)
     {
-//        String filePath = p_request.getParameter("file");
+        // String filePath = p_request.getParameter("file");
         String htmlRoot = p_context.getRealPath("/resources/preview/");
 
         StringBuffer fullPath = new StringBuffer(htmlRoot);
@@ -712,7 +799,8 @@ public class PreviewPageHandler extends PageHandler
     {
         String filePath = getFilePathFromRequest(p_request);
 
-        StringBuffer fullPath = new StringBuffer(AmbFileStoragePathUtils.getCxeDocDirPath());
+        StringBuffer fullPath = new StringBuffer(
+                AmbFileStoragePathUtils.getCxeDocDirPath());
         fullPath.append(File.separator);
         fullPath.append(filePath);
 
@@ -722,7 +810,7 @@ public class PreviewPageHandler extends PageHandler
 
     private String getPreviewUrl(HttpServletRequest p_request, String userId)
     {
-//        String filePath = getFilePathFromRequest(p_request);
+        // String filePath = getFilePathFromRequest(p_request);
 
         StringBuffer fullPath = new StringBuffer("resources/preview/");
         fullPath.append(File.separator);
@@ -736,10 +824,10 @@ public class PreviewPageHandler extends PageHandler
 
         return fullPath.toString().replace("\\", "/");
     }
-    
+
     private String getPreviewPdfUrl(HttpServletRequest p_request, String userId)
     {
-//        String filePath = getFilePathFromRequest(p_request);
+        // String filePath = getFilePathFromRequest(p_request);
 
         StringBuffer fullPath = new StringBuffer("resources/preview/");
         fullPath.append(File.separator);
@@ -763,7 +851,9 @@ public class PreviewPageHandler extends PageHandler
 
         if (fPath.startsWith(OpenOfficeHelper.OO_HEADER_DISPLAY_NAME_PREFIX))
         {
-            fPath = fPath.substring(OpenOfficeHelper.OO_HEADER_DISPLAY_NAME_PREFIX.length());
+            fPath = fPath
+                    .substring(OpenOfficeHelper.OO_HEADER_DISPLAY_NAME_PREFIX
+                            .length());
             fPath = fPath.trim();
         }
         else
@@ -795,33 +885,36 @@ public class PreviewPageHandler extends PageHandler
         return job;
     }
 
-    public static void deleteOldPreviewFile(long p_targetPageId, long p_targetLocaleId)
+    public static void deleteOldPreviewFile(long p_targetPageId,
+            long p_targetLocaleId)
     {
         try
         {
-            TargetPage tPage = ServerProxy.getPageManager().getTargetPage(p_targetPageId);
+            TargetPage tPage = ServerProxy.getPageManager().getTargetPage(
+                    p_targetPageId);
             SourcePage sPage = tPage.getSourcePage();
-            String company_id = sPage.getCompanyId();
+            String company_id = String.valueOf(sPage.getCompanyId());
             String filename = sPage.getExternalPageId();
             String fileSuffix = filename.substring(filename.lastIndexOf("."));
-            if (ODT_EXT.equalsIgnoreCase(fileSuffix) || ODP_EXT.equalsIgnoreCase(fileSuffix)
+            if (ODT_EXT.equalsIgnoreCase(fileSuffix)
+                    || ODP_EXT.equalsIgnoreCase(fileSuffix)
                     || ODS_EXT.equalsIgnoreCase(fileSuffix)
                     || DOCX_EXT.equalsIgnoreCase(fileSuffix)
                     || PPTX_EXT.equalsIgnoreCase(fileSuffix)
-                    || XLSX_EXT.equalsIgnoreCase(fileSuffix)
-            		)
+                    || XLSX_EXT.equalsIgnoreCase(fileSuffix))
             {
                 String targetLocale = ServerProxy.getLocaleManager()
                         .getLocaleById(p_targetLocaleId).getLocale().toString();
                 String targetFileName = targetLocale
                         + filename.substring(filename.indexOf(File.separator));
-                String targetHtmlFileName = targetFileName + HTML_SUFFIX + File.separator
-                        + "exported.html";
-                File previewDir = AmbFileStoragePathUtils.getPdfPreviewDir(company_id);
-                String fullTargetHtmlFileName = previewDir
-                        + File.separator + targetHtmlFileName;
+                String targetHtmlFileName = targetFileName + HTML_SUFFIX
+                        + File.separator + "exported.html";
+                File previewDir = AmbFileStoragePathUtils
+                        .getPdfPreviewDir(company_id);
+                String fullTargetHtmlFileName = previewDir + File.separator
+                        + targetHtmlFileName;
                 FileUtils.deleteSilently(fullTargetHtmlFileName);
-                
+
                 File[] files = previewDir.listFiles(new FileFilter()
                 {
                     @Override
@@ -831,21 +924,22 @@ public class PreviewPageHandler extends PageHandler
                         {
                             return true;
                         }
-                        
+
                         return false;
                     }
                 });
-                
+
                 if (files != null)
                 {
                     for (File file : files)
                     {
-                        String userPreviewFile = file + File.separator + targetHtmlFileName;
+                        String userPreviewFile = file + File.separator
+                                + targetHtmlFileName;
                         FileUtils.deleteSilently(userPreviewFile);
                     }
                 }
             }
-            
+
             if ("xlsx".equalsIgnoreCase(fileSuffix)
                     || "docx".equalsIgnoreCase(fileSuffix)
                     || "pptx".equalsIgnoreCase(fileSuffix))

@@ -28,6 +28,7 @@ public class ConfigConstants
 
     public static final String BASE_DIR = "BaseDir";
     public static final String INBOX = "Inbox";
+    public static final String INBOX4XLZ = "inbox4XLZ";
     public static final String OUTBOX = "Outbox";
     public static final String JOB_CREATING_BOX = "JobCreatingBox";
     public static final String JOB_CREATE_SUCCESSFUL_BOX = "JobCreateSuccessfulBox";
@@ -52,6 +53,7 @@ public class ConfigConstants
 
     public static final String USEFTP = "UseFTP";
     public static final String FTPHOST = "FTPServerHost";
+    public static final String FTPPORT = "FTPServerPort";
     public static final String FTPUSERNAME = "FTPUsername";
     public static final String FTPPASSWORD = "FTPPassword";
     public static final String FTPINBOX = "FTPInbox";

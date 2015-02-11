@@ -120,9 +120,10 @@ public class SearchJobsReplaceHandler extends PageHandler
                         tuvInfos.add(jobInfo.getTuvInfo());
                         if (companyId == null)
                         {
-                            companyId = ServerProxy.getJobHandler()
+                            companyId = String.valueOf(ServerProxy
+                                    .getJobHandler()
                                     .getJobById(jobInfo.getJobId())
-                                    .getCompanyId();
+                                    .getCompanyId());
                         }
                     }
                 }

@@ -43,11 +43,14 @@ import jxl.write.WritableCellFormat;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -61,7 +64,7 @@ import com.globalsight.util.zip.ZipIt;
 public class ReportHelper
 {
     public static List<String> allJobStatusList;
-    
+
     /**
      * Get the job info which report need. Because maybe there are a lot of
      * jobs, so here use the projective query, that can get a good performance.
@@ -72,7 +75,7 @@ public class ReportHelper
         Map<String, ReportJobInfo> reportJobInfosMap = new HashMap<String, ReportJobInfo>();
 
         StringBuffer hql = new StringBuffer();
-        hql.append("select distinct j.id, j.jobName, j.state, b.project.id,w.targetLocale.id");
+        hql.append("select distinct j.id, j.jobName, j.state, b.id, b.project.id,w.targetLocale.id");
         hql.append(" from JobImpl j , WorkflowImpl w , RequestImpl r , BasicL10nProfile b");
         hql.append(" where w.job.id = j.id and r.job.id = j.id ");
         hql.append(" and r.l10nProfile.id = b.id and j.state ");
@@ -83,7 +86,7 @@ public class ReportHelper
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql.append(" and j.companyId = ");
-            hql.append(currentId);
+            hql.append(Long.parseLong(currentId));
         }
 
         Iterator it = HibernateUtil.search(hql.toString()).iterator();
@@ -94,8 +97,9 @@ public class ReportHelper
             Long jobId = (Long) row[0];
             String name = (String) row[1];
             String state = (String) row[2];
-            Long projectId = (Long) row[3];
-            Long targetId = (Long) row[4];
+            Long locprofileId = (Long) row[3];
+            Long projectId = (Long) row[4];
+            Long targetId = (Long) row[5];
 
             if (reportJobInfosMap.get(jobId.toString()) == null)
             {
@@ -104,7 +108,8 @@ public class ReportHelper
                     targetLocaleIdList.add(targetId.toString());
 
                 ReportJobInfo rj = new ReportJobInfo(jobId.toString(), name,
-                        state, projectId.toString(), targetLocaleIdList);
+                        state, locprofileId.toString(), projectId.toString(),
+                        targetLocaleIdList);
                 reportJobInfosMap.put(jobId.toString(), rj);
             }
             else
@@ -139,24 +144,6 @@ public class ReportHelper
 
         return p_sb.toString();
     }
-
-    /**
-     * Only get the jobs
-     */
-    /*
-     * public static List getJobs(ArrayList<String> stateList) { Map<String,
-     * ReportJobInfo> reportJobInfosMap = new HashMap<String, ReportJobInfo>();
-     * 
-     * StringBuffer hql = new StringBuffer(); hql.append("from JobImpl j");
-     * hql.append(" where j.state "); hql.append(addClause(stateList));
-     * 
-     * String currentId = CompanyThreadLocal.getInstance().getValue();
-     * 
-     * if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId)) {
-     * hql.append(" and j.companyId = "); hql.append(currentId); }
-     * 
-     * return HibernateUtil.search(hql.toString()); }
-     */
 
     /**
      * Splits the string by comma, return List<Long>.
@@ -285,10 +272,10 @@ public class ReportHelper
         return result;
     }
 
-//    public static Locale getLocale(Locale p_locale)
-//    {
-//        return p_locale == null ? Locale.US : p_locale;
-//    }
+    // public static Locale getLocale(Locale p_locale)
+    // {
+    // return p_locale == null ? Locale.US : p_locale;
+    // }
 
     /**
      * Gets the Excel Report File, such as
@@ -315,7 +302,7 @@ public class ReportHelper
     public static File getReportFile(String p_reportType, Job p_job,
             String p_extension)
     {
-        String companyId = p_job != null ? p_job.getCompanyId()
+        String companyId = p_job != null ? String.valueOf(p_job.getCompanyId())
                 : CompanyWrapper.getCurrentCompanyId();
 
         int maxLen = 50;
@@ -331,8 +318,8 @@ public class ReportHelper
             {
                 jobName = jobName.substring(0, maxLen);
             }
-            result.append(p_reportType + "-[" + jobName + "]["
-                    + p_job.getJobId() + "]" + p_extension);
+            result.append(p_reportType + "-(" + jobName + ")("
+                    + p_job.getJobId() + ")" + p_extension);
         }
         else
         {
@@ -536,17 +523,18 @@ public class ReportHelper
         }
         return list;
     }
-    
+
     // Get all target Locale, and sorted by ISO_CODE.
     public static List<GlobalSightLocale> getAllTargetLocales()
             throws EnvoyServletException
     {
-        return getAllTargetLocales(Locale.US, GlobalSightLocaleComparator.ISO_CODE);
+        return getAllTargetLocales(Locale.US,
+                GlobalSightLocaleComparator.ISO_CODE);
     }
-    
+
     // Gets all sorted target locale.
-    public static List<GlobalSightLocale> getAllTargetLocales(Locale p_locale, int p_sortedType)
-            throws EnvoyServletException
+    public static List<GlobalSightLocale> getAllTargetLocales(Locale p_locale,
+            int p_sortedType) throws EnvoyServletException
     {
         List<GlobalSightLocale> locales = new ArrayList<GlobalSightLocale>();
 
@@ -563,17 +551,18 @@ public class ReportHelper
             throw new EnvoyServletException(ge.getExceptionId(), ge);
         }
 
-        if(p_locale != null && p_sortedType >= 0)
+        if (p_locale != null && p_sortedType >= 0)
         {
-            Collections.sort(locales, new GlobalSightLocaleComparator(p_sortedType, p_locale));
+            Collections.sort(locales, new GlobalSightLocaleComparator(
+                    p_sortedType, p_locale));
         }
-        
+
         return locales;
     }
 
     public static ArrayList<String> getAllJobStatusList()
     {
-        if(allJobStatusList == null || allJobStatusList.size() == 0)
+        if (allJobStatusList == null || allJobStatusList.size() == 0)
         {
             allJobStatusList = new ArrayList<String>();
             allJobStatusList.add(Job.PENDING);
@@ -584,24 +573,26 @@ public class ReportHelper
             allJobStatusList.add(Job.EXPORT_FAIL);
             allJobStatusList.add(Job.ARCHIVED);
         }
-        
-        return (ArrayList<String>) ((ArrayList<String>) allJobStatusList).clone();
+
+        return (ArrayList<String>) ((ArrayList<String>) allJobStatusList)
+                .clone();
     }
-    
+
     public static WritableCellFormat getMoneyFormat(String p_currencyName)
     {
         String symbol = ReportUtil.getCurrencySymbol(p_currencyName);
-        NumberFormat moneyFormat = new NumberFormat(
-                symbol + "###,###,##0.000", NumberFormat.COMPLEX_FORMAT);
+        NumberFormat moneyFormat = new NumberFormat(symbol + "###,###,##0.000",
+                NumberFormat.COMPLEX_FORMAT);
         return new WritableCellFormat(moneyFormat);
     }
-    
+
     public static String getJobStatusDisplayName(String p_jobState)
     {
         return getJobStatusDisplayName(p_jobState, Locale.US);
     }
-    
-    public static String getJobStatusDisplayName(String p_jobState, Locale p_userLocale)
+
+    public static String getJobStatusDisplayName(String p_jobState,
+            Locale p_userLocale)
     {
         String propertyKey = "";
         String defaultName = "";
@@ -668,28 +659,22 @@ public class ReportHelper
             defaultName = "Leveraging";
             propertyKey = "lb_state_leveraging";
         }
-        /*
-        else if (p_jobState.equals(Job.PROCESSING))
+        else if (p_jobState.equals(Job.CALCULATING_WORD_COUNTS))
         {
-            long fileCount = 0;
-            Collection<Request> requests = getRequestList();
-            Set<Long> pageNumbers = new HashSet<Long>(requests.size());
-            for (Request r : requests)
-            {
-                if (fileCount == 0)
-                {
-                    fileCount = r.getBatchInfo().getPageCount();
-                }
-                long pageNumber = r.getBatchInfo().getPageNumber();
-                if (!pageNumbers.contains(pageNumber))
-                {
-                    pageNumbers.add(pageNumber);
-                }
-            }
-            int fileNumber = pageNumbers.size();
-            defaultName = "Processing (" + fileNumber + " of " + fileCount
-                    + ")";
-        }   */
+            defaultName = "Calculating Word Counts";
+            propertyKey = "lb_state_CalculatingWordCounts";
+        }
+        /*
+         * else if (p_jobState.equals(Job.PROCESSING)) { long fileCount = 0;
+         * Collection<Request> requests = getRequestList(); Set<Long>
+         * pageNumbers = new HashSet<Long>(requests.size()); for (Request r :
+         * requests) { if (fileCount == 0) { fileCount =
+         * r.getBatchInfo().getPageCount(); } long pageNumber =
+         * r.getBatchInfo().getPageNumber(); if
+         * (!pageNumbers.contains(pageNumber)) { pageNumbers.add(pageNumber); }
+         * } int fileNumber = pageNumbers.size(); defaultName = "Processing (" +
+         * fileNumber + " of " + fileCount + ")"; }
+         */
         else if (p_jobState.equals(Job.SKIPPING))
         {
             defaultName = "Skipping";
@@ -702,7 +687,7 @@ public class ReportHelper
         }
 
         // get value from resource bundle
-        if(p_userLocale == null)
+        if (p_userLocale == null)
         {
             p_userLocale = Locale.US;
         }
@@ -719,6 +704,102 @@ public class ReportHelper
             result = defaultName;
         }
 
+        return result;
+    }
+    
+    /**
+     * Sets the data for m_reportsDataMap, which used for store report data.
+     */
+    public static void setReportsDataMap(
+            Map<String, ReportsData> p_reportsDataMap, String p_userId,
+            List<Long> p_reportJobIDS, List<String> p_reportTypeList,
+            double p_percent, String p_status) throws UserManagerException,
+            RemoteException, GeneralException
+    {
+        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportTypeList);
+        ReportsData data = p_reportsDataMap.get(key);
+        if (data == null)
+        {
+            data = new ReportsData();
+            User user = ServerProxy.getUserManager().getUser(p_userId);
+            data.setUser(user);
+            data.setReportJobIDS(p_reportJobIDS);
+            if (p_reportTypeList != null)
+                data.setReportTypeList(p_reportTypeList);
+        }
+
+        data.setPercent(p_percent);
+        data.setStatus(p_status);
+        p_reportsDataMap.put(key, data);
+    }
+    
+    /**
+     * Check whether generating the report. IF yes, then waiting.
+     * 
+     * @throws GeneralException 
+     * @throws RemoteException 
+     * @throws UserManagerException 
+     */
+    public static boolean checkReportsDataMap(
+            Map<String, ReportsData> p_reportsDataMap, String p_userId,
+            List<Long> p_reportJobIDS, List<String> p_reportTypeList)
+            throws UserManagerException, RemoteException, GeneralException
+    {
+        String key = getKey(p_userId, p_reportJobIDS, p_reportTypeList);
+        ReportsData data = p_reportsDataMap.get(key);
+        if (data != null && data.isInProgress())
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /**
+     * Gets key of the Map.
+     */
+    public static String getKey(String p_userId, List<Long> p_reportJobIDS,
+            String p_reportType)
+    {
+        StringBuffer result = new StringBuffer();
+        if (p_userId != null)
+            result.append(p_userId);
+
+        if (p_reportJobIDS != null && p_reportJobIDS.size() > 0)
+        {
+            List<Long> reportJobIDS = new ArrayList<Long>(p_reportJobIDS);
+            Collections.sort(reportJobIDS);
+            result.append(reportJobIDS);
+        }
+
+        if (p_reportType != null && p_reportType.trim().length() > 0)
+        {
+            if (p_reportType.startsWith("["))
+                result.append(p_reportType);
+            else
+                result.append("[").append(p_reportType).append("]");
+        }
+            
+        return result.toString();
+    }
+    
+    public static String getKey(String p_userId, List<Long> p_reportJobIDS,
+            List<String> p_reportTypeList)
+    {
+        String reportType = null;
+        if (p_reportTypeList != null)
+            reportType = p_reportTypeList.toString();
+
+        return getKey(p_userId, p_reportJobIDS, reportType);
+    }
+    
+    public static List<Long> getJobIDS(List<Job> p_jobs)
+    {
+        List<Long> result = new ArrayList<Long>();
+        for (Job job : p_jobs)
+        {
+            result.add(job.getJobId());
+        }
         return result;
     }
 }

@@ -325,19 +325,12 @@ public interface CommentManager
      * @param p_levelObjectType
      *            The type of object the issues should be associated with
      * @see Issue for valid types (prefix TYPE_)
-     * @param p_logicalKey
-     *            The logical key stores a hierarchy of keys that show the
-     *            hierarchy for the issue on the This parameter can be a part of
-     *            the key or the whole thing. For segments the logical key is
-     *            <target page id>_<tu id>_<tuv id>_<sub id> So could be 1001_
-     *            if looking for all the segment issues of target page 1001. Or
-     *            could be 1001_3001_2120_ to get all the issues on the specific
-     *            segment.
+     * @param p_targetPageId
      * 
      * @return Returns a list of Issue objects.
      */
-    public ArrayList getIssues(int p_levelObjectType, String p_logicalKey)
-            throws RemoteException, CommentException;
+    public ArrayList<IssueImpl> getIssues(int p_levelObjectType,
+            long p_targetPageId) throws RemoteException, CommentException;
 
     /**
      * Returns the number of issues associated with the type, matching the

@@ -462,9 +462,10 @@ public class LocaleManagerLocal implements LocaleManager
             String hql = "from LocalePair l where l.source.id = :sId "
                     + "and l.target.id = :tId and l.companyId = :cId";
             Map map = new HashMap();
+            long cId = Long.parseLong(companyId);
             map.put("sId", p_source.getIdAsLong());
             map.put("tId", p_target.getIdAsLong());
-            map.put("cId", companyId);
+            map.put("cId", cId);
             List result = HibernateUtil.search(hql, map);
             LocalePair lp;
             if (result != null && result.size() > 0)
@@ -474,7 +475,7 @@ public class LocaleManagerLocal implements LocaleManager
             }
             else
             {
-                lp = new LocalePair(p_source, p_target, companyId);
+                lp = new LocalePair(p_source, p_target, cId);
             }
 
             session.saveOrUpdate(lp);
@@ -565,7 +566,7 @@ public class LocaleManagerLocal implements LocaleManager
             String hql = "select distinct lp.source from LocalePair lp"
                     + " where lp.isActive = 'Y' and lp.companyId = :companyId";
             HashMap map = new HashMap();
-            map.put("companyId", p_companyId);
+            map.put("companyId", Long.parseLong(p_companyId));
 
             return new Vector(HibernateUtil.search(hql, map));
         }
@@ -603,7 +604,7 @@ public class LocaleManagerLocal implements LocaleManager
             {
                 hql += " and lp.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return new Vector(HibernateUtil.search(hql, map));
@@ -641,7 +642,7 @@ public class LocaleManagerLocal implements LocaleManager
             {
                 hql += " and lp.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return new Vector(HibernateUtil.search(hql, map));
@@ -678,7 +679,7 @@ public class LocaleManagerLocal implements LocaleManager
             {
                 hql += " and lp.companyId = :companyId";
                 map = new HashMap();
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return new Vector(HibernateUtil.search(hql, map));
@@ -748,7 +749,7 @@ public class LocaleManagerLocal implements LocaleManager
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and lp.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             List localePairs = HibernateUtil.search(hql, map);
@@ -770,7 +771,7 @@ public class LocaleManagerLocal implements LocaleManager
 
         return localePair;
     }
-    
+
     /**
      * Get a locale pair object based on the given source, target string (ie.
      * en_US, fr_FR_), and a company ID.
@@ -926,7 +927,7 @@ public class LocaleManagerLocal implements LocaleManager
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql.append(" and lp.companyId = :companyId");
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             List localePairs = HibernateUtil.search(hql.toString(), map);
@@ -974,7 +975,7 @@ public class LocaleManagerLocal implements LocaleManager
 
             HashMap map = new HashMap();
             map.put("sId", p_sourceLocale.getIdAsLong());
-            map.put("companyId", p_companyId);
+            map.put("companyId", Long.parseLong(p_companyId));
 
             return new Vector(HibernateUtil.search(hql.toString(), map));
         }
@@ -1019,7 +1020,7 @@ public class LocaleManagerLocal implements LocaleManager
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql.append(" and lp.companyId = :companyId");
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return new Vector(HibernateUtil.search(hql.toString(), map));
@@ -1061,13 +1062,13 @@ public class LocaleManagerLocal implements LocaleManager
 
             HashMap map = new HashMap();
             map.put("sId", p_sourceLocale.getIdAsLong());
-            map.put("pId", p_project);
+            map.put("pId", Long.parseLong(p_project));
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql.append(" and lp.companyId = :companyId");
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return new Vector(HibernateUtil.search(hql.toString(), map));
@@ -1283,7 +1284,7 @@ public class LocaleManagerLocal implements LocaleManager
                         // dependancy between then must be kept in the code and
                         // not in the DB.
                         ce.deleteRatesOnRole(curRole);
-                        um.removeRole(curRole.getName());
+                        um.removeRole(curRole);
                     }
                 }
 
@@ -1296,7 +1297,7 @@ public class LocaleManagerLocal implements LocaleManager
                     for (int j = 0; j < roles.length; j++)
                     {
                         curRole = (Role) roles[j];
-                        um.removeRole(curRole.getName());
+                        um.removeRole(curRole);
                     }
                 }
             }

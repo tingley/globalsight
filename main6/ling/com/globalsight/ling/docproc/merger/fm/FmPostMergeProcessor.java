@@ -43,17 +43,19 @@ public class FmPostMergeProcessor implements PostMergeProcessor
      */
     public String process(String p_content, String p_IanaEncoding) throws DiplomatMergerException
     {
-        if (targetLocale == null || !FontMappingHelper.isLocaleWithFonts(targetLocale))
+        FontMappingHelper helper = new FontMappingHelper();
+        
+        if (targetLocale == null || !helper.isLocaleWithFonts(targetLocale))
         {
             return p_content;
         }
         
-        String defaultFont = FontMappingHelper.getDefaultMappingFont(targetLocale);
+        String defaultFont = helper.getDefaultMappingFont(targetLocale);
 
         if (c_category.isDebugEnabled())
         {
             c_category.debug("targetLocale : " + targetLocale);
-            c_category.debug("FontMapping list : " + FontMappingHelper.getFontMappingList());
+            c_category.debug("FontMapping list : " + helper.getFontMappingList());
             c_category.debug("defaultFont : " + defaultFont);
         }
 
@@ -85,7 +87,7 @@ public class FmPostMergeProcessor implements PostMergeProcessor
 
             if (sourceFont != null)
             {
-                String targetFont = FontMappingHelper.getMappingFont(sourceFont, targetLocale);
+                String targetFont = helper.getMappingFont(sourceFont, targetLocale);
                 
                 if (targetFont != null)
                 {

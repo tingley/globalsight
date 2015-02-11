@@ -122,7 +122,7 @@ ContextMenu.fixSize=function(p_size)
     //WebFX_PopUpcss.style.height = h + "px";
     //WebFX_PopUpcss.style.width = w + "px";
     //h and w are not different in Firefox and IE, so I use a hard number, waiting for solution.
-    WebFX_PopUpcss.style.height = 15 * p_size+ 1 + "pt";
+    WebFX_PopUpcss.style.height = 17 * p_size + "pt";
     WebFX_PopUpcss.style.width = 190 + "px";
     //use document.height for moz
 }

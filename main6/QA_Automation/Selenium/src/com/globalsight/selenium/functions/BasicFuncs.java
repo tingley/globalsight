@@ -204,10 +204,11 @@ public class BasicFuncs
         String textCell = "//td[" + (cellIndex == null ? "2" : cellIndex)
                 + "]";
         String inputCell = "//td[1]/input";
-
+        //String Name = name.replace("_", "");
+        
 		int index = 1;
         String textField = "", elementField = "";
-        while (true)
+        while (index < 100)
         {
             textField = prefix + index + suffix + textCell;
             if (selenium.isElementPresent(textField))
@@ -222,6 +223,38 @@ public class BasicFuncs
         }
 
         return elementField;
+    }
+    
+    public boolean checkNameFromTable(Selenium selenium, String table,
+            String name, String cellIndex)
+    {
+        if (StringUtil.isEmpty(table) || StringUtil.isEmpty(name)
+                || !selenium.isTextPresent(name))
+            return false;
+
+        boolean tagC=false;
+        String prefix = table + "//tr[";
+        String suffix = "]";
+        String textCell = "//td[" + (cellIndex == null ? "2" : cellIndex)
+                + "]";
+
+		int index = 1;
+        String textField = "";
+        while (index < 100)
+        {
+            textField = prefix + index + suffix + textCell;
+            if (selenium.isElementPresent(textField))
+            {
+                if (name.equals(selenium.getText(textField)))
+                {
+                    tagC=true;
+                    break;
+                }
+            }
+            index++;
+        }
+
+        return tagC;
     }
 
     public String getElementValueInTable(Selenium selenium, String table,

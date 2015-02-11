@@ -48,4 +48,8 @@ public interface ActivityConstants
     public static final String REVIEW_NOT_EDITABLE = "reviewNotEditable";
     public static final String AUTO_ACTION = "autoaction";
     public static final String GSEDITION = "gsedition";
+
+    // Filter
+    public static final String FILTER_ACTIVITY_NAME = "activityNameFilter";
+    public static final String FILTER_COMPANY_NAME = "activityCompanyNameFilter";
 }

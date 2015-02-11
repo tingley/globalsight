@@ -55,7 +55,6 @@ public class UploadPageHandler extends PageHandler
 
         // Fix for GBS-2291, from Task Upload Page
         sessionMgr.setAttribute(UPLOAD_ORIGIN, UPLOAD_FROMTASKUPLOAD);
-
         // Get state, must be non-null.
 		String action = (String) p_request.getParameter(UPLOAD_ACTION);
 		OEMProcessStatus status = (OEMProcessStatus) sessionMgr
@@ -88,6 +87,12 @@ public class UploadPageHandler extends PageHandler
 			else if (action.equals(UPLOAD_ACTION_CANCE_PROGRESS))
 			{
 				uploadPageHandlerHelper.cancelProcess(p_request, p_response, sessionMgr);
+				return;
+			}
+			else if (action.equals(UPLOAD_ACTION_CONFIRM_CONTINUE))
+			{
+				String s = p_request.getParameter("isContinue");
+				status.setIsContinue("y".equals(s));
 				return;
 			}
 		}

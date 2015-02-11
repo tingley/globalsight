@@ -18,11 +18,15 @@
 package com.globalsight.everest.integration.ling.tm2;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
 
 /**
  * Container of match type statistics of a leveraged target page.
@@ -52,11 +56,6 @@ public class MatchTypeStatistics
     public static final int THRESHOLD_MED_FUZZY = 14;
     public static final int THRESHOLD_LOW_FUZZY = 15;
 
-    // The following two attributes are defined as the low and high
-    // range of the bucket used for the sub-leverage-match that's
-    // considered the word count below the leverage match threshold
-    // defined in TM profile.
-    private int m_subLevMatchLow = 50;// fixed 50
     private int m_threshold = 0;
 
     public MatchTypeStatistics(int p_leverageMatchThreshold)
@@ -69,9 +68,6 @@ public class MatchTypeStatistics
         String key = makeKey(match.getOriginalSourceTuvId(), match.getSubId());
         MatchState p_matchState = match.getMatchState();
         float p_matchPoint = match.getScoreNum();
-
-        // isSubLevMatch
-        boolean isSubLevMatch = determinIsSubLevMatch(p_matchPoint);
 
         // statisticsType (threshold non-related)
         int statisticsType = NO_MATCH;
@@ -99,8 +95,10 @@ public class MatchTypeStatistics
         int lingManagerMatchType = determineLingManagerType(p_matchPoint,
                 p_matchState);
 
-        Types types = new Types(isSubLevMatch, statisticsType,
-                statisticsTypeByThreshold, lingManagerMatchType, p_matchState);
+        boolean isMtTranslation = (match.getMtName() != null && match
+                .getMtName().endsWith("_MT"));
+        Types types = new Types(statisticsType, statisticsTypeByThreshold,
+                lingManagerMatchType, p_matchState, isMtTranslation);
 
         // Set SID
         String sid = TmUtil.getSidForTuv(match.getTmId(),
@@ -257,18 +255,6 @@ public class MatchTypeStatistics
         return lingManagerType;
     }
 
-    private boolean determinIsSubLevMatch(float p_matchPoint)
-    {
-        boolean isSubLevMatch = false;
-        // check to see if it's also a sub-leverage-match (less than LMT).
-        if (p_matchPoint >= m_subLevMatchLow && p_matchPoint < m_threshold)
-        {
-            isSubLevMatch = true;
-        }
-
-        return isSubLevMatch;
-    }
-
     public String getSid(long p_tuvId, String p_subId)
     {
         String key = makeKey(p_tuvId, p_subId);
@@ -310,7 +296,42 @@ public class MatchTypeStatistics
 
         return statisticsMatchType;
     }
+    
+    /**
+     * Get Types Map, including all sub segments.
+     * @return Map<"tuvId_subId", Types>
+     */
+    public Map<String, Types> getLingManagerMatchType(Tuv p_tuv)
+    {
+        Map<String, Types> result = new HashMap<String, Types>();
+        long tuvId = p_tuv.getId();
+        String subId = "0";        
+        result.put(makeKey(tuvId, subId), getTypes(tuvId, subId));
+        
+        List<GxmlElement> subs = p_tuv.getSubflowsAsGxmlElements();
+        for (int i = 0; subs != null && i < subs.size(); i++)
+        {
+            GxmlElement sub = subs.get(i);
+            subId = sub.getAttribute(GxmlNames.SUB_ID);
+            result.put(makeKey(tuvId, subId), getTypes(tuvId, subId));
+        }
 
+        return result;
+    }
+
+    /**
+     * Judge whether the leverage match comes from Machine Translation.
+     * Don't need check the subId.
+     */
+    public boolean isMachineTranslation(Tuv p_tuv)
+    {
+        Types type = getTypes(p_tuv.getId(), "0");
+        if (type != null && type.isMtTranslation())
+            return true;
+        else
+            return false;
+    }
+    
     /**
      * There are four kinds of format to show exact match, judge use which one.
      * It is also used to count in-context match.
@@ -320,7 +341,7 @@ public class MatchTypeStatistics
      *         segments).
      */
     public boolean isExactMatchLocalized(long p_tuvId, String p_subId,
-            String companyId)
+            long companyId)
     {
         String key = makeKey(p_tuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);

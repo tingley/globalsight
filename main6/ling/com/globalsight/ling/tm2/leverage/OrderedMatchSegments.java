@@ -30,9 +30,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.GxmlUtil;
 
 /**
  * OrderedMatchSegments stores leverage matches by target locales so we can
@@ -67,6 +71,7 @@ class OrderedMatchSegments
     void populate(Collection p_leveragedTus, LeverageOptions p_leverageOptions,
             String companyId)
     {
+        long longCompanyId = Long.parseLong(companyId);
         LeveragingLocales leveragingLocales = p_leverageOptions
                 .getLeveragingLocales();
 
@@ -77,13 +82,13 @@ class OrderedMatchSegments
         alignMatchesForCrossLocales(leveragingLocales, p_leveragedTus);
 
         // remove duplicates
-        removeDuplicates(p_leverageOptions, companyId);
+        removeDuplicates(p_leverageOptions, longCompanyId);
 
         // apply leverage options for multiple translations
-        applyMultiTransOption(p_leverageOptions, companyId);
+        applyMultiTransOption(p_leverageOptions, longCompanyId);
 
         // assign order
-        assignOrder(p_leverageOptions, companyId);
+        assignOrder(p_leverageOptions, longCompanyId);
 
         c_logger.debug("\nOrderedMatchSegments:\n" + toDebugString());
     }
@@ -254,7 +259,7 @@ class OrderedMatchSegments
 
     // remove duplicates
     private void removeDuplicates(LeverageOptions p_leverageOptions,
-            String companyId)
+            long companyId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -263,41 +268,63 @@ class OrderedMatchSegments
                     .next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
-            Collections.sort(leveragedTuvList, new DuplicateRemovalComparator(
-                    targetLocale, p_leverageOptions, companyId));
-
-            LeveragedTuv previousTuv = null;
             Iterator itTuv = leveragedTuvList.iterator();
+            ArrayList<String> existedTargetSegments = new ArrayList<String>();
+            ArrayList<String> existedSourceSegments = new ArrayList<String>();
+            String targetSegmentText = "", sourceSegmentText = "";
+
+            /**
+             * GBS-3011, Vincent Yan 2013/03/14 To remove duplicated matched
+             * TUV, we don't check the original source TUV and only check if the
+             * content of matched TUV is the same. If yes, then remove the
+             * duplicated leverage match.
+             */
             while (itTuv.hasNext())
             {
                 LeveragedTuv leveragedTuv = (LeveragedTuv) itTuv.next();
-                if (previousTuv != null)
+                if (!leveragedTuv.getMatchState().equals(
+                        MatchState.SEGMENT_TM_EXACT_MATCH))
+                    continue;
+                
+                sourceSegmentText = getSegmentText(leveragedTuv.getSourceTuv()
+                        .getSegment());
+                targetSegmentText = getSegmentText(leveragedTuv.getSegment());
+                if (existedSourceSegments.contains(sourceSegmentText)
+                        && existedTargetSegments.contains(targetSegmentText))
                 {
-                    if (previousTuv.getSourceTuv().getSegment()
-                            .equals(leveragedTuv.getSourceTuv().getSegment())
-                            && previousTuv.getSegment().equals(
-                                    leveragedTuv.getSegment()))
-                    {
-                        // source and target text are the same. Remove
-                        // the current Tuv
-                        itTuv.remove();
-                    }
-                    else
-                    {
-                        previousTuv = leveragedTuv;
-                    }
+                    itTuv.remove();
                 }
                 else
                 {
-                    previousTuv = leveragedTuv;
+                    existedTargetSegments.add(targetSegmentText);
+                    existedSourceSegments.add(sourceSegmentText);
                 }
             }
         }
     }
 
+    /**
+     * Get the actual plain text within tag '<segment...>...</segment>', and
+     * unescape string to be compared with other segments
+     * 
+     * @param text
+     *            Segment content
+     * @return String Plain text with tags and being unescaped.
+     */
+    private String getSegmentText(String text)
+    {
+        if (StringUtil.isEmpty(text))
+            return text;
+        String segmentText = "";
+        segmentText = GxmlUtil.stripRootTag(text);
+        if (StringUtil.isNotEmpty(segmentText))
+            segmentText = XmlUtil.unescapeString(segmentText);
+        return segmentText;
+    }
+
     // apply leverage options for multiple translations
     private void applyMultiTransOption(LeverageOptions p_leverageOptions,
-            String companyId)
+            long companyId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -313,7 +340,7 @@ class OrderedMatchSegments
                 continue;
             }
 
-            Collections.sort(leveragedTuvList, new MultiTransComparator(
+            SortUtil.sort(leveragedTuvList, new MultiTransComparator(
                     targetLocale, p_leverageOptions, companyId));
 
             LeveragedTuv firstTuv = (LeveragedTuv) leveragedTuvList.get(0);
@@ -448,7 +475,7 @@ class OrderedMatchSegments
     }
 
     // assign order
-    private void assignOrder(LeverageOptions options, String companyId)
+    private void assignOrder(LeverageOptions options, long companyId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -535,10 +562,10 @@ class OrderedMatchSegments
     {
         GlobalSightLocale m_targetLocale;
         LeverageOptions options;
-        String companyId;
+        long companyId = -1;
 
         LeveragedTuvComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, String companyId)
+                LeverageOptions options, long companyId)
         {
             m_targetLocale = p_targetLocale;
             this.options = options;
@@ -603,7 +630,7 @@ class OrderedMatchSegments
     private class AssignOrderComparator extends LeveragedTuvComparator
     {
         AssignOrderComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, String companyId)
+                LeverageOptions options, long companyId)
         {
             super(p_targetLocale, options, companyId);
         }
@@ -675,7 +702,7 @@ class OrderedMatchSegments
         LeverageOptions m_leverageOptions;
 
         DuplicateRemovalComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions p_leverageOptions, String companyId)
+                LeverageOptions p_leverageOptions, long companyId)
         {
             super(p_targetLocale, p_leverageOptions, companyId);
             m_leverageOptions = p_leverageOptions;
@@ -686,14 +713,18 @@ class OrderedMatchSegments
             LeveragedTuv tuv1 = (LeveragedTuv) p_o1;
             LeveragedTuv tuv2 = (LeveragedTuv) p_o2;
 
-            int result = tuv1.getSourceTuv().getSegment()
-                    .compareTo(tuv2.getSourceTuv().getSegment());
+            String seg1 = getSegmentText(tuv1.getSourceTuv().getSegment());
+            String seg2 = getSegmentText(tuv2.getSourceTuv().getSegment());
+
+            int result = seg1.compareTo(seg2);
 
             if (result != 0)
                 return result;
 
+            seg1 = getSegmentText(tuv1.getSegment());
+            seg2 = getSegmentText(tuv2.getSegment());
             // Ok, the source segment is the same. Compare the target
-            result = tuv1.getSegment().compareTo(tuv2.getSegment());
+            result = seg1.compareTo(seg2);
             if (result != 0)
                 return result;
 
@@ -723,7 +754,7 @@ class OrderedMatchSegments
         LeverageOptions m_leverageOptions;
 
         MultiTransComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions p_leverageOptions, String companyId)
+                LeverageOptions p_leverageOptions, long companyId)
         {
             super(p_targetLocale, p_leverageOptions, companyId);
             m_leverageOptions = p_leverageOptions;

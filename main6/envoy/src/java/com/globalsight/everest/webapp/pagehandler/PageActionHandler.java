@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +51,7 @@ public abstract class PageActionHandler extends PageHandler
      * Invokes this PageHandler
      * 
      * @param p_pageDescriptor
-     *            the page desciptor
+     *            the page descriptor
      * @param p_request
      *            the original request sent from the browser
      * @param p_response
@@ -66,29 +65,29 @@ public abstract class PageActionHandler extends PageHandler
             EnvoyServletException
     {
         isReturn.set(null);
-        
+
         beforeAction(p_request, p_response);
-        
+
         callAction(p_request, p_response);
-		// gbs-1389: forward restricted access to initial page
-		Object isRestrictedAccess = p_request.getAttribute("restricted_access");
-		if (isRestrictedAccess != null
-				&& ((Boolean) isRestrictedAccess).booleanValue() == true) 
-		{
-			return;
-		}
-        
+        // gbs-1389: forward restricted access to initial page
+        Object isRestrictedAccess = p_request.getAttribute("restricted_access");
+        if (isRestrictedAccess != null
+                && ((Boolean) isRestrictedAccess).booleanValue() == true)
+        {
+            return;
+        }
+
         if (isReturn.get() != null)
         {
             return;
         }
-        
+
         afterAction(p_request, p_response);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
-    
+
     protected void pageReturn()
     {
         isReturn.set(Boolean.TRUE);
@@ -115,15 +114,15 @@ public abstract class PageActionHandler extends PageHandler
                     Object actionForm = null;
                     if (form != null && form.trim().length() > 0)
                     {
-                        actionForm = loadForm(p_request, form, handler
-                                .loadFromDb());
+                        actionForm = loadForm(p_request, form,
+                                handler.loadFromDb());
                     }
-                    
+
                     String formToken = handler.formToken();
                     if (formToken != null && formToken.trim().length() > 0)
                     {
-                        boolean notDuplicate = FormUtil.isNotDuplicateSubmisson(
-                                p_request, formToken);
+                        boolean notDuplicate = FormUtil
+                                .isNotDuplicateSubmisson(p_request, formToken);
                         if (!notDuplicate)
                         {
                             return;
@@ -203,7 +202,7 @@ public abstract class PageActionHandler extends PageHandler
                 String id = CompanyThreadLocal.getInstance().getValue();
                 try
                 {
-                    m.invoke(object, id);
+                    m.invoke(object, Long.parseLong(id));
                 }
                 catch (Exception e)
                 {
@@ -289,8 +288,9 @@ public abstract class PageActionHandler extends PageHandler
 
         return editor;
     }
-    
-    protected boolean getCheckBoxParameter(HttpServletRequest request, String name)
+
+    protected boolean getCheckBoxParameter(HttpServletRequest request,
+            String name)
     {
         return "true".equals(request.getParameter(name));
     }

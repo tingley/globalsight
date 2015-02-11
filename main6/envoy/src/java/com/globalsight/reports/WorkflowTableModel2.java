@@ -116,7 +116,8 @@ public class WorkflowTableModel2 extends AbstractTableModel
 
     private static final Object EMPTY = new String("");
     private static final String NOT_ACCEPTED_YET = "notAcceptedYet";
-    private static final String MY_MESSAGES = "messages/workflowTable";
+    private static final String MY_MESSAGES = BasicReportHandler.BUNDLE_LOCATION
+            + "workflowTable";
 
     private boolean useInContext = false;
 
@@ -395,11 +396,7 @@ public class WorkflowTableModel2 extends AbstractTableModel
                     o = new Integer(w.getThresholdNoMatchWordCount());
                     break;
                 case REP_WC:
-                    o = new Integer(w.getRepetitionWordCount()
-                            + w.getSubLevRepetitionWordCount()
-                            + w.getHiFuzzyRepetitionWordCount()
-                            + w.getMedHiFuzzyRepetitionWordCount()
-                            + w.getMedFuzzyRepetitionWordCount());
+                    o = new Integer(w.getRepetitionWordCount());
                     break;
 
                 // case SUBLEVREPS:

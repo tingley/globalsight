@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.page.pageimport;
@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -38,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.cxe.adapter.cap.CapImporter;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
@@ -87,9 +87,9 @@ import com.globalsight.ling.tm.Leverager;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
@@ -138,11 +138,12 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Imports the request and create Source and Target Pages from the request
      * information.
-     * 
+     *
      * @return A hash map of all the pages (Source and Target) that were
      *         created. The key for the hash map is the id of the page's
      *         GlobalSightLocale.
      */
+    @Override
     HashMap importFile(Request p_request) throws FileImportException
     {
         HashMap pages = new HashMap();
@@ -313,17 +314,17 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.info("Done importing page: "
                     + p_request.getExternalPageId());
 
-            try
-            {
-                long queueLength = CapImporter.getNumberOfWaitingImports();
-                c_logger.info("Number of Files left in Import Queue: "
-                        + queueLength);
-            }
-            catch (Exception e)
-            {
+//            try
+//            {
+//                long queueLength = CapImporter.getNumberOfWaitingImports();
+//                c_logger.info("Number of Files left in Import Queue: "
+//                        + queueLength);
+//            }
+//            catch (Exception e)
+//            {
                 // don't allow failure to get the queue length to affect import
-                c_logger.error("Failed to query import queue length: ", e);
-            }
+//                c_logger.error("Failed to query import queue length: ", e);
+//            }
 
             c_logger.debug("Performance:: import time = "
                     + (System.currentTimeMillis() - start_PERFORMANCE) + " "
@@ -358,6 +359,7 @@ public class ExtractedFileImporter extends FileImporter
         SourcePage page = null;
         String dataType = p_request.getDataSourceType();
 
+        // There is no "db" dataSourceType in running at all(legacy code).
         if (dataType.equals("db"))
         {
             page = createPageFromPrsXml(p_request);
@@ -376,7 +378,7 @@ public class ExtractedFileImporter extends FileImporter
     private SourcePage createPageFromGxml(Request p_request)
             throws FileImportException
     {
-        String companyId = p_request.getCompanyId();
+        long companyId = p_request.getCompanyId();
 
         SourcePage page = null;
         GxmlRootElement gxmlRootElement = null;
@@ -396,8 +398,8 @@ public class ExtractedFileImporter extends FileImporter
 
         try
         {
-            ArrayList tus;
-            ArrayList srcTuvs;
+            ArrayList<Tu> tus;
+            ArrayList<Tuv> srcTuvs;
 
             esf = getExtractedSourceFile(page);
             setAttributesOfExtractedFile(p_request, esf, gxmlRootElement);
@@ -409,7 +411,7 @@ public class ExtractedFileImporter extends FileImporter
             // Re-calculate word-count from excluded items.
             if (srcTuvs != null && srcTuvs.size() > 0)
             {
-                Tuv tuv = (Tuv) srcTuvs.get(0);
+                Tuv tuv = srcTuvs.get(0);
                 String generateFrom = tuv.getTu(companyId).getGenerateFrom();
                 boolean isWSXlf = TuImpl.FROM_WORLDSERVER
                         .equalsIgnoreCase(generateFrom);
@@ -425,7 +427,8 @@ public class ExtractedFileImporter extends FileImporter
             setTuTuvIds(page);
 
             // Generate templates
-            List templates = generateTemplates(page, gxmlRootElement, tus);
+            List<PageTemplate> templates = generateTemplates(page,
+                    gxmlRootElement, tus);
 
             // Save source page, leverage group and page template.
             HibernateUtil.save(page);
@@ -434,10 +437,8 @@ public class ExtractedFileImporter extends FileImporter
             page = SegmentTuTuvPersistence.saveTuTuvAndRelatedData(page);
 
             // Save templatePart data.
-            Iterator iterator = templates.iterator();
-            while (iterator.hasNext())
+            for (PageTemplate pTemplate : templates)
             {
-                PageTemplate pTemplate = (PageTemplate) iterator.next();
                 HibernateUtil.save(pTemplate.getTemplateParts());
             }
         }
@@ -465,7 +466,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * This method creates a source page from the request and the xml root
      * element. It adds the page to the request and persists the relationship.
-     * 
+     *
      * @param p_request
      *            The request to import a page for.
      * @return SourcePage The page for importing.
@@ -528,7 +529,7 @@ public class ExtractedFileImporter extends FileImporter
 
     /**
      * This method parses the GXML obtained from CXE and creates a DOM tree
-     * 
+     *
      * @return GxmlRootElement - the root of the DOM tree.
      * @throws FileImportException
      */
@@ -598,14 +599,14 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * This method creates TUs for localizable and translatable segments of the
      * XML tree.
-     * 
+     *
      * @param p_request
      *            - The request for localization.
      * @param p_page
      *            - The page that the TUs are being created for/from.
      * @return java.util.List
      */
-    private ArrayList createTUs(Request p_request, SourcePage p_page,
+    private ArrayList<Tu> createTUs(Request p_request, SourcePage p_page,
             GxmlRootElement p_GxmlRootElement) throws FileImportException
     {
         LeverageGroup lg = getLeverageGroupForPage(p_page);
@@ -613,13 +614,13 @@ public class ExtractedFileImporter extends FileImporter
         GlobalSightLocale sourceLocale = getSourceLocale(p_request);
 
         return createTUs_1(p_request, p_page, lg, tmId, sourceLocale,
-                p_GxmlRootElement, new ArrayList());
+                p_GxmlRootElement, new ArrayList<Tu>());
     }
 
     private LeverageGroup getLeverageGroupForPage(SourcePage p_page)
     {
         // assume this is an extracted page
-        return (LeverageGroup) getExtractedSourceFile(p_page)
+        return getExtractedSourceFile(p_page)
                 .getLeverageGroups().iterator().next();
     }
 
@@ -628,9 +629,9 @@ public class ExtractedFileImporter extends FileImporter
         return p_request.getL10nProfile().getMainTmId();
     }
 
-    private ArrayList createTUs_1(Request p_request, SourcePage p_page,
+    private ArrayList<Tu> createTUs_1(Request p_request, SourcePage p_page,
             LeverageGroup p_lg, long p_tmId, GlobalSightLocale p_sourceLocale,
-            GxmlElement p_GxmlElement, ArrayList p_tuList)
+            GxmlElement p_GxmlElement, ArrayList<Tu> p_tuList)
             throws FileImportException
     {
         if (p_GxmlElement == null)
@@ -711,13 +712,13 @@ public class ExtractedFileImporter extends FileImporter
 
                     if (isCreateTu)
                     {
-                        ArrayList tus = createTranslatableSegments(elem,
+                        ArrayList<Tu> tus = createTranslatableSegments(elem,
                                 p_request, p_page, p_sourceLocale, p_tmId,
                                 pageDataType);
 
                         for (int j = 0, maxj = tus.size(); j < maxj; j++)
                         {
-                            tu = (Tu) tus.get(j);
+                            tu = tus.get(j);
                             Tuv tuv = tu.getTuv(p_sourceLocale.getId(),
                                     p_request.getCompanyId());
                             if (tuv.getSid() == null)
@@ -810,8 +811,8 @@ public class ExtractedFileImporter extends FileImporter
                      * if (nodeValue1.indexOf(TRANSLATION_MT) > 0) { TuImpl
                      * tuPre = (TuImpl)array.get(array.size()-1);
                      * tuPre.setXliffTranslationType(TuImpl.TRANSLATION_MT); }
-                     * 
-                     * 
+                     *
+                     *
                      * if (nodeValue1.indexOf(SEGMENT_LOCKED) > 0) { TuImpl
                      * tuPre = (TuImpl) array.get(array.size() - 1);
                      * tuPre.setXliffLocked(true); }
@@ -825,10 +826,10 @@ public class ExtractedFileImporter extends FileImporter
 
     /**
      * This method creates TUVs from a list of TUs and a Request
-     * 
+     *
      * @return java.util.List
      */
-    private ArrayList createTUVs(Request p_request, ArrayList p_tus)
+    private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus)
             throws Exception
     {
         ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(p_tus.size());
@@ -853,7 +854,7 @@ public class ExtractedFileImporter extends FileImporter
                 : projectManagerId;
         for (int i = 0, max = p_tus.size(); i < max; i++)
         {
-            Tu tu = (Tu) p_tus.get(i);
+            Tu tu = p_tus.get(i);
 
             tu.setSourceTmName(sourceTmName);
 
@@ -877,7 +878,7 @@ public class ExtractedFileImporter extends FileImporter
      * This method calculates the exact match keys for Source Tuvs by delegating
      * to the IndexerLocal component.
      */
-    private void setExactMatchKeysForSrcTUVs(List p_srcTuvs)
+    private void setExactMatchKeysForSrcTUVs(List<Tuv> p_srcTuvs)
             throws FileImportException
     {
         try
@@ -888,254 +889,6 @@ public class ExtractedFileImporter extends FileImporter
         {
             throw new FileImportException(e);
         }
-    }
-
-    /**
-     * Parses through the PrsXml with PrsReader and creates a source page.
-     */
-    private SourcePage createPageFromPrsXml(Request p_request)
-            throws FileImportException
-    {
-        SourcePage page = null;
-
-        String pageDataType = GxmlNames.PRS_DATATYPE;
-
-        // the word count must be totaled up from each record
-        int pageWordCount = 0;
-
-        // create list to keep TUs in the order they are read in the GXML
-        ArrayList tuList = new ArrayList();
-        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
-                .getSourceLocale();
-        long sourceLocaleId = sourceLocale.getId();
-
-        GxmlFragmentReaderPool pool = GxmlFragmentReaderPool.instance();
-        GxmlFragmentReader reader = pool.getGxmlFragmentReader();
-        PrsRootElement root;
-
-        try
-        {
-            String prsxml = readXmlFromFile(p_request.getGxml());
-            // now set the GXML string value back into the request, it will not
-            // be persisted, but will be used in a second
-            p_request.setGxml(prsxml);
-            root = reader.parsePRS(prsxml);
-        }
-        catch (GxmlException ge)
-        {
-            c_logger.error("Failed to parse the PrsXml.", ge);
-            page = createPage(p_request, "", 0);
-            setExceptionInRequest(p_request, ge);
-            return page;
-        }
-        catch (IOException ioe)
-        {
-            c_logger.error("Failed to read the PrsXml from the temp file", ioe);
-            GeneralException ge = new GeneralException(ioe);
-            page = createPage(p_request, "", 0);
-            setExceptionInRequest(p_request, ge);
-            return page;
-        }
-        finally
-        {
-            pool.freeGxmlFragmentReader(reader);
-        }
-
-        page = createPage(p_request, pageDataType, pageWordCount);
-
-        PageManager pm = getPageManager();
-        LeverageGroup lg = null;
-
-        try
-        {
-            List recordElements = root
-                    .getTranslatableAndLocalizableGroupedByRecord();
-            int numOfRecords = recordElements.size();
-            long tmId = p_request.getL10nProfile().getMainTmId();
-
-            ExtractedSourceFile esf = getExtractedSourceFile(page);
-            if (p_request.getBaseHref() != null
-                    && p_request.getBaseHref().length() > 0)
-            {
-                esf.setExternalBaseHref(p_request.getBaseHref());
-            }
-
-            for (int nr = 0; nr < numOfRecords; nr++)
-            {
-                lg = pm.createLeverageGroup();
-                List elements = (List) recordElements.get(nr);
-
-                for (int i = 0; i < elements.size(); i++)
-                {
-                    GxmlElement elem = (GxmlElement) elements.get(i);
-
-                    switch (elem.getType())
-                    {
-                        case GxmlElement.LOCALIZABLE:
-                            Tu tTu = createLocalizableSegment(elem, p_request,
-                                    page, sourceLocale, tmId);
-
-                            pageWordCount += tTu.getTuv(sourceLocale.getId(),
-                                    p_request.getCompanyId()).getWordCount();
-
-                            lg.addTu(tTu);
-                            tuList.add(tTu);
-                            break;
-
-                        case GxmlElement.TRANSLATABLE:
-                            ArrayList tus = createTranslatableSegments(elem,
-                                    p_request, page, sourceLocale, tmId,
-                                    pageDataType);
-
-                            // go through list and add to leverage group
-                            // and to list of TUs to pass in to template
-                            // generation
-                            for (int j = 0, maxj = tus.size(); j < maxj; j++)
-                            {
-                                Tu lTu = (Tu) tus.get(j);
-
-                                pageWordCount += lTu.getTuv(
-                                        sourceLocale.getId(),
-                                        p_request.getCompanyId())
-                                        .getWordCount();
-
-                                lg.addTu(lTu);
-                                tuList.add(lTu);
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-
-                esf.addLeverageGroup(lg);
-            }
-
-            ArrayList srcTuvs = new ArrayList(tuList.size());
-            int order = 1;
-
-            long sourceTmId = p_request.getL10nProfile()
-                    .getTranslationMemoryProfile().getProjectTmIdForSave();
-            ProjectHandler projectHandler = ServerProxy.getProjectHandler();
-            Tm projectTm = projectHandler.getProjectTMById(sourceTmId, false);
-            String sourceTmName = null;
-            if (projectTm != null)
-            {
-                sourceTmName = projectTm.getName();
-            }
-
-            String sourceProjectName = p_request.getL10nProfile().getProject()
-                    .getName();
-            String projectManagerId = p_request.getL10nProfile().getProject()
-                    .getProjectManagerId();
-            String creationUser = projectManagerId == null ? Tmx.DEFAULT_USER
-                    : projectManagerId;
-            for (int i = 0, max = tuList.size(); i < max; i++)
-            {
-                Tu tu = (Tu) tuList.get(i);
-                Tuv tuv = tu.getTuv(sourceLocaleId, p_request.getCompanyId());
-
-                tu.setOrder(order);
-                tu.setSourceTmName(sourceTmName);
-
-                tuv.setCreatedDate(new Date());
-                tuv.setCreatedUser(creationUser);
-                tuv.setUpdatedProject(sourceProjectName);
-                tuv.setOrder(order);
-                order++;
-
-                srcTuvs.add(tuv);
-            }
-
-            // assign exact match crcs to all source tuvs
-            getTuvManager().setExactMatchKeys(srcTuvs);
-
-            page.setWordCount(pageWordCount);
-
-            generateTemplates(page, root, tuList);
-
-            ExtractedFileImportPersistenceHandler piph = new ExtractedFileImportPersistenceHandler();
-
-            piph.persistObjects(page);
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Exception when creating TUVs in page import.", e);
-            String[] args = new String[1];
-            args[0] = Long.toString(p_request.getId());
-            setExceptionInRequest(p_request,
-                    new FileImportException(
-                            FileImportException.MSG_FAILED_TO_ITERATE_GXML_DOC,
-                            args, e));
-        }
-
-        return page;
-    }
-
-    /**
-     * Called when creating a page with NO gs tags (like all Prs pages).
-     */
-    private SourcePage createPage(Request p_request, String p_dataType,
-            int p_wordCount) throws FileImportException
-    {
-        return createPage(p_request, p_dataType, p_wordCount, false, "");
-    }
-
-    /**
-     * Gets the SourcePage to import and add segments and TUVs too. Also adds
-     * the page to the request and persists the relationship.
-     * 
-     * @param p_request
-     *            The request to import a page for.
-     * @param p_dataType
-     *            The type of data (HTML, XML, etc..)
-     * @param p_wordCount
-     *            The number of translatable words
-     * @param p_containGsTags
-     *            'True' of 'False" whether this page contains GS tags.
-     * @return SourcePage The page for importing.
-     */
-    private SourcePage createPage(Request p_request, String p_dataType,
-            int p_wordCount, boolean p_containGsTags, String p_gxmlVersion)
-            throws FileImportException
-    {
-        SourcePage page = null;
-        PageManager pm = getPageManager();
-        L10nProfile profile = p_request.getL10nProfile();
-
-        try
-        {
-            page = pm.getPageWithExtractedFileForImport(p_request,
-                    profile.getSourceLocale(), p_dataType, p_wordCount,
-                    p_containGsTags, p_gxmlVersion);
-        }
-        catch (Exception pe)
-        {
-            if (page == null)
-            {
-                c_logger.error("Couldn't get/create the page for importing.",
-                        pe);
-                String[] args = new String[2];
-                args[0] = Long.toString(p_request.getId());
-                args[1] = p_request.getExternalPageId();
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args, pe);
-            }
-            else
-            {
-                c_logger.error("Exception when adding the page to "
-                        + "the request.", pe);
-                String[] args = new String[2];
-                args[0] = Long.toString(p_request.getId());
-                args[1] = page.getExternalPageId();
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_ADD_PAGE_TO_REQUEST,
-                        args, pe);
-            }
-        }
-
-        return page;
     }
 
     /**
@@ -1227,8 +980,8 @@ public class ExtractedFileImporter extends FileImporter
             GlobalSightLocale p_sourceLocale, long p_tmId, String p_pageDataType)
             throws FileImportException
     {
-        String companyId = p_request != null ? p_request.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_request != null ? p_request.getCompanyId() : Long
+                .parseLong(CompanyWrapper.getCurrentCompanyId());
 
         TuvManager tm = getTuvManager();
 
@@ -1342,7 +1095,8 @@ public class ExtractedFileImporter extends FileImporter
                 }
 
                 OptimizeUtil op = new OptimizeUtil();
-                op.setGxml((TuvImpl)tuv, oriGxml, companyId, tuDataType, fileName, p_pageDataType);
+                op.setGxml((TuvImpl) tuv, oriGxml, companyId, tuDataType,
+                        fileName, p_pageDataType);
 
                 tuv.setSid(p_elem.getAttribute("sid"));
                 tuv.setSrcComment(srcComment);
@@ -1365,13 +1119,13 @@ public class ExtractedFileImporter extends FileImporter
         return tuList;
     }
 
-
     /**
      * Creates the templates for the source page/extracted file that has been
      * created from Gxml.
      */
-    private List generateTemplates(SourcePage p_page, GxmlRootElement p_doc,
-            List p_tuList) throws FileImportException
+    private List<PageTemplate> generateTemplates(SourcePage p_page,
+            GxmlRootElement p_doc, List<Tu> p_tuList)
+            throws FileImportException
     {
         List<PageTemplate> templates = new ArrayList<PageTemplate>();
 
@@ -1403,30 +1157,6 @@ public class ExtractedFileImporter extends FileImporter
         }
 
         return templates;
-    }
-
-    /**
-     * Creates the templates for the source page/extracted file that has been
-     * created from PrsXml.
-     */
-    private void generateTemplates(SourcePage p_page, PrsRootElement p_doc,
-            List p_tuList) throws FileImportException
-    {
-        TemplateGenerator tg = new TemplateGenerator();
-        PageTemplate template;
-
-        template = tg.generateDetail(p_doc, p_tuList);
-        template.setSourcePage(p_page);
-        ExtractedSourceFile esf = getExtractedSourceFile(p_page);
-        esf.addPageTemplate(template, PageTemplate.TYPE_DETAIL);
-
-        template = tg.generateStandard(p_doc, p_tuList);
-        template.setSourcePage(p_page);
-        esf.addPageTemplate(template, PageTemplate.TYPE_STANDARD);
-
-        template = tg.generateExport(p_doc, p_tuList);
-        template.setSourcePage(p_page);
-        esf.addPageTemplate(template, PageTemplate.TYPE_EXPORT);
     }
 
     /**
@@ -1627,23 +1357,22 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.info("Finished leveraging successfuly from page and segment TM");
 
             // save the match results to leverage_match table
-            Session session = TmUtil.getStableSession();
+            Connection conn = null;
             try
             {
+                conn = DbUtil.getConnection();
                 LingServerProxy.getLeverageMatchLingManager()
-                        .saveLeverageResults(session.connection(),
-                                p_sourcePage, leverageDataCenter);
+                        .saveLeverageResults(conn, p_sourcePage,
+                                leverageDataCenter);
             }
             finally
             {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
+                DbUtil.silentReturnConnection(conn);
             }
             // retrieve exact matches
             exactMatchedSegments = leverageDataCenter
-                    .getExactMatchedSegments(p_request.getCompanyId());
+                    .getExactMatchedSegments(String.valueOf(p_request
+                            .getCompanyId()));
         }
         catch (Exception e)
         {
@@ -1696,7 +1425,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Leverages terms for all translatable segments in the specified source
      * page and persists the result.
-     * 
+     *
      * @return collection of TermLeverageMatch objects, grouped by source tuv
      *         id, or null when the database does not exist or an error happens.
      */
@@ -1738,9 +1467,10 @@ public class ExtractedFileImporter extends FileImporter
                 }
                 else
                 {
-                    result = ServerProxy.getTermLeverageManager()
+                    result = ServerProxy
+                            .getTermLeverageManager()
                             .leverageTerms(sourceTuvs, options,
-                                    p_sourcePage.getCompanyId());
+                                    String.valueOf(p_sourcePage.getCompanyId()));
                 }
             }
             catch (Exception e)
@@ -1762,23 +1492,19 @@ public class ExtractedFileImporter extends FileImporter
      * Retrieves all translatable source TUVs in the source page by iterating
      * through the page's leverage groups and TUs.
      */
-    private ArrayList getSourceTranslatableTuvs(SourcePage p_sourcePage)
+    private ArrayList<Tuv> getSourceTranslatableTuvs(SourcePage p_sourcePage)
     {
-        ArrayList result = new ArrayList();
+        ArrayList<Tuv> result = new ArrayList<Tuv>();
 
-        List leverageGroups = getExtractedSourceFile(p_sourcePage)
-                .getLeverageGroups();
+        List<LeverageGroup> leverageGroups = getExtractedSourceFile(
+                p_sourcePage).getLeverageGroups();
         long sourceLocaleId = p_sourcePage.getLocaleId();
-        Iterator itLeverageGroup = leverageGroups.iterator();
-
-        while (itLeverageGroup.hasNext())
+        for (Iterator<LeverageGroup> it = leverageGroups.iterator(); it
+                .hasNext();)
         {
-            Collection tus = ((LeverageGroup) itLeverageGroup.next()).getTus();
-            Iterator itTus = tus.iterator();
-
-            while (itTus.hasNext())
+            Collection<Tu> tus = it.next().getTus();
+            for (Tu tu : tus)
             {
-                Tu tu = (Tu) itTus.next();
                 if (!tu.isLocalizable())
                 {
                     result.add(tu.getTuv(sourceLocaleId,
@@ -1815,7 +1541,7 @@ public class ExtractedFileImporter extends FileImporter
             if (manager != null)
             {
                 termbaseId = manager.getTermbaseId(p_termbaseName,
-                        p_request.getCompanyId());
+                        String.valueOf(p_request.getCompanyId()));
             }
 
             // If termbase does not exist, return null options.
@@ -1832,7 +1558,8 @@ public class ExtractedFileImporter extends FileImporter
             // options.setFuzzyThreshold(50);
 
             ITermbase termbase = manager.connect(p_termbaseName,
-                    ITermbase.SYSTEM_USER, "", p_request.getCompanyId());
+                    ITermbase.SYSTEM_USER, "",
+                    String.valueOf(p_request.getCompanyId()));
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
@@ -1928,7 +1655,7 @@ public class ExtractedFileImporter extends FileImporter
      * Searches the list of GXML elements for a LOCALIZABLE type="url-base" and,
      * if present, sets the page's internal base href to its value.
      * </p>
-     * 
+     *
      * <p>
      * This routine assumes that a HTML page contains only one base href, if at
      * all. Multiple <base> tags might be extracted if they are, e.g., part of a
@@ -1999,7 +1726,7 @@ public class ExtractedFileImporter extends FileImporter
      * Reads the content of the gxml or prsxml file and returns a String of XML
      * either GXML or PRSXML. This also deletes the file after reading its
      * contents
-     * 
+     *
      * @param p_gxmlFileName
      *            filename containing the GXML (or PRSXML)
      * @exception IOException
@@ -2129,29 +1856,30 @@ public class ExtractedFileImporter extends FileImporter
      * Set tuId and tuvId for all TUs and TUVs in current source page. And need
      * set these TuIds and TuvIds into its related business objects such as
      * xliffAlt, RemovedTag etc.
-     * 
+     *
      * @param p_sourcePage
      */
     @SuppressWarnings("unchecked")
     private void setTuTuvIds(SourcePage p_sourcePage)
     {
         if (p_sourcePage == null)
+        {
             return;
+        }
 
-        String companyId = p_sourcePage.getCompanyId();
-
+        long companyId = p_sourcePage.getCompanyId();
         List<LeverageGroup> lgList = p_sourcePage.getExtractedFile()
                 .getLeverageGroups();
         for (LeverageGroup lg : lgList)
         {
-            Collection tus = lg.getTus(false);
+            Collection<Tu> tus = lg.getTus(false);
             // Set tuIds for all TUs
             SegmentTuTuvIndexUtil.setTuIds(tus);
 
             // Set tuIds into its own
             // TUVs,RemovedTag,RemovedPrefixTag,RemovedSuffixTag.
             List<Tuv> allTuvs = new ArrayList<Tuv>();
-            for (Iterator tuIter = tus.iterator(); tuIter.hasNext();)
+            for (Iterator<Tu> tuIter = tus.iterator(); tuIter.hasNext();)
             {
                 TuImpl tu = (TuImpl) tuIter.next();
                 allTuvs.addAll(tu.getTuvs(false, companyId));
@@ -2190,13 +1918,13 @@ public class ExtractedFileImporter extends FileImporter
 
             // Set tuvIds into its own XliffAlt objects (for XLF/XLZ/PASSOLO
             // formats)
-            for (Iterator tuvIter = allTuvs.iterator(); tuvIter.hasNext();)
+            for (Iterator<Tuv> tuvIter = allTuvs.iterator(); tuvIter.hasNext();)
             {
                 TuvImpl tuv = (TuvImpl) tuvIter.next();
                 Set<XliffAlt> xlfAlts = tuv.getXliffAlt(false);
                 if (xlfAlts != null && xlfAlts.size() > 0)
                 {
-                    for (Iterator xlfAltIter = xlfAlts.iterator(); xlfAltIter
+                    for (Iterator<XliffAlt> xlfAltIter = xlfAlts.iterator(); xlfAltIter
                             .hasNext();)
                     {
                         XliffAlt alt = (XliffAlt) xlfAltIter.next();
@@ -2210,5 +1938,285 @@ public class ExtractedFileImporter extends FileImporter
     public static boolean getLeveragematch()
     {
         return s_autoReplaceTerms.booleanValue();
+    }
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////  LEGACY CODES !!!   ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+    /**
+     * Parses through the PrsXml with PrsReader and creates a source page.
+     * @deprecated -- Legacy codes.
+     */
+    @SuppressWarnings("rawtypes")
+    private SourcePage createPageFromPrsXml(Request p_request)
+            throws FileImportException
+    {
+        SourcePage page = null;
+
+        String pageDataType = GxmlNames.PRS_DATATYPE;
+
+        // the word count must be totaled up from each record
+        int pageWordCount = 0;
+
+        // create list to keep TUs in the order they are read in the GXML
+        ArrayList<Tu> tuList = new ArrayList<Tu>();
+        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
+                .getSourceLocale();
+        long sourceLocaleId = sourceLocale.getId();
+
+        GxmlFragmentReaderPool pool = GxmlFragmentReaderPool.instance();
+        GxmlFragmentReader reader = pool.getGxmlFragmentReader();
+        PrsRootElement root;
+
+        try
+        {
+            String prsxml = readXmlFromFile(p_request.getGxml());
+            // now set the GXML string value back into the request, it will not
+            // be persisted, but will be used in a second
+            p_request.setGxml(prsxml);
+            root = reader.parsePRS(prsxml);
+        }
+        catch (GxmlException ge)
+        {
+            c_logger.error("Failed to parse the PrsXml.", ge);
+            page = createPage(p_request, "", 0);
+            setExceptionInRequest(p_request, ge);
+            return page;
+        }
+        catch (IOException ioe)
+        {
+            c_logger.error("Failed to read the PrsXml from the temp file", ioe);
+            GeneralException ge = new GeneralException(ioe);
+            page = createPage(p_request, "", 0);
+            setExceptionInRequest(p_request, ge);
+            return page;
+        }
+        finally
+        {
+            pool.freeGxmlFragmentReader(reader);
+        }
+
+        page = createPage(p_request, pageDataType, pageWordCount);
+
+        PageManager pm = getPageManager();
+        LeverageGroup lg = null;
+
+        try
+        {
+            List recordElements = root
+                    .getTranslatableAndLocalizableGroupedByRecord();
+            int numOfRecords = recordElements.size();
+            long tmId = p_request.getL10nProfile().getMainTmId();
+
+            ExtractedSourceFile esf = getExtractedSourceFile(page);
+            if (p_request.getBaseHref() != null
+                    && p_request.getBaseHref().length() > 0)
+            {
+                esf.setExternalBaseHref(p_request.getBaseHref());
+            }
+
+            for (int nr = 0; nr < numOfRecords; nr++)
+            {
+                lg = pm.createLeverageGroup();
+                List elements = (List) recordElements.get(nr);
+
+                for (int i = 0; i < elements.size(); i++)
+                {
+                    GxmlElement elem = (GxmlElement) elements.get(i);
+
+                    switch (elem.getType())
+                    {
+                        case GxmlElement.LOCALIZABLE:
+                            Tu tTu = createLocalizableSegment(elem, p_request,
+                                    page, sourceLocale, tmId);
+
+                            pageWordCount += tTu.getTuv(sourceLocale.getId(),
+                                    p_request.getCompanyId()).getWordCount();
+
+                            lg.addTu(tTu);
+                            tuList.add(tTu);
+                            break;
+
+                        case GxmlElement.TRANSLATABLE:
+                            ArrayList<Tu> tus = createTranslatableSegments(
+                                    elem, p_request, page, sourceLocale, tmId,
+                                    pageDataType);
+
+                            // go through list and add to leverage group
+                            // and to list of TUs to pass in to template
+                            // generation
+                            for (int j = 0, maxj = tus.size(); j < maxj; j++)
+                            {
+                                Tu lTu = tus.get(j);
+
+                                pageWordCount += lTu.getTuv(
+                                        sourceLocale.getId(),
+                                        p_request.getCompanyId())
+                                        .getWordCount();
+
+                                lg.addTu(lTu);
+                                tuList.add(lTu);
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                esf.addLeverageGroup(lg);
+            }
+
+            ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(tuList.size());
+            int order = 1;
+
+            long sourceTmId = p_request.getL10nProfile()
+                    .getTranslationMemoryProfile().getProjectTmIdForSave();
+            ProjectHandler projectHandler = ServerProxy.getProjectHandler();
+            Tm projectTm = projectHandler.getProjectTMById(sourceTmId, false);
+            String sourceTmName = null;
+            if (projectTm != null)
+            {
+                sourceTmName = projectTm.getName();
+            }
+
+            String sourceProjectName = p_request.getL10nProfile().getProject()
+                    .getName();
+            String projectManagerId = p_request.getL10nProfile().getProject()
+                    .getProjectManagerId();
+            String creationUser = projectManagerId == null ? Tmx.DEFAULT_USER
+                    : projectManagerId;
+            for (int i = 0, max = tuList.size(); i < max; i++)
+            {
+                Tu tu = tuList.get(i);
+                Tuv tuv = tu.getTuv(sourceLocaleId, p_request.getCompanyId());
+
+                tu.setOrder(order);
+                tu.setSourceTmName(sourceTmName);
+
+                tuv.setCreatedDate(new Date());
+                tuv.setCreatedUser(creationUser);
+                tuv.setUpdatedProject(sourceProjectName);
+                tuv.setOrder(order);
+                order++;
+
+                srcTuvs.add(tuv);
+            }
+
+            // assign exact match crcs to all source tuvs
+            getTuvManager().setExactMatchKeys(srcTuvs);
+
+            page.setWordCount(pageWordCount);
+
+            generateTemplates(page, root, tuList);
+
+            ExtractedFileImportPersistenceHandler piph = new ExtractedFileImportPersistenceHandler();
+
+            piph.persistObjects(page);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Exception when creating TUVs in page import.", e);
+            String[] args = new String[1];
+            args[0] = Long.toString(p_request.getId());
+            setExceptionInRequest(p_request,
+                    new FileImportException(
+                            FileImportException.MSG_FAILED_TO_ITERATE_GXML_DOC,
+                            args, e));
+        }
+
+        return page;
+    }
+
+    /**
+     * Called when creating a page with NO gs tags (like all Prs pages).
+     * @deprecated -- legacy codes
+     */
+    private SourcePage createPage(Request p_request, String p_dataType,
+            int p_wordCount) throws FileImportException
+    {
+        return createPage(p_request, p_dataType, p_wordCount, false, "");
+    }
+
+    /**
+     * Gets the SourcePage to import and add segments and TUVs too. Also adds
+     * the page to the request and persists the relationship.
+     * 
+     * @param p_request
+     *            The request to import a page for.
+     * @param p_dataType
+     *            The type of data (HTML, XML, etc..)
+     * @param p_wordCount
+     *            The number of translatable words
+     * @param p_containGsTags
+     *            'True' of 'False" whether this page contains GS tags.
+     * @return SourcePage The page for importing.
+     * @deprecated -- legacy codes
+     */
+    private SourcePage createPage(Request p_request, String p_dataType,
+            int p_wordCount, boolean p_containGsTags, String p_gxmlVersion)
+            throws FileImportException
+    {
+        SourcePage page = null;
+        PageManager pm = getPageManager();
+        L10nProfile profile = p_request.getL10nProfile();
+
+        try
+        {
+            page = pm.getPageWithExtractedFileForImport(p_request,
+                    profile.getSourceLocale(), p_dataType, p_wordCount,
+                    p_containGsTags, p_gxmlVersion);
+        }
+        catch (Exception pe)
+        {
+            if (page == null)
+            {
+                c_logger.error("Couldn't get/create the page for importing.",
+                        pe);
+                String[] args = new String[2];
+                args[0] = Long.toString(p_request.getId());
+                args[1] = p_request.getExternalPageId();
+                throw new FileImportException(
+                        FileImportException.MSG_FAILED_TO_IMPORT_PAGE, args, pe);
+            }
+            else
+            {
+                c_logger.error("Exception when adding the page to "
+                        + "the request.", pe);
+                String[] args = new String[2];
+                args[0] = Long.toString(p_request.getId());
+                args[1] = page.getExternalPageId();
+                throw new FileImportException(
+                        FileImportException.MSG_FAILED_TO_ADD_PAGE_TO_REQUEST,
+                        args, pe);
+            }
+        }
+
+        return page;
+    }
+
+    /**
+     * Creates the templates for the source page/extracted file that has been
+     * created from PrsXml.
+     * @deprecated -- legacy codes
+     */
+    private void generateTemplates(SourcePage p_page, PrsRootElement p_doc,
+            List<Tu> p_tuList) throws FileImportException
+    {
+        TemplateGenerator tg = new TemplateGenerator();
+        PageTemplate template;
+
+        template = tg.generateDetail(p_doc, p_tuList);
+        template.setSourcePage(p_page);
+        ExtractedSourceFile esf = getExtractedSourceFile(p_page);
+        esf.addPageTemplate(template, PageTemplate.TYPE_DETAIL);
+
+        template = tg.generateStandard(p_doc, p_tuList);
+        template.setSourcePage(p_page);
+        esf.addPageTemplate(template, PageTemplate.TYPE_STANDARD);
+
+        template = tg.generateExport(p_doc, p_tuList);
+        template.setSourcePage(p_page);
+        esf.addPageTemplate(template, PageTemplate.TYPE_EXPORT);
     }
 }

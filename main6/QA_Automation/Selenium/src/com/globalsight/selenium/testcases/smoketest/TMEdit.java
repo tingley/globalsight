@@ -18,11 +18,11 @@ public class TMEdit extends BaseTestCase
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.TRANSLATION_MEMORY_SUBMENU);
 
-        iTMFuncs.selectRadioButtonFromTable(selenium,
+      /*  iTMFuncs.selectRadioButtonFromTable(selenium,
                 TMManagement.TM_MANAGEMENT_TABLE,
                 getProperty("tm.duplicate.name"));
-
-        clickAndWait(selenium, TMManagement.EDIT_BUTTON);
+*/
+        clickAndWait(selenium, "link=" + getProperty("tm.duplicate.name"));
 
         String editMsg = getProperty("tm.edit");
         selenium.type(TMManagement.DOMAIN_TEXT, editMsg);

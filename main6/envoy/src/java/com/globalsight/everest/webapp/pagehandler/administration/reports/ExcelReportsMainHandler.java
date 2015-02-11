@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -51,6 +52,7 @@ public class ExcelReportsMainHandler extends PageHandler
 {
     private final String REPORTNAME = "activityName";
     private ArrayList<Project> projectList = null;
+    private ArrayList<BasicL10nProfile> l10nProfiles = null;
     private ArrayList<GlobalSightLocale> targetLocales = null;
     private Locale uiLocale = null;
     private static Logger LOGGER = 
@@ -100,6 +102,7 @@ public class ExcelReportsMainHandler extends PageHandler
         
         sessionMgr.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
         sessionMgr.setAttribute(ReportConstants.PROJECT_LIST, projectList);
+        sessionMgr.setAttribute(ReportConstants.L10N_PROFILES, l10nProfiles);
         sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
     }
 
@@ -124,6 +127,7 @@ public class ExcelReportsMainHandler extends PageHandler
 
         sessionMgr.setAttribute("reportJobInfos", ReportHelper.getJobInfo(stateList));
         sessionMgr.setAttribute("projectList", projectList);
+        sessionMgr.setAttribute(ReportConstants.L10N_PROFILES, l10nProfiles);
         sessionMgr.setAttribute("targetLocales", targetLocales);
     }
     
@@ -138,6 +142,10 @@ public class ExcelReportsMainHandler extends PageHandler
             projectList = new ArrayList<Project>(ServerProxy
                     .getProjectHandler().getAllProjects());
             Collections.sort(projectList, new ProjectComparator(getUILocale()));
+
+            l10nProfiles = new ArrayList<BasicL10nProfile>(ServerProxy
+                    .getProjectHandler().getAllL10nProfilesData());
+
         }
         catch (Exception e)
         {

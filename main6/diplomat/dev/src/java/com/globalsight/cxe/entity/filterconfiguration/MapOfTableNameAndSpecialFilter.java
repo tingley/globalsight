@@ -16,8 +16,10 @@
  */
 package com.globalsight.cxe.entity.filterconfiguration;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class MapOfTableNameAndSpecialFilter
 {
@@ -49,10 +51,18 @@ public class MapOfTableNameAndSpecialFilter
         TABLENAME_FILTER.put(FilterConstants.BASE_TABLENAME, 
                 new BaseFilter());
         TABLENAME_FILTER.put(FilterConstants.FM_TABLENAME, new FMFilter());
+        TABLENAME_FILTER.put(FilterConstants.PLAINTEXT_TABLENAME, 
+                new PlainTextFilter());
     }
 
     public static Filter getFilterInstance(String tableName)
     {
         return TABLENAME_FILTER.get(tableName);
+    }
+
+    public static Collection<String> getAllFilter()
+    {
+        Collection<String> c = TABLENAME_FILTER.keySet();
+        return c;
     }
 }

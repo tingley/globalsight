@@ -29,7 +29,7 @@ public class AboutModifier
     private static Logger log = Logger.getLogger(AboutModifier.class);
     private static String srcPath = BuildUtil.ROOT
             + "/main6/envoy/src/java/properties/server.properties";
-    private static String trgPath = "/GlobalSight/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/server.properties";
+    private static String trgPath = "/GlobalSight/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties/server.properties";
     
     public static void modifyAboutJsp(String root)
     {

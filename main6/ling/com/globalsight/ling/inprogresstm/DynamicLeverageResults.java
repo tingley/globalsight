@@ -153,7 +153,7 @@ public class DynamicLeverageResults implements Serializable
      * the order of FROM_GOLD_TM, FROM_IN_PROGRESS_TM_SAME_JOB and
      * FROM_IN_PROGRESS_TM_OTHER_JOB when the score is the same.
      */
-    public void generalSort(LeverageOptions leverageOptions, String companyId)
+    public void generalSort(LeverageOptions leverageOptions, long companyId)
     {
         c_generalComapator.setLeverageOptions(leverageOptions);
         c_generalComapator.setCompanyId(companyId);
@@ -190,7 +190,7 @@ public class DynamicLeverageResults implements Serializable
      *            Set of LeverageMatch objects
      */
     public void mergeWithPreLeverage(Set p_preLeverageResults,
-            boolean isTmProcedence, String companyId)
+            boolean isTmProcedence, long companyId)
     {
         // sanity check
         if (p_preLeverageResults == null)
@@ -338,14 +338,14 @@ public class DynamicLeverageResults implements Serializable
     {
         private HashMap m_categoryMap;
         private LeverageOptions leveragetOptions;
-        private String companyId;
+        private long companyId = -1;
 
         public void setLeverageOptions(LeverageOptions leveragetOptions)
         {
             this.leveragetOptions = leveragetOptions;
         }
 
-        public void setCompanyId(String companyId)
+        public void setCompanyId(long companyId)
         {
             this.companyId = companyId;
         }
@@ -486,7 +486,7 @@ public class DynamicLeverageResults implements Serializable
     {
         private HashMap m_categoryMap;
         private LeverageOptions leverageOptions;
-        private String companyId;
+        private long companyId = -1;
 
         private GeneralComparator()
         {
@@ -507,7 +507,7 @@ public class DynamicLeverageResults implements Serializable
             this.leverageOptions = leverageOptions;
         }
 
-        public void setCompanyId(String companyId)
+        public void setCompanyId(long companyId)
         {
             this.companyId = companyId;
         }
@@ -623,9 +623,10 @@ public class DynamicLeverageResults implements Serializable
     }
 
     public void generalSortByTm(LeverageOptions leverageOptions,
-            String companyId)
+            long companyId)
     {
         c_generalComparatorByTm.setLeverageOptions(leverageOptions);
+        c_generalComparatorByTm.setCompanyId(companyId);
         Collections.sort(m_leverageResults, c_generalComparatorByTm);
     }
 }

@@ -99,8 +99,7 @@ public class XmlDtdBasicHandler extends PageActionHandler
             dtdId.set(Long.parseLong(id));
 
             File targetFile = new File(DtdFileManager.getStorePath(Long
-                    .parseLong(id))
-                    + "/" + uploader.getName());
+                    .parseLong(id)) + "/" + uploader.getName());
             if (!file.renameTo(targetFile))
             {
                 FileUtils.copyFile(file, targetFile);
@@ -120,7 +119,7 @@ public class XmlDtdBasicHandler extends PageActionHandler
     public void validateName(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        //PrintWriter out = response.getWriter();
+        // PrintWriter out = response.getWriter();
         ServletOutputStream out = response.getOutputStream();
 
         try
@@ -128,19 +127,21 @@ public class XmlDtdBasicHandler extends PageActionHandler
             String name = request.getParameter("name");
             String id = request.getParameter("id");
             ResourceBundle bundle = getBundle(request.getSession(false));
-            
+
             if (name != null && name.length() > 0)
             {
                 XmlDtdImpl xmlDtd = XmlDtdManager.getXmlDtdByName(name);
                 if (xmlDtd != null
                         && (id == null || Long.parseLong(id) != xmlDtd.getId()))
                 {
-                    out.write(bundle.getString("lb_xml_dtd_name_exists").getBytes("UTF-8"));
+                    out.write(bundle.getString("lb_xml_dtd_name_exists")
+                            .getBytes("UTF-8"));
                 }
             }
             else
             {
-                out.write(bundle.getString("lb_xml_dtd_name_null").getBytes("UTF-8"));
+                out.write(bundle.getString("lb_xml_dtd_name_null").getBytes(
+                        "UTF-8"));
             }
         }
         catch (Exception e)
@@ -172,7 +173,8 @@ public class XmlDtdBasicHandler extends PageActionHandler
         if (file != null)
         {
             response.setContentType("text/plain");
-            String attachment = "attachment; filename=\"" + file.getName() + "\";";
+            String attachment = "attachment; filename=\"" + file.getName()
+                    + "\";";
             response.setHeader("Content-Disposition", attachment);
             if (request.isSecure())
             {
@@ -243,8 +245,8 @@ public class XmlDtdBasicHandler extends PageActionHandler
         dataForTable(request);
         if (dtdId.get() != null)
         {
-            request.setAttribute(XmlDtdConstant.DTD, HibernateUtil.get(
-                    XmlDtdImpl.class, dtdId.get()));
+            request.setAttribute(XmlDtdConstant.DTD,
+                    HibernateUtil.get(XmlDtdImpl.class, dtdId.get()));
         }
     }
 
@@ -257,13 +259,14 @@ public class XmlDtdBasicHandler extends PageActionHandler
         String id = request.getParameter("id");
         if (id != null)
         {
-            XmlDtdImpl xmlDtd = HibernateUtil.get(XmlDtdImpl.class, Long
-                    .parseLong(id));
+            XmlDtdImpl xmlDtd = HibernateUtil.get(XmlDtdImpl.class,
+                    Long.parseLong(id));
             if (xmlDtd != null)
             {
                 String currentId = CompanyThreadLocal.getInstance().getValue();
                 if (CompanyWrapper.SUPER_COMPANY_ID.equals(currentId)
-                        || xmlDtd.getCompanyId().equals(currentId))
+                        || String.valueOf(xmlDtd.getCompanyId()).equals(
+                                currentId))
                 {
                     dtdId.set(Long.parseLong(id));
                 }

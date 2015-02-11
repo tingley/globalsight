@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
@@ -37,7 +38,7 @@ public class InstallValues
 {
     private static Logger log = Logger.getLogger(InstallValues.class);
     public final static String RESOURCE_FILE = "install/data/installValues.properties";
-    private static final String ER_DIR = "/jboss/jboss_server/server/default/deploy/globalsight.ear";
+    private static final String ER_DIR = "/jboss/server/standalone/deployments/globalsight.ear";
     private static final String TEMP_DIRECTORY = System
             .getProperty("java.io.tmpdir");
     private static Properties PROPERTIES = null;
@@ -280,5 +281,9 @@ public class InstallValues
 
         values.put("canoncial_mysql_path", gsHome + "/install/data/mysql/");
         values.put("ear_home", gsHome + "/deployment");
+         
+        // put values for linux jboss service command (service.sh.template)
+        values.put("JBOSS_HOME", gsHome + "/jboss/server");
+        values.put("SERVICE_NAME", "globalsight");
     }
 }

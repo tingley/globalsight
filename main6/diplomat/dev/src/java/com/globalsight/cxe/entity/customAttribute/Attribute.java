@@ -27,7 +27,7 @@ public class Attribute extends PersistentObject
     private static final long serialVersionUID = -9043113788985393187L;
 
     public static final String PROTECT_NAME_PREFIX = "protect_";
-    
+
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_CHOICE_LIST = "choiceList";
     public static final String TYPE_DATE = "date";
@@ -40,13 +40,13 @@ public class Attribute extends PersistentObject
     private boolean visible;
     private boolean editable;
     private boolean required;
-    private String companyId;
+    private long companyId;
     private Set<AttributeSet> attributeSets = new HashSet<AttributeSet>();
-//    private Set<JobAttribute> jobAttributes = new HashSet<JobAttribute>();;
+    // private Set<JobAttribute> jobAttributes = new HashSet<JobAttribute>();;
     private String description;
 
     private Condition condition;
-    
+
     public String getType()
     {
         if (condition == null)
@@ -75,12 +75,12 @@ public class Attribute extends PersistentObject
         this.editable = editable;
     }
 
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return companyId;
     }
 
-    public void setCompanyId(String companyId)
+    public void setCompanyId(long companyId)
     {
         this.companyId = companyId;
     }
@@ -145,16 +145,16 @@ public class Attribute extends PersistentObject
         this.displayName = displayName;
     }
 
-//    public Set<JobAttribute> getJobAttributes()
-//    {
-//        return jobAttributes;
-//    }
-//
-//    public void setJobAttributes(Set<JobAttribute> jobAttributes)
-//    {
-//        this.jobAttributes = jobAttributes;
-//    }
-    
+    // public Set<JobAttribute> getJobAttributes()
+    // {
+    // return jobAttributes;
+    // }
+    //
+    // public void setJobAttributes(Set<JobAttribute> jobAttributes)
+    // {
+    // this.jobAttributes = jobAttributes;
+    // }
+
     public boolean removeable()
     {
         return !name.startsWith(PROTECT_NAME_PREFIX);
@@ -174,7 +174,7 @@ public class Attribute extends PersistentObject
         clone.setVisible(this.visible);
         return clone;
     }
-    
+
     @Override
     public int hashCode()
     {

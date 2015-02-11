@@ -427,7 +427,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         return sid;
     }
 
-    public String getOrgSid(String companyId)
+    public String getOrgSid(long companyId)
     {
         if (orgSid == null && m_originalSourceTuvId > 0)
         {

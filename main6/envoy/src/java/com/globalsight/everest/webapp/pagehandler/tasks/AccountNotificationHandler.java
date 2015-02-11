@@ -53,77 +53,57 @@ public class AccountNotificationHandler
     static
     {
         // Admin
-        s_adminNotifications.add(
-            UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE);
+        s_adminNotifications.add(UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE);
         // PM and WFM
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_JOB_DISCARD_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_READY_TO_DISPATCH);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_DISPATCH_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_IMPORT_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_IMPORT_CORRECTION);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_DELAYED_REIMPORT_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_TASK_ACCEPTANCE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_TASK_COMPLETION);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_TASK_REJECTION);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_NO_AVAILABLE_RESOURCE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_EXPORT_SOURCE_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_ESTIMATED_EXCEEDS_PLANNED_DATE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_ADD_WORKFLOW_TO_JOB_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_STF_CREATION_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_SCHEDULING_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_ACTIVITY_DEADLINE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS);
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE);
-        
-        //Adds parameter for notification pm overdue
-        s_pmAndWfmNotifications.add(
-            UserParamNames.NOTIFY_OVERDUE_PM);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_JOB_DISCARD_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_READY_TO_DISPATCH);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_DISPATCH_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_IMPORT_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_IMPORT_CORRECTION);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_DELAYED_REIMPORT_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_TASK_ACCEPTANCE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_TASK_COMPLETION);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_WFL_COMPLETION);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_JOB_COMPLETION);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_TASK_REJECTION);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_NO_AVAILABLE_RESOURCE);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_EXPORT_SOURCE_FAILURE);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_ESTIMATED_EXCEEDS_PLANNED_DATE);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_ADD_WORKFLOW_TO_JOB_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_STF_CREATION_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_SCHEDULING_FAILURE);
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_ACTIVITY_DEADLINE);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS);
+        s_pmAndWfmNotifications
+                .add(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE);
+
+        // Adds parameter for notification pm overdue
+        s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_OVERDUE_PM);
 
         // LP, LM, and etc...
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_DELAYED_REIMPORT);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_NEWLY_ASSIGNED_TASK);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_EXPORT_FOR_UPDATE);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_EXPORT_COMPLETION);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_WORKFLOW_DISCARD);
-        s_generalNotifications.add(
-            UserParamNames.NOTIFY_SAVING_SEGMENTS_FAILURE);
-        //Adds parameter for notification user overdue
-        s_generalNotifications.add(
-        	UserParamNames.NOTIFY_OVERDUE_USER);
+        s_generalNotifications.add(UserParamNames.NOTIFY_DELAYED_REIMPORT);
+        s_generalNotifications.add(UserParamNames.NOTIFY_NEWLY_ASSIGNED_TASK);
+        s_generalNotifications.add(UserParamNames.NOTIFY_EXPORT_FOR_UPDATE);
+        s_generalNotifications.add(UserParamNames.NOTIFY_EXPORT_COMPLETION);
+        s_generalNotifications.add(UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+        s_generalNotifications.add(UserParamNames.NOTIFY_WORKFLOW_DISCARD);
+        s_generalNotifications
+                .add(UserParamNames.NOTIFY_SAVING_SEGMENTS_FAILURE);
+        // Adds parameter for notification user overdue
+        s_generalNotifications.add(UserParamNames.NOTIFY_OVERDUE_USER);
         // Adds parameter for notification quote person
-        s_generalNotifications.add(
-            	UserParamNames.NOTIFY_QUOTE_PERSON);
+        s_generalNotifications.add(UserParamNames.NOTIFY_QUOTE_PERSON);
     }
 
 

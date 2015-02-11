@@ -18,10 +18,6 @@
 package com.globalsight.everest.tm;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,7 +26,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.corpus.CorpusManager;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTM;
@@ -38,9 +33,6 @@ import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -52,336 +44,325 @@ import com.globalsight.util.progress.ProgressReporter;
  * TmRemover class is responsible for deleting TM.
  */
 public class TmRemover extends MultiCompanySupportedThread implements
-		ProcessMonitor, ProgressReporter, Serializable
+        ProcessMonitor, ProgressReporter, Serializable
 {
-	static private final Logger c_logger = Logger
-			.getLogger(TmRemover.class);
+    static private final Logger c_logger = Logger.getLogger(TmRemover.class);
 
-	private Connection m_connection;
+    // private long m_tmId;
 
-	//private long m_tmId;
-	
-	private ArrayList<String> tmIds = null;
+    private ArrayList<String> tmIds = null;
 
-	private int m_percentage = 0;
+    private int m_percentage = 0;
 
-	private boolean m_done = false;
+    private boolean m_done = false;
 
-	private boolean m_error = false;
+    private boolean m_error = false;
 
-	private String m_message = "";
+    private String m_message = "";
 
-	private InterruptMonitor m_monitor = new InterruptMonitor();
-	
-	private boolean deleteLanguageFlag = false;
-	
-	private long localeID;
+    private InterruptMonitor m_monitor = new InterruptMonitor();
 
-	/**
-	 * TmRemover constructor.
-	 * 
-	 * @param p_tmId
-	 *            TM id to be removed.
-	 * @param p_companyId
-	 *            ID of the company to which the TM belogs.
-	 */
-	public TmRemover(ArrayList<String> tmIds) throws TmManagerException
-	{
-		super();
+    private boolean deleteLanguageFlag = false;
 
-		this.tmIds = tmIds;
+    private long localeID;
 
-		try
-		{
-			m_connection = DbUtil.getConnection();
-		}
-		catch (Exception ex)
-		{
-			c_logger.error("Failed to get connection.", ex);
+    /**
+     * TmRemover constructor.
+     */
+    public TmRemover(ArrayList<String> tmIds)
+    {
+        super();
+        this.tmIds = tmIds;
+    }
 
-			throw new TmManagerException(ex);
-		}
-	}
+    public void run()
+    {
+        try
+        {
+            super.run();
 
-	public void run()
-	{
-		try
-		{
-			super.run();
-			
             setPercentage(0);
             ArrayList<String> dependencyTms = new ArrayList<String>();
             ArrayList<String> nonDependencyTms = new ArrayList<String>(tmIds);
-            
+
             getDependentTmProfileNames(dependencyTms, nonDependencyTms);
 
             if (dependencyTms.size() > 0)
                 setDependencyError(dependencyTms);
             int size = nonDependencyTms.size();
             long tmId = -1l;
-            if (size > 0) {
-                int round = Math.round(80/size);
+            if (size > 0)
+            {
+                int round = Math.round(80 / size);
                 int index = 1;
                 Tm tm = null;
                 GlobalSightLocale locale = null;
                 TmCoreManager manager = LingServerProxy.getTmCoreManager();
                 ProjectTMTBUsers ptUsers = new ProjectTMTBUsers();
 
-                for (String tmpTmId : nonDependencyTms) {
+                for (String tmpTmId : nonDependencyTms)
+                {
                     tmId = Long.parseLong(tmpTmId);
-                    
-                    tm = ServerProxy.getProjectHandler().getProjectTMById(tmId, true);
-                    
+
+                    tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
+                            true);
+
                     int convertedRate = tm.getConvertRate();
-                    if (convertedRate > 0 && convertedRate < 100) {
+                    if (convertedRate > 0 && convertedRate < 100)
+                    {
                         long tm2Id = tm.getConvertedTM3Id();
-                        ProjectTM oriTm = ServerProxy.getProjectHandler().getProjectTMById(tm2Id, true);
+                        ProjectTM oriTm = ServerProxy.getProjectHandler()
+                                .getProjectTMById(tm2Id, true);
                         oriTm.setConvertedTM3Id(-1);
                         oriTm.setLastTUId(-1);
                         HibernateUtil.save(oriTm);
                     }
 
-                    if (deleteLanguageFlag) {
-                        locale = ServerProxy.getLocaleManager().getLocaleById(localeID);
+                    if (deleteLanguageFlag)
+                    {
+                        locale = ServerProxy.getLocaleManager().getLocaleById(
+                                localeID);
                         manager.removeTmData(tm, locale, this, m_monitor);
                     }
-                    else {
+                    else
+                    {
                         manager.removeTmData(tm, this, m_monitor);
                         ptUsers.deleteAllUsers(String.valueOf(tmId), "TM");
                     }
-                    
+
                     setPercentage(index * round);
                 }
             }
             setPercentage(100);
-		}
-		catch (Throwable ex)
-		{
-			try
-			{
-				// cancel the row deletion
-				m_connection.rollback();
-			}
-			catch (SQLException ignore)
-			{
-			}
+        }
+        catch (Throwable ex)
+        {
+            if (ex instanceof InterruptException)
+            {
+                c_logger.info(m_message);
+            }
+            else
+            {
+                c_logger.error("An error occured while removing Tm", ex);
 
-			if (ex instanceof InterruptException)
-			{
-				c_logger.info(m_message);
-			}
-			else
-			{
-				c_logger.error("An error occured while removing Tm", ex);
-
-				synchronized (this)
-				{
-                    m_message = "&lt;font color='red'&gt;" + getStringFromBundle("lb_tm_remove_error_occur", "An error occured while removing Tm")
+                synchronized (this)
+                {
+                    m_message = "&lt;font color='red'&gt;"
+                            + getStringFromBundle("lb_tm_remove_error_occur",
+                                    "An error occured while removing Tm")
                             + ": " + ex.getMessage() + "&lt;/font&gt;";
-					m_done = true;
-					m_error = true;
-				}
-			}
-		}
-		finally
-		{
-			m_done = true;
+                    m_done = true;
+                    m_error = true;
+                }
+            }
+        }
+        finally
+        {
+            m_done = true;
+        }
+    }
 
-			try
-			{
-				DbUtil.returnConnection(m_connection);
-			}
-			catch (Exception ignore)
-			{
-			}
-		}
-	}
+    // ProcessMonitor methods
 
-	// ProcessMonitor methods
+    /** Method for getting counter value. */
+    public int getCounter()
+    {
+        return 0;
+    }
 
-	/** Method for getting counter value. */
-	public int getCounter()
-	{
-		return 0;
-	}
+    /** Method for getting percentage complete information. */
+    public int getPercentage()
+    {
+        synchronized (this)
+        {
+            return m_percentage;
+        }
+    }
 
-	/** Method for getting percentage complete information. */
-	public int getPercentage()
-	{
-		synchronized (this)
-		{
-			return m_percentage;
-		}
-	}
+    /**
+     * Method for getting a status if the process has finished (either
+     * successfully, with error or canceled by user request)
+     */
+    public boolean hasFinished()
+    {
+        synchronized (this)
+        {
+            return m_done;
+        }
+    }
 
-	/**
-	 * Method for getting a status if the process has finished (either
-	 * successfully, with error or canceled by user request)
-	 */
-	public boolean hasFinished()
-	{
-		synchronized (this)
-		{
-			return m_done;
-		}
-	}
+    /**
+     * This must be called after setResourceBundle and before start to avoid a
+     * window where getReplacingMessage returns null.
+     */
+    public void initReplacingMessage()
+    {
+        setMessageKey("", "");
+    }
 
-	/**
-         * This must be called after setResourceBundle and before start to
-         * avoid a window where getReplacingMessage returns null.
-	 */
-	public void initReplacingMessage()
-	{
-		setMessageKey("", "");
-	}
+    /**
+     * Method for getting a message that replaces an existing message in UI.
+     * This is typically used to get a message that shows the current status
+     */
+    public String getReplacingMessage()
+    {
+        synchronized (this)
+        {
+            return m_message;
+        }
+    }
 
-	/**
-	 * Method for getting a message that replaces an existing message in UI.
-	 * This is typically used to get a message that shows the current status
-	 */
-	public String getReplacingMessage()
-	{
-		synchronized (this)
-		{
-			return m_message;
-		}
-	}
+    /**
+     * Returns true if an error has occured and the replacing message contains
+     * error message.
+     */
+    public boolean isError()
+    {
+        synchronized (this)
+        {
+            // return m_error;
+            return false;
+        }
+    }
 
-	/**
-	 * Returns true if an error has occured and the replacing message contains
-	 * error message.
-	 */
-	public boolean isError()
-	{
-		synchronized (this)
-		{
-			//return m_error;
-		    return false;
-		}
-	}
+    /**
+     * Method for getting messages that are appended in UI. This is typically
+     * used to get messages that cumulatively displayed e.g. items so far done.
+     */
+    public List getAppendingMessages()
+    {
+        return null;
+    }
 
-	/**
-	 * Method for getting messages that are appended in UI. This is typically
-	 * used to get messages that cumulatively displayed e.g. items so far done.
-	 */
-	public List getAppendingMessages()
-	{
-		return null;
-	}
-	
-	/**
+    /**
      * Method for setting flag to determine delete TM or TM's language
      */
-	public void SetDeleteLanguageFlag(boolean flag) {
-	    deleteLanguageFlag = flag;
-	}
+    public void SetDeleteLanguageFlag(boolean flag)
+    {
+        deleteLanguageFlag = flag;
+    }
 
-	synchronized public void cancelProcess()
-	{
-		m_monitor.interrupt();
-	}
+    synchronized public void cancelProcess()
+    {
+        m_monitor.interrupt();
+    }
 
-	//
-	// ProgressReporter
-	//
-	
+    //
+    // ProgressReporter
+    //
+
     /**
-     * Set the current progress message key.  It is generally assumed that
-     * this is a key into a localizable message bundle.
-     * @param statusMessage progress message key
+     * Set the current progress message key. It is generally assumed that this
+     * is a key into a localizable message bundle.
+     * 
+     * @param statusMessage
+     *            progress message key
      */
     @Override
-    public void setMessageKey(String messageKey, String defaultMessage) {
-	    synchronized (this) {
+    public void setMessageKey(String messageKey, String defaultMessage)
+    {
+        synchronized (this)
+        {
             String tmp = getStringFromBundle(messageKey, defaultMessage);
             if (!StringUtil.isEmpty(tmp))
                 m_message += tmp + "&lt;br&gt;";
-	    }
-	}
-    
-    /**
-     * Set the current completion percentage.  
-     * @param percentage completion percentage
-     */
-	@Override
-    public void setPercentage(int percentage) {
-	    synchronized (this) {
-	        m_percentage = percentage;
-	        if (m_percentage == 100)
-	            m_done = true;
-	    }
+        }
     }
-	
-	private void setDependencyError(ArrayList<String> p_tmProfileNames)
-	{
-		synchronized (this)
-		{
-		    String tmpMsg = "Tm is refered to by the following Tm Profiles. "
-                + "Please deselect this Tm from the Tm Profiles before removing it.";
-			m_message = "&lt;font color='red'&gt;" + getStringFromBundle("lb_tm_remove_tm_deselect_tmp", tmpMsg) + "&lt;br&gt;";
 
-			for (Iterator<String> it = p_tmProfileNames.iterator(); it.hasNext();)
-				m_message += "&lt;b&gt;" + it.next() + "&lt;/b&gt;&lt;br&gt;";
+    /**
+     * Set the current completion percentage.
+     * 
+     * @param percentage
+     *            completion percentage
+     */
+    @Override
+    public void setPercentage(int percentage)
+    {
+        synchronized (this)
+        {
+            m_percentage = percentage;
+            if (m_percentage == 100)
+                m_done = true;
+        }
+    }
 
-			m_message += "&lt;/font&gt;";
-			
-			m_error = true;
-		}
-	}
+    private void setDependencyError(ArrayList<String> p_tmProfileNames)
+    {
+        synchronized (this)
+        {
+            String tmpMsg = "Tm is refered to by the following Tm Profiles. "
+                    + "Please deselect this Tm from the Tm Profiles before removing it.";
+            m_message = "&lt;font color='red'&gt;"
+                    + getStringFromBundle("lb_tm_remove_tm_deselect_tmp",
+                            tmpMsg) + "&lt;br&gt;";
 
-	private void checkInterrupt() throws InterruptException
-	{
-		m_message = getStringFromBundle("lb_tm_remove_cancel_by_user", "Tm removal has been cancelled by user request.");
-		m_done = true;
+            for (Iterator<String> it = p_tmProfileNames.iterator(); it
+                    .hasNext();)
+                m_message += "&lt;b&gt;" + it.next() + "&lt;/b&gt;&lt;br&gt;";
 
-		throw new InterruptException();
-	}
+            m_message += "&lt;/font&gt;";
 
-	private void getDependentTmProfileNames(ArrayList<String> dependencyTms, ArrayList<String> nonDependencyTms) throws Exception
-	{
-		Collection tmProfiles = ServerProxy.getProjectHandler()
-				.getAllTMProfiles();
+            m_error = true;
+        }
+    }
 
-		String tmp = null;
-		long tmpTmId = -1l;
-		Tm tm = null;
-		for (Iterator itTmProfiles = tmProfiles.iterator(); itTmProfiles
-				.hasNext();)
-		{
-			TranslationMemoryProfile profile = (TranslationMemoryProfile) itTmProfiles
-					.next();
+    private void checkInterrupt() throws InterruptException
+    {
+        m_message = getStringFromBundle("lb_tm_remove_cancel_by_user",
+                "Tm removal has been cancelled by user request.");
+        m_done = true;
 
-			tmpTmId = profile.getProjectTmIdForSave();
-			// check with the Tm to save
-			if (tmIds.contains(String.valueOf(tmpTmId)))
-			{
-			    ProjectTM projectTM = ServerProxy.getProjectHandler().getProjectTMById(tmpTmId, false);
-				dependencyTms.add(projectTM.getName());
-				nonDependencyTms.remove(String.valueOf(tmpTmId));
-				continue;
-			}
+        throw new InterruptException();
+    }
 
-			// check with the Tm to leverage from
-			Collection tms = profile.getProjectTMsToLeverageFrom();
-			for (Iterator itTms = tms.iterator(); itTms.hasNext();)
-			{
-				LeverageProjectTM lptm = (LeverageProjectTM) itTms.next();
-				tmp = String.valueOf(lptm.getProjectTmId());
-				if (tmIds.contains(tmp))
-				{
-					dependencyTms.add(profile.getName());
-					nonDependencyTms.remove(tmp);
-					break;
-				}
-			}
-		}
-	}
+    private void getDependentTmProfileNames(ArrayList<String> dependencyTms,
+            ArrayList<String> nonDependencyTms) throws Exception
+    {
+        Collection tmProfiles = ServerProxy.getProjectHandler()
+                .getAllTMProfiles();
 
-	private class InterruptException extends Exception
-	{
-	}
-	
-	public void setLocaleId(long cl) {
-	    localeID = cl;
-	}
+        String tmp = null;
+        long tmpTmId = -1l;
+        Tm tm = null;
+        for (Iterator itTmProfiles = tmProfiles.iterator(); itTmProfiles
+                .hasNext();)
+        {
+            TranslationMemoryProfile profile = (TranslationMemoryProfile) itTmProfiles
+                    .next();
+
+            tmpTmId = profile.getProjectTmIdForSave();
+            // check with the Tm to save
+            if (tmIds.contains(String.valueOf(tmpTmId)))
+            {
+                ProjectTM projectTM = ServerProxy.getProjectHandler()
+                        .getProjectTMById(tmpTmId, false);
+                dependencyTms.add(projectTM.getName());
+                nonDependencyTms.remove(String.valueOf(tmpTmId));
+                continue;
+            }
+
+            // check with the Tm to leverage from
+            Collection tms = profile.getProjectTMsToLeverageFrom();
+            for (Iterator itTms = tms.iterator(); itTms.hasNext();)
+            {
+                LeverageProjectTM lptm = (LeverageProjectTM) itTms.next();
+                tmp = String.valueOf(lptm.getProjectTmId());
+                if (tmIds.contains(tmp))
+                {
+                    dependencyTms.add(profile.getName());
+                    nonDependencyTms.remove(tmp);
+                    break;
+                }
+            }
+        }
+    }
+
+    private class InterruptException extends Exception
+    {
+    }
+
+    public void setLocaleId(long cl)
+    {
+        localeID = cl;
+    }
 }

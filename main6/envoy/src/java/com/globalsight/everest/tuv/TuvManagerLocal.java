@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +37,6 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuvLing;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -144,18 +142,19 @@ public final class TuvManagerLocal implements TuvManager
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, String companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
             throws TuvException
     {
         TuvImpl tuvInDb = null;
         Connection conn = null;
         try
         {
-        	conn = DbUtil.getConnection();
-        	List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
+            conn = DbUtil.getConnection();
+            List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
             for (TuvImplVo tuv : p_tuvs)
             {
-				tuvInDb = SegmentTuvUtil.getTuvById(conn, tuv.getId(), companyId);
+                tuvInDb = SegmentTuvUtil.getTuvById(conn, tuv.getId(),
+                        companyId);
                 tuvInDb.setExactMatchKey(GlobalSightCrc
                         .calculate(((TuvLing) tuv).getExactMatchFormat()));
                 tuvInDb.setGxml(tuv.getGxml());
@@ -168,7 +167,7 @@ public final class TuvManagerLocal implements TuvManager
                 tuvsToBeUpdated.add(tuvInDb);
             }
 
-            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, Long.parseLong(companyId));
+            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, companyId);
         }
         catch (Exception ex)
         {
@@ -194,9 +193,7 @@ public final class TuvManagerLocal implements TuvManager
         }
         finally
         {
-        	if (conn != null) {
-            	DbUtil.silentReturnConnection(conn);
-        	}
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -298,8 +295,7 @@ public final class TuvManagerLocal implements TuvManager
         List result = null;
         try
         {
-            result = SegmentTuvUtil.getExportTuvs(
-                    Long.parseLong(p_sourcePage.getCompanyId()),
+            result = SegmentTuvUtil.getExportTuvs(p_sourcePage.getCompanyId(),
                     p_locale.getId(), p_sourcePage.getId());
         }
         catch (Exception e)
@@ -400,7 +396,6 @@ public final class TuvManagerLocal implements TuvManager
             GlobalSightLocale p_targetLocale) throws TuvException,
             RemoteException
     {
-        Session session = TmUtil.getStableSession();
         try
         {
             TargetPage targetPage = null;
@@ -420,16 +415,11 @@ public final class TuvManagerLocal implements TuvManager
                 targetTuv.setLastModified(new Date());
             }
 
-			SegmentTuvUtil.updateTuvs(targetTuvs,
-					Long.parseLong(p_sourcePage.getCompanyId()));
+            SegmentTuvUtil.updateTuvs(targetTuvs, p_sourcePage.getCompanyId());
         }
         catch (Exception e)
         {
             throw new TuvException(e);
-        }
-        finally
-        {
-            TmUtil.closeStableSession(session);
         }
     }
 
@@ -448,7 +438,7 @@ public final class TuvManagerLocal implements TuvManager
      *             when a communication-related error occurs.
      */
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            String companyId) throws TuvException, RemoteException
+            long companyId) throws TuvException, RemoteException
     {
         List tuvs = new ArrayList();
         try
@@ -480,7 +470,7 @@ public final class TuvManagerLocal implements TuvManager
      *             when a communication-related error occurs.
      */
     public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            String companyId) throws TuvException, RemoteException
+            long companyId) throws TuvException, RemoteException
     {
         Tuv tuv = null;
         try
@@ -507,7 +497,7 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuvId, String companyId)
+    public Tuv getTuvForSegmentEditor(long p_tuvId, long companyId)
             throws TuvException, RemoteException
     {
         try
@@ -520,7 +510,7 @@ public final class TuvManagerLocal implements TuvManager
         }
     }
 
-    public Tu getTuForSegmentEditor(long p_tuId, String companyId)
+    public Tu getTuForSegmentEditor(long p_tuId, long companyId)
             throws TuvException, RemoteException
     {
         try
@@ -579,8 +569,8 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuv(Tuv p_tuv, String companyId) throws TuvException,
-            RemoteException
+    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+            throws TuvException, RemoteException
     {
         try
         {
@@ -591,7 +581,6 @@ public final class TuvManagerLocal implements TuvManager
             tuv.setState(TuvState.LOCALIZED);
             tuv.setLastModified(new Date());
 
-            // HibernateUtil.update(tuv);
             SegmentTuvUtil.updateTuv(tuv, companyId);
         }
         catch (Exception ex)
@@ -672,64 +661,6 @@ public final class TuvManagerLocal implements TuvManager
         {
             throw new TuvException(e);
         }
-    }
-
-    /**
-     * Retrieves the list of repetition TUs belonging to a source page.
-     * 
-     * @param p_sourcePageId
-     *            - the id of the source page
-     * @return Collection a unsorted list of TUs from the source page.
-     */
-    public Collection<TuImpl> getRepTusBySourcePageId(Long p_sourcePageId)
-    {
-        try
-        {
-            return SegmentTuUtil.getRepTusBySourcePageId(p_sourcePageId);
-        }
-        catch (Exception e)
-        {
-            throw new TuvException(e);
-        }
-    }
-
-    /**
-     * Return all TUs which belong to the same repetition group by TuID.
-     * 
-     * @param p_repTuId
-     *            - This Tu may be not repeated or repetition.
-     * 
-     * @return - List<TuImpl>.
-     * @throws RemoteException
-     * @throws TuvException
-     */
-    public List<TuImpl> getRepTusByTuId(Long p_repTuId, String companyId)
-            throws TuvException, RemoteException
-    {
-        Tu tu = getTuForSegmentEditor(p_repTuId, companyId);
-        long repeatedTuId = 0;
-        if (tu.isRepeated())
-        {
-            repeatedTuId = tu.getId();
-        }
-        else if (tu.getRepetitionOfId() > 0)
-        {
-            repeatedTuId = tu.getRepetitionOfId();
-        }
-
-        if (repeatedTuId > 0)
-        {
-            try
-            {
-                return SegmentTuUtil.getRepTusByTuId(companyId, repeatedTuId);
-            }
-            catch (Exception e)
-            {
-                throw new TuvException(e);
-            }
-        }
-
-        return null;
     }
 
     /**

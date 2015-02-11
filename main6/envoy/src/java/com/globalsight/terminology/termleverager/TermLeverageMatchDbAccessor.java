@@ -28,10 +28,8 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.database.PreparedStatementBatch;
@@ -380,15 +378,14 @@ class TermLeverageMatchDbAccessor
 
         try
         {
-            SourcePage sp = HibernateUtil.get(SourcePage.class, p_sourcePageId);
-            String tuTableName = SegmentTuTuvCacheManager.getTuTableName(sp
-                    .getCompanyId());
-            String tuvTableName = SegmentTuTuvCacheManager.getTuvTableName(sp
-                    .getCompanyId());
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableNameJobDataIn(p_sourcePageId);
+            String tuvTableName = SegmentTuTuvCacheManager
+                    .getTuvTableNameJobDataIn(p_sourcePageId);
             String sql = SELECT_PAGE_MATCH_SQL.replace(
-                    TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
-            sql = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
-                    tuvTableName);
+                    TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
+                    .replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                            tuvTableName);
             stmt = p_conn.prepareStatement(sql);
             stmt.setLong(1, p_sourcePageId);
             stmt.setLong(2, p_sourcePageLocaleId);

@@ -31,6 +31,9 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
+import jxl.CellView;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -48,6 +51,7 @@ import jxl.write.WritableWorkbook;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -91,8 +95,12 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  * This Generator is used for creating Translations Edit Report (Include
  * Translations Edit Report in offline download report page)
  */
-public class TranslationsEditReportGenerator implements ReportGenerator, Cancelable
+public class TranslationsEditReportGenerator implements ReportGenerator,
+        Cancelable
 {
+    private static final Logger logger = 
+            Logger.getLogger(TranslationsEditReportGenerator.class);
+    
     private WritableCellFormat contentFormat = null;
     private WritableCellFormat rtlContentFormat = null;
     private WritableCellFormat headerFormat = null;
@@ -110,7 +118,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
     private String m_dateFormat;
     private ResourceBundle m_bundle;
-    
+
     private boolean cancel = false;
 
     public TranslationsEditReportGenerator(String p_currentCompanyName)
@@ -134,8 +142,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     public TranslationsEditReportGenerator(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
-        m_companyName = UserUtil.getCurrentCompanyName(p_request);
-        CompanyThreadLocal.getInstance().setValue(m_companyName);
         m_uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
         if (m_uiLocale == null)
@@ -159,6 +165,15 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 .getTargetLocaleList(p_request
                         .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
                         comparator);
+        
+        m_companyName = UserUtil.getCurrentCompanyName(p_request);
+        if (CompanyWrapper.isSuperCompanyName(m_companyName)
+                && m_jobIDS != null && m_jobIDS.size() > 0)
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(m_jobIDS.get(0));
+            m_companyName = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+        }
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
     }
 
     @Override
@@ -168,9 +183,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         List<File> workBooks = new ArrayList<File>();
         for (long jobID : p_jobIDS)
         {
-        	if (cancel)
-        		return new File[0];
-        		
+            if (cancel)
+                return new File[0];
+
             Job job = ServerProxy.getJobHandler().getJobById(jobID);
             if (job == null)
                 continue;
@@ -343,6 +358,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         addLanguageHeader(sheet);
         // Add Segment Header
         addSegmentHeader(sheet);
+        // Create Name Areas for drop down list.
+        createNameAreas(p_workbook);
 
         // Insert Data into Report
         writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(m_uiLocale),
@@ -548,12 +565,47 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
      * @return
      * @throws Exception
      */
-    private WritableCellFeatures getSelectFeatures(String companyId)
+    private WritableCellFeatures getSelectFeatures(String p_nameedRange)
             throws Exception
     {
         WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(getFailureCategoriesList(companyId));
+        features.setDataValidationRange(p_nameedRange);
         return features;
+    }
+    
+    /**
+     * Create Workbook Name Areas for Drop Down List,
+     * Only write the data of drop down list into the first sheet.
+     */
+    private void createNameAreas(WritableWorkbook p_workbook)
+    {
+        try
+        {
+            if (p_workbook.getSheets().length == 1)
+            {
+                WritableSheet sheet = p_workbook.getSheet(0);
+                String companyId = CompanyWrapper.getCompanyIdByName(m_companyName);
+                List<String> categories = getFailureCategoriesList(companyId);
+                int col = sheet.getColumns() + 1;
+                for (int i = 0; i < categories.size(); i++)
+                {
+                    sheet.addCell(new Label(col, SEGMENT_START_ROW + i,
+                            categories.get(i)));
+                }
+                // Hidden Category Column.
+                CellView cellView = new CellView();
+                cellView.setHidden(true);
+                sheet.setColumnView(col, cellView);
+                
+                p_workbook.addNameArea(CATEGORY_LIST, sheet, 
+                        col, SEGMENT_START_ROW, 
+                        col, SEGMENT_START_ROW + categories.size());
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Reviewers Comments Report Write Category Error." + e);
+        }
     }
 
     private List<String> getFailureCategoriesList(String companyId)
@@ -566,8 +618,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
-            String cat = aCategory.getValue();
-            result.add(cat.replace(",", " "));
+            result.add(aCategory.getValue());
         }
         return result;
     }
@@ -614,7 +665,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             String p_targetLang, String p_srcPageId, String p_dateFormat,
             int p_row) throws Exception
     {
-        String companyId = p_job.getCompanyId();
+        long companyId = p_job.getCompanyId();
         Collection wfs = p_job.getWorkflows();
         Iterator it = wfs.iterator();
         Vector targetPages = new Vector();
@@ -624,9 +675,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
         while (it.hasNext())
         {
-        	if (cancel)
-        		return 0;
-        	
+            if (cancel)
+                return 0;
+
             Workflow workflow = (Workflow) it.next();
 
             if (Workflow.PENDING.equals(workflow.getState())
@@ -670,9 +721,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             String sid = null;
             for (int i = 0; i < targetPages.size(); i++)
             {
-            	if (cancel)
-            		return 0;
-            	
+                if (cancel)
+                    return 0;
+
                 TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
 
@@ -708,24 +759,25 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
                         sourcePageLocale, targetPageLocale, p_job
                                 .getL10nProfile().getProject()
-                                .getTermbaseName(), p_job.getCompanyId());
+                                .getTermbaseName(),
+                        String.valueOf(p_job.getCompanyId()));
 
                 TermLeverageResult termLeverageResult = null;
                 if (termLeverageOptions != null)
                 {
                     termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions, companyId);
+                            sourceTuvs, termLeverageOptions,
+                            String.valueOf(companyId));
                 }
                 // Find segment all comments belong to this target page
-                List issues = null;
-                issues = commentManager.getIssues(Issue.TYPE_SEGMENT,
-                        String.valueOf(targetPage.getId()) + "\\_");
+                List<IssueImpl> issues = commentManager.getIssues(
+                        Issue.TYPE_SEGMENT, targetPage.getId());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
-                	if (cancel)
-                		return 0;
-                	
+                    if (cancel)
+                        return 0;
+
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
@@ -748,9 +800,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     {
                         for (int m = 0; m < issues.size(); m++)
                         {
-                        	if (cancel)
-                        		return 0;
-                        	
+                            if (cancel)
+                                return 0;
+
                             Issue issue = (Issue) issues.get(m);
                             String logicKey = CommentHelper.makeLogicalKey(
                                     targetPage.getId(),
@@ -785,8 +837,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     sid = sourceTuv.getSid();
                     targetSegmentString = targetTuv.getGxmlElement()
                             .getTextValue();
-                    Date targetSegmentModifiedDate = targetTuv
-                            .getLastModified();
 
                     String matches = "";
                     Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
@@ -801,9 +851,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         for (Iterator ite = leverageMatches.iterator(); ite
                                 .hasNext();)
                         {
-                        	if (cancel)
-                        		return 0;
-                        	
+                            if (cancel)
+                                return 0;
+
                             LeverageMatch leverageMatch = (LeverageMatch) ite
                                     .next();
                             if ((leverageMatches.size() > 1))
@@ -828,13 +878,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     {
                         matches = m_bundle.getString("lb_no_match_report");
                     }
-                    if (sourceTuv.getTu(companyId).isRepeated())
+                    if (targetTuv.isRepeated())
                     {
                         matches += "\r\n"
                                 + m_bundle
                                         .getString("jobinfo.tradosmatches.invoice.repeated");
                     }
-                    else if (sourceTuv.getTu(companyId).getRepetitionOfId() != 0)
+                    else if (targetTuv.getRepetitionOfId() > 0)
                     {
                         matches += "\r\n"
                                 + m_bundle
@@ -862,9 +912,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         {
                             for (int ni = 0; ni < matchRecordList.size(); ni++)
                             {
-                            	if (cancel)
-                            		return 0;
-                            	
+                                if (cancel)
+                                    return 0;
+
                                 MatchRecord mr = (MatchRecord) matchRecordList
                                         .get(ni);
                                 score = mr.getScore();
@@ -890,9 +940,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                             {
                                 for (int ti = 0; ti < targets.size(); ti++)
                                 {
-                                	if (cancel)
-                                		return 0;
-                                	
+                                    if (cancel)
+                                        return 0;
+
                                     TargetTerm tt = (TargetTerm) targets
                                             .get(ti);
                                     String targetTermLocale = tt.getLocale();
@@ -1020,7 +1070,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     WritableCellFormat cfFormat = format;
                     Label dropdown = null;
                     dropdown = new Label(col++, p_row, failure, cfFormat);
-                    dropdown.setCellFeatures(getSelectFeatures(companyId));
+                    dropdown.setCellFeatures(getSelectFeatures(CATEGORY_LIST));
                     p_sheet.addCell(dropdown);
                     p_sheet.setColumnView(col - 1, 30);
 
@@ -1132,9 +1182,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         return false;
     }
 
-	@Override
-	public void cancel() 
-	{
-		cancel = true;
-	}
+    @Override
+    public void cancel()
+    {
+        cancel = true;
+    }
 }

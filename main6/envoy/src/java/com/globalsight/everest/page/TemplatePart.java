@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 package com.globalsight.everest.page;
 
@@ -41,7 +41,7 @@ public class TemplatePart extends PersistentObject
     public static final long INVALID_TUID = 0;
     public static final Long INVALID_TUID_LONG = new Long(INVALID_TUID);
 
-    private static final int CLOB_THRESHOLD = 4000;
+    protected static final int CLOB_THRESHOLD = 4000;
 
     private String m_skeletonClob;
     private String m_skeletonString;
@@ -53,11 +53,9 @@ public class TemplatePart extends PersistentObject
     // //////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // //////////////////////////////////////////////////////////////////
-    /**
-     * Constructor used by TopLink ONLY.
-     */
     public TemplatePart()
     {
+        
     }
 
     public TemplatePart(PageTemplate p_pageTemplate, String p_skeleton,
@@ -80,7 +78,7 @@ public class TemplatePart extends PersistentObject
     // //////////////////////////////////////////////////////////////////
     // End: Constructor
     // //////////////////////////////////////////////////////////////////
-    public Tu getTu(String companyId)
+    public Tu getTu(long companyId)
     {
         if (this.m_tu == null)
         {
@@ -157,6 +155,7 @@ public class TemplatePart extends PersistentObject
     /**
      * Display the string representation of this object.
      */
+    @Override
     public String toString()
     {
         StringBuffer sb = new StringBuffer();
@@ -174,7 +173,7 @@ public class TemplatePart extends PersistentObject
     // package level method that is called by PageTemplate.
     // This may return NULL. Not every template part has a
     // TUV - some are just skeletons.
-    Tuv getTuv(long p_localeId, String companyId)
+    Tuv getTuv(long p_localeId, long companyId)
     {
         if (this.m_tu == null)
         {
@@ -214,7 +213,7 @@ public class TemplatePart extends PersistentObject
         m_pageTemplate = template;
     }
 
-    private void loadTu(String companyId)
+    private void loadTu(long companyId)
     {
         if (m_tu == null && tuId > 0)
         {

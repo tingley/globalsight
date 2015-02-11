@@ -40,6 +40,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -108,16 +109,9 @@ public class JobControlReadyHandler extends JobManagementHandler
             performAppropriateOperation(p_request);
         }
 
-        p_request.setAttribute(
-                JOB_SCRIPTLET,
-                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
-                        .getPageURL(), ((NavigationBean) beanMap
-                        .get(MODIFY_BEAN)).getPageURL(),
-                        ((NavigationBean) beanMap.get(DETAILS_BEAN))
-                                .getPageURL(), ((NavigationBean) beanMap
-                                .get(PLANNED_COMPLETION_DATE_BEAN))
-                                .getPageURL(), getExpJobListing(p_request),
-                        Job.READY_TO_BE_DISPATCHED, true, true));
+        JobVoReadySearcher searcher = new JobVoReadySearcher();
+        searcher.setJobVos(p_request, true);
+        
         p_request.setAttribute(JOB_LIST_START_PARAM,
                 p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(
@@ -210,9 +204,13 @@ public class JobControlReadyHandler extends JobManagementHandler
         else if (action != null && action.equals("save"))
         {
             // save the results from a search/replace
-            SearchHandlerHelper.replace(
-                    (List) sessionMgr.getAttribute("tuvInfos"),
-                    (String) sessionMgr.getAttribute(COMPANY_ID));
+            String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
+            if (companyId != null)
+            {
+                SearchHandlerHelper.replace(
+                        (List) sessionMgr.getAttribute("tuvInfos"),
+                        Long.parseLong(companyId));
+            }
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {

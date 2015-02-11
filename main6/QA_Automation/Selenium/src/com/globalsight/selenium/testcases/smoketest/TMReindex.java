@@ -19,19 +19,13 @@ public class TMReindex extends BaseTestCase
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.TRANSLATION_MEMORY_SUBMENU);
 
-        iTMFuncs.selectRadioButtonFromTable(selenium,
-                TMManagement.TM_MANAGEMENT_TABLE, getProperty("tm.tmName"));
+        /*iTMFuncs.selectRadioButtonFromTable(selenium,
+                TMManagement.TM_MANAGEMENT_TABLE, getProperty("tm.tmName"));*/
 
         clickAndWait(selenium, TMManagement.REINDEX_BUTTON);
 
-        selenium.click(TMManagement.SELECTED_TM_RADIO);
-        selenium.click(TMManagement.REINDEX_NEXT_BUTTON);
-        selenium.waitForCondition("var imsg=selenium.getText(\""
-                + TMManagement.ReindexProgress_MSG
-                + "\"); imsg==\"41 entries (100%)\"", CommonFuncs.SHORT_WAIT);
-
-        Assert.assertEquals(selenium.getText(TMManagement.REINDEX_MESSAGE),
-                "Indexing has successfully finished.");
+        //selenium.click(TMManagement.SELECTED_TM_RADIO);
+        clickAndWait(selenium,TMManagement.REINDEX_NEXT_BUTTON);
 
         clickAndWait(selenium, TMManagement.REINDEX_OK_BUTTON);
     }

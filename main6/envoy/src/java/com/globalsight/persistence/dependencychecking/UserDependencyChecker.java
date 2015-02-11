@@ -99,7 +99,7 @@ public class UserDependencyChecker extends DependencyChecker
                 if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
                 {
                     hql += " and p.companyId = :companyId";
-                    map.put("companyId", currentId);
+                    map.put("companyId", Long.parseLong(currentId));
                 }
                 projects = new Vector(HibernateUtil.search(hql, map));
             }

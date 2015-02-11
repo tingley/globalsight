@@ -33,14 +33,15 @@
    	     sessionMgr.getAttribute(ReportConstants.PROJECT_LIST);
     List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
             sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST);
-    String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
-        + "&action=" + ReportConstants.GENERATE_REPORTS;
+    String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+    String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("comments_analysis_report_web_form")%></title>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <script type="text/javascript">
 // Set the ReportJobInfo datas to the JS(jobInfos) 
 var jobInfos = new Array();
@@ -118,7 +119,20 @@ function doSubmit()
 	}
 	
 	document.getElementById("inputJobIDS").value = jobIDArr.toString();
-	lisaQAForm.submit();
+	// Submit the Form, if possible(No report is generating.)
+	$.ajax({
+		type: 'POST',
+		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+		data: {'inputJobIDS': jobIDArr.toString(),
+			   'reportType': $("input[name='reportType']").val()},
+		success: function(data) {
+					if(data == null || data.status != "inProgress")
+					{
+						$("form[name='lisaQAForm']").submit();
+					}
+    			 },
+		dataType: 'json'
+	});
 }
 
 function filterJob()

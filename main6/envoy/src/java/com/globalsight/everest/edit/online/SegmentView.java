@@ -51,6 +51,8 @@ public class SegmentView
     private String xliffTarget = null;
     private Set xliffAlt = null;
     private Tuv targetTuv = null;
+    private String pagePath = "";
+    
 
     //////////////////////////////////////////////////////////////////
     // Constructors
@@ -284,4 +286,14 @@ public class SegmentView
     public Tuv getTargetTuv() {
         return this.targetTuv;
     }
+
+	public String getPagePath() 
+	{
+		return pagePath;
+	}
+
+	public void setPagePath(String pagePath) 
+	{
+		this.pagePath = pagePath;
+	}
 }

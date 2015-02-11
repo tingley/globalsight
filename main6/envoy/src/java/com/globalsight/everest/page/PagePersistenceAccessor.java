@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.persistence.page.SourcePageDescriptorModifier;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -118,9 +119,21 @@ public final class PagePersistenceAccessor
 
         try
         {
-            String hql = "from TemplatePart t "
-                    + "where t.pageTemplate.typeValue = :type "
-                    + "and t.pageTemplate.sourcePage.id = :pId order by t.order";
+            boolean flag = SegmentTuTuvCacheManager
+                    .isJobDataMigrated(p_sourcePageId);
+            String hql = null;
+            if (flag)
+            {
+                hql = "from TemplatePartArchived t "
+                        + "where t.pageTemplate.typeValue = :type "
+                        + "and t.pageTemplate.sourcePage.id = :pId order by t.order";
+            }
+            else
+            {
+                hql = "from TemplatePart t "
+                        + "where t.pageTemplate.typeValue = :type "
+                        + "and t.pageTemplate.sourcePage.id = :pId order by t.order";
+            }
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("type", p_pageTemplateType);
             map.put("pId", p_sourcePageId);
@@ -752,11 +765,9 @@ public final class PagePersistenceAccessor
                                 TargetPage tp = (TargetPage) targetPages.get(j);
                                 PageWordCounts pwc = tp.getWordCount();
                                 // set the unmatched word count
-                                pwc.setUnmatchedWordCount(spClone
-                                        .getWordCount());
+                                pwc.setNoMatchWordCount(spClone.getWordCount());
                                 // update the total word count
-                                pwc.setTotalWordCount(pwc
-                                        .getUnmatchedWordCount()
+                                pwc.setTotalWordCount(pwc.getNoMatchWordCount()
                                         + pwc.getLowFuzzyWordCount()
                                         + pwc.getMedFuzzyWordCount()
                                         + pwc.getMedHiFuzzyWordCount()

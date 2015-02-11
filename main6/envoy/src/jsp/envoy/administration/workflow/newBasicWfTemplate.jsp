@@ -38,7 +38,7 @@
    SessionManager sessionMgr = 
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-   String actionType = (String)sessionMgr.getAttribute(WorkflowTemplateConstants.ACTION);
+   String actionType = (String) request.getAttribute(WorkflowTemplateConstants.ACTION);
    boolean isEdit = actionType != null && 
          actionType.equals(WorkflowTemplateConstants.EDIT_ACTION);
    String disabled = isEdit ? "DISABLED" : "";

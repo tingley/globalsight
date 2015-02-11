@@ -159,8 +159,6 @@ function submitForm()
     else
     {
         alert("<%= bundle.getString("jsmsg_upload_no_file") %>");
-        ignoreClose = false;
-        return false;
     }
 }
 

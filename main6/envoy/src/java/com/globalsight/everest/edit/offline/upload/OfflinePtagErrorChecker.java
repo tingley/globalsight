@@ -19,6 +19,8 @@ package com.globalsight.everest.edit.offline.upload;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,12 +48,14 @@ import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
@@ -105,6 +109,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             createProgram(tradosSegEnd), RE.MATCH_SINGLELINE);
     private OEMProcessStatus status = null;
     private boolean cancel = false;
+    private String filename = null;
 
     private static REProgram createProgram(String p_pattern)
     {
@@ -161,7 +166,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      * Offline report file error checker.
      */
     public String checkAndSave(Map p_idSegmentMap, boolean p_adjustWS,
-            long p_localeId, String companyId, User p_user) throws Exception
+            long p_localeId, long companyId, User p_user) throws Exception
     {
         TuvManager tuvManager = ServerProxy.getTuvManager();
         List tuvs = new ArrayList<Tuv>();
@@ -175,6 +180,7 @@ public class OfflinePtagErrorChecker implements Cancelable
         PseudoErrorChecker errorChecker = new PseudoErrorChecker();
         errorChecker.setStyles(SegmentUtil2.getTAGS());
         boolean hasError = false;
+        List<List<String>> errorInternalList = new ArrayList<List<String>>();
 
         int n = UploadApi.LOAD_DATA;
         int m = UploadApi.CHECK_SAVE / 2;
@@ -210,7 +216,26 @@ public class OfflinePtagErrorChecker implements Cancelable
             else
             {
                 // all other non-html formats
-                pTagData.setAddables(tuv.getDataType(companyId));
+            	long leverageGroupId = tuv.getTu(companyId).getLeverageGroupId();
+	           	 SourcePage sp = ServerProxy.getPageManager()
+	                        .getSourcePageByLeverageGroupId(leverageGroupId);
+	           	 String path = sp.getExternalPageId().toLowerCase();
+	           	 if ("office-xml".equals(tuv.getDataType(companyId)))
+	           	 {
+	           		 if (path.endsWith(".docx") || path.endsWith(".pptx"))
+	           		 {
+	           			 pTagData.setAddables("office-xml");
+	           		 }
+	           		 else
+	           		 {
+	           			 pTagData.setAddables("office");
+	           		 }
+	           	 }
+	           	 else
+	           	 {
+	           		// all other non-html formats
+	                    pTagData.setAddables(tuv.getDataType(companyId));
+	           	 }
             }
             TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pTagData);
 
@@ -231,10 +256,21 @@ public class OfflinePtagErrorChecker implements Cancelable
                         m_errWriter.addSegmentErrorMsg(String.valueOf(tuId),
                                 errMsg.trim());
                     }
+                    else
+                    {
+                        if (errorChecker.geStrInternalErrMsg().length() > 0)
+                        {
+                            List<String> seg = new ArrayList<String>();
+                            seg.add(tuIdLong.toString());
+                            seg.add(errorChecker.geStrInternalErrMsg());
+                            errorInternalList.add(seg);
+                        }
+                    }
 
                     tuv.setGxmlExcludeTopTags(TmxPseudo.pseudo2Tmx(pTagData),
                             companyId);
                     tuv.setLastModifiedUser(p_user.getUserId());
+                    tuv.setState(TuvState.LOCALIZED);
                     tuvs.add(tuv);
                 }
             }
@@ -252,7 +288,57 @@ public class OfflinePtagErrorChecker implements Cancelable
         }
         else
         {
-            SegmentTuvUtil.updateTuvs(tuvs, Long.parseLong(companyId));
+            if (errorInternalList.size() > 0)
+            {
+                if (status != null)
+                {
+                    status.setIsContinue(null);
+                    CheckResult r = new CheckResult();
+                    r.setErrorInternalList(errorInternalList);
+                    r.setFileName(m_errWriter.getFileName());
+                    //r.setTaskId(p_uploadPage.getTaskId());
+                    //r.setWorkflowId(p_uploadPage.getWorkflowId());
+                    //r.setPageId(p_uploadPage.getPageId());
+                    status.setCheckResult(r);
+                    status.setCheckResultCopy(r);
+                    
+                    Calendar c = Calendar.getInstance();
+                    int next = c.get(Calendar.HOUR_OF_DAY);
+                    c.set(Calendar.HOUR_OF_DAY, next + 1);
+                    Date d = c.getTime();
+                    
+                    while (status.getIsContinue() == null)
+                    {
+                        Date d2 = new Date();
+                        if (d2.after(d))
+                        {
+                            String msg = "Wait for confirmation has spent 1 hours";
+                            CATEGORY.info(msg);
+                            return msg;
+                        }
+                        
+                        try 
+                        {
+                            Thread.sleep(1000);
+                        } 
+                        catch (InterruptedException e) 
+                        {
+                            CATEGORY.error(e);
+                        }
+                    }
+                }
+            }
+            
+            if (status.getIsContinue() != null && !status.getIsContinue())
+            {
+                status.getCheckResultCopy().setFileName(null);
+                return "<div class='headingError'><bold>"
+                        + "Page is cancelled for missing following internal tags</bold>"
+                        + status.getCheckResultCopy().getMessage(false)
+                        + "</div>";
+            }
+
+            SegmentTuvUtil.updateTuvs(tuvs, companyId);
 
             updateProcess(n + m + 5);
 
@@ -324,6 +410,7 @@ public class OfflinePtagErrorChecker implements Cancelable
         boolean hasErr = false;
         int uploadPagePtagDisplayMode;
         List errorList = new ArrayList();
+        List<List<String>> errorInternalList = new ArrayList<List<String>>();
 
         // Create PTag resources
         pTagData = new PseudoData();
@@ -596,6 +683,30 @@ public class OfflinePtagErrorChecker implements Cancelable
                         }
                         else
                         {
+                        	if (errorChecker.geStrInternalErrMsg().length() > 0)
+                            {
+                                // show cannot find target segment here :
+                                // GBS-3001 issue
+                                if (filename != null
+                                        && filename.toLowerCase().endsWith(
+                                                ".ttx")
+                                        && "".equals(uploadSeg
+                                                .getDisplayTargetText())
+                                        && "".equals(uploadSeg
+                                                .getDisplaySourceText()))
+                                {
+                                    // ignore me
+                                }
+                                else
+                                {
+                                    List<String> segment = new ArrayList<String>();
+                                    segment.add(uploadSeg.getDisplaySegmentID());
+                                    segment.add(errorChecker
+                                            .geStrInternalErrMsg());
+                                    errorInternalList.add(segment);
+                                }
+                            }
+                        	
                             // If sucessful, set the new GXML string.
                             // The convertor will encode special
                             // characters user may have entered.
@@ -740,6 +851,47 @@ public class OfflinePtagErrorChecker implements Cancelable
                 CATEGORY.info(error);
             }
             return m_errWriter.buildPage().toString();
+        }
+        else if (errorInternalList.size() > 0)
+        {
+        	if (status != null)
+        	{
+        		status.setIsContinue(null);
+        		CheckResult r = new CheckResult();
+        		r.setErrorInternalList(errorInternalList);
+        		r.setFileName(m_errWriter.getFileName());
+        		r.setTaskId(p_uploadPage.getTaskId());
+        		r.setWorkflowId(p_uploadPage.getWorkflowId());
+        		r.setPageId(p_uploadPage.getPageId());
+        		status.setCheckResult(r);
+        		status.setCheckResultCopy(r);
+        		
+        		Calendar c = Calendar.getInstance();
+        		int n = c.get(Calendar.HOUR_OF_DAY);
+        		c.set(Calendar.HOUR_OF_DAY, n + 1);
+        		Date d = c.getTime();
+        		
+        		while (status.getIsContinue() == null)
+        		{
+        			Date d2 = new Date();
+        			if (d2.after(d))
+        			{
+        				String msg = "Wait for confirmation has spent 1 hours";
+        				CATEGORY.info(msg);
+        				return msg;
+        			}
+        			
+        			try 
+        			{
+						Thread.sleep(1000);
+					} 
+        			catch (InterruptedException e) 
+        			{
+        				CATEGORY.error(e);
+					}
+        		}
+        		
+        	}
         }
 
         p_uploadPage
@@ -927,4 +1079,9 @@ public class OfflinePtagErrorChecker implements Cancelable
     {
 		cancel = true;
 	}
+
+    public void setFileName(String fileName)
+    {
+        this.filename = fileName;
+    }
 }

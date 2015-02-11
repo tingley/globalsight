@@ -16,16 +16,16 @@
  */
 package com.globalsight.diplomat.servlet.config;
 
-import java.util.Vector;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Vector;
 
-import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.Utility;
+import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.diplomat.util.database.ConnectionPoolException;
 
 public class DJ_TaskQueue
 {
@@ -51,9 +51,10 @@ public class DJ_TaskQueue
     private int m_pagesPerBatch = 0;
     private long m_maxElapsedMillis = 0;
 
-    /////////////////////////////////////////////////
-    public DJ_TaskQueue(long p_id, String p_name, String p_tableName, long p_connectionID,
-                        int p_recordsPerPage, int p_pagesPerBatch, long p_maxElapsedMillis)
+    // ///////////////////////////////////////////////
+    public DJ_TaskQueue(long p_id, String p_name, String p_tableName,
+            long p_connectionID, int p_recordsPerPage, int p_pagesPerBatch,
+            long p_maxElapsedMillis)
     {
         m_id = p_id;
         m_name = p_name;
@@ -64,7 +65,7 @@ public class DJ_TaskQueue
         m_maxElapsedMillis = p_maxElapsedMillis;
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     public DJ_TaskQueue(long p_id)
     {
         Connection connection = null;
@@ -77,12 +78,13 @@ public class DJ_TaskQueue
             connection = ConnectionPool.getConnection();
             Statement query = connection.createStatement();
 
-            String sql = "SELECT * FROM " + TASK_QUEUE_PROFILE + " WHERE " + TASK_QUEUE_PROFILE_ID + " = " + m_id;
+            String sql = "SELECT * FROM " + TASK_QUEUE_PROFILE + " WHERE "
+                    + TASK_QUEUE_PROFILE_ID + " = " + m_id;
 
             ResultSet results = query.executeQuery(sql);
             while (results.next())
             {
-                m_name = results.getString (TQP_NAME);
+                m_name = results.getString(TQP_NAME);
                 m_tableName = results.getString(TQ_TABLE_NAME);
                 m_connectionID = results.getLong(TQ_CONNECTION_ID);
                 m_recordsPerPage = results.getInt(RECORDS_PER_PAGE);
@@ -111,31 +113,37 @@ public class DJ_TaskQueue
         }
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     public long getID()
     {
         return m_id;
     }
+
     public String getName()
     {
         return m_name;
     }
+
     public String getTableName()
     {
         return m_tableName;
     }
+
     public long getConnectionID()
     {
         return m_connectionID;
     }
+
     public int getRecordsPerPage()
     {
         return m_recordsPerPage;
     }
+
     public int getPagesPerBatch()
     {
         return m_pagesPerBatch;
     }
+
     public long getMaxElapsedMillis()
     {
         return m_maxElapsedMillis;
@@ -145,36 +153,42 @@ public class DJ_TaskQueue
     {
         m_id = p_id;
     }
+
     public void setName(String p_name)
     {
         m_name = p_name;
     }
+
     public void setTableName(String p_tableName)
     {
         m_tableName = p_tableName;
     }
+
     public void setConnectionID(long p_connectionID)
     {
         m_connectionID = p_connectionID;
     }
+
     public void setRecordsPerPage(int p_recordsPerPage)
     {
         m_recordsPerPage = p_recordsPerPage;
     }
+
     public void setPagesPerBatch(int p_pagesPerBatch)
     {
         m_pagesPerBatch = p_pagesPerBatch;
     }
+
     public void setMaxElapsedMillis(long p_maxElapsedMillis)
     {
         m_maxElapsedMillis = p_maxElapsedMillis;
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     private String deleteSql(String p_tableName)
     {
-        return "DELETE FROM " + p_tableName +
-            " WHERE " + TASK_QUEUE_PROFILE_ID + " = " + m_id;
+        return "DELETE FROM " + p_tableName + " WHERE " + TASK_QUEUE_PROFILE_ID
+                + " = " + m_id;
     }
 
     public void deleteEntry()
@@ -183,6 +197,7 @@ public class DJ_TaskQueue
         try
         {
             connection = ConnectionPool.getConnection();
+            connection.setAutoCommit(false);
             Statement st = connection.createStatement();
             if (m_id > 0)
             {
@@ -199,7 +214,7 @@ public class DJ_TaskQueue
         catch (SQLException e)
         {
             theLogger.printStackTrace(Logger.ERROR, "DJ_TaskQueue", e);
-            //attempt a roll-back
+            // attempt a roll-back
             try
             {
                 if (connection != null)
@@ -207,7 +222,8 @@ public class DJ_TaskQueue
             }
             catch (SQLException sqle2)
             {
-                theLogger.printStackTrace(Logger.ERROR,"Could not rollback: " , sqle2);
+                theLogger.printStackTrace(Logger.ERROR, "Could not rollback: ",
+                        sqle2);
             }
         }
         finally
@@ -222,18 +238,24 @@ public class DJ_TaskQueue
         }
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     public void update()
     {
         Connection connection = null;
         try
         {
             connection = ConnectionPool.getConnection();
-            String sql = "UPDATE " + TASK_QUEUE_PROFILE + " SET " + TQP_NAME + "=" + Utility.quote(m_name) + ", " +
-                         TQ_TABLE_NAME + "=" + Utility.quote(m_tableName) + ", " + TQ_CONNECTION_ID + "=" + m_connectionID + ", " +
-                         RECORDS_PER_PAGE + "=" + m_recordsPerPage + ", " + PAGES_PER_BATCH + "=" + m_pagesPerBatch + ", " +
-                         MAX_ELAPSED_MILLIS + "=" + m_maxElapsedMillis + " WHERE " + TASK_QUEUE_PROFILE_ID + "=" + m_id;
+            connection.setAutoCommit(false);
+            String sql = "UPDATE " + TASK_QUEUE_PROFILE + " SET " + TQP_NAME
+                    + "=" + Utility.quote(m_name) + ", " + TQ_TABLE_NAME + "="
+                    + Utility.quote(m_tableName) + ", " + TQ_CONNECTION_ID
+                    + "=" + m_connectionID + ", " + RECORDS_PER_PAGE + "="
+                    + m_recordsPerPage + ", " + PAGES_PER_BATCH + "="
+                    + m_pagesPerBatch + ", " + MAX_ELAPSED_MILLIS + "="
+                    + m_maxElapsedMillis + " WHERE " + TASK_QUEUE_PROFILE_ID
+                    + "=" + m_id;
             connection.createStatement().executeUpdate(sql);
+            connection.commit();
         }
         catch (ConnectionPoolException cpe)
         {
@@ -242,7 +264,7 @@ public class DJ_TaskQueue
         catch (SQLException e)
         {
             theLogger.printStackTrace(Logger.ERROR, "DJ_TaskQueue", e);
-            //attempt a roll-back
+            // attempt a roll-back
             try
             {
                 if (connection != null)
@@ -250,7 +272,8 @@ public class DJ_TaskQueue
             }
             catch (SQLException sqle2)
             {
-                theLogger.printStackTrace(Logger.ERROR,"Could not rollback: " , sqle2);
+                theLogger.printStackTrace(Logger.ERROR, "Could not rollback: ",
+                        sqle2);
             }
         }
         finally
@@ -262,20 +285,24 @@ public class DJ_TaskQueue
             catch (ConnectionPoolException cpe)
             {
             }
-        }       
+        }
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     public void insert()
     {
         Connection connection = null;
         try
         {
             connection = ConnectionPool.getConnection();
-            String sql = "INSERT INTO " + TASK_QUEUE_PROFILE + " VALUES(" + INCREMENT_TQP_ID + ".NEXTVAL," +
-                         Utility.quote(m_name) + "," + Utility.quote(m_tableName) + "," + m_connectionID +
-                         "," + m_recordsPerPage + "," + m_pagesPerBatch + "," + m_maxElapsedMillis + ")";
+            connection.setAutoCommit(false);
+            String sql = "INSERT INTO " + TASK_QUEUE_PROFILE + " VALUES("
+                    + INCREMENT_TQP_ID + ".NEXTVAL," + Utility.quote(m_name)
+                    + "," + Utility.quote(m_tableName) + "," + m_connectionID
+                    + "," + m_recordsPerPage + "," + m_pagesPerBatch + ","
+                    + m_maxElapsedMillis + ")";
             connection.createStatement().executeUpdate(sql);
+            connection.commit();
         }
         catch (ConnectionPoolException cpe)
         {
@@ -284,7 +311,7 @@ public class DJ_TaskQueue
         catch (SQLException e)
         {
             theLogger.printStackTrace(Logger.ERROR, "DJ_TaskQueue", e);
-            //attempt a roll-back
+            // attempt a roll-back
             try
             {
                 if (connection != null)
@@ -292,7 +319,8 @@ public class DJ_TaskQueue
             }
             catch (SQLException sqle2)
             {
-                theLogger.printStackTrace(Logger.ERROR,"Could not rollback: " , sqle2);
+                theLogger.printStackTrace(Logger.ERROR, "Could not rollback: ",
+                        sqle2);
             }
         }
         finally
@@ -308,7 +336,7 @@ public class DJ_TaskQueue
 
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     static private Vector retrieveAllProfiles(String p_sql)
     {
         Connection connection = null;
@@ -347,15 +375,15 @@ public class DJ_TaskQueue
         }
 
         return files;
-    }   
+    }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     static public Vector retrieveTaskProfiles()
     {
         return retrieveAllProfiles(ORDER_BY_ID);
     }
 
-    /////////////////////////////////////////////////
+    // ///////////////////////////////////////////////
     static public Vector retrieveTaskProfilesByName()
     {
         return retrieveAllProfiles(ORDER_BY_NAME);

@@ -16,10 +16,10 @@
  */
 package com.globalsight.ling.docproc.merger.fm;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
-import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
 
 /**
@@ -35,20 +34,11 @@ import com.globalsight.everest.util.system.SystemConfiguration;
  */
 public class FontMappingHelper
 {
-    private static final Object lock = new Object();
-    private static List<FontMapping> fontMappingList = null;
     private static String ignoreKeys = "=maxTimeToWait=";
+    private static String propertiesFile = "/properties/AdobeAdapter.properties";
 
-    static
-    {
-        init();
-    }
-    
-    protected static String getPropertiesFile()
-    {
-        return "/properties/AdobeAdapter.properties";
-    }
-    
+    private List<FontMapping> fontMappingList = null;
+
     protected static Logger getLogger()
     {
         return Logger.getLogger(FontMappingHelper.class);
@@ -60,13 +50,13 @@ public class FontMappingHelper
      * @param targetLocale
      * @return the font
      */
-    public static String getDefaultMappingFont(String targetLocale)
+    public String getDefaultMappingFont(String targetLocale)
     {
         String targetFont = null;
 
         if (fontMappingList == null)
         {
-            init();
+            fontMappingList = getCompanyFontMapping();
         }
 
         for (FontMapping fm : fontMappingList)
@@ -86,9 +76,9 @@ public class FontMappingHelper
      * 
      * @return
      */
-    public static List<FontMapping> getFontMappingList()
+    public List<FontMapping> getFontMappingList()
     {
-        return fontMappingList;
+        return getCompanyFontMapping();
     }
 
     /**
@@ -98,13 +88,13 @@ public class FontMappingHelper
      * @param targetLocale
      * @return a font or null if not found
      */
-    public static String getMappingFont(String sourceFont, String targetLocale)
+    public String getMappingFont(String sourceFont, String targetLocale)
     {
         String targetFont = null;
 
         if (fontMappingList == null)
         {
-            init();
+            fontMappingList = getCompanyFontMapping();
         }
 
         for (FontMapping fp : fontMappingList)
@@ -125,11 +115,11 @@ public class FontMappingHelper
      * @param targetLocale
      * @return true if there are font mapping for this locale
      */
-    public static boolean isLocaleWithFonts(String targetLocale)
+    public boolean isLocaleWithFonts(String targetLocale)
     {
         if (fontMappingList == null)
         {
-            init();
+            fontMappingList = getCompanyFontMapping();
         }
 
         for (FontMapping fp : fontMappingList)
@@ -146,7 +136,8 @@ public class FontMappingHelper
     public static boolean isInddXml(String p_format, String p_content)
     {
         if ("xml".equalsIgnoreCase(p_format) && p_content != null
-                && p_content.contains("</Inddgsstory>") && p_content.contains("</Root>")
+                && p_content.contains("</Inddgsstory>")
+                && p_content.contains("</Root>")
                 && p_content.contains("InddFontFamily="))
         {
             return true;
@@ -155,7 +146,7 @@ public class FontMappingHelper
         return false;
     }
 
-    public static String processInddXml(String p_targetLocale, String p_content)
+    public String processInddXml(String p_targetLocale, String p_content)
     {
         if (p_targetLocale == null || p_content == null)
         {
@@ -179,8 +170,8 @@ public class FontMappingHelper
             // handle InddFontFamily="MingLiU"
             if (tag.contains("InddFontFamily=\""))
             {
-                StringIndex si = StringIndex.getValueBetween(new StringBuffer(tag), 0,
-                        "InddFontFamily=\"", "\"");
+                StringIndex si = StringIndex.getValueBetween(new StringBuffer(
+                        tag), 0, "InddFontFamily=\"", "\"");
                 String oriFont = si.value;
 
                 String mappingFont = getMappingFont(oriFont, p_targetLocale);
@@ -202,7 +193,9 @@ public class FontMappingHelper
 
         // handle [Bold-10-Helvetica]source: [/Bold-10-Helvetica]
         Pattern fontTagPattern = Pattern
-                .compile("(\\[[^\\]/-]+-[\\d\\.]+-)([^\\]]+)(\\].*?\\[/[^\\]-]+-[\\d\\.]+-)([^\\]]+)(\\])", Pattern.DOTALL);
+                .compile(
+                        "(\\[[^\\]/-]+-[\\d\\.]+-)([^\\]]+)(\\].*?\\[/[^\\]-]+-[\\d\\.]+-)([^\\]]+)(\\])",
+                        Pattern.DOTALL);
         Matcher fontTagM = fontTagPattern.matcher(p_content);
         while (fontTagM.find())
         {
@@ -235,53 +228,70 @@ public class FontMappingHelper
     /**
      * Init font pair
      */
-    private static void init()
+    private List<FontMapping> getCompanyFontMapping()
     {
-        synchronized (lock)
+        if (fontMappingList != null)
         {
-            if (fontMappingList != null)
+            return fontMappingList;
+        }
+
+        InputStream is = null;
+
+        try
+        {
+            fontMappingList = new ArrayList<FontMapping>();
+            Properties properties = new Properties();
+
+            is = SystemConfiguration.getCompanyFileStream(propertiesFile);
+            properties.load(is);
+
+            for (Enumeration e = properties.keys(); e.hasMoreElements();)
             {
-                return;
-            }
-
-            try
-            {
-                fontMappingList = new ArrayList<FontMapping>();
-                Properties properties = new Properties();
-
-                // load root properties first
-                properties.load(FontMappingHelper.class.getResourceAsStream(getPropertiesFile()));
-
-                for (Enumeration e = properties.keys(); e.hasMoreElements();)
+                String key = (String) e.nextElement();
+                if (!ignoreKeys.contains(key))
                 {
-                    String key = (String) e.nextElement();
-                    if (!ignoreKeys.contains(key))
+                    String value = properties.getProperty(key);
+                    if (key.contains("default"))
                     {
-                        String value = properties.getProperty(key);
-                        if (key.contains("default"))
+                        FontMapping fm = FontMappingParser.parseOne(key, value);
+                        if (null != fm)
                         {
-                            FontMapping fm = FontMappingParser.parseOne(key, value);
-                            if (null != fm)
-                            {
-                                fontMappingList.add(fm);
-                            }
+                            fontMappingList.add(fm);
                         }
-                        else
-                        {
-                            List<FontMapping> fms = FontMappingParser.parse(key, value);
-                            fontMappingList.addAll(fms);
-                        }
+                    }
+                    else
+                    {
+                        List<FontMapping> fms = FontMappingParser.parse(key,
+                                value);
+                        fontMappingList.addAll(fms);
                     }
                 }
             }
-            catch (Throwable ex)
+        }
+        catch (Throwable ex)
+        {
+            getLogger().error(
+                    "Failed to load font mapping from file: " + propertiesFile,
+                    ex);
+        }
+        finally
+        {
+            if (is != null)
             {
-                getLogger().error("Failed to load font mapping from file: " + getPropertiesFile(), ex);
+                try
+                {
+                    is.close();
+                }
+                catch (Exception e)
+                {
+                }
             }
         }
+
+        return fontMappingList;
     }
 
-    protected static void initForDebug(List<FontMapping> fms)
+    protected void initForDebug(List<FontMapping> fms)
     {
         fontMappingList = fms;
     }

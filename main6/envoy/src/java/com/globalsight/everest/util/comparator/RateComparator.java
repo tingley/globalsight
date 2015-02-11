@@ -34,6 +34,8 @@ public class RateComparator extends StringComparator
 	public static final int CURRENCY = 3;
 	public static final int RATE_TYPE = 4;
     public static final int ASC_COMPANY = 5;
+    public static final int SOURCE_LOCALE = 6;
+    public static final int TARGET_LOCALE = 7;
 
     String m_fixed;
     String m_hourly;
@@ -102,6 +104,16 @@ public class RateComparator extends StringComparator
              bValue = CompanyWrapper.getCompanyNameById(b.getActivity().getCompanyId());
              rv = this.compareStrings(aValue,bValue);
              break;
+        case SOURCE_LOCALE:
+            aValue = a.getLocalePair().getSource().getDisplayName(m_locale);
+            bValue = b.getLocalePair().getSource().getDisplayName(m_locale);
+            rv = this.compareStrings(aValue, bValue);
+            break;
+        case TARGET_LOCALE:
+            aValue = a.getLocalePair().getTarget().getDisplayName(m_locale);
+            bValue = b.getLocalePair().getTarget().getDisplayName(m_locale);
+            rv = this.compareStrings(aValue, bValue);
+            break;
 		}
 		return rv;
 	}

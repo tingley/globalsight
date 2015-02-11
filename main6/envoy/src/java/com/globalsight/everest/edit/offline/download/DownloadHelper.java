@@ -74,6 +74,12 @@ public class DownloadHelper implements AmbassadorDwUpConstants
 
         return targetLocale;
     }
+    
+    static public String makeParentPath(DownloadParams p_downloadParams)
+    {
+        return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
+                + getTargetLocaleCode(p_downloadParams) + "/";
+    }
 
     // GBS-633 Downloaded folder naming convention:
     // <jobname>_<targetlocale> instead of <jobname>_<task id> before
@@ -92,8 +98,10 @@ public class DownloadHelper implements AmbassadorDwUpConstants
 
     static public String makeTmx14bParentPath(DownloadParams p_downloadParams)
     {
+        boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
         return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
-                + getTargetLocaleCode(p_downloadParams) + "/tmx/1.4b/";
+                + getTargetLocaleCode(p_downloadParams) + "/tmx"
+                + (isOmegaT ? "/auto" : "") + "/1.4b/";
     }
 
     static public String makeTermParentPath(DownloadParams p_downloadParams)

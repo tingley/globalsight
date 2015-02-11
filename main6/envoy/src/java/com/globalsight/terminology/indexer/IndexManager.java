@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.globalsight.ling.lucene.Index;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.ReaderResult;
@@ -209,6 +210,8 @@ public class IndexManager
             {
                 CATEGORY.error("boo boo: the indexer was cleared twice", ex);
             }
+
+            HibernateUtil.closeSession();
         }
 
         CATEGORY.info("Termbase indexing for `" + m_termbase.getName() +

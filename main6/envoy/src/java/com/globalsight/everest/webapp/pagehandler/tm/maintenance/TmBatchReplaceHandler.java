@@ -17,63 +17,47 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.webapp.pagehandler.tm.maintenance.ReplaceResultTableMaker;
-import com.globalsight.everest.webapp.pagehandler.tm.maintenance.TableMaker;
-import com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHelper;
-
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tm.searchreplace.TmConcordanceResult;
-import com.globalsight.everest.tm.searchreplace.SearchReplaceManager;
-import com.globalsight.everest.tm.TmManager;
-import com.globalsight.util.progress.IProcessStatusListener;
-import com.globalsight.util.progress.ProcessStatus;
-
-import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.edit.EditUtil;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tm.searchreplace.SearchReplaceManager;
+import com.globalsight.everest.tm.searchreplace.TmConcordanceResult;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  *
  */
-public class TmBatchReplaceHandler
-    extends PageHandler
+public class TmBatchReplaceHandler extends PageHandler
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TmBatchReplaceHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TmBatchReplaceHandler.class);
 
     //
     // Constructor
@@ -82,65 +66,70 @@ public class TmBatchReplaceHandler
     {
     }
 
-
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
-    	if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
-		{
-			p_response
-					.sendRedirect("/globalsight/ControlServlet?activityName=tm");
-			return;
-		}
+        if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+        {
+            p_response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+            return;
+        }
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
-        Locale uiLocale = (Locale)session.getAttribute(UILOCALE);
+        Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
 
         String userId = getUser(session).getUserId();
 
         // From session Manger:
-        //  - get target search locale
-        GlobalSightLocale targetLocale =
-            (GlobalSightLocale)sessionMgr.getAttribute(
-                TM_TARGET_SEARCH_LOCALE);
+        // - get target search locale
+        GlobalSightLocale targetLocale = (GlobalSightLocale) sessionMgr
+                .getAttribute(TM_TARGET_SEARCH_LOCALE);
 
         // - get the previous search manager
-        SearchReplaceManager manager = (SearchReplaceManager)
-            sessionMgr.getAttribute(TM_CONCORDANCE_MANAGER);
+        SearchReplaceManager manager = (SearchReplaceManager) sessionMgr
+                .getAttribute(TM_CONCORDANCE_MANAGER);
 
-        ProcessStatus status = (ProcessStatus)sessionMgr.getAttribute(TM_TM_STATUS);
+        ProcessStatus status = (ProcessStatus) sessionMgr
+                .getAttribute(TM_TM_STATUS);
         // - get the initial search results
-        TmConcordanceResult searchResults =
-            (TmConcordanceResult)status.getResults();
+        TmConcordanceResult searchResults = (TmConcordanceResult) status
+                .getResults();
 
         // From the request:
         // - get target find text
-        String oldTextUtf8 = (String)p_request.getParameter(TM_TARGET_FIND_TEXT);
+        String oldTextUtf8 = (String) p_request
+                .getParameter(TM_TARGET_FIND_TEXT);
         String oldText = EditUtil.utf8ToUnicode(oldTextUtf8);
 
         // - get target replacement text
-        String newTextUtf8 = (String)p_request.getParameter(TM_TARGET_REPLACE_TEXT);
+        String newTextUtf8 = (String) p_request
+                .getParameter(TM_TARGET_REPLACE_TEXT);
         String newText = EditUtil.utf8ToUnicode(newTextUtf8);
 
         // - get target case sensitive option
-        boolean caseSensitiveSearch =
-            ((String)p_request.getParameter(TM_TARGET_FIND_MATCH_CASE) != null);
+        boolean caseSensitiveSearch = ((String) p_request
+                .getParameter(TM_TARGET_FIND_MATCH_CASE) != null);
 
         // - get user selected tu ids where the replacement will occur
-        String selectedTuIds[] = p_request.getParameterValues(
-            WebAppConstants.TM_REPLACE_SEGMENT_CHKBOX);
+        String selectedTuIds[] = p_request
+                .getParameterValues(WebAppConstants.TM_REPLACE_SEGMENT_CHKBOX);
 
         // TODO: add a REPLACE_ALL flag and ignore the current selection.
 
@@ -156,8 +145,8 @@ public class TmBatchReplaceHandler
         String html = tableMaker.getTableRows(searchResults, replaceResults);
         setParameters(p_request, html);
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     //
@@ -165,18 +154,18 @@ public class TmBatchReplaceHandler
     //
 
     private void setParameters(HttpServletRequest p_request, String p_rows)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         // set replace results HTML on the session manager
         p_request.setAttribute(TM_CONCORDANCE_REPLACE_RESULTS_HTML, p_rows);
     }
 
     private void setSessionValues(HttpServletRequest p_request,
-        Collection p_results)
+            Collection p_results)
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         // set replace results on the session manager
         sessionMgr.setAttribute(TM_CONCORDANCE_REPLACE_RESULTS, p_results);
@@ -209,7 +198,7 @@ public class TmBatchReplaceHandler
     }
 
     private ArrayList getTuvs(Map p_searchResultsMap, String[] p_tuIds,
-        GlobalSightLocale p_targetLocale)
+            GlobalSightLocale p_targetLocale)
     {
         ArrayList result = new ArrayList();
 
@@ -218,8 +207,8 @@ public class TmBatchReplaceHandler
 
         for (int i = 0, max = p_tuIds.length; i < max; i++)
         {
-            if ((tu = (SegmentTmTu)p_searchResultsMap.get(
-                new Long(p_tuIds[i]))) != null)
+            if ((tu = (SegmentTmTu) p_searchResultsMap
+                    .get(new Long(p_tuIds[i]))) != null)
             {
                 result.addAll(tu.getTuvList(p_targetLocale));
             }

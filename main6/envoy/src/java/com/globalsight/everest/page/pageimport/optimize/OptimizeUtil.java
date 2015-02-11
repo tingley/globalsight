@@ -35,7 +35,7 @@ public class OptimizeUtil
 	}
 	
 	public void setGxml(TuvImpl tuv, String gxml,
-            String companyId, String tuDataType, String fileName, String pageDataType)
+            long companyId, String tuDataType, String fileName, String pageDataType)
 	{
 		for (Optimizer o : optimizers)
 		{

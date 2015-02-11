@@ -16,114 +16,178 @@
  */
 package com.globalsight.everest.projecthandler;
 
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 
 public class ProjectInfo implements java.io.Serializable
 {
     private long m_projectId = -1;
-    private String m_name = null;    
+    private String m_name = null;
     private String m_description = null;
-    private String m_companyId = null;
+    private long m_companyId = -1;
     private String m_userId = null;
     private String m_projectManagerName = null;
-    private String m_tmName = null;
     private String m_termbaseName = null;
 
+    public float getPMCost()
+    {
+        return PMCost;
+    }
+
+    public void setPMCost(float pMCost)
+    {
+        PMCost = pMCost;
+    }
+
+    private float PMCost = 0.1f;
+    private boolean reviewOnlyAutoAccept = false;
+    private boolean reviewOnlyAutoSend = false;
+    private boolean autoAcceptPMTask = false;
+
+
+
+    private String attributeSetName;
     /**
-    * Default Constructor
-    */
-    public ProjectInfo(long p_projectId, String p_name, String p_description, 
-        String p_companyId, String p_userId, String p_termbaseName)
+     * Default Constructor
+     */
+    public ProjectInfo(ProjectImpl pp)
+    {
+        m_projectId = pp.getId();
+        m_name = pp.getName();
+        m_description = pp.getDescription();
+        m_userId = pp.getManagerUserId();
+        m_termbaseName = pp.getTermbaseName();
+        m_companyId = pp.getCompanyId();
+        PMCost = pp.getPMCost();
+        reviewOnlyAutoAccept = pp.getReviewOnlyAutoAccept();
+        reviewOnlyAutoSend = pp.getReviewOnlyAutoSend();
+        autoAcceptPMTask = pp.getAutoAcceptPMTask();
+        attributeSetName = pp.getAttributeSet() == null ? "" : pp
+                .getAttributeSet()
+                .getName();
+    }
+
+    /**
+     * Default Constructor
+     */
+    public ProjectInfo(long p_projectId, String p_name, String p_description,
+            String p_userId, String p_termbaseName)
     {
         m_projectId = p_projectId;
         m_name = p_name;
         m_description = p_description;
         m_userId = p_userId;
         m_termbaseName = p_termbaseName;
-        m_companyId = p_companyId;
     }
-    
+
     /**
-     * Default Constructor
+     * Get the project name.
      */
-     public ProjectInfo(long p_projectId, String p_name, String p_description, 
-         String p_userId, String p_termbaseName)
-     {
-         m_projectId = p_projectId;
-         m_name = p_name;
-         m_description = p_description;
-         m_userId = p_userId;
-         m_termbaseName = p_termbaseName;
-     }
-
-    /**
-    * Get the project name.
-    */
-    public String getName() 
+    public String getName()
     {
-    	return m_name;
+        return m_name;
     }
 
     /**
-    * Get the project description.
-    */
-    public String getDescription() 
+     * Get the project description.
+     */
+    public String getDescription()
     {
         return m_description;
-    }   
+    }
 
     /**
-    * Get the project id
-    */
+     * Get the project id
+     */
     public long getProjectId()
     {
         return m_projectId;
     }
 
     /**
-    * Get the project manager userid
-    */
+     * Get the project manager userid
+     */
     public String getProjectManagerId()
     {
         return m_userId;
     }
-    
+
     /**
-    * Get the project manager full name
-    */
+     * Get the project manager full name
+     */
     public String getProjectManagerName()
     {
         return m_projectManagerName;
     }
-    
+
     /**
-    * Set the project manager full name. This attribute is not saved
-    * in database, but retrieved later on from UserManager and set. 
-    *
-    * This value is set in ProjectHandlerLocal. We could have done this in 
-    * ResultHandler in persistence service also when we are creating an 
-    * instance of this object.
-    */
+     * Set the project manager full name. This attribute is not saved in
+     * database, but retrieved later on from UserManager and set.
+     * 
+     * This value is set in ProjectHandlerLocal. We could have done this in
+     * ResultHandler in persistence service also when we are creating an
+     * instance of this object.
+     */
     public void setProjectManagerName(String p_projectManagerName)
     {
         m_projectManagerName = p_projectManagerName;
     }
-    
+
     public String getTermbaseName()
     {
         return m_termbaseName;
     }
-    
-    public String getCompanyId()
+
+    public long getCompanyId()
     {
         return m_companyId;
     }
-    
+
+    public boolean isReviewOnlyAutoAccept()
+    {
+        return reviewOnlyAutoAccept;
+    }
+
+    public void setReviewOnlyAutoAccept(boolean reviewOnlyAutoAccept)
+    {
+        this.reviewOnlyAutoAccept = reviewOnlyAutoAccept;
+    }
+
+    public boolean isReviewOnlyAutoSend()
+    {
+        return reviewOnlyAutoSend;
+    }
+
+    public void setReviewOnlyAutoSend(boolean reviewOnlyAutoSend)
+    {
+        this.reviewOnlyAutoSend = reviewOnlyAutoSend;
+    }
+
+    public boolean isAutoAcceptPMTask()
+    {
+        return autoAcceptPMTask;
+    }
+
+    public void setAutoAcceptPMTask(boolean autoAcceptPMTask)
+    {
+        this.autoAcceptPMTask = autoAcceptPMTask;
+    }
+
     /**
-    * Returns a string representation of the object (based on the object name).
-    */
+     * Returns a string representation of the object (based on the object name).
+     */
     public String toString()
-    { 
+    {
         return getName();
+    }
+
+    public String getAttributeSetName()
+    {
+        return attributeSetName;
+    }
+
+    public void setAttributeSetName(String attributeSetName)
+    {
+        this.attributeSetName = attributeSetName;
     }
 
     @Override

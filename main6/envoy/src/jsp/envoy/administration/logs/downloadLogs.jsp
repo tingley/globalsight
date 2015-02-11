@@ -45,4 +45,6 @@ if ("full".equals(downloadOption)) {
     helper.doDownloadFullLogs(systemLogDirectory, logs, days);
 }   
 
+out.clear();
+out = pageContext.pushBody();
 %>

@@ -34,6 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
+import jxl.CellView;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -51,6 +54,7 @@ import jxl.write.WritableWorkbook;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -91,6 +95,8 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class CommentsAnalysisReportGenerator implements ReportGenerator
 {
+    private static final Logger logger = Logger
+            .getLogger(CommentsAnalysisReportGenerator.class);
     private HttpServletRequest request = null;
 
     private WritableCellFormat contentFormat = null;
@@ -255,12 +261,15 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             // Create One Report Sheet/Tab
             WritableSheet sheet = p_workbook.createSheet(tgtL.toString(),
                     p_workbook.getNumberOfSheets());
+            sheet.getSettings().setProtected(true);
             // Add Title
             addTitle(sheet);
             // Add Locale Pair Header
             addLanguageHeader(sheet);
             // Add Segment Header
             addSegmentHeader(sheet, SEGMENT_HEADER_ROW);
+            // Create Name Areas for drop down list.
+            createNameAreas(p_workbook);
 
             // Insert Language Data
             writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(uiLocale));
@@ -551,11 +560,45 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         return rtlContentFormat;
     }
 
-    private WritableCellFeatures getSelectFeatures() throws Exception
+    private WritableCellFeatures getSelectFeatures(String p_nameedRange) throws Exception
     {
         WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(getFailureCategoriesList());
+        features.setDataValidationRange(p_nameedRange);
         return features;
+    }
+    
+    /**
+     * Create Workbook Name Areas for Drop Down List,
+     * Only write the data of drop down list into the first sheet.
+     */
+    private void createNameAreas(WritableWorkbook p_workbook)
+    {
+        try
+        {
+            if (p_workbook.getSheets().length == 1)
+            {
+                WritableSheet sheet = p_workbook.getSheet(0);
+                List<String> categories = getFailureCategoriesList();
+                int col = sheet.getColumns() + 1;
+                for (int i = 0; i < categories.size(); i++)
+                {
+                    sheet.addCell(new Label(col, SEGMENT_START_ROW + i,
+                            categories.get(i)));
+                }
+                // Hidden Category Column.
+                CellView cellView = new CellView();
+                cellView.setHidden(true);
+                sheet.setColumnView(col, cellView);
+                
+                p_workbook.addNameArea(CATEGORY_LIST, sheet, 
+                        col, SEGMENT_START_ROW, 
+                        col, SEGMENT_START_ROW + categories.size());
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Reviewers Comments Report Write Category Error." + e);
+        }
     }
 
     /**
@@ -580,7 +623,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
-        String companyId = p_job.getCompanyId();
+        long companyId = p_job.getCompanyId();
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile()
                 .getTranslationMemoryProfile();
@@ -590,7 +633,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             excludItems = new ArrayList<String>(tmp.getJobExcludeTuTypes());
         }
 
-        for (Iterator<Workflow> it = p_job.getWorkflows().iterator(); it.hasNext();)
+        for (Iterator<Workflow> it = p_job.getWorkflows().iterator(); it
+                .hasNext();)
         {
             Workflow workflow = (Workflow) it.next();
             if (Workflow.PENDING.equals(workflow.getState())
@@ -600,8 +644,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             {
                 continue;
             }
-            if (p_targetLocale.getId() == workflow.getTargetLocale()
-                    .getId())
+            if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
                 targetPages = workflow.getTargetPages();
                 break;
@@ -632,28 +675,26 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 List targetTuvs = getPageTuvs(targetPage);
 
                 // Leverage TM
-                Map exactMatches = leverageMatchLingManager
-                        .getExactMatches(sourcePage.getIdAsLong(),
-                                new Long(targetPage.getLocaleId()));
+                Map exactMatches = leverageMatchLingManager.getExactMatches(
+                        sourcePage.getIdAsLong(),
+                        new Long(targetPage.getLocaleId()));
                 Map leverageMatcheMap = leverageMatchLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(),
-                                new Long(targetPage.getLocaleId()));
+                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
+                                targetPage.getLocaleId()));
 
                 // Find segment comments
-                List issues = null;
-                CommentManager commentManager = ServerProxy
-                        .getCommentManager();
-                issues = commentManager.getIssues(Issue.TYPE_SEGMENT,
-                        String.valueOf(targetPage.getId()) + "\\_");
+                CommentManager commentManager = ServerProxy.getCommentManager();
+                List<IssueImpl> issues = commentManager.getIssues(
+                        Issue.TYPE_SEGMENT, targetPage.getId());
 
                 Locale sourcePageLocale = sourcePage.getGlobalSightLocale()
                         .getLocale();
                 Locale targetPageLocale = targetPage.getGlobalSightLocale()
                         .getLocale();
-                boolean rtlSourceLocale = EditUtil
-                        .isRTLLocale(sourcePageLocale.toString());
-                boolean rtlTargetLocale = EditUtil
-                        .isRTLLocale(targetPageLocale.toString());
+                boolean rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale
+                        .toString());
+                boolean rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale
+                        .toString());
 
                 String category = null;
                 for (int j = 0; j < targetTuvs.size(); j++)
@@ -668,15 +709,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     sid = sourceTuv.getSid();
 
                     category = sourceTuv.getTu(companyId).getTuType();
-                    if (excludItems != null
-                            && excludItems.contains(category))
+                    if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
                     }
 
                     String matches = "";
-                    Set leverageMatches = (Set) leverageMatcheMap
-                            .get(sourceTuv.getIdAsLong());
+                    Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
+                            .getIdAsLong());
 
                     if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
                     {
@@ -695,17 +735,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 matches = matches
                                         + (++count)
                                         + ", "
-                                        + StringUtil
-                                                .formatPCT(leverageMatch
-                                                        .getScoreNum())
-                                        + "\r\n";
+                                        + StringUtil.formatPCT(leverageMatch
+                                                .getScoreNum()) + "\r\n";
                             }
                             else
                             {
                                 matches = matches
-                                        + StringUtil
-                                                .formatPCT(leverageMatch
-                                                        .getScoreNum());
+                                        + StringUtil.formatPCT(leverageMatch
+                                                .getScoreNum());
                                 break;
                             }
                         }
@@ -714,12 +751,12 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     {
                         matches = bundle.getString("lb_no_match_report");
                     }
-                    if (sourceTuv.getTu(companyId).isRepeated())
+                    if (targetTuv.isRepeated())
                     {
                         matches += "\r\n"
                                 + bundle.getString("jobinfo.tradosmatches.invoice.repeated");
                     }
-                    else if (sourceTuv.getTu(companyId).getRepetitionOfId() != 0)
+                    else if (targetTuv.getRepetitionOfId() > 0)
                     {
                         matches += "\r\n"
                                 + bundle.getString("jobinfo.tradosmatches.invoice.repetition");
@@ -732,8 +769,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                         for (int m = 0; m < issues.size(); m++)
                         {
                             Issue issue = (Issue) issues.get(m);
-                            if (targetTuv.getId() == issue
-                                    .getLevelObjectId())
+                            if (targetTuv.getId() == issue.getLevelObjectId())
                             {
                                 issueHistories = issue.getHistory();
                                 failure = issue.getCategory();
@@ -749,14 +785,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 .get(k);
                         String date = dateFormat.format(issueHistory
                                 .dateReportedAsDate());
-                            comments = comments
-                                    + "["
-                                    + date
-                                    + "     "
-                                    + UserUtil.getUserNameById(issueHistory
-                                            .reportedBy()) + "]:\r\n"
-                                    + issueHistory.getComment();
-                            if (k != issueHistories.size() - 1)
+                        comments = comments
+                                + "["
+                                + date
+                                + "     "
+                                + UserUtil.getUserNameById(issueHistory
+                                        .reportedBy()) + "]:\r\n"
+                                + issueHistory.getComment();
+                        if (k != issueHistories.size() - 1)
                         {
                             comments = comments + "\r\n";
                         }
@@ -780,8 +816,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 return a.getTask()
                                         .getCompletedDate()
                                         .compareTo(
-                                                b.getTask()
-                                                        .getCompletedDate());
+                                                b.getTask().getCompletedDate());
                             }
                         });
 
@@ -797,15 +832,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                             len--;
                         }
 
-                        int beforeLastReviewerCount = previousTaskTuvs
-                                .size() - lastReviewerCount - 1;
+                        int beforeLastReviewerCount = previousTaskTuvs.size()
+                                - lastReviewerCount - 1;
 
                         if (beforeLastReviewerCount == 1)
                         {
-                            TaskTuv taskTuv = (TaskTuv) previousTaskTuvs
-                                    .get(0);
+                            TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(0);
                             String previousSeg = taskTuv
-                                    .getTuv(p_job.getCompanyId())
+                                    .getTuv(companyId)
                                     .getGxmlElement().getTextValue();
                             if (!previousSeg.equals(targetSegmentString))
                             {
@@ -820,7 +854,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 TaskTuv taskTuv = (TaskTuv) previousTaskTuvs
                                         .get(k);
                                 previousSegment = taskTuv
-                                        .getTuv(p_job.getCompanyId())
+                                        .getTuv(companyId)
                                         .getGxmlElement().getTextValue();
                                 if (!previous.contains(previousSegment))
                                 {
@@ -839,9 +873,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                                 previousSegment = (String) previous.get(pi);
                                 if (previous.size() > 1)
                                 {
-                                    previousSegments = previousSegments
-                                            + "{" + previousSegment
-                                            + "}\r\n";
+                                    previousSegments = previousSegments + "{"
+                                            + previousSegment + "}\r\n";
                                 }
                                 else
                                 {
@@ -874,13 +907,13 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     p_sheet.setColumnView(col - 1, 20);
 
                     // Segment id
-                    p_sheet.addCell(new Number(col++, p_row, sourceTuv
-                            .getTu(companyId).getId(), getContentFormat()));
+                    p_sheet.addCell(new Number(col++, p_row, sourceTuv.getTu(
+                            companyId).getId(), getContentFormat()));
                     p_sheet.setColumnView(col - 1, 20);
 
                     // TargetPage id
-                    p_sheet.addCell(new Number(col++, p_row, targetPage
-                            .getId(), getContentFormat()));
+                    p_sheet.addCell(new Number(col++, p_row,
+                            targetPage.getId(), getContentFormat()));
                     p_sheet.setColumnView(col - 1, 20);
 
                     // Source segment
@@ -931,9 +964,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     // int index = failureCategories.indexOf(failure);
                     // if (index != -1)
                     // {
-                    dropdown = new Label(col++, p_row, failure,
-                            getContentFormat());
-                    dropdown.setCellFeatures(getSelectFeatures());
+                    dropdown = new Label(col++, p_row, failure, getContentFormat());
+                    dropdown.setCellFeatures(getSelectFeatures(CATEGORY_LIST));
                     // }
                     // else
                     // {
@@ -960,8 +992,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     p_sheet.setColumnView(col - 1, 30);
 
                     // Previous segment
-                    p_sheet.addCell(new Label(col++, p_row,
-                            previousSegments, getContentFormat()));
+                    p_sheet.addCell(new Label(col++, p_row, previousSegments,
+                            getContentFormat()));
                     p_sheet.setColumnView(col - 1, 40);
 
                     p_row++;
@@ -1009,8 +1041,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
-            String cat = aCategory.getValue();
-            result.add(cat.replace(",", " "));
+            result.add(aCategory.getValue());
         }
         return result;
     }
@@ -1032,14 +1063,14 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     public void setPercent(int p_finishedJobNum)
     {
         ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS, 100
-                * p_finishedJobNum / m_jobIDS.size());
+                * p_finishedJobNum / m_jobIDS.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
         ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId,
-                m_jobIDS);
+                m_jobIDS, getReportType());
         if (data != null)
             return data.isCancle();
 

@@ -15,52 +15,57 @@
  *  
  */
 package com.globalsight.everest.permission;
+
 /**
-* Provides methods for a flexible user permission PermissionGroup
-*/
+ * Provides methods for a flexible user permission PermissionGroup
+ */
 public interface PermissionGroup
 {
     /**
-    ** Return the id of the PermissionGroup
-    ** @return id as a long
-    **/
+     ** Return the id of the PermissionGroup
+     ** 
+     * @return id as a long
+     **/
     public long getId();
 
     /**
      * Return the name of the permission group
+     * 
      * @return name
      */
     public String getName();
 
     /**
      * Return the description of the permissiongroup
+     * 
      * @return description
      */
     public String getDescription();
 
     /**
      * Sets the name of the permission group
+     * 
      * @param p_newName
      */
     public void setName(String p_newName);
-    
-    public String getCompanyId();
-    
-    public void setCompanyId(String companyId);
+
+    public long getCompanyId();
+
+    public void setCompanyId(long companyId);
 
     /**
      * Sets the description of the permissiongroup
+     * 
      * @param p_newDesc
      */
     public void setDescription(String p_newDesc);
 
-    /** Gets the PermissionSet for this PermissionGroup*/
+    /** Gets the PermissionSet for this PermissionGroup */
     public PermissionSet getPermissionSet();
 
-    /** Sets the PermissionSet for this PermissionGroup
-    * The string should be of the format "|1|2|3|" where
-    * 1,2,and 3 are permissions that the use has.
-    */
-    public void setPermissionSet (String p_permissionSetString);
+    /**
+     * Sets the PermissionSet for this PermissionGroup The string should be of
+     * the format "|1|2|3|" where 1,2,and 3 are permissions that the use has.
+     */
+    public void setPermissionSet(String p_permissionSetString);
 }
-

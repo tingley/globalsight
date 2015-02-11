@@ -23,29 +23,43 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 
 /**
- * Helper class for TermbaseManager.deleteTermbase() that deletes a
- * termbase asynchronously. It does so by carefully deleteing data in
- * chunks so that database's rollback segments do not overflow.
+ * Helper class for TermbaseManager.deleteTermbase() that deletes a termbase
+ * asynchronously. It does so by carefully deleteing data in chunks so that
+ * database's rollback segments do not overflow.
  */
-public class TermbaseDeleterMDB
-    extends GenericQueueMDB
+@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TermbaseDeleterMDB.class);
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
+                + JmsHelper.JMS_TERMBASE_DELETION_QUEUE),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+@TransactionManagement(value = TransactionManagementType.BEAN)
+public class TermbaseDeleterMDB extends GenericQueueMDB
+{
+    private static final Logger CATEGORY = Logger
+            .getLogger(TermbaseDeleterMDB.class);
 
     // Delete 100 rows at a time.
     static private final int BATCHSIZE = 100;
@@ -59,21 +73,23 @@ public class TermbaseDeleterMDB
         super(CATEGORY);
     }
 
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void onMessage(Message p_message)
     {
         Long tbid = new Long(-1);
 
         try
         {
-            HashMap map = (HashMap)((ObjectMessage)p_message).getObject();
-            
-            CompanyThreadLocal.getInstance().setIdValue((String) map.get(CompanyWrapper.CURRENT_COMPANY_ID));
+            HashMap map = (HashMap) ((ObjectMessage) p_message).getObject();
 
-            String action = (String)map.get("action");
+            CompanyThreadLocal.getInstance().setIdValue(
+                    (String) map.get(CompanyWrapper.CURRENT_COMPANY_ID));
+
+            String action = (String) map.get("action");
 
             if ("delete_termbase".equals(action))
             {
-                tbid = (Long)map.get("tbid");
+                tbid = (Long) map.get("tbid");
 
                 deletePhysicalTermbase(tbid);
             }
@@ -82,8 +98,8 @@ public class TermbaseDeleterMDB
         {
             // Unexpected error: roll back the JMS transaction to make
             // the message come back.
-            CATEGORY.error("Termbase deletion error for TB " + tbid +
-                ", ignoring", ex);
+            CATEGORY.error("Termbase deletion error for TB " + tbid
+                    + ", ignoring", ex);
 
             m_messageDrivenContext.setRollbackOnly();
         }
@@ -94,11 +110,10 @@ public class TermbaseDeleterMDB
     }
 
     /**
-     * Helper method for TermbaseManager.deleteTermbase() that
-     * performs the necessary deletes in the SQL database.
+     * Helper method for TermbaseManager.deleteTermbase() that performs the
+     * necessary deletes in the SQL database.
      */
-    private void deletePhysicalTermbase(Long p_tbid)
-        throws SQLException
+    private void deletePhysicalTermbase(Long p_tbid) throws SQLException
     {
         Connection conn = null;
 
@@ -117,13 +132,15 @@ public class TermbaseDeleterMDB
 
             // No commit necessary.
 
-            CATEGORY.info("Asynchronous deletion of termbase " + p_tbid + " done.");
+            CATEGORY.info("Asynchronous deletion of termbase " + p_tbid
+                    + " done.");
         }
         finally
         {
             try
             {
-                if (conn != null) conn.rollback();
+                if (conn != null)
+                    conn.rollback();
             }
             catch (Throwable t)
             { /* ignore */
@@ -134,16 +151,16 @@ public class TermbaseDeleterMDB
     }
 
     private void deleteTerms(Connection p_conn, Long p_tbid)
-        throws SQLException
+            throws SQLException
     {
         long min = 0, max = 0;
         PreparedStatement stmt = null;
         ResultSet rset = null;
         try
         {
-            stmt = p_conn.prepareStatement(
-                "select min(cid), max(cid) from TB_TERM " +
-                "where tbid = ?");
+            stmt = p_conn
+                    .prepareStatement("select min(cid), max(cid) from TB_TERM "
+                            + "where tbid = ?");
             stmt.setLong(1, p_tbid.longValue());
 
             rset = stmt.executeQuery();
@@ -159,8 +176,8 @@ public class TermbaseDeleterMDB
 
             if (max > 0)
             {
-                stmt = p_conn.prepareStatement("delete from TB_TERM " +
-                    "where tbid = ? and cid >= ? and cid <= ?");
+                stmt = p_conn.prepareStatement("delete from TB_TERM "
+                        + "where tbid = ? and cid >= ? and cid <= ?");
 
                 for (long i = min; i <= max; i += BATCHSIZE)
                 {
@@ -182,16 +199,16 @@ public class TermbaseDeleterMDB
     }
 
     private void deleteLanguages(Connection p_conn, Long p_tbid)
-        throws SQLException
+            throws SQLException
     {
         long min = 0, max = 0;
         PreparedStatement stmt = null;
         ResultSet rset = null;
         try
         {
-            stmt = p_conn.prepareStatement(
-                "select min(cid), max(cid) from TB_LANGUAGE " +
-                "where tbid = ?");
+            stmt = p_conn
+                    .prepareStatement("select min(cid), max(cid) from TB_LANGUAGE "
+                            + "where tbid = ?");
             stmt.setLong(1, p_tbid.longValue());
 
             rset = stmt.executeQuery();
@@ -207,8 +224,8 @@ public class TermbaseDeleterMDB
 
             if (max > 0)
             {
-                stmt = p_conn.prepareStatement("delete from TB_LANGUAGE " +
-                    "where tbid = ? and cid >= ? and cid <= ?");
+                stmt = p_conn.prepareStatement("delete from TB_LANGUAGE "
+                        + "where tbid = ? and cid >= ? and cid <= ?");
 
                 for (long i = min; i <= max; i += BATCHSIZE)
                 {
@@ -232,16 +249,16 @@ public class TermbaseDeleterMDB
     }
 
     private void deleteConcepts(Connection p_conn, Long p_tbid)
-        throws SQLException
+            throws SQLException
     {
         long min = 0, max = 0;
         PreparedStatement stmt = null;
         ResultSet rset = null;
         try
         {
-            stmt = p_conn.prepareStatement(
-                "select min(cid), max(cid) from TB_CONCEPT " +
-                "where tbid = ?");
+            stmt = p_conn
+                    .prepareStatement("select min(cid), max(cid) from TB_CONCEPT "
+                            + "where tbid = ?");
             stmt.setLong(1, p_tbid.longValue());
 
             rset = stmt.executeQuery();
@@ -257,8 +274,8 @@ public class TermbaseDeleterMDB
 
             if (max > 0)
             {
-                stmt = p_conn.prepareStatement("delete from TB_CONCEPT " +
-                    "where tbid = ? and cid >= ? and cid <= ?");
+                stmt = p_conn.prepareStatement("delete from TB_CONCEPT "
+                        + "where tbid = ? and cid >= ? and cid <= ?");
 
                 for (long i = min; i <= max; i += BATCHSIZE)
                 {
@@ -282,16 +299,16 @@ public class TermbaseDeleterMDB
     }
 
     private void deleteUserData(Connection p_conn, Long p_tbid)
-        throws SQLException
+            throws SQLException
     {
         long min = 0, max = 0;
         PreparedStatement stmt = null;
         ResultSet rset = null;
         try
         {
-            stmt = p_conn.prepareStatement(
-                "select min(type), max(type) from TB_USER_DATA " +
-                "where tbid = ?");
+            stmt = p_conn
+                    .prepareStatement("select min(type), max(type) from TB_USER_DATA "
+                            + "where tbid = ?");
             stmt.setLong(1, p_tbid.longValue());
 
             rset = stmt.executeQuery();
@@ -307,8 +324,8 @@ public class TermbaseDeleterMDB
 
             if (max > 0)
             {
-                stmt = p_conn.prepareStatement("delete from TB_USER_DATA " +
-                    "where tbid = ? and type = ?");
+                stmt = p_conn.prepareStatement("delete from TB_USER_DATA "
+                        + "where tbid = ? and type = ?");
 
                 for (long i = min; i <= max; i++)
                 {

@@ -9,7 +9,7 @@ hibernate.query.substitutions yes 'Y', no 'N'
 
 ## select the classic query parser
 
-#hibernate.query.factory_class org.hibernate.hql.classic.ClassicQueryTranslatorFactory
+hibernate.query.factory_class org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory
 
 
 #################
@@ -220,12 +220,10 @@ hibernate.connection.pool_size 10
 
 hibernate.c3p0.max_size 200
 hibernate.c3p0.min_size 9
-hibernate.c3p0.timeout 5000
+hibernate.c3p0.timeout 1800
 hibernate.c3p0.max_statements 0
-hibernate.c3p0.idle_test_period 3000
+hibernate.c3p0.idle_test_period 300
 hibernate.c3p0.acquire_increment 2
-hibernate.c3p0.validate false
-
 
 
 ##############################
@@ -252,7 +250,7 @@ hibernate.c3p0.validate false
 
 #hibernate.connection.provider_class org.hibernate.connection.DriverManagerConnectionProvider
 #hibernate.connection.provider_class org.hibernate.connection.DatasourceConnectionProvider
-hibernate.connection.provider_class org.hibernate.connection.C3P0ConnectionProvider
+hibernate.connection.provider_class org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider
 #hibernate.connection.provider_class org.hibernate.connection.ProxoolConnectionProvider
 
 
@@ -457,10 +455,11 @@ hibernate.cache.region_prefix hibernate.test
 
 #hibernate.cache.provider_class org.hibernate.cache.EhCacheProvider
 #hibernate.cache.provider_class org.hibernate.cache.EmptyCacheProvider
-hibernate.cache.provider_class org.hibernate.cache.HashtableCacheProvider
+#hibernate.cache.provider_class org.hibernate.cache.HashtableCacheProvider
 #hibernate.cache.provider_class org.hibernate.cache.TreeCacheProvider
 #hibernate.cache.provider_class org.hibernate.cache.OSCacheProvider
 #hibernate.cache.provider_class org.hibernate.cache.SwarmCacheProvider
+hibernate.cache.region.factory_class org.hibernate.cache.ehcache.EhCacheRegionFactory
 
 
 ## choose a custom query cache implementation
@@ -489,4 +488,3 @@ hibernate.cache.provider_class org.hibernate.cache.HashtableCacheProvider
 #WebSphere
 #hibernate.jndi.class com.ibm.websphere.naming.WsnInitialContextFactory
 #hibernate.jndi.url iiop://localhost:900/
-

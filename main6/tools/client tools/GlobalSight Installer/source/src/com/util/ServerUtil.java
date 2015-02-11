@@ -41,7 +41,7 @@ public class ServerUtil
     private static Boolean IN_LINUX = null;
     private static SystemInfo SYSTEM_INFO;
     
-    private static final String TEST_PATH = "install/JavaServiceWrapper";   
+    private static final String TEST_PATH = "install/data";   
     public static final String SERVER_NAME_PRUFIX = "GlobalSight";
 
     private static List<String> VERSIONS = new ArrayList<String>();

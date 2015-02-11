@@ -72,6 +72,8 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
     private String m_lastModifiedUser = null;
     private String m_updatedByProject = null;
     private String sid = null;
+    private Long m_repetitionOfId = new Long(0);
+    private boolean m_repeated = false;
 
     /**
      * TUV orders range from 1 - n. The default value is 0.
@@ -123,6 +125,8 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
         m_createdUser = p_other.m_createdUser;
         m_lastModifiedUser = p_other.m_lastModifiedUser;
         m_updatedByProject = p_other.m_updatedByProject;
+        m_repeated = p_other.m_repeated;
+        m_repetitionOfId = p_other.m_repetitionOfId;
     }
 
     //
@@ -225,7 +229,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return Tuv DataType.
      */
-    public String getDataType(String companyId)
+    public String getDataType(long companyId)
     {
         return m_tu == null ? null : m_tu.getDataType();
     }
@@ -534,7 +538,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      *            Gxml String.
      */
     public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
-            String companyId)
+            long companyId)
     {
         setGxmlIgnoreSubflows(addTopTags(p_gxml, companyId));
     }
@@ -578,7 +582,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml, String companyId)
+    public void setGxmlExcludeTopTags(String p_gxml, long companyId)
     {
         setGxml(addTopTags(p_gxml, companyId));
     }
@@ -588,7 +592,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu(String companyId)
+    public Tu getTu(long companyId)
     {
         return m_tu;
     }
@@ -640,7 +644,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized(String companyId)
+    public boolean isExactMatchLocalized(long companyId)
     {
         Tu tu = getTu(companyId);
         if (tu != null)
@@ -740,7 +744,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable(String companyId)
+    public boolean isLocalizable(long companyId)
     {
         Tu tu = getTu(companyId);
         return (tu != null && tu.isLocalizable());
@@ -1128,7 +1132,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * them. @param a Gxml string that is missing the top level tags. @return a
      * Gxml string with top level tags.
      */
-    private String addTopTags(String p_gxml, String companyId)
+    private String addTopTags(String p_gxml, long companyId)
     {
         String elementName = GxmlNames.SEGMENT;
 
@@ -1216,5 +1220,25 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
     public void setSrcComment(String srcComment)
     {
         this.srcComment = srcComment;
+    }
+
+    public boolean isRepeated()
+    {
+        return m_repeated;
+    }
+
+    public void setRepeated(boolean repeated)
+    {
+        this.m_repeated = repeated;
+    }
+
+    public long getRepetitionOfId()
+    {
+        return m_repetitionOfId == null ? 0 : m_repetitionOfId.longValue();
+    }
+
+    public void setRepetitionOfId(long repetitionOfId)
+    {
+        this.m_repetitionOfId = new Long(repetitionOfId);
     }
 }

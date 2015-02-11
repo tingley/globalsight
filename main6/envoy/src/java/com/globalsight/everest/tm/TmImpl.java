@@ -17,20 +17,15 @@
 
 package com.globalsight.everest.tm;
 
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.ling.tm2.SegmentTmInfo;
-
-import com.globalsight.util.edit.EditUtil;
-
 import java.io.Serializable;
-
 import java.util.Date;
+
+import com.globalsight.ling.tm2.SegmentTmInfo;
 
 /**
  * @deprecated This code is no longer supported.
  */
-public final class TmImpl
-    implements Tm, Serializable
+public final class TmImpl implements Tm, Serializable
 {
     //
     // Private Members
@@ -45,7 +40,8 @@ public final class TmImpl
     private String m_creationUser = "";
     private Date m_creationDate = null;
     // id of the company which this activity belong to
-    private String m_companyId;    
+    private long m_companyId;
+    private boolean isFirstImporting = false;
 
     //
     // Constructors
@@ -74,21 +70,23 @@ public final class TmImpl
         m_id = p_id;
         m_idAsLong = null;
     }
-    
+
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
@@ -196,8 +194,7 @@ public final class TmImpl
     }
 
     /**
-     * Returns a string representation of the object for debugging
-     * purposes.
+     * Returns a string representation of the object for debugging purposes.
      */
     public String toDebugString()
     {
@@ -222,58 +219,86 @@ public final class TmImpl
     }
 
     @Override
-    public SegmentTmInfo getSegmentTmInfo() {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
-    }
-    
-    @Override
-    public Long getTm3Id() {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
-    }
-    
-    @Override
-    public void setTm3Id(Long id) {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+    public SegmentTmInfo getSegmentTmInfo()
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
-    public boolean getIsRemoteTm() {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+    public Long getTm3Id()
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
+    }
+
+    @Override
+    public void setTm3Id(Long id)
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
+    }
+
+    @Override
+    public boolean getIsRemoteTm()
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public int getConvertRate()
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public void setConvertRate(int convertRate)
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public long getLastTUId()
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public void setLastTUId(long lastTUId)
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public long getConvertedTM3Id()
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 
     @Override
     public void setConvertedTM3Id(long convertedTm3Id)
     {
-        throw new UnsupportedOperationException("This implementation is no longer supported");
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
+    }
+
+    @Override
+    public void setFirstImporting(boolean isFirstImporting)
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
+    }
+
+    @Override
+    public boolean isFirstImporting()
+    {
+        throw new UnsupportedOperationException(
+                "This implementation is no longer supported");
     }
 }

@@ -49,7 +49,6 @@ import org.jbpm.taskmgmt.exe.TaskInstance;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.OfflineEditorManagerException;
@@ -68,6 +67,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.taskmanager.TaskSearchParameters;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -78,6 +78,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchHandlerHelper;
@@ -91,6 +92,7 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
+import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -163,34 +165,65 @@ public class TaskListHandler extends PageHandler
                 .getAttribute(SESSION_MANAGER);
         User user = TaskHelper.getUser(sess);
         String action = p_request.getParameter(TASK_ACTION);
+        List<OEMProcessStatus> statusList = new ArrayList<OEMProcessStatus>();
         if (TAST_ACTION_DOWNLOADALL.equals(action))
         {
             try
             {
-                downloadAllOfflineFiles(sess, user, p_request, p_response);
+                downloadAllOfflineFiles(sess, user, p_request, p_response, statusList);
                 return;
             }
             catch (Exception e)
             {
                 log.error(e.toString(), e);
                 errorOccur = true;
-                errorMsg.append("\\r\\n\\r\\n");
-                errorMsg.append(refineErrorMsg(e));
+                if (statusList != null && statusList.size() > 0)
+                {
+                    OEMProcessStatus ops = statusList.get(0);
+                    errorMsg.append("<br /><br />");
+                    errorMsg.append(refineErrorMsg(e));
+                    ops.setErrorOccured(true);
+                    ops.speakRed(ops.getCounter(), errorMsg.toString(), null);
+                    p_response.reset();
+                    p_response.setStatus(204);
+                    p_response.flushBuffer();
+                    return;
+                }
+                else
+                {
+                    errorMsg.append("\\r\\n\\r\\n");
+                    errorMsg.append(refineErrorMsg(e));
+                }
             }
         }
         else if (TAST_ACTION_DOWNLOADALL_COMBINED.equals(action))
         {
             try
             {
-                downloadAllOfflineFilesCombined(sess, user, p_request, p_response);
+                downloadAllOfflineFilesCombined(sess, user, p_request, p_response, statusList);
                 return;
             }
             catch (Exception e)
             {
                 log.error(e.toString(), e);
                 errorOccur = true;
-                errorMsg.append("\\r\\n\\r\\n");
-                errorMsg.append(refineErrorMsg(e));
+                if (statusList != null && statusList.size() > 0)
+                {
+                    OEMProcessStatus ops = statusList.get(0);
+                    errorMsg.append("<br /><br />");
+                    errorMsg.append(refineErrorMsg(e));
+                    ops.setErrorOccured(true);
+                    ops.speakRed(ops.getCounter(), errorMsg.toString(), null);
+                    p_response.reset();
+                    p_response.setStatus(204);
+                    p_response.flushBuffer();
+                    return;
+                }
+                else
+                {
+                    errorMsg.append("\\r\\n\\r\\n");
+                    errorMsg.append(refineErrorMsg(e));
+                }
             }
         }
         else if (TASK_ACTION_GETTASKSTATUS.equals(action))
@@ -223,12 +256,19 @@ public class TaskListHandler extends PageHandler
             p_response.getWriter().write(result.toString());
             return;
         }
-
         // for GBS-1939
         else if (TASK_ACTION_SELECTED_TASKSSTATUS.equals(action))
         {
             String result;
             result = selectedTasksStatusJSON(p_request, user);
+            p_response.getWriter().write(result);
+            return;
+        }
+        // Zero word count task should be ignored when offline download.
+        else if ("filterZeroWCTasksForOfflineDownload".equals(action))
+        {
+            String result = filterZeroWorcCountTasksForOfflineDownload(sess,
+                    user, p_request);
             p_response.getWriter().write(result);
             return;
         }
@@ -272,7 +312,7 @@ public class TaskListHandler extends PageHandler
         
         return oriMsg;
     }
-    
+
     /**
      * Return job id if jobHandler is null, otherwise return l10n profile id
      * @param jobId
@@ -401,10 +441,15 @@ public class TaskListHandler extends PageHandler
         }
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void downloadAllOfflineFilesCombined(HttpSession session, User user,
-            HttpServletRequest request, HttpServletResponse response)
-            throws GeneralException, NamingException, IOException
+            HttpServletRequest request, HttpServletResponse response,
+            List<OEMProcessStatus> statusList) throws GeneralException,
+            NamingException, IOException
     {
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        sessionMgr.removeElement(DOWNLOAD_STATUS);
         Vector<String> downloadOfflineFilesOptions = getDownloadOption(session);
         SendDownloadFileHelper help = new SendDownloadFileHelper();
         Locale locale = (Locale) session.getAttribute(UILOCALE);
@@ -418,15 +463,15 @@ public class TaskListHandler extends PageHandler
         int resInsMode = help
                 .getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
         String displayExactMatch = downloadOfflineFilesOptions.get(6);
-        String consolidateTM = downloadOfflineFilesOptions.get(7);
-        String consolidateTerm = downloadOfflineFilesOptions.get(8);
+//        String consolidateTM = downloadOfflineFilesOptions.get(7);
+//        String consolidateTerm = downloadOfflineFilesOptions.get(8);
         String terminology = downloadOfflineFilesOptions.get(9);
         // populate 100
         String populate100 = downloadOfflineFilesOptions.get(10);
         // populate fuzzy target segments (only for Bilingual RTF)
         String populateFuzzy = downloadOfflineFilesOptions.get(11);
         // need consolidate output file (for XLF format)
-        String consolidateXLF = downloadOfflineFilesOptions.get(12);
+//        String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
 
@@ -462,44 +507,23 @@ public class TaskListHandler extends PageHandler
         HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
         
         Vector excludeTypes = null;
-        int downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+        int downloadEditAll = 0;
         GlobalSightLocale srcLocale = null;
         GlobalSightLocale targetLocale = null;
         String targetLocaleStr = null;
         long workflowId = -1;
-        
-        
+
         String taskIds = request.getParameter("taskParam");
+        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
         for (Task task : tasks)
         {
-            long jobId = task.getJobId();
-            String jobName = task.getJobName();
-
-            // GBS-630: This fragment is used to verify whether the activity is
-            // checked in UI
-            // TODO: Better to refactor TaskSearchParameters to support multiple
-            // job ids
-            if (taskIds != null && !"".equals(taskIds))
+            // GBS-630: verify whether the activity is checked on UI.
+            if (!selectedTaskIds.contains(task.getId()))
             {
-                String taskId = "";
-                StringTokenizer tokenizer = new StringTokenizer(taskIds);
-                boolean checked = false;
-                while (tokenizer.hasMoreTokens())
-                {
-                    taskId = tokenizer.nextToken();
-                    if (Long.parseLong(taskId) == task.getId())
-                    {
-                        checked = true;
-                        break;
-                    }
-                }
-
-                if (!checked)
-                {
-                    continue;
-                }
+                continue;
             }
-            
+
+            long jobId = task.getJobId();
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             alljobIds.add(jobId);
             alljobIdsSort.add(jobId);
@@ -536,8 +560,11 @@ public class TaskListHandler extends PageHandler
             {
                 workflowId = task.getWorkflow().getId();
                 L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
-                downloadEditAll = help.getEditAllState(downloadOfflineFilesOptions.get(5),
-                        l10nProfile);
+                if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
+                {
+                    downloadEditAll = help.getEditAllState(downloadOfflineFilesOptions.get(15),
+                            l10nProfile);
+                }
                 excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
                 targetLocaleStr = task.getTargetLocale().toString();
                 srcLocale = task.getSourceLocale();
@@ -606,11 +633,8 @@ public class TaskListHandler extends PageHandler
                 .equalsIgnoreCase(includeRepetitions));
         downloadParams.setChangeCreationIdForMTSegments("yes"
                 .equalsIgnoreCase(changeCreationIdForMt));
-
-        OEMProcessStatus status = new OEMProcessStatus(downloadParams);
-        OfflineEditManager odm = ServerProxy.getOfflineEditManager();
-        odm.attachListener(status);
         downloadParams.setZipper(zipper);
+        
         try
         {
             downloadParams.verify();
@@ -619,6 +643,12 @@ public class TaskListHandler extends PageHandler
         {
             throw new EnvoyServletException(e);
         }
+        
+        OfflineEditManager odm = ServerProxy.getOfflineEditManager();
+        OEMProcessStatus status = new OEMProcessStatus(downloadParams);
+        statusList.add(status);
+        odm.attachListener(status);
+        sessionMgr.setAttribute(DOWNLOAD_STATUS, status);
         odm.runProcessDownloadRequest(downloadParams);
 
         zipper.closeZipFile();
@@ -629,10 +659,15 @@ public class TaskListHandler extends PageHandler
                 tmpFile);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void downloadAllOfflineFiles(HttpSession session, User user,
-            HttpServletRequest request, HttpServletResponse response)
-            throws GeneralException, NamingException, IOException
+            HttpServletRequest request, HttpServletResponse response,
+            List<OEMProcessStatus> statusList) throws GeneralException,
+            NamingException, IOException
     {
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        sessionMgr.removeElement(DOWNLOAD_STATUS);
         Vector<String> downloadOfflineFilesOptions = getDownloadOption(session);
         SendDownloadFileHelper help = new SendDownloadFileHelper();
         Locale locale = (Locale) session.getAttribute(UILOCALE);
@@ -662,11 +697,12 @@ public class TaskListHandler extends PageHandler
         String zipFileName = "DownloadAllOfflineFiles.zip";
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(tmpFile);
+
         TaskSearchParameters params = new TaskSearchParameters();
         params.setUser(user);
         params.setSessionId(session.getId());
         params.setActivityState(new Integer(Task.STATE_ACCEPTED));
-        Collection tasks = null;
+        Collection<Task> tasks = null;
         try
         {
             tasks = ServerProxy.getTaskManager().getTasks(params);
@@ -677,36 +713,19 @@ public class TaskListHandler extends PageHandler
         }
 
         String taskIds = request.getParameter("taskParam");
-        Iterator<Task> taskIterator = tasks.iterator();
-        while (taskIterator.hasNext())
+        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
+
+        int taskTotalSize = selectedTaskIds.size() != 0 ? selectedTaskIds.size()
+                : tasks.size();
+        int taskCounter = 0;
+        OEMProcessStatus status = new OEMProcessStatus();
+        statusList.add(status);
+        for (Task task : tasks)
         {
-            Task task = taskIterator.next();
-            long jobId = task.getJobId();
-            String jobName = task.getJobName();
-
-            // GBS-630: This fragment is used to verify whether the activity is
-            // checked in UI
-            // TODO: Better to refactor TaskSearchParameters to support multiple
-            // job ids
-            if (taskIds != null && !"".equals(taskIds))
+            // GBS-630: verify whether the activity is checked on UI
+            if (!selectedTaskIds.contains(task.getId()))
             {
-                String taskId = "";
-                StringTokenizer tokenizer = new StringTokenizer(taskIds);
-                boolean checked = false;
-                while (tokenizer.hasMoreTokens())
-                {
-                    taskId = tokenizer.nextToken();
-                    if (Long.parseLong(taskId) == task.getId())
-                    {
-                        checked = true;
-                        break;
-                    }
-                }
-
-                if (!checked)
-                {
-                    continue;
-                }
+                continue;
             }
 
             List<Long> pageIdList = new ArrayList<Long>();
@@ -733,8 +752,12 @@ public class TaskListHandler extends PageHandler
             long workflowId = task.getWorkflow().getId();
             L10nProfile l10nProfile = task.getWorkflow().getJob()
                     .getL10nProfile();
-            int downloadEditAll = help.getEditAllState(
-                    downloadOfflineFilesOptions.get(5), l10nProfile);
+            int downloadEditAll = 4;
+            if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
+            {
+                downloadEditAll = help.getEditAllState(downloadOfflineFilesOptions.get(15),
+                        l10nProfile);
+            }
             Vector excludeTypes = l10nProfile.getTranslationMemoryProfile()
                     .getJobExcludeTuTypes();
             List primarySourceFiles = help.getAllPSFList(task);
@@ -746,7 +769,7 @@ public class TaskListHandler extends PageHandler
             // String targetLocale = task.getTargetLocale().getLanguage() + "_"
             // + task.getTargetLocale().getCountryCode();
 
-            DownloadParams downloadParams = new DownloadParams(jobName, null,
+            DownloadParams downloadParams = new DownloadParams(task.getJobName(), null,
                     "", Long.toString(workflowId), Long.toString(task.getId()),
                     pageIdList, pageNameList, canUseUrlList,
                     primarySourceFiles, stfList, editorId, platformId,
@@ -759,7 +782,7 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(consolidateTerm));
             downloadParams.setTermFormat(terminology);
             downloadParams
-                    .setJob(ServerProxy.getJobHandler().getJobById(jobId));
+                    .setJob(ServerProxy.getJobHandler().getJobById(task.getJobId()));
             downloadParams.setDisplayExactMatch(displayExactMatch);
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
             downloadParams.setPopulateFuzzy("yes"
@@ -770,10 +793,7 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(includeRepetitions));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
-
-            OEMProcessStatus status = new OEMProcessStatus(downloadParams);
-            OfflineEditManager odm = ServerProxy.getOfflineEditManager();
-            odm.attachListener(status);
+            
             downloadParams.setZipper(zipper);
             try
             {
@@ -783,6 +803,28 @@ public class TaskListHandler extends PageHandler
             {
                 throw new EnvoyServletException(e);
             }
+            
+            taskCounter++;
+            if (taskCounter < taskTotalSize)
+            {
+                status.setMultiTasks(true);
+                status.setTaskCounter(taskCounter);
+                status.setTaskTotalSize(taskTotalSize);
+                status.setCounter(taskCounter);
+                status.setTotalFiles(taskTotalSize);
+            }
+            else
+            {
+                int curSize = OEMProcessStatus.findNumberOfFiles(downloadParams);
+                status.setMultiTasks(false);
+                status.setCounter((taskTotalSize - 1) * curSize);
+                status.setTotalFiles(taskTotalSize * curSize);
+                status.setPercentage(status.getTaskPercentage());
+            }
+            sessionMgr.setAttribute(DOWNLOAD_STATUS, status);
+            
+            OfflineEditManager odm = ServerProxy.getOfflineEditManager();
+            odm.attachListener(status);
             odm.runProcessDownloadRequest(downloadParams);
         }
 
@@ -925,7 +967,6 @@ public class TaskListHandler extends PageHandler
     private String selectedTasksStatusJSON(HttpServletRequest p_request,
             User p_user)
     {
-        String userId = p_user.getUserId();
         String taskIds = p_request.getParameter("taskParam");
         StringTokenizer tokenizer = new StringTokenizer(taskIds);
         StringBuffer isFinishedTaskId = new StringBuffer();
@@ -1086,24 +1127,25 @@ public class TaskListHandler extends PageHandler
      *            -- list of tasks
      * @return HashSet
      */
-    private HashSet getTaskLangs(List p_tasks)
+    private HashSet<String> getTaskLangs(List<Task> p_tasks)
     {
-        HashSet taskLangs = new HashSet();
+        HashSet<String> taskLangs = new HashSet<String>();
         if (p_tasks == null)
             return taskLangs;
-        Iterator it = p_tasks.iterator();
-        while (it.hasNext())
+
+        for (Task t : p_tasks)
         {
-            Task t = (Task) it.next();
             Workflow wf = t.getWorkflow();
             if (wf != null)
             {
                 taskLangs.add(wf.getTargetLocale().toString());
             }
         }
+
         return taskLangs;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void getTasks(HttpServletRequest p_request, HttpSession p_session,
             User p_user) throws ServletException, IOException,
             EnvoyServletException
@@ -1249,7 +1291,7 @@ public class TaskListHandler extends PageHandler
         }
 
         p_request.setAttribute("action", p_request.getParameter("action"));
-        List tasks = null;
+        List<Task> tasks = null;
         TaskSearchParameters searchParams = null;
         if (listType == null)
         {
@@ -1326,7 +1368,7 @@ public class TaskListHandler extends PageHandler
 
         if (tasks == null)
         {
-            tasks = new Vector();
+            tasks = new Vector<Task>();
         }
 
         if (tasks.size() == 0)
@@ -1452,11 +1494,16 @@ public class TaskListHandler extends PageHandler
         String comment = EditUtil.utf8ToUnicode(commentInput);
         TaskHelper.rejectTask(p_user.getUserId(), task, comment);
 
-        TaskHelper.storeObject(p_session, WebAppConstants.WORK_OBJECT, task);
+//        TaskHelper.storeObject(p_session, WebAppConstants.WORK_OBJECT, task);
+        HibernateUtil.update(task);
+        // As task has been rejected, this task has no relation with current
+        // user any more.
+		SessionManager sessionMgr = (SessionManager) p_session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+		sessionMgr.removeElement(WebAppConstants.WORK_OBJECT);
         // update the MRU list with the changed state
         TaskHelper.updateMRUtask(p_request, p_session, task, p_response,
                 Task.STATE_REJECTED);
-
     }
 
     /* Convert the given string into an integer value; if null, or an error */
@@ -1549,8 +1596,13 @@ public class TaskListHandler extends PageHandler
         // save the results from a search/replace
         SessionManager sessionMgr = (SessionManager) p_session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        SearchHandlerHelper.replace((List) sessionMgr.getAttribute("tuvInfos"),
-                (String) sessionMgr.getAttribute(COMPANY_ID));
+        String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
+        if (companyId != null)
+        {
+            SearchHandlerHelper.replace(
+                    (List) sessionMgr.getAttribute("tuvInfos"),
+                    Long.parseLong(companyId));
+        }
     }
 
     private TaskSearchParameters getRequestSearchParams(
@@ -1796,7 +1848,8 @@ public class TaskListHandler extends PageHandler
                 sp.setActivityState(new Integer(Task.STATE_ACTIVE));
                 return sp;
             }
-            StringTokenizer strtok = new StringTokenizer(cookie.getValue(), ":");
+            String cookieValue = URLDecoder.decode(cookie.getValue());
+            StringTokenizer strtok = new StringTokenizer(cookieValue, ":");
             while (strtok.hasMoreTokens())
             {
                 String tok = strtok.nextToken();
@@ -2352,4 +2405,67 @@ public class TaskListHandler extends PageHandler
         return t;
     }
 
+    /**
+     * When offline download, zero word count tasks should be ignored.
+     */
+    private String filterZeroWorcCountTasksForOfflineDownload(
+            HttpSession session, User user, HttpServletRequest p_request)
+    {
+        String taskIds = p_request.getParameter("taskParam");
+        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
+
+        TaskManager taskManager = ServerProxy.getTaskManager();
+        for (Iterator<Long> it = selectedTaskIds.iterator(); it.hasNext();)
+        {
+            try
+            {
+                Task task = taskManager.getTask(it.next());
+                if (task.getWorkflow().getTotalWordCount() == 0)
+                {
+                    it.remove();
+                }
+            }
+            catch (Exception ignore)
+            {
+
+            }
+        }
+
+        StringBuilder ids = new StringBuilder(); 
+        if (!selectedTaskIds.isEmpty())
+        {
+            for (Long id : selectedTaskIds)
+            {
+                ids.append(" ").append(id);
+            }
+        }
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("{\"selectedTaskIds\":\"")
+                .append(selectedTaskIds.isEmpty() ? "0" : ids.toString().trim())
+                .append("\"}");
+
+        return sb.toString();
+    }
+
+    /**
+     * Get selected task ID List.
+     * @param taskParam -- selected task IDs in string like "1001 1002 1003".
+     */
+    private List<Long> getSelectedTaskIds(String taskParam)
+    {
+        List<Long> selectedTaskIds = new ArrayList<Long>();
+        if (taskParam != null && !"".equals(taskParam))
+        {
+            String taskId = "";
+            StringTokenizer tokenizer = new StringTokenizer(taskParam);
+            while (tokenizer.hasMoreTokens())
+            {
+                taskId = tokenizer.nextToken();
+                selectedTaskIds.add(Long.parseLong(taskId));
+            }
+        }
+        
+        return selectedTaskIds;
+    }
 }

@@ -26,9 +26,9 @@ import com.globalsight.smartbox.util.LogUtil;
 import com.globalsight.smartbox.util.ZipUtil;
 
 /**
- * Use case 01 post process
+ * Special downloading/post process for "Use case 01"
  * 
- * @author leon
+ * @author Leon
  * 
  */
 public class Usecase01PostProcess implements PostProcess
@@ -43,20 +43,18 @@ public class Usecase01PostProcess implements PostProcess
         List<File> files = new ArrayList<File>();
         for (String str : targetFiles)
         {
-            if (str.endsWith("pdf"))
-            {
-                continue;
-            }
+//            if (str.endsWith("pdf"))
+//            {
+//                continue;
+//            }
             File file = new File(str);
             files.add(file);
         }
 
         // Get zip file
-        String jobName = jobInfo.getJobName();
-        String zipFileName = jobName.substring(0, jobName.lastIndexOf("_"))
-                + ".zip";
-        String zipFilePath = cpConfig.getTempBox() + File.separator
-                + zipFileName;
+        String zipFileName = jobInfo.getOriginFile();
+        zipFileName = zipFileName.substring(zipFileName.lastIndexOf(File.separator) + 1);
+        String zipFilePath = cpConfig.getTempBox() + File.separator + zipFileName;
         File zipFile = new File(zipFilePath);
         try
         {

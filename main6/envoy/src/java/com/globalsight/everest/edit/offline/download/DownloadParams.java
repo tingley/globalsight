@@ -76,7 +76,7 @@ public class DownloadParams implements Serializable
     private boolean m_createZip = false;
     private int m_fileFormat = -1;
     private Vector m_excludeTypeNames = null;
-    private int m_downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+    //private int m_downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
     private List m_supportFiles = null;
     private int m_resourceOption = AmbassadorDwUpConstants.MAKE_RES_ATNS;
     private boolean m_isPrimaryFiles = false;
@@ -117,6 +117,8 @@ public class DownloadParams implements Serializable
     private String activityType = "";
 
     private Map<String, String> uniqueFileNames = new HashMap<String, String>();
+    
+    private int TMEditType = 1; //Default is to allow edit of ICE and 100% segments
 
     //
     // Constructors
@@ -170,7 +172,7 @@ public class DownloadParams implements Serializable
      *            - indicates the file type (Text, RTF, TradosRtf)
      * @param p_excludeTypes
      *            a list of type to exclude as an array of strings
-     * @param p_downloadEditAll
+     * @param p_TMEditType
      *            the tri-state of the downloadEditAll button.
      * @param p_supportFiles
      *            a list of GlossaryFile objects.
@@ -189,7 +191,7 @@ public class DownloadParams implements Serializable
             String p_encoding, int p_tagDisplayFormatID, String p_uiLocale,
             GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
             boolean p_createZip, int p_fileFormat, Vector p_excludeTypes,
-            int p_downloadEditAll, List p_supportFiles, int p_resourceOption,
+            int p_TMEditType, List p_supportFiles, int p_resourceOption,
             User p_user)
     {
         super();
@@ -226,7 +228,8 @@ public class DownloadParams implements Serializable
                 if (m_editorID == AmbassadorDwUpConstants.EDITOR_WIN_WORD97
                         || m_editorID == AmbassadorDwUpConstants.EDITOR_WIN_WORD2000
                         || m_editorID == AmbassadorDwUpConstants.EDITOR_WIN_WORD2000_ANDABOVE
-                        || m_editorID == AmbassadorDwUpConstants.EDITOR_XLIFF)
+                        || m_editorID == AmbassadorDwUpConstants.EDITOR_XLIFF
+                        || m_editorID == AmbassadorDwUpConstants.EDITOR_OMEGAT)
                 {
                     m_encoding = "UnicodeLittle";
                 }
@@ -259,7 +262,7 @@ public class DownloadParams implements Serializable
         m_targetLocale = p_targetLocale;
         m_createZip = p_createZip;
         m_fileFormat = p_fileFormat;
-        m_downloadEditAll = p_downloadEditAll;
+        TMEditType = p_TMEditType;
         m_excludeTypeNames = p_excludeTypes;
         m_supportFiles = p_supportFiles;
         m_resourceOption = p_resourceOption;
@@ -602,10 +605,10 @@ public class DownloadParams implements Serializable
      * @return a tri-state value indicating: Yes, No or Unauthorized.
      * @see AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_*
      */
-    public int getDownloadEditAllState()
-    {
-        return m_downloadEditAll;
-    }
+//    public int getDownloadEditAllState()
+//    {
+//        return m_downloadEditAll;
+//    }
 
     /**
      * Get the resource insertion option
@@ -856,7 +859,7 @@ public class DownloadParams implements Serializable
                         .toString()));
         sb.append(", CreateZip=" + m_createZip);
         sb.append(", FileFormat=" + m_fileFormat);
-        sb.append(", EditAll=" + m_downloadEditAll);
+        sb.append(", TMEditType=" + TMEditType);
         sb.append(", ResourceLinking=" + m_resourceOption);
         sb.append(", ExcludedTypeNames=");
         if (m_excludeTypeNames == null)
@@ -954,9 +957,7 @@ public class DownloadParams implements Serializable
                     || (m_platformID <= AmbassadorDwUpConstants.PLATFORM_LIST_START)
                     || (m_platformID >= AmbassadorDwUpConstants.PLATFORM_LIST_END)
                     || ((m_tagDisplayFormatID != PseudoConstants.PSEUDO_COMPACT) && (m_tagDisplayFormatID != PseudoConstants.PSEUDO_VERBOSE))
-                    || ((m_fileFormat <= AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_LIST_START) || (m_fileFormat >= AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_LIST_END))
-                    || ((m_downloadEditAll != AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO)
-                            && (m_downloadEditAll != AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES) && (m_downloadEditAll != AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED)))
+                    || ((m_fileFormat <= AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_LIST_START) || (m_fileFormat >= AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_LIST_END)))
             {
                 m_isPrimaryFiles = result = false;
             }
@@ -1043,7 +1044,7 @@ public class DownloadParams implements Serializable
 
     public void setConsolidateTmxFiles(boolean consolidateTmxFiles)
     {
-        this.consolidateTmxFiles = consolidateTmxFiles;
+        this.consolidateTmxFiles = true;
     }
 
     public String getDisplayExactMatch()
@@ -1073,7 +1074,7 @@ public class DownloadParams implements Serializable
 
     public void setConsolidateTermFiles(boolean consolidateTermFiles)
     {
-        this.consolidateTermFiles = consolidateTermFiles;
+        this.consolidateTermFiles = true;
     }
 
     public boolean createTermFiles()
@@ -1182,7 +1183,8 @@ public class DownloadParams implements Serializable
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
-                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED)
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
             this.needConsolidate = false;
         else
             this.needConsolidate = needConsolidate;
@@ -1211,7 +1213,8 @@ public class DownloadParams implements Serializable
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
-                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED)
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
             this.includeRepetitions = false;
         else
             this.includeRepetitions = includeRepetitions;
@@ -1494,5 +1497,15 @@ public class DownloadParams implements Serializable
     public void setAllPage_tasks(HashMap<Long, Long> allPage_tasks)
     {
         this.allPage_tasks = allPage_tasks;
+    }
+
+    public int getTMEditType()
+    {
+        return TMEditType;
+    }
+
+    public void setTMEditType(int tMEditType)
+    {
+        TMEditType = tMEditType;
     }
 }

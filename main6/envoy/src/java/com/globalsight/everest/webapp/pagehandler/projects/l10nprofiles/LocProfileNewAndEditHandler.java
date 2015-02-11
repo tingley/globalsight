@@ -276,28 +276,8 @@ public class LocProfileNewAndEditHandler extends PageHandler implements LocProfi
         p_request.setAttribute("SourceLocaleId", Itmp.toString());
 
         // tm usage id
-        int tmchoice = editLocprofile.getTmChoice();
-        if (editLocprofile.isExactMatchEditing())
-        {
-            if (tmchoice == L10nProfile.REGULAR_TM_WITH_PAGE_TM)
-            {
-                Itmp = new Integer((int)ALLOW_EDIT_TM_USAGE);
-                p_request.setAttribute("LocProfileTMUsageId", Itmp.toString());
-            }
-        }
-        else
-        {
-            if (tmchoice == L10nProfile.REGULAR_TM_WITH_PAGE_TM)
-            {
-                Itmp = new Integer((int)DENY_EDIT_TM_USAGE);
-                p_request.setAttribute("LocProfileTMUsageId", Itmp.toString());
-            }
-            if (tmchoice == L10nProfile.NO_TM)
-            {
-                Itmp = new Integer((int)NO_TM_USAGE);
-                p_request.setAttribute("LocProfileTMUsageId", Itmp.toString());
-            }
-        }
+        int TMEditType = editLocprofile.getTMEditType();
+        p_request.setAttribute("LocProfileTMUsageId", TMEditType);
         
         p_request.setAttribute("AutomaticDispatch", editLocprofile.dispatchIsAutomatic() + "");
         

@@ -28,13 +28,6 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
  */
 public class EventTopicMap
 {
-    // ////////////////////////////////////
-    // Public Constants //
-    // ////////////////////////////////////
-
-    // JMS Topic JNDI Names (one for each adapter)
-    // an example topic name is
-    // com.globalsight.cxe.jms.ForFileSystemSourceAdapter
     public static final String JMS_PREFIX = "com.globalsight.cxe.jms.";
     public static final String FOR_FILE_SYSTEM_SOURCE_ADAPTER = "ForFileSystemSourceAdapter";
     public static final String FOR_FILE_SYSTEM_TARGET_ADAPTER = "ForFileSystemTargetAdapter";
@@ -57,6 +50,7 @@ public class EventTopicMap
     public static final String FOR_COPYFLOW_SOURCE_ADAPTER = "ForCopyFlowSourceAdapter";
     public static final String FOR_COPYFLOW_TARGET_ADAPTER = "ForCopyFlowTargetAdapter";
     public static final String FOR_DYNAMIC_PREVIEW = "ForDynamicPreview";
+    public static final String FOR_TERM_AUDIT_LOG = "ForTermAuditLog";
     public static final String FOR_MEDIASURFACE_SOURCE_ADAPTER = "ForMediasurfaceSourceAdapter";
     public static final String FOR_MEDIASURFACE_TARGET_ADAPTER = "ForMediasurfaceTargetAdapter";
 
@@ -263,12 +257,12 @@ public class EventTopicMap
      *            the CXE Message Type (Event Type)
      * @return JMS Topic Name as a String
      */
-    public static String getJmsTopicName(CxeMessageType p_cxeMessageType)
+    public static String getJmsQueueName(CxeMessageType p_cxeMessageType)
     {
-        String topicName = (String) s_instance.m_map.get(new Integer(
+        String jmsName = (String) s_instance.m_map.get(new Integer(
                 p_cxeMessageType.getValue()));
 
-        if (topicName == null)
+        if (jmsName == null)
         {
             throw new java.util.NoSuchElementException(
                     "There is no mapped topic for event "
@@ -287,9 +281,9 @@ public class EventTopicMap
         if (s_appServerWrapper.getJ2EEServerName().equals(
                 AppServerWrapperFactory.JBOSS))
         {
-            topicName = EventTopicMap.TOPIC_PREFIX_JBOSS + topicName;
+            jmsName = EventTopicMap.QUEUE_PREFIX_JBOSS + jmsName;
         }
 
-        return topicName;
+        return jmsName;
     }
 }

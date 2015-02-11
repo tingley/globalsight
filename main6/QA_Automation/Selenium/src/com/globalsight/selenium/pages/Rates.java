@@ -20,7 +20,7 @@ public class Rates {
     public static final String Currency_SELECT = "//select[@name='currency']";
     public static final String RateType_SELECT = "rateType";
 
-	public static final String Save_BUTTON="Save";
+	public static final String Save_BUTTON="//input[@value='Save']";
 	public static final String Cancel_BUTTON="Cancel";
 
 	

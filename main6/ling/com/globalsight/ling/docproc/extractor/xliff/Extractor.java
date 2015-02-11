@@ -142,9 +142,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private String sourceContent = new String();
     // For recording the tag transformed source content to write source tuv.
     private String tuvSourceContent = new String();
- // For recording the original target content to write into skeleton.
+    // For recording the original target content to write into skeleton.
     private String targetContent = new String();
-    //For recording the tag transformed source content to write target tuv.
+    // For recording the tag transformed source content to write target tuv.
     private String tuvTargetContent = new String();
     // The content removed tag, for validating the no tag content is null or not
     private String contentNoTag = new String();
@@ -163,7 +163,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     // value, should set the current index value to the pre-trans-unit index
     // value.
     private int lastIndex = 1;
-    
+
     // key
     static public final String XLIFF_PART = "xliffPart";
     // value1 : Indicate this is source segment
@@ -174,7 +174,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     static public final String XLIFF_PART_ALT_SOURCE = "altSource";
     // value4 : Indicate this is alt-target section
     static public final String XLIFF_PART_ALT_TARGET = "altTarget";
-    
+
     private boolean isFromWorldServer = false;
 
     //
@@ -222,17 +222,16 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             // provide detailed error report
             parser.setErrorHandler(this);
             // parse and create DOM tree
-            parser.parse(new InputSource(readInput()));
+            Document document = parser.parse(new InputSource(readInput()));
 
             // preserve the values in the inputs' XML declaration
-            m_haveXMLDecl = parser.getHaveXMLDecl();
-            m_version = parser.getXMLVersion();
-            m_standalone = parser.getStandalone();
-            encoding = parser.getEncoding();
+            encoding = document.getXmlEncoding();
+            m_version = document.getXmlVersion();
+            m_standalone = document.getXmlStandalone() ? "yes" : "no";
+            m_haveXMLDecl = encoding != null || m_version != null;
 
             // traverse the DOM tree
-            Node doc = parser.getDocument();
-            domNodeVisitor(doc, true);
+            domNodeVisitor(document, true);
         }
         catch (Exception e)
         {
@@ -296,11 +295,13 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         String systemId = SegmentUtil.restoreEntity(docType.getSystemId());
         String publicId = SegmentUtil.restoreEntity(docType.getPublicId());
-        String internalSubset = SegmentUtil.restoreEntity(docType.getInternalSubset());
+        String internalSubset = SegmentUtil.restoreEntity(docType
+                .getInternalSubset());
 
         if (systemId != null || publicId != null || internalSubset != null)
         {
-            outputSkeleton("<!DOCTYPE " + SegmentUtil.restoreEntity(docType.getName()) + " ");
+            outputSkeleton("<!DOCTYPE "
+                    + SegmentUtil.restoreEntity(docType.getName()) + " ");
             String externalId = null;
 
             if (systemId != null && publicId != null)
@@ -346,8 +347,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
     private void cdataProcessor(Node p_node, boolean isTranslatable)
     {
-        outputSkeleton("<![CDATA[" + SegmentUtil.restoreEntity(p_node.getNodeValue())
-                + "]]>");
+        outputSkeleton("<![CDATA["
+                + SegmentUtil.restoreEntity(p_node.getNodeValue()) + "]]>");
     }
 
     private void entityProcessor(Node p_node, boolean isTranslatable)
@@ -438,33 +439,34 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             }
         }
     }
-    
+
     private void outputSkeletonNode(Node p_node)
     {
         switch (p_node.getNodeType())
         {
-        case Node.ELEMENT_NODE:
-            outputSkeleton("<" + p_node.getNodeName());
-            NamedNodeMap attrs = p_node.getAttributes();
-            outputAttributes(attrs, false);
-            outputSkeleton(">");
+            case Node.ELEMENT_NODE:
+                outputSkeleton("<" + p_node.getNodeName());
+                NamedNodeMap attrs = p_node.getAttributes();
+                outputAttributes(attrs, false);
+                outputSkeleton(">");
 
-            NodeList ns = p_node.getChildNodes();
-            for (int i = 0; i < ns.getLength(); i++)
-            {
-                outputSkeletonNode(ns.item(i));
-            }
+                NodeList ns = p_node.getChildNodes();
+                for (int i = 0; i < ns.getLength(); i++)
+                {
+                    outputSkeletonNode(ns.item(i));
+                }
 
-            outputSkeleton("</" + p_node.getNodeName() + ">");
+                outputSkeleton("</" + p_node.getNodeName() + ">");
 
-            p_node = null;
-            break;
+                p_node = null;
+                break;
 
-        case Node.TEXT_NODE:
-            String nodeValue = SegmentUtil.restoreEntity(p_node.getNodeValue());
-            outputSkeleton(nodeValue);
+            case Node.TEXT_NODE:
+                String nodeValue = SegmentUtil.restoreEntity(p_node
+                        .getNodeValue());
+                outputSkeleton(nodeValue);
 
-            break;
+                break;
         }
     }
 
@@ -483,36 +485,30 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         boolean isEmptyTag = p_node.getFirstChild() == null ? true : false;
         HashMap<String, String> map = getNodeTierInfo(p_node);
         String stuff = null;
-        
+
         judgeIsFromWorldServer(p_node);
 
-        if(name.toLowerCase().equals("trans-unit")) {
+        if (name.toLowerCase().equals("trans-unit"))
+        {
             lastIndex = m_admin.getBptIndex();
-            
+
             if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
             {
                 Node n = p_node.getFirstChild();
-                
+
                 while (!"target".equals(n.getNodeName()))
                 {
                     n = n.getNextSibling();
                 }
                 /*
-                if (n != null)
-                {
-                    Node sNode = n.getAttributes().getNamedItem("state");
-                    if (sNode != null)
-                    {
-                        String value = SegmentUtil.restoreEntity(sNode.getNodeValue());
-                        if ("Locked".equals(value))
-                        {
-                            outputSkeletonNode(p_node);
-                            
-                            return;
-                        }
-                    }
-                }
-                */
+                 * if (n != null) { Node sNode =
+                 * n.getAttributes().getNamedItem("state"); if (sNode != null) {
+                 * String value =
+                 * SegmentUtil.restoreEntity(sNode.getNodeValue()); if
+                 * ("Locked".equals(value)) { outputSkeletonNode(p_node);
+                 * 
+                 * return; } } }
+                 */
             }
         }
 
@@ -545,14 +541,16 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     bptIndex = m_admin.incrementBptIndex();
                     sourceIndex.add(bptIndex);
                     sourceContent = sourceContent + "<" + name
-                            + getAttributeString(p_node.getAttributes(), false) + ">";
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
                     tuvSourceContent = tuvSourceContent + stuff;
                 }
                 else if (map.get("xliffPart").equals("target"))
                 {
                     tuvTargetContent = tuvTargetContent + stuff;
                     targetContent = targetContent + "<" + name
-                            + getAttributeString(p_node.getAttributes(), false) + ">";
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
                     if (sourceIndex.size() > 0)
                     {
                         sourceIndex.remove(0);
@@ -658,8 +656,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 else if (map.get("xliffPart").equals("target"))
                 {
                     targetContent = targetContent + "<" + name
-                            + getAttributeString(p_node.getAttributes(), false) + ">";
-                    
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
+
                     if (isEmbeddedInline(p_node))
                     {
                         tuvTargetContent = tuvTargetContent + "&lt;" + name
@@ -735,15 +734,16 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                  */
                 if (isEmbeddedInline(p_node))
                 {
-                    tuvTargetContent = tuvTargetContent + "&lt;/" + name + "&gt;";
+                    tuvTargetContent = tuvTargetContent + "&lt;/" + name
+                            + "&gt;";
                 }
                 else
                 {
                     if (isInlineTag(name))
                     {
                         if (!isEmptyTag)
-                            tuvTargetContent = tuvTargetContent + "&lt;/" + name
-                                    + "&gt;</ph>";
+                            tuvTargetContent = tuvTargetContent + "&lt;/"
+                                    + name + "&gt;</ph>";
                     }
                     else
                     {
@@ -826,13 +826,14 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     else if (map.get("xliffPart").equals("altSource"))
                     {
                         outputSkeleton(sourceContent);
-                        
+
                         if (!checkAltSourceOrTargetIsEmpty(p_node, "target"))
                         {
                             outputExtractedStuff(tuvAltSource, isTranslatable,
                                     map, true);
                         }
-                        else {
+                        else
+                        {
                             sourceContent = "";
                             tuvTargetContent = "";
                             tuvAltSource = "";
@@ -844,13 +845,13 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         && map.get("xliffPart").equals("altTarget"))
                 {
                     outputSkeleton(tuvTargetContent);
-                    
+
                     if (!checkAltSourceOrTargetIsEmpty(p_node, "source"))
                     {
                         outputExtractedStuff(tuvAltTarget, isTranslatable, map,
                                 false);
                     }
-                    
+
                     sourceContent = "";
                     tuvTargetContent = "";
                     tuvAltSource = "";
@@ -935,7 +936,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 array.add("&apos;");
                 array.add("&#xd;");
                 array.add("&#x9;");
-                String tuvValue = SegmentUtil.restoreEntity(p_node.getNodeValue(), array);
+                String tuvValue = SegmentUtil.restoreEntity(
+                        p_node.getNodeValue(), array);
                 tuvValue = protectElement(tuvValue);
 
                 // then wrap the "&lt" and "&gt" to become place holder
@@ -946,10 +948,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 encodeString = SegmentUtil.restoreEntity(encodeString, array);
                 encodeString = ltgtProcess(encodeString, map.get("xliffPart"));
                 // wrap the "&nbsp;"
-                encodeString = packageProtectElement(encodeString, map
-                        .get("xliffPart"));
+                encodeString = packageProtectElement(encodeString,
+                        map.get("xliffPart"));
             }
-            else {
+            else
+            {
                 encodeString = m_xmlEncoder.encodeStringBasic(nodeValue);
             }
         }
@@ -987,8 +990,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             outputSkeleton(nodeValue);
         }
     }
-    
-    private int getbptIndex(String xliffPart) {
+
+    private int getbptIndex(String xliffPart)
+    {
         int bptIndex = 0;
 
         if (xliffPart.equals("source"))
@@ -1008,7 +1012,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 bptIndex = m_admin.incrementBptIndex();
             }
         }
-        
+
         return bptIndex;
     }
 
@@ -1028,7 +1032,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                             + getbptIndex(xliffPart)
                             + "\" type=\"x-nbspace\" erasable=\"yes\">&amp;amp;nbsp;</ph> ";
                     p_str = p_str.replaceAll("_xliff_nbsp_tag", temp);
-                    
+
                     if (xliffPart.equals("source"))
                     {
                         contentNoTag = contentNoTag.replaceAll(
@@ -1043,7 +1047,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     String temp = "<ph x=\"" + getbptIndex(xliffPart)
                             + "\" type=\"xa\" erasable=\"yes\">&amp;#xa;</ph> ";
                     p_str = p_str.replaceAll("_xliff_xa_tag", temp);
-                    
+
                     if (xliffPart.equals("source"))
                     {
                         contentNoTag = contentNoTag.replaceAll("_xliff_xa_tag",
@@ -1125,8 +1129,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     String str = p_str.substring(begin + 4, end);
                     if (str.equals("Fragment") || str.equals("/Fragment"))
                     {
-						newStr = newStr + p_str.substring(lastEnd, begin)
-								+ "&lt;" + str + "&gt;";
+                        newStr = newStr + p_str.substring(lastEnd, begin)
+                                + "&lt;" + str + "&gt;";
                     }
                     else
                     {
@@ -1152,13 +1156,14 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                         sb = sb.append("<ph type=\"ltgt\" id=\"");
 
-                        sb = sb.append(bptIndex).append("\" x=\"").append(bptIndex);
-                        sb = sb.append("\">&amp;lt;").append(str).append(
-                                "&amp;gt;</ph>");
+                        sb = sb.append(bptIndex).append("\" x=\"")
+                                .append(bptIndex);
+                        sb = sb.append("\">&amp;lt;").append(str)
+                                .append("&amp;gt;</ph>");
                         newStr = newStr + p_str.substring(lastEnd, begin)
                                 + sb.toString();
                     }
-                    
+
                     if (xliffPart.equals("source"))
                     {
                         contentNoTag = contentNoTag
@@ -1169,7 +1174,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 lastEnd = end + 4;
             }
         }
-        
+
         if (xliffPart.equals("source"))
         {
             if (lastEnd == 0)
@@ -1282,215 +1287,124 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         {
             return true;
         }
-        
+
         return false;
     }
-    
+
     private HashMap<String, String> getNodeTierInfo(Node node)
     {
         INodeInfo nodeInfo;
-        
-        if(isFromWorldServer) {
+
+        if (isFromWorldServer)
+        {
             nodeInfo = new WSNodeInfo(getMainFormat());
         }
-        else {
+        else
+        {
             nodeInfo = new NodeInfo(getMainFormat());
         }
-        
+
         return nodeInfo.getNodeTierInfo(node);
     }
-    
-/*
-    private HashMap<String, String> getNodeTierInfo(Node node)
-    {
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("xliffPart", "");
-        Node parentNode = node;
 
-        while (parentNode != null)
-        {
-            String name = parentNode.getNodeName();
-
-            if ("source".equals(name) || "target".equals(name))
-            {
-                if (parentNode.getParentNode() != null)
-                {
-                    if (parentNode.getParentNode().getNodeName()
-                            .equalsIgnoreCase("alt-trans"))
-                    {
-                        if ("source".equals(name))
-                        {
-                            map.put("xliffPart", "altSource");
-                        }
-                        else if ("target".equals(name))
-                        {
-                            map.put("xliffPart", "altTarget");
-                        }
-
-                        NamedNodeMap attrs = parentNode.getAttributes();
-                        String attname = null;
-
-                        for (int i = 0; i < attrs.getLength(); ++i)
-                        {
-                            Node att = attrs.item(i);
-                            attname = att.getNodeName();
-                            String value = att.getNodeValue();
-
-                            if (attname.equals("xml:lang"))
-                            {
-                                map.put("altLanguage", value);
-                                break;
-                            }
-                        }
-
-                        NamedNodeMap grandAttrs = parentNode.getParentNode()
-                                .getAttributes();
-
-                        for (int i = 0; i < grandAttrs.getLength(); ++i)
-                        {
-                            Node att = grandAttrs.item(i);
-                            attname = att.getNodeName();
-                            String value = att.getNodeValue();
-
-                            if (attname.equals("match-quality"))
-                            {
-                                map.put("altQuality", value);
-                            }
-                        }
-                    }
-                    else if (parentNode.getParentNode().getNodeName()
-                            .equalsIgnoreCase("trans-unit"))
-                    {
-                        if ("source".equals(name))
-                        {
-                            map.put("xliffPart", "source");
-                        }
-                        else if ("target".equals(name))
-                        {
-                            map.put("xliffPart", "target");
-                            
-                            if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
-                            {
-                                NamedNodeMap grandAttrs = parentNode.getAttributes();
-                                for (int i = 0; i < grandAttrs.getLength(); ++i)
-                                {
-                                    Node att = grandAttrs.item(i);
-                                    String attname = att.getNodeName();
-                                    String value = att.getNodeValue();
-
-                                    if (attname.equals("state"))
-                                    {
-                                        map.put("passoloState", value);
-                                    }
-                                }
-                            }
-                        }
-
-                        NamedNodeMap grandAttrs = parentNode.getParentNode()
-                                .getAttributes();
-                        String attname = null;
-
-                        for (int i = 0; i < grandAttrs.getLength(); ++i)
-                        {
-                            Node att = grandAttrs.item(i);
-                            attname = att.getNodeName();
-                            String value = att.getNodeValue();
-
-                            if (attname.equals("id"))
-                            {
-                                map.put("tuID", value);
-                            }                           
-                            
-                            else if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
-                            {
-                                if (attname.equals("resname"))
-                                {
-                                    XmlEntities encoder = new XmlEntities();
-                                    map.put("resname", encoder.encodeStringBasic(encoder.encodeStringBasic(value)));
-                                }
-                            }
-                            
-                        }
-
-                        Node grandNode = parentNode.getParentNode();
-                        NodeList childs = grandNode.getChildNodes();
-
-                        for (int i = 0; i < childs.getLength(); i++)
-                        {
-                            Node childNode = childs.item(i);
-
-                            if (childNode.getNodeName().equalsIgnoreCase(
-                                    IWS_SEGMENT_DATA))
-                            {
-                                NodeList segNodes = childNode.getChildNodes();
-
-                                for (int j = 0; j < segNodes.getLength(); j++)
-                                {
-                                    Node segNode = segNodes.item(j);
-                                    if (IWS_STATUS.equalsIgnoreCase(segNode.getNodeName()))
-                                    {
-                                        NamedNodeMap attrs = segNode.getAttributes();
-
-                                        for (int x = 0; x < attrs.getLength(); x++)
-                                        {
-                                            Node attr = attrs.item(x);
-                                            // translation_type
-                                            if (IWS_TRANSLATION_TYPE.equals(attr.getNodeName()))
-                                            {
-                                                String translationType = attr.getNodeValue();
-                                                if (translationType != null && translationType.trim().length() > 0) {
-                                                    map.put(IWS_TRANSLATION_TYPE, translationType);
-                                                }
-                                            }
-                                            // source_content
-                                            if (IWS_SOURCE_CONTENT.equals(attr.getNodeName()))
-                                            {
-                                                String sourceContent = attr.getNodeValue();
-                                                if (sourceContent != null && sourceContent.trim().length() > 0)
-                                                {
-                                                    map.put(IWS_SOURCE_CONTENT, sourceContent);                                                    
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                NamedNodeMap attrs = childNode.getAttributes();
-
-                                for (int x = 0; x < attrs.getLength(); x++)
-                                {
-                                    Node attr = attrs.item(x);
-                                    if (attr.getNodeName().equals(IWS_TM_SCORE))
-                                    {
-                                        map.put(IWS_TM_SCORE, attr.getNodeValue());
-                                    }
-                                    else if (attr.getNodeName().equals(IWS_SID))
-                                    {
-                                        map.put(IWS_SID, attr.getNodeValue());
-                                    }
-                                    else if (IWS_WORDCOUNT.equals(attr.getNodeName()))
-                                    {
-                                        map.put(IWS_WORDCOUNT, attr.getNodeValue());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                break;
-            }
-
-            parentNode = parentNode.getParentNode();
-        }
-
-        return map;
-    }
-*/
     /*
-     * Some trans-unit or alt-trans does not have target part. This method used to check if
-     * the source part have the responsible target part. If have not, just treat
-     * as empty target content.
+     * private HashMap<String, String> getNodeTierInfo(Node node) {
+     * HashMap<String, String> map = new HashMap<String, String>();
+     * map.put("xliffPart", ""); Node parentNode = node;
+     * 
+     * while (parentNode != null) { String name = parentNode.getNodeName();
+     * 
+     * if ("source".equals(name) || "target".equals(name)) { if
+     * (parentNode.getParentNode() != null) { if
+     * (parentNode.getParentNode().getNodeName() .equalsIgnoreCase("alt-trans"))
+     * { if ("source".equals(name)) { map.put("xliffPart", "altSource"); } else
+     * if ("target".equals(name)) { map.put("xliffPart", "altTarget"); }
+     * 
+     * NamedNodeMap attrs = parentNode.getAttributes(); String attname = null;
+     * 
+     * for (int i = 0; i < attrs.getLength(); ++i) { Node att = attrs.item(i);
+     * attname = att.getNodeName(); String value = att.getNodeValue();
+     * 
+     * if (attname.equals("xml:lang")) { map.put("altLanguage", value); break; }
+     * }
+     * 
+     * NamedNodeMap grandAttrs = parentNode.getParentNode() .getAttributes();
+     * 
+     * for (int i = 0; i < grandAttrs.getLength(); ++i) { Node att =
+     * grandAttrs.item(i); attname = att.getNodeName(); String value =
+     * att.getNodeValue();
+     * 
+     * if (attname.equals("match-quality")) { map.put("altQuality", value); } }
+     * } else if (parentNode.getParentNode().getNodeName()
+     * .equalsIgnoreCase("trans-unit")) { if ("source".equals(name)) {
+     * map.put("xliffPart", "source"); } else if ("target".equals(name)) {
+     * map.put("xliffPart", "target");
+     * 
+     * if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat())) {
+     * NamedNodeMap grandAttrs = parentNode.getAttributes(); for (int i = 0; i <
+     * grandAttrs.getLength(); ++i) { Node att = grandAttrs.item(i); String
+     * attname = att.getNodeName(); String value = att.getNodeValue();
+     * 
+     * if (attname.equals("state")) { map.put("passoloState", value); } } } }
+     * 
+     * NamedNodeMap grandAttrs = parentNode.getParentNode() .getAttributes();
+     * String attname = null;
+     * 
+     * for (int i = 0; i < grandAttrs.getLength(); ++i) { Node att =
+     * grandAttrs.item(i); attname = att.getNodeName(); String value =
+     * att.getNodeValue();
+     * 
+     * if (attname.equals("id")) { map.put("tuID", value); }
+     * 
+     * else if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat())) { if
+     * (attname.equals("resname")) { XmlEntities encoder = new XmlEntities();
+     * map.put("resname",
+     * encoder.encodeStringBasic(encoder.encodeStringBasic(value))); } }
+     * 
+     * }
+     * 
+     * Node grandNode = parentNode.getParentNode(); NodeList childs =
+     * grandNode.getChildNodes();
+     * 
+     * for (int i = 0; i < childs.getLength(); i++) { Node childNode =
+     * childs.item(i);
+     * 
+     * if (childNode.getNodeName().equalsIgnoreCase( IWS_SEGMENT_DATA)) {
+     * NodeList segNodes = childNode.getChildNodes();
+     * 
+     * for (int j = 0; j < segNodes.getLength(); j++) { Node segNode =
+     * segNodes.item(j); if (IWS_STATUS.equalsIgnoreCase(segNode.getNodeName()))
+     * { NamedNodeMap attrs = segNode.getAttributes();
+     * 
+     * for (int x = 0; x < attrs.getLength(); x++) { Node attr = attrs.item(x);
+     * // translation_type if (IWS_TRANSLATION_TYPE.equals(attr.getNodeName()))
+     * { String translationType = attr.getNodeValue(); if (translationType !=
+     * null && translationType.trim().length() > 0) {
+     * map.put(IWS_TRANSLATION_TYPE, translationType); } } // source_content if
+     * (IWS_SOURCE_CONTENT.equals(attr.getNodeName())) { String sourceContent =
+     * attr.getNodeValue(); if (sourceContent != null &&
+     * sourceContent.trim().length() > 0) { map.put(IWS_SOURCE_CONTENT,
+     * sourceContent); } } } } }
+     * 
+     * NamedNodeMap attrs = childNode.getAttributes();
+     * 
+     * for (int x = 0; x < attrs.getLength(); x++) { Node attr = attrs.item(x);
+     * if (attr.getNodeName().equals(IWS_TM_SCORE)) { map.put(IWS_TM_SCORE,
+     * attr.getNodeValue()); } else if (attr.getNodeName().equals(IWS_SID)) {
+     * map.put(IWS_SID, attr.getNodeValue()); } else if
+     * (IWS_WORDCOUNT.equals(attr.getNodeName())) { map.put(IWS_WORDCOUNT,
+     * attr.getNodeValue()); } } } } } }
+     * 
+     * break; }
+     * 
+     * parentNode = parentNode.getParentNode(); }
+     * 
+     * return map; }
+     */
+    /*
+     * Some trans-unit or alt-trans does not have target part. This method used
+     * to check if the source part have the responsible target part. If have
+     * not, just treat as empty target content.
      */
     private boolean checkHaveTargetPart(Node node, String parentName)
     {
@@ -1513,8 +1427,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         return false;
     }
-    
-    private boolean checkAltSourceOrTargetIsEmpty(Node node, String nodeName) {
+
+    private boolean checkAltSourceOrTargetIsEmpty(Node node, String nodeName)
+    {
         Node parentNode = node.getParentNode();
 
         if (parentNode.getNodeName().equalsIgnoreCase("alt-trans"))
@@ -1527,16 +1442,16 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                 if (childNode.getNodeName().equalsIgnoreCase(nodeName))
                 {
-                    boolean isEmpty = 
-                        childNode.getFirstChild() == null ? true : false;
+                    boolean isEmpty = childNode.getFirstChild() == null ? true
+                            : false;
                     return isEmpty;
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     private String getTextNodeIndex(Node p_node)
     {
         String s = "";
@@ -1593,14 +1508,15 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             {
                 String stuff = null;
 
-                stuff = " " + attname + "=\"" + SegmentUtil.restoreEntity(value) + "\"";
+                stuff = " " + attname + "=\""
+                        + SegmentUtil.restoreEntity(value) + "\"";
 
                 m_admin.addContent(stuff);
             }
             else
             {
-                outputSkeleton(" " + attname + "=\"" + SegmentUtil.restoreEntity(value)
-                        + "\"");
+                outputSkeleton(" " + attname + "=\""
+                        + SegmentUtil.restoreEntity(value) + "\"");
             }
         }
     }
@@ -1873,16 +1789,20 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     public void loadRules() throws ExtractorException
     {
     }
-    
+
     /*
      * Judge if the xliff generated from worldserver
      */
-    private void judgeIsFromWorldServer(Node p_node) {
-        if(p_node.getNodeName().toLowerCase().equals("file")) {
+    private void judgeIsFromWorldServer(Node p_node)
+    {
+        if (p_node.getNodeName().toLowerCase().equals("file"))
+        {
             Node sNode = p_node.getAttributes().getNamedItem("tool");
-            if(sNode != null) {
+            if (sNode != null)
+            {
                 String value = sNode.getNodeValue();
-                if(value.indexOf("WorldServer") > -1) {
+                if (value.indexOf("WorldServer") > -1)
+                {
                     isFromWorldServer = true;
                 }
             }

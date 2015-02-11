@@ -44,20 +44,20 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 /**
- * <p>CommentEditorPageHandler is responsible for:</p>
+ * <p>
+ * CommentEditorPageHandler is responsible for:
+ * </p>
  * <ol>
  * <li>Displaying the comment editor as part of the online editor.</li>
  * <li>Handling segment comment persistence.</li>
  * </ol>
  */
 
-public class CommentEditorPageHandler
-    extends PageHandler
-    implements EditorConstants
+public class CommentEditorPageHandler extends PageHandler implements
+        EditorConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            CommentEditorPageHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(CommentEditorPageHandler.class);
 
     //
     // Constructor
@@ -72,26 +72,28 @@ public class CommentEditorPageHandler
     //
 
     /**
-    * Invokes this PageHandler
-    *
-    * @param p_pageDescriptor the page desciptor
-    * @param p_request the original request sent from the browser
-    * @param p_response the original response object
-    * @param p_context context the Servlet context
-    */
+     * Invokes this PageHandler
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
+     */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-      HttpServletRequest p_request, HttpServletResponse p_response,
-      ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession();
 
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(
-            WebAppConstants.SESSION_MANAGER);
-        EditorState state = (EditorState)sessionMgr.getAttribute(
-            WebAppConstants.EDITORSTATE);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
 
         String value;
         if ((value = p_request.getParameter("tuId")) != null)
@@ -106,9 +108,8 @@ public class CommentEditorPageHandler
         {
             state.setSubId(Long.parseLong(value));
         }
-        
 
-        long tuId  = state.getTuId();
+        long tuId = state.getTuId();
         long tuvId = state.getTuvId();
         long subId = state.getSubId();
 
@@ -118,63 +119,76 @@ public class CommentEditorPageHandler
             commentId = Long.parseLong(value);
         }
 
-        CommentView view = EditorHelper.getCommentView(state, commentId,
-            tuId, tuvId, subId);
-        
+        CommentView view = EditorHelper.getCommentView(state, commentId, tuId,
+                tuvId, subId);
+
         // init categories
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        if (isSuperCompany(currentCompanyId)) {
-            currentCompanyId = ServerProxy.getPageManager().getSourcePage(
-                    state.getSourcePageId()).getCompanyId();
+        if (isSuperCompany(currentCompanyId))
+        {
+            currentCompanyId = String.valueOf(ServerProxy.getPageManager()
+                    .getSourcePage(state.getSourcePageId()).getCompanyId());
         }
-        
-        List<String> categoryStringList = CompanyWrapper.getCompanyCategoryList(currentCompanyId);
+
+        List<String> categoryStringList = CompanyWrapper
+                .getCompanyCategoryList(currentCompanyId);
         List<Select> categoryList = initCategory(p_request, categoryStringList);
         p_request.setAttribute("toList", categoryList);
 
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("CommentView for " +
-                tuId + "_" + tuvId + "_" + subId + " (id=" + commentId +
-                ") is " + view);
+            CATEGORY.debug("CommentView for " + tuId + "_" + tuvId + "_"
+                    + subId + " (id=" + commentId + ") is " + view);
         }
-        
+
         if ((value = p_request.getParameter("commentUpload")) != null)
         {
-            try{
+            try
+            {
                 FileUploadHelper o_upload = new FileUploadHelper();
-                p_request.setAttribute("fileName", "tuv_" + Long.toString(view.getTuvId()));
+                p_request.setAttribute("fileName",
+                        "tuv_" + Long.toString(view.getTuvId()));
                 p_request.setAttribute("filePath", "terminologyImg");
                 o_upload.doUpload(p_request);
             }
-                catch(Exception e) {}
+            catch (Exception e)
+            {
+            }
         }
 
         sessionMgr.setAttribute(WebAppConstants.COMMENTVIEW, view);
 
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
-    
+
     /**
      * Check whether the company is Welocalize
+     * 
      * @param companyId
      * @return
      */
-    private boolean isSuperCompany(String companyId) {
-        if (companyId != null && companyId.equals("1")) {
+    private boolean isSuperCompany(String companyId)
+    {
+        if (companyId != null && companyId.equals("1"))
+        {
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
-    
+
     /**
      * Get the categories that a company contains
-     * @param p_request HttpServletRequest
+     * 
+     * @param p_request
+     *            HttpServletRequest
      * @return List Category list
      */
-    private List<Select> initCategory(HttpServletRequest p_request, List<String> categoryList)
+    private List<Select> initCategory(HttpServletRequest p_request,
+            List<String> categoryList)
     {
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         List<Select> list = new ArrayList<Select>();

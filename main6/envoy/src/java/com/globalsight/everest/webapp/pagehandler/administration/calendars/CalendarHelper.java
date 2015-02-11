@@ -453,8 +453,8 @@ public class CalendarHelper
 
             if (userId.equals(cal.getOwnerUserId()))
             {
-                session.setAttribute(WebAppConstants.USER_TIME_ZONE, cal
-                        .getTimeZone());
+                session.setAttribute(WebAppConstants.USER_TIME_ZONE,
+                        cal.getTimeZone());
             }
 
             return ServerProxy.getCalendarManager().modifyUserCalendar(cal,
@@ -566,7 +566,8 @@ public class CalendarHelper
         cal.setTimeZoneId(request.getParameter(CalendarConstants.TZ_FIELD));
         String hours = request.getParameter(CalendarConstants.BIZ_HOURS_FIELD);
         cal.setHoursPerDay(Integer.parseInt(hours));
-        cal.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        cal.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
 
         // Calculate working hours and add working days if needed
         updateWorkingDay(request, cal, CalendarConstants.SYSTEM,
@@ -668,9 +669,9 @@ public class CalendarHelper
             for (int j = 0; j < whs.size(); j++)
             {
                 WorkingHour wh = (WorkingHour) whs.get(j);
-                UserCalendarWorkingHour uwh = new UserCalendarWorkingHour(wh
-                        .getOrder(), wh.getStartHour(), wh.getStartMinute(), wh
-                        .getEndHour(), wh.getEndMinute());
+                UserCalendarWorkingHour uwh = new UserCalendarWorkingHour(
+                        wh.getOrder(), wh.getStartHour(), wh.getStartMinute(),
+                        wh.getEndHour(), wh.getEndMinute());
                 uwd.addWorkingHour(uwh, cal.getTimeZone());
             }
             cal.addWorkingDay(uwd);
@@ -697,44 +698,44 @@ public class CalendarHelper
                 ReservedTime rt = rtState.getReservedTime();
                 switch (rtState.getState())
                 {
-                case ReservedTimeState.REMOVED:
-                    List list = null;
-                    if (rt.getType() == ReservedTime.TYPE_EVENT)
-                        list = cal.getReservedTimes();
-                    else
-                        list = cal.getPersonalReservedTimes();
-                    ReservedTime found = null;
-                    for (int j = 0; j < list.size(); j++)
-                    {
-                        found = (ReservedTime) list.get(j);
-                        if (found == rt)
+                    case ReservedTimeState.REMOVED:
+                        List list = null;
+                        if (rt.getType() == ReservedTime.TYPE_EVENT)
+                            list = cal.getReservedTimes();
+                        else
+                            list = cal.getPersonalReservedTimes();
+                        ReservedTime found = null;
+                        for (int j = 0; j < list.size(); j++)
                         {
-                            cal.removeReservedTime(rt);
-                            break;
+                            found = (ReservedTime) list.get(j);
+                            if (found == rt)
+                            {
+                                cal.removeReservedTime(rt);
+                                break;
+                            }
                         }
-                    }
-                    break;
-                case ReservedTimeState.EDITED:
-                    // copy all fields
-                    if (rt.getType() == ReservedTime.TYPE_EVENT)
-                        list = cal.getReservedTimes();
-                    else
-                        list = cal.getPersonalReservedTimes();
-                    found = null;
-                    for (int j = 0; j < list.size(); j++)
-                    {
-                        found = (ReservedTime) list.get(j);
-                        if (found.getId() == rtState.getId())
+                        break;
+                    case ReservedTimeState.EDITED:
+                        // copy all fields
+                        if (rt.getType() == ReservedTime.TYPE_EVENT)
+                            list = cal.getReservedTimes();
+                        else
+                            list = cal.getPersonalReservedTimes();
+                        found = null;
+                        for (int j = 0; j < list.size(); j++)
                         {
-                            break;
+                            found = (ReservedTime) list.get(j);
+                            if (found.getId() == rtState.getId())
+                            {
+                                break;
+                            }
                         }
-                    }
-                    copyReservedTimeFields(found, rtState.getReservedTime());
-                    break;
-                case ReservedTimeState.NEW:
-                    // add to the calendar
-                    cal.addReservedTime(rt);
-                    break;
+                        copyReservedTimeFields(found, rtState.getReservedTime());
+                        break;
+                    case ReservedTimeState.NEW:
+                        // add to the calendar
+                        cal.addReservedTime(rt);
+                        break;
                 }
             }
             // Since it's been added to the calendar, we can remove it
@@ -753,7 +754,8 @@ public class CalendarHelper
         cal.setTimeZoneId(request.getParameter(CalendarConstants.TZ_FIELD));
         String hours = request.getParameter(CalendarConstants.BIZ_HOURS_FIELD);
         cal.setHoursPerDay(Integer.parseInt(hours));
-        cal.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        cal.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
 
         updateWorkingDay(request, cal, CalendarConstants.SYSTEM,
                 CalendarConstants.SUN_TIME_FIELD, 1);
@@ -797,42 +799,42 @@ public class CalendarHelper
                 .getAttribute(CalendarConstants.CALENDAR);
         switch (newState)
         {
-        case ReservedTimeState.NEW:
-            ReservedTime rt = updateReservedTimeFields(request, null, cal);
-            ReservedTimeState rts = new ReservedTimeState(rt);
-            rts.setState(ReservedTimeState.NEW);
-            updatedRTS.add(rts);
-            break;
-        case ReservedTimeState.EDITED:
-            if (rtState.getState() == ReservedTimeState.UNCHANGED)
-            {
-                // first time edited. Just add to updated list.
-                rt = updateReservedTimeFields(request, null, cal);
-                rts = new ReservedTimeState(rt);
-                rts.setState(ReservedTimeState.EDITED);
-                rts.setId(rtState.getId());
+            case ReservedTimeState.NEW:
+                ReservedTime rt = updateReservedTimeFields(request, null, cal);
+                ReservedTimeState rts = new ReservedTimeState(rt);
+                rts.setState(ReservedTimeState.NEW);
                 updatedRTS.add(rts);
-            }
-            else
-            {
-                // previously edited. Just update the object.
-                updateReservedTimeFields(request, rtState.getReservedTime(),
-                        cal);
-            }
-            break;
-        case ReservedTimeState.REMOVED:
-            rt = rtState.getReservedTime();
-            if (rtState.getState() == ReservedTimeState.NEW)
-            {
-                rtState.setState(ReservedTimeState.REMOVED);
-            }
-            else
-            {
-                rts = new ReservedTimeState(rt);
-                rts.setState(ReservedTimeState.REMOVED);
-                updatedRTS.add(rts);
-            }
-            break;
+                break;
+            case ReservedTimeState.EDITED:
+                if (rtState.getState() == ReservedTimeState.UNCHANGED)
+                {
+                    // first time edited. Just add to updated list.
+                    rt = updateReservedTimeFields(request, null, cal);
+                    rts = new ReservedTimeState(rt);
+                    rts.setState(ReservedTimeState.EDITED);
+                    rts.setId(rtState.getId());
+                    updatedRTS.add(rts);
+                }
+                else
+                {
+                    // previously edited. Just update the object.
+                    updateReservedTimeFields(request,
+                            rtState.getReservedTime(), cal);
+                }
+                break;
+            case ReservedTimeState.REMOVED:
+                rt = rtState.getReservedTime();
+                if (rtState.getState() == ReservedTimeState.NEW)
+                {
+                    rtState.setState(ReservedTimeState.REMOVED);
+                }
+                else
+                {
+                    rts = new ReservedTimeState(rt);
+                    rts.setState(ReservedTimeState.REMOVED);
+                    updatedRTS.add(rts);
+                }
+                break;
         }
         updatedRTS = (ArrayList) sessionMgr
                 .getAttribute("updatedReservedTimes");
@@ -1097,8 +1099,8 @@ public class CalendarHelper
      * 
      * @param bi
      *            The interval ranges
-     * @param p_startDate -
-     *            The initial date of the calendar (1st day of the month)
+     * @param p_startDate
+     *            - The initial date of the calendar (1st day of the month)
      * @param days
      *            The array of days for the month
      * @param type
@@ -1221,8 +1223,8 @@ public class CalendarHelper
             if (!startHour.equals("-1"))
             {
                 WorkingHour wh1 = WorkingHourCreator.createWorkingHour(type,
-                        count, Integer.parseInt(startHour), Integer
-                                .parseInt(startMin), Integer.parseInt(endHour),
+                        count, Integer.parseInt(startHour),
+                        Integer.parseInt(startMin), Integer.parseInt(endHour),
                         Integer.parseInt(endMin));
                 if (wd == null)
                 {
@@ -1312,10 +1314,10 @@ class WorkingDayCreator
     {
         switch (id)
         {
-        case CalendarConstants.SYSTEM:
-            return new CalendarWorkingDay(day);
-        case CalendarConstants.USER:
-            return new UserCalendarWorkingDay(day);
+            case CalendarConstants.SYSTEM:
+                return new CalendarWorkingDay(day);
+            case CalendarConstants.USER:
+                return new UserCalendarWorkingDay(day);
         }
         return null;
     }
@@ -1329,12 +1331,12 @@ class WorkingHourCreator
     {
         switch (id)
         {
-        case CalendarConstants.SYSTEM:
-            return new CalendarWorkingHour(count, startHour, startMin, endHour,
-                    endMin);
-        case CalendarConstants.USER:
-            return new UserCalendarWorkingHour(count, startHour, startMin,
-                    endHour, endMin);
+            case CalendarConstants.SYSTEM:
+                return new CalendarWorkingHour(count, startHour, startMin,
+                        endHour, endMin);
+            case CalendarConstants.USER:
+                return new UserCalendarWorkingHour(count, startHour, startMin,
+                        endHour, endMin);
         }
         return null;
     }

@@ -129,13 +129,13 @@ public class LocalePairDependencyChecker extends DependencyChecker
         {
             // Add the comany id into the query parameter to fix multi company
             // issue
-            String company_id = p_lp.getCompanyId();
+            long company_id = p_lp.getCompanyId();
 
             String sql = JobDescriptorModifier.ACTIVE_JOBS_BY_SOURCE_AND_TARGET_SQL;
             Map map = new HashMap();
             map.put("sourceLocaleId", p_lp.getSource().getIdAsLong());
             map.put("targetLocaleId", p_lp.getTarget().getIdAsLong());
-            map.put("companyId", new Long(company_id));
+            map.put("companyId", company_id);
             activeJobs = new Vector(HibernateUtil.searchWithSql(sql, map,
                     JobImpl.class));
         }

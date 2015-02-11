@@ -24,7 +24,6 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GlobalSightLocale;
 
 /**
  * WfTemplateSearchCriteria is used to construct a workflow template search
@@ -45,8 +44,8 @@ public class WfTemplateSearchCriteria
     /**
      * Get the search expression based on the specified search criteria object.
      * 
-     * @param p_searchCriteriaParams -
-     *            The search criteria object.
+     * @param p_searchCriteriaParams
+     *            - The search criteria object.
      * @throws Exception
      */
     public Collection search(SearchCriteriaParameters p_searchCriteriaParams)
@@ -69,7 +68,7 @@ public class WfTemplateSearchCriteria
         {
             switch (((Integer) (keys[i])).intValue())
             {
-                // workflow template name
+            // workflow template name
                 case WfTemplateSearchParameters.WF_TEMPLATE_NAME:
                     wfTemplateName(keys[i], criteria);
                     break;
@@ -79,7 +78,7 @@ public class WfTemplateSearchCriteria
                     wfTemplateProject(keys[i], criteria);
                     break;
 
-                //Company Name
+                // Company Name
                 case WfTemplateSearchParameters.COMPANY_NAME:
                     companyNameExpression(keys[i], criteria);
                     break;
@@ -111,7 +110,7 @@ public class WfTemplateSearchCriteria
             return;
         }
 
-        hql.append(" and w.companyId = " + currentId.trim());
+        hql.append(" and w.companyId = " + Long.parseLong(currentId.trim()));
     }
 
     private void companyNameExpression(Object p_key, Map criteria)
@@ -121,7 +120,7 @@ public class WfTemplateSearchCriteria
         {
             return;
         }
-        companyName = "%"+companyName+"%";
+        companyName = "%" + companyName + "%";
         hql.append(" and w.companyId in (select c.id from Company c where c.name like :cId)");
         map.put("cId", companyName);
     }

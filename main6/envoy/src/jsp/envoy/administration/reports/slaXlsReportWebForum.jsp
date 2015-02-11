@@ -56,7 +56,7 @@
     String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
 %>
 <html>
-<!-- This JSP is: /envoy/administration/reports/slaXlsReportWebForm.jsp-->
+<!-- This JSP is: /envoy/administration/reports/slaXlsReportWebForum.jsp-->
 <head>
 <title><%=bundle.getString("translation_sla_performance_report")%></title>
 </head>

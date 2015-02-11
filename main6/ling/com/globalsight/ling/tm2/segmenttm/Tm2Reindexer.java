@@ -1,20 +1,27 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.tm2.segmenttm;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.hibernate.Session;
-
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.indexer.Reindexer;
@@ -23,7 +30,8 @@ import com.globalsight.ling.tm2.lucene.LuceneReindexer;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
 
-public class Tm2Reindexer {
+public class Tm2Reindexer
+{
 
     private static final String GET_SEGMENTS = "SELECT tu.id tu_id, tu.format format, tu.type type, "
             + "tuv.id tuv_id, tuv.segment_string segment_string, "
@@ -36,19 +44,15 @@ public class Tm2Reindexer {
 
     private static final String SORT_BY_LOCALE = "order by tuv.locale_id";
 
-    private Session m_session;
-    
-    public Tm2Reindexer(Session session) {
-        m_session = session;
-    }
-
-    public boolean reindexTm(Tm tm, Reindexer reindexer) throws Exception {
-        Connection conn = m_session.connection();
+    public boolean reindexTm(Tm tm, Reindexer reindexer) throws Exception
+    {
+        Connection conn = null;
         LuceneReindexer luceneReindexer = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try
         {
+            conn = DbUtil.getConnection();
             boolean success = true;
             String query = GET_SEGMENTS;
             if (!TmSegmentIndexer.indexesTargetSegments())
@@ -73,8 +77,8 @@ public class Tm2Reindexer {
                     }
                     luceneReindexer = new LuceneReindexer(tm.getId(), locale);
                 }
-                SegmentTmTuv tuv = getSegment(rs, luceneReindexer
-                        .getLocale(), tm.getId());
+                SegmentTmTuv tuv = getSegment(rs, luceneReindexer.getLocale(),
+                        tm.getId());
                 luceneReindexer.index(tuv);
                 reindexer.incrementCounter(1);
                 synchronized (reindexer)
@@ -92,6 +96,7 @@ public class Tm2Reindexer {
         {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
             if (luceneReindexer != null)
             {
                 try
@@ -104,7 +109,7 @@ public class Tm2Reindexer {
             }
         }
     }
-        
+
     private SegmentTmTuv getSegment(ResultSet p_rs, GlobalSightLocale p_locale,
             long p_tmId) throws Exception
     {
@@ -118,8 +123,8 @@ public class Tm2Reindexer {
 
         tuv = new SegmentTmTuv(p_rs.getLong("tuv_id"), segment, p_locale);
 
-        SegmentTmTu tu = new SegmentTmTu(p_rs.getLong("tu_id"), p_tmId, p_rs
-                .getString("format"), p_rs.getString("type"), true,
+        SegmentTmTu tu = new SegmentTmTu(p_rs.getLong("tu_id"), p_tmId,
+                p_rs.getString("format"), p_rs.getString("type"), true,
                 getLocale(p_rs.getLong("source_locale_id")));
 
         tu.addTuv(tuv);
@@ -129,7 +134,6 @@ public class Tm2Reindexer {
 
     private GlobalSightLocale getLocale(long p_localeId) throws Exception
     {
-        return (GlobalSightLocale)m_session.get(GlobalSightLocale.class, p_localeId);
+        return ServerProxy.getLocaleManager().getLocaleById(p_localeId);
     }
-
 }

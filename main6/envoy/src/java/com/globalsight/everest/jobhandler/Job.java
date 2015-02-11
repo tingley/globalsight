@@ -62,6 +62,7 @@ public interface Job extends WorkObject
     public static final String IN_QUEUE = "IN_QUEUE";
     public static final String EXTRACTING = "EXTRACTING";
     public static final String LEVERAGING = "LEVERAGING";
+    public static final String CALCULATING_WORD_COUNTS = "CALCULATING-WORD-COUNTS";
     public static final String PROCESSING = "PROCESSING";
     public static final String EXPORTING = "EXPORTING";
     public static final String SKIPPING = "SKIPPING";
@@ -82,6 +83,7 @@ public interface Job extends WorkObject
             add(ARCHIVED);
             add(ADD_FILE);
             add(PROCESSING);
+            add(CALCULATING_WORD_COUNTS);
         }
     };
 
@@ -95,13 +97,23 @@ public interface Job extends WorkObject
         }
     };
 
+    public static final List<String> PENDING_STATUS_LIST = new ArrayList<String>()
+    {
+        {
+            add(PENDING);
+            add(BATCHRESERVED);
+            add(IMPORTFAILED);
+            add(ADD_FILE);
+        }
+    };
+
     public long getId();
 
     public long getJobId(); // could be deprecated - just calls getId() -
 
-    public void setCompanyId(String companyId);
+    public void setCompanyId(long companyId);
 
-    public String getCompanyId();
+    public long getCompanyId();
 
     public void setJobName(String p_jobName);
 
@@ -371,12 +383,18 @@ public interface Job extends WorkObject
     public Project getProject();
 
     public boolean hasPassoloFiles();
-    
+
     public Date getStartDate();
-    
+
     public void setStartDate(Date startDate);
-    
+
     public Date getCompletedDate();
-    
+
     public void setCompletedDate(Date completedDate);
+
+    public String getFProfileNames();
+
+    public void setIsMigrated(boolean p_isMigrated);
+
+    public boolean isMigrated();
 }

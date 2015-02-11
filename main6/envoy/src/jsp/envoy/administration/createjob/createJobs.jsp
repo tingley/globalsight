@@ -12,11 +12,11 @@
             .getAttribute(WebAppConstants.SESSION_MANAGER);
     User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
     String companyIdWorkingFor = CompanyThreadLocal.getInstance().getValue();
-    String userId = "";
+    String userName = "";
     String password = "";
     if (user != null)
     {
-        userId = user.getUserId();
+        userName = user.getUserName();
         password = user.getPassword();
     }
 %>
@@ -263,7 +263,7 @@ $(document).ready(function() {
             creating = false;
             return;
         }
-        document.createJobForm.action += "&uploadAction=createJob";
+        document.createJobForm.action += "&uploadAction=createJob&userName=<%=userName%>";
         document.createJobForm.submit();
     });
     // *************************************cancel button*************************************
@@ -340,6 +340,7 @@ function hideTip(id)
     }
 }
 
+// This is not used any more.
 function showWarningMessage(emptyFiles, largeFiles, existFiles)
 {
     var msg = "";
@@ -443,7 +444,7 @@ function mapTargetLocales(o)
             if (!mapped)
             {
                 $.get("/globalsight/ControlServlet?activityName=createJobs", 
-                        {"uploadAction":"queryTargetLocales","l10Nid":l10Nid,"no":Math.random()}, 
+                        {"uploadAction":"queryTargetLocales","l10Nid":l10Nid,"no":Math.random(),"userName":"<%=userName%>"}, 
                         function(data){
                             $("#targetLocaleArea").show();
                             $("#targetLocaleArea").html(data);
@@ -481,7 +482,7 @@ function queryFileProfile(id)
     var profile = $("#bp" + id).find(".profileArea");
     var theFileName = $("#Hidden" + id).attr("value");
     $.get("/globalsight/ControlServlet?activityName=createJobs", 
-            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":l10Nid,"no":Math.random()}, 
+            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":l10Nid,"no":Math.random(), "userName":"<%=userName%>"}, 
             function(data){
                 profile.html("<select id='fp" + id
                         + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
@@ -720,7 +721,7 @@ function OW(obj) {
                 // Turn to login UI via refresh.
                 document.location.href="/globalsight/ControlServlet?activityName=createJobs";
             } else {
-                document.CJ.openChooser('<%=userId%>', '<%=password%>', '<%=companyIdWorkingFor%>');
+                document.CJ.openChooser('<%=userName%>', '<%=password%>', '<%=companyIdWorkingFor%>');
                 obj.blur();
             }
     });
@@ -734,7 +735,7 @@ function OAW(obj) {
                 // Turn to login UI via refresh.
                 document.location.href="/globalsight/ControlServlet?activityName=createJobs";
             } else {
-                document.ATTC.openChooser('<%=userId%>', '<%=password%>', '<%=companyIdWorkingFor%>');
+                document.ATTC.openChooser('<%=userName%>', '<%=password%>', '<%=companyIdWorkingFor%>');
                 obj.blur();
             }
     });
@@ -755,6 +756,7 @@ function OAW(obj) {
 <input type="hidden" name="baseStorageFolder" value="<c:out value='${baseStorageFolder}'/>">
 <input type="hidden" name="baseFolder" value="">
 <input type="hidden" id="attributeString" name="attributeString" value="">
+<input type="hidden" name="userName" value="<%=userName%>">
 
 <table class="listborder" cellspacing="0" cellpadding="0" width="979" align="left" border="1">
 <tr>

@@ -607,6 +607,10 @@ public class UserParameterPersistenceManagerLocal implements
             createNotificationParameter(p_userId, p_existing, result,
                     NOTIFY_TASK_COMPLETION);
             createNotificationParameter(p_userId, p_existing, result,
+                    NOTIFY_WFL_COMPLETION);
+            createNotificationParameter(p_userId, p_existing, result,
+                    NOTIFY_JOB_COMPLETION);
+            createNotificationParameter(p_userId, p_existing, result,
                     NOTIFY_TASK_REJECTION);
             createNotificationParameter(p_userId, p_existing, result,
                     NOTIFY_PM_CHANGE_IN_PROJECT);

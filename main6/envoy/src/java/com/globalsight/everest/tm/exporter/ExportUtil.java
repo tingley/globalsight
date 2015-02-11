@@ -17,36 +17,31 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import java.io.File;
+import java.util.Hashtable;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.exporter.IExportManager;
-
+import com.globalsight.everest.localemgr.LocaleManager;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
-
+import com.globalsight.exporter.IExportManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.localemgr.LocaleManager;
-
-import java.io.*;
-import java.util.*;
-
-import org.hibernate.Session;
 
 public class ExportUtil
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            ExportUtil.class);
+    private static final Logger CATEGORY = Logger.getLogger(ExportUtil.class);
 
     public static String EXPORT_BASE_DIRECTORY = "/";
-    static {
+    static
+    {
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
 
-            String root = sc.getStringParameter(
-                SystemConfiguration.WEB_SERVER_DOC_ROOT);
+            String root = sc
+                    .getStringParameter(SystemConfiguration.WEB_SERVER_DOC_ROOT);
 
             if (!(root.endsWith("/") || root.endsWith("\\")))
             {
@@ -55,8 +50,8 @@ public class ExportUtil
 
             EXPORT_BASE_DIRECTORY = root + IExportManager.EXPORT_DIRECTORY;
 
-            if (!(EXPORT_BASE_DIRECTORY.endsWith("/") ||
-                  EXPORT_BASE_DIRECTORY.endsWith("\\")))
+            if (!(EXPORT_BASE_DIRECTORY.endsWith("/") || EXPORT_BASE_DIRECTORY
+                    .endsWith("\\")))
             {
                 EXPORT_BASE_DIRECTORY = EXPORT_BASE_DIRECTORY + "/";
             }
@@ -66,8 +61,8 @@ public class ExportUtil
         }
         catch (Throwable e)
         {
-            CATEGORY.error(
-                "cannot create directory " + EXPORT_BASE_DIRECTORY, e);
+            CATEGORY.error("cannot create directory " + EXPORT_BASE_DIRECTORY,
+                    e);
         }
     }
 
@@ -75,7 +70,7 @@ public class ExportUtil
     static private Hashtable s_locale2name = new Hashtable();
 
     /** Static class, private constructor. */
-    private ExportUtil ()
+    private ExportUtil()
     {
     }
 
@@ -89,19 +84,20 @@ public class ExportUtil
     }
 
     /**
-     * A cache from GlobalSightLocale to printed locale representation
-     * as found in TMX files.
-     *
-     * @param p_locale: a GlobalSightLocale.
+     * A cache from GlobalSightLocale to printed locale representation as found
+     * in TMX files.
+     * 
+     * @param p_locale
+     *            : a GlobalSightLocale.
      */
     static public String getLocaleString(GlobalSightLocale p_locale)
     {
-        String result = (String)s_locale2name.get(p_locale);
+        String result = (String) s_locale2name.get(p_locale);
 
         if (result == null)
         {
-            result = p_locale.getLanguageCode() + "-" +
-                p_locale.getCountryCode();
+            result = p_locale.getLanguageCode() + "-"
+                    + p_locale.getCountryCode();
 
             result = result.toUpperCase();
 
@@ -114,8 +110,7 @@ public class ExportUtil
     /**
      * Maps a local string (en_US) to a GlobalSightLocale id.
      */
-    static public long getLocaleId(String p_locale)
-        throws Exception
+    static public long getLocaleId(String p_locale) throws Exception
     {
         LocaleManager mgr = ServerProxy.getLocaleManager();
         GlobalSightLocale locale = mgr.getLocaleByString(p_locale);
@@ -126,9 +121,8 @@ public class ExportUtil
     /**
      * Good old getLocale method.
      */
-    static public GlobalSightLocale getLocaleById(Session p_session, long p_id)
-        throws Exception
+    static public GlobalSightLocale getLocaleById(long p_id) throws Exception
     {
-        return (GlobalSightLocale)p_session.get(GlobalSightLocale.class, p_id);
+        return HibernateUtil.get(GlobalSightLocale.class, p_id);
     }
 }

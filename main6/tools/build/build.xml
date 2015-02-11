@@ -4,25 +4,23 @@
 	<property file="user.build.properties" />
 	<loadproperties srcFile="build.properties" />
 
-    <tstamp />
+	<tstamp />
 
 	<target name="buildversion">
-        <mkdir dir="${serverclassesDest}" />
+		<mkdir dir="${serverclassesDest}" />
 		<!-- Create a BuildVersion.java which holds the current build version -->
-        <loadfile property="buildversion.java"
-                  srcFile="BuildVersion.java.template">
-            <filterchain>
-                <expandproperties/>
-            </filterchain>
-        </loadfile>
-        <echo file="BuildVersion.java" message="${buildversion.java}" />
-        <copy todir="../../${envoySrcJava}/com/globalsight">
-            <fileset dir="." includes="BuildVersion.java">
-                <!-- Only copy the file when it changes. -->
-                <different targetdir="../../${envoySrcJava}/com/globalsight"
-                           ignoreFileTimes="true" />
-            </fileset>
-        </copy>
+		<loadfile property="buildversion.java" srcFile="BuildVersion.java.template">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+		</loadfile>
+		<echo file="BuildVersion.java" message="${buildversion.java}" />
+		<copy todir="../../${envoySrcJava}/com/globalsight">
+			<fileset dir="." includes="BuildVersion.java">
+				<!-- Only copy the file when it changes. -->
+				<different targetdir="../../${envoySrcJava}/com/globalsight" ignoreFileTimes="true" />
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="distdir">
@@ -39,108 +37,56 @@
 		</javac>
 	</target>
 
-    <!-- http://tomcat.apache.org/tomcat-5.5-doc/jasper-howto.html#Web_Application_Compilation -->
-
-    <path id="jasper.classpath"> 
-      <fileset dir="${jbossDefaultLibDir}"> 
-        <include name="*.jar"/> 
-      </fileset> 
-      <fileset dir="${tomcatLibDir}"> 
-        <include name="*.jar"/> 
-      </fileset> 
-      <pathelement location="${webapponlyJarLib}/standard.jar" />
-      <pathelement location="${webapponlyJarLib}/jstl.jar" />
-      <pathelement path="${classpath}"/>
-    </path> 
-
-    <target name="jspcompile" depends="compile, cap">
-      <mkdir dir="jsp/generated"/>
-
-      <taskdef classname="org.apache.jasper.JspC" name="jasper2" classpathref="jasper.classpath" />
-      <!-- jasper2 takes paths relative to the current directory,
-           not the basedir, so force it -->
-      <jasper2 classpath="jasper.classpath" javaEncoding="UTF-8" validateXml="false" 
-        uriroot="${basedir}/${globalsight_home}/globalsight-web.war" 
-        webXmlFragment="${basedir}/jsp/webJSP.xml" 
-        outputDir="${basedir}/jsp/generated" />
-
-      <mkdir dir="jsp/classes"/>
-      <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="UTF-8" debug="on" 
-        target="${javactarget}" classpathref="jasper.classpath" srcdir="${basedir}/jsp/generated" 
-        destdir="${basedir}/jsp/classes" fork="true" memoryMaximumSize="1024m" >
-        <exclude name="org/apache/jsp/envoy/administration/config/teamsite/new1header_jsp.java" />
-        <exclude name="org/apache/jsp/envoy/administration/config/teamsite/new2header_jsp.java" />
-        <exclude name="org/apache/jsp/envoy/administration/cvsconfig/CVSRepositoryMain_jsp.java" />
-      </javac>
-      
-	  <!-- 
-	    Below command is like to generate a jar file which contains all compiled JSP files, 
-	    and make it easier to deploy it to server
-	  -->
-	  <!--
-	  <jar basedir="jsp/classes" jarfile="jsp/GlobalSight_JSP.jar"/>
-	  -->
-    </target>
-
 	<target name="javadoc">
-        <javadoc encoding="ISO-8859-1" destdir="apidoc">
-            <packageset dir="../../${envoySrcJava}" />
-            <packageset dir="../../${diplomatDevSrcJava}" />
-            <packageset dir="../../${lingSrcJava}">
-                <exclude name="test/**" />
-                <exclude name="tools/**" />
-            </packageset>
-        </javadoc>
+		<javadoc encoding="ISO-8859-1" destdir="apidoc">
+			<packageset dir="../../${envoySrcJava}" />
+			<packageset dir="../../${diplomatDevSrcJava}" />
+			<packageset dir="../../${lingSrcJava}">
+				<exclude name="test/**" />
+				<exclude name="tools/**" />
+			</packageset>
+		</javadoc>
 	</target>
 
-        <target name="build-tests" depends="compile-tests, copy-test-files" />
-        <target name="compile-tests" depends="compile">
-            <mkdir dir="${testclasses}"/>
-            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="utf-8" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
-                <src path="${testSrc}" />
-            </javac>
-        </target>
-        <target name="copy-test-files">
-            <copy todir="${testclasses}">
-                <fileset dir="${testSrc}">
-                    <exclude name="**/*.java" />
-                </fileset>
-            </copy>
-        </target>
+	<target name="build-tests" depends="compile-tests, copy-test-files" />
+	<target name="compile-tests" depends="compile">
+		<mkdir dir="${testclasses}" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="utf-8" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+			<src path="${testSrc}" />
+		</javac>
+	</target>
+	<target name="copy-test-files">
+		<copy todir="${testclasses}">
+			<fileset dir="${testSrc}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
 
-        <target name="build-ling-tests" depends="compile-ling-tests, copy-ling-test-files" />
-        <target name="compile-ling-tests" depends="compile">
-            <mkdir dir="${testclasses}"/>
-            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
-                <src path="../../${lingSrcJava}" />
-                <include name="test/globalsight/**/*.java" />
-            </javac>
-        </target>
-        <target name="copy-ling-test-files">
-            <copy todir="${testclasses}">
-                <fileset dir="../../${lingSrcJava}">
-                    <include name="test/globalsight/**/*" />
-                    <exclude name="**/*.java" />
-                </fileset>
-            </copy>
-        </target>
+	<target name="build-ling-tests" depends="compile-ling-tests, copy-ling-test-files" />
+	<target name="compile-ling-tests" depends="compile">
+		<mkdir dir="${testclasses}" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+			<src path="../../${lingSrcJava}" />
+			<include name="test/globalsight/**/*.java" />
+		</javac>
+	</target>
+	<target name="copy-ling-test-files">
+		<copy todir="${testclasses}">
+			<fileset dir="../../${lingSrcJava}">
+				<include name="test/globalsight/**/*" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
 
-        <target name="build-hibernate-tests" depends="compile-hibernate-tests" />
-        <target name="compile-hibernate-tests" depends="compile">
-            <mkdir dir="${testclasses}"/>
-            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
-                <src path="../../envoy/hibernatetest/domain" />
-                <src path="../../envoy/hibernatetest/service" />
-            </javac>
-        </target>
-
-	<!-- Build the third party JAR files. They are empty JARs except for Manifest -->
-	<target name="thirdPartyJars">
-        <jar destfile="${globalsight_home}/lib/thirdParty1.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty1.mf" />
-        <jar destfile="${globalsight_home}/lib/thirdParty2.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty2.mf" />
-        <jar destfile="${globalsight_home}/lib/jbpmLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/jbpmLibs.mf" />
-        <jar destfile="${globalsight_home}/lib/hibernateLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/hibernateLibs.mf" />
-        <jar destfile="${globalsight_home}/lib/ssoLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/ssoLibs.mf" />
+	<target name="build-hibernate-tests" depends="compile-hibernate-tests" />
+	<target name="compile-hibernate-tests" depends="compile">
+		<mkdir dir="${testclasses}" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+			<src path="../../envoy/hibernatetest/domain" />
+			<src path="../../envoy/hibernatetest/service" />
+		</javac>
 	</target>
 
 	<target name="ling">
@@ -160,13 +106,12 @@
 	</target>
 
 	<target name="tsAutoImport" depends="compile">
-        <copy todir="tsautoimport">
-            <fileset dir="../teamsite/tsautoimport">
-                <exclude name="properties/**" />
-            </fileset>
-        </copy>
-        <copy todir="tsautoimport/lib" file="${commonJarLib}/log4j.jar" />
-        <jar update="true" duplicate="preserve" filesonly="true" destfile="tsautoimport/lib/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
+		<copy todir="tsautoimport">
+			<fileset dir="../teamsite/tsautoimport">
+				<exclude name="properties/**" />
+			</fileset>
+		</copy>
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="tsautoimport/lib/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
             com/globalsight/diplomat/util/Logger.class,
             com/globalsight/log/GlobalSightCategory.class,
             com/globalsight/log/GlobalSightCategoryFactory.class,
@@ -190,67 +135,29 @@
 		<ant antfile="zip.xml" target="TeamsiteAutoImport" />
 	</target>
 
-    <target name="copy">
-        <copy todir="${globalsight_home}/cxe-ejb.jar/META-INF">
-            <fileset dir="../../tools/lib">
-                <include name="MANIFEST.MF" />
-            </fileset>
-            <fileset dir="../../diplomat/dev/src/java/com/globalsight/cxe/adaptermdb">
-                <include name="*.xml" />
-            </fileset>
-        </copy>
-        <copy todir="${globalsight_home}/META-INF">
-            <fileset dir="${jbossUtilDir}">
-                <include name="jboss-app.xml" />
-            </fileset>
-        </copy>
-        <copy todir="${globalsight_home}/globalsight-web.war/WEB-INF">
-            <fileset dir="${jbossUtilDir}">
-                <include name="jboss-web.xml.template" />
-            </fileset>
-        </copy>
-        <copy todir="${globalsight_home}/lib">
-            <fileset dir="${commonJarLib}">
-                <!-- Must not install our own log4j.jar: GBS-2171 -->
-                <exclude name="log4j.jar" />
-            </fileset>
-            <fileset dir="${mysqlJarLib}" />
-            <fileset dir="${apacheAxisJarLib}">
-                <include name="axis.jar" />
-            </fileset>
-        </copy>
-        <!-- Put the remaining optional Apache Axis jars in the axis sub directory -->
-        <!-- so they can be omitted if needed depending on the app server -->
-        <!-- Exclude the saaj.jar which goes into java/jre/lib/ext -->
-        <copy todir="${globalsight_home}/lib/axis">
-            <fileset dir="${apacheAxisJarLib}">
-                <exclude name="axis.jar" />
-                <exclude name="saaj.jar" />
-            </fileset>
-        </copy>
-        <copy todir="${globalsight_home}/lib/jbpm">
-            <fileset dir="${jbpmJarLib}" />
-        </copy>
-        <copy todir="${globalsight_home}/lib/sso">
-            <fileset dir="${ssoJarLib}" />
-        </copy>
-        <copy todir="${globalsight_home}/lib/hibernate">
-            <fileset dir="${hibernateJarLib}" />
-        </copy>
-        <copy todir="${globalsight_home}/globalsight-web.war/WEB-INF/lib">
-            <fileset dir="${webapponlyJarLib}">
-                <include name="*.jar" />
-            </fileset>
-        </copy>
-    </target>
+	<target name="copy">
+		<copy todir="${globalsight_home}/META-INF">
+			<fileset dir="${jbossUtilDir}">
+				<include name="jboss-deployment-structure.xml" />
+			</fileset>
+		</copy>
+		<copy todir="${globalsight_home}/globalsight-web.war/WEB-INF">
+			<fileset dir="${jbossUtilDir}">
+				<include name="jboss-web.xml" />
+			</fileset>
+		</copy>
+		<copy todir="${globalsight_home}/lib">
+			<fileset dir="${commonJarLib}" />
+		</copy>
+	</target>
 
-	<target name="all" depends="compile, ling, cap, cxe, copy, thirdPartyJars, AddSourceAppletJar" />
+	<target name="all" depends="compile, ling, cap, cxe, copy, AddSourceAppletJar" />
 
 	<!-- Jar up all GlobalSight classes into globalsight.jar -->
 	<target name="globalsight.jar" depends="compile">
 		<echo message="**** Creating globalsight.jar ****" />
-		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/lib/globalsight.jar">
-            <fileset dir="${serverclassesDest}" includes="**/*.class" />
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/globalsight.jar">
+			<fileset dir="${serverclassesDest}" includes="**/*.class" />
 		</jar>
 	</target>
 
@@ -431,7 +338,7 @@
 	<target name="DesktopIcon">
 		<ant dir="${desktopicon.dir}/tools" antfile="build.xml" target="make.package" />
 	</target>
-	
+
 	<target name="AddSourceAppletJar">
 		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="all" />
 	</target>
@@ -490,7 +397,7 @@
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/Word2003ConverterSetup/Debug" prefix="" includes="*.*" />
 		</zip>
 	</target>
-	
+
 	<!-- GlobalSight Office 2007 Converter -->
 	<target name="Office2007Converter" depends="distdir">
 		<echo message="**** Packaging Office 2007 Converter ****" />
@@ -498,7 +405,7 @@
 			<zipfileset dir="../../diplomat\dev\src\c-sharp\Office2007Converters\Office2007ConvertersSetup\Release" prefix="" includes="*.*" />
 		</zip>
 	</target>
-	
+
 	<!-- GlobalSight Office 2003 Converter -->
 	<target name="Office2003Converter" depends="distdir">
 		<echo message="**** Packaging Office 2003 Converter ****" />
@@ -576,8 +483,7 @@
 	</target>
 
 	<!--     Build everything and make the zip file -->
-        <!-- jspcompile is not necessary, but do it to catch errors-->
-	<target name="dist" depends="jspcompile, zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip">
+	<target name="dist" depends="zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip">
 	</target>
 
 	<target name="distnojsp" depends="dist" />
@@ -591,18 +497,18 @@
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
 		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="clean" />
-        <ant dir="${spellchecker}" antfile="build.xml" target="clean" inheritAll="false" />
-        <delete dir="${capclasses}" />
-        <delete dir="${testclasses}" />
-        <delete dir="jsp" />
-        <delete dir="apidoc" />
-        <delete dir="tsautoimport" />
+		<ant dir="${spellchecker}" antfile="build.xml" target="clean" inheritAll="false" />
+		<delete dir="${capclasses}" />
+		<delete dir="${testclasses}" />
+		<delete dir="jsp" />
+		<delete dir="apidoc" />
+		<delete dir="tsautoimport" />
 		<delete dir="${dist}">
 		</delete>
 		<delete dir="${docdirectory}">
 		</delete>
 		<delete file="BuildVersion.java" />
-        <delete file="../../${envoySrcJava}/com/globalsight/BuildVersion.java"/>
+		<delete file="../../${envoySrcJava}/com/globalsight/BuildVersion.java" />
 		<delete file="run.classpath.bat" />
 		<delete file="run.classpath.sh" />
 		<delete dir="com" />
@@ -610,76 +516,70 @@
 		<delete file="customer.jar" />
 		<delete file="dbProfile.jar" />
 		<delete file="commons-httpclient-3.0-rc2.jar" />
-        <delete dir="${testreports}" failonerror="false"/>
+		<delete dir="${testreports}" failonerror="false" />
 	</target>
 
-    <!-- classpath for running GS code within the source tree.  Probably, we
-         should separate the compile classpath from the run classpath. -->
-    <path id="run.classpath">
-        <!-- classpath property is really for compiling and doesn't have the
-             right run-time load ordering. -->
-        <pathelement location="${hibernateJarLib}/dom4j-1.6.1.jar" />
-        <pathelement location="${commonJarLib}/jaxen-1.1-beta-4.jar" />
-        <pathelement path="${classpath}"/>
-        <!-- classpath property doesn't have this because it's not needed for
-             compiling. -->
-        <pathelement location="${mysqlJarLib}/mysql-connector-java-5.1.18-bin.jar" />
-        <pathelement location="${testclasses}"/>
-    	<pathelement location="${jbossLibDir}/endorsed/xalan.jar" />
-    </path>
+	<!-- classpath for running GS code within the source tree.  Probably, we should separate the compile classpath from the run classpath. -->
+	<path id="run.classpath">
+		<!-- classpath property is really for compiling and doesn't have the right run-time load ordering. -->
+		<pathelement path="${classpath}" />
+		<!-- classpath property doesn't have this because it's not needed for compiling. -->
+		<pathelement location="${testclasses}" />
+	</path>
 
-    <!-- classpath for running GS code within the source tree, referring to
-         an install for generated properties.  The gs.home property is the
-         globalsight.ear directory of the install, and can be set in
-         user.build.properties.  Note it's up to you to make sure your
-         install is in sync with the source. -->
+	<!-- classpath for running GS code within the source tree, referring to
+	         an install for generated properties.  The gs.home property is the
+	         globalsight.ear directory of the install, and can be set in
+	         user.build.properties.  Note it's up to you to make sure your
+	         install is in sync with the source. -->
 
-    <!-- If they didn't set it in user.build.properties, set to a dummy
-         value so run.classpath.{bat.sh} don't get funny characters. -->
-    <property name="gs.home" value="gshome" />
-    <path id="runwithinstall.classpath">
-        <path refid="run.classpath" />
-        <pathelement location="${gs.home}/lib/classes" />
-    </path>
+	<!-- If they didn't set it in user.build.properties, set to a dummy
+	         value so run.classpath.{bat.sh} don't get funny characters. -->
+	<property name="gs.home" value="gshome" />
+	<path id="runwithinstall.classpath">
+		<path refid="run.classpath" />
+		<pathelement location="${gs.home}/lib/classes" />
+	</path>
 
-    <target name="write-run-classpath">
-        <pathconvert property="runwithinstall.classpath" refid="runwithinstall.classpath" />
-        <echo>Writing classpath to run.classpath.{bat,sh}</echo>
-        <echo file="run.classpath.bat" message="set RUNCLASSPATH=${runwithinstall.classpath}" />
-        <echo file="run.classpath.sh" message="RUNCLASSPATH=${runwithinstall.classpath}" />
-    </target>
+	<target name="write-run-classpath">
+		<pathconvert property="runwithinstall.classpath" refid="runwithinstall.classpath" />
+		<echo>Writing classpath to run.classpath.{bat,sh}</echo>
+		<echo file="run.classpath.bat" message="set RUNCLASSPATH=${runwithinstall.classpath}" />
+		<echo file="run.classpath.sh" message="RUNCLASSPATH=${runwithinstall.classpath}" />
+	</target>
 
-    <!-- Run all unittests (or just one if test property is set) -->
-    <target name="test" depends="runtests" />
-    <target name="runtests" depends="all, build-tests, just-runtests" />
-    <!-- Shortcut that does not build the tests, so handy to save time, or
+	<!-- Run all unittests (or just one if test property is set) -->
+	<target name="test" depends="runtests" />
+	<target name="runtests" depends="all, build-tests, just-runtests" />
+	<!-- Shortcut that does not build the tests, so handy to save time, or
          to run only the test classes currently present. -->
-    <target name="just-runtests">
-        <mkdir dir="${testreports}"/>
-        <mkdir dir="${testreports}/raw"/>
-        <junit fork="yes" printsummary="yes" failureproperty="junit.failure">
-        <!-- haltonfailure="yes"> -->
-          <sysproperty key="test.idcs5.enable" value="${test.idcs5.enable}"/>
-          <sysproperty key="test.idcs5.winfiles" value="${test.idcs5.winfiles}"/>
-          <classpath refid="runwithinstall.classpath" />
-          <batchtest unless="test" todir="${testreports}/raw">
-            <fileset dir="${testclasses}">
-              <include name="**/Test*.class" />
-              <include name="**/*Test.class" />
-              <exclude name="**/*$*" />  <!-- no inner clasess -->
-            </fileset>
-            <formatter type="xml"/>
-          </batchtest>
-          <test if="test" name="${test}" todir="${testreports}/raw">
-            <formatter type="xml"/>
-          </test>
-        </junit>
-        <junitreport todir="${testreports}">
-          <fileset dir="${testreports}/raw"/>
-          <report todir="${testreports}"/>
-        </junitreport>
-        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
-    </target>
+	<target name="just-runtests">
+		<mkdir dir="${testreports}" />
+		<mkdir dir="${testreports}/raw" />
+		<junit fork="yes" printsummary="yes" failureproperty="junit.failure">
+			<!-- haltonfailure="yes"> -->
+			<sysproperty key="test.idcs5.enable" value="${test.idcs5.enable}" />
+			<sysproperty key="test.idcs5.winfiles" value="${test.idcs5.winfiles}" />
+			<classpath refid="runwithinstall.classpath" />
+			<batchtest unless="test" todir="${testreports}/raw">
+				<fileset dir="${testclasses}">
+					<include name="**/Test*.class" />
+					<include name="**/*Test.class" />
+					<exclude name="**/*$*" />
+					<!-- no inner clasess -->
+				</fileset>
+				<formatter type="xml" />
+			</batchtest>
+			<test if="test" name="${test}" todir="${testreports}/raw">
+				<formatter type="xml" />
+			</test>
+		</junit>
+		<junitreport todir="${testreports}">
+			<fileset dir="${testreports}/raw" />
+			<report todir="${testreports}" />
+		</junitreport>
+		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />
+	</target>
 
 	<!-- Sign the customer.jar for the applets -->
 	<target name="signCustomerJar">

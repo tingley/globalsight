@@ -57,7 +57,8 @@ public class ExportLocationPersistenceManagerLocal implements
     {
         try
         {
-            p_ExportLocation.setCompanyId(CompanyWrapper.getCurrentCompanyId());
+            p_ExportLocation.setCompanyId(Long.parseLong(CompanyWrapper
+                    .getCurrentCompanyId()));
             HibernateUtil.save((ExportLocationImpl) p_ExportLocation);
             return readExportLocation(p_ExportLocation.getId());
         }
@@ -156,7 +157,7 @@ public class ExportLocationPersistenceManagerLocal implements
             while (it.hasNext())
             {
                 ExportLocation el = (ExportLocation) it.next();
-                if (el.getCompanyId().equals(companyId))
+                if (String.valueOf(el.getCompanyId()).equals(companyId))
                 {
                     result.add(el);
                 }
@@ -168,7 +169,7 @@ public class ExportLocationPersistenceManagerLocal implements
             throw new ExportLocationEntityException(e);
         }
     }
-    
+
     /**
      * Get a list of all existing ExportLocation objects in the datastore; make
      * them editable.
@@ -187,7 +188,7 @@ public class ExportLocationPersistenceManagerLocal implements
             while (it.hasNext())
             {
                 ExportLocation el = (ExportLocation) it.next();
-                if (el.getCompanyId().equals(companyId))
+                if (String.valueOf(el.getCompanyId()).equals(companyId))
                 {
                     result.add(el);
                 }
@@ -231,7 +232,7 @@ public class ExportLocationPersistenceManagerLocal implements
 
         return this.readExportLocation(id);
     }
-    
+
     /**
      * Returns the default export location. The ID of this location is stored in
      * the system_parameter table as a UI modifiable parameter
@@ -246,7 +247,8 @@ public class ExportLocationPersistenceManagerLocal implements
             SystemParameter sp;
             sp = ServerProxy.getSystemParameterPersistenceManager()
                     .getSystemParameter(
-                            SystemConfigParamNames.DEFAULT_EXPORT_LOCATION, companyId);
+                            SystemConfigParamNames.DEFAULT_EXPORT_LOCATION,
+                            companyId);
             id = Long.parseLong(sp.getValue());
         }
         catch (Exception e)

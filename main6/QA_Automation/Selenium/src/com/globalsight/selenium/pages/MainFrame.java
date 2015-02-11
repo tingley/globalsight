@@ -70,7 +70,7 @@ public class MainFrame
     public static final String Localized_SUBMENU = "link=Localized";
     public static final String MY_JOBS_EXPORTED_SUBMENU = "link=Exported";
     public static final String Archived = "link=Archived";
-    public static final String MY_JOBS_ALL_STATUS_SUBMENU = "link=All Status";
+    public static final String MY_JOBS_ALL_STATUS_SUBMENU = "link=All Jobs";
     public static final String Search_BUTTON = "Search";
 
     // My Activities _MENU & _SUBMENU

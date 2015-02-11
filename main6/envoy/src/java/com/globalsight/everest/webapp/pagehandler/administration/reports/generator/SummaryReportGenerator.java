@@ -271,11 +271,7 @@ public class SummaryReportGenerator extends XlsReports implements ReportGenerato
                 reportWordCount.addTrados75to84WordCount(w.getThresholdMedFuzzyWordCount());
                 reportWordCount.addTrados50to74WordCount(w.getThresholdLowFuzzyWordCount());
                 reportWordCount.addTradosNoMatchWordCount(w.getThresholdNoMatchWordCount());
-                reportWordCount.addTradosRepsWordCount(w.getRepetitionWordCount()
-                        + w.getHiFuzzyRepetitionWordCount()
-                        + w.getMedHiFuzzyRepetitionWordCount()
-                        + w.getMedFuzzyRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount());
+                reportWordCount.addTradosRepsWordCount(w.getRepetitionWordCount());
             }
         }
         return summaryDatas;

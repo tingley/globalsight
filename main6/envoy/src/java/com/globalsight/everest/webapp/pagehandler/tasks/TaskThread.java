@@ -32,6 +32,8 @@ import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.projecthandler.ProjectImpl;
@@ -46,12 +48,13 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowJbpmPersistenceHandler;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.mail.MailerHelper;
 
-public class TaskThread extends Thread
+public class TaskThread extends MultiCompanySupportedThread
 {
     private static final Logger log = Logger.getLogger(TaskThread.class
             .getName());
@@ -63,6 +66,7 @@ public class TaskThread extends Thread
 
     public TaskThread(TaskImpl p_task, Map<String, ?> p_dataMap)
     {
+        super();
         dataMap = p_dataMap;
         task = p_task;
         task.setRatings(new ArrayList(task.getRatings()));
@@ -73,11 +77,21 @@ public class TaskThread extends Thread
 
     public void run()
     {
-        String action = (String) dataMap.get(KEY_ACTION);
-        if (ACTION_AUTOACCEPT.equals(action))
+        super.run();
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        try
         {
-            autoAcceptTask(task);
+            String action = (String) dataMap.get(KEY_ACTION);
+            if (ACTION_AUTOACCEPT.equals(action))
+            {
+                autoAcceptTask(task);
+            }
         }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
+        CompanyThreadLocal.getInstance().setIdValue(companyId);
     }
 
     /**
@@ -89,16 +103,15 @@ public class TaskThread extends Thread
      */
     protected void autoAcceptTask(TaskImpl p_task)
     {
-        String companyId = p_task.getCompanyId();
+        long companyId = p_task.getCompanyId();
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String projectName = p_task.getProjectName();
+
         ProjectImpl project = null;
-        Company company = null;
-        CompanyThreadLocal.getInstance().setIdValue(companyId);
         try
         {
             project = (ProjectImpl) ServerProxy.getProjectHandler()
-                    .getProjectByName(p_task.getProjectName());
-            company = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(companyId));
+                    .getProjectByNameAndCompanyId(projectName, companyId);
         }
         catch (Exception e)
         {
@@ -140,7 +153,7 @@ public class TaskThread extends Thread
                             || canAutoAcceptByPM(project, acceptor))
                     {
                         autoAcceptAndSendEmail(type, acceptor, p_task, node,
-                                pi, company, project);
+                                pi, companyId, companyName, project);
                     }
                 }
                 else
@@ -180,8 +193,8 @@ public class TaskThread extends Thread
      */
     public static void autoAcceptAndSendEmail(int p_activityType,
             String p_acceptor, TaskImpl p_task, Node p_node,
-            ProcessInstance p_pi, Company p_company, ProjectImpl p_project)
-            throws Exception
+            ProcessInstance p_pi, long p_companyId, String p_companyName,
+            ProjectImpl p_project) throws Exception
     {
         Map<String, Object> data = new HashMap<String, Object>();
         Set<String> iReceipt = new HashSet<String>();
@@ -190,7 +203,7 @@ public class TaskThread extends Thread
         ServerProxy.getTaskManager().acceptTask(p_acceptor, p_task, data);
 
         String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(
-                p_node, "_" + p_company.getId(), p_pi,
+                p_node, "_" + p_companyId, p_pi,
                 WorkflowConstants.TASK_TYPE_ACC);
         EmailInformation sender = ServerProxy.getUserManager()
                 .getEmailInformationForUser(p_project.getProjectManagerId());
@@ -211,13 +224,11 @@ public class TaskThread extends Thread
             ReportGenerator generator = null;
             if (p_activityType == Activity.TYPE_REVIEW)
             {
-                generator = new ReviewersCommentsReportGenerator(
-                        p_company.getCompanyName());
+                generator = new ReviewersCommentsReportGenerator(p_companyName);
             }
             else
             {
-                generator = new TranslationsEditReportGenerator(
-                        p_company.getCompanyName());
+                generator = new TranslationsEditReportGenerator(p_companyName);
             }
             files = generator.generateReports(jobIDS, targetLocales);
         }
@@ -230,7 +241,7 @@ public class TaskThread extends Thread
         sendAutoAcceptMail(sender, recipient, files,
                 MailerConstants.AUTO_ACCEPT_SUBJECT,
                 MailerConstants.AUTO_ACCEPT_MESSAGE, messageArguments,
-                p_company);
+                p_companyId);
     }
 
     /**
@@ -254,7 +265,7 @@ public class TaskThread extends Thread
     private static void sendAutoAcceptMail(EmailInformation p_sender,
             EmailInformation p_recipient, File[] p_files,
             String p_emailSubjectKey, String p_emailMessageKey,
-            String[] p_messageArguments, Company p_company)
+            String[] p_messageArguments, long p_companyId)
     {
         String[] attachments = null;
         if (p_files != null)
@@ -270,7 +281,7 @@ public class TaskThread extends Thread
         {
             ServerProxy.getMailer().sendMail(p_sender, p_recipient,
                     p_emailSubjectKey, p_emailMessageKey, p_messageArguments,
-                    attachments, p_company.getId());
+                    attachments, p_companyId);
         }
         catch (Exception e)
         {

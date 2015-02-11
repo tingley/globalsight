@@ -17,54 +17,55 @@
 package com.globalsight.reports.xmlqueries;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import com.globalsight.diplomat.util.Logger;
-import com.globalsight.reports.xmlqueries.JobInfoQuery;
 import java.util.Date;
 
-/** 
-* XmlQueryServlet
-* <p>
-* This servlet is usd for doing XML queries against System4
-*/
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.globalsight.diplomat.util.Logger;
+
+/**
+ * XmlQueryServlet
+ * <p>
+ * This servlet is usd for doing XML queries against System4
+ */
 public class XmlQueryServlet extends HttpServlet
 {
     /**
      * Reports Logger
      */
-    private static org.apache.log4j.Logger s_logger = org.apache.log4j.Logger.getLogger("Reports");
+    private static org.apache.log4j.Logger s_logger = org.apache.log4j.Logger
+            .getLogger(XmlQueryServlet.class);
 
     /**
      * Performs some query and then outputs XML
      * 
-     * @param p_request 
+     * @param p_request
      * @param p_response
      * @exception IOException
      * @exception ServletException
      */
-    public void doPost (HttpServletRequest p_request, HttpServletResponse p_response)
-    throws IOException, ServletException
+    public void doPost(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws IOException,
+            ServletException
     {
-        doGet(p_request,p_response);
+        doGet(p_request, p_response);
     }
 
     /**
-     * Performs some querying and writes out XML. Handled queries are:
-     * jobInfo
+     * Performs some querying and writes out XML. Handled queries are: jobInfo
      * 
-     * @param p_request -- parameter must include "queryName"
+     * @param p_request
+     *            -- parameter must include "queryName"
      * @param p_response
      * @exception IOException
      * @exception ServletException
      */
-    public void doGet (HttpServletRequest p_request, HttpServletResponse p_response)
-    throws IOException, ServletException
+    public void doGet(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws IOException,
+            ServletException
     {
         p_response.setContentType("text/xml;");
         p_response.setHeader("Pragma", "No-cache");
@@ -72,20 +73,21 @@ public class XmlQueryServlet extends HttpServlet
         p_response.setDateHeader("Expires", System.currentTimeMillis());
         String queryName = p_request.getParameter("queryName");
         String xml = "";
-        try {
+        try
+        {
             if ("jobInfo".equals(queryName))
             {
-                s_logger.info("Running xml query 'jobInfo' at " + (new Date()).toString());
+                s_logger.info("Running xml query 'jobInfo' at "
+                        + (new Date()).toString());
                 JobInfoQuery query = new JobInfoQuery(p_request);
                 xml = query.runQuery();
             }
         }
         catch (Exception e)
         {
-            s_logger.error("Problem running xml query " + queryName,e);
+            s_logger.error("Problem running xml query " + queryName, e);
         }
-        Logger.writeDebugFile("jobInfo.xml",xml);
+        Logger.writeDebugFile("jobInfo.xml", xml);
         p_response.getWriter().println(xml);
     }
 }
-

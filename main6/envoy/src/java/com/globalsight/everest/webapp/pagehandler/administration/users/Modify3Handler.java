@@ -154,6 +154,7 @@ public class Modify3Handler extends PageHandler
 	        UserUtil.genLocaleOptionString(sourceWrapper, uiLocale));
             p_theRequest.setAttribute("targetLocale",
             UserUtil.genLocaleOptionString(targetWrapper, uiLocale));
+            p_theRequest.setAttribute(Modify2Handler.COMPANY_ID, selectedCompanyId);
             Vector vRoles = wrapper.getRoles(sourceLocale, targetLocale);
             UserUtil.createActivityHTMLForRoles(selectedCompanyId, activityBuf, vRoles, uiLocale, sourceLocale, targetLocale);
             UserUtil.createLocaleHTML(selectedCompanyId, sourceLocaleBuf, jsBuf, paddingBuf, bundle, 

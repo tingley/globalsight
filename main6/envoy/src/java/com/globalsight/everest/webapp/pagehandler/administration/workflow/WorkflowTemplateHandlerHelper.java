@@ -1080,6 +1080,9 @@ public class WorkflowTemplateHandlerHelper
         values.addElement(new SystemAction(SystemAction.RSTF, p_bundle
                 .getString(SystemAction.RSTF)));
 
+        values.addElement(new SystemAction(SystemAction.ETF, p_bundle
+                .getString(SystemAction.ETF)));
+
         return values;
     }
 }

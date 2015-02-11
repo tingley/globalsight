@@ -38,6 +38,8 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GeneralExceptionConstants;
 
 public class ImportErrorHandler extends JobDetailsHandler
 {
@@ -103,7 +105,7 @@ public class ImportErrorHandler extends JobDetailsHandler
             sB.append("<TR BGCOLOR=\"" + (i % 2 == 0 ? "#FFFFFF" : "#EEEEEE")
                     + "\">\n");
             // Page Name
-            sB.append("<TD VALIGN=\"BOTTOM\"><SPAN CLASS=\"standardText\">"
+            sB.append("<TD VALIGN=\"BOTTOM\" style='word-wrap:break-word;'><SPAN CLASS=\"standardText\">"
                     + curPage.getExternalPageId() + "</SPAN></TD>\n");
             // Word Count
             sB.append("<TD ALIGN=\"CENTER\" VALIGN=\"BOTTOM\"><SPAN CLASS=\"standardText\">"
@@ -114,11 +116,12 @@ public class ImportErrorHandler extends JobDetailsHandler
                     + (state.equals(PageState.IMPORT_FAIL) ? TABLE_ENTRY_RED
                             : TABLE_ENTRY) + "\">" + state + "</SPAN></TD>\n");
             // Message
-            sB.append("<TD VALIGN=\"BOTTOM\"><SPAN CLASS=\"standardText\">"
+            GeneralException exception = curPage.getRequest().getException();
+            sB.append("<TD VALIGN=\"BOTTOM\" style='word-wrap:break-word;'><SPAN CLASS=\"standardText\">"
                     + ((state.equals(PageState.IMPORT_FAIL) || (curPage
-                            .getRequest().getType() < 0)) ? curPage
-                            .getRequest().getException()
-                            .getTopLevelMessage(uiLocale) : "")
+                            .getRequest().getType() < 0)) ? (exception == null ? GeneralExceptionConstants.DEFAULT_MSG_STRING
+                            : exception.getTopLevelMessage(uiLocale))
+                            : GeneralExceptionConstants.DEFAULT_MSG_STRING)
                     + "</SPAN></TD>\n");
             sB.append("</TR>");
         }

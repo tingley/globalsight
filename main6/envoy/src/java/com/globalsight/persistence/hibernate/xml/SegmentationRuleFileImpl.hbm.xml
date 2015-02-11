@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class
-        name="com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl"
-        table="SEGMENTATION_RULE">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
-        <property name="name" length="40" column="NAME" type="string"
-            not-null="true" unique="false" />
-        <property name="companyId" column="COMPANY_ID"
-            type="string" not-null="true" unique="false" />
-        <property name="type" length="4" column="SR_TYPE" type="int"
-            not-null="true" unique="false" />
-        <property name="description" length="4000" column="DESCRIPTION"
-            type="string" not-null="false" unique="false" />
-        <property name="ruleText" length="4000" column="RULE_TEXT"
-            type="string" not-null="false" unique="false" />
-        <property name="isActive" column="IS_ACTIVE" type="yes_no"
-            not-null="true" unique="false" />
-    </class>
+	<class
+		name="com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl"
+		table="SEGMENTATION_RULE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
+		<property name="type" length="4" column="SR_TYPE" type="int"
+			not-null="true" unique="false" />
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="ruleText" length="4000" column="RULE_TEXT"
+			type="string" not-null="false" unique="false" />
+		<property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
+	</class>
 </hibernate-mapping>

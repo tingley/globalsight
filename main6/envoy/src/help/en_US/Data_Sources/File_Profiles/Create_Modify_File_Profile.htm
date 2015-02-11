@@ -244,9 +244,15 @@ kadovFilePopupInit('a3');
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
 <p class="whs14">Terminology Approval:</td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p>Yes: Terminology will be populated after job is finished and exported. 
-<br>
-No: Terminology will not be populated after job is finished and exported.</td></tr>
+<p>No: Translated segments will not be populated into terminology after job is finished and exported, Default behavior.
+<br>Yes: Translated segments will not be populated into terminology after job is finished and exported.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs14">Populate Source Into Un-Translated Target:</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>No: Default, for XLF/XLZ files, if segment is not translated, the original target content will be put back, keep unchanged as original in exported files.
+<br>Yes: For XLF/XLZ files, if segment is not translated, put source content into target in exported files.
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">

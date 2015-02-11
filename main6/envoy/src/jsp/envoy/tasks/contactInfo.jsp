@@ -37,7 +37,7 @@
 	String title= bundle.getString("lb_edit") + " " +
                     bundle.getString("lb_my_account") + " - " +
                     bundle.getString("lb_contact_information");
-
+	 PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	//Labels
 	String lbAddress = bundle.getString("lb_address");
 	String lbHomePhone = bundle.getString("lb_home_phone");
@@ -65,13 +65,13 @@
 			.getAttribute(WebAppConstants.UILOCALE);
 
 	User user = (User) sessionMgr.getAttribute("myAccountUser");
-	String homePhone = user.getPhoneNumber(User.PhoneType.HOME);
+	String homePhone = user.getHomePhoneNumber();
 	if (homePhone == null||"null".equals(homePhone)) homePhone = "";
-	String workPhone = user.getPhoneNumber(User.PhoneType.OFFICE);
+	String workPhone = user.getOfficePhoneNumber();
 	if (workPhone == null||"null".equals(workPhone)) workPhone = "";
-	String cellPhone = user.getPhoneNumber(User.PhoneType.CELL);
+	String cellPhone = user.getCellPhoneNumber();
 	if (cellPhone == null||"null".equals(cellPhone)) cellPhone = "";
-	String fax = user.getPhoneNumber(User.PhoneType.FAX);
+	String fax = user.getFaxPhoneNumber();
 	if (fax == null||"null".equals(fax)) fax = "";
 	String address = user.getAddress();
 	if (address == null||"null".equals(address)) address = "";
@@ -83,6 +83,8 @@
 	if (bccEmail == null||"null".equals(bccEmail)) bccEmail = "";
 	String password = user.getPassword();
 	String uiLanguage = user.getDefaultUILocale();
+	User me=(User) sessionMgr
+            .getAttribute(WebAppConstants.USER);
 %>
 <HTML>
 <HEAD>
@@ -295,8 +297,15 @@ function isValidEmail(mail,msg)
 	</TR>
 	<TR>
 		<TD VALIGN="TOP"><%=lbEmail%><SPAN CLASS="asterisk">*</SPAN>:</TD>
-		<TD><INPUT TYPE="text" SIZE="40" NAME="email"
-			VALUE="<%=email%>" ></TD>
+		<TD>
+			<%
+			    if (!userPermissions.getPermissionFor(Permission.CHANGE_OWN_EMAIL)&&me.getUserId().equals(user.getUserId()))
+						       out.print("<INPUT TYPE='text' SIZE='40' NAME='email' READONLY='readonly'	VALUE='"+email+"' >");
+					  	   else
+						       out.print("<INPUT TYPE='text' SIZE='40' NAME='email' VALUE='"+email+"' >");
+			%>
+		
+		</TD>
 	</TR>
 	<amb:permission name="<%=Permission.USERS_ACCESS_CCEMAIL%>">
 		<TR>

@@ -153,6 +153,14 @@ public class MailerConstants
                               UserParamNames.NOTIFY_TASK_COMPLETION);
         s_wfNotifications.add(WorkflowMailerConstants.COMPLETED_TASK_SUBJECT);
 
+        s_notificationMap.put(WorkflowMailerConstants.COMPLETED_WFL_SUBJECT,
+                UserParamNames.NOTIFY_WFL_COMPLETION);
+
+        s_wfNotifications.add(WorkflowMailerConstants.COMPLETED_JOB_SUBJECT);
+        s_notificationMap.put(WorkflowMailerConstants.COMPLETED_JOB_SUBJECT,
+                UserParamNames.NOTIFY_JOB_COMPLETION);
+        s_wfNotifications.add(WorkflowMailerConstants.COMPLETED_TASK_SUBJECT);
+
         s_notificationMap.put(WF_PM_CHANGE_FAILED_SUBJECT,
                               UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT);
         s_wfNotifications.add(WF_PM_CHANGE_FAILED_SUBJECT);

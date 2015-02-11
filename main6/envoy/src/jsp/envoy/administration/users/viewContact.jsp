@@ -58,13 +58,13 @@
 
     String address = user.getAddress();
     if (address == null||"null".equals(address)) address = "";
-    String homePhone = user.getPhoneNumber(User.PhoneType.HOME);
+    String homePhone = user.getHomePhoneNumber();
     if (homePhone == null||"null".equals(homePhone)) homePhone = "";
-    String workPhone = user.getPhoneNumber(User.PhoneType.OFFICE);
+    String workPhone = user.getOfficePhoneNumber();
     if (workPhone == null||"null".equals(workPhone)) workPhone = "";
-    String cellPhone = user.getPhoneNumber(User.PhoneType.CELL);
+    String cellPhone = user.getCellPhoneNumber();
     if (cellPhone == null||"null".equals(cellPhone)) cellPhone = "";
-    String fax = user.getPhoneNumber(User.PhoneType.FAX);
+    String fax = user.getFaxPhoneNumber();
     if (fax == null||"null".equals(fax)) fax = "";
     String email = user.getEmail();
     if (email == null||"null".equals(email)) email = "";

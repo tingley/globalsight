@@ -36,34 +36,34 @@ import com.globalsight.everest.workflowmanager.WorkflowOwner;
 
 public class InsertJobCommand
 {
-	private JobImpl m_job;
+    private JobImpl m_job;
 
-	private RequestImpl m_request;
+    private RequestImpl m_request;
 
-	private List m_listOfWorkflows;
+    private List m_listOfWorkflows;
 
-	public InsertJobCommand(JobImpl p_job, RequestImpl p_request,
-			List p_listOfWorkflows)
-	{
-		m_job = p_job;
-		m_request = p_request;
-		m_listOfWorkflows = p_listOfWorkflows;
-	}
+    public InsertJobCommand(JobImpl p_job, RequestImpl p_request,
+            List p_listOfWorkflows)
+    {
+        m_job = p_job;
+        m_request = p_request;
+        m_listOfWorkflows = p_listOfWorkflows;
+    }
 
-	public JobImpl persistObjects(Session session) throws PersistenceException
-	{
-		try
-		{
-			String companyId = m_request.getCompanyId();
+    public JobImpl persistObjects(Session session) throws PersistenceException
+    {
+        try
+        {
+            long companyId = m_request.getCompanyId();
 
-			m_job.setCreateDate(new Timestamp(System.currentTimeMillis()));
-			m_job.setPriority(m_request.getL10nProfile().getPriority());
-			m_job.setIsWordCountReached(false);
-			m_job.setTimestamp(new Timestamp(System.currentTimeMillis()));
-			m_job.setPageCount(1);
-			m_job.setCompanyId(companyId);
-			m_request.setJob(m_job);
-	        boolean isDefaultContextMatch = PageHandler
+            m_job.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            m_job.setPriority(m_request.getL10nProfile().getPriority());
+            m_job.setIsWordCountReached(false);
+            m_job.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            m_job.setPageCount(1);
+            m_job.setCompanyId(companyId);
+            m_request.setJob(m_job);
+            boolean isDefaultContextMatch = PageHandler
                     .isDefaultContextMatch(m_request);
             boolean isInContextMatch = PageHandler.isInContextMatch(m_request);
             if (isDefaultContextMatch)
@@ -79,48 +79,47 @@ public class InsertJobCommand
                 m_job.setLeverageOption(Job.EXACT_ONLY);
             }
 
-			m_request.setTimestamp(new Timestamp(System.currentTimeMillis()));
-			List requtests = new ArrayList();
-			requtests.add(m_request);
-			m_job.setRequestList(requtests);
+            m_request.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            List requtests = new ArrayList();
+            requtests.add(m_request);
+            m_job.setRequestList(requtests);
 
-			Iterator it = m_listOfWorkflows.iterator();
-			while (it.hasNext())
-			{
-				WorkflowImpl workflow = (WorkflowImpl) it.next();
-				workflow.setJob(m_job);
-				workflow
-						.setTimestamp(new Timestamp(System.currentTimeMillis()));
-				workflow.setCompanyId(companyId);
-				List workflows = new ArrayList();
-				workflows.add(workflow);
-				m_job.setWorkflowInstances(workflows);
+            Iterator it = m_listOfWorkflows.iterator();
+            while (it.hasNext())
+            {
+                WorkflowImpl workflow = (WorkflowImpl) it.next();
+                workflow.setJob(m_job);
+                workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                workflow.setCompanyId(companyId);
+                List workflows = new ArrayList();
+                workflows.add(workflow);
+                m_job.setWorkflowInstances(workflows);
 
-				// create the workflow owners for each workflow
-				List wfOwners = workflow.getWorkflowOwners();
+                // create the workflow owners for each workflow
+                List wfOwners = workflow.getWorkflowOwners();
 
-				for (int i = 0; i < wfOwners.size(); i++)
-				{
-					WorkflowOwner wfo = (WorkflowOwner) wfOwners.get(i);
-					wfo.setWorkflow(workflow);
-				}
+                for (int i = 0; i < wfOwners.size(); i++)
+                {
+                    WorkflowOwner wfo = (WorkflowOwner) wfOwners.get(i);
+                    wfo.setWorkflow(workflow);
+                }
 
-				// go through all tasks for the workflow
-				Collection tasks = workflow.getTasks().values();
-				for (Iterator i = tasks.iterator(); i.hasNext();)
-				{
-					TaskImpl t = (TaskImpl) i.next();
-					t.setStateStr("DEACTIVE");
-					t.setCompanyId(companyId);
-				}
-			}
+                // go through all tasks for the workflow
+                Collection tasks = workflow.getTasks().values();
+                for (Iterator i = tasks.iterator(); i.hasNext();)
+                {
+                    TaskImpl t = (TaskImpl) i.next();
+                    t.setStateStr("DEACTIVE");
+                    t.setCompanyId(companyId);
+                }
+            }
 
-			session.save(m_job);
-			return m_job;
-		}
-		catch (Exception e)
-		{
-			throw new PersistenceException(e);
-		}
-	}
+            session.save(m_job);
+            return m_job;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e);
+        }
+    }
 }

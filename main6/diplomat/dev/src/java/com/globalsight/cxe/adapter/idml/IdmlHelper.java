@@ -55,14 +55,17 @@ import com.globalsight.util.FileUtil;
 public class IdmlHelper
 {
     private static final String CATEGORY_NAME = "IdmlAdapter";
-    
+
     private static final String CONTENT = "content.xml";
-    
-    private static final String LINE_BREAK = FileUtil.unUnicode("\u2028");
-    private static final String NONBREEAKING_SPACE = FileUtil.unUnicode("\u00A0");
+
+    // GBS-2955
+    public static final String MARK_LF_IDML = "<GS-IDML-LF/>";
+    public static final String LINE_BREAK = FileUtil.unUnicode("\u2028");
+    private static final String NONBREEAKING_SPACE = FileUtil
+            .unUnicode("\u00A0");
     private static final String PARAGRAPH_START = "<ParagraphStyleRange";
     private static final String PARAGRAPH_END = "</ParagraphStyleRange>";
-    
+
     private static final String METADATA = "META-INF" + File.separator
             + "metadata.xml";
 
@@ -89,9 +92,9 @@ public class IdmlHelper
 
     private static Hashtable<String, Integer> s_exportBatches = new Hashtable<String, Integer>();
     private static Object s_exportBatchesLocker = new Object();
-    
+
     private String displayName = null;
-    
+
     private List<String> layers = null;
     private InddFilter filter = null;
 
@@ -100,9 +103,10 @@ public class IdmlHelper
         m_cxeMessage = p_cxeMessage;
         m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
     }
-    
+
     /**
      * Just for junit test
+     * 
      * @deprecated
      */
     public IdmlHelper()
@@ -130,16 +134,17 @@ public class IdmlHelper
             convert(filename);
             // 4 wait for Adobe Converter to convert
             MessageData[] messageData = readXmlOutput(filename);
-            
+
             CxeMessage[] result = new CxeMessage[messageData.length];
-            
+
             for (int i = 0; i < result.length; i++)
             {
                 // 5 modify eventflowxml
                 String basename = FileUtils.getBaseName(filename);
                 String dirname = getUnzipDir(basename);
                 String xmlfilename = dirname + File.separator + CONTENT;
-                modifyEventFlowXmlForImport(xmlfilename, i + 1, messageData.length);
+                modifyEventFlowXmlForImport(xmlfilename, i + 1,
+                        messageData.length);
                 // 6 return proper CxeMesseges
                 CxeMessageType type = getPostConversionEvent();
                 CxeMessage cxeMessage = new CxeMessage(type);
@@ -182,22 +187,24 @@ public class IdmlHelper
             String tFileName = (String) params.get("TargetFileName");
             if (ExportUtil.isLastFile(eBatchId, tFileName, targetLocale))
             {
-                String oofilename = getCategory().getDiplomatAttribute("safeBaseFileName")
-                        .getValue();
+                String oofilename = getCategory().getDiplomatAttribute(
+                        "safeBaseFileName").getValue();
                 String oofile = FileUtils.concatPath(m_saveDir, oofilename);
                 modifyEventFlowXmlForExport();
                 convert(oofile);
                 MessageData fmd = readConvOutput(oofile);
 
-                CxeMessage outputMsg = new CxeMessage(CxeMessageType.getCxeMessageType(m_eventFlow
-                        .getPostMergeEvent()));
+                CxeMessage outputMsg = new CxeMessage(
+                        CxeMessageType.getCxeMessageType(m_eventFlow
+                                .getPostMergeEvent()));
                 outputMsg.setMessageData(fmd);
                 outputMsg.setParameters(params);
 
                 String eventFlowXml = m_eventFlow.serializeToXml();
                 outputMsg.setEventFlowXml(eventFlowXml);
 
-                return new CxeMessage[] { outputMsg };
+                return new CxeMessage[]
+                { outputMsg };
             }
             else
             {
@@ -205,7 +212,8 @@ public class IdmlHelper
                 // reconstruct the file.
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("Skipping reconstruction for file: " + saveFileName);
+                    logger.debug("Skipping reconstruction for file: "
+                            + saveFileName);
                 }
                 long lastMod = new File(saveFileName).lastModified();
 
@@ -217,7 +225,8 @@ public class IdmlHelper
                 params.put("ExportedTime", new Long(lastMod));
                 outputMsg.setParameters(params);
 
-                return new CxeMessage[] { outputMsg };
+                return new CxeMessage[]
+                { outputMsg };
             }
         }
         catch (Exception e)
@@ -269,7 +278,8 @@ public class IdmlHelper
         StringBuffer saveDir = new StringBuffer(m_convDir);
 
         saveDir.append(File.separator);
-        saveDir.append(m_isImport ? m_eventFlow.getSourceLocale() : m_eventFlow.getTargetLocale());
+        saveDir.append(m_isImport ? m_eventFlow.getSourceLocale() : m_eventFlow
+                .getTargetLocale());
         File saveDirF = new File(saveDir.toString());
         saveDirF.mkdirs();
 
@@ -289,17 +299,17 @@ public class IdmlHelper
         if (m_isImport)
         {
             converter.convertIdmlToXml(filepath, dirName);
-        } 
+        }
         else
         {
             split(dirName);
-            
+
             String filename = getCategory().getDiplomatAttribute(
                     "safeBaseFileName").getValue();
             converter.convertXmlToIdml(filename, dirName);
         }
     }
-    
+
     public static void split(String dir) throws Exception
     {
         File f = new File(dir, CONTENT);
@@ -308,25 +318,26 @@ public class IdmlHelper
         {
             backupFile.delete();
         }
-        
+
         String content = FileUtil.readFile(f, "utf-8");
-        
-        Pattern p = Pattern.compile("<story name=\"(.*?)\">[\\r\\n]*([\\d\\D]*?)</story>");
+
+        Pattern p = Pattern
+                .compile("<story name=\"(.*?)\">[\\r\\n]*([\\d\\D]*?)</story>");
         Matcher m = p.matcher(content);
         while (m.find())
         {
             String path = m.group(1);
             String fContent = m.group(2);
-            
+
             fContent = fContent.replaceFirst("<xml ", "<?xml ");
             fContent = fContent.replaceFirst("/>", "\\?>");
-            
+
             File newFile = new File(dir, path);
             FileUtil.writeFile(newFile, fContent, "utf-8");
         }
-        
+
         f.renameTo(backupFile);
-        
+
         f = new File(dir, CONTENT);
         if (f.exists())
         {
@@ -339,7 +350,7 @@ public class IdmlHelper
         return p_filepath + ".unzip";
     }
 
-        private String getBaseFileName()
+    private String getBaseFileName()
     {
         String dName = m_eventFlow.getDisplayName();
         return FileUtils.getBaseName(dName);
@@ -352,13 +363,14 @@ public class IdmlHelper
 
     private CxeMessageType getPostConversionEvent()
     {
-        return CxeMessageType.getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT);
+        return CxeMessageType
+                .getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT);
     }
 
     public String getPostMergeEvent()
     {
-        return CxeMessageType.getCxeMessageType(CxeMessageType.IDML_LOCALIZED_EVENT)
-                .getName();
+        return CxeMessageType.getCxeMessageType(
+                CxeMessageType.IDML_LOCALIZED_EVENT).getName();
     }
 
     private String getSafeBaseFileName()
@@ -381,15 +393,15 @@ public class IdmlHelper
         m_eventFlow.setPostMergeEvent(getCategory().getPostMergeEvent());
     }
 
-    protected void modifyEventFlowXmlForImport(String p_xmlFilename, int p_docPageNum,
-            int p_docPageCount) throws Exception
+    protected void modifyEventFlowXmlForImport(String p_xmlFilename,
+            int p_docPageNum, int p_docPageCount) throws Exception
     {
         // First get original Category
         Category oriC = getCategory();
         if (oriC != null)
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
-                    oriC.getDiplomatAttribute("postMergeEvent"),
+            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
+            { oriC.getDiplomatAttribute("postMergeEvent"),
                     oriC.getDiplomatAttribute("formatType"),
                     oriC.getDiplomatAttribute("safeBaseFileName"),
                     oriC.getDiplomatAttribute("originalFileSize"),
@@ -400,12 +412,17 @@ public class IdmlHelper
         }
         else
         {
-            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
-                    new DiplomatAttribute("postMergeEvent", m_eventFlow.getPostMergeEvent()),
-                    new DiplomatAttribute("formatType", m_eventFlow.getSourceFormatType()),
-                    new DiplomatAttribute("safeBaseFileName", getSafeBaseFileName()),
-                    new DiplomatAttribute("originalFileSize", String.valueOf(m_cxeMessage
-                            .getMessageData().getSize())),
+            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
+            {
+                    new DiplomatAttribute("postMergeEvent",
+                            m_eventFlow.getPostMergeEvent()),
+                    new DiplomatAttribute("formatType",
+                            m_eventFlow.getSourceFormatType()),
+                    new DiplomatAttribute("safeBaseFileName",
+                            getSafeBaseFileName()),
+                    new DiplomatAttribute("originalFileSize",
+                            String.valueOf(m_cxeMessage.getMessageData()
+                                    .getSize())),
                     new DiplomatAttribute("relSafeName", p_xmlFilename) });
             m_eventFlow.addCategory(newC);
         }
@@ -415,18 +432,20 @@ public class IdmlHelper
 
         m_eventFlow.setDocPageCount(p_docPageCount);
         m_eventFlow.setDocPageNumber(p_docPageNum);
-        
+
         if (displayName == null)
         {
             displayName = m_eventFlow.getDisplayName();
         }
     }
 
-    protected MessageData readConvOutput(String fileName) throws IdmlAdapterException
+    protected MessageData readConvOutput(String fileName)
+            throws IdmlAdapterException
     {
         try
         {
-            String oofile = FileUtils.getPrefix(fileName) + "." + m_conversionType;
+            String oofile = FileUtils.getPrefix(fileName) + "."
+                    + m_conversionType;
             FileMessageData fmd = MessageDataFactory.createFileMessageData();
             fmd.copyFrom(new File(oofile));
             return fmd;
@@ -454,7 +473,7 @@ public class IdmlHelper
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         s.append(FileUtil.lineSeparator);
         s.append("<stories>");
-        
+
         if (isTranslateFileInfo())
         {
             String path = dir + File.separator + METADATA;
@@ -465,7 +484,7 @@ public class IdmlHelper
                 c = c.replaceFirst("<\\?xml ", "<xml ");
                 c = c.replaceFirst("\"\\?>", "\"/>");
                 c = formatForImport(c);
-                
+
                 s.append(FileUtil.lineSeparator);
                 s.append("<story name=\"").append(METADATA).append("\">");
                 s.append(FileUtil.lineSeparator);
@@ -474,21 +493,21 @@ public class IdmlHelper
                 s.append("</story>");
             }
         }
-        
 
-        Pattern p = Pattern.compile("<idPkg:Story src=\"([^\"]*?/Story_([^\"]*?).xml)\"/>");
+        Pattern p = Pattern
+                .compile("<idPkg:Story src=\"([^\"]*?/Story_([^\"]*?).xml)\"\\s*/>");
         Matcher m = p.matcher(content);
 
         while (m.find())
         {
             String id = m.group(2);
-            
+
             if (!isTranslate(id, dir))
             {
                 continue;
             }
-            
-            String path = dir + File.separator +  m.group(1);
+
+            String path = dir + File.separator + m.group(1);
             File f = new File(path);
 
             String c = FileUtil.readFile(f, "utf-8");
@@ -504,80 +523,90 @@ public class IdmlHelper
             s.append(FileUtil.lineSeparator);
             s.append("</story>");
         }
-        
+
         s.append(FileUtil.lineSeparator);
         s.append("</stories>");
 
         File f = new File(dir + CONTENT);
         FileUtil.writeFile(f, s.toString(), "utf-8");
-        
+
         return f;
     }
-    
+
     private String optimizeForOddChar(String s)
     {
         if (!isExtractLineBreak())
         {
-            s = removeLinkBreak(s);
+            s = removeLineBreak(s);
         }
-        
+        else
+        {
+            s = convertLineBreakToTag(s);
+        }
+
         if (isReplaceNonbreakingSpace())
         {
             s = replaceSpace(s);
         }
-        
+
         return s;
     }
-    
-    private String removeLinkBreak(String s)
+
+    private String convertLineBreakToTag(String s)
+    {
+        s = s.replace(LINE_BREAK, MARK_LF_IDML);
+        return s;
+    }
+
+    private String removeLineBreak(String s)
     {
         s = s.replace(LINE_BREAK, "");
         return s;
     }
-    
+
     private String replaceSpace(String s)
     {
         return s.replace(NONBREEAKING_SPACE, " ");
     }
-    
+
     private InddFilter getInddFilter()
     {
         if (filter == null)
         {
             filter = getMainFilter();
         }
-        
+
         if (filter == null)
         {
             filter = new InddFilter();
         }
-        
+
         return filter;
     }
-    
+
     private boolean isTranslateFileInfo()
     {
         return getInddFilter().getTranslateFileInfo();
     }
-    
+
     private boolean isExtractLineBreak()
     {
         return getInddFilter().getExtractLineBreak();
     }
-    
+
     private boolean isReplaceNonbreakingSpace()
     {
-      
+
         return getInddFilter().isReplaceNonbreakingSpace();
     }
-    
+
     /**
      * Is the layer with the id should be translated.
      * 
      * @param id
      * @param root
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private boolean isTranslate(String id, String dir) throws Exception
     {
@@ -585,28 +614,28 @@ public class IdmlHelper
         {
             filter = getMainFilter();
         }
-        
+
         if (filter == null)
         {
             filter = new InddFilter();
         }
-        
+
         boolean isTranslateHiddenLayer = filter.getTranslateHiddenLayer();
         boolean isTranslateMaster = filter.getTranslateMasterLayer();
-        
+
         if (!isTranslateHiddenLayer && isHidden(id, dir))
         {
             return false;
         }
-        
+
         if (!isTranslateMaster && isMasterSpread(id, dir))
         {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Gets all hidden layers id.
      * 
@@ -630,7 +659,7 @@ public class IdmlHelper
 
         return layers;
     }
-    
+
     /**
      * Is the story with the id in hidden layer.
      * 
@@ -643,7 +672,7 @@ public class IdmlHelper
     {
         return isInHiddenLayer(id, dir) || isInHiddenLayerGroup(id, dir);
     }
-    
+
     /**
      * Is the layer with the id is in a hidden layer.
      * 
@@ -652,8 +681,7 @@ public class IdmlHelper
      * @return
      * @throws Exception
      */
-    private boolean isInHiddenLayer(String id, String dir)
-            throws Exception
+    private boolean isInHiddenLayer(String id, String dir) throws Exception
     {
         String s = "ParentStory=\"" + id + "\"";
 
@@ -676,12 +704,12 @@ public class IdmlHelper
                     if (m.find())
                     {
                         String layerId = m.group(1);
-                        
+
                         if (layers == null)
                         {
                             layers = getHiddenLayers(dir);
                         }
-                        
+
                         return layers.contains(layerId);
                     }
 
@@ -692,7 +720,7 @@ public class IdmlHelper
 
         return false;
     }
-    
+
     /**
      * Is the story with the id in a hidden layer group.
      * 
@@ -701,23 +729,24 @@ public class IdmlHelper
      * @return
      * @throws Exception
      */
-    private boolean isInHiddenLayerGroup(String id, String dir)throws Exception
+    private boolean isInHiddenLayerGroup(String id, String dir)
+            throws Exception
     {
         String s = "ParentStory=\"" + id + "\"";
-        
+
         String regex = "<Group[^>]*?ItemLayer=\"([^\"]*?)\"[^>]*?>([\\d\\D]*?)</Group>";
-        
+
         List<String> roots = new ArrayList<String>();
         roots.add(dir + "/MasterSpreads");
         roots.add(dir + "/Spreads");
-        
+
         for (String root : roots)
         {
             List<File> fs = FileUtil.getAllFiles(new File(root));
             for (File f : fs)
             {
                 String content = FileUtil.readFile(f, "utf-8");
-                    
+
                 if (content.contains(s))
                 {
                     Pattern p = Pattern.compile(regex);
@@ -732,19 +761,19 @@ public class IdmlHelper
                             {
                                 layers = getHiddenLayers(dir);
                             }
-                            
+
                             return layers.contains(layerId);
                         }
                     }
-                    
+
                     return false;
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Is the layer with the id is in a master spread.
      * 
@@ -756,7 +785,7 @@ public class IdmlHelper
     private boolean isMasterSpread(String id, String dir) throws Exception
     {
         String s = "ParentStory=\"" + id + "\"";
-        
+
         String path = dir + "/MasterSpreads";
         List<File> fs = FileUtil.getAllFiles(new File(path));
         for (File f : fs)
@@ -769,17 +798,19 @@ public class IdmlHelper
         }
         return false;
     }
-    
-    protected MessageData[] readXmlOutput(String p_filepath) throws IdmlAdapterException
+
+    protected MessageData[] readXmlOutput(String p_filepath)
+            throws IdmlAdapterException
     {
         try
         {
             File content = integrate(p_filepath);
             FileMessageData d = MessageDataFactory.createFileMessageData("xml");
             d.copyFrom(content);
-            
-            MessageData[] md = new MessageData[]{d};
-            
+
+            MessageData[] md = new MessageData[]
+            { d };
+
             String dir = getUnzipDir(p_filepath);
             File dirFile = new File(dir);
             copyToTargetLocales(FileUtil.getAllFiles(dirFile));
@@ -797,14 +828,17 @@ public class IdmlHelper
     {
         try
         {
-            String fileName = FileUtils.concatPath(m_saveDir, getSafeBaseFileName());
+            String fileName = FileUtils.concatPath(m_saveDir,
+                    getSafeBaseFileName());
             if (logger.isInfoEnabled())
             {
-                logger.info("Converting: " + m_eventFlow.getDisplayName() + ", size: "
-                        + m_cxeMessage.getMessageData().getSize() + ", tmp file: " + fileName);
+                logger.info("Converting: " + m_eventFlow.getDisplayName()
+                        + ", size: " + m_cxeMessage.getMessageData().getSize()
+                        + ", tmp file: " + fileName);
             }
 
-            FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
+            FileMessageData fmd = (FileMessageData) m_cxeMessage
+                    .getMessageData();
             fmd.copyTo(new File(fileName));
 
             return fileName;
@@ -812,7 +846,8 @@ public class IdmlHelper
         catch (Exception e)
         {
             logger.error("Failed to write adobe to inbox. ", e);
-            String[] errorArgs = { m_eventFlow.getDisplayName() };
+            String[] errorArgs =
+            { m_eventFlow.getDisplayName() };
             throw new IdmlAdapterException("Import", errorArgs, e);
         }
     }
@@ -828,14 +863,18 @@ public class IdmlHelper
         return saveFileName;
     }
 
-    private static IdmlAdapterException wrapAdobeExportException(Exception e, String arg)
+    private static IdmlAdapterException wrapAdobeExportException(Exception e,
+            String arg)
     {
-        return new IdmlAdapterException("Export", new String[] { arg }, e);
+        return new IdmlAdapterException("Export", new String[]
+        { arg }, e);
     }
 
-    private static IdmlAdapterException wrapAdobeImportException(Exception e, String arg)
+    private static IdmlAdapterException wrapAdobeImportException(Exception e,
+            String arg)
     {
-        return new IdmlAdapterException("Import", new String[] { arg }, e);
+        return new IdmlAdapterException("Import", new String[]
+        { arg }, e);
     }
 
     private List<File> copyToTargetLocales(List<File> files)
@@ -871,7 +910,8 @@ public class IdmlHelper
         }
     }
 
-    private static boolean isExportFileComplete(String p_filekey, int p_pageCount)
+    private static boolean isExportFileComplete(String p_filekey,
+            int p_pageCount)
     {
         // Default is to write out the file.
         boolean result = true;
@@ -920,14 +960,15 @@ public class IdmlHelper
     public static String getConversionDir() throws Exception
     {
         StringBuffer convDir = new StringBuffer();
-        convDir.append(m_sc.getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR,
+        convDir.append(m_sc.getStringParameter(
+                SystemConfigParamNames.FILE_STORAGE_DIR,
                 CompanyWrapper.SUPER_COMPANY_ID));
         convDir.append(File.separator);
         convDir.append("Idml-Conv");
 
         return convDir.toString();
     }
-    
+
     public static boolean isIdmlFileProfile(long fileProfileId)
     {
         FileProfileImpl f = HibernateUtil.get(FileProfileImpl.class,
@@ -946,7 +987,7 @@ public class IdmlHelper
 
         return false;
     }
-    
+
     /**
      * Removes space if it is not in content tag.
      * 
@@ -981,7 +1022,7 @@ public class IdmlHelper
                     if ("\n\t".indexOf(temp.charAt(i)) > -1)
                     {
                         temp.deleteCharAt(i);
-                    } 
+                    }
                     else
                     {
                         break;
@@ -994,73 +1035,78 @@ public class IdmlHelper
 
         return temp.toString();
     }
-    
+
     private int getIndexOfParaStart(StringBuffer s, int index)
     {
         int n = s.indexOf(PARAGRAPH_START, index + 1);
         if (n < 0)
             return n;
-        
+
         int n2 = s.indexOf(">", n);
-        
+
         if (s.charAt(n2 - 1) == '/')
             return getIndexOfParaStart(s, n2);
-        
+
         return n;
     }
-    
+
     public String formatForImport(String s)
     {
-        s = optimizeForOddChar(s); 
+        s = optimizeForOddChar(s);
         StringBuffer temp = new StringBuffer(s);
-        
+
         int parL = PARAGRAPH_END.length();
         int index = getIndexOfParaStart(temp, -1);
-        
+
         while (index > 0)
         {
             int n2 = temp.indexOf(PARAGRAPH_END, index);
-            
+
             if (n2 < 0)
             {
                 break;
             }
-            
+
             String content = temp.substring(index, n2 + parL);
-            String temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>", "");
-            
-            while (temContent.split(PARAGRAPH_START).length != temContent.split(PARAGRAPH_END).length + 1)
+            String temContent = content.replaceAll(
+                    "<ParagraphStyleRange[^>]*/>", "");
+
+            while (temContent.split(PARAGRAPH_START).length != temContent
+                    .split(PARAGRAPH_END).length + 1)
             {
                 n2 = temp.indexOf(PARAGRAPH_END, n2 + 1);
                 if (n2 < 0)
                     break;
-                
+
                 content = temp.substring(index, n2 + parL);
-                temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>", "");
+                temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>",
+                        "");
             }
-            
+
             String content2 = trimSpace(content);
             temp = temp.replace(index, index + content.length(), content2);
-            
+
             index = getIndexOfParaStart(temp, index + content2.length());
         }
-        
+
         String range = temp.toString();
         IdmlTagHelper h = new IdmlTagHelper();
         return h.mergeTags(range);
     }
-    
-    public static String formatForOfflineDownload (String s)
+
+    public static String formatForOfflineDownload(String s)
     {
         s = removeSpaceBeforeTag(s, "[^>]*?&lt;Content&gt;[^>]*?");
         s = removeSpaceAfterTags(s, "[^>]*?&lt;/Content&gt;[^>]*?");
-        s = removeSpaceBeforeTag(s, "[^>]*?&lt;CharacterStyleRange.*?&gt;[^>]*?");
-        s = removeSpaceAfterTags(s, "[^>]*?&lt;CharacterStyleRange.*?&gt;[^>]*?");
+        s = removeSpaceBeforeTag(s,
+                "[^>]*?&lt;CharacterStyleRange.*?&gt;[^>]*?");
+        s = removeSpaceAfterTags(s,
+                "[^>]*?&lt;CharacterStyleRange.*?&gt;[^>]*?");
         s = removeSpaceBeforeTag(s, "[^>]*?&lt;/CharacterStyleRange&gt;[^>]*?");
         s = removeSpaceAfterTags(s, "[^>]*?&lt;/CharacterStyleRange&gt;[^>]*?");
         return s;
     }
-    
+
     private static String trimSpaceBeforeTag(String s, String tagRegex)
     {
         StringBuffer temp = new StringBuffer(s);
@@ -1084,7 +1130,8 @@ public class IdmlHelper
                     if ("\n\t".indexOf(temp.charAt(i)) > -1)
                     {
                         temp.deleteCharAt(i);
-                    } else
+                    }
+                    else
                     {
                         break;
                     }
@@ -1094,7 +1141,7 @@ public class IdmlHelper
 
         return temp.toString();
     }
-    
+
     private static String trimSpaceAfterTags(String s, String tagRegex)
     {
         StringBuffer temp = new StringBuffer(s);
@@ -1119,7 +1166,8 @@ public class IdmlHelper
                     if ("\n\t".indexOf(temp.charAt(i)) > -1)
                     {
                         temp.deleteCharAt(i);
-                    } else
+                    }
+                    else
                     {
                         break;
                     }
@@ -1129,19 +1177,19 @@ public class IdmlHelper
 
         return temp.toString();
     }
-    
+
     private static String removeSpaceBeforeTag(String s, String tagRegex)
     {
         String realRegex = "<[^>]*?>" + tagRegex + "</[^>]*>";
         return trimSpaceBeforeTag(s, realRegex);
     }
-    
+
     private static String removeSpaceAfterTags(String s, String tagRegex)
     {
         String realRegex = "<[^>]*?>" + tagRegex + "</[^>]*>";
         return trimSpaceAfterTags(s, realRegex);
     }
-    
+
     private InddFilter getMainFilter()
     {
         try
@@ -1155,14 +1203,16 @@ public class IdmlHelper
             }
             long fpId = Long.parseLong(fpIdstr);
             FileProfile fileProfile = null;
-            fileProfile = ServerProxy.getFileProfilePersistenceManager().readFileProfile(fpId);
+            fileProfile = ServerProxy.getFileProfilePersistenceManager()
+                    .readFileProfile(fpId);
             long filterId = fileProfile.getFilterId();
             String filterTableName = fileProfile.getFilterTableName();
 
-            if (filterId > 0 && FilterConstants.INDD_TABLENAME.equals(filterTableName))
+            if (filterId > 0
+                    && FilterConstants.INDD_TABLENAME.equals(filterTableName))
             {
-                InddFilter f = (InddFilter) FilterHelper.getFilter(filterTableName,
-                        filterId);
+                InddFilter f = (InddFilter) FilterHelper.getFilter(
+                        filterTableName, filterId);
                 return f;
             }
             else

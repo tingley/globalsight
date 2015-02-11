@@ -86,7 +86,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
     private String m_taskType = TYPE_TRANSLATION;
 
-    private String m_companyId;
+    private long m_companyId;
 
     private long m_taskInstanceId = -99;
 
@@ -154,7 +154,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -164,7 +164,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }

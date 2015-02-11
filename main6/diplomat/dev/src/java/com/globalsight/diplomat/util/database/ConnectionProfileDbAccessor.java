@@ -20,6 +20,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.globalsight.ling.tm2.persistence.DbUtil;
+
 /**
  * Responsible for accessing connection profiles from the database.  Provides
  * static access only.
@@ -56,27 +58,36 @@ public class ConnectionProfileDbAccessor
     throws DbAccessException
     {
         ConnectionProfile profile = new ConnectionProfile();
+        Connection conn = null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
         try
         {
-        PreparedStatement st = getConnection().prepareStatement(SELECT_SQL);
-        st.setLong(1,p_id);
-        ResultSet rs = st.executeQuery();
-        if (rs.next())
-        {
-            profile.setId(rs.getLong(CON_ID));
-            profile.setProfileName(rs.getString(NAME));
-            profile.setDriver(rs.getString(DRIVER));
-            profile.setConnectionString(rs.getString(CONNECTION_STRING));
-            profile.setUserName(rs.getString(USER_NAME));
-            profile.setPassword(rs.getString(PASSWORD));
-        }
-        rs.close();
-        st.close();
+            conn = getConnection();
+            st = conn.prepareStatement(SELECT_SQL);
+            st.setLong(1,p_id);
+            rs = st.executeQuery();
+            if (rs.next())
+            {
+                profile.setId(rs.getLong(CON_ID));
+                profile.setProfileName(rs.getString(NAME));
+                profile.setDriver(rs.getString(DRIVER));
+                profile.setConnectionString(rs.getString(CONNECTION_STRING));
+                profile.setUserName(rs.getString(USER_NAME));
+                profile.setPassword(rs.getString(PASSWORD));
+            }
         }
         catch (Exception e)
         {
             throw new DbAccessException("Unable to read connection profile with id=" + p_id, e);
         }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(st);
+            DbUtil.silentReturnConnection(conn);
+        }
+
         return profile;
     }
 }

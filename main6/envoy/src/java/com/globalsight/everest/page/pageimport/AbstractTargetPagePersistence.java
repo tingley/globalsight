@@ -80,6 +80,7 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.leverage.MatchState;
+import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -106,14 +107,14 @@ public abstract class AbstractTargetPagePersistence implements
             .getLogger(AbstractTargetPagePersistence.class);
 
     private MachineTranslator machineTranslator = null;
-//    private boolean autoCommitToTm = false;
+    // private boolean autoCommitToTm = false;
     private IXliffProcessor processor;
 
     public AbstractTargetPagePersistence(MachineTranslator p_machineTranslator,
             boolean autoCommitToTm)
     {
         this.machineTranslator = p_machineTranslator;
-//        this.autoCommitToTm = autoCommitToTm;
+        // this.autoCommitToTm = autoCommitToTm;
     }
 
     public Collection<TargetPage> persistObjectsWithUnextractedFile(
@@ -232,8 +233,8 @@ public abstract class AbstractTargetPagePersistence implements
             TermLeverageResult p_termMatches, boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         Set<Tu> unAppliedTus = new HashSet<Tu>();
         unAppliedTus.addAll(p_sourceTuvMap.keySet());
@@ -299,8 +300,32 @@ public abstract class AbstractTargetPagePersistence implements
                         sourceLocale, p_targetLocale, unAppliedTus,
                         appliedTuTuvMap);
             }
+            
+            /****** Priority 5 : remove all internal text segments match ******/
+            Set<Tu> internalTextTus = new HashSet<Tu>();
+            if (appliedTuTuvMap != null && appliedTuTuvMap.size() > 0)
+            {
+                for (Iterator it = appliedTuTuvMap.keySet().iterator(); it.hasNext();)
+                {
+                    TuImpl tu = (TuImpl) it.next();
+                    Tuv tuv = (Tuv) p_sourceTuvMap.get(tu);
+                    if (InternalTextUtil.isInternalText(tuv.getGxmlExcludeTopTags()))
+                    {
+                        internalTextTus.add(tu);
+                    }
+                }
+            }
+            
+            if (internalTextTus.size() > 0)
+            {
+                for (Iterator it = internalTextTus.iterator(); it.hasNext();)
+                {
+                    TuImpl tu = (TuImpl) it.next();
+                    appliedTuTuvMap.remove(tu);
+                }
+            }
 
-            /****** Priority 5 : Handle Rest TUs ******/
+            /****** Priority 6 : Handle Rest TUs ******/
             if (p_sourceTuvMap.size() > appliedTuTuvMap.size())
             {
                 unAppliedTus.removeAll(appliedTuTuvMap.keySet());
@@ -317,7 +342,8 @@ public abstract class AbstractTargetPagePersistence implements
                                 companyId);
                     }
 
-                    if (tu.getTuv(newTuv.getLocaleId(), false, companyId) == null)
+                    if (tu.getTuv(newTuv.getLocaleId(), false, companyId) == null
+                            || internalTextTus.contains(tu))
                     {
                         tu.addTuv(newTuv);
                         appliedTuTuvMap.put(tu, newTuv);
@@ -384,8 +410,8 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         // 1. Some basic method variables
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
@@ -520,10 +546,10 @@ public abstract class AbstractTargetPagePersistence implements
                         }
                         if (!trg.isEmpty())
                         {
-                            boolean success = xlfProcess.addTargetTuvToTu(tu,
-                                    sourceTuv, targetTuv, src, trg,
-                                    p_appliedTuTuvMap, tmScore,
-                                    threshold, isPO);
+                            boolean success = xlfProcess
+                                    .addTargetTuvToTu(tu, sourceTuv, targetTuv,
+                                            src, trg, p_appliedTuTuvMap,
+                                            tmScore, threshold, isPO);
                             if (success)
                             {
                                 continue;
@@ -559,8 +585,8 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
         long threshold = getThresholdForMatchDataSources(tmProfile);
@@ -579,12 +605,11 @@ public abstract class AbstractTargetPagePersistence implements
         LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
                 .getLeverageMatchLingManager();
         // All 100% matches (=100)
-        @SuppressWarnings("unchecked")
         Map<Long, ArrayList<LeverageSegment>> exactMap = leverageMatchLingManager
                 .getExactMatchesWithSetInside(p_sourcePage.getIdAsLong(),
                         p_targetLocale.getIdAsLong(), mode, tmProfile);
         // All fuzzy matches (<100)
-        Map fuzzyLeverageMatchesMap = null;
+        Map<Long, Set<LeverageMatch>>  fuzzyLeverageMatchesMap = null;
         try
         {
             fuzzyLeverageMatchesMap = leverageMatchLingManager.getFuzzyMatches(
@@ -740,8 +765,8 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
         long tmProfileThreshold = tmProfile.getFuzzyMatchThreshold();
@@ -818,7 +843,8 @@ public abstract class AbstractTargetPagePersistence implements
             if (leverageFile.exists())
             {
                 FileInputStream file = new FileInputStream(leverageFile);
-                ArrayList matchList = tdaHelper.extract(file, tmProfileThreshold);
+                ArrayList matchList = tdaHelper.extract(file,
+                        tmProfileThreshold);
 
                 if (matchList != null && matchList.size() > 0)
                 {
@@ -891,8 +917,8 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
         long mtConfidenceScore = tmProfile.getMtConfidenceScore();
@@ -988,9 +1014,10 @@ public abstract class AbstractTargetPagePersistence implements
                     && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml)
                             .trim()))
             {
-				// As the MT returned translation may be invalid XML string,it
-				// should not fail the job creation process.
-            	try {
+                // As the MT returned translation may be invalid XML string,it
+                // should not fail the job creation process.
+                try
+                {
                     // Perhaps the MT results include nothing except for tags
                     Tuv copyTuv = new TuvImpl((TuvImpl) currentNewTuv);
                     copyTuv.setGxml(machineTranslatedGxml);
@@ -999,9 +1026,11 @@ public abstract class AbstractTargetPagePersistence implements
                     {
                         isGetMTResult = true;
                     }
-            	} catch (Exception ignore) {
-            		
-            	}
+                }
+                catch (Exception ignore)
+                {
+
+                }
             }
 
             // replace the content in target tuv with mt result
@@ -1388,28 +1417,31 @@ public abstract class AbstractTargetPagePersistence implements
         // IWS XLIFF
         if (tu.hasXliffTMScoreStr())
         {
-            try {
+            try
+            {
                 return Float.valueOf(tu.getIwsScore());
-            } catch (NumberFormatException ignore) {
+            }
+            catch (NumberFormatException ignore)
+            {
 
             }
         }
 
         // Passolo
-		if (isPassolo
-				&& ("Translated and reviewed".equals(passoloState) 
-						|| "Translated".equals(passoloState)))
-		{
-			return 100;
-		}
+        if (isPassolo
+                && ("Translated and reviewed".equals(passoloState) || "Translated"
+                        .equals(passoloState)))
+        {
+            return 100;
+        }
 
-		// translate="no"
-		boolean equals = isSrcEqualsTrg(p_srcSegment, p_trgSegment);
-		if (!Text.isBlank(p_trgSegment)
-				&& ("no".equalsIgnoreCase(tu.getTranslate()) || !equals))
-		{
-			return 100;
-		}
+        // translate="no"
+        boolean equals = isSrcEqualsTrg(p_srcSegment, p_trgSegment);
+        if (!Text.isBlank(p_trgSegment)
+                && ("no".equalsIgnoreCase(tu.getTranslate()) || !equals))
+        {
+            return 100;
+        }
 
         return 0;
     }
@@ -1474,25 +1506,26 @@ public abstract class AbstractTargetPagePersistence implements
         return tuv;
     }
 
-    private float getMaxScoreNum(Map p_fuzzyLeverageMatchesMap,
+    private float getMaxScoreNum(
+            Map<Long, Set<LeverageMatch>> p_fuzzyLeverageMatchesMap,
             Tuv p_sourceTuv, String p_subId)
     {
         float maxScoreNum = 0f;
 
-        Set leverageMatches = new HashSet();
+        Set<LeverageMatch> leverageMatches = new HashSet<LeverageMatch>();
         if (p_fuzzyLeverageMatchesMap != null
                 && p_fuzzyLeverageMatchesMap.size() > 0)
         {
-            leverageMatches = (Set) p_fuzzyLeverageMatchesMap.get(p_sourceTuv
+            leverageMatches = p_fuzzyLeverageMatchesMap.get(p_sourceTuv
                     .getIdAsLong());
         }
 
         if (leverageMatches != null && leverageMatches.size() > 0)
         {
-            Iterator lmIt = leverageMatches.iterator();
+            Iterator<LeverageMatch> lmIt = leverageMatches.iterator();
             while (lmIt.hasNext())
             {
-                LeverageMatch leverageMatch = (LeverageMatch) lmIt.next();
+                LeverageMatch leverageMatch = lmIt.next();
                 if (p_subId != null && p_subId.equals(leverageMatch.getSubId()))
                 {
                     float tmpScoreNum = leverageMatch.getScoreNum();
@@ -1509,7 +1542,7 @@ public abstract class AbstractTargetPagePersistence implements
 
     private HashMap<Tu, Tuv> formTuTuvMap(Set<Tu> p_unAppliedTus,
             HashMap<Tu, Tuv> p_sourceTuvMap, GlobalSightLocale p_targetLocale,
-            String companyId) throws TuvException, RemoteException, Exception
+            long companyId) throws TuvException, RemoteException, Exception
     {
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
 
@@ -1533,17 +1566,18 @@ public abstract class AbstractTargetPagePersistence implements
         return result;
     }
 
-	private long getThresholdForMatchDataSources(TranslationMemoryProfile tmProfile)
+    private long getThresholdForMatchDataSources(
+            TranslationMemoryProfile tmProfile)
     {
-		// Default is TM profile's threshold.
-    	long result = tmProfile.getFuzzyMatchThreshold();
+        // Default is TM profile's threshold.
+        long result = tmProfile.getFuzzyMatchThreshold();
 
-    	if (machineTranslator != null || tmProfile.getUseMT())
-    	{
-    		result = tmProfile.getMtConfidenceScore();
-    	}
-    	
-    	return result;
+        if (machineTranslator != null || tmProfile.getUseMT())
+        {
+            result = tmProfile.getMtConfidenceScore();
+        }
+
+        return result;
     }
 
 }

@@ -256,8 +256,8 @@ public class PageSegments implements Serializable
     private List createSegmentPairList(GlobalSightLocale p_trgLocale)
             throws PageSegmentsException
     {
-        String companyId = m_sourcePage != null ? m_sourcePage.getCompanyId()
-                : CompanyWrapper.getCurrentCompanyId();
+        long companyId = m_sourcePage != null ? m_sourcePage.getCompanyId()
+                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         List segmentPairList = new ArrayList();
 
@@ -630,8 +630,8 @@ public class PageSegments implements Serializable
         private void verifyMergeable(List p_segmentPairsToMerge)
                 throws PageSegmentsException
         {
-            String companyId = m_sourcePage != null ? m_sourcePage
-                    .getCompanyId() : CompanyWrapper.getCurrentCompanyId();
+            long companyId = m_sourcePage != null ? m_sourcePage.getCompanyId()
+                    : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
             SegmentPairImpl prevPair = this;
 
             Iterator it = p_segmentPairsToMerge.iterator();

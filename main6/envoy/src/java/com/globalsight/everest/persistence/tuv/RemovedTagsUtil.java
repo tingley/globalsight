@@ -32,6 +32,7 @@ import com.globalsight.everest.tuv.RemovedPrefixTag;
 import com.globalsight.everest.tuv.RemovedSuffixTag;
 import com.globalsight.everest.tuv.RemovedTag;
 import com.globalsight.everest.tuv.TuImpl;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -106,20 +107,21 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
      * @param p_tus
      * @param p_companyId
      * @param p_sourcePageId
+     * @param p_tuTablename -- TU table name job data in.
      */
     public static void loadAllRemovedTagsForTus(List<TuImpl> p_tus,
-            String p_companyId, long p_sourcePageId)
+            long p_companyId, long p_sourcePageId, String p_tuTableName)
     {
-        loadRemovedTags(p_tus, p_companyId, p_sourcePageId);
-        loadPrefixTag(p_tus, p_companyId, p_sourcePageId);
-        loadSuffixTag(p_tus, p_companyId, p_sourcePageId);
+        loadRemovedTags(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
+        loadPrefixTag(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
+        loadSuffixTag(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
     }
-    
-    private static void loadRemovedTags(List<TuImpl> p_tus, String p_companyId,
-            long p_sourcePageId)
+
+    private static void loadRemovedTags(List<TuImpl> p_tus, long p_companyId,
+            long p_sourcePageId, String p_tuTableName)
     {
         String sql = LOAD_REMOVED_TAGS_BY_SPID_SQL.replace(
-                TU_TABLE_PLACEHOLDER, getTuTableName(p_companyId));
+                TU_TABLE_PLACEHOLDER, p_tuTableName);
         List<RemovedTag> removedTags = HibernateUtil.searchWithSql(
                 RemovedTag.class, sql, p_sourcePageId);
         
@@ -153,11 +155,11 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
         }
     }
     
-    private static void loadPrefixTag(List<TuImpl> p_tus, String p_companyId,
-            long p_sourcePageId)
+    private static void loadPrefixTag(List<TuImpl> p_tus, long p_companyId,
+            long p_sourcePageId, String p_tuTableName)
     {
         String sql = LOAD_REMOVED_PREFIX_TAG_BY_SPID_SQL.replace(
-                TU_TABLE_PLACEHOLDER, getTuTableName(p_companyId));
+                TU_TABLE_PLACEHOLDER, p_tuTableName);
         List<RemovedPrefixTag> prefixTags = HibernateUtil.searchWithSql(
                 RemovedPrefixTag.class, sql, p_sourcePageId);
         
@@ -184,11 +186,11 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
         }
     }
     
-    private static void loadSuffixTag(List<TuImpl> p_tus, String p_companyId,
-            long p_sourcePageId)
+    private static void loadSuffixTag(List<TuImpl> p_tus, long p_companyId,
+            long p_sourcePageId, String p_tuTableName)
     {
         String sql = LOAD_REMOVED_SUFFIX_TAG_BY_SPID_SQL.replace(
-                TU_TABLE_PLACEHOLDER, getTuTableName(p_companyId));
+                TU_TABLE_PLACEHOLDER, p_tuTableName);
         List<RemovedSuffixTag> suffixTags = HibernateUtil.searchWithSql(
                 RemovedSuffixTag.class, sql, p_sourcePageId);
         

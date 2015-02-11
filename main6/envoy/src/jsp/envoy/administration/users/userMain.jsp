@@ -92,15 +92,20 @@
         error = "";
     }
 
-    
-
 	String uNameFilter = (String) sessionMgr.getAttribute("uNameFilter");
+	uNameFilter = uNameFilter == null ? "" : uNameFilter;
 	String ufNameFilter = (String) sessionMgr.getAttribute("ufNameFilter");
+	ufNameFilter = ufNameFilter == null ? "" : ufNameFilter;
 	String ulNameFilter = (String) sessionMgr.getAttribute("ulNameFilter");
+	ulNameFilter = ulNameFilter == null ? "" : ulNameFilter;
 	String uEmailFilter = (String) sessionMgr.getAttribute("uEmailFilter");
+	uEmailFilter = uEmailFilter == null ? "" : uEmailFilter;
 	String uCompanyFilter = (String) sessionMgr.getAttribute("uCompanyFilter");
- 	 String uProjectFilter = (String) sessionMgr.getAttribute("uProjectFilter");
-     String uPermissionFilter = (String) sessionMgr.getAttribute("uPermissionFilter");
+	uCompanyFilter = uCompanyFilter == null ? "" : uCompanyFilter;
+ 	String uProjectFilter = (String) sessionMgr.getAttribute("uProjectFilter");
+ 	uProjectFilter = uProjectFilter == null ? "" : uProjectFilter;
+    String uPermissionFilter = (String) sessionMgr.getAttribute("uPermissionFilter");
+    uPermissionFilter = uPermissionFilter == null ? "" : uPermissionFilter;
 	
 	 // Labels, etc
     String lbsearch = bundle.getString("lb_search");
@@ -111,8 +116,6 @@
     List srcLocales = (List)request.getAttribute("srcLocales");
     List targLocales = (List)request.getAttribute("targLocales");
     String[] levels = (String[])request.getAttribute("levels");
-    
-
 %>
 <html>
 <head>
@@ -136,7 +139,7 @@ $(
 	function(){
 		$("#userForm").keydown(function(e){
 
-			if(e.keyCode==13)//Èç¹ûÑ¡ÖÐµÄÊÇdiv1ÖÐµÄÎÄ×ÖÈ»ºó°´ÏÂenter¼üÃ»ÓÐ·´Ó¦£¬±ØÐëÊÇ¿ÉÒÔ»ñµÃ½¹µãµÄ¿Ø¼þ²ÅÄÜ°´ÏÂ°´¼ü
+			if(e.keyCode==13)//ï¿½ï¿½ï¿½Ñ¡ï¿½Ðµï¿½ï¿½ï¿½div1ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½enterï¿½ï¿½Ã»ï¿½Ð·ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½Ô»ï¿½Ã½ï¿½ï¿½ï¿½Ä¿Ø¼ï¿½ï¿½ï¿½ï¿½Ü°ï¿½ï¿½Â°ï¿½ï¿½ï¿½
 			
 			{
 				submitForm("Search")
@@ -178,16 +181,14 @@ function handleSelectAll() {
 	}
 	buttonManagement();
 }
-function modifyuser(name){
-	
-		var url = "<%=editUrl%>&&radioBtn=" + name;
 
-   		userForm.action = url;
-
-        userForm.submit();
-   				  
-				
+function modifyuser(name)
+{
+    var url = "<%=editUrl%>&radioBtn=" + name;
+	userForm.action = url;
+    userForm.submit();
 }
+
 function submitForm(selectedButton)
 {
     // otherwise do the following
@@ -293,13 +294,14 @@ function submitForm(selectedButton)
     	<input type="checkbox" name="radioBtn" id="<%=user.getUserId()%>" value="<%=user.getUserId()%>" onclick="buttonManagement()">
     </amb:column>
 
-    <amb:column label="lb_user_name" sortBy="<%=UserComparator.USERNAME%>" filter="uNameFilter" filterValue="<%=uNameFilter == null ? "" : uNameFilter %>" width="120">
-        <a href='javascript:void(0)' title='Edit user' onclick="modifyuser('<%= user.getUserId() %>')"> <%= user.getUserName() %> </a>
-
-    
-
+    <amb:column label="lb_user_name" sortBy="<%=UserComparator.USERNAME%>" filter="uNameFilter" filterValue="<%=uNameFilter%>" width="120">
+    <%  if (perms.getPermissionFor(Permission.USERS_EDIT)) { %>
+        <a href="javascript:void(0)" title="Edit user" onclick="modifyuser('<%=user.getUserId()%>');"><%=user.getUserName()%></a>
+    <%  } else { %>
+        <%=user.getUserName() %>
+    <%  } %>
     </amb:column>
-  <amb:column label="lb_first_name" sortBy="<%=UserComparator.FIRSTNAME%>" filter="ufNameFilter" filterValue="<%=ufNameFilter== null ? "" : ufNameFilter %>" width="120">
+    <amb:column label="lb_first_name" sortBy="<%=UserComparator.FIRSTNAME%>" filter="ufNameFilter" filterValue="<%=ufNameFilter%>" width="120">
     <%
     String name = user.getFirstName();
     if (securities != null)
@@ -314,7 +316,7 @@ function submitForm(selectedButton)
         out.print(name);
     %>
     </amb:column>
-    <amb:column label="lb_last_name" sortBy="<%=UserComparator.LASTNAME%>" filter="ulNameFilter" filterValue="<%=ulNameFilter== null ? "" : ulNameFilter %>" width="120">
+    <amb:column label="lb_last_name" sortBy="<%=UserComparator.LASTNAME%>" filter="ulNameFilter" filterValue="<%=ulNameFilter%>" width="120">
     <%
 
         String name = user.getLastName();
@@ -332,21 +334,21 @@ function submitForm(selectedButton)
     %>
     </amb:column>
     
-    <amb:column label="lb_project" sortBy="<%=UserComparator.PROJECT%>" filter="uProjectFilter" filterValue="<%=uProjectFilter== null ? "" : uProjectFilter %>" width="120">
+    <amb:column label="lb_project" sortBy="<%=UserComparator.PROJECT%>" filter="uProjectFilter" filterValue="<%=uProjectFilter%>" width="120">
     <%
         String name = user.getProjectNames();
 
         out.print(name);
     %>
     </amb:column>
-  	<amb:column label="lb_email" sortBy="<%=UserComparator.EMAIL%>" filter="uEmailFilter" filterValue="<%=uEmailFilter== null ? "" : uEmailFilter %>"   width="120">
+  	<amb:column label="lb_email" sortBy="<%=UserComparator.EMAIL%>" filter="uEmailFilter" filterValue="<%=uEmailFilter%>"   width="120">
     <%
         String name = user.getEmail();
 
         out.print(name== null ? "" : name);
     %>
     </amb:column>
-		<amb:column label="lb_permission_group" sortBy="<%=UserComparator.PERMISSION%>"  filter="uPermissionFilter" filterValue="<%=uPermissionFilter== null ? "" : uPermissionFilter %>"  width="120">
+		<amb:column label="lb_permission_group" sortBy="<%=UserComparator.PERMISSION%>"  filter="uPermissionFilter" filterValue="<%=uPermissionFilter%>"  width="120">
     <%
         String name = user.getPermissiongNames();
 
@@ -356,7 +358,7 @@ function submitForm(selectedButton)
 
 
     <% if (isSuperAdmin) { %>
-    <amb:column label="lb_company_name" sortBy="<%=UserComparator.ASC_COMPANY%>" filter="uCompanyFilter" filterValue="<%=uCompanyFilter== null ? "" : uCompanyFilter %>" width="120">
+    <amb:column label="lb_company_name" sortBy="<%=UserComparator.ASC_COMPANY%>" filter="uCompanyFilter" filterValue="<%=uCompanyFilter%>" width="120">
       <%=user.getCompanyName()%>
     </amb:column>
     <amb:column label="lb_active" width="20px">

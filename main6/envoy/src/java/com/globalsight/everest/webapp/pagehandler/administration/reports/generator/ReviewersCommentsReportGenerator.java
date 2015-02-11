@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import jxl.CellView;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -50,6 +51,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
+import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -91,7 +93,8 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  * Reviewers Comments Report Generator, Include Reviewers Comments Report in
  * offline download report.
  */
-public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancelable
+public class ReviewersCommentsReportGenerator implements ReportGenerator,
+        Cancelable
 {
     static private final Logger logger = Logger
             .getLogger(ReviewersCommentsReportGenerator.class);
@@ -147,10 +150,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             HttpServletResponse p_response) throws Exception
     {
         HttpSession session = p_request.getSession();
-
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
-        m_companyName = UserUtil.getCurrentCompanyName(p_request);
-        CompanyThreadLocal.getInstance().setValue(m_companyName);
         if (p_request.getSession().getAttribute(WebAppConstants.UILOCALE) != null)
         {
             m_uiLocale = (Locale) p_request.getSession().getAttribute(
@@ -173,6 +173,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
                         comparator);
 
+        m_companyName = UserUtil.getCurrentCompanyName(p_request);
+        if (CompanyWrapper.isSuperCompanyName(m_companyName)
+                && m_jobIDS != null && m_jobIDS.size() > 0)
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(m_jobIDS.get(0));
+            m_companyName = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+        }
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
+        
         m_isCalculatePercent = true;
     }
 
@@ -208,15 +217,12 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     }
 
     /**
-     * Send Report Files to Client
+     * Create Reports for download
      * 
      * @param p_jobIDS
      *            Job ID List
      * @param p_targetLocales
      *            Target Locales List
-     * @param p_companyName
-     *            Company Name
-     * @throws Exception
      */
     public File[] generateReports(List<Long> p_jobIDS,
             List<GlobalSightLocale> p_targetLocales) throws Exception
@@ -239,10 +245,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Cancel generate reports.
             if (isCancelled())
                 return null;
-            
+
             if (cancel)
-            	return null;
-            
+                return null;
+
             // Sets Reports Percent.
             setPercent(++finishedJobNum);
 
@@ -276,9 +282,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         {
             if (!jobTL.contains(tgtL))
                 continue;
-            
+
             if (cancel)
-            	return;
+                return;
 
             // Create Report Template
             WritableSheet sheet = p_workbook.createSheet(tgtL.toString(),
@@ -291,6 +297,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             addLanguageHeader(sheet);
             // Add Segment Header
             addSegmentHeader(sheet, SEGMENT_HEADER_ROW);
+            // Create Name Areas for drop down list.
+            createNameAreas(p_workbook);
 
             // Insert Language Data
             writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(m_uiLocale));
@@ -625,11 +633,60 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     /**
      * Get category failures
      */
-    private WritableCellFeatures getSelectFeatures() throws Exception
+    private WritableCellFeatures getSelectFeatures(String p_nameedRange) throws Exception
     {
         WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(getFailureCategoriesList());
+        features.setDataValidationRange(p_nameedRange);
         return features;
+    }
+    
+    /**
+     * Create Workbook Name Areas for Drop Down List,
+     * Only write the data of drop down list into the first sheet.
+     */
+    private void createNameAreas(WritableWorkbook p_workbook)
+    {
+        try
+        {
+            if (p_workbook.getSheets().length == 1)
+            {
+                WritableSheet sheet = p_workbook.getSheet(0);
+                List<String> categories = getFailureCategoriesList();
+                int col = sheet.getColumns() + 1;
+                for (int i = 0; i < categories.size(); i++)
+                {
+                    sheet.addCell(new Label(col, SEGMENT_START_ROW + i,
+                            categories.get(i)));
+                }
+                // Hidden Category Column.
+                CellView cellView = new CellView();
+                cellView.setHidden(true);
+                sheet.setColumnView(col, cellView);
+                
+                p_workbook.addNameArea(CATEGORY_LIST, sheet, 
+                        col, SEGMENT_START_ROW, 
+                        col, SEGMENT_START_ROW + categories.size());
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Reviewers Comments Report Write Category Error." + e);
+        }
+    }
+    
+    private List<String> getFailureCategoriesList()
+    {
+        List<String> result = new ArrayList<String>();
+
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List failureCategories = IssueOptions.getAllCategories(m_bundle, currentCompanyId);
+        for (int i = 0; i < failureCategories.size(); i++)
+        {
+            Select aCategory = (Select) failureCategories.get(i);
+            String cat = aCategory.getValue();
+            result.add(cat);
+        }
+        return result;
     }
 
     /**
@@ -671,7 +728,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             excludItems = new ArrayList<String>(tmp.getJobExcludeTuTypes());
         }
 
-        String companyId = p_job.getCompanyId();
+        long companyId = p_job.getCompanyId();
 
         for (Iterator it = p_job.getWorkflows().iterator(); it.hasNext();)
         {
@@ -705,7 +762,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
                     sourcePageLocale, targetPageLocale, p_job.getL10nProfile()
                             .getProject().getTermbaseName(),
-                    p_job.getCompanyId());
+                    String.valueOf(p_job.getCompanyId()));
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
             if (termLeverageOptions != null)
             {
@@ -723,9 +780,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             String sid = null;
             for (int i = 0; i < targetPages.size(); i++)
             {
-            	if (cancel)
-                	return 0;
-            	
+                if (cancel)
+                    return 0;
+
                 TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
@@ -744,15 +801,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         .isRTLLocale(targetPageLocale.toString());
 
                 // Find segment all comments belong to this target page
-                List issues = null;
-                issues = commentManager.getIssues(Issue.TYPE_SEGMENT,
-                        String.valueOf(targetPage.getId()) + "\\_");
+                List<IssueImpl> issues = commentManager.getIssues(
+                        Issue.TYPE_SEGMENT, targetPage.getId());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
-                	if (cancel)
-                    	return 0;
-                	
+                    if (cancel)
+                        return 0;
+
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
@@ -771,9 +827,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     {
                         for (int m = 0; m < issues.size(); m++)
                         {
-                        	if (cancel)
-                            	return 0;
-                        	
+                            if (cancel)
+                                return 0;
+
                             Issue issue = (Issue) issues.get(m);
                             String logicKey = CommentHelper.makeLogicalKey(
                                     targetPage.getId(),
@@ -817,9 +873,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         for (Iterator ite = leverageMatches.iterator(); ite
                                 .hasNext();)
                         {
-                        	if (cancel)
-                            	return 0;
-                        	
+                            if (cancel)
+                                return 0;
+
                             LeverageMatch leverageMatch = (LeverageMatch) ite
                                     .next();
                             if ((leverageMatches.size() > 1))
@@ -844,13 +900,13 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     {
                         matches = m_bundle.getString("lb_no_match_report");
                     }
-                    if (sourceTuv.getTu(companyId).isRepeated())
+                    if (targetTuv.isRepeated())
                     {
                         matches += "\r\n"
                                 + m_bundle
                                         .getString("jobinfo.tradosmatches.invoice.repeated");
                     }
-                    else if (sourceTuv.getTu(companyId).getRepetitionOfId() != 0)
+                    else if (targetTuv.getRepetitionOfId() > 0)
                     {
                         matches += "\r\n"
                                 + m_bundle
@@ -977,7 +1033,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
 
                     Label dropdown = null;
                     dropdown = new Label(col++, p_row, failure, cfFormat);
-                    dropdown.setCellFeatures(getSelectFeatures());
+                    dropdown.setCellFeatures(getSelectFeatures(CATEGORY_LIST));
                     p_sheet.addCell(dropdown);
                     p_sheet.setColumnView(col - 1, 30);
 
@@ -1050,22 +1106,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         return false;
     }
 
-    private List<String> getFailureCategoriesList()
-    {
-        List<String> result = new ArrayList<String>();
-
-        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List failureCategories = IssueOptions.getAllCategories(m_bundle,
-                currentCompanyId);
-        for (int i = 0; i < failureCategories.size(); i++)
-        {
-            Select aCategory = (Select) failureCategories.get(i);
-            String cat = aCategory.getValue();
-            result.add(cat.replace(",", " "));
-        }
-        return result;
-    }
-
     private void setWritableCellFormatNull()
     {
         contentFormat = null;
@@ -1088,7 +1128,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         if (m_isCalculatePercent)
         {
             ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS,
-                    100 * p_finishedJobNum / m_jobIDS.size());
+                    100 * p_finishedJobNum / m_jobIDS.size(), getReportType());
         }
     }
 
@@ -1099,7 +1139,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         if (m_isCalculatePercent)
         {
             ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId,
-                    m_jobIDS);
+                    m_jobIDS, getReportType());
             if (data != null)
                 return data.isCancle();
         }
@@ -1107,9 +1147,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         return false;
     }
 
-	@Override
-	public void cancel() 
-	{
-		cancel = true;
-	}
+    @Override
+    public void cancel()
+    {
+        cancel = true;
+    }
 }

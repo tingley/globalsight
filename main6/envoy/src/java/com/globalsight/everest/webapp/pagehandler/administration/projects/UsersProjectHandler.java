@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -54,9 +53,7 @@ import com.globalsight.everest.util.comparator.UserInfoComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
-
 
 public class UsersProjectHandler extends PageHandler
 {
@@ -64,36 +61,36 @@ public class UsersProjectHandler extends PageHandler
     private static final int MODIFY_EXISTING_PROJECT = 2;
     private static final int REMOVE_EXISTING_PROJECT = 3;
 
-
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  ServletContext context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         if (request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
         {
-            response
-                    .sendRedirect("/globalsight/ControlServlet?activityName=projects");
+            response.sendRedirect("/globalsight/ControlServlet?activityName=projects");
             return;
         }
         HttpSession session = request.getSession(false);
         try
         {
-            SessionManager sessionMgr =
-                (SessionManager)session.getAttribute(SESSION_MANAGER);
+            SessionManager sessionMgr = (SessionManager) session
+                    .getAttribute(SESSION_MANAGER);
 
             // save data from first page
-            Project project = (Project)sessionMgr.getAttribute("project");
+            Project project = (Project) sessionMgr.getAttribute("project");
             if (project == null)
             {
                 project = ProjectHandlerHelper.createProject();
@@ -102,21 +99,21 @@ public class UsersProjectHandler extends PageHandler
             sessionMgr.setAttribute("project", project);
 
             // Get default users
-            ArrayList defUsers = (ArrayList)
-                ProjectHandlerHelper.getPossibleUsersForProject(project.getProjectManager());
+            ArrayList defUsers = (ArrayList) ProjectHandlerHelper
+                    .getPossibleUsersForProject(project.getProjectManager());
 
-            // loop through and make three lists.  The first list is all
+            // loop through and make three lists. The first list is all
             // the Users that are available for all projects and cannot
-            // be removed from a project.  They are added to a project by
-            // default.  The second list is users that can be added
-            // and removed from projects.  The third list is the list of
+            // be removed from a project. They are added to a project by
+            // default. The second list is users that can be added
+            // and removed from projects. The third list is the list of
             // added users that weren't added by default.
             ArrayList possibleUsers = new ArrayList();
             Set addedUsers = new TreeSet(project.getUserIds());
 
             for (int i = 0; i < defUsers.size(); i++)
             {
-                UserInfo userInfo = (UserInfo)defUsers.get(i);
+                UserInfo userInfo = (UserInfo) defUsers.get(i);
                 if (userInfo.isInAllProjects())
                 {
                     // It's added by default, remove it from added list
@@ -130,14 +127,14 @@ public class UsersProjectHandler extends PageHandler
             }
 
             // If we got here via a sort, then addedUsers may not be correct.
-            // Check request for hidden field "toField".  If it's set, use
+            // Check request for hidden field "toField". If it's set, use
             // that list rather than the addedUsers just calculated.
-            String toField = (String)request.getParameter("toField");
+            String toField = (String) request.getParameter("toField");
             if (toField != null)
             {
                 String[] userids = toField.split(",");
                 addedUsers = new TreeSet();
-                for (int i=0; i < userids.length; i++)
+                for (int i = 0; i < userids.length; i++)
                 {
                     addedUsers.add(userids[i]);
                 }
@@ -169,27 +166,21 @@ public class UsersProjectHandler extends PageHandler
             }
 
             // fix for GBS-1693
-            Collections.sort(defUsers, new UserInfoComparator(Locale
-                    .getDefault()));
-            Collections.sort(possibleUsers, new UserInfoComparator(Locale
-                    .getDefault()));
-            Collections.sort(addedUsersIds, new StringComparator(Locale
-                    .getDefault()));
+            Collections.sort(defUsers,
+                    new UserInfoComparator(Locale.getDefault()));
+            Collections.sort(possibleUsers,
+                    new UserInfoComparator(Locale.getDefault()));
+            Collections.sort(addedUsersIds,
+                    new StringComparator(Locale.getDefault()));
 
             request.setAttribute("toField", toField);
             request.setAttribute("addedUsersIds", addedUsersIds);
-            Locale locale = (Locale)session.getAttribute(
-                WebAppConstants.UILOCALE);
+            Locale locale = (Locale) session
+                    .getAttribute(WebAppConstants.UILOCALE);
             setTableNavigation(request, session, defUsers,
-                           new UserInfoComparator(locale),
-                           10,
-                           "numPerPage",
-                           "numPages", "defUsers",
-                           "sorting",
-                           "reverseSort",
-                           "pageNum",
-                           "lastPageNum",
-                           "listSize");
+                    new UserInfoComparator(locale), 10, "numPerPage",
+                    "numPages", "defUsers", "sorting", "reverseSort",
+                    "pageNum", "lastPageNum", "listSize");
             sessionMgr.setAttribute("defUsers", defUsers);
 
             // Set possible users
@@ -201,7 +192,7 @@ public class UsersProjectHandler extends PageHandler
             // Filter out ones that are added by default because they
             // are part of all projects.
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
@@ -209,20 +200,21 @@ public class UsersProjectHandler extends PageHandler
     }
 
     private void setData(Project p_project, HttpServletRequest p_request,
-                         SessionManager p_sessionMgr)
-        throws EnvoyServletException
+            SessionManager p_sessionMgr) throws EnvoyServletException
     {
         // If just doing a sort, don't set fields
-        String linkName = (String)p_request.getParameter("linkName");
-        if ("self".equals(linkName)) return;
-        
+        String linkName = (String) p_request.getParameter("linkName");
+        if ("self".equals(linkName))
+            return;
+
         ProjectHandlerHelper.setData(p_project, p_request, false);
 
-        p_project.setCompanyId(CompanyThreadLocal.getInstance().getValue());
-        String pmName = (String)p_sessionMgr.getAttribute("pmId");                
-        if (pmName == null)  
+        p_project.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
+        String pmName = (String) p_sessionMgr.getAttribute("pmId");
+        if (pmName == null)
         {
-            pmName = (String)p_request.getParameter("pmField");
+            pmName = (String) p_request.getParameter("pmField");
         }
         if (pmName != null)
         {

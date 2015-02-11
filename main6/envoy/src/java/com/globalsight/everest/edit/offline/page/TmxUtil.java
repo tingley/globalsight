@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -31,6 +33,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tm.util.Tmx.Prop;
 import com.globalsight.util.FileUtil;
@@ -122,7 +125,8 @@ public class TmxUtil
 
     public static String composeFirstMatch(String p_source,
             String p_sourceLocale, String p_target, String p_targetLocale,
-            String p_userId, Date p_date, int p_tmxLevel, String sid)
+            String p_userId, Date p_date, int p_tmxLevel, String sid,
+            DownloadParams p_params)
     {
         StringBuffer result = new StringBuffer();
         if (p_date == null)
@@ -148,37 +152,44 @@ public class TmxUtil
         }
 
         // Source TUV
-        result.append("<tuv xml:lang=\"");
-        result.append(p_sourceLocale.replace("_", "-"));
-        result.append("\"");
-        result.append(">\r\n");
-        result.append(convertToTmxLevel(p_source, p_tmxLevel));
-        result.append("</tuv>\r\n");
+        result.append(composeTmTuv(p_sourceLocale, p_source, p_tmxLevel, p_params));
 
         // Target TUV
+        result.append(composeTmTuv(p_targetLocale, p_target, p_tmxLevel, p_params));
+
+        return result.toString();
+    }
+    
+    public static String composeTmTuv(String p_localeName, String p_tuvStr,
+            int p_tmxLevel, DownloadParams p_params)
+    {
+        StringBuffer result = new StringBuffer();
+        String tuv = operateCDATA(p_tuvStr);
+        
         result.append("<tuv xml:lang=\"");
-        result.append(p_targetLocale.replace("_", "-"));
-        result.append("\"");
-        result.append(">\r\n");
-        result.append(convertToTmxLevel(p_target, p_tmxLevel));
+        result.append(p_localeName.replace("_", "-"));
+        result.append("\">\r\n");
+        result.append(convertToTmxLevel(tuv, p_tmxLevel));
         result.append("</tuv>\r\n");
 
         return result.toString();
     }
-
-    public static String composeTargetTu(String p_target,
-            String p_targetLocale, int p_tmxLevel)
+    
+    //Encodes Greater Than and Less Than in CDATA element.
+    public static String operateCDATA(String p_segText)
     {
-        StringBuffer result = new StringBuffer();
-        // Target TUV
-        result.append("<tuv xml:lang=\"");
-        result.append(p_targetLocale.replace("_", "-"));
-        result.append("\"");
-        result.append(">\r\n");
-        result.append(convertToTmxLevel(p_target, p_tmxLevel));
-        result.append("</tuv>\r\n");
-
-        return result.toString();
+        String segment = p_segText;
+        String pattern = "!\\[CDATA.*?\\]\\]";
+        Pattern r = Pattern.compile(pattern);
+        Matcher matcher = r.matcher(segment);
+        while (matcher.find())
+        {
+            String orig = matcher.group();
+            segment = segment.replace(orig,
+                    orig.replace("<", "&lt;").replace(">", "&gt;"));
+        }
+        
+        return segment;
     }
 
     public static String composeTuTail()
@@ -188,7 +199,7 @@ public class TmxUtil
 
     public static String composeTu(String p_source, String p_sourceLocale,
             String p_target, String p_targetLocale, String p_userId,
-            Date p_date, int p_tmxLevel, String sid)
+            Date p_date, int p_tmxLevel, String sid, DownloadParams p_params)
     {
         StringBuffer result = new StringBuffer();
         if (p_date == null)
@@ -215,12 +226,7 @@ public class TmxUtil
         }
 
         // Source TUV
-        result.append("<tuv xml:lang=\"");
-        result.append(p_sourceLocale.replace("_", "-"));
-        result.append("\"");
-        result.append(">\r\n");
-        result.append(convertToTmxLevel(p_source, p_tmxLevel));
-        result.append("</tuv>\r\n");
+        result.append(composeTmTuv(p_sourceLocale, p_source, p_tmxLevel, p_params));
         
         if (p_source == null || "null".equalsIgnoreCase(p_source.trim()))
             s_logger.warn(getEmptySourceSegmentInfo(p_source, p_sourceLocale,
@@ -228,12 +234,7 @@ public class TmxUtil
                     p_date, p_tmxLevel, sid));
         
         // Target TUV
-        result.append("<tuv xml:lang=\"");
-        result.append(p_targetLocale.replace("_", "-"));
-        result.append("\"");
-        result.append(">\r\n");
-        result.append(convertToTmxLevel(p_target, p_tmxLevel));
-        result.append("</tuv>\r\n");
+        result.append(composeTmTuv(p_targetLocale, p_target, p_tmxLevel, p_params));
         // TU close tag
         result.append("</tu>\r\n");
 
@@ -268,12 +269,9 @@ public class TmxUtil
     	}
 
         Element root = dom.getRootElement();
-        String[] strs =
-        { "//bpt", "//ept", "//ph", "//it", "//ut", "//hi" };
-        String[] attributes =
-        { "locType", "wordcount", "erasable", "movable" };
         if (p_tmxLevel == TMX_LEVEL_ONE)
         {
+            String[] strs = { "//bpt", "//ept", "//ph", "//it", "//ut", "//hi" };
             replaceNbsps(root);
             for (int i = 0; i < strs.length; i++)
             {
@@ -282,17 +280,16 @@ public class TmxUtil
         }
         else if (p_tmxLevel == TMX_LEVEL_TWO)
         {
+            String[] attributes = { "locType", "wordcount", "erasable", "movable" };
             // TMX Compliance: nbsp must be output as character.
             replaceNbsps(root);
             // Remove any SUB tags (but TM2 doesn't contain any).
             removeSubElements(root);
             removeUncompliantAttributes(root, attributes);
-            removeAttributeForNode(root, "it", new String[]
-            { "i" });
+            removeAttributeForNode(root, "it", new String[]{ "i" });
         }
 
         return root.asXML();
-
     }
 
     public static String convertXlfToTmxFormat(String p_xml)

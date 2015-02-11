@@ -18,7 +18,6 @@ package com.globalsight.calendar;
 
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import java.util.TimeZone;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -64,7 +62,8 @@ public class CalendarManagerLocal implements CalendarManager
 
     private static boolean s_isInstalled = false;
 
-    private static HashMap<Integer, String> s_dayOfWeek = new HashMap<Integer, String>(7);
+    private static HashMap<Integer, String> s_dayOfWeek = new HashMap<Integer, String>(
+            7);
     static
     {
         validateInstallationKey();
@@ -265,7 +264,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { p_userCalendar.getOwnerUserId() };
+            String[] args =
+            { p_userCalendar.getOwnerUserId() };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_CREATE_USER_CALENDAR_FAILED,
                     args, e);
@@ -326,7 +326,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String args[] = { String.valueOf(p_calendarId) };
+            String args[] =
+            { String.valueOf(p_calendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_HOLIDAY_BY_CAL_ID_FAILED,
                     args, e);
@@ -360,7 +361,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_taskId) };
+            String[] args =
+            { String.valueOf(p_taskId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_RESERVED_TIME_FOR_TASK_FAILED,
                     args, e);
@@ -397,7 +399,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_userCalendarId) };
+            String[] args =
+            { String.valueOf(p_userCalendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_RESERVED_TIMES_FOR_DATE_FAILED,
                     args, e);
@@ -413,7 +416,8 @@ public class CalendarManagerLocal implements CalendarManager
         UserFluxCalendar cal = getUserFluxCalendarById(new Long(
                 p_userCalendarId));
 
-        return computeUserCalendarIntervals(cal, new Timestamp(cal.getTimeZone()));
+        return computeUserCalendarIntervals(cal,
+                new Timestamp(cal.getTimeZone()));
     }
 
     /**
@@ -450,7 +454,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String args[] = { p_userId };
+            String args[] =
+            { p_userId };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_USER_TIME_ZONE, args, e);
         }
@@ -474,7 +479,8 @@ public class CalendarManagerLocal implements CalendarManager
             else
             {
                 hql += " where c.companyId = ? ";
-                return HibernateUtil.search(hql, currentCompanyId);
+                return HibernateUtil.search(hql,
+                        Long.parseLong(currentCompanyId));
             }
         }
         catch (Exception e)
@@ -494,7 +500,7 @@ public class CalendarManagerLocal implements CalendarManager
         try
         {
             String hql = " from FluxCalendar c where c.companyId = ? ";
-            return HibernateUtil.search(hql, p_companyId);
+            return HibernateUtil.search(hql, Long.parseLong(p_companyId));
         }
         catch (Exception e)
         {
@@ -522,7 +528,8 @@ public class CalendarManagerLocal implements CalendarManager
             else
             {
                 hql += " where h.companyId = ? ";
-                return HibernateUtil.search(hql, currentCompanyId);
+                return HibernateUtil.search(hql,
+                        Long.parseLong(currentCompanyId));
             }
         }
         catch (Exception e)
@@ -554,7 +561,7 @@ public class CalendarManagerLocal implements CalendarManager
             {
                 sql += " and c.company_id = ? ";
                 return HibernateUtil.searchWithSql(UserFluxCalendar.class, sql,
-                        currentCompanyId);
+                        Long.parseLong(currentCompanyId));
             }
         }
         catch (Exception e)
@@ -596,11 +603,12 @@ public class CalendarManagerLocal implements CalendarManager
 
                     // imported entry would be 'event' type.
                     ReservedTime rt = new ReservedTime(entry.getSubject(),
-                            ReservedTime.TYPE_EVENT, createTimestamp(entry
-                                    .getStartDate(), entry
-                                    .getStartDateFormatType(), tz), 0, 0,
-                            createTimestamp(entry.getEndDate(), entry
-                                    .getEndDateFormatType(), tz), 0, 0, null);
+                            ReservedTime.TYPE_EVENT, createTimestamp(
+                                    entry.getStartDate(),
+                                    entry.getStartDateFormatType(), tz), 0, 0,
+                            createTimestamp(entry.getEndDate(),
+                                    entry.getEndDateFormatType(), tz), 0, 0,
+                            null);
 
                     session.save(rt);
                     cal.addReservedTime(rt);
@@ -631,7 +639,8 @@ public class CalendarManagerLocal implements CalendarManager
             return;
         }
 
-        FluxCalendar defaultCal = getDefaultCalendar(cal.getCompanyId());
+        FluxCalendar defaultCal = getDefaultCalendar(String.valueOf(cal
+                .getCompanyId()));
         try
         {
             // reset the previous default calendar
@@ -648,7 +657,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_calendarId) };
+            String[] args =
+            { String.valueOf(p_calendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_MAKE_DEFAULT_CALENDAR_FAILED,
                     args, e);
@@ -685,7 +695,8 @@ public class CalendarManagerLocal implements CalendarManager
         catch (Exception e)
         {
             tx.rollback();
-            String[] args = { String.valueOf(p_calendar.getId()) };
+            String[] args =
+            { String.valueOf(p_calendar.getId()) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_MODIFY_CALENDAR_FAILED, args,
                     e);
@@ -703,8 +714,8 @@ public class CalendarManagerLocal implements CalendarManager
 
         try
         {
-            Holiday holiday = HibernateUtil.get(Holiday.class, p_holiday
-                    .getIdAsLong());
+            Holiday holiday = HibernateUtil.get(Holiday.class,
+                    p_holiday.getIdAsLong());
 
             holiday.setName(p_holiday.getName());
             holiday.setDayOfMonth(p_holiday.getDayOfMonth());
@@ -725,7 +736,8 @@ public class CalendarManagerLocal implements CalendarManager
         catch (Exception e)
         {
             tx.rollback();
-            String[] args = { String.valueOf(p_holiday.getId()) };
+            String[] args =
+            { String.valueOf(p_holiday.getId()) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_MODIFY_HOLIDAY_FAILED, args, e);
         }
@@ -755,7 +767,8 @@ public class CalendarManagerLocal implements CalendarManager
         catch (Exception e)
         {
             tx.rollback();
-            String[] args = { p_userCalendar.getOwnerUserId() };
+            String[] args =
+            { p_userCalendar.getOwnerUserId() };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_MODIFY_USER_CALENDAR_FAILED,
                     args, e);
@@ -771,8 +784,8 @@ public class CalendarManagerLocal implements CalendarManager
     public void removeScheduledActivity(long p_taskId, String p_userId)
             throws RemoteException, CalendarManagerException
     {
-        removeScheduledActivity(p_taskId, findUserCalendarByOwner(p_userId,
-                true));
+        removeScheduledActivity(p_taskId,
+                findUserCalendarByOwner(p_userId, true));
     }
 
     /**
@@ -795,16 +808,16 @@ public class CalendarManagerLocal implements CalendarManager
                 ReservedTime rt = (ReservedTime) rts[i];
                 // Get the appropriate reserved time collection
                 p_calendar.getCollectionByType(rt.getType()).remove(rt);
-                
-                
+
             }
-            
+
             HibernateUtil.saveOrUpdate(p_calendar);
             HibernateUtil.delete(Arrays.asList(rts));
         }
         catch (Exception e)
         {
-            String[] args = { ownerId, String.valueOf(p_taskId) };
+            String[] args =
+            { ownerId, String.valueOf(p_taskId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_REMOVE_RESERVED_TIME_FAILED,
                     args, e);
@@ -849,16 +862,16 @@ public class CalendarManagerLocal implements CalendarManager
                 ownerId = cal.getOwnerUserId();
 
                 cal.getCollectionByType(rt.getType()).remove(rt);
-                
+
                 HibernateUtil.saveOrUpdate(cal);
             }
-            
-            
+
             HibernateUtil.delete(Arrays.asList(rts));
         }
         catch (Exception e)
         {
-            String[] args = { ownerId, String.valueOf(p_taskId) };
+            String[] args =
+            { ownerId, String.valueOf(p_taskId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_REMOVE_RESERVED_TIME_FAILED,
                     args, e);
@@ -876,7 +889,8 @@ public class CalendarManagerLocal implements CalendarManager
         // cannot remove a default calendar.
         if (cal.getIsDefault())
         {
-            String[] args = { String.valueOf(p_calendarId) };
+            String[] args =
+            { String.valueOf(p_calendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_CANNOT_REMOVE_DEFAULT_CAL,
                     args, null);
@@ -893,7 +907,8 @@ public class CalendarManagerLocal implements CalendarManager
         {
             e.printStackTrace();
 
-            String[] args = { String.valueOf(p_calendarId) };
+            String[] args =
+            { String.valueOf(p_calendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_REMOVE_CALENDAR_FAILED, args,
                     e);
@@ -929,7 +944,8 @@ public class CalendarManagerLocal implements CalendarManager
         catch (Exception e)
         {
             tx.rollback();
-            String[] args = { String.valueOf(p_holidayId) };
+            String[] args =
+            { String.valueOf(p_holidayId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_REMOVE_HOLIDAY_FAILED, args, e);
         }
@@ -948,7 +964,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { p_ownerUserId };
+            String[] args =
+            { p_ownerUserId };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_REMOVE_USER_CALENDAR_FAILED,
                     args, e);
@@ -967,8 +984,8 @@ public class CalendarManagerLocal implements CalendarManager
             // now sort the users based on the full name
             if (sz > 0)
             {
-                Collections.sort(p_userInfos, new UserInfoComparator(4, Locale
-                        .getDefault()));
+                Collections.sort(p_userInfos,
+                        new UserInfoComparator(4, Locale.getDefault()));
             }
 
             return getUserUnavailability(sz, p_userInfos, p_month, p_year);
@@ -1092,7 +1109,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] arg = { String.valueOf(p_calendarId) };
+            String[] arg =
+            { String.valueOf(p_calendarId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FAILED_TO_CHECK_FOR_DEPENDENCY,
                     arg, null);
@@ -1106,8 +1124,8 @@ public class CalendarManagerLocal implements CalendarManager
                 UserFluxCalendar calendar = (UserFluxCalendar) list.get(0);
                 map.put(calendar.getIdAsLong(), calendar.getName());
             }
-            String[] arg = { String.valueOf(p_calendarId),
-                    map.values().toString() };
+            String[] arg =
+            { String.valueOf(p_calendarId), map.values().toString() };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_CANNOT_REMOVE_DUE_TO_DEPENDENCY,
                     arg, null);
@@ -1166,9 +1184,9 @@ public class CalendarManagerLocal implements CalendarManager
             for (int j = 0; j < whs.size(); j++)
             {
                 WorkingHour wh = (WorkingHour) whs.get(j);
-                UserCalendarWorkingHour uwh = new UserCalendarWorkingHour(wh
-                        .getOrder(), wh.getStartHour(), wh.getStartMinute(), wh
-                        .getEndHour(), wh.getEndMinute());
+                UserCalendarWorkingHour uwh = new UserCalendarWorkingHour(
+                        wh.getOrder(), wh.getStartHour(), wh.getStartMinute(),
+                        wh.getEndHour(), wh.getEndMinute());
                 uwd.addWorkingHour(uwh, cal.getTimeZone());
             }
             cal.addWorkingDay(uwd);
@@ -1206,7 +1224,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String args[] = { p_ownerUserId };
+            String args[] =
+            { p_ownerUserId };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_USER_CAL_BY_OWNER_FAILED,
                     args, e);
@@ -1238,13 +1257,14 @@ public class CalendarManagerLocal implements CalendarManager
                 SQLQuery query = session.createSQLQuery(sql).addEntity(
                         FluxCalendar.class);
                 query.setParameter(0, new Long(p_holidayId));
-                query.setParameter(1, currentCompanyId);
+                query.setParameter(1, Long.parseLong(currentCompanyId));
                 return query.list();
             }
         }
         catch (Exception e)
         {
-            String[] arg = { String.valueOf(p_holidayId) };
+            String[] arg =
+            { String.valueOf(p_holidayId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_GET_CALENDARS_BY_HOLIDAY_ID_FAILED,
                     arg, null);
@@ -1261,7 +1281,7 @@ public class CalendarManagerLocal implements CalendarManager
                     + " where IS_DEFAULT = 'Y' and company_id = ? ";
 
             return HibernateUtil.getFirstWithSql(FluxCalendar.class, sql,
-                    p_companyId);
+                    Long.parseLong(p_companyId));
         }
         catch (Exception e)
         {
@@ -1281,7 +1301,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_id) };
+            String[] args =
+            { String.valueOf(p_id) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_CALENDAR_FAILED, args, e);
         }
@@ -1296,7 +1317,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_id) };
+            String[] args =
+            { String.valueOf(p_id) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_HOLIDAY_FAILED, args, e);
         }
@@ -1329,7 +1351,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_id) };
+            String[] args =
+            { String.valueOf(p_id) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_RESERVED_TIME_FAILED,
                     args, e);
@@ -1363,7 +1386,8 @@ public class CalendarManagerLocal implements CalendarManager
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_userCalId) };
+            String[] args =
+            { String.valueOf(p_userCalId) };
             throw new CalendarManagerException(
                     CalendarManagerException.MSG_FIND_USER_CAL_BY_ID_FAILED,
                     args, e);
@@ -1428,9 +1452,8 @@ public class CalendarManagerLocal implements CalendarManager
                     catch (Exception e)
                     {
                         // for last week defined as "$"
-                        ts
-                                .setDayOfWeekInMonth(ts
-                                        .getActualMaximum(Timestamp.DAY_OF_WEEK_IN_MONTH));
+                        ts.setDayOfWeekInMonth(ts
+                                .getActualMaximum(Timestamp.DAY_OF_WEEK_IN_MONTH));
                     }
                 }
 
@@ -1438,8 +1461,8 @@ public class CalendarManagerLocal implements CalendarManager
                         0, 0, null));
             }
 
-            Collections.sort(rts, new ReservedTimeComparator(2, Locale
-                    .getDefault()));
+            Collections.sort(rts,
+                    new ReservedTimeComparator(2, Locale.getDefault()));
 
             // put the reserved times for the user
             map.put(userInfo, rts);

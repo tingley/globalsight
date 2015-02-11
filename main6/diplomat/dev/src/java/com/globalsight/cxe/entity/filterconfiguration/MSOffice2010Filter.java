@@ -36,6 +36,7 @@ public class MSOffice2010Filter implements Filter
     private String filterName;
     private String filterDescription;
     private boolean headerTranslate = true;
+    private boolean footendnoteTranslate = false;
     private boolean masterTranslate = false;
     private boolean fileinfoTranslate = false;
     private boolean notesTranslate = false;
@@ -290,6 +291,7 @@ public class MSOffice2010Filter implements Filter
                 .append(FilterHelper.escape(toString(allInternalTextStyles)))
                 .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
+        sb.append("\"footendnoteTranslate\":").append(footendnoteTranslate).append(",");
         sb.append("\"masterTranslate\":").append(masterTranslate).append(",");
         sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate)
                 .append(",");
@@ -421,6 +423,16 @@ public class MSOffice2010Filter implements Filter
     public void setHeaderTranslate(boolean headerTranslate)
     {
         this.headerTranslate = headerTranslate;
+    }
+
+    public boolean isFootendnoteTranslate()
+    {
+        return footendnoteTranslate;
+    }
+
+    public void setFootendnoteTranslate(boolean footendnoteTranslate)
+    {
+        this.footendnoteTranslate = footendnoteTranslate;
     }
 
     public boolean isMasterTranslate()

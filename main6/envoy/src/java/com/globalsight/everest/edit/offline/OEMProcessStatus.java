@@ -17,19 +17,18 @@
 
 package com.globalsight.everest.edit.offline;
 
-import com.globalsight.everest.edit.offline.download.DownloadHelper;
-import com.globalsight.everest.edit.offline.download.DownloadParams;
-import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
-import com.globalsight.util.progress.ProcessStatus;
-import com.globalsight.util.progress.IProcessStatusListener;
-
-import com.globalsight.everest.glossaries.GlossaryFile;
-import java.util.Iterator;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.io.File;
+
+import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.edit.offline.upload.CheckResult;
+import com.globalsight.everest.glossaries.GlossaryFile;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
+import com.globalsight.util.progress.IProcessStatusListener;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  * Extends ProcessStatus to create a specialized status object for offline.
@@ -45,6 +44,9 @@ public class OEMProcessStatus
     
     private boolean useProcess = false;
     private int process = 0;
+    private Boolean isContinue = null;
+    private CheckResult checkResult = null;
+    private CheckResult checkResultCopy = null;
     
 
     /** Creates a new instance of OEMProcessStatus. */
@@ -228,7 +230,7 @@ public class OEMProcessStatus
     //
 
 
-    private int findNumberOfFiles(DownloadParams p_params)
+    public static int findNumberOfFiles(DownloadParams p_params)
     {
         int count = 0;
 
@@ -341,4 +343,30 @@ public class OEMProcessStatus
 	{
 		this.process = process;
 	}
+
+	public Boolean getIsContinue() {
+		return isContinue;
+	}
+
+	public void setIsContinue(Boolean isContinue) {
+		this.isContinue = isContinue;
+	}
+
+	public CheckResult getCheckResult() {
+		return checkResult;
+	}
+
+	public void setCheckResult(CheckResult checkResult) {
+		this.checkResult = checkResult;
+	}
+
+    public CheckResult getCheckResultCopy()
+    {
+        return checkResultCopy;
+    }
+
+    public void setCheckResultCopy(CheckResult checkResultCopy)
+    {
+        this.checkResultCopy = checkResultCopy;
+    }
 }

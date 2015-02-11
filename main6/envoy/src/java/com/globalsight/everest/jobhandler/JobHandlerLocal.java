@@ -309,9 +309,9 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.name = :name and a.companyId = :cId";
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("name", p_activityName);
-            map.put("cId", p_companyId);
+            map.put("cId", Long.parseLong(p_companyId));
             Iterator<?> it = HibernateUtil.search(hql, map).iterator();
             if (it.hasNext())
             {
@@ -332,7 +332,6 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getActivity(String)
      */
-    @SuppressWarnings("unchecked")
     public Activity getActivity(String p_activityName) throws RemoteException,
             JobException
     {
@@ -340,14 +339,14 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.name = :name";
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("name", p_activityName);
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             Iterator<?> it = HibernateUtil.search(hql, map).iterator();
@@ -379,14 +378,14 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.displayName = :name";
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, Object> map = new HashMap<String, Object>();
             map.put("name", p_activityName);
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             Iterator<?> it = HibernateUtil.search(hql, map).iterator();
@@ -415,13 +414,13 @@ public class JobHandlerLocal implements JobHandler
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.useType = 'DTP'";
 
-            Map<String, String> map = null;
+            Map<String, Long> map = null;
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map = new HashMap<String, String>();
-                map.put("companyId", currentId);
+                map = new HashMap<String, Long>();
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return (Collection<Activity>) HibernateUtil.search(hql, map);
@@ -442,13 +441,13 @@ public class JobHandlerLocal implements JobHandler
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.useType = 'TRANS'";
 
-            Map<String, String> map = null;
+            Map<String, Long> map = null;
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map = new HashMap<String, String>();
-                map.put("companyId", currentId);
+                map = new HashMap<String, Long>();
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return (Collection<Activity>) HibernateUtil.search(hql, map);
@@ -478,13 +477,13 @@ public class JobHandlerLocal implements JobHandler
         {
             String hql = "from Activity a where a.isActive = 'Y'";
 
-            Map<String, String> map = null;
+            Map<String, Long> map = null;
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map = new HashMap<String, String>();
-                map.put("companyId", currentId);
+                map = new HashMap<String, Long>();
+                map.put("companyId", Long.parseLong(currentId));
             }
 
             return (Collection<Activity>) HibernateUtil.search(hql, map);
@@ -512,8 +511,8 @@ public class JobHandlerLocal implements JobHandler
         try
         {
             String hql = "from Activity a where a.isActive = 'Y' and a.companyId = :companyId";
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("companyId", p_companyId);
+            Map<String, Long> map = new HashMap<String, Long>();
+            map.put("companyId", Long.parseLong(p_companyId));
 
             return (Collection<Activity>) HibernateUtil.search(hql, map);
         }
@@ -620,9 +619,11 @@ public class JobHandlerLocal implements JobHandler
                 if (p_company.getTmVersion().getValue() == 3)
                 {
                     Connection conn = DbUtil.getConnection();
+                    conn.setAutoCommit(false);
                     try
                     {
                         createTmStorage(c.getId(), conn);
+                        conn.commit();
                     }
                     finally
                     {
@@ -652,9 +653,11 @@ public class JobHandlerLocal implements JobHandler
             // since session.connection() will leak. Note that this
             // is non-transactional.
             Connection conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
             try
             {
                 removeTmStorage(companyId, conn);
+                conn.commit();
             }
             finally
             {
@@ -801,7 +804,7 @@ public class JobHandlerLocal implements JobHandler
                 // Copy properties files
                 SystemConfiguration.copyPropertiesToCompany(company
                         .getCompanyName());
-
+                
                 // Must set dirty after the transaction committed
                 ServerProxy.getSystemParameterPersistenceManager().setDirty();
 
@@ -809,9 +812,11 @@ public class JobHandlerLocal implements JobHandler
                 // since session.connection() will leak. Note that this is
                 // non-transactional.
                 Connection conn = DbUtil.getConnection();
+                conn.setAutoCommit(false);
                 try
                 {
                     createTmStorage(company.getId(), conn);
+                    conn.commit();
                 }
                 finally
                 {
@@ -894,7 +899,7 @@ public class JobHandlerLocal implements JobHandler
         String location = adminEl.getLocation() + "/"
                 + p_company.getCompanyName();
         el.setLocation(location);
-        el.setCompanyId(Long.toString(p_company.getId()));
+        el.setCompanyId(p_company.getId());
         session.save(el);
 
         // create the default location of SystemParameter
@@ -956,7 +961,7 @@ public class JobHandlerLocal implements JobHandler
                 .setString("code", pivotCurCode).list();
 
         Currency pivot = new Currency((IsoCurrency) result.get(0), 1,
-                p_companyId);
+                Long.parseLong(p_companyId));
         session.save(pivot);
 
         Currency.addPivotCurdrency(pivot);
@@ -974,7 +979,7 @@ public class JobHandlerLocal implements JobHandler
                 true, 8);
         // defCal.setLastUpdatedBy(userId);
         // defCal.setLastUpdatedTime(new Date());
-        defCal.setCompanyId(p_companyId);
+        defCal.setCompanyId(Long.parseLong(p_companyId));
 
         // Set holidaies
         Holiday christmas = new Holiday("Christmas Day", null, 25, 0, 0, true,
@@ -1019,12 +1024,14 @@ public class JobHandlerLocal implements JobHandler
     private void createDefaultPermGroups(String p_companyId, Session session)
             throws PersistenceException, Exception
     {
+        long companyId = Long.parseLong(p_companyId);
         PermissionGroup permGroup = null;
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Administrator");
         permGroup.setDescription("Default Administrator Group");
-        permGroup.setPermissionSet("|1|3|4|5|6|7|8|9|10|11|12|13|14|17|18|"
+        permGroup
+                .setPermissionSet("|1|3|4|5|6|7|8|9|10|11|12|13|14|17|18|"
                         + "19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|"
                         + "39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|"
                         + "59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|"
@@ -1036,13 +1043,14 @@ public class JobHandlerLocal implements JobHandler
                         + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
                         + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
                         + "266|267|268|270|292|293|294|295|296|297|298|299|306|361|367|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("ProjectManager");
         permGroup.setDescription("Default Project Manager Group");
-        permGroup.setPermissionSet("|3|4|5|6|7|8|9|10|11|12|13|14|17|18|19|33|"
+        permGroup
+                .setPermissionSet("|3|4|5|6|7|8|9|10|11|12|13|14|17|18|19|33|"
                         + "34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|"
                         + "55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|75|76|"
                         + "77|78|79|80|82|83|89|90|91|92|104|127|128|129|130|131|132|133|"
@@ -1052,32 +1060,35 @@ public class JobHandlerLocal implements JobHandler
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
                         + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
                         + "248|249|252|253|254|255|256|259|261|270|361|367|385|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("WorkflowManager");
         permGroup.setDescription("Default Workflow Manager Group");
-        permGroup.setPermissionSet("|14|20|21|22|23|24|25|26|27|28|29|30|31|"
+        permGroup
+                .setPermissionSet("|14|20|21|22|23|24|25|26|27|28|29|30|31|"
                         + "32|86|87|88|128|130|132|133|134|135|136|137|138|140|141|142|"
                         + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
                         + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|"
                         + "187|192|198|199|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocaleManager");
         permGroup.setDescription("Default Locale Manager Group");
-        permGroup.setPermissionSet("|163|164|166|167|168|169|170|171|172|173|187|199|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup
+                .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|187|199|");
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
-        permGroup.setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|363|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup
+                .setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|363|");
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1087,28 +1098,30 @@ public class JobHandlerLocal implements JobHandler
                 + "136|137|138|139|140|141|142|143|144|145|146|147|148|"
                 + "149|150|151|153|154|155|156|157|158|159|160|161|162|"
                 + "174|188|192|193|199|205|367|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorAdmin");
         permGroup.setDescription("Default VendorAdmin Group");
-        permGroup.setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup
+                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorManager");
         permGroup.setDescription("Default VendorManager Group");
-        permGroup.setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup
+                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorViewer");
         permGroup.setDescription("Default VendorViewer Group");
         permGroup.setPermissionSet("|178|181|184|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
     }
 
@@ -1125,6 +1138,7 @@ public class JobHandlerLocal implements JobHandler
     private void createDefaultPermGroupsForOldServer(String p_companyId,
             Session session) throws PersistenceException, Exception
     {
+        long companyId = Long.parseLong(p_companyId);
         PermissionGroup permGroup = null;
 
         permGroup = new PermissionGroupImpl();
@@ -1143,7 +1157,7 @@ public class JobHandlerLocal implements JobHandler
                         + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
                         + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
                         + "266|267|268|270|292|293|294|295|296|297|298|299|307|362|368|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1160,7 +1174,7 @@ public class JobHandlerLocal implements JobHandler
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
                         + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
                         + "248|249|252|253|254|255|256|259|261|270|362|367|368|385|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1172,7 +1186,7 @@ public class JobHandlerLocal implements JobHandler
                         + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
                         + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|"
                         + "187|192|198|199|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1180,7 +1194,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setDescription("Default Locale Manager Group");
         permGroup
                 .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|187|199|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1188,7 +1202,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setDescription("Default Localization Participant Group");
         permGroup
                 .setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|364|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1198,7 +1212,7 @@ public class JobHandlerLocal implements JobHandler
                 + "136|137|138|139|140|141|142|143|144|145|146|147|148|"
                 + "149|150|151|153|154|155|156|157|158|159|160|161|162|"
                 + "174|188|192|193|199|205|368|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1206,7 +1220,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setDescription("Default VendorAdmin Group");
         permGroup
                 .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
@@ -1214,14 +1228,14 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setDescription("Default VendorManager Group");
         permGroup
                 .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorViewer");
         permGroup.setDescription("Default VendorViewer Group");
         permGroup.setPermissionSet("|178|181|184|");
-        permGroup.setCompanyId(p_companyId);
+        permGroup.setCompanyId(companyId);
         session.save(permGroup);
     }
 
@@ -1866,7 +1880,7 @@ public class JobHandlerLocal implements JobHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 hql += " and a.companyId = :companyId";
-                map.put("companyId", currentId);
+                map.put("companyId", Long.parseLong(currentId));
             }
             Collection activities = HibernateUtil.search(hql, map);
 
@@ -2168,7 +2182,7 @@ public class JobHandlerLocal implements JobHandler
                 // dependancy
                 // needs to be kept in the code.
                 getCostingEngine().deleteRatesOnRole(curRole);
-                getUserManager().removeRole(curRole.getName());
+                getUserManager().removeRole(curRole);
             }
         }
 
@@ -2183,7 +2197,7 @@ public class JobHandlerLocal implements JobHandler
             for (int j = 0; j < roles.length; j++)
             {
                 curRole = (Role) roles[j];
-                getUserManager().removeRole(curRole.getName());
+                getUserManager().removeRole(curRole);
             }
         }
     }
@@ -2337,7 +2351,7 @@ public class JobHandlerLocal implements JobHandler
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             sb.append(" AND j.COMPANY_ID = ");
-            sb.append(currentId);
+            sb.append(Long.parseLong(currentId));
         }
 
         c_category.debug("The query is " + sb.toString());
@@ -2378,7 +2392,7 @@ public class JobHandlerLocal implements JobHandler
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
-            sb.append(" AND JOB.company_id = '" + currentId + "'");
+            sb.append(" AND JOB.company_id = " + Long.parseLong(currentId));
         }
 
         c_category.debug("The query is " + sb.toString());
@@ -2702,7 +2716,7 @@ public class JobHandlerLocal implements JobHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 sb.append(" AND j.COMPANY_ID = ");
-                sb.append(p_companyId);
+                sb.append(Long.parseLong(p_companyId));
             }
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
@@ -2752,12 +2766,13 @@ public class JobHandlerLocal implements JobHandler
             sb.append("SELECT j.* FROM Job j WHERE 1=1");
             if (!StringUtil.isEmpty(p_state))
             {
-                sb.append(" AND j.STATE IN (").append(p_state).append(")");
+                sb.append(" AND j.STATE IN ('").append(p_state.toUpperCase())
+                        .append("')");
             }
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 sb.append(" AND j.COMPANY_ID = ");
-                sb.append(p_companyId);
+                sb.append(Long.parseLong(p_companyId));
             }
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
@@ -2823,7 +2838,7 @@ public class JobHandlerLocal implements JobHandler
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 sb.append(" AND j.COMPANY_ID = ");
-                sb.append(p_companyId);
+                sb.append(Long.parseLong(p_companyId));
             }
             sb.append(" GROUP BY j.state");
 
@@ -2849,9 +2864,9 @@ public class JobHandlerLocal implements JobHandler
         }
         finally
         {
-        	DbUtil.silentClose(rs);
-        	DbUtil.silentClose(stmt);
-        	DbUtil.silentReturnConnection(conn);
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(conn);
         }
     }
 }

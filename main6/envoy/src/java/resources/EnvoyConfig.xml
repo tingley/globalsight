@@ -153,32 +153,16 @@
     <WebActivity webActivityName="projects">
       <WebPage pageName="PRO" isDefault="true" jspName="/envoy/administration/projects/projectMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectMainHandler">
         <PageLink linkName="self" destinationPageName="PRO"></PageLink>
-        <PageLink linkName="new1" destinationPageName="NPRO"></PageLink>
-        <PageLink linkName="modify" destinationPageName="MPRO"></PageLink>
+        <PageLink linkName="new1" destinationPageName="M4P"></PageLink>
+        <PageLink linkName="modify" destinationPageName="M4P"></PageLink>
         <PageLink linkName="_import" destinationPageName="PROIMP1"></PageLink>
         <PageLink linkName="_export" destinationPageName="PROEXP1"></PageLink>
         <PageLink linkName="remove" destinationPageName="PRO"></PageLink>
       </WebPage>
-      <WebPage pageName="NPRO" isDefault="false" jspName="/envoy/administration/projects/projectBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.BasicProjectHandler">
-        <PageLink linkName="cancel" destinationPageName="PRO"></PageLink>
-        <PageLink linkName="next" destinationPageName="NPROUSERS"></PageLink>
-      </WebPage>
-      <WebPage pageName="MPRO" isDefault="false" jspName="/envoy/administration/projects/projectBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.BasicProjectHandler">
-        <PageLink linkName="users" destinationPageName="MPROUSERS"></PageLink>
-        <PageLink linkName="done" destinationPageName="PRO"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="PRO"></PageLink>
-        <PageLink linkName="next" destinationPageName="NPROUSERS"></PageLink>
-      </WebPage>
-      <WebPage pageName="NPROUSERS" isDefault="false" jspName="/envoy/administration/projects/projectUsers.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.UsersProjectHandler">
-        <PageLink linkName="self" destinationPageName="NPROUSERS"></PageLink>
+       <WebPage pageName="M4P" isDefault="false" jspName="/envoy/administration/projects/modifyProject.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.ModifyProjectHandler">
+        <PageLink linkName="self" destinationPageName="M4P"></PageLink>
         <PageLink linkName="save" destinationPageName="PRO"></PageLink>
-        <PageLink linkName="prev" destinationPageName="NPRO"></PageLink>
         <PageLink linkName="cancel" destinationPageName="PRO"></PageLink>
-      </WebPage>
-      <WebPage pageName="MPROUSERS" isDefault="false" jspName="/envoy/administration/projects/projectUsers.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.projects.UsersProjectHandler">
-        <PageLink linkName="self" destinationPageName="MPROUSERS"></PageLink>
-        <PageLink linkName="done" destinationPageName="MPRO"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="MPRO"></PageLink>
       </WebPage>
       <WebPage pageName="PROIMP1" isDefault="false" 
       jspName="/envoy/administration/projects/import.jsp" 
@@ -653,7 +637,6 @@
         <PageLink linkName="remove" destinationPageName="FP1"></PageLink>
         <PageLink linkName="edit" destinationPageName="FPED"></PageLink>
         <PageLink linkName="new1" destinationPageName="FPED"></PageLink>
-        <PageLink linkName="advsearch" destinationPageName="FPSEARCH"></PageLink>
         <PageLink linkName="search" destinationPageName="FP1"></PageLink>
       </WebPage>
       <WebPage pageName="FPED" isDefault="false"
@@ -663,20 +646,6 @@
         <PageLink linkName="save" destinationPageName="FP1"></PageLink>
         <PageLink linkName="self" destinationPageName="FPED"></PageLink>
       </WebPage>
-      <WebPage pageName="FPSEARCH" isDefault="false"
-      jspName="/envoy/administration/fileprofile/fileprofileSearch.jsp"
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileSearchHandler">
-     	<PageLink linkName="search" destinationPageName="FP1"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="FP1"></PageLink>
-     </WebPage>
-    </WebActivity>
-    <WebActivity webActivityName="fileprofilesSearch">
-      <WebPage pageName="FPSEARCH" isDefault="true"
-      jspName="/envoy/administration/fileprofile/fileprofileSearch.jsp"
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileSearchHandler">
-     	<PageLink linkName="search" destinationPageName="FP1"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="FP1"></PageLink>
-     </WebPage>
     </WebActivity>
     <WebActivity webActivityName="fileextensions">
       <WebPage pageName="FX1" isDefault="true" jspName="/envoy/administration/config/fileextension/fileextensionMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.config.fileextension.FileExtensionMainHandler">
@@ -1273,7 +1242,7 @@
         <PageLink linkName="taskDetails" destinationPageName="TK2"></PageLink>
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
       </WebPage>
-      <WebPage pageName="DTLS" isDefault="false" jspName="/envoy/projects/workflows/jobDetails.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDetailsHandler">
+      <WebPage pageName="DTLS" isDefault="false" jspName="/envoy/projects/workflows/jobWorkflows.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobWorkflowsHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="self" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="pending" destinationPageName="WF1"></PageLink>
@@ -1286,20 +1255,13 @@
         <PageLink linkName="rateVendor" destinationPageName="VENDTASKRATINGS"></PageLink>
         <PageLink linkName="wordcountList" destinationPageName="WFWCL"></PageLink>
         <PageLink linkName="addWF" destinationPageName="ADDWF"></PageLink>
-        <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
-        <PageLink linkName="sourceEditor" destinationPageName="EDS1"></PageLink>
         <PageLink linkName="graphicalWf" destinationPageName="GWF"></PageLink>
-        <PageLink linkName="workflowComments" destinationPageName="WORKFLOWCOM"></PageLink>
         <PageLink linkName="workflowActivities" destinationPageName="WORKFLOWACT"></PageLink>
-        <PageLink linkName="changeCurr" destinationPageName="CHANGECURR"></PageLink>
         <PageLink linkName="workflowImportError" destinationPageName="WFIMPERR"></PageLink>
         <PageLink linkName="exportError" destinationPageName="EXPERR"></PageLink>
         <PageLink linkName="export" destinationPageName="EJ"></PageLink>
         <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
         <PageLink linkName="editTotalSourcePageWc" destinationPageName="EDITTOTALSOURCEPAGEWC"></PageLink>
-        <PageLink linkName="editFinalCost" destinationPageName="EDITFINALCOST"></PageLink>
-        <PageLink linkName="surcharges" destinationPageName="SURCHARGES"></PageLink>
-        <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>
         <PageLink linkName="download" destinationPageName="CUST_FILE"></PageLink>
         <PageLink linkName="jobComments" destinationPageName="JOBCOMMENTS"></PageLink>
         <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
@@ -1309,8 +1271,35 @@
         <PageLink linkName="estimatedCompletionDate" destinationPageName="ECDATE"></PageLink>
         <PageLink linkName="estimatedTranslateCompletionDate" destinationPageName="ETCDATE"></PageLink>
         <PageLink linkName="addSourceFiles" destinationPageName="ADDSOURCE"></PageLink>
-        <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
         <PageLink linkName="updateLeverage" destinationPageName="updateLeveragePageName"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+      </WebPage>
+      <WebPage pageName="SOURCEFILES" isDefault="false" jspName="/envoy/projects/workflows/jobSourceFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSourceFilesHandler">
+      	<PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+        <PageLink linkName="jobComments" destinationPageName="JOBCOMMENTS"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
+        <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>
+        <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
+        <PageLink linkName="pageSearch" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="addSourceFiles" destinationPageName="ADDSOURCE"></PageLink>
+        <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
+        <PageLink linkName="sourceEditor" destinationPageName="EDS1"></PageLink>
+        <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
+        <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>
+      </WebPage>
+      <WebPage pageName="COSTS" isDefault="false" jspName="/envoy/projects/workflows/jobCosts.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobCostsHandler">
+        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+        <PageLink linkName="jobComments" destinationPageName="JOBCOMMENTS"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
+        <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>
+        <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
+        <PageLink linkName="surcharges" destinationPageName="SURCHARGES"></PageLink>
+        <PageLink linkName="editFinalCost" destinationPageName="EDITFINALCOST"></PageLink>
       </WebPage>
       <WebPage pageName="ASSIGN" isDefault="false" jspName="/envoy/projects/workflows/assign.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.AssignHandler">
         <PageLink linkName="done" destinationPageName="DTLS"></PageLink>
@@ -1351,12 +1340,19 @@
         <PageLink linkName="referenceUpload" destinationPageName="TK12"></PageLink>
         <PageLink linkName="segmentComments" destinationPageName="SEGCOMMENTS"></PageLink>
         <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+        <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
       </WebPage>
       <WebPage pageName="JOBATTRIBUTES" isDefault="false" jspName="/envoy/administration/attribute/jobAttributes.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeMainHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
         <PageLink linkName="jobComments" destinationPageName="JOBCOMMENTS"></PageLink>
         <PageLink linkName="self" destinationPageName="JOBATTRIBUTES"></PageLink>
         <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+        <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
+        <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
       </WebPage>
       <WebPage pageName="JOBREPORTS" isDefault="false" jspName="/envoy/projects/workflows/jobDetailsReports.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
@@ -1364,6 +1360,9 @@
         <PageLink linkName="jobAttributes" destinationPageName="JOBATTRIBUTES"></PageLink>
         <PageLink linkName="jobReports" destinationPageName="JOBREPORTS"></PageLink>
         <PageLink linkName="generateReports" destinationPageName="JOBREPORTS"></PageLink>
+        <PageLink linkName="jobSourceFiles" destinationPageName="SOURCEFILES"></PageLink>
+        <PageLink linkName="jobCosts" destinationPageName="COSTS"></PageLink>
+        <PageLink linkName="editPages" destinationPageName="EDITPAGES"></PageLink>
       </WebPage>
       <WebPage pageName="SEGCOMMENTS" isDefault="false" jspName="/envoy/administration/comment/segmentComments.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.comment.SegmentCommentHandler">
         <PageLink linkName="jobComments" destinationPageName="JOBCOMMENTS"></PageLink>
@@ -1377,7 +1376,7 @@
 	    </WebPage>
       <WebPage pageName="IMPERR" isDefault="false" jspName="/envoy/projects/workflows/importError.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.ImportErrorHandler">
         <PageLink linkName="pending" destinationPageName="WF1"></PageLink>
-        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobDetails" destinationPageName="SOURCEFILES"></PageLink>
       </WebPage>
       <WebPage pageName="EXPERR" isDefault="false" jspName="/envoy/projects/workflows/exportError.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportErrorHandler">
         <PageLink linkName="exported" destinationPageName="WF5"></PageLink>
@@ -1400,11 +1399,11 @@
         <PageLink linkName="editTotalSourcePageWc" destinationPageName="EDITTOTALSOURCEPAGEWC"></PageLink>
       </WebPage>
       <WebPage pageName="EDITFINALCOST" isDefault="false" jspName="/envoy/projects/workflows/editFinalCost.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.EditFinalCostHandler">
-        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobDetails" destinationPageName="COSTS"></PageLink>
         <PageLink linkName="editFinalCost" destinationPageName="EDITFINALCOST"></PageLink>
       </WebPage>
       <WebPage pageName="SURCHARGES" isDefault="false" jspName="/envoy/projects/workflows/surcharges.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.SurchargesHandler">
-        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobDetails" destinationPageName="COSTS"></PageLink>
         <PageLink linkName="surcharges" destinationPageName="SURCHARGES"></PageLink>
         <PageLink linkName="editAddSurcharges" destinationPageName="EDITADDSURCHARGES"></PageLink>
       </WebPage>
@@ -1413,7 +1412,7 @@
         <PageLink linkName="surcharges" destinationPageName="SURCHARGES"></PageLink>
       </WebPage>
       <WebPage pageName="EDITSOURCEPAGEWC" isDefault="false" jspName="/envoy/projects/workflows/editSourcePageWc.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.EditSourcePageWcHandler">
-        <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="jobDetails" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>
       </WebPage>
         <WebPage pageName="CHANGEWFMGR" isDefault="false" jspName="/envoy/projects/workflows/changeWorkflowManager.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.ChangeWorkflowManagerHandler">

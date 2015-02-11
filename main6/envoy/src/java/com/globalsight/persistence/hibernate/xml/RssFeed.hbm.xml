@@ -1,33 +1,47 @@
 <?xml version="1.0"?>	
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="com.globalsight.everest.webapp.pagehandler.rss.Feed" table="RSS_FEED">
+	<class name="com.globalsight.everest.webapp.pagehandler.rss.Feed"
+		table="RSS_FEED">
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
 
-		<property name="rssUrl" length="100" column="RSS_URL" type="string" not-null="false" unique="false"/>
-		<property name="rssEncoding" length="20" column="ENCODING" type="string" not-null="false" unique="false"/>
-		<property name="rssVersion" length="6" column="VERSION" type="string" not-null="false" unique="false"/>
+		<property name="rssUrl" length="100" column="RSS_URL" type="string"
+			not-null="false" unique="false" />
+		<property name="rssEncoding" length="20" column="ENCODING"
+			type="string" not-null="false" unique="false" />
+		<property name="rssVersion" length="6" column="VERSION" type="string"
+			not-null="false" unique="false" />
 
-		<property name="channelTitle" length="200" column="TITLE" type="string" not-null="true" unique="false"/>
-		<property name="channelLink" length="200" column="LINK" type="string" not-null="true" unique="false"/>
-		<property name="channelDescription" column="DESCRIPTION" type="string" not-null="false" unique="false"/>
-		
-		<property name="channelLanguage" length="12" column="LANGUAGE" type="string" not-null="false" unique="false"/>
-		<property name="channelCopyRight" length="200" column="COPYRIGHT" type="string" not-null="false" unique="false"/>
+		<property name="channelTitle" length="200" column="TITLE"
+			type="string" not-null="true" unique="false" />
+		<property name="channelLink" length="200" column="LINK" type="string"
+			not-null="true" unique="false" />
+		<property name="channelDescription" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
 
-		<property name="imageTitle" length="200" column="IMAGE_TITLE" type="string" not-null="false" unique="false"/>
-		<property name="imageLink" length="200" column="IMAGE_LINK" type="string" not-null="false" unique="false"/>
-		<property name="imageUrl" length="100" column="IMAGE_URL" type="string" not-null="false" unique="false"/>
-		
-		<property name="isDefault" column="IS_DEFAULT" type="yes_no" not-null="false" unique="false"/>
-		<property name="companyId" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
-		
-        <set name="items" table="RSS_ITEM" cascade="all" inverse="true">
-            <key column="FEED_ID" />
-            <one-to-many class="com.globalsight.everest.webapp.pagehandler.rss.Item" />
-        </set>
+		<property name="channelLanguage" length="12" column="LANGUAGE"
+			type="string" not-null="false" unique="false" />
+		<property name="channelCopyRight" length="200" column="COPYRIGHT"
+			type="string" not-null="false" unique="false" />
+
+		<property name="imageTitle" length="200" column="IMAGE_TITLE"
+			type="string" not-null="false" unique="false" />
+		<property name="imageLink" length="200" column="IMAGE_LINK"
+			type="string" not-null="false" unique="false" />
+		<property name="imageUrl" length="100" column="IMAGE_URL"
+			type="string" not-null="false" unique="false" />
+
+		<property name="isDefault" column="IS_DEFAULT" type="yes_no"
+			not-null="false" unique="false" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
+
+		<set name="items" table="RSS_ITEM" cascade="all" inverse="true">
+			<key column="FEED_ID" />
+			<one-to-many class="com.globalsight.everest.webapp.pagehandler.rss.Item" />
+		</set>
 	</class>
-	
+
 </hibernate-mapping>

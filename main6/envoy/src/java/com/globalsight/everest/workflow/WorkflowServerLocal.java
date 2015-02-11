@@ -106,6 +106,8 @@ public class WorkflowServerLocal implements WorkflowServer
 
     private Timestamp m_timestamp = new Timestamp();
 
+    private static Map completeWorkFlow = new HashMap();
+
     // system wide parameter that determines whether the notification action is
     // active.
     // The values are 0 or 1 (inactive and active respectively).
@@ -182,7 +184,7 @@ public class WorkflowServerLocal implements WorkflowServer
                 HibernateUtil.update(job);
             }
 
-            String companyId = p_wfClone.getCompanyId();
+            String companyId = String.valueOf(p_wfClone.getCompanyId());
             p_emailInfo.setCompanyId(companyId);
 
             Object[] args =
@@ -319,7 +321,6 @@ public class WorkflowServerLocal implements WorkflowServer
             // For task complete, the finish email info need the node's
             // activity.
             p_emailInfo.setPreNode(node);
-
             if (isCompleted)
             {
                 // only notify task completion
@@ -333,6 +334,15 @@ public class WorkflowServerLocal implements WorkflowServer
                 // assume that
                 // the workflow is completed once the next node is "Exit" node.
                 state = WorkflowConstants.STATE_COMPLETED;
+                // well,the p_arrowLabel is param come from next node,
+                // if the p_arrowLabel is null
+                // that means it have none,yes ,all the workflow have finished.
+                p_emailInfo.setAssigneesName(p_assignee);
+                completeWorkFlow.put(
+                        workflowInstance.getId() + p_emailInfo.getJobName(),
+                        p_emailInfo);
+
+
             }
             else
             {
@@ -411,6 +421,29 @@ public class WorkflowServerLocal implements WorkflowServer
         }
 
         return new WorkflowInstanceInfo(p_wfClone.getId(), state, nextTaskInfos);
+    }
+
+    public void advanceWorkFlowNotification(String key, String state)
+    {
+        TaskEmailInfo p_emailInfo = (TaskEmailInfo) completeWorkFlow
+                .remove(key);
+        if (p_emailInfo == null)
+        {
+
+            return;
+        }
+        Object[] args =
+        {
+                p_emailInfo.getJobName(),
+                p_emailInfo.getAssigneesName(),
+                capLoginUrl(),
+                p_emailInfo.getPriorityAsString(),
+                p_emailInfo.getJobName(),
+                WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
+                        p_emailInfo.getTargetLocale(), "en_US"), state };
+        sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo,
+                null,
+                WorkflowMailerConstants.COMPLETED_WFL, args);
     }
 
     /**
@@ -564,8 +597,8 @@ public class WorkflowServerLocal implements WorkflowServer
             List<TaskInstance> taskInstances = WorkflowJbpmPersistenceHandler
                     .getTaskInstances(p_userId, p_taskState, false, ctx);
             // then add the task instances that are visible by PM.
-            taskInstances.addAll(WorkflowJbpmPersistenceHandler.getTaskInstances(
-                    p_userId, p_taskState, true, ctx));
+            taskInstances.addAll(WorkflowJbpmPersistenceHandler
+                    .getTaskInstances(p_userId, p_taskState, true, ctx));
 
             convertAndMap(taskInstances, taskList, p_userId, p_taskState);
         }
@@ -685,7 +718,7 @@ public class WorkflowServerLocal implements WorkflowServer
         Map<Long, WorkflowTaskInstance> taskList = new HashMap<Long, WorkflowTaskInstance>();
         try
         {
-        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             List<TaskInstance> taskInstances = WorkflowJbpmPersistenceHandler
                     .getTaskInstances(p_userId, p_taskState, false, ctx);
 
@@ -693,7 +726,7 @@ public class WorkflowServerLocal implements WorkflowServer
         }
         finally
         {
-        	ctx.close();
+            ctx.close();
         }
 
         return taskList;
@@ -1349,9 +1382,9 @@ public class WorkflowServerLocal implements WorkflowServer
         JbpmContext ctx = null;
         try
         {
-        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-            ProcessInstance processInstance = ctx.getProcessInstance(p_wfInstance
-                    .getId());
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ProcessInstance processInstance = ctx
+                    .getProcessInstance(p_wfInstance.getId());
             ProcessDefinition processDefinition = processInstance
                     .getProcessDefinition();
             Vector tasks = p_wfInstance.getWorkflowInstanceTasks();
@@ -1369,11 +1402,11 @@ public class WorkflowServerLocal implements WorkflowServer
                 WorkflowTaskInstance taskInstance = (WorkflowTaskInstance) it
                         .next();
                 setTaskInstanceId(taskInstance, processDefinition);
-            }        	
+            }
         }
         finally
         {
-        	ctx.close();
+            ctx.close();
         }
     }
 
@@ -1407,8 +1440,8 @@ public class WorkflowServerLocal implements WorkflowServer
             TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
                     .getTaskInstance(p_nodeInstanceId, ctx);
 
-            String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
-                    .getTaskNode());
+            String config = WorkflowJbpmUtil.getConfigure(taskInstance
+                    .getTask().getTaskNode());
             WorkflowNodeParameter param = WorkflowNodeParameter
                     .createInstance(config);
             // update the actorId or pooledActors in the task instance.
@@ -1428,8 +1461,9 @@ public class WorkflowServerLocal implements WorkflowServer
             WorkflowJbpmUtil.setPrivateValue(taskInstance, "start", null);
 
             int initialState = -1;
-            initialState = WorkflowJbpmUtil.getStateFromTaskInstance(taskInstance,
-                    p_assignee, WorkflowConstants.TASK_ALL_STATES);
+            initialState = WorkflowJbpmUtil
+                    .getStateFromTaskInstance(taskInstance, p_assignee,
+                            WorkflowConstants.TASK_ALL_STATES);
             Object[] args =
             {
                     WorkflowJbpmUtil.getActivityName(taskInstance.getTask()
@@ -1451,11 +1485,12 @@ public class WorkflowServerLocal implements WorkflowServer
                     && isNotificationActive())
             {
                 EventNotificationHelper.performSchedulingProcess(new Integer(
-                        SchedulerConstants.UNACCEPT_ACTIVITY), p_nodeInstanceId,
+                        SchedulerConstants.UNACCEPT_ACTIVITY),
+                        p_nodeInstanceId,
                         (Integer) SchedulerConstants.s_eventTypes
                                 .get(SchedulerConstants.COMPLETE_TYPE),
-                        taskInstance.getTask().getTaskNode(), p_taskInfo, new Long(
-                                taskInstance.getCreate().getTime()),
+                        taskInstance.getTask().getTaskNode(), p_taskInfo,
+                        new Long(taskInstance.getCreate().getTime()),
                         (Integer) SchedulerConstants.s_eventTypes
                                 .get(SchedulerConstants.ACCEPT_TYPE),
                         getWarningThreshold(), p_emailInfo);
@@ -1463,7 +1498,7 @@ public class WorkflowServerLocal implements WorkflowServer
         }
         finally
         {
-            ctx.close();        	
+            ctx.close();
         }
     }
 
@@ -1617,26 +1652,31 @@ public class WorkflowServerLocal implements WorkflowServer
         JbpmContext ctx = null;
         try
         {
-        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             ProcessInstance pi = ctx.getProcessInstance(p_workflowInstanceId);
-            Collection taskInstances = pi.getTaskMgmtInstance().getTaskInstances();
+            Collection taskInstances = pi.getTaskMgmtInstance()
+                    .getTaskInstances();
             String companyIdStr = MailerHelper.getCompanyId(p_emailInfo);
 
             pi.suspend();
 
             String localePair = WorkflowHelper.localePair(
-                    p_emailInfo.getSourceLocale(), p_emailInfo.getTargetLocale(),
-                    "en_US");
+                    p_emailInfo.getSourceLocale(),
+                    p_emailInfo.getTargetLocale(), "en_US");
             ArrayList<String> assignees = null;
 
             // There is no taskInstance, when the task didn't dispatch.
             if (null == taskInstances || taskInstances.size() == 0)
             {
                 Object[] arguments =
-                { "", UserUtil.getUserNameById(p_emailInfo.getProjectManagerId()),
-                        capLoginUrl(), p_emailInfo.getJobName(), localePair };
-                sendSingleTaskActionEmailToUser(p_emailInfo.getProjectManagerId(),
-                        p_emailInfo, p_emailInfo.getAccepterName(), assignees,
+                {
+                        "",
+                        UserUtil.getUserNameById(p_emailInfo
+                                .getProjectManagerId()), capLoginUrl(),
+                        p_emailInfo.getJobName(), localePair };
+                sendSingleTaskActionEmailToUser(
+                        p_emailInfo.getProjectManagerId(), p_emailInfo,
+                        p_emailInfo.getAccepterName(), assignees,
                         WorkflowMailerConstants.CANCEL_TASK, arguments);
             }
             else
@@ -1661,8 +1701,8 @@ public class WorkflowServerLocal implements WorkflowServer
                     }
                     Object[] args =
                     {
-                            WorkflowJbpmUtil.getActivityNameWithArrowName(node, "_"
-                                    + companyIdStr, pi, ""),
+                            WorkflowJbpmUtil.getActivityNameWithArrowName(node,
+                                    "_" + companyIdStr, pi, ""),
                             UserUtil.getUserNameById(p_emailInfo
                                     .getProjectManagerId()), capLoginUrl(),
                             p_emailInfo.getJobName(), localePair };
@@ -1670,8 +1710,9 @@ public class WorkflowServerLocal implements WorkflowServer
                     // Modify for GBS-1004
                     /*
                      * String[] a = new String[assignees.size()];
-                     * sendTaskActionEmailToUsers(p_emailInfo.getProjectManagerId(),
-                     * assignees.toArray(a), p_emailInfo.getProjectIdAsLong(), null,
+                     * sendTaskActionEmailToUsers
+                     * (p_emailInfo.getProjectManagerId(), assignees.toArray(a),
+                     * p_emailInfo.getProjectIdAsLong(), null,
                      * WorkflowMailerConstants.CANCEL_TASK, args);
                      */
                     sendSingleTaskActionEmailToUser(
@@ -1682,22 +1723,26 @@ public class WorkflowServerLocal implements WorkflowServer
                     // Stop the "complete by" or "accept by" timer of this node.
                     if (isNotificationActive())
                     {
-                        // since we don't have the WorkItem object, we don't really
+                        // since we don't have the WorkItem object, we don't
+                        // really
                         // know what the state is. Therefore, we'll assume
                         // "complete"
-                        // for now and we'll do another check for "accept" during
+                        // for now and we'll do another check for "accept"
+                        // during
                         // the unscheduling process.
-                        EventNotificationHelper.performSchedulingProcess(
-                                new Integer(SchedulerConstants.CANCEL_WORKFLOW),
-                                node.getId(), null, null, null, null, null,
-                                getWarningThreshold(), p_emailInfo);
+                        EventNotificationHelper
+                                .performSchedulingProcess(new Integer(
+                                        SchedulerConstants.CANCEL_WORKFLOW),
+                                        node.getId(), null, null, null, null,
+                                        null, getWarningThreshold(),
+                                        p_emailInfo);
                     }
                 }
-            }        	
+            }
         }
         finally
         {
-            ctx.close();        	
+            ctx.close();
         }
     }
 
@@ -1802,7 +1847,7 @@ public class WorkflowServerLocal implements WorkflowServer
         JbpmContext ctx = null;
         try
         {
-        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             List taskInstances = WorkflowJbpmPersistenceHandler
                     .getNonRejectedTaskInstancesByAssignee(p_userId, ctx);
 
@@ -1829,7 +1874,8 @@ public class WorkflowServerLocal implements WorkflowServer
                     {
                         actorIds.remove(p_userId);
                         actorIds.add(pm);
-                        ti.setPooledActors(WorkflowJbpmUtil.toStringArray(actorIds));
+                        ti.setPooledActors(WorkflowJbpmUtil
+                                .toStringArray(actorIds));
                     }
                 }
                 // for GBS-1302, reassign interim activity
@@ -1838,7 +1884,7 @@ public class WorkflowServerLocal implements WorkflowServer
         }
         finally
         {
-            ctx.close();        	
+            ctx.close();
         }
     }
 
@@ -2091,63 +2137,77 @@ public class WorkflowServerLocal implements WorkflowServer
             Workflow workflow = (Workflow) HibernateUtil.get(
                     WorkflowImpl.class, Long.valueOf(workflowId));
             String state = workflow.getState();
-            JobCreationMonitor.updateWorkflowState(workflow, Workflow.SKIPPING);
-            int indexInDefaultPath = Integer.parseInt(entry.getHelp());
-            for (int i = 0; i <= indexInDefaultPath; i++)
+            if (Workflow.SKIPPING.equals(state))
             {
-                if (!map.get(workflowId))
+            	
+            	s_logger.info("Ignored re-skip request from workflow(id=" + workflowId + ") since it is being skipped.");
+            	continue;
+            }
+            	
+            
+            try
+            {
+            	JobCreationMonitor.updateWorkflowState(workflow, Workflow.SKIPPING);
+                int indexInDefaultPath = Integer.parseInt(entry.getHelp());
+                for (int i = 0; i <= indexInDefaultPath; i++)
                 {
-                    Iterator it = ServerProxy.getTaskManager()
-                            .getCurrentTasks(workflow.getId()).iterator();
-                    Task task = null;
-                    if (it.hasNext())
+                    if (!map.get(workflowId))
                     {
-                        task = (Task) (it.next());
-                    }
-                    else
-                    {
-                        return;
-                    }
-                    List owners = new ArrayList();
-                    WorkflowOwner owner = new WorkflowOwner();
-                    owner.setWorkflow(workflow);
-                    owner.setOwnerId(userId);
-                    owner.setOwnerType(((WorkflowOwner) workflow
-                            .getWorkflowOwners().get(0)).getOwnerType());
-                    owners.add(owner);
-                    ServerProxy.getWorkflowManager().reassignWorkflowOwners(
-                            workflow.getId(), owners);
-                    ServerProxy.getTaskManager().acceptTask(userId, task, true);
-                    if (i == indexInDefaultPath)
-                    {
-                        // i == indexInDefaultPath indicates this is the last
-                        // activity to skip.
-                        ServerProxy.getTaskManager().completeTask(userId, task,
-                                null, "LAST_SKIPPING");
-                    }
-                    else
-                    {
-                        ServerProxy.getTaskManager().completeTask(userId, task,
-                                null, "SKIPPING");
-                    }
-                    try
-                    {
-                        ctx = WorkflowConfiguration.getInstance()
-                                .getJbpmContext();
-                        TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
-                                .getTaskInstance(task.getId(), ctx);
-                        WorkflowJbpmPersistenceHandler.saveSkipVariable(
-                                taskInstance, workflow.getId());
-                    }
-                    finally
-                    {
-                        ctx.close();
+                        Iterator it = ServerProxy.getTaskManager()
+                                .getCurrentTasks(workflow.getId()).iterator();
+                        Task task = null;
+                        if (it.hasNext())
+                        {
+                            task = (Task) (it.next());
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        List owners = new ArrayList();
+                        WorkflowOwner owner = new WorkflowOwner();
+                        owner.setWorkflow(workflow);
+                        owner.setOwnerId(userId);
+                        owner.setOwnerType(((WorkflowOwner) workflow
+                                .getWorkflowOwners().get(0)).getOwnerType());
+                        owners.add(owner);
+                        ServerProxy.getWorkflowManager().reassignWorkflowOwners(
+                                workflow.getId(), owners);
+                        ServerProxy.getTaskManager().acceptTask(userId, task, true);
+                        if (i == indexInDefaultPath)
+                        {
+                            // i == indexInDefaultPath indicates this is the last
+                            // activity to skip.
+                            ServerProxy.getTaskManager().completeTask(userId, task,
+                                    null, "LAST_SKIPPING");
+                        }
+                        else
+                        {
+                            ServerProxy.getTaskManager().completeTask(userId, task,
+                                    null, "SKIPPING");
+                        }
+                        try
+                        {
+                            ctx = WorkflowConfiguration.getInstance()
+                                    .getJbpmContext();
+                            TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
+                                    .getTaskInstance(task.getId(), ctx);
+                            WorkflowJbpmPersistenceHandler.saveSkipVariable(
+                                    taskInstance, workflow.getId());
+                        }
+                        finally
+                        {
+                            ctx.close();
+                        }
                     }
                 }
             }
-            if (!"Exit".equals(entry.getValue()))
+            finally
             {
-                JobCreationMonitor.updateWorkflowState(workflow, state);
+            	if (!"Exit".equals(entry.getValue()))
+                {
+                    JobCreationMonitor.updateWorkflowState(workflow, state);
+                }
             }
         }
 
@@ -2799,7 +2859,7 @@ public class WorkflowServerLocal implements WorkflowServer
         }
         finally
         {
-        	ctx.close();
+            ctx.close();
         }
 
         return wti;
@@ -3002,7 +3062,7 @@ public class WorkflowServerLocal implements WorkflowServer
         {
             Task task = (Task) ServerProxy.getTaskManager().getTask(
                     p_taskInfo.getId());
-            String companyIdStr = task.getCompanyId();
+            String companyIdStr = String.valueOf(task.getCompanyId());
             List sourcePages = task.getSourcePages();
             SourcePage sp1 = (SourcePage) sourcePages.get(0);
             String efxml = sp1.getRequest().getEventFlowXml();
@@ -3080,10 +3140,17 @@ public class WorkflowServerLocal implements WorkflowServer
         if (isNotificationActive())
         {
             int actionType = SchedulerConstants.FINISH_ACTIVITY;
-            // Only skip the scheduler if this is not the last activty to skip.
-            if (skipping != null && !skipping.startsWith("LAST"))
-                actionType = SchedulerConstants.SKIP_ACTIVITY;
-
+            if (skipping != null)
+            {
+                if (skipping.startsWith("LAST"))
+                {
+                    actionType = SchedulerConstants.SKIP_FINISH_ACTIVITY;
+                }
+                else
+                {
+                    actionType = SchedulerConstants.SKIP_ACTIVITY;
+                }
+            }
             EventNotificationHelper.performSchedulingProcess(new Integer(
                     actionType), p_nodeInstanceId,
                     (Integer) SchedulerConstants.s_eventTypes
@@ -3127,6 +3194,12 @@ public class WorkflowServerLocal implements WorkflowServer
                 break;
             case WorkflowMailerConstants.COMPLETED_TASK:
                 subject = WorkflowMailerConstants.COMPLETED_TASK_SUBJECT;
+                break;
+            case WorkflowMailerConstants.COMPLETED_WFL:
+                subject = WorkflowMailerConstants.COMPLETED_WFL_SUBJECT;
+                break;
+            case WorkflowMailerConstants.COMPLETED_JOB:
+                subject = WorkflowMailerConstants.COMPLETED_JOB_SUBJECT;
                 break;
             case WorkflowMailerConstants.NO_AVAILABLE_RESOURCE:
                 subject = WorkflowMailerConstants.NO_AVAILABLE_RESOURCE_SUBJECT;
@@ -3173,6 +3246,12 @@ public class WorkflowServerLocal implements WorkflowServer
                 break;
             case WorkflowMailerConstants.COMPLETED_TASK:
                 message = WorkflowMailerConstants.COMPLETED_TASK_MESSAGE;
+                break;
+            case WorkflowMailerConstants.COMPLETED_WFL:
+                message = WorkflowMailerConstants.COMPLETED_WFL_MESSAGE;
+                break;
+            case WorkflowMailerConstants.COMPLETED_JOB:
+                message = WorkflowMailerConstants.COMPLETED_JOB_MESSAGE;
                 break;
             case WorkflowMailerConstants.NO_AVAILABLE_RESOURCE:
                 message = WorkflowMailerConstants.NO_AVAILABLE_RESOURCE_MESSAGE;
@@ -3267,12 +3346,16 @@ public class WorkflowServerLocal implements WorkflowServer
                                 p_emailInfo.getSourceLocale(),
                                 p_emailInfo.getTargetLocale(), "en_US") };
                 if (skipping == null)
+                {
                     sendTaskActionEmailToUser(p_assignee, p_emailInfo, null,
                             WorkflowMailerConstants.COMPLETED_TASK, args);
+
+                }
             }
 
             if (p_node == null)
             {
+
                 return null;
             }
 
@@ -3688,7 +3771,17 @@ public class WorkflowServerLocal implements WorkflowServer
 
     /* send an email to a user based on a workflow action (i.e. advancing */
     /* or rejecting a task) */
-    private void sendTaskActionEmailToUser(String p_fromUserId,
+    public void sendJobActionEmailToUser(String p_fromUserId,
+            TaskEmailInfo p_emailInfo, int p_taskActionType)
+    {
+        Object[] p_messageArgs =
+        { p_emailInfo.getJobName(), capLoginUrl(),
+                p_emailInfo.getAssigneesName(),
+                p_emailInfo.getPriorityAsString() };
+        sendTaskActionEmailToUser(p_fromUserId, p_emailInfo, null,
+                p_taskActionType, p_messageArgs);
+    }
+    public void sendTaskActionEmailToUser(String p_fromUserId,
             TaskEmailInfo p_emailInfo, String p_cc, int p_taskActionType,
             Object[] p_messageArgs)
     {
@@ -3764,7 +3857,7 @@ public class WorkflowServerLocal implements WorkflowServer
         {
             Project proj = ServerProxy.getProjectHandler().getProjectById(
                     p_projectId);
-            String companyIdStr = proj.getCompanyId();
+            String companyIdStr = String.valueOf(proj.getCompanyId());
             String from = getEmailInfo(p_initiator).getEmailAddress();
             if (from != null)
             {

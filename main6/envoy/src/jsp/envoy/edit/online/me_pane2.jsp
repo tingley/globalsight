@@ -37,9 +37,7 @@ switch (iViewMode)
 %>
 <HTML>
 <HEAD>
-<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <SCRIPT>
-dojo.require("dijit.Dialog");
 
 var mode = "<%=viewMode%>";
 var isVisible = false; //is progress bar visible
@@ -48,7 +46,7 @@ function showProgressBar()
 {
    try
    {
-	   var div = content.dojo.byId('tgt_prograssbar');
+	   var div = content.document.getElementById('tgt_prograssbar');
 	   isVisible = div.style.visibility == "visible";
 	   if (!isVisible)
        {

@@ -47,7 +47,7 @@ public class JobCreationMonitor
         String sql = "update JOB set STATE = '" + Job.IMPORTFAILED
                 + "' where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
                 + "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
-                + Job.PROCESSING + "')";
+                + Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')";
         try
         {
             HibernateUtil.executeSql(sql);
@@ -79,7 +79,8 @@ public class JobCreationMonitor
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             job.setCreateDate(ts);
             job.setTimestamp(ts);
-            job.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+            job.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                    .getValue()));
 
             HibernateUtil.save(job);
         }
@@ -118,7 +119,8 @@ public class JobCreationMonitor
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             job.setCreateDate(ts);
             job.setTimestamp(ts);
-            job.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+            job.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                    .getValue()));
 
             HibernateUtil.save(job);
         }

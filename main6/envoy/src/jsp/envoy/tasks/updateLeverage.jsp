@@ -86,7 +86,6 @@
 <HTML>
 <HEAD>
 <TITLE><%= title %></TITLE>
-<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
@@ -166,6 +165,7 @@ $(document).ready(function()
 	
 	// Cilck "Update" button
     $("#update").click(function() {
+    	selectedJobsForUpdate = "";
     	if (checkBeforeUpdate()) {
     		var updateFromJobsChecked = null;
     		if ($("#updateFromJobCheckBoxID").attr("checked") == "checked"){
@@ -192,7 +192,6 @@ $(document).ready(function()
 					setTimeout(udpateLeverageProgress, 500);
 				}
     		);
-    		
     	}
     });
 	
@@ -208,8 +207,7 @@ $(document).ready(function()
 
 	// Click "Cancel" button
 	$("#cancel").click(function() {
-		updateLeverageForm.action = '<%=cancelUrl%>';
-        updateLeverageForm.submit();
+		window.close();
 	});
 
 	function udpateLeverageProgress()
@@ -257,11 +255,13 @@ $(document).ready(function()
 
 	    if (ufj == true) {
 	        var selectedJobs = document.getElementById("selectJobs");
-	    	var intValue = 0;
+	    	var intValue1 = 0;
+	    	var intValue2 = 0;
+	    	var idTag = false;
 			selectedJobsForUpdate = "";//Initialize this to empty first
 	        for(i=0; i<selectedJobs.length; i++) {
 	            if(selectedJobs.options[i].selected){
-	            	intValue += 1;
+	            	intValue1 += 1;
 					if (selectedJobsForUpdate == ""){
 						selectedJobsForUpdate = selectedJobs.options[i].value;
 					} else {
@@ -271,7 +271,8 @@ $(document).ready(function()
 	        }
 			//this just for add jobids and may be it will merge the up code
 	        var list= $('input:radio[name="reportOn"]:checked').val();
-	        if(list=="idTRJobIds"){
+	        if(list=="idTRJobIds") {
+		        idTag =true;
     	 		selectedJobsForUpdate = "";
     	 		var uniqueTool=new Object();
     	 		var writJobs=$("#jobIds").val();
@@ -280,12 +281,12 @@ $(document).ready(function()
 	    		writJobs=jQuery.unique(arryJobs);
 	    		
 	    		for(i=0; i<selectedJobs.length; i++) {
-		            $.each(writJobs, function(j,val){ 
-							if(selectedJobs.options[i].value==val){
+		            $.each(writJobs, function(j,val) { 
+							if(selectedJobs.options[i].value==val) {
 								if(uniqueTool[val]) return true;
 								uniqueTool[val]=true;
-								intValue += 1;
-								if (selectedJobsForUpdate == ""){
+								intValue2 += 1;
+								if (selectedJobsForUpdate == "") {
 									selectedJobsForUpdate = val;
 								} else {
 									selectedJobsForUpdate += " " + val;
@@ -297,9 +298,13 @@ $(document).ready(function()
     	 		
     	 	}
 			
-	        if (intValue < 1) {
+	        if (intValue1 < 1 && idTag == false) {
 	            alert("<%=selectedJobsNumber%>");
 	            return false;
+	        }
+	        if (intValue2 < 1&&idTag == true) {
+		        alert("Invalid or empty Job ID(s).");
+		        return false;
 	        }
 
 	        // Tm penalty should be between [0,100)
@@ -342,16 +347,24 @@ $(document).ready(function()
 	}
 });
 
+function helpSwitch() 
+{  
+    // The variable helpFile is defined in each JSP
+    helpWindow = window.open(helpFile,'helpWindow',
+      'resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
+    helpWindow.focus();
+}
 </SCRIPT>
 
 </HEAD>
-<BODY id="idBody" LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()">
-<%@ include file="/envoy/common/header.jspIncl" %>
-<%@ include file="/envoy/common/navigation.jspIncl" %>
-<%@ include file="/envoy/wizards/guides.jspIncl" %>
+<BODY id="idBody" LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
 
-<DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 800px; TOP: 108px">
-<span class="mainHeading"><%=title%></span>
+<DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute;padding:12px 0px;">
+	<span class="mainHeading"><%=title%></span>
+	<span class="HREFBold" style="float: right;">
+	  <a href="javascript:helpSwitch();"><%=bundle.getString("lb_help")%></a> |
+	  <a href="javascript:window.close();"><%=bundle.getString("lb_close")%></a> 
+	</span>
 <BR/><BR/>
 <table class="standardText" cellspacing="0" cellpadding="0" border="0">
 <tbody><tr><td width="600"><%=description%></td></tr></tbody>

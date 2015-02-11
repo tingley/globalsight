@@ -16,9 +16,10 @@
  */
 package com.globalsight.everest.page.pageimport;
 
-import com.globalsight.everest.persistence.PersistentObject;
-import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+
+import com.globalsight.everest.persistence.PersistentObject;
 
 /**
  * TemplateFormat is a Java data object to map the 'template_format' table in
@@ -26,67 +27,79 @@ import java.io.IOException;
  */
 public class TemplateFormat extends PersistentObject
 {
-	private static final long serialVersionUID = 1713744736501145738L;
+    private static final long serialVersionUID = 1713744736501145738L;
 
-	private String m_name;
-	private String m_templateType;
-	private String m_sourceType;
-	private String m_text;
-	
-	public TemplateFormat()
-	{
-	}
+    private String m_name;
+    private String m_templateType;
+    private String m_sourceType;
+    private String m_text;
 
-	public TemplateFormat(String p_name, String p_tmplType, String p_srcType,
-			String p_text)
-	{
-		m_name = p_name;
-		m_templateType = p_tmplType;
-		m_sourceType = p_srcType;
-		m_text = p_text;
-	}
+    public TemplateFormat()
+    {
+    }
 
-	protected void writeObject(ObjectOutputStream p_oos) throws IOException
-	{
-	}
-	
-	public String getName()
-	{
-		return m_name;
-	}
-	
-	public void setName(String name)
-	{
-		m_name = name;
-	}
-	
-	public String getTemplateType()
-	{
-		return m_templateType;
-	}
-	
-	public void setTemplateType(String templateType)
-	{
-		m_templateType = templateType;
-	}
-	
-	public String getSourceType()
-	{
-		return m_sourceType;
-	}
-	
-	public void setSourceType(String sourceType)
-	{
-		m_sourceType = sourceType;
-	}
+    public TemplateFormat(String p_name, String p_tmplType, String p_srcType,
+            String p_text)
+    {
+        m_name = p_name;
+        m_templateType = p_tmplType;
+        m_sourceType = p_srcType;
+        m_text = p_text;
+    }
 
-	public String getText()
-	{
-		return m_text;
-	}
-	
-	public void setText(String text)
-	{
-		m_text = text;
-	}
+    protected void writeObject(ObjectOutputStream p_oos) throws IOException
+    {
+    }
+
+    public String getName()
+    {
+        return m_name;
+    }
+
+    public void setName(String name)
+    {
+        m_name = name;
+    }
+
+    public String getTemplateType()
+    {
+        return m_templateType;
+    }
+
+    public void setTemplateType(String templateType)
+    {
+        m_templateType = templateType;
+    }
+
+    public String getSourceType()
+    {
+        return m_sourceType;
+    }
+
+    public void setSourceType(String sourceType)
+    {
+        m_sourceType = sourceType;
+    }
+
+    public String getText()
+    {
+        return m_text;
+    }
+
+    public void setText(String text)
+    {
+        m_text = text;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object paramObject)
+    {
+        return super.equals(paramObject);
+    }
 }

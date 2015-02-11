@@ -19,13 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.tm.management;
 
 import org.apache.log4j.Logger;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm3.core.TM3Exception;
 import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.integration.GSTuvData;
@@ -37,35 +33,34 @@ public class Tm3ConvertHelper extends Thread
     private static final Logger logger = Logger
             .getLogger(Tm3ConvertHelper.class.getName());
 
-    private Session session = null;
-    private Transaction transaction = null;
     private ProjectTM oldTm = null;
     private ProgressReporter proReport = null;
     private Tm3Migrator migrator = null;
     private boolean isCanceled = false;
-    
-    public Tm3ConvertHelper (Session p_session, long p_companyId, ProjectTM p_oldTm, ProgressReporter p_pr) {
-        this.session = p_session;
-        this.transaction = session.beginTransaction();
+
+    public Tm3ConvertHelper(long p_companyId, ProjectTM p_oldTm,
+            ProgressReporter p_pr)
+    {
         this.oldTm = p_oldTm;
         this.proReport = p_pr;
-        
-        this.migrator = new Tm3Migrator(p_session, p_companyId, p_oldTm);
+
+        this.migrator = new Tm3Migrator(p_companyId, p_oldTm);
     }
 
-    public Tm3ConvertHelper (Session p_session, long p_companyId, ProjectTM p_oldTm) {
-        this.session = p_session;
-        this.transaction = session.beginTransaction();
+    public Tm3ConvertHelper(long p_companyId, ProjectTM p_oldTm)
+    {
         this.oldTm = p_oldTm;
-        
-        this.migrator = new Tm3Migrator(p_session, p_companyId, p_oldTm);
+
+        this.migrator = new Tm3Migrator(p_companyId, p_oldTm);
     }
 
-    public String getUniqueName() {
-        if (migrator == null) {
+    public String getUniqueName()
+    {
+        if (migrator == null)
+        {
             return "";
         }
-        return migrator.getUniqueTmName(session, oldTm.getName());
+        return migrator.getUniqueTmName(oldTm.getName());
     }
 
     public void convert()
@@ -74,17 +69,21 @@ public class Tm3ConvertHelper extends Thread
                 this);
         thread.start();
     }
-    
-    public ProjectTM getCurrentTM() {
+
+    public ProjectTM getCurrentTM()
+    {
         return oldTm;
     }
-    
-    public ProjectTM getCurrentTM3TM() {
+
+    public ProjectTM getCurrentTM3TM()
+    {
         ProjectTM tm3tm = null;
-        if (oldTm != null && oldTm.getConvertedTM3Id() > 0) {
+        if (oldTm != null && oldTm.getConvertedTM3Id() > 0)
+        {
             try
             {
-                tm3tm = ServerProxy.getProjectHandler().getProjectTMById(oldTm.getConvertedTM3Id(), false);
+                tm3tm = ServerProxy.getProjectHandler().getProjectTMById(
+                        oldTm.getConvertedTM3Id(), false);
             }
             catch (Exception e)
             {
@@ -93,7 +92,7 @@ public class Tm3ConvertHelper extends Thread
         }
         return tm3tm;
     }
-    
+
     @Override
     public void run()
     {
@@ -103,65 +102,39 @@ public class Tm3ConvertHelper extends Thread
             {
                 if (migrator != null)
                 {
-                    migrator.migrate(new TransactionWrapper());
-                    transaction.commit();
+                    migrator.migrate();
                 }
             }
             catch (Exception e)
             {
-                if (transaction != null && transaction.isActive())
-                    transaction.rollback();
-
                 if (!isCanceled)
-                    logger.error("Error found when migrating TM to TM3. " + e.getMessage(), e);
-            }
-            finally
-            {
-                TmUtil.closeStableSession(session);
+                    logger.error(
+                            "Error found when migrating TM to TM3. "
+                                    + e.getMessage(), e);
             }
         }
     }
-    
-    public void cancel() {
-        try {
-            isCanceled = true;
-//            proReport.setMessageKey("lb_tm_convert_cancel", "User cancel the conversion");
-            
-            this.migrator.cancelConvert();
-            TM3Tm<GSTuvData> tm3tm = migrator.getCurrrentTm3();
-//            TM3Manager manager = DefaultManager.create();
-//            manager.removeTm(session, tm3tm);
-            logger.info("User interrupt the conversion. TM3 ID is " + tm3tm.getId().toString());
-        } catch (TM3Exception e) {
-//            proReport.setMessageKey("lb_tm_convert_cancel", "User cancel the conversion");
-            logger.error("Error found in cancel TM3 Conversion.", e);
-        }
-    }
 
-    class TransactionWrapper implements Tm3Migrator.TransactionControl
-    {
-        @Override
-        public void commitAndRestartTransaction()
-        {
-            Tm3ConvertHelper.this.commitAndRestartTransaction();
-        }
-    }
-
-    public Transaction commitAndRestartTransaction()
+    public void cancel()
     {
         try
         {
-            transaction.commit();
-            transaction = session.beginTransaction();
-            return transaction;
+            isCanceled = true;
+            // proReport.setMessageKey("lb_tm_convert_cancel",
+            // "User cancel the conversion");
+
+            this.migrator.cancelConvert();
+            TM3Tm<GSTuvData> tm3tm = migrator.getCurrrentTm3();
+            // TM3Manager manager = DefaultManager.create();
+            // manager.removeTm(session, tm3tm);
+            logger.info("User interrupt the conversion. TM3 ID is "
+                    + tm3tm.getId().toString());
         }
-        catch (Exception e)
+        catch (TM3Exception e)
         {
-            transaction.rollback();
-            
-            proReport.setMessageKey("lb_tm_convert_cancel", "User cancel the conversion");
-            logger.error("User interrupt the conversion.");
-            return null;
+            // proReport.setMessageKey("lb_tm_convert_cancel",
+            // "User cancel the conversion");
+            logger.error("Error found in cancel TM3 Conversion.", e);
         }
     }
 }

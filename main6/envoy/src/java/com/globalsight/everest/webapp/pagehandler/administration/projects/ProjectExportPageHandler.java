@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -165,6 +166,8 @@ public class ProjectExportPageHandler extends PageHandler implements
                 sessionMgr.setAttribute(TM_EXPORTER, exporter);
                 sessionMgr.setAttribute(USER_NAMES,
                         UserUtil.convertUserIdsToUserNames(projectMembers));
+                sessionMgr.setAttribute(COMPANY_NAME, CompanyWrapper
+                        .getCompanyNameById(project.getCompanyId()));
             }
             else if (action.equals(TM_ACTION_ANALYZE_TM))
             {

@@ -72,7 +72,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UpdateSourcePageManager;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.PersistenceService;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
@@ -89,7 +89,6 @@ import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.AddRequestToJobCommand;
@@ -244,7 +243,7 @@ public class JobCreatorLocal implements JobCreator
             {
                 priorHandleDocumentumJob(parser, job);
             }
-            
+
             // remove job cache after batch complete
             if (isBatchComplete)
             {
@@ -253,7 +252,7 @@ public class JobCreatorLocal implements JobCreator
                 {
                     uuid = ((JobImpl) job).getUuid();
                 }
-                
+
                 if (uuid != null)
                 {
                     RuntimeCache.clearJobAttributes(uuid);
@@ -422,9 +421,15 @@ public class JobCreatorLocal implements JobCreator
     {
         try
         {
+            TranslationMemoryProfile tmp = request.getL10nProfile()
+                    .getTranslationMemoryProfile();
+            boolean useMT = tmp.getUseMT();
+            long mtConfidenceScore = tmp.getMtConfidenceScore();
+            if (!useMT) {
+                mtConfidenceScore = 0;
+            }
             job.setIsWordCountReached(false);
-            job.setLeverageMatchThreshold((int) request.getL10nProfile()
-                    .getTranslationMemoryProfile().getFuzzyMatchThreshold());
+            job.setLeverageMatchThreshold((int) tmp.getFuzzyMatchThreshold());
             boolean isDefaultContextMatch = PageHandler
                     .isDefaultContextMatch(request);
             boolean isInContextMatch = PageHandler.isInContextMatch(request);
@@ -449,6 +454,8 @@ public class JobCreatorLocal implements JobCreator
                 workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 workflow.setCompanyId(job.getCompanyId());
                 workflow.setPriority(job.getPriority());
+                workflow.setUseMT(useMT);
+                workflow.setMtConfidenceScore((int) mtConfidenceScore);
 
                 // create the workflow owners for each workflow
                 List wfOwners = workflow.getWorkflowOwners();
@@ -497,8 +504,9 @@ public class JobCreatorLocal implements JobCreator
 
         try
         {
-            connection = session.connection();
-
+            connection = DbUtil.getConnection();
+            boolean autoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
             // add the request (and source page) to the job
             AddRequestToJobCommand arjc = new AddRequestToJobCommand(
                     (RequestImpl) p_request);
@@ -528,8 +536,7 @@ public class JobCreatorLocal implements JobCreator
                 // if only error pages then target pages won't exist.
                 if (p_targetPages != null && p_targetPages.size() > 0)
                 {
-                    Collection c = p_targetPages.values();
-                    Iterator it = c.iterator();
+                    Iterator it = p_targetPages.values().iterator();
                     String hql = "from WorkflowImpl w where w.job.id = :jId "
                             + "and w.targetLocale.id = :tId";
                     Map<String, Long> map = new HashMap<String, Long>();
@@ -543,9 +550,10 @@ public class JobCreatorLocal implements JobCreator
 
                         for (WorkflowImpl w : ws)
                         {
-                            if (Workflow.CANCELLED.equalsIgnoreCase(w
-                                    .getState()))
-                                continue;
+//                            if (Workflow.CANCELLED.equalsIgnoreCase(w.getState()))
+//                            {
+//                                continue;                                
+//                            }
 
                             tp.setWorkflowInstance(w);
                             w.addTargetPage(tp);
@@ -565,6 +573,7 @@ public class JobCreatorLocal implements JobCreator
             connection.commit();
             // commit all together
             transaction.commit();
+            connection.setAutoCommit(autoCommit);
 
         }
         catch (Exception e)
@@ -573,6 +582,7 @@ public class JobCreatorLocal implements JobCreator
 
             try
             {
+                connection.rollback();
                 transaction.rollback();
             }
             catch (Exception sqle)
@@ -592,17 +602,7 @@ public class JobCreatorLocal implements JobCreator
         }
         finally
         {
-            try
-            {
-                if (connection != null)
-                {
-                    connection.close();
-                }
-            }
-            catch (Exception e)
-            {
-                c_logger.error(e.getMessage(), e);
-            }
+            DbUtil.silentReturnConnection(connection);
         }
 
         // A job does not exist yet, create one.
@@ -720,7 +720,8 @@ public class JobCreatorLocal implements JobCreator
                             {
                                 job.setOrgState(null);
                                 job.setState(orgState);
-                                HibernateUtil.update(job);
+//                                HibernateUtil.update(job);
+                                HibernateUtil.merge(job);
 
                                 for (Workflow w : dispatchedWK)
                                 {
@@ -961,12 +962,15 @@ public class JobCreatorLocal implements JobCreator
         int reimportOption = ActivePageReimporter.getReimportOption();
         if (reimportOption == ActivePageReimporter.REIMPORT_NEW_TARGETS)
         {
-            Session session = TmUtil.getStableSession();
+            Connection conn = null;
             try
             {
+                conn = DbUtil.getConnection();
+                conn.setAutoCommit(false);
                 UpdateWorkflowAndPageStatesCommand updateState = new UpdateWorkflowAndPageStatesCommand(
                         p_job);
-                updateState.persistObjects(session.connection());
+                updateState.persistObjects(conn);
+                conn.commit();
 
                 // check if there are any requests that should be marked as
                 // failed
@@ -994,10 +998,7 @@ public class JobCreatorLocal implements JobCreator
             }
             finally
             {
-                if (session != null)
-                {
-                    TmUtil.closeStableSession(session);
-                }
+                DbUtil.silentReturnConnection(conn);
             }
         }
     }
@@ -1166,7 +1167,7 @@ public class JobCreatorLocal implements JobCreator
             return;
         }
 
-        String companyIdStr = p_job.getCompanyId();
+        String companyIdStr = String.valueOf(p_job.getCompanyId());
         SystemConfiguration config = SystemConfiguration.getInstance();
         String capLoginUrl = config
                 .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
@@ -1584,7 +1585,7 @@ public class JobCreatorLocal implements JobCreator
             if (DataSourceType.TEAM_SITE.equals(dataSourceType))
             {
                 CxeProxy.returnImportStatusToTeamSite(efxml, state, p_details,
-                        p_job.getCompanyId());
+                        String.valueOf(p_job.getCompanyId()));
             }
             else if (DataSourceType.VIGNETTE.equals(dataSourceType))
             {
@@ -1679,7 +1680,7 @@ public class JobCreatorLocal implements JobCreator
     private void handleDocumentumJob(Job job, String objId, String userId)
             throws Exception
     {
-    	Connection connection = null;
+        Connection connection = null;
         PreparedStatement psQueryWfIds = null;
         ResultSet rs = null;
         try
@@ -1707,15 +1708,15 @@ public class JobCreatorLocal implements JobCreator
             c_logger.debug("Writing the custom attributes(jobId, workflow ids) back to Documentum server");
             // Write custom attributes(jobId, workflow ids) back to Documentum
             // Server.
-            DocumentumOperator.getInstance().writeCustomAttrsBack(userId, objId,
-                    jobId, wfIdsList);
-            c_logger.debug(debugInfo.toString());        	
+            DocumentumOperator.getInstance().writeCustomAttrsBack(userId,
+                    objId, jobId, wfIdsList);
+            c_logger.debug(debugInfo.toString());
         }
         finally
         {
-        	DbUtil.silentClose(rs);
-        	DbUtil.silentClose(psQueryWfIds);
-        	DbUtil.silentReturnConnection(connection);
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(psQueryWfIds);
+            DbUtil.silentReturnConnection(connection);
         }
     }
 

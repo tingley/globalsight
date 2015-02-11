@@ -55,12 +55,19 @@ public class ProcessStatus implements IProcessStatusListener, Serializable
 	protected Object m_results;
 	
 	protected ResourceBundle m_bundle = null;
+	
+	protected boolean isMultiTasks = false;
+	
+	protected int taskCounter = 0;
+
+    protected int taskTotalSize = 0;
+    
+    protected boolean errorOccured = false;
 
 	//
 	// Constructor
 	//
-
-	/** Initializes the ProcessStatus object. */
+    /** Initializes the ProcessStatus object. */
 	public ProcessStatus()
 	{
 		m_counter = 0;
@@ -347,4 +354,50 @@ public class ProcessStatus implements IProcessStatusListener, Serializable
 
 	}
 
+	public boolean isMultiTasks()
+    {
+        return isMultiTasks;
+    }
+
+    public void setMultiTasks(boolean isMultiTasks)
+    {
+        this.isMultiTasks = isMultiTasks;
+    }
+
+    public int getTaskCounter()
+    {
+        return taskCounter;
+    }
+
+    public void setTaskCounter(int taskCounter)
+    {
+        this.taskCounter = taskCounter;
+    }
+
+    public int getTaskTotalSize()
+    {
+        return taskTotalSize;
+    }
+
+    public void setTaskTotalSize(int taskTotalSize)
+    {
+        this.taskTotalSize = taskTotalSize;
+    }
+    
+    public int getTaskPercentage()
+    {
+        int curTaskCount = this.getTaskCounter();
+        int tasksSize = this.getTaskTotalSize();
+        return (int)(((curTaskCount * 1.0)/(tasksSize * 1.0)) * 100.0);
+    }
+    
+    public boolean isErrorOccured()
+    {
+        return errorOccured;
+    }
+
+    public void setErrorOccured(boolean errorOccured)
+    {
+        this.errorOccured = errorOccured;
+    }
 }

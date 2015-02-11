@@ -29,10 +29,10 @@ public class AttributeSet extends PersistentObject
 {
     private static final long serialVersionUID = 2037545602039043777L;
     public static final String PROTECT_NAME_PREFIX = "protect_";
-    
+
     private String name;
     private Set<Attribute> attributes = new HashSet<Attribute>();
-    private String companyId;
+    private long companyId;
     private String description;
     private Set<ProjectImpl> projects = new HashSet<ProjectImpl>();
 
@@ -43,7 +43,7 @@ public class AttributeSet extends PersistentObject
             attributes.clear();
         }
     }
-    
+
     public String getName()
     {
         return name;
@@ -58,7 +58,7 @@ public class AttributeSet extends PersistentObject
     {
         return attributes;
     }
-    
+
     public List<Attribute> getAttributeAsList()
     {
         List<Attribute> atts = new ArrayList<Attribute>();
@@ -66,7 +66,7 @@ public class AttributeSet extends PersistentObject
         {
             atts.addAll(attributes);
         }
-        
+
         return atts;
     }
 
@@ -75,23 +75,23 @@ public class AttributeSet extends PersistentObject
         this.attributes = attributes;
     }
 
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return companyId;
     }
 
-    public void setCompanyId(String companyId)
+    public void setCompanyId(long companyId)
     {
         this.companyId = companyId;
     }
-    
+
     public void addAttribute(Attribute attribute)
     {
         if (attributes == null)
         {
             attributes = new HashSet<Attribute>();
         }
-        
+
         attributes.add(attribute);
     }
 

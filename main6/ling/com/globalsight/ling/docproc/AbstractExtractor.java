@@ -97,6 +97,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private ExtractorRegistry m_ExtractorRegistry = null;
     private Filter m_mainFilter = null;
     private BaseFilter mainBaseFilter = null;
+    private boolean doSegBeforeInlText = true;
 
     static
     {
@@ -924,5 +925,22 @@ public abstract class AbstractExtractor implements ExtractorInterface
     public BaseFilter getMainBaseFilter()
     {
         return mainBaseFilter;
+    }
+
+    /**
+     * # GBS-2894 : do segmentation before internal text
+     */
+    public boolean isDoSegBeforeInlText()
+    {
+        return doSegBeforeInlText;
+    }
+
+    /**
+     * # GBS-2894 : do segmentation before internal text.
+     * Set true to apply this rule
+     */
+    public void setDoSegBeforeInlText(boolean doSegFirst)
+    {
+        this.doSegBeforeInlText = doSegFirst;
     }
 }

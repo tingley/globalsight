@@ -43,8 +43,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 /**
  * Page handler for adding/removing projects to a user
  */
-public class ModifyProjectsHandler
-    extends PageHandler
+public class ModifyProjectsHandler extends PageHandler
 {
     public ModifyProjectsHandler()
     {
@@ -52,17 +51,20 @@ public class ModifyProjectsHandler
 
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-        HttpServletRequest request, HttpServletResponse response,
-        ServletContext context)
-        throws ServletException, IOException,
-               EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = request.getSession(false);
 
@@ -71,21 +73,19 @@ public class ModifyProjectsHandler
         request.setAttribute("fromUserEdit", "1");
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(pageDescriptor, request,
-            response, context);
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
-
     /**
-     *  Set up edit of projects
+     * Set up edit of projects
      */
     private void setUpEdit(HttpServletRequest request, HttpSession session)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
-        SessionManager sessionMgr = (SessionManager)session
-            .getAttribute(SESSION_MANAGER);
-        ModifyUserWrapper wrapper = (ModifyUserWrapper)
-            sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                .getAttribute(MODIFY_USER_WRAPPER);
 
         // Save data from previous page unless coming from table navigation
         if (request.getParameter("firstName") != null)
@@ -94,8 +94,9 @@ public class ModifyProjectsHandler
         // Set edit flag
         sessionMgr.setAttribute("editUser", "true");
 
-        FieldSecurity securitiesHash = (FieldSecurity)sessionMgr.getAttribute("securitiesHash");
-        String access = (String)securitiesHash.get(UserSecureFields.PROJECTS);
+        FieldSecurity securitiesHash = (FieldSecurity) sessionMgr
+                .getAttribute("securitiesHash");
+        String access = (String) securitiesHash.get(UserSecureFields.PROJECTS);
         if ("hidden".equals(access))
         {
             return;
@@ -104,38 +105,47 @@ public class ModifyProjectsHandler
         ArrayList addedProjects = new ArrayList();
         if (sessionMgr.getAttribute("ProjectPageVisited") != null)
         {
-            ArrayList addedProjectIds = (ArrayList)wrapper.getProjects();
+            ArrayList addedProjectIds = (ArrayList) wrapper.getProjects();
             // convert list of projectIds to Projects
-            for (int i = 0; i < addedProjectIds.size(); i++) 
+            for (int i = 0; i < addedProjectIds.size(); i++)
             {
-                Long id = (Long)addedProjectIds.get(i);
-                addedProjects.add(ProjectHandlerHelper.getProjectById(id.longValue()));
+                Long id = (Long) addedProjectIds.get(i);
+                addedProjects.add(ProjectHandlerHelper.getProjectById(id
+                        .longValue()));
             }
         }
         else
         {
-            addedProjects = (ArrayList)
-                UserHandlerHelper.getProjectsByUser(wrapper.getUserId());
+            addedProjects = (ArrayList) UserHandlerHelper
+                    .getProjectsByUser(wrapper.getUserId());
         }
 
-        String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+        String userName = (String) session
+                .getAttribute(WebAppConstants.USER_NAME);
         User user = UserHandlerHelper.getUser(userName);
-        
+
         boolean isSuperPM = false;
-        try {
+        try
+        {
             isSuperPM = UserUtil.isSuperPM(user.getUserId());
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
-        
+
         List projects = null;
         if (!isSuperPM)
         {
             projects = UserHandlerHelper.getProjectsManagedByUser(user);
             String companyId = null;
-            try {
-                companyId = CompanyWrapper.getCompanyIdByName(wrapper.getCompanyName());
-            } catch (PersistenceException e) {
+            try
+            {
+                companyId = CompanyWrapper.getCompanyIdByName(wrapper
+                        .getCompanyName());
+            }
+            catch (PersistenceException e)
+            {
                 throw new EnvoyServletException(e);
             }
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
@@ -144,18 +154,19 @@ public class ModifyProjectsHandler
                 for (Iterator iter = projects.iterator(); iter.hasNext();)
                 {
                     project = (Project) iter.next();
-                    if (!project.getCompanyId().equals(companyId))
+                    if (!String.valueOf(project.getCompanyId()).equals(
+                            companyId))
                     {
                         iter.remove();
                     }
                 }
             }
         }
-        else 
+        else
         {
             projects = new ArrayList(ProjectHandlerHelper.getAllProjects());
         }
-        
+
         ArrayList availableProjects = (ArrayList) new ArrayList(projects);
 
         List defaultProjects = UserHandlerHelper.setProjectsForEdit(
@@ -167,9 +178,10 @@ public class ModifyProjectsHandler
             defaultProjects.addAll(addedProjects);
         }
 
-        setTableNavigation(request, session, defaultProjects,
-                null,
-                10,   // change this to be configurable!
+        setTableNavigation(request, session, defaultProjects, null, 10, // change
+                                                                        // this
+                                                                        // to be
+                                                                        // configurable!
                 "projects", "project");
 
         request.setAttribute("future", new Boolean(wrapper.isInAllProjects()));

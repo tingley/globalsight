@@ -47,6 +47,8 @@ import util.Page;
 
 public class Install extends installer.EventBroadcaster
 {
+    private static final String SERVICE_NAME = "\"GlobalSight Service\"";
+
     private static final String BACKSLASH = "\\";
 
     private static final String DOUBLEBACKSLASH = "\\\\";
@@ -82,29 +84,22 @@ public class Install extends installer.EventBroadcaster
     public static final String INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX = INSTALLATION_OPENLDAP_DIRECTORY_LINUX
             + "/globalsight";
 
-    // public static final String DEPLOYMENT_DIRECTORY = "../deployment";
-    public static final String DEPLOYMENT_DIRECTORY = "../jboss/jboss_server/server/default/deploy";
+    public static String GS_HOME = determineGsHome();
+
+    // new directory in jboss 7
+    public static final String DIR_EAR = concatPath(GS_HOME,
+            "jboss/server/standalone/deployments/globalsight.ear");
 
     public static Page PAGE = new Page();
 
-    public static String GS_HOME = determineGsHome();
+    public static String JBOSS_HOME = concatPath(GS_HOME, "jboss/server");
 
-    public static String JAVA_SERVICE_WRAPPER_HOME = GS_HOME + File.separator
-            + "install" + File.separator + "JavaServiceWrapper"
-            + File.separator + "bin";
+    public static String JBOSS_BIN = concatPath(JBOSS_HOME, "bin");
 
-    public static String JBOSS_HOME = GS_HOME + File.separator + "jboss"
-            + File.separator + "jboss_server";
+    public static String JBOSS_UTIL_BIN = concatPath(GS_HOME, "jboss/util/bin");
 
-    public static String JBOSS_BIN = JBOSS_HOME + File.separator + "bin";
-
-    public static String NETEGRITY = GS_HOME + File.separator + "netegrity";
-
-    public static String MYSQL_SQL_FILE = GS_HOME + File.separator + "install"
-            + File.separator + "data" + File.separator + "mysql"
-            + File.separator;
-
-    public static String EAR_HOME = GS_HOME + File.separator + "deployment";
+    public static String MYSQL_SQL_FILE = concatPath(GS_HOME,
+            "install/data/mysql");
 
     public static final String TEMP_DIRECTORY = System
             .getProperty("java.io.tmpdir");
@@ -1054,155 +1049,106 @@ public class Install extends installer.EventBroadcaster
         m_configFileList = new Hashtable<String, String>();
 
         String choice = SERVER_JBOSS;
-        m_configFileList.put(
-                concatPath(GS_HOME, choice + "/application.xml.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/META-INF/application.xml"));
 
-        // startJboss.cmd.template
         if (SERVER_JBOSS.equals(choice))
         {
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/startJboss.cmd.template"),
-                    concatPath(GS_HOME, "jboss/startJboss.cmd"));
-            // jboss-service.xml
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/jboss-service.xml.template"),
-                    concatPath(GS_HOME, "jboss/jboss-service.xml"));
-
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/server.xml.template"),
-                    concatPath(GS_HOME, "jboss/server.xml"));
-
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/mail-service.xml.template"),
-                    concatPath(GS_HOME, "jboss/mail-service.xml"));
-
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/uil2-service.xml.template"),
-                    concatPath(GS_HOME, "jboss/uil2-service.xml"));
-
-            // mysql-ds.xml
-            m_configFileList.put(
-                    concatPath(GS_HOME, "jboss/mysql-ds.xml.template"),
-                    concatPath(DEPLOYMENT_DIRECTORY, "mysql-ds.xml"));
-
-            // Jboss-web.xml
+            // standalone.xml
             m_configFileList
-                    .put(concatPath(DEPLOYMENT_DIRECTORY,
-                            "globalsight.ear/globalsight-web.war/WEB-INF/jboss-web.xml.template"),
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/globalsight-web.war/WEB-INF/jboss-web.xml"));
-
-            // Jboss-web.xml
-            m_configFileList
-                    .put(concatPath(DEPLOYMENT_DIRECTORY,
-                            "globalsight.ear/xdespellchecker.war/WEB-INF/jboss-web.xml.template"),
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/xdespellchecker.war/WEB-INF/jboss-web.xml"));
-
-            // Jboss-web.xml
-            m_configFileList
-                    .put(concatPath(DEPLOYMENT_DIRECTORY,
-                            "globalsight.ear/spellchecker.war/WEB-INF/jboss-web.xml.template"),
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/spellchecker.war/WEB-INF/jboss-web.xml"));
+                    .put(concatPath(GS_HOME,
+                            "jboss/util/standalone.xml.template"),
+                            concatPath(GS_HOME,
+                                    "jboss/server/standalone/configuration/standalone.xml"));
+            if (m_operatingSystem == OS_LINUX)
+            {
+                // service.sh
+                m_configFileList.put(
+                        concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
+                        concatPath(JBOSS_UTIL_BIN, "service.sh"));
+            }
         }
 
         // Process files in the deployment directory
+        m_configFileList.put(
+                concatPath(DIR_EAR,
+                        "lib/classes/hibernate-jbpm.cfg.xml.template"),
+                concatPath(DIR_EAR, "lib/classes/hibernate-jbpm.cfg.xml"));
+
+        m_configFileList.put(
+                concatPath(DIR_EAR, "lib/classes/quartz.properties.template"),
+                concatPath(DIR_EAR, "lib/classes/quartz.properties"));
+
+        m_configFileList.put(
+                concatPath(DIR_EAR,
+                        "globalsight-web.war/WEB-INF/web.xml.template"),
+                concatPath(DIR_EAR, "globalsight-web.war/WEB-INF/web.xml"));
 
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml"));
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/properties/envoy_generated.properties.template"),
+                        concatPath(DIR_EAR,
+                                "lib/classes/properties/envoy_generated.properties"));
 
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/quartz.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/quartz.properties"));
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/properties/db_connection.properties.template"),
+                        concatPath(DIR_EAR,
+                                "lib/classes/properties/db_connection.properties"));
 
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/globalsight-web.war/WEB-INF/web.xml.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/WEB-INF/web.xml"));
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/hibernate.properties.template"),
+                        concatPath(DIR_EAR, "lib/classes/hibernate.properties"));
 
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/envoy_generated.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/envoy_generated.properties"));
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/properties/Logger.properties.template"),
+                        concatPath(DIR_EAR,
+                                "lib/classes/properties/Logger.properties"));
 
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/db_connection.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/db_connection.properties"));
-
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/hibernate.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/hibernate.properties"));
-
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/Logger.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/Logger.properties"));
-
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/SRX2.0.xsd.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/SRX2.0.xsd"));
+        m_configFileList.put(
+                concatPath(DIR_EAR,
+                        "lib/classes/properties/SRX2.0.xsd.template"),
+                concatPath(DIR_EAR, "lib/classes/properties/SRX2.0.xsd"));
 
         // process the XDE spellchecker files
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/xdespellchecker.war/WEB-INF/web.xml.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/xdespellchecker.war/WEB-INF/web.xml"));
+        m_configFileList.put(
+                concatPath(DIR_EAR,
+                        "xdespellchecker.war/WEB-INF/web.xml.template"),
+                concatPath(DIR_EAR, "xdespellchecker.war/WEB-INF/web.xml"));
 
         // process the GlobalSight spellchecker files
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/spellchecker.war/WEB-INF/web.xml.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/spellchecker.war/WEB-INF/web.xml"));
+                .put(concatPath(DIR_EAR,
+                        "spellchecker.war/WEB-INF/web.xml.template"),
+                        concatPath(DIR_EAR, "spellchecker.war/WEB-INF/web.xml"));
 
         m_configFileList
-                .put(concatPath(
-                        DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/spellchecker.war/WEB-INF/classes/spell/spell.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/spellchecker.war/WEB-INF/classes/spell/spell.properties"));
+                .put(concatPath(DIR_EAR,
+                        "spellchecker.war/WEB-INF/classes/spell/spell.properties.template"),
+                        concatPath(DIR_EAR,
+                                "spellchecker.war/WEB-INF/classes/spell/spell.properties"));
 
         // process command line scripts
         m_configFileList.put(
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/bin/CreateDictionary.cmd.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/bin/CreateDictionary.cmd"));
+                concatPath(DIR_EAR, "bin/CreateDictionary.cmd.template"),
+                concatPath(DIR_EAR, "bin/CreateDictionary.cmd"));
 
-        m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/globalsight-web.war/reports/datasource.xml.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/reports/datasource.xml"));
+        m_configFileList.put(
+                concatPath(DIR_EAR,
+                        "globalsight-web.war/reports/datasource.xml.template"),
+                concatPath(DIR_EAR,
+                        "globalsight-web.war/reports/datasource.xml"));
 
         // teamsite auto import
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/autoTeamSiteImport.map"),
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/properties/autoTeamSiteImport.map"),
                         concatPath(INSTALLATION_DATA_DIRECTORY,
                                 "teamsite/tsautoimport/properties/autoTeamSiteImport.map"));
 
         m_configFileList
-                .put(concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/properties/autoTeamSiteImport.properties"),
+                .put(concatPath(DIR_EAR,
+                        "lib/classes/properties/autoTeamSiteImport.properties"),
                         concatPath(INSTALLATION_DATA_DIRECTORY,
                                 "teamsite/tsautoimport/properties/autoTeamSiteImport.properties"));
 
@@ -1289,16 +1235,6 @@ public class Install extends installer.EventBroadcaster
                         concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
                                 "slapd.conf"));
 
-        // ldif file for netegrity integration - vendor viewer
-        String vvLdifPath = concatPath(NETEGRITY,
-                "migrate_anonymous_vv.ldif.template");
-        File vvLdifFile = new File(vvLdifPath);
-        if (vvLdifFile.exists())
-        {
-            m_configFileList.put(vvLdifPath,
-                    concatPath(NETEGRITY, "migrate_anonymous_vv.ldif"));
-        }
-
         m_configFileList
                 .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "create_cap_mysql.sql.template"),
@@ -1356,15 +1292,6 @@ public class Install extends installer.EventBroadcaster
                         "drop_jbpm_tables.sql.template"),
                         concatPath(INSTALLATION_MYSQL_DIRECTORY,
                                 "drop_jbpm_tables.sql"));
-
-        // Configuration file for Java Service Wrapper
-        m_configFileList.put(
-                concatPath("JavaServiceWrapper/conf", "wrapper.conf.template"),
-                concatPath("JavaServiceWrapper/conf", "wrapper.conf"));
-
-        m_configFileList.put(
-                concatPath(GS_HOME, "jboss/startJboss.sh.template"),
-                concatPath(GS_HOME, "jboss/startJboss.sh"));
     }
 
     // returns the number of configuration files in the list
@@ -1379,38 +1306,6 @@ public class Install extends installer.EventBroadcaster
         int size = m_configFileList.size() + 3;
 
         return size;
-    }
-
-    private void copyFilesToJbossHome() throws Exception
-    {
-        System.out
-                .println("\nCopying GlobalSight-JMS-service.xml to jboss home directory.");
-
-        String deployDir = GS_HOME + FORWARDSLASH
-                + "jboss/jboss_server/server/default/deploy";
-        String configDir = GS_HOME + FORWARDSLASH
-                + "jboss/jboss_server/server/default/conf";
-        String jboss_tomcat_sar_dir = GS_HOME
-                + FORWARDSLASH
-                + "jboss/jboss_server/server/default/deploy/jbossweb-tomcat50.sar";
-        RecursiveCopy copier = new RecursiveCopy();
-
-        copier.copyFile(concatPath(GS_HOME, "jboss/jboss-service.xml"),
-                configDir);
-
-        copier.copyFile(
-                concatPath(GS_HOME, "jboss/GlobalSight-JMS-service.xml"),
-                deployDir);
-        copier.copyFile(concatPath(GS_HOME, "jboss/mail-service.xml"),
-                deployDir);
-        copier.copyFile(concatPath(GS_HOME, "jboss/uil2-service.xml"),
-                deployDir + FORWARDSLASH + "jms");
-
-        copier.copyFile(concatPath(GS_HOME, "jboss/ear-deployer.xml"),
-                deployDir);
-
-        copier.copyFile(concatPath(GS_HOME, "jboss/server.xml"),
-                jboss_tomcat_sar_dir);
     }
 
     // public void createXDEKey() throws Exception
@@ -1471,7 +1366,6 @@ public class Install extends installer.EventBroadcaster
             String destination = m_configFileList.get(source).toString();
             processFile(source, destination);
         }
-        copyFilesToJbossHome();
 
         if (enableSSL)
         {
@@ -1496,6 +1390,25 @@ public class Install extends installer.EventBroadcaster
         else
             pop3Server = m_installValues.getProperty("mailserver");
         m_installValues.setProperty("mailserver_pop3", pop3Server);
+
+        boolean enableEmailServer = "true".equalsIgnoreCase(m_installValues
+                .getProperty("system_notification_enabled", "false"));
+        m_installValues.setProperty("mail_smtp_start", enableEmailServer ? ""
+                : "<!--");
+        m_installValues.setProperty("mail_smtp_end", enableEmailServer ? ""
+                : "-->");
+
+        boolean enableEmailAuthentication = "true"
+                .equalsIgnoreCase(m_installValues.getProperty(
+                        "email_authentication_enabled", "false"));
+        if (!enableEmailServer)
+        {
+            enableEmailAuthentication = true;
+        }
+        m_installValues.setProperty("mail_authentication_start",
+                enableEmailAuthentication ? "" : "<!--");
+        m_installValues.setProperty("mail_authentication_end",
+                enableEmailAuthentication ? "" : "-->");
 
         return useSSLMail;
     }
@@ -1525,20 +1438,20 @@ public class Install extends installer.EventBroadcaster
 
     public void processSsl() throws Exception
     {
-        String keystoreDir = concatPath(GS_HOME,
-                "jboss/jboss_server/server/default/conf");
-        String keystoreFileName = "globalsight.keystore";
-        String jksFile = m_installValues.getProperty("server_ssl_ks_path");
-        File ksfile = new File(jksFile);
-        String newks = jksFile;
-        if (jksFile == null || "".equals(jksFile.trim()) || !ksfile.isFile())
+        String defaultKeyStore = concatPath(GS_HOME,
+                "jboss/util/globalsight_ori.keystore");
+
+        String keyStore = m_installValues.getProperty("server_ssl_ks_path");
+        if (keyStore == null || "".equals(keyStore.trim())
+                || !new File(keyStore).isFile())
         {
-            newks = concatPath(GS_HOME,
-                    "jboss/jboss_server/server/default/conf/globalsight_ori.keystore");
+            keyStore = defaultKeyStore;
         }
 
         RecursiveCopy copier = new RecursiveCopy();
-        copier.copyFile(newks, keystoreDir, keystoreFileName);
+        copier.copyFile(keyStore,
+                concatPath(GS_HOME, "jboss/server/standalone/configuration"),
+                "globalsight.keystore");
     }
 
     private void processFile(String sourceFileStr, String destFileStr)
@@ -1710,8 +1623,7 @@ public class Install extends installer.EventBroadcaster
         {
             ldapInstallDir = '"' + ldapInstallDir.replace('/', '\\') + '"';
             String[] cmds =
-            { concatPath(JAVA_SERVICE_WRAPPER_HOME, "initOpenLDAP.bat"),
-                    ldapInstallDir };
+            { concatPath(JBOSS_UTIL_BIN, "initOpenLDAP.bat"), ldapInstallDir };
             executeNoOutputNoError(cmds);
         }
         else
@@ -1743,7 +1655,7 @@ public class Install extends installer.EventBroadcaster
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
                 "/mysql/create_views_mysql.sql"));
 
-        initOpenLDAP();
+        // initOpenLDAP();
     }
 
     public int countUpdateDatabaseCommands()
@@ -1834,7 +1746,6 @@ public class Install extends installer.EventBroadcaster
     }
 
     // executes the command and hides output, but does display "." and ":"
-
     private void executeNoOutputNoError(String command) throws IOException
     {
         Process p = Runtime.getRuntime().exec(command);
@@ -1862,16 +1773,12 @@ public class Install extends installer.EventBroadcaster
                     p.getOutputStream()));
 
             String line;
-            int linenum = 0;
 
             // note for future modification:
             // handling stdout and stderr this way might block...this should
             // be handled with separate threads to process stdout and stderr
-
             while ((line = in.readLine()) != null)
             {
-                linenum++;
-
                 if (showCmdOutput)
                 {
                     System.out.println(line);
@@ -1879,20 +1786,6 @@ public class Install extends installer.EventBroadcaster
                 else if (showUIOutput)
                 {
                     fireActionEvent(line);
-                }
-                else
-                {
-                    if (linenum % 10 == 0)
-                    {
-                        if (linenum % 100 == 0)
-                        {
-                            System.out.print(":");
-                        }
-                        else
-                        {
-                            System.out.print(".");
-                        }
-                    }
                 }
             }
 
@@ -1997,13 +1890,10 @@ public class Install extends installer.EventBroadcaster
         m_installValues.put("gs_home_forwardslash", gs_home_forwardslash);
         m_installValues.put("gs_home", GS_HOME);
 
-        // change gs_ear_root
-        String earRoot = (m_operatingSystem == OS_WINDOWS ? "\\jboss\\jboss_server\\server\\default\\deploy\\globalsight.ear"
-                : "/jboss/jboss_server/server/default/deploy/globalsight.ear");
-        String gs_ear_root = GS_HOME + earRoot;
-        m_installValues.put("gs_ear_root", gs_ear_root);
+        // gs_ear_root
+        m_installValues.put("gs_ear_root", DIR_EAR);
 
-        String gs_ear_root_forwardslash = replace(gs_ear_root, BACKSLASH,
+        String gs_ear_root_forwardslash = replace(DIR_EAR, BACKSLASH,
                 FORWARDSLASH);
         m_installValues.put("gs_ear_root_forwardslash",
                 gs_ear_root_forwardslash);
@@ -2114,8 +2004,14 @@ public class Install extends installer.EventBroadcaster
                 install_data_dir_forwardslash);
 
         m_installValues.put("canoncial_mysql_path", MYSQL_SQL_FILE);
-        m_installValues.put("ear_home", EAR_HOME);
         m_installValues.put("GS_HOME", GS_HOME);
+        if (m_operatingSystem == OS_LINUX)
+        {
+            // put values for linux jboss service command (service.sh.template)
+            m_installValues.put("JBOSS_HOME", JBOSS_HOME);
+            m_installValues.put("SERVICE_NAME",
+                    RESOURCE.getString("service_name"));
+        }
     }
 
     public boolean determineOperatingSystem()
@@ -2173,8 +2069,7 @@ public class Install extends installer.EventBroadcaster
         System.out.print("\n" + event);
         fireActionEvent(event);
 
-        String cmdPath = concatPath(JAVA_SERVICE_WRAPPER_HOME,
-                "CreateStartMenu.cmd");
+        String cmdPath = concatPath(JBOSS_UTIL_BIN, "CreateStartMenu.cmd");
 
         try
         {
@@ -2187,40 +2082,46 @@ public class Install extends installer.EventBroadcaster
         }
     }
 
-    // installs "GlobalSight" as an NT service
     public void installGlobalSightService() throws IOException
     {
         if (m_operatingSystem == OS_WINDOWS)
         {
-            System.out.println("\nRemoving NT service "
-                    + "\"GlobalSight Service\" if it is installed.");
-            String uninstallCommand = concatPath(JAVA_SERVICE_WRAPPER_HOME,
-                    "UninstallApp-NT.cmd");
-            executeNoOutputNoError(uninstallCommand);
+            boolean is64Bit = is64Bit();
+            System.out.println("\nRemoving NT service " + SERVICE_NAME
+                    + " if it is installed...");
+            String uninstallCommand = concatPath(JBOSS_UTIL_BIN,
+                    "service-win32-uninstall.bat");
+            if (is64Bit)
+            {
+                uninstallCommand = concatPath(JBOSS_UTIL_BIN,
+                        "service-win64-uninstall.bat");
+            }
 
-            System.out.println("\nAdding NT service "
-                    + "\"GlobalSight Service\"");
-            String installCommand = concatPath(JAVA_SERVICE_WRAPPER_HOME,
-                    "InstallApp-NT.cmd");
+            System.out.println("Executing " + uninstallCommand);
+            execute(uninstallCommand);
+            System.out.println("done.");
 
+            System.out.println("\nAdding NT service " + SERVICE_NAME + "...");
+            String installCommand = concatPath(JBOSS_UTIL_BIN,
+                    "service-win32-install.bat");
+            if (is64Bit)
+            {
+                installCommand = concatPath(JBOSS_UTIL_BIN,
+                        "service-win64-install.bat");
+            }
+            System.out.println("Executing " + installCommand);
             execute(installCommand);
+            System.out.println("done.");
         }
         else if (m_operatingSystem == OS_LINUX)
         {
-            String initFilePath = concatPath(JBOSS_BIN, "jboss_init_unix.sh");
-            String jbossHome = JBOSS_HOME.replace("/", "\\/");
-            String[] sqlStmt =
-            { "sh", "./data/linux/replace.sh", "%%JBOSS_HOME%%", jbossHome,
-                    initFilePath };
-
-            execute(sqlStmt);
-
-            String installCommand = concatPath(JAVA_SERVICE_WRAPPER_HOME,
+            String serviceSh = concatPath(JBOSS_UTIL_BIN, "service.sh");
+            String installServiceSh = concatPath(JBOSS_UTIL_BIN,
                     "InstallApp-NT.sh");
-            String[] sqlStmt2 =
-            { "sh", installCommand, initFilePath,
+            String[] installService =
+            { "sh", installServiceSh, serviceSh,
                     RESOURCE.getString("service_name") };
-            execute(sqlStmt2);
+            execute(installService);
         }
     }
 
@@ -2296,4 +2197,9 @@ public class Install extends installer.EventBroadcaster
         }
     }
 
+    private boolean is64Bit()
+    {
+        String os = System.getProperty("os.arch");
+        return os.endsWith("64");
+    }
 }

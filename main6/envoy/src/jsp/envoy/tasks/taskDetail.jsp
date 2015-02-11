@@ -739,6 +739,7 @@ var dirty = false;
 var objectName = "";
 var guideNode = "myActivities";
 var w_editor = null;
+var w_updateLeverage = null;
 var b_editInSameWindow = eval("<%=editInSameWindow%>");
 var b_canEditInSameWindow = eval("<%=canEditInSameWindow%>");
 var b_isReviewActivity = eval("<%=isReviewActivity%>");
@@ -917,8 +918,10 @@ function doUnload()
     {
         w_editor.close();
     }
+    try { w_updateLeverage.close(); } catch (e) {};
 
     w_editor = null;
+    w_updateLeverage = null;
 }
 
 function warnAboutRejectBeforeAcceptance(url)
@@ -942,7 +945,7 @@ function doUpdateLeverage(urlUpdateLeverage)
 			}
 			else
 			{
-				location.replace(urlUpdateLeverage);
+				w_updateLeverage = window.open(urlUpdateLeverage, "UpdateLeverage", "height=550,width=700,resizable=no,scrollbars=no");
 			}
 	});
 }
@@ -1850,6 +1853,7 @@ function checkDownloadDelayTime()
                     pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
                       pageName;
                     modifiedBy = unextractedFile.getLastModifiedBy();
+                    modifiedBy = UserUtil.getUserNameById(modifiedBy);
 
                     // Get the Last Modified date and format it
                     Date date = unextractedFile.getLastModifiedDate();
@@ -2086,7 +2090,8 @@ if(isShowSecondaryTargetFile)
                 stfPath = URLEncoder.encodeUrlStr(stfPath);
     			stfPath = stfPath.replace("%2F", "/");
                 String modifiedBy = stf.getModifierUserId();
-
+                modifiedBy = UserUtil.getUserNameById(modifiedBy);
+                
                 // Get the Last Modified date and format it
                 ts.setDate(new Date(stf.getLastUpdatedTime()));
 
@@ -2221,6 +2226,7 @@ if(je != null) {
             spUrl = URLEncoder.encodeUrlStr(spUrl);
     		spUrl = spUrl.replace("%2F", "/");
             String modifier = unextractedSrc.getLastModifiedBy();
+            modifier = UserUtil.getUserNameById(modifier);
 
             // Get the Last Modified date and format it
             ts.setDate(unextractedSrc.getLastModifiedDate());

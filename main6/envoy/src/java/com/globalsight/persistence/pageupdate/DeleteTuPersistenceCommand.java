@@ -25,11 +25,18 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.util.database.PreparedStatementBatch;
 
+/**
+ * @deprecated
+ * @author YorkJin
+ *
+ */
 public class DeleteTuPersistenceCommand extends PersistenceCommand
 {
     static private Logger s_logger = Logger
@@ -56,14 +63,14 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
      */
 
     // Mark the TUs as orphans instead of deleting them.
-    static private final String s_UPDATE_TU = "update translation_unit set leverage_group_id=0 where id=?";
+    static private final String s_UPDATE_TU = "update " + TuvQueryConstants.TU_TABLE_PLACEHOLDER + " set leverage_group_id=0 where id=?";
     // Getting paranoid, set orphaned TUVs to OUT_OF_DATE.
-    static private final String s_UPDATE_TUV = "update translation_unit_variant set state='OUT_OF_DATE' where id=?";
+    static private final String s_UPDATE_TUV = "update " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " set state='OUT_OF_DATE' where id=?";
 
     private PreparedStatementBatch m_psBatch1 = null;
     private PreparedStatementBatch m_psBatch2 = null;
     private List m_tus;
-    private String m_companyId = null;
+    private long m_companyId = -1;
 
     //
     // Constructor
@@ -78,7 +85,7 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
     // Methods
     //
 
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         m_companyId = p_companyId;
     }
@@ -106,12 +113,20 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
     public void createPreparedStatement(Connection p_connection)
             throws Exception
     {
+        String tuTableName = SegmentTuTuvCacheManager
+                .getTuWorkingTableName(m_companyId);
+        String sql1 = s_UPDATE_TU.replace(
+                TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
+        String tuvTableName = SegmentTuTuvCacheManager
+                .getTuvWorkingTableName(m_companyId);
+        String sql2 = s_UPDATE_TUV.replace(
+                TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName);
         m_psBatch1 = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
-                s_UPDATE_TU, true);
+                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection, sql1,
+                true);
         m_psBatch2 = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
-                s_UPDATE_TUV, true);
+                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection, sql2,
+                true);
     }
 
     public void setData() throws Exception
@@ -123,12 +138,6 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
             ps1.setLong(1, tu.getId());
             ps1.addBatch();
 
-            if (s_logger.isDebugEnabled())
-            {
-                System.err.println(s_UPDATE_TU.replaceFirst("\\?",
-                        String.valueOf(tu.getId())));
-            }
-
             for (Iterator it = tu.getTuvs(true, m_companyId).iterator(); it
                     .hasNext();)
             {
@@ -137,12 +146,6 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
                 PreparedStatement ps2 = m_psBatch2.getNextPreparedStatement();
                 ps2.setLong(1, tuv.getId());
                 ps2.addBatch();
-
-                if (s_logger.isDebugEnabled())
-                {
-                    System.err.println(s_UPDATE_TUV.replaceFirst("\\?",
-                            String.valueOf(tuv.getId())));
-                }
             }
         }
     }

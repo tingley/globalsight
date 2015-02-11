@@ -435,7 +435,7 @@ public class ControlServlet extends HttpServlet
             // (String)userSession.getAttribute(UserLdapHelper.LDAP_ATTR_COMPANY);
             // }
             String companyName = UserUtil.getCurrentCompanyName(p_request);
-            if (companyName != null)
+            if (companyName != null && !"".equals(companyName))
             {
                 CompanyThreadLocal.getInstance().setValue(companyName);
             }

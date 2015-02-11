@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
@@ -163,14 +162,14 @@ public class PermissionManagerLocal implements PermissionManager
             throws PermissionException, RemoteException
     {
         String hql = " from PermissionGroupImpl p ";
-        Map<String, String> map = null;
+        Map<String, Long> map = null;
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
         {
             hql += " where p.companyId = :companyId ";
-            map = new HashMap<String, String>();
-            map.put("companyId", currentCompanyId);
+            map = new HashMap<String, Long>();
+            map.put("companyId", Long.parseLong(currentCompanyId));
         }
 
         hql += " order by p.name ";
@@ -185,27 +184,29 @@ public class PermissionManagerLocal implements PermissionManager
             throw new PermissionException(e);
         }
     }
+
     @SuppressWarnings("unchecked")
-    public Collection<PermissionGroup> getPermissionGroupsBycondition(String condition)
-            throws PermissionException, RemoteException
+    public Collection<PermissionGroup> getPermissionGroupsBycondition(
+            String condition) throws PermissionException, RemoteException
     {
         String hql = "select p from PermissionGroupImpl p ,Company c where c.id=p.companyId";
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        
 
         Session session = HibernateUtil.getSession();
 
-        if (!StringUtil.isEmpty(condition)){
-            hql +=  condition;
+        if (!StringUtil.isEmpty(condition))
+        {
+            hql += condition;
         }
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
         {
-            hql += " and p.companyId ="+currentCompanyId;
+            hql += " and p.companyId =" + Long.parseLong(currentCompanyId);
         }
         try
         {
             s_logger.debug("Getting all permission groups from DB");
-            return (Collection<PermissionGroup>) session.createQuery(hql).list();
+            return (Collection<PermissionGroup>) session.createQuery(hql)
+                    .list();
         }
         catch (Exception e)
         {
@@ -316,34 +317,37 @@ public class PermissionManagerLocal implements PermissionManager
             throw new PermissionException(e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
-    public Collection<Object[]> getAlltableNameForUser(String tableName) throws RemoteException
+    public Collection<Object[]> getAlltableNameForUser(String tableName)
+            throws RemoteException
     {
         String sql = "";
-        if(tableName=="permissiongroup"){
-            sql="SELECT  peru.USER_ID uid, per.NAME pname  FROM permissiongroup per, permissiongroup_user peru WHERE per.ID=peru.PERMISSIONGROUP_ID";
-            
-        }else if(tableName=="project"){
-            sql="SELECT  peru.USER_ID uid, per.PROJECT_NAME pname  FROM project per, project_user peru WHERE per.PROJECT_SEQ=peru.PROJECT_ID";
-            
+        if (tableName == "permissiongroup")
+        {
+            sql = "SELECT  peru.USER_ID uid, per.NAME pname  FROM permissiongroup per, permissiongroup_user peru WHERE per.ID=peru.PERMISSIONGROUP_ID";
+
+        }
+        else if (tableName == "project")
+        {
+            sql = "SELECT  peru.USER_ID uid, per.PROJECT_NAME pname  FROM project per, project_user peru WHERE per.PROJECT_SEQ=peru.PROJECT_ID and per.is_active = \"Y\"";
+
         }
 
         Session session = HibernateUtil.getSession();
-        SQLQuery query = session.createSQLQuery(sql).addScalar("uid", Hibernate.STRING).addScalar("pname", Hibernate.STRING);
-        Collection<Object[]> l= query.list();
-        
+        SQLQuery query = session.createSQLQuery(sql);
+        Collection<Object[]> l = query.list();
+
         try
         {
-            return  l;
+            return l;
         }
-           
+
         catch (Exception e)
         {
             throw new PermissionException(e);
         }
     }
-
 
     /**
      * Queries all permissiongroup names for this user.
@@ -545,6 +549,7 @@ public class PermissionManagerLocal implements PermissionManager
             try
             {
                 c = ConnectionPool.getConnection();
+                c.setAutoCommit(false);
                 // remove existing mapped users from the list to avoid remapping
                 p_users.removeAll(getAllUsersForPermissionGroup(p_permGroup
                         .getId()));
@@ -563,6 +568,7 @@ public class PermissionManagerLocal implements PermissionManager
                 }
 
                 psb.executeBatches();
+                c.commit();
             }
             catch (Exception ex)
             {
@@ -599,6 +605,7 @@ public class PermissionManagerLocal implements PermissionManager
             try
             {
                 c = ConnectionPool.getConnection();
+                c.setAutoCommit(false);
 
                 if (p_permGroup == null)
                 {
@@ -634,6 +641,7 @@ public class PermissionManagerLocal implements PermissionManager
                 }
 
                 psb.executeBatches();
+                c.commit();
             }
             catch (Exception ex)
             {
@@ -666,9 +674,11 @@ public class PermissionManagerLocal implements PermissionManager
             try
             {
                 c = ConnectionPool.getConnection();
+                c.setAutoCommit(false);
                 ps = c.prepareStatement(SQL_DELETE_ALL_USERS);
                 ps.setLong(1, p_permGroup.getId());
                 ps.execute();
+                c.commit();
             }
             catch (Exception ex)
             {

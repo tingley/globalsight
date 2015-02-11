@@ -87,7 +87,7 @@ public class PrepareCreatingJob extends BaseTestCase
 		 MainFrame.WORKFLOWS_SUBMENU);
 		 workflowFuncs.importWorkFlow(selenium,
 		 ConfigUtil.getPath(getProperty("workflow.importFile")),
-		         getProperty("workflow.workflow"), "Pwf1_en_US_de_DE");
+		         getProperty("workflow.workflow"), "Pwf_en_US_de_DE");
 //		openMenuItemAndWait(selenium, MainFrame.SETUP_MENU, MainFrame.WORKFLOWS_SUBMENU);
 //		String workflowTemplate = ConfigUtil.getProperty("workflow.duplicate.template");
 //		boolean check = SeleniumUtils.selectRadioButtonFromTable(selenium, workflowFuncs.MAIN_TABLE, workflowTemplate);

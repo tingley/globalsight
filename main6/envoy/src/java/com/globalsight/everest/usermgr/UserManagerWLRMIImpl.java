@@ -19,6 +19,7 @@ package com.globalsight.everest.usermgr;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.naming.directory.Attribute;
@@ -32,6 +33,7 @@ import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.securitymgr.FieldSecurity;
 import com.globalsight.everest.util.system.RemoteServer;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserSearchParams;
 import com.globalsight.everest.workflow.Activity;
 
 /**
@@ -329,6 +331,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         return m_localInstance.getUsers();
     }
 
+    public Vector getUsers(String condition) throws RemoteException,
+            UserManagerException
+    {
+        return m_localInstance.getUsers(condition);
+    }
+
     /**
      * Get all active users for current company only
      * 
@@ -455,10 +463,10 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     /**
      * @see UserManager.getUsers(LDAPAttribute[], LDAPAttribute[], Project)
      */
-    public Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
+    public Vector getUsers(UserSearchParams params,
             Project p_project) throws RemoteException, UserManagerException
     {
-        return m_localInstance.getUsers(p_userAttrs, p_roleAttrs, p_project);
+        return m_localInstance.getUsers(params, p_project);
     }
 
     /**
@@ -487,7 +495,7 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.addRole(p_role);
     }
 
-    public void removeRole(String p_roleName) throws RemoteException,
+    public void removeRole(Role p_roleName) throws RemoteException,
             UserManagerException
     {
         m_localInstance.removeRole(p_roleName);
@@ -620,19 +628,19 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     /**
      * @see UserManagerLocal.loggedInUsers(String, String).
      */
-    public void loggedInUsers(String p_userName, String p_sessionId)
+    public void loggedInUsers(String p_userId, String p_sessionId)
             throws RemoteException, UserManagerException
     {
-        m_localInstance.loggedInUsers(p_userName, p_sessionId);
+        m_localInstance.loggedInUsers(p_userId, p_sessionId);
     }
 
     /**
      * @see UserManagerLocal.loggedOutUsers(String, String).
      */
-    public void loggedOutUsers(String p_userName, String p_sessionId)
+    public void loggedOutUsers(String p_userId, String p_sessionId)
             throws RemoteException, UserManagerException
     {
-        m_localInstance.loggedOutUsers(p_userName, p_sessionId);
+        m_localInstance.loggedOutUsers(p_userId, p_sessionId);
     }
 
     @Override
@@ -642,6 +650,11 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     {
         m_localInstance.addUser(p_userRequestingAdd, p_user, p_projectIds,
                 p_fieldSecurity, p_roles, needEncodePwd);
+    }
+
+    public Map<String, String> getLoggedInUsers()
+    {
+        return m_localInstance.getLoggedInUsers();
     }
 
     // ////////////////////////////////////////////////////////////////////////////

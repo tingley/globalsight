@@ -123,6 +123,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<%@ include file="/envoy/projects/workflows/myJobContextMenu.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -144,6 +145,8 @@ function loadPage()
    }
    // Load the Guide
    loadGuides();
+   
+   ContextMenu.intializeContextMenu();
 }
 
 function dtpSelectedIndex()

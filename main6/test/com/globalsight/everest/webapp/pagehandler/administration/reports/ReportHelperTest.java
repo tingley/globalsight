@@ -12,7 +12,7 @@ public class ReportHelperTest
 {
     private long m_jobId = 1;
     private String m_jobName = "testJobName";
-    private String m_companyId = "22";
+    private long m_companyId = 22;
     private String m_str = "2,3,6,8,9";
 
     @Test

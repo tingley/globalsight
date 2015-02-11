@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +64,7 @@ import com.globalsight.everest.taskmanager.TaskInfo;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.EnvoyWorkItem;
@@ -81,7 +83,8 @@ import com.globalsight.util.IntHolder;
 public class JobStatusXlsReportProcessor implements ReportsProcessor
 {
     private static Logger s_logger = Logger.getLogger(REPORTS);
-
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
     private WritableWorkbook m_workbook = null;
     private Locale uiLocale = null;
 
@@ -109,9 +112,12 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         settings.setSuppressWarnings(true);
         m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
                 settings);
-        addJobs(p_request);
-        m_workbook.write();
-        m_workbook.close();
+        addJobs(p_request, p_response);
+        if (m_workbook != null)
+        {
+            m_workbook.write();
+            m_workbook.close();
+        }
     }
 
     /**
@@ -119,8 +125,11 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
      * 
      * @throws Exception
      */
-    private void addJobs(HttpServletRequest p_request) throws Exception
+    private void addJobs(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
     {
+        String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         WritableSheet sheet = m_workbook.createSheet(
                 bundle.getString("lb_job_status"), 0);
@@ -164,6 +173,18 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             wantsAllLocales = true;
         }
 
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            m_workbook = null;
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobList.iterator();
         IntHolder row = new IntHolder(4);
         while (jobIter.hasNext())
@@ -192,6 +213,10 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
                 }
             }
         }
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 100, ReportsData.STATUS_FINISHED);
     }
 
     /**

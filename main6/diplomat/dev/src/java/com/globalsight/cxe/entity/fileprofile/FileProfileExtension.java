@@ -20,7 +20,6 @@ package com.globalsight.cxe.entity.fileprofile;
 import java.io.Serializable;
 
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 
 public class FileProfileExtension implements Serializable
 {
@@ -28,21 +27,36 @@ public class FileProfileExtension implements Serializable
 
     FileExtensionImpl extension;
     FileProfileImpl fileProfile;
-    
+
     public FileExtensionImpl getExtension()
     {
         return extension;
     }
+
     public void setExtension(FileExtensionImpl extension)
     {
         this.extension = extension;
     }
+
     public FileProfileImpl getFileProfile()
     {
         return fileProfile;
     }
+
     public void setFileProfile(FileProfileImpl fileProfile)
     {
         this.fileProfile = fileProfile;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object paramObject)
+    {
+        return super.equals(paramObject);
     }
 }

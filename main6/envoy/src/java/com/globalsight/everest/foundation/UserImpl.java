@@ -17,10 +17,12 @@
 package com.globalsight.everest.foundation;
 
 import java.io.Serializable;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.usermgr.UserInfo;
 
 /**
  * UserImpl implemented the User interface. Holds the user information (except
@@ -54,7 +56,11 @@ public class UserImpl extends PersistentObject implements User, Serializable
 
     private String m_address = null;
 
-    private Hashtable m_phoneNumbers = new Hashtable();
+//    private Hashtable m_phoneNumbers = new Hashtable();
+    private String officePhoneNumber;
+    private String homePhoneNumber;
+    private String cellPhoneNumber;
+    private String faxPhoneNumber;
 
     private String m_defaultLocale = null;
 
@@ -66,6 +72,8 @@ public class UserImpl extends PersistentObject implements User, Serializable
     // specifies whether the user is part of all current AND
     // future projects
     private boolean m_isInAllProjects = false;
+    
+    private Set<ContainerRoleImpl> containerRoles = new HashSet<ContainerRoleImpl>();
 
     public String getProjectNames()
     {
@@ -202,6 +210,26 @@ public class UserImpl extends PersistentObject implements User, Serializable
     {
         m_bccEmail = p_bccEmail;
     }
+    
+    public String getCcEmail()
+    {
+        return m_ccEmail;
+    }
+
+    public void setCcEmail(String p_ccEmail)
+    {
+        m_ccEmail = p_ccEmail;
+    }
+
+    public String getBccEmail()
+    {
+        return m_bccEmail;
+    }
+
+    public void setBccEmail(String p_bccEmail)
+    {
+        m_bccEmail = p_bccEmail;
+    }
 
     public String getAddress()
     {
@@ -213,25 +241,6 @@ public class UserImpl extends PersistentObject implements User, Serializable
         m_address = p_address;
     }
 
-    public String getPhoneNumber(int p_type)
-    {
-        return (String) m_phoneNumbers.get(new Integer(p_type));
-    }
-
-    public void setPhoneNumber(int p_type, String p_phoneNumber)
-    {
-        if (p_type == PhoneType.OFFICE || p_type == PhoneType.HOME
-                || p_type == PhoneType.CELL || p_type == PhoneType.FAX)
-        {
-            if (p_phoneNumber == null)
-            {
-                // clear out the field
-                p_phoneNumber = new String();
-            }
-            m_phoneNumbers.put(new Integer(p_type), p_phoneNumber);
-        }
-    }
-
     public String getDefaultUILocale()
     {
         return (m_defaultLocale == null || m_defaultLocale.length() == 0) ? "en_US"
@@ -239,6 +248,18 @@ public class UserImpl extends PersistentObject implements User, Serializable
     }
 
     public void setDefaultUILocale(String p_defaultLocale)
+    {
+        m_defaultLocale = p_defaultLocale;
+    }
+    
+    //used for hibernate
+    public String getDefaultLocale()
+    {
+        return m_defaultLocale;
+    }
+
+    //used for hibernate
+    public void setDefaultLocale(String p_defaultLocale)
     {
         m_defaultLocale = p_defaultLocale;
     }
@@ -326,8 +347,7 @@ public class UserImpl extends PersistentObject implements User, Serializable
                 + (m_lastName != null ? m_lastName : "null") + " m_password="
                 + (m_password != null ? m_password : "null") + " m_email="
                 + (m_email != null ? m_email : "null") + " m_address="
-                + (m_address != null ? m_address : "null") + " m_phoneNumbers="
-                + (m_phoneNumbers.toString()) + " m_defaultLocale="
+                + (m_address != null ? m_address : "null") + " m_defaultLocale="
                 + (m_defaultLocale != null ? m_defaultLocale : "null")
                 + " m_isInAllProjects="
                 + (m_isInAllProjects ? "true" : "false");
@@ -390,4 +410,69 @@ public class UserImpl extends PersistentObject implements User, Serializable
 
         return sb.toString();
     }
+
+	public String getOfficePhoneNumber() 
+	{
+		return officePhoneNumber;
+	}
+
+	public void setOfficePhoneNumber(String officePhoneNumber) 
+	{
+		this.officePhoneNumber = officePhoneNumber;
+	}
+
+	public String getHomePhoneNumber() {
+		return homePhoneNumber;
+	}
+
+	public void setHomePhoneNumber(String homePhoneNumber) 
+	{
+		this.homePhoneNumber = homePhoneNumber;
+	}
+
+	public String getCellPhoneNumber() 
+	{
+		return cellPhoneNumber;
+	}
+
+	public void setCellPhoneNumber(String cellPhoneNumber) 
+	{
+		this.cellPhoneNumber = cellPhoneNumber;
+	}
+
+	public String getFaxPhoneNumber() 
+	{
+		return faxPhoneNumber;
+	}
+
+	public void setFaxPhoneNumber(String faxPhoneNumber) 
+	{
+		this.faxPhoneNumber = faxPhoneNumber;
+	}
+
+	public Set<ContainerRoleImpl> getContainerRoles() 
+	{
+		return containerRoles;
+	}
+
+	public void setContainerRoles(Set<ContainerRoleImpl> containerRoles) 
+	{
+		this.containerRoles = containerRoles;
+	}
+	
+	public UserInfo toUserInfo()
+	{
+		UserInfo ui = new UserInfo();
+		ui.setUserId(getUserId());
+		ui.setUserName(getUserName());
+		ui.setTitle(getTitle());
+		ui.setFirstName(getFirstName());
+		ui.setLastName(getLastName());
+		ui.setEmailAddress(getEmail());
+		ui.setCCEmailAddress(getCcEmail());
+		ui.setBCCEmailAddress(getBccEmail());
+		ui.isInAllProjects(isInAllProjects());
+
+		return ui;
+	}
 }

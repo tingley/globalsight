@@ -43,16 +43,16 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.util.system.SystemConfiguration;
 
 /**
- * Periodically polls the customer database for changes.
- * Any changes are brought into System4 as PRS XML files.
+ * Periodically polls the customer database for changes. Any changes are brought
+ * into System4 as PRS XML files.
  */
 public class DbAutoImporter extends TimerTask
 {
-    private static org.apache.log4j.Logger s_logger =
-        org.apache.log4j.Logger.getLogger("DatabaseSourceAdapter");
+    private static org.apache.log4j.Logger s_logger = org.apache.log4j.Logger
+            .getLogger(DbAutoImporter.class);
     private TaskQueueTableMonitor m_monitor;
-    private long m_delay = 1L * 60L * 1000L; //one minute delay
-    private long m_period = 5L * 60L * 1000L; //two minute period
+    private long m_delay = 1L * 60L * 1000L; // one minute delay
+    private long m_period = 5L * 60L * 1000L; // two minute period
 
     /**
      * Creates a database AutoImporter
@@ -88,15 +88,17 @@ public class DbAutoImporter extends TimerTask
                 s_logger.debug("Nothing returned from TaskQueueMonitor.");
                 return;
             }
-            s_logger.info("There are " + taskXmlVector.size() + " tasks in the database.");
+            s_logger.info("There are " + taskXmlVector.size()
+                    + " tasks in the database.");
             connection = ConnectionPool.getConnection();
-            AdapterResult[] results = createOutputMessages(taskXmlVector,connection);
-            CxeProxy.publishEvents(results,EventTopicMap.FOR_EXTRACTOR);
+            AdapterResult[] results = createOutputMessages(taskXmlVector,
+                    connection);
+            CxeProxy.publishEvents(results, EventTopicMap.FOR_EXTRACTOR);
         }
         catch (Exception e)
         {
-            //just log the error, do not publish an import error event
-            s_logger.error("Could not import from the customer database.",e);
+            // just log the error, do not publish an import error event
+            s_logger.error("Could not import from the customer database.", e);
         }
         finally
         {
@@ -113,33 +115,38 @@ public class DbAutoImporter extends TimerTask
         }
     }
 
-
-    private AdapterResult[] createOutputMessages(Vector p_taskXmlVector, Connection p_connection) throws Exception
+    private AdapterResult[] createOutputMessages(Vector p_taskXmlVector,
+            Connection p_connection) throws Exception
     {
-        CxeMessageType msgType = CxeMessageType.getCxeMessageType(CxeMessageType.PRSXML_IMPORTED_EVENT);
-        AdapterResult results[]= new AdapterResult[p_taskXmlVector.size()];
-        for (int t=0; t< p_taskXmlVector.size(); t++)
+        CxeMessageType msgType = CxeMessageType
+                .getCxeMessageType(CxeMessageType.PRSXML_IMPORTED_EVENT);
+        AdapterResult results[] = new AdapterResult[p_taskXmlVector.size()];
+        for (int t = 0; t < p_taskXmlVector.size(); t++)
         {
             TaskXml taskxml = (TaskXml) p_taskXmlVector.elementAt(t);
             String prsXml = taskxml.getPaginatedResultSetXml();
             FileMessageData fmd = MessageDataFactory.createFileMessageData();
-            BufferedOutputStream bos = new BufferedOutputStream(fmd.getOutputStream());
-            OutputStreamWriter osw = new OutputStreamWriter(bos,"UTF8");
-            osw.write(prsXml,0,prsXml.length());
+            BufferedOutputStream bos = new BufferedOutputStream(
+                    fmd.getOutputStream());
+            OutputStreamWriter osw = new OutputStreamWriter(bos, "UTF8");
+            osw.write(prsXml, 0, prsXml.length());
             osw.close();
 
             CxeMessage cxeMessage = new CxeMessage(msgType);
             cxeMessage.setEventFlowXml(taskxml.getEventFlowXml());
             cxeMessage.setMessageData(fmd);
-            Logger.writeDebugFile(Integer.toString(t) + "srcDB_ef.xml", cxeMessage.getEventFlowXml());
-            Logger.writeDebugFile(Integer.toString(t) + "srcDB_prs.xml", cxeMessage.getMessageData());
+            Logger.writeDebugFile(Integer.toString(t) + "srcDB_ef.xml",
+                    cxeMessage.getEventFlowXml());
+            Logger.writeDebugFile(Integer.toString(t) + "srcDB_prs.xml",
+                    cxeMessage.getMessageData());
             results[t] = new AdapterResult(cxeMessage);
-            storePrsXml(prsXml,p_connection);
+            storePrsXml(prsXml, p_connection);
         }
         return results;
     }
 
-    private void storePrsXml(String p_prsXml, Connection p_connection) throws Exception
+    private void storePrsXml(String p_prsXml, Connection p_connection)
+            throws Exception
     {
         PreparedStatement st = null;
         try
@@ -147,7 +154,8 @@ public class DbAutoImporter extends TimerTask
             StringReader sr = new StringReader(p_prsXml);
             InputSource inputsource = new InputSource(sr);
             DOMParser parser = new DOMParser();
-            parser.setFeature("http://xml.org/sax/features/validation", false); //don't validate
+            parser.setFeature("http://xml.org/sax/features/validation", false); // don't
+                                                                                // validate
             parser.parse(inputsource);
             Element elem = parser.getDocument().getDocumentElement();
             String id = elem.getAttribute("id");
@@ -155,7 +163,7 @@ public class DbAutoImporter extends TimerTask
             p_connection.setAutoCommit(false);
             String sql = "INSERT INTO PRSXML_STORAGE VALUES(?, ?)";
             st = p_connection.prepareStatement(sql);
-            st.setString(1,quotedId);
+            st.setString(1, quotedId);
             // Insert Clob into MySql as String.
             st.setString(2, p_prsXml);
             st.executeUpdate();
@@ -172,7 +180,7 @@ public class DbAutoImporter extends TimerTask
             }
             catch (Exception e2)
             {
-                s_logger.error("Could not rollback: " , e2);
+                s_logger.error("Could not rollback: ", e2);
             }
 
             throw e;
@@ -181,32 +189,41 @@ public class DbAutoImporter extends TimerTask
         {
             if (st != null)
             {
-                try {st.close();} catch (Exception e1){}
+                try
+                {
+                    st.close();
+                }
+                catch (Exception e1)
+                {
+                }
             }
         }
     }
 
-
     /**
-     * Sets the delay and period and other values after reading DatabaseAdapter.properties
+     * Sets the delay and period and other values after reading
+     * DatabaseAdapter.properties
      */
     private void setValues()
     {
-        try {
-            SystemConfiguration config=SystemConfiguration.getInstance("/properties/DatabaseAdapter.properties");
+        try
+        {
+            SystemConfiguration config = SystemConfiguration
+                    .getInstance("/properties/DatabaseAdapter.properties");
             String delay = config.getStringParameter("delay");
             String period = config.getStringParameter("period");
             m_delay = Long.valueOf(delay).longValue() * 60L * 1000L;
             m_period = Long.valueOf(period).longValue() * 60L * 1000L;
-            s_logger.info("Using a delay of " + delay + " minutes and a period of " + 
-                          period + " minutes.");
+            s_logger.info("Using a delay of " + delay
+                    + " minutes and a period of " + period + " minutes.");
         }
         catch (Exception e)
         {
-            s_logger.error("Could not get delay and period from DatabaseAdapter.properties. Using a 2-minute period.",e);
-            m_delay = 1L * 60L * 1000L; //one minute delay
-            m_period = 5L * 60L * 1000L; //two minute period
+            s_logger.error(
+                    "Could not get delay and period from DatabaseAdapter.properties. Using a 2-minute period.",
+                    e);
+            m_delay = 1L * 60L * 1000L; // one minute delay
+            m_period = 5L * 60L * 1000L; // two minute period
         }
     }
 }
-

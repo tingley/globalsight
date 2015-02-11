@@ -1,0 +1,190 @@
+<style type="text/css">
+.jobSummaryContentName {
+	padding: 5px 5px 2px 10px;
+	font-weight: bold;
+	display: inline-block;
+	width: 125px;
+}
+
+.jobSummaryContentValue {
+	display: inline-block;
+	width: 260px;
+	word-wrap: break-word;
+}
+
+.jobSummaryContentRight {
+	border-left: 1px solid #DDD;
+}
+
+#jobSummaryFoot {
+	padding: 10px 5px 10px 10px;
+}
+</style>
+<div class="mainHeading" style="margin-bottom:8px">
+	<%=bundle.getString("lb_job")%>: ${Job.name}
+</div>
+<div class="standardText" id="helpText" style="margin-bottom:8px;word-wrap: break-word;width:500px">
+	<%=bundle.getString("helper_text_job_details")%>
+</div>
+
+<div id="jobSummary" class="detailText" style="width:825px;">
+	<div id="jobSummaryTitle" class="standardtext" style="font-weight:bold;border-bottom:1px groove #0C1476;">Summary</div>
+	<div id="jobSummaryContent">
+		<div>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_id")%>:</span><span class="jobSummaryContentValue">${jobId}</span>
+			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_loc_profile")%>:</span><span class="jobSummaryContentValue">${Job.l10nProfile.name}</span>
+		</div>
+		<div>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_job_name")%>:</span><span class="jobSummaryContentValue">${Job.name}</span>
+			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_date_created")%>:</span><span class="jobSummaryContentValue">${dateCreated}</span>
+		</div>
+		<div>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_initiator")%>:</span><span class="jobSummaryContentValue">${jobInitiator}</span>
+			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_project")%>:</span><span class="jobSummaryContentValue">${Job.project.name}</span>
+		</div>
+		<div>
+			<span class="jobSummaryContentName"><%=bundle.getString("lb_source_locale")%>:</span><span class="jobSummaryContentValue">${srcLocale}</span>
+			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_priority")%>:</span><span class="jobSummaryContentValue">${Job.priority}</span>
+		</div>
+		<c:if test="${isCostingEnabled}">
+			<div>
+				<span class="jobSummaryContentName"><%=bundle.getString("lb_pages")%>
+					<amb:permission  name="<%=Permission.JOB_COSTING_EDIT%>" >
+						(<a id="editPageLink" href="#" class="standardHREFDetail" onclick="confirmJobPagesChange()"><%=bundle.getString("lb_edit")%></A>)
+						<script type="text/javascript">
+							function confirmJobPagesChange()
+							{
+								<c:if test="${isFinshedJob}">
+									 if (confirm("<%=bundle.getString("jsmsg_costing_lockdown")%>"))
+									 {
+									    changeJobPages();
+									 }
+									 else
+									 {
+									    return;
+									 }
+								</c:if>
+								<c:if test="${!isFinshedJob}">
+									changeJobPages();
+								</c:if>
+							}
+							
+							function changeJobPages()
+							{
+								$("#jobPageCount").css("display","none");
+								$("#jobPageCountEditState").css("display","inline");
+								$("#changeJobPageCount").focus();
+							}
+							
+							function saveJobPageCount()
+							{
+								var pageCount = $("#changeJobPageCount").val();
+								// Make sure the Job Name is not null
+						        if (pageCount == "")
+						        {
+						           alert("<%=bundle.getString("jsmsg_enter_pages")%>"); 
+						           $("#changeJobPageCount").focus();
+						           return;
+						        }
+						
+						        // Make sure the value entered is a number
+						        var re = /^[0-9]\d*$/;
+						        if (!re.test(pageCount))
+						        {
+						           alert("You must enter a nonnegative integer in the pages field."); 
+						           $("#changeJobPageCount").focus();
+						           return;
+						        }
+						        
+						        var url = "${jobDetails.pageURL}&jobId=${jobId}&action=jobPageCount&pageCount=" + $("#changeJobPageCount").val() + "&t=" + new Date().getTime();
+						        $.get(url,function(data){
+									if(data=="OK"){
+										$("#jobPageCount").text($("#changeJobPageCount").val());
+										$("#jobPageCount").css("display","inline");
+										$("#jobPageCountEditState").css("display","none");
+									}else{
+										alert("Fail to change pages count!");
+									}
+								});
+							}
+						</script>
+					</amb:permission>:
+				</span>
+				<span id="jobPageCount">${Job.pageCount}</span>
+				<span id="jobPageCountEditState" style="display:none">
+					<input id="changeJobPageCount" type="text" name="changeJobPageCount" value="${Job.pageCount}" size="4" maxlength="10" />
+					<input id="saveJobPageCountButton" type="button" value="Save" style="width:50px" onclick="saveJobPageCount()"/>
+				</span>
+			</div>
+		</c:if>
+	</div>
+	<amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
+		<div id="jobSummaryFoot">
+		<%
+	        String openSegments = "<b><a href='" + jobCommentsURL + "'>" + request.getAttribute("openSegmentCommentsCount") + "</a></b>";
+	        String closedSegments = "<b><a href='" + jobCommentsURL + "'>" + request.getAttribute("closedSegmentCommentsCount") + "</a></b>";
+	        Object[] args = {openSegments, closedSegments}; 
+	        out.println(MessageFormat.format(bundle.getString("lb_segment_comments"),args)); 
+		%>
+		</div>
+	</amb:permission>
+</div>
+
+<div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;padding-top:10px">
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<amb:permission name="<%=Permission.JOB_WORKFLOWS_VIEW%>" >
+			    <td id="jobWorkflowsTab" class="tableHeadingListOff">
+			        <img src="/globalsight/images/tab_left_gray.gif" border="0">
+			        <a class="sortHREFWhite" href="${jobDetails.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_workflows")%></a>
+			        <img src="/globalsight/images/tab_right_gray.gif" border="0">
+		        </td>
+			</amb:permission>
+	        
+			<amb:permission  name="<%=Permission.JOB_FILES_VIEW%>" >
+				<td width="2"></td> 
+	        	<td id="jobSourceFilesTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobSourceFiles.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_SourceFiles")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>	
+			</amb:permission>
+			
+			<c:if test="${jobCostsTabPermission}">
+				<td width="2"></td> 
+	        	<td id="jobCostsTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobCosts.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_costs")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>
+	        </c:if>	
+			
+			<amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
+				<td width="2"></td> 
+	        	<td id="jobCommentsTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobComments.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_comments")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>	
+			</amb:permission>
+			
+			<amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >
+				<td width="2"></td> 
+	        	<td id="jobAttributesTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobAttributes.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_job_attributes")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>	
+			</amb:permission>
+			
+			<amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+				<td width="2"></td> 
+	        	<td id="jobReportsTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobReports.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_reports")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>	
+			</amb:permission>
+		</tr>
+	</table>
+</div>

@@ -21,7 +21,7 @@ public interface RateConstants
 {
     // Constant for saving currency in session
     public static final String RATE = "rate";
-   
+
     // For combo boxes
     public static final String ACTIVITIES = "activities";
     public static final String CURRENCIES = "currencies";
@@ -42,4 +42,11 @@ public interface RateConstants
     // For multiply create rate
     public static final String RATE_NAME = "rate_name";
     public static final String RATE_LOCALEPAIR = "rate_localePair";
+    
+    public static final String RATE_ID = "rateID";
+    
+    public static final String FILTER_RATE_NAME = "rateNameFilter";
+    public static final String FILTER_RATE_COMPANY = "rateCompanyFilter";
+    public static final String FILTER_RATE_SOURCE_LOCALE = "rateSourceLocaleFilter";
+    public static final String FILTER_RATE_TARGET_LOCALE = "rateTargetLocaleFilter";
 }

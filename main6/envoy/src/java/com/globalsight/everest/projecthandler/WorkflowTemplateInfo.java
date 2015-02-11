@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -32,56 +31,51 @@ import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * This is a wrapper class for workflow template, which contains the
- * additional info that are stored in our database (not stored in
- * i-Flow db).
+ * This is a wrapper class for workflow template, which contains the additional
+ * info that are stored in our database (not stored in i-Flow db).
  */
-public class WorkflowTemplateInfo
-    extends PersistentObject
+public class WorkflowTemplateInfo extends PersistentObject
 {
     private static final long serialVersionUID = 7148736237934022388L;
-    
+
     // query keys for TOPLink queries
     public static final String TEMPLATE_ID = "m_templateId";
     public static final String SOURCE_LOCALE = "m_sourceLocale";
     public static final String TARGET_LOCALE = "m_targetLocale";
     public static final String WF_MANAGER_IDS = "m_wfManagerIds";
-    
+
     // Workflow type constants
     public static final String TYPE_TRANSLATION = WorkflowTypeConstants.TYPE_TRANSLATION;
     public static final String TYPE_DTP = WorkflowTypeConstants.TYPE_DTP;
 
     // persistence variables
 
-    private String               m_description = null;
-    private Project              m_project = null;
-    private GlobalSightLocale    m_sourceLocale = null;
-    private GlobalSightLocale    m_targetLocale = null;
-    private long                 m_templateId = -1;
-    private String               m_encoding = null;
-    private boolean              m_notifyPm = true;
-    private L10nProfile          m_l10nProfile= null;
+    private String m_description = null;
+    private Project m_project = null;
+    private GlobalSightLocale m_sourceLocale = null;
+    private GlobalSightLocale m_targetLocale = null;
+    private long m_templateId = -1;
+    private String m_encoding = null;
+    private boolean m_notifyPm = true;
+    private L10nProfile m_l10nProfile = null;
     private Set<LeverageLocales> m_leveragingLocales;
-    private List<String>         m_wfManagerIds = new ArrayList<String>();
+    private List<String> m_wfManagerIds = new ArrayList<String>();
 
-    private String               m_workflowType = TYPE_TRANSLATION;
-    private String 			     m_companyId = null;
-
+    private String m_workflowType = TYPE_TRANSLATION;
+    private long m_companyId = -1;
 
     // non-persistence variables
     private WorkflowTemplate m_workflowTemplate = null;
 
-
     //
-    //  Begin: Constructor
+    // Begin: Constructor
     //
 
     /**
-     * Default constructor to be used by TopLink only.  This is here
-     * solely because the persistence mechanism that persists
-     * instances of this class is using TopLink, and TopLink requires
-     * a public default constructor for all the classes that it
-     * handles persistence for.
+     * Default constructor to be used by TopLink only. This is here solely
+     * because the persistence mechanism that persists instances of this class
+     * is using TopLink, and TopLink requires a public default constructor for
+     * all the classes that it handles persistence for.
      */
     public WorkflowTemplateInfo()
     {
@@ -101,11 +95,12 @@ public class WorkflowTemplateInfo
         m_targetLocale = p_targetLocale;
         m_encoding = p_encoding;
         m_leveragingLocales = p_leveragingLocales;
-        m_companyId = CompanyThreadLocal.getInstance().getValue();
+        m_companyId = Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue());
 
-        for (Iterator it = m_leveragingLocales.iterator(); it.hasNext(); )
+        for (Iterator it = m_leveragingLocales.iterator(); it.hasNext();)
         {
-            LeverageLocales leverageLocales = (LeverageLocales)it.next();
+            LeverageLocales leverageLocales = (LeverageLocales) it.next();
             leverageLocales.setBackPointer(this);
         }
     }
@@ -116,6 +111,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the target locale's code set
+     * 
      * @return The encoding of the target locale.
      */
     public String getCodeSet()
@@ -123,29 +119,34 @@ public class WorkflowTemplateInfo
         return m_encoding;
     }
 
-    public boolean isDtpWorkflow(String p_workflowType) {
-    	return TYPE_DTP.equals(p_workflowType);
+    public boolean isDtpWorkflow(String p_workflowType)
+    {
+        return TYPE_DTP.equals(p_workflowType);
     }
-    
-    public void setWorkflowType(String p_workflowType) {
-    	m_workflowType = p_workflowType;
+
+    public void setWorkflowType(String p_workflowType)
+    {
+        m_workflowType = p_workflowType;
     }
-    
-    public String getWorkflowType() {
-    	return m_workflowType;
+
+    public String getWorkflowType()
+    {
+        return m_workflowType;
     }
-    
+
     /**
      * Get the company id of this workflow template.
+     * 
      * @return The workflow template's company id.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return m_companyId;
     }
-    
+
     /**
      * Get the description of this workflow template.
+     * 
      * @return The workflow template's description.
      */
     public String getDescription()
@@ -155,6 +156,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the project manager id for this workflow.
+     * 
      * @return The project manager id for this workflow.
      */
     public String getProjectManagerId()
@@ -164,6 +166,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the project for this workflow.
+     * 
      * @return The project for this workflow.
      */
     public Project getProject()
@@ -173,6 +176,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the source locale of this workflow.
+     * 
      * @return The source locale of this workflow.
      */
     public GlobalSightLocale getSourceLocale()
@@ -182,7 +186,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the target locale
-     *
+     * 
      * @return Locale The target locale
      */
     public GlobalSightLocale getTargetLocale()
@@ -192,9 +196,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Get a list of leveraging locales
-     *
-     * @return Vector of GlobalSightLocale. If leveraging locales are
-     * not set, null is returned.
+     * 
+     * @return Vector of GlobalSightLocale. If leveraging locales are not set,
+     *         null is returned.
      */
     public Set<GlobalSightLocale> getLeveragingLocales()
     {
@@ -202,7 +206,7 @@ public class WorkflowTemplateInfo
 
         for (Iterator it = m_leveragingLocales.iterator(); it.hasNext();)
         {
-            globalSightLocales.add(((LeverageLocales)it.next()).getLocale());
+            globalSightLocales.add(((LeverageLocales) it.next()).getLocale());
         }
 
         return globalSightLocales;
@@ -210,6 +214,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the workflow manager id for this workflow.
+     * 
      * @return The workflow manager id for this workflow.
      */
     public List<String> getWorkflowManagerIds()
@@ -219,7 +224,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get workflow template ID
-     *
+     * 
      * @return long The workflow template ID
      */
     public long getWorkflowTemplateId()
@@ -229,7 +234,8 @@ public class WorkflowTemplateInfo
 
     /**
      * Determine whether the email notification is enabled for the PM.
-     * @return True if it's selected (enabled).  Otherwise, return false.
+     * 
+     * @return True if it's selected (enabled). Otherwise, return false.
      */
     public boolean notifyProjectManager()
     {
@@ -238,7 +244,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the PM email notification flag to be the specified value.
-     * @param p_notifyPm - The flag to be set.
+     * 
+     * @param p_notifyPm
+     *            - The flag to be set.
      */
     public void notifyProjectManager(boolean p_notifyPm)
     {
@@ -258,7 +266,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the encoding for the target locale to be the specified value.
-     * @param p_encoding - The target encoding to be set.
+     * 
+     * @param p_encoding
+     *            - The target encoding to be set.
      */
     public void setCodeSet(String p_encoding)
     {
@@ -267,16 +277,20 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the company id of this template to be the specified value.
-     * @param p_companyId - The company id to be set.
+     * 
+     * @param p_companyId
+     *            - The company id to be set.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         m_companyId = p_companyId;
     }
-    
+
     /**
      * Set the description of this template to be the specified value.
-     * @param p_description - The description to be set.
+     * 
+     * @param p_description
+     *            - The description to be set.
      */
     public void setDescription(String p_description)
     {
@@ -285,7 +299,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the project for this workflow.
-     * @param p_project - The project the template is associated with.
+     * 
+     * @param p_project
+     *            - The project the template is associated with.
      */
     public void setProject(Project p_project)
     {
@@ -294,7 +310,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the project manager id for this workflow.
-     * @param p_projectManagerId - The PM id to be set.
+     * 
+     * @param p_projectManagerId
+     *            - The PM id to be set.
      */
     public void setWorkflowManagerIds(List<String> p_wfManagerIds)
     {
@@ -313,7 +331,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the workflow template object to be the specified value.
-     * @param p_workflowTemplate - The template to be set.
+     * 
+     * @param p_workflowTemplate
+     *            - The template to be set.
      */
     public void setWorkflowTemplate(WorkflowTemplate p_workflowTemplate)
     {
@@ -327,28 +347,32 @@ public class WorkflowTemplateInfo
     {
         m_l10nProfile = p_l10nProfile;
     }
+
     public L10nProfile getL10nProfile()
     {
-    	return m_l10nProfile;
+        return m_l10nProfile;
     }
+
     /**
      * Return a string representation of the object.
      */
     public String toString()
     {
         return super.toString()
-            + " m_templateId=" + m_templateId
-            + " m_workflowType=" + m_workflowType
-            + " m_name=" + getName()
-            + " m_sourceLocale="
-            + (m_sourceLocale!=null?m_sourceLocale.toString(): "null")
-            + " m_targetLocale="
-            + (m_targetLocale!=null?m_targetLocale.toString(): "null")
-            + " m_encoding="
-            + (m_encoding!=null?m_encoding:"null")
-            + (m_wfManagerIds != null && m_wfManagerIds.size() > 0 ? 
-               m_wfManagerIds.toString() : "empty")
-            ;
+                + " m_templateId="
+                + m_templateId
+                + " m_workflowType="
+                + m_workflowType
+                + " m_name="
+                + getName()
+                + " m_sourceLocale="
+                + (m_sourceLocale != null ? m_sourceLocale.toString() : "null")
+                + " m_targetLocale="
+                + (m_targetLocale != null ? m_targetLocale.toString() : "null")
+                + " m_encoding="
+                + (m_encoding != null ? m_encoding : "null")
+                + (m_wfManagerIds != null && m_wfManagerIds.size() > 0 ? m_wfManagerIds
+                        .toString() : "empty");
     }
 
     //
@@ -356,8 +380,7 @@ public class WorkflowTemplateInfo
     //
 
     /**
-     * Deactivate this WorkflowTemplateInfo object.
-     * i.e. Logically delete it.
+     * Deactivate this WorkflowTemplateInfo object. i.e. Logically delete it.
      */
     public void deactivate()
     {
@@ -366,6 +389,7 @@ public class WorkflowTemplateInfo
 
     /**
      * Get the workflow template object (only set during create/update).
+     * 
      * @return The workflow template object.
      */
     WorkflowTemplate getWorkflowTemplate()
@@ -375,7 +399,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the source locale to be the specified locale.
-     * @param p_sourceLocale - The locale to be set.
+     * 
+     * @param p_sourceLocale
+     *            - The locale to be set.
      */
     void setSourceLocale(GlobalSightLocale p_sourceLocale)
     {
@@ -384,7 +410,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the target locale to be the specified locale.
-     * @param p_targetLocale - The locale to be set.
+     * 
+     * @param p_targetLocale
+     *            - The locale to be set.
      */
     void setTargetLocale(GlobalSightLocale p_targetLocale)
     {
@@ -393,7 +421,9 @@ public class WorkflowTemplateInfo
 
     /**
      * Set the workflow template id to be the specified value.
-     * @param p_id - The id to be set.
+     * 
+     * @param p_id
+     *            - The id to be set.
      */
     void setWorkflowTemplateId(long p_id)
     {
@@ -401,46 +431,40 @@ public class WorkflowTemplateInfo
     }
 
     /**
-     * Makes a clone of this object, but makes it new so that it can
-     * be persisted using TopLink (basically no id).
-     *
-     * @return WorkflowInfo and all task assignments in it, so that it
-     * can be inserted using TopLink.
+     * Makes a clone of this object, but makes it new so that it can be
+     * persisted using TopLink (basically no id).
+     * 
+     * @return WorkflowInfo and all task assignments in it, so that it can be
+     *         inserted using TopLink.
      * @exception CloneNotSupportedException
      */
     public WorkflowTemplateInfo cloneForInsert()
     {
-        WorkflowTemplateInfo wf = new WorkflowTemplateInfo(
-            this.m_name,
-            this.m_description,
-            this.m_project,
-            this.m_notifyPm,
-            this.m_wfManagerIds,
-            this.m_sourceLocale,
-            this.m_targetLocale,
-            this.m_encoding,
-            this.m_leveragingLocales);
+        WorkflowTemplateInfo wf = new WorkflowTemplateInfo(this.m_name,
+                this.m_description, this.m_project, this.m_notifyPm,
+                this.m_wfManagerIds, this.m_sourceLocale, this.m_targetLocale,
+                this.m_encoding, this.m_leveragingLocales);
 
         return wf;
     }
 
-	public String getEncoding()
-	{
-		return m_encoding;
-	}
+    public String getEncoding()
+    {
+        return m_encoding;
+    }
 
-	public void setEncoding(String m_encoding)
-	{
-		this.m_encoding = m_encoding;
-	}
+    public void setEncoding(String m_encoding)
+    {
+        this.m_encoding = m_encoding;
+    }
 
-	public boolean isNotifyPm()
-	{
-		return m_notifyPm;
-	}
+    public boolean isNotifyPm()
+    {
+        return m_notifyPm;
+    }
 
-	public void setNotifyPm(boolean pm)
-	{
-		m_notifyPm = pm;
-	}
-} 
+    public void setNotifyPm(boolean pm)
+    {
+        m_notifyPm = pm;
+    }
+}

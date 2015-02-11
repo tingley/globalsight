@@ -36,7 +36,9 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class JobControlInProgressHandler extends JobManagementHandler
@@ -83,17 +85,10 @@ public class JobControlInProgressHandler extends JobManagementHandler
         }
 
         performAppropriateOperation(p_request);
-        p_request.setAttribute(
-                JOB_SCRIPTLET,
-                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
-                        .getPageURL(), ((NavigationBean) beanMap
-                        .get(MODIFY_BEAN)).getPageURL(),
-                        ((NavigationBean) beanMap.get(DETAILS_BEAN))
-                                .getPageURL(), ((NavigationBean) beanMap
-                                .get(PLANNED_COMPLETION_DATE_BEAN))
-                                .getPageURL(), getExpJobListing(p_request),
-                        Job.DISPATCHED, true, true));
-
+        
+        JobVoInProgressSearcher searcher = new JobVoInProgressSearcher();
+        searcher.setJobVos(p_request, true);
+        
         p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(JOB_LIST_START_PARAM,
@@ -167,17 +162,26 @@ public class JobControlInProgressHandler extends JobManagementHandler
                         .getAttribute(WebAppConstants.USER)).getUserId();
                 // pass in null as the state - it should discard the job and
                 // all its workflows regardless of the state
-                WorkflowHandlerHelper
-                        .cancelJob(userId, WorkflowHandlerHelper
-                                .getJobById(Long.parseLong(jobId)), null);
+                Job job = WorkflowHandlerHelper
+                        .getJobById(Long.parseLong(jobId));
+                //WorkflowHandlerHelper
+                //        .cancelJob(userId, job, null);
+                
+                // Remove job data
+                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
+                        .getCompanyId()));
+                removal.removeJob(job);
             }
         }
         else if (action != null && action.equals("save"))
         {
             // save the results from a search/replace
-            SearchHandlerHelper.replace(
-                    (List) sessionMgr.getAttribute("tuvInfos"),
-                    (String) sessionMgr.getAttribute(COMPANY_ID));
+            String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
+            if (companyId != null)
+            {
+                SearchHandlerHelper.replace((List) sessionMgr
+                        .getAttribute("tuvInfos"), Long.parseLong(companyId));
+            }
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {

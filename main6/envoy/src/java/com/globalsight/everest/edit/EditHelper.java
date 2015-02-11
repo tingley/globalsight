@@ -66,9 +66,9 @@ public class EditHelper
     }
 
     /**
-     * Determines if a tuvs state is a protected state.
+     * Determines if a tuv's state is a protected state.
      */
-    public static boolean isTuvInProtectedState(Tuv p_tuv, String companyId)
+    public static boolean isTuvInProtectedState(Tuv p_tuv, long companyId)
     {
         // Revised: 10-17-01 bb
         // We now protect all exact matches instead of just

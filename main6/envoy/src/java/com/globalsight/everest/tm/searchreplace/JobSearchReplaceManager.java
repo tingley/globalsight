@@ -37,6 +37,6 @@ public interface JobSearchReplaceManager
             Collection p_jobInfos, boolean p_caseSensitiveSearch)
             throws TmManagerException, RemoteException;
 
-    public void replace(Collection p_tuvs, String companyId)
+    public void replace(Collection p_tuvs, long companyId)
             throws TmManagerException, RemoteException;
 }

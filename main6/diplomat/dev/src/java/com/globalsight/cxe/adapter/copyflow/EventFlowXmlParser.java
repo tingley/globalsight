@@ -22,7 +22,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.NoSuchElementException;
 
-//DOM,SAX
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -32,22 +31,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-//GlobalSight
 import com.globalsight.diplomat.util.XmlUtil;
 
 /**
-* The EventFlowXmlParser is a class that the desktop helpers can use
-* to parse the EventFlowXml. This is not intended for a general use
-* EventFlowXml Parser, although it could be modified to be such.
-*/
+ * The EventFlowXmlParser is a class that the desktop helpers can use to parse
+ * the EventFlowXml. This is not intended for a general use EventFlowXml Parser,
+ * although it could be modified to be such.
+ */
 public class EventFlowXmlParser
 {
     /**
-     * The name of the category in the event flow xml for any data specific
-     * to the DesktopApplicationAdapters.
+     * The name of the category in the event flow xml for any data specific to
+     * the DesktopApplicationAdapters.
      */
-    public static final String EFXML_DA_CATEGORY_NAME =
-        "DesktopApplicationAdapter";
+    public static final String EFXML_DA_CATEGORY_NAME = "DesktopApplicationAdapter";
 
     //
     // Private Members
@@ -63,10 +60,14 @@ public class EventFlowXmlParser
 
     /**
      * Constructor for use by sub classes.
-     * @param p_workingDir -- the main working directory where the
-     * conversion server looks for files
-     * @param p_eventFlowXml -- the EventFlowXml
-     * @param p_content -- the content (whether GXML or Native)
+     * 
+     * @param p_workingDir
+     *            -- the main working directory where the conversion server
+     *            looks for files
+     * @param p_eventFlowXml
+     *            -- the EventFlowXml
+     * @param p_content
+     *            -- the content (whether GXML or Native)
      */
     public EventFlowXmlParser(String p_eventFlowXml)
     {
@@ -75,6 +76,7 @@ public class EventFlowXmlParser
 
     /**
      * Gets the event flow XML.
+     * 
      * @return eventFlowXml
      */
     public String getEventFlowXml()
@@ -83,39 +85,45 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Gets the named element from the DOM structure
-     * <br>
-     * @param p_elementName -- the name of the element to get
+     * Gets the named element from the DOM structure <br>
+     * 
+     * @param p_elementName
+     *            -- the name of the element to get
      * @return the Element
      */
     protected Element getSingleElement(String p_elementName)
     {
-        return getSingleElement(m_rootElement,p_elementName);
+        return getSingleElement(m_rootElement, p_elementName);
     }
 
     /**
      * Gets the named element from the specified DOM structure
-     * @param p_elementName -- the name of the element to get
+     * 
+     * @param p_elementName
+     *            -- the name of the element to get
      * @return the Element
      */
     protected static Element getSingleElement(Element p_rootElement,
-        String p_elementName)
+            String p_elementName)
     {
-        return (Element)p_rootElement.getElementsByTagName(
-            p_elementName).item(0);
+        return (Element) p_rootElement.getElementsByTagName(p_elementName)
+                .item(0);
     }
 
     /**
      * Sets the value of a single element. For example,
      * setSingleElementValue(rootElement,"postMergeEvent",postMergeEvent)
-     *
-     * @param p_rootElement -- the root to use in order to find p_elementName
-     * @param p_elementName -- the element whose value to set
-     * @param p_value -- the single value for this element
+     * 
+     * @param p_rootElement
+     *            -- the root to use in order to find p_elementName
+     * @param p_elementName
+     *            -- the element whose value to set
+     * @param p_value
+     *            -- the single value for this element
      * @return the old value of the element
      */
     public static String setSingleElementValue(Element p_rootElement,
-        String p_elementName, String p_value)
+            String p_elementName, String p_value)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
         String originalValue = e.getFirstChild().getNodeValue();
@@ -126,10 +134,13 @@ public class EventFlowXmlParser
     /**
      * Sets the value of a single element using. For example,
      * setSingleElementValue("postMergeEvent",postMergeEvent)
-     *
-     * @param p_rootElement -- the root to use in order to find p_elementName
-     * @param p_elementName -- the element whose value to set
-     * @param p_value -- the single value for this element
+     * 
+     * @param p_rootElement
+     *            -- the root to use in order to find p_elementName
+     * @param p_elementName
+     *            -- the element whose value to set
+     * @param p_value
+     *            -- the single value for this element
      * @return the old value of the element
      */
     public String setSingleElementValue(String p_elementName, String p_value)
@@ -139,14 +150,16 @@ public class EventFlowXmlParser
 
     /**
      * Gets the value of a single element. For example,
-     * getSingleElementValue(rootElement,"postMergeEvent")
-     * <br>
-     * @param p_rootElement -- the root to use in order to find p_elementName
-     * @param p_elementName -- the element whose value to get
+     * getSingleElementValue(rootElement,"postMergeEvent") <br>
+     * 
+     * @param p_rootElement
+     *            -- the root to use in order to find p_elementName
+     * @param p_elementName
+     *            -- the element whose value to get
      * @return the value of the element
      */
     public static String getSingleElementValue(Element p_rootElement,
-        String p_elementName)
+            String p_elementName)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
         return e.getFirstChild().getNodeValue();
@@ -154,10 +167,12 @@ public class EventFlowXmlParser
 
     /**
      * Gets the value of a single element. For example,
-     * getSingleElementValue("postMergeEvent")
-     * <br>
-     * @param p_rootElement -- the root to use in order to find p_elementName
-     * @param p_elementName -- the element whose value to get
+     * getSingleElementValue("postMergeEvent") <br>
+     * 
+     * @param p_rootElement
+     *            -- the root to use in order to find p_elementName
+     * @param p_elementName
+     *            -- the element whose value to get
      * @return the value of the element
      */
     public String getSingleElementValue(String p_elementName)
@@ -166,9 +181,10 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Adds a category with the name to the Event Flow XML
-     * <br>
-     * @param p_name -- the name of the category to add
+     * Adds a category with the name to the Event Flow XML <br>
+     * 
+     * @param p_name
+     *            -- the name of the category to add
      * @return Element -- the newly added category element
      */
     public Element addCategory(String p_name)
@@ -180,9 +196,10 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Finds the given category element with the attribute name equal
-     * to p_name.
-     * @param p_name --the name of the category to find
+     * Finds the given category element with the attribute name equal to p_name.
+     * 
+     * @param p_name
+     *            --the name of the category to find
      * @return Element
      */
     public Element getCategory(String p_name)
@@ -198,22 +215,21 @@ public class EventFlowXmlParser
             }
         }
 
-        throw new NoSuchElementException(
-            "Category " + p_name + " does not exist.");
+        throw new NoSuchElementException("Category " + p_name
+                + " does not exist.");
     }
 
-
     /**
-     * Gets the value of the given data attribute of the given category.
-     * <br>
-     * @param p_categoryElement -- the category
-     * @param p_daName -- the value of the name attribute for the
-     * desired da element
-     * @return String -- the value(s) associated with the data
-     * attribute element
+     * Gets the value of the given data attribute of the given category. <br>
+     * 
+     * @param p_categoryElement
+     *            -- the category
+     * @param p_daName
+     *            -- the value of the name attribute for the desired da element
+     * @return String -- the value(s) associated with the data attribute element
      */
     public String[] getCategoryDaValue(Element p_categoryElement,
-        String p_daName)
+            String p_daName)
     {
         NodeList nl = p_categoryElement.getElementsByTagName("da");
         String[] values = null;
@@ -224,10 +240,10 @@ public class EventFlowXmlParser
             if (daElement.getAttribute("name").equals(p_daName))
             {
                 NodeList dvs = daElement.getElementsByTagName("dv");
-                values = new String [dvs.getLength()];
+                values = new String[dvs.getLength()];
                 for (int j = 0; j < values.length; j++)
                 {
-                    Element dv = (Element)dvs.item(j);
+                    Element dv = (Element) dvs.item(j);
                     values[j] = dv.getFirstChild().getNodeValue();
                 }
                 break;
@@ -238,10 +254,13 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Utility function to create an EventFlowXml da element
-     * containing the given values.  <br>
-     * @param p_name -- the attribute name of the da element
-     * @param p_values -- the dv values of the da element
+     * Utility function to create an EventFlowXml da element containing the
+     * given values. <br>
+     * 
+     * @param p_name
+     *            -- the attribute name of the da element
+     * @param p_values
+     *            -- the dv values of the da element
      * @return the newly made Element
      */
     public Element makeEventFlowXmlDaElement(String p_name, String[] p_values)
@@ -260,24 +279,24 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Re-sets the eventFlowXml String after serializing the DOM
-     * structure out as a string.
+     * Re-sets the eventFlowXml String after serializing the DOM structure out
+     * as a string.
+     * 
      * @throws IOException
      */
-    public void reconstructEventFlowXmlStringFromDOM()
-        throws IOException
+    public void reconstructEventFlowXmlStringFromDOM() throws IOException
     {
-        OutputFormat oformat = new OutputFormat(m_document,"UTF8",true);
+        OutputFormat oformat = new OutputFormat(m_document, "UTF-8", true);
         oformat.setOmitDocumentType(true);
         oformat.setOmitComments(false);
         oformat.setOmitXMLDeclaration(true);
         oformat.setPreserveSpace(true);
         oformat.setIndenting(false);
         XMLSerializer xmlSerializer = new XMLSerializer(oformat);
-        //just double the buffer size to be safe
+        // just double the buffer size to be safe
         int bufferSize = m_eventFlowXml.length() * 2;
         StringWriter stringWriter = new StringWriter(bufferSize);
-        //restore the DTD
+        // restore the DTD
         stringWriter.write(XmlUtil.formattedEventFlowXmlDtd());
         xmlSerializer.setOutputCharStream(stringWriter);
         xmlSerializer.serialize(m_document);
@@ -286,10 +305,11 @@ public class EventFlowXmlParser
 
     /**
      * Parses the EventFlowXml to set or re-set internal values.
-     * @throws SAXException, IOException
+     * 
+     * @throws SAXException
+     *             , IOException
      */
-    public void parse()
-        throws SAXException, IOException
+    public void parse() throws SAXException, IOException
     {
         findRootElement();
 
@@ -300,10 +320,10 @@ public class EventFlowXmlParser
 
     /**
      * Finds and sets the root Element for EventFlowXml parsing
+     * 
      * @throws SAXException
      */
-    private void findRootElement()
-        throws SAXException, IOException
+    private void findRootElement() throws SAXException, IOException
     {
         StringReader sr = new StringReader(m_eventFlowXml);
         InputSource is = new InputSource(sr);
@@ -316,7 +336,9 @@ public class EventFlowXmlParser
 
     /**
      * Finds the source or target locale
-     * @param p_type is "source" or "target"
+     * 
+     * @param p_type
+     *            is "source" or "target"
      * @return locale
      */
     private String findLocale(String p_type)
@@ -333,8 +355,7 @@ public class EventFlowXmlParser
     /******************************************/
 
     /**
-     * Returns the root Element of the Event Flow XML
-     * DOM tree for parsing.
+     * Returns the root Element of the Event Flow XML DOM tree for parsing.
      */
     public Element getRootElement()
     {
@@ -373,11 +394,11 @@ public class EventFlowXmlParser
         return m_targetLocale;
     }
 
-
     /**
-     * Sets the post merge event in the DOM structure
-     * <br>
-     * @param p_postMergeEvent -- the new post merge event
+     * Sets the post merge event in the DOM structure <br>
+     * 
+     * @param p_postMergeEvent
+     *            -- the new post merge event
      * @return the old post merge event
      */
     public String setPostMergeEvent(String p_postMergeEvent)
@@ -386,8 +407,8 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Gets the post merge event from the DOM structure
-     * <br>
+     * Gets the post merge event from the DOM structure <br>
+     * 
      * @return the post merge event
      */
     public String getPostMergeEvent() throws Exception
@@ -395,10 +416,9 @@ public class EventFlowXmlParser
         return getSingleElementValue("postMergeEvent");
     }
 
-
     /**
      * Gets the filename from the <target> element
-     *
+     * 
      * @return the current filename (from the docs directory)
      */
     public String getFilename()
@@ -415,7 +435,7 @@ public class EventFlowXmlParser
 
                 for (int j = 0; j < dvs.getLength(); j++)
                 {
-                    Element dv = (Element)dvs.item(j);
+                    Element dv = (Element) dvs.item(j);
                     return dv.getFirstChild().getNodeValue();
                 }
 
@@ -428,8 +448,9 @@ public class EventFlowXmlParser
 
     /**
      * Sets the filename in the <target> element
-     *
-     * @param p_filename -- the new filename
+     * 
+     * @param p_filename
+     *            -- the new filename
      */
     public void setFilename(String p_filename)
     {
@@ -445,7 +466,7 @@ public class EventFlowXmlParser
 
                 for (int j = 0; j < dvs.getLength(); j++)
                 {
-                    Element dv = (Element)dvs.item(j);
+                    Element dv = (Element) dvs.item(j);
                     dv.getFirstChild().setNodeValue(p_filename);
                     return;
                 }
@@ -464,8 +485,8 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Gets the format type from the <source> element
-     * <br>
+     * Gets the format type from the <source> element <br>
+     * 
      * @return "word","xml",etc.
      */
     public String getSourceFormatType()
@@ -474,9 +495,10 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Sets the format type in the <source> element
-     * <br>
-     * @param p_newFormatType -- the new format ("xml","word",etc.)
+     * Sets the format type in the <source> element <br>
+     * 
+     * @param p_newFormatType
+     *            -- the new format ("xml","word",etc.)
      * @return the previous value of formatType
      */
     public String setSourceFormatType(String p_newFormatType)
@@ -488,30 +510,29 @@ public class EventFlowXmlParser
     }
 
     /**
-     * Sets the source charset in the DOM structure
-     * i.e. <source><charset>UTF-8</charset></source>
-     * <br>
-     * @param p_encoding -- the new encoding (charset) to use
+     * Sets the source charset in the DOM structure i.e.
+     * <source><charset>UTF-8</charset></source> <br>
+     * 
+     * @param p_encoding
+     *            -- the new encoding (charset) to use
      * @return the original value
      */
     public String setSourceEncoding(String p_encoding)
     {
-        return setSingleElementValue(getSingleElement("source"),
-            "charset", p_encoding);
+        return setSingleElementValue(getSingleElement("source"), "charset",
+                p_encoding);
     }
 
     /**
-     * Gets the source charset from the DOM structure
-     * i.e. <source><charset>UTF-8</charset></source>
-     * <br>
+     * Gets the source charset from the DOM structure i.e.
+     * <source><charset>UTF-8</charset></source> <br>
+     * 
      * @return the encoding (charset)
      */
     public String getSourceEncoding()
     {
-        return getSingleElementValue(getSingleElement("source"),
-            "charset");
+        return getSingleElementValue(getSingleElement("source"), "charset");
     }
-
 
     /**
      * Gets the L10nProfileId from the BatchInfo section
@@ -525,4 +546,3 @@ public class EventFlowXmlParser
         return Long.parseLong(l10nProfileId);
     }
 }
-

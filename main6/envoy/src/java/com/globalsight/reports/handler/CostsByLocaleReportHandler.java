@@ -45,7 +45,8 @@ import com.globalsight.reports.util.ReportsPackage;
 
 public class CostsByLocaleReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/costsByLocaleReport";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION
+            + "costsByLocaleReport";
     private static final String NO_CONTENT_STRING = "&nbsp";
     private static final String SUB_TOTAL_MSG = "subtotal";
     private static final String GRAND_TOTAL_MSG = "grandtotal";

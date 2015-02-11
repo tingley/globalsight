@@ -50,6 +50,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private String m_newTarget = "";
     private Vector m_TrgTagList = new Vector();
     private String m_strErrMsg = "";
+    private String m_strInternalErrMsg = "";
     private ResourceBundle m_resources = null;
     private Locale m_locale = null;
     private static final String RESPATH = "com.globalsight.ling.tw.ErrorChecker";
@@ -100,7 +101,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         m_mockTarget = "";
         m_targetTexts = new Vector();
         m_newTarget = "";
-
+        m_strInternalErrMsg = "";
         /*
          * Do not reset the following m_bVerifyLeadingWhiteSpace
          * m_bVerifyTrailingWhiteSpace m_PseudoData
@@ -307,14 +308,6 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
     private boolean checkStyleTag(String s1, String s2)
     {
-        List<String> tags = new ArrayList<String>();
-        tags.add("bold");
-        tags.add("color");
-        tags.add("hyperlink");
-        tags.add("italic");
-        tags.add("superscript");
-        tags.add("underline");
-
         s1 = s1.replaceAll("[TE]+", "");
         s2 = s2.replaceAll("[TE]+", "");
 
@@ -333,7 +326,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                 for (String t : ts2)
                 {
-                    if (!ts1.contains(t))
+                    if (ts1 == null || !ts1.contains(t))
                         errorTag.add(t);
                 }
 
@@ -358,12 +351,12 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private Map<String, List<String>> getInsideTags(String s)
     {
         List<String> tags = new ArrayList<String>();
-        tags.add("bold");
+//        tags.add("bold");
         tags.add("color");
         tags.add("hyperlink");
-        tags.add("italic");
-        tags.add("superscript");
-        tags.add("underline");
+//        tags.add("italic");
+//        tags.add("superscript");
+//        tags.add("underline");
 
         Map<String, List<String>> insideTags = new HashMap<String, List<String>>();
 
@@ -614,6 +607,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         String strTrgTagName;
         String invalidNames = "";
         String missingNames = "";
+        String missingInternalNames = "";
         TagNode firstUnusedErasable = null;
         TagNode firstUnusedNonErasable = null;
         boolean bHasMissing = false;
@@ -622,6 +616,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         Enumeration trgEnumerator = m_TrgTagList.elements();
         int nInvalidCnt = 0;
         int nMissingCnt = 0;
+        int nMissingInternalCnt = 0;
 
         // search for illegal names
         while (trgEnumerator.hasMoreElements())
@@ -805,35 +800,48 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             TagNode srcItem = (TagNode) srcEnumerator.nextElement();
             
-            if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
-            {
-                continue;
-            }
-            
             String erasable = (String) srcItem.getAttributes().get("erasable");
 
             if (!srcItem.isMapped()
                     && (erasable == null || erasable.toLowerCase().equals("no")))
             {
-                bHasMissing = true;
-                nMissingCnt += 1;
-
-                if (missingNames.length() > 0)
+                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
                 {
-                    missingNames += ", ";
-                }
-                if ((nMissingCnt % 10) == 0)
-                {
-                    missingNames += "\n\t";
-                }
+                	nMissingInternalCnt += 1;
 
-                String tag = srcItem.getPTagName();
-//                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
-//                {
-//                    tag = unescapeString(tag);
-//                }
-                missingNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
-                        + PseudoConstants.PSEUDO_CLOSE_TAG;
+                    if (missingInternalNames.length() > 0)
+                    {
+                    	missingInternalNames += ", ";
+                    }
+                    if ((nMissingInternalCnt % 10) == 0)
+                    {
+                    	missingInternalNames += "\n\t";
+                    }
+
+                    String tag = srcItem.getPTagName();
+
+                    missingInternalNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
+                            + PseudoConstants.PSEUDO_CLOSE_TAG;;
+                }
+                else
+                {
+                    bHasMissing = true;
+                    nMissingCnt += 1;
+
+                    if (missingNames.length() > 0)
+                    {
+                        missingNames += ", ";
+                    }
+                    if ((nMissingCnt % 10) == 0)
+                    {
+                        missingNames += "\n\t";
+                    }
+
+                    String tag = srcItem.getPTagName();
+
+                    missingNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
+                            + PseudoConstants.PSEUDO_CLOSE_TAG;
+                }
             }
         }
 
@@ -872,6 +880,12 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             }
 
             return false;
+        }
+        else
+        {
+            String[] args =
+            { missingInternalNames };
+            m_strInternalErrMsg = missingInternalNames;
         }
 
         m_PseudoData.resetAllSourceListNodes();
@@ -1432,4 +1446,12 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     {
         this.styles = styles;
     }
+
+	public String geStrInternalErrMsg() {
+		return m_strInternalErrMsg;
+	}
+
+	public void setStrInternalErrMsg(String m_strInternalErrMsg) {
+		this.m_strInternalErrMsg = m_strInternalErrMsg;
+	}
 }

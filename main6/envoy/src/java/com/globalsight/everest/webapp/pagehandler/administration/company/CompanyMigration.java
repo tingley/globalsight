@@ -26,13 +26,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -51,9 +50,9 @@ public class CompanyMigration
             1);
     public static final String MIGRATING = "migrating";
     public static final String STOPPED = "stopped";
-    private static final String FINISHED = "finished";
+//    private static final String FINISHED = "finished";
 
-    private static final String SQL_QUERY_TABLE = "show tables like ";
+    private static final String SQL_QUERY_TABLE = "show tables like ?";
 
     private static final String GET_SP_COUNT_FOR_COMPANY = "SELECT COUNT(sp.id) "
             + "FROM source_page sp, source_page_leverage_group sp_lg "
@@ -74,9 +73,9 @@ public class CompanyMigration
             + "TARGET_LOCALE_ID, MATCH_TYPE, ORDER_NUM, SCORE_NUM, MATCHED_TUV_ID, "
             + "MATCHED_TABLE_TYPE, PROJECT_TM_INDEX, TM_ID, TM_PROFILE_ID, MT_NAME, "
             + "MATCHED_ORIGINAL_SOURCE, JOB_DATA_TU_ID "
-            + "FROM LEVERAGE_MATCH " + "WHERE SOURCE_PAGE_ID = ?";
+            + "FROM _LEVERAGE_MATCH_DATA_IN_ " + "WHERE SOURCE_PAGE_ID = ?";
 
-    private static final String DELETE_LM_BY_SP_ID = "DELETE FROM LEVERAGE_MATCH WHERE SOURCE_PAGE_ID = ?";
+//    private static final String DELETE_LM_BY_SP_ID = "DELETE FROM LEVERAGE_MATCH WHERE SOURCE_PAGE_ID = ?";
 
     private static final String INSERT_TU_BY_LG_ID = "INSERT INTO "
             + TuvQueryConstants.TU_TABLE_PLACEHOLDER
@@ -84,12 +83,12 @@ public class CompanyMigration
             + "(ID, ORDER_NUM, TM_ID, DATA_TYPE, TU_TYPE, "
             + "LOCALIZE_TYPE, LEVERAGE_GROUP_ID, PID, SOURCE_TM_NAME, XLIFF_TRANSLATION_TYPE, "
             + "XLIFF_LOCKED, IWS_SCORE, XLIFF_TARGET_SEGMENT, XLIFF_TARGET_LANGUAGE, GENERATE_FROM, "
-            + "SOURCE_CONTENT, PASSOLO_STATE, TRANSLATE, REPETITION_OF_ID, IS_REPEATED ) "
+            + "SOURCE_CONTENT, PASSOLO_STATE, TRANSLATE) "
             + "SELECT ID, ORDER_NUM, TM_ID, DATA_TYPE, TU_TYPE, "
             + "LOCALIZE_TYPE, LEVERAGE_GROUP_ID, PID, SOURCE_TM_NAME, XLIFF_TRANSLATION_TYPE, "
             + "XLIFF_LOCKED, IWS_SCORE, XLIFF_TARGET_SEGMENT, XLIFF_TARGET_LANGUAGE, GENERATE_FROM, "
-            + "SOURCE_CONTENT, PASSOLO_STATE, TRANSLATE, REPETITION_OF_ID, IS_REPEATED "
-            + "FROM translation_unit " + "WHERE leverage_group_id = ?";
+            + "SOURCE_CONTENT, PASSOLO_STATE, TRANSLATE "
+            + "FROM _TRANSLATION_UNIT_DATA_IN_ " + "WHERE leverage_group_id = ?";
 
     private static final String INSERT_TUV_BY_LG_ID = "INSERT INTO "
             + TuvQueryConstants.TUV_TABLE_PLACEHOLDER
@@ -97,12 +96,14 @@ public class CompanyMigration
             + "(ID, ORDER_NUM, LOCALE_ID, TU_ID, IS_INDEXED, "
             + "SEGMENT_CLOB, SEGMENT_STRING, WORD_COUNT, EXACT_MATCH_KEY, STATE, "
             + "MERGE_STATE, TIMESTAMP, LAST_MODIFIED, MODIFY_USER, CREATION_DATE, "
-            + "CREATION_USER, UPDATED_BY_PROJECT, SID, SRC_COMMENT ) "
+            + "CREATION_USER, UPDATED_BY_PROJECT, SID, SRC_COMMENT, REPETITION_OF_ID, "
+            + "IS_REPEATED) "
             + "SELECT tuv.ID, tuv.ORDER_NUM, tuv.LOCALE_ID, tuv.TU_ID, tuv.IS_INDEXED, "
             + "tuv.SEGMENT_CLOB, tuv.SEGMENT_STRING, tuv.WORD_COUNT, tuv.EXACT_MATCH_KEY, tuv.STATE, "
             + "tuv.MERGE_STATE, tuv.TIMESTAMP, tuv.LAST_MODIFIED, tuv.MODIFY_USER, tuv.CREATION_DATE, "
-            + "tuv.CREATION_USER, tuv.UPDATED_BY_PROJECT, tuv.SID, tuv.SRC_COMMENT "
-            + "FROM translation_unit_variant tuv, translation_unit tu "
+            + "tuv.CREATION_USER, tuv.UPDATED_BY_PROJECT, tuv.SID, tuv.SRC_COMMENT, tuv.REPETITION_OF_ID, "
+            + "tuv.IS_REPEATED "
+            + "FROM _TRANSLATION_UNIT_VARIANT_DATA_IN_ tuv, _TRANSLATION_UNIT_DATA_IN_ tu "
             + "WHERE tu.ID = tuv.TU_ID " + "AND tu.leverage_group_id = ?";
 
     /**
@@ -113,13 +114,14 @@ public class CompanyMigration
     public static void checkLeverageMatchTable(long p_companyId)
     {
         String table = "leverage_match_" + p_companyId;
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            String sql = SQL_QUERY_TABLE + "'" + table + "'";
-            ps = session.connection().prepareStatement(sql);
+            conn = DbUtil.getConnection();
+            ps = conn.prepareStatement(SQL_QUERY_TABLE);
+            ps.setString(1, table);
             rs = ps.executeQuery();
             if (!rs.next())
             {
@@ -135,10 +137,7 @@ public class CompanyMigration
         {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(ps);
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -150,13 +149,14 @@ public class CompanyMigration
     public static void checkTuTable(long p_companyId)
     {
         String table = "translation_unit_" + p_companyId;
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            String sql = SQL_QUERY_TABLE + "'" + table + "'";
-            ps = session.connection().prepareStatement(sql);
+            conn = DbUtil.getConnection();
+            ps = conn.prepareStatement(SQL_QUERY_TABLE);
+            ps.setString(1, table);
             rs = ps.executeQuery();
             if (!rs.next())
             {
@@ -172,10 +172,7 @@ public class CompanyMigration
         {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(ps);
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -187,13 +184,14 @@ public class CompanyMigration
     public static void checkTuvTable(long p_companyId)
     {
         String table = "translation_unit_variant_" + p_companyId;
-        Session session = TmUtil.getStableSession();
+        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            String sql = SQL_QUERY_TABLE + "'" + table + "'";
-            ps = session.connection().prepareStatement(sql);
+            conn = DbUtil.getConnection();
+            ps = conn.prepareStatement(SQL_QUERY_TABLE);
+            ps.setString(1, table);
             rs = ps.executeQuery();
             if (!rs.next())
             {
@@ -209,10 +207,7 @@ public class CompanyMigration
         {
             DbUtil.silentClose(rs);
             DbUtil.silentClose(ps);
-            if (session != null)
-            {
-                TmUtil.closeStableSession(session);
-            }
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -309,10 +304,7 @@ public class CompanyMigration
         sb.append(" GENERATE_FROM varchar(50) DEFAULT NULL,");
         sb.append(" SOURCE_CONTENT varchar(30) DEFAULT NULL,");
         sb.append(" PASSOLO_STATE varchar(60) DEFAULT NULL,");
-        sb.append(" TRANSLATE varchar(12) DEFAULT NULL,");
-        sb.append(" REPETITION_OF_ID BIGINT DEFAULT NULL,");
-        sb.append(" IS_REPEATED CHAR(1) DEFAULT 'N' CHECK (IS_REPEATED IN ('Y', 'N')),");
-        sb.append(" KEY `REPETITION_OF_ID` (`REPETITION_OF_ID`)");
+        sb.append(" TRANSLATE varchar(12) DEFAULT NULL");
         sb.append(");");
         String sql2 = sb.toString();
 
@@ -379,7 +371,10 @@ public class CompanyMigration
         sb.append(" CREATION_USER  VARCHAR(80),");
         sb.append(" UPDATED_BY_PROJECT VARCHAR(40),");
         sb.append(" SID VARCHAR(255),");
-        sb.append(" SRC_COMMENT TEXT ");
+        sb.append(" SRC_COMMENT TEXT,");
+        sb.append(" REPETITION_OF_ID BIGINT DEFAULT NULL,");
+        sb.append(" IS_REPEATED CHAR(1) DEFAULT 'N' CHECK (IS_REPEATED IN ('Y', 'N')),");
+        sb.append(" KEY `REPETITION_OF_ID` (`REPETITION_OF_ID`)");
         sb.append(");");
         String sql2 = sb.toString();
 
@@ -441,6 +436,9 @@ public class CompanyMigration
                 int totalSpIdNumber = 0;
                 int finishedSpIdCount = 0;
                 int count = 0;
+                String targetLMTable = "leverage_match_" + p_companyId;
+                String targetTUTable = "translation_unit_" + p_companyId;
+                String targetTUVTable = "translation_unit_variant_" + p_companyId;
                 try
                 {
                     company = ServerProxy.getJobHandler().getCompanyById(
@@ -480,10 +478,13 @@ public class CompanyMigration
                             .prepareStatement(GET_SP_ID_LG_ID_FOR_COMPANY);
                     ps3.setLong(1, p_companyId);
                     rs3 = ps3.executeQuery();
+                    Job curJob = null;
 
                     while (rs3.next())
                     {
                         long spId = rs3.getLong(1);
+                        curJob = ServerProxy.getPageManager()
+                                .getSourcePage(spId).getRequest().getJob();
                         long lgId = rs3.getLong(2);
                         if (!migratedLgIds.contains(lgId))
                         {
@@ -492,9 +493,14 @@ public class CompanyMigration
                             // Insert LM data to "leverage_match_[companyId]"
                             if (ps4 == null)
                             {
-                                String sql4 = INSERT_LM_BY_SP_ID.replace(
-                                        TuvQueryConstants.LM_TABLE_PLACEHOLDER,
-                                        "leverage_match_" + p_companyId);
+                                String fromLMTable = "leverage_match";
+                                if (curJob.isMigrated())
+                                {
+                                    fromLMTable = "leverage_match_archived";
+                                }
+                                String sql4 = INSERT_LM_BY_SP_ID
+                                        .replace(TuvQueryConstants.LM_TABLE_PLACEHOLDER, targetLMTable)
+                                        .replace("_LEVERAGE_MATCH_DATA_IN_", fromLMTable);
                                 ps4 = connection.prepareStatement(sql4);
                             }
                             ps4.setLong(1, spId);
@@ -512,9 +518,15 @@ public class CompanyMigration
                             // "translation_unit_[companyId]"
                             if (ps6 == null)
                             {
-                                String sql6 = INSERT_TU_BY_LG_ID.replace(
-                                        TuvQueryConstants.TU_TABLE_PLACEHOLDER,
-                                        "translation_unit_" + p_companyId);
+                                String fromTUTable = "translation_unit";
+                                if (curJob.isMigrated())
+                                {
+                                    fromTUTable = "translation_unit_archived";
+                                }
+
+                                String sql6 = INSERT_TU_BY_LG_ID
+                                        .replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER, targetTUTable)
+                                        .replace("_TRANSLATION_UNIT_DATA_IN_", fromTUTable);
                                 ps6 = connection.prepareStatement(sql6);
                             }
                             ps6.setLong(1, lgId);
@@ -524,11 +536,17 @@ public class CompanyMigration
                             // "translation_unit_variant_[companyId]".
                             if (ps7 == null)
                             {
+                                String fromTUTable = "translation_unit";
+                                String fromTUVTable = "translation_unit_variant";
+                                if (curJob.isMigrated())
+                                {
+                                    fromTUTable = "translation_unit_archived";
+                                    fromTUVTable = "translation_unit_variant_archived";
+                                }
                                 String sql7 = INSERT_TUV_BY_LG_ID
-                                        .replace(
-                                                TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
-                                                "translation_unit_variant_"
-                                                        + p_companyId);
+                                        .replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, targetTUVTable)
+                                        .replace("_TRANSLATION_UNIT_VARIANT_DATA_IN_", fromTUVTable)
+                                        .replace("_TRANSLATION_UNIT_DATA_IN_", fromTUTable);
                                 ps7 = connection.prepareStatement(sql7);
                             }
                             ps7.setLong(1, lgId);
@@ -548,6 +566,11 @@ public class CompanyMigration
                                 count = 0;
                             }
                         }
+                        // Current job's data are moved to its OWN working
+                        // tables, even it has been archived previously, so
+                        // update flag to false.
+                        curJob.setIsMigrated(false);
+                        HibernateUtil.update(curJob);
                     }
 
                     logger.info("Company migration is finished completely.");

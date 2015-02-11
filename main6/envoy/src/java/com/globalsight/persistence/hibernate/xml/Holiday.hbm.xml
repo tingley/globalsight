@@ -1,46 +1,44 @@
 <?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC 
-        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
 
-    <class name="com.globalsight.calendar.Holiday" table="HOLIDAY">
+	<class name="com.globalsight.calendar.Holiday" table="HOLIDAY">
 
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
 
-        <property name="name" length="40" column="NAME" type="string"
-            not-null="true" />
-        
-        <property name="description" length="4000" column="DESCRIPTION"
-            type="string" />
-        
-        <property name="timeExpression" length="100" type="string"
-            column="TIME_EXPRESSION" not-null="true" />
-        
-        <property name="companyId" length="22" column="COMPANY_ID"
-            type="string" not-null="true" />
-        
-        <property name="month" length="2" column="MONTH" type="integer"
-            not-null="true" />
-        
-        <property name="dayOfMonth" length="2" column="DAY_OF_MONTH"
-            type="integer" />
-        
-        <property name="weekOfMonth" length="1" column="WEEK_OF_MONTH"
-            type="string" />
-        
-        <property name="dayOfWeek" length="1" column="DAY_OF_WEEK"
-            type="integer" />
-        
-        <property name="endingYear" length="4" column="ENDING_YEAR"
-            type="integer" />
-        
-        <property name="isAbsolute" column="IS_ABSOLUTE" type="yes_no"
-            not-null="true" />
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" />
 
-    </class>
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" />
+
+		<property name="timeExpression" length="100" type="string"
+			column="TIME_EXPRESSION" not-null="true" />
+
+		<property name="companyId" length="20" column="COMPANY_ID"
+			type="long" not-null="true" />
+
+		<property name="month" length="2" column="MONTH" type="integer"
+			not-null="true" />
+
+		<property name="dayOfMonth" length="2" column="DAY_OF_MONTH"
+			type="integer" />
+
+		<property name="weekOfMonth" length="1" column="WEEK_OF_MONTH"
+			type="string" />
+
+		<property name="dayOfWeek" length="1" column="DAY_OF_WEEK"
+			type="integer" />
+
+		<property name="endingYear" length="4" column="ENDING_YEAR"
+			type="integer" />
+
+		<property name="isAbsolute" column="IS_ABSOLUTE" type="yes_no"
+			not-null="true" />
+
+	</class>
 
 </hibernate-mapping>

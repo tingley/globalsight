@@ -17,6 +17,7 @@
 package com.globalsight.reports.handler;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,7 +48,8 @@ import com.globalsight.reports.util.ReportsPackage;
 
 public class TaskDurationReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/taskDurationReport";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION
+            + "taskDurationReport";
     private static final String NO_CONTENT_STRING = "&nbsp;";
 
     private static final int NUM_ITEMS_DISPLAYED = 20;
@@ -253,16 +255,25 @@ public class TaskDurationReportHandler extends BasicReportHandler
                 .append(" from JobImpl j, RequestImpl r, ")
                 .append(" BasicL10nProfile l, WorkflowImpl w, TaskImpl t, ")
                 .append(" GlobalSightLocale l1, GlobalSightLocale l2 ")
-                .append(" where j.id = w.job ").append(" and j.id = r.job ")
-                .append(" and r.l10nProfile = l.id ")
-                .append(" and w.id = t.workflow ")
-                .append(" and w.targetLocale = l1.id ")
-                .append(" and l.sourceLocale = l2.id ")
-                .append(" and j.createDate between DATE_SUB(now(), ")
-                .append(" INTERVAL 31 DAY) and now() ")
+                .append(" where j.id = w.job.id ")
+                .append(" and j.id = r.job.id ")
+                .append(" and r.l10nProfile.id = l.id ")
+                .append(" and w.id = t.workflow.id ")
+                .append(" and w.targetLocale.id = l1.id ")
+                .append(" and l.sourceLocale.id = l2.id ")
+                .append(" and j.createDate >= :createDate ")
                 .append(" and j.state in ('EXPORTED', 'LOCALIZED') ");
 
         Map<String, Object> params = new HashMap<String, Object>();
+
+        // last 30 days to now
+        Calendar now = Calendar.getInstance();
+        now.set(Calendar.HOUR_OF_DAY, 0);
+        now.set(Calendar.MINUTE, 0);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+        now.add(Calendar.DATE, -30);
+        params.put("createDate", now.getTime());
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))

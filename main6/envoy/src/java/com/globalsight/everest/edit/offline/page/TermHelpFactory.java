@@ -24,6 +24,7 @@ import com.globalsight.everest.edit.offline.page.terminology.GsTermHelp;
 import com.globalsight.everest.edit.offline.page.terminology.HtmlTermHelp;
 import com.globalsight.everest.edit.offline.page.terminology.TbxTermHelp;
 import com.globalsight.everest.edit.offline.page.terminology.TradocTermHelp;
+import com.globalsight.everest.edit.offline.page.terminology.TxtTermHelp;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 
 /**
@@ -40,6 +41,7 @@ public class TermHelpFactory
     public static int GLOBALSIGHT = 1;
     public static int TRADOC = 2;
     public static int TBX = 3;
+    public static int TXT = 4;
 
     /**
      * Gets a instance of <tt>TermHelp</tt> according to the <tt>format</tt>
@@ -60,7 +62,9 @@ public class TermHelpFactory
         else if (format == TRADOC)
             return new TradocTermHelp();
         else if (format == TBX)
-        	return new TbxTermHelp();
+            return new TbxTermHelp();
+        else if (format == TXT)
+            return new TxtTermHelp();
 
         return new GsTermHelp();
     }
@@ -84,7 +88,9 @@ public class TermHelpFactory
         else if (OfflineConstants.TERM_TRADOS.equals(format))
             return new TradocTermHelp();
         else if (OfflineConstants.TERM_TBX.equals(format))
-        	return new TbxTermHelp();
+            return new TbxTermHelp();
+        else if (OfflineConstants.TERM_TXT.equals(format))
+            return new TxtTermHelp();
 
         return new GsTermHelp();
     }

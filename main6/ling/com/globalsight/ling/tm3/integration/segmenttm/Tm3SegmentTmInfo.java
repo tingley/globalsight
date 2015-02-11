@@ -24,8 +24,6 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
 import com.globalsight.everest.jobhandler.Job;
@@ -68,6 +64,7 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.lucene.LuceneSearcher;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 import com.globalsight.ling.tm3.core.BaseTm;
@@ -78,6 +75,7 @@ import com.globalsight.ling.tm3.core.TM3Attributes;
 import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3Exception;
 import com.globalsight.ling.tm3.core.TM3Handle;
+import com.globalsight.ling.tm3.core.TM3ImportHelper;
 import com.globalsight.ling.tm3.core.TM3Locale;
 import com.globalsight.ling.tm3.core.TM3Manager;
 import com.globalsight.ling.tm3.core.TM3SaveMode;
@@ -89,6 +87,7 @@ import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
 
@@ -117,7 +116,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     private static final Logger LOGGER = Logger
             .getLogger(Tm3SegmentTmInfo.class);
 
-    public static List<TM3Tu<GSTuvData>> tusRemove = new ArrayList<TM3Tu<GSTuvData>>();;
+    public static List<TM3Tu<GSTuvData>> tusRemove = new ArrayList<TM3Tu<GSTuvData>>();
     private TM3Manager manager = DefaultManager.create();
     private boolean indexTarget;
     {
@@ -125,8 +124,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         {
             // Fix for GBS-2448
             // indexTarget =
-            // SystemConfiguration.getInstance().getBooleanParameter(
-            // "leverager.targetIndexing");
+            // SystemConfiguration.getInstance().getBooleanParameter("leverager.targetIndexing");
             indexTarget = true;
 
         }
@@ -136,9 +134,9 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-    protected TM3Tm<GSTuvData> getTM3Tm(Session session, Tm tm)
+    protected TM3Tm<GSTuvData> getTM3Tm(Tm tm)
     {
-        TM3Tm<GSTuvData> tm3tm = manager.getTm(session, new GSDataFactory(),
+        TM3Tm<GSTuvData> tm3tm = manager.getTm(new GSDataFactory(),
                 tm.getTm3Id());
         if (tm3tm == null)
         {
@@ -154,13 +152,13 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
      * TM3 data, we just get a handle to the TUs and delete them in bulk.
      */
     @Override
-    public void deleteSegmentTmTus(Session pSession, Tm pTm,
-            Collection<SegmentTmTu> pTus) throws Exception
+    public void deleteSegmentTmTus(Tm pTm, Collection<SegmentTmTu> pTus)
+            throws Exception
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = manager.getTm(pSession,
-                    new GSDataFactory(), pTm.getTm3Id());
+            TM3Tm<GSTuvData> tm3tm = manager.getTm(new GSDataFactory(),
+                    pTm.getTm3Id());
             if (tm3tm == null)
             {
                 throw new IllegalArgumentException("Non-existent tm3 tm: "
@@ -191,14 +189,13 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
      * Delete TUVs.
      */
     @Override
-    public void deleteSegmentTmTuvs(Session pSession, Tm pTm,
-            Collection<SegmentTmTuv> pTuvs) throws Exception
+    public void deleteSegmentTmTuvs(Tm pTm, Collection<SegmentTmTuv> pTuvs)
+            throws Exception
     {
         try
         {
             GSDataFactory factory = new GSDataFactory();
-            TM3Tm<GSTuvData> tm3tm = manager.getTm(pSession, factory,
-                    pTm.getTm3Id());
+            TM3Tm<GSTuvData> tm3tm = manager.getTm(factory, pTm.getTm3Id());
             if (tm3tm == null)
             {
                 throw new IllegalArgumentException("Non-existent tm3 tm: "
@@ -265,14 +262,13 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public void updateSegmentTmTuvs(Session pSession, Tm pTm,
-            Collection<SegmentTmTuv> pTuvs) throws LingManagerException
+    public void updateSegmentTmTuvs(Tm pTm, Collection<SegmentTmTuv> pTuvs)
+            throws LingManagerException
     {
         try
         {
             GSDataFactory factory = new GSDataFactory();
-            TM3Tm<GSTuvData> tm3tm = manager.getTm(pSession, factory,
-                    pTm.getTm3Id());
+            TM3Tm<GSTuvData> tm3tm = manager.getTm(factory, pTm.getTm3Id());
             if (tm3tm == null)
             {
                 throw new IllegalArgumentException("Non-existent tm3 tm: "
@@ -293,7 +289,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             }
 
             String modifyUser = null;
-            TM3Tm<GSTuvData> tm = getTM3Tm(pSession, pTm);
+            TM3Tm<GSTuvData> tm = getTM3Tm(pTm);
             for (SegmentTmTuv tuv : pTuvs)
             {
                 modifyUser = tuv.getModifyUser();
@@ -372,14 +368,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public List<SegmentTmTu> getSegmentsById(Session session, Tm tm,
-            List<Long> tuIds) throws LingManagerException
+    public List<SegmentTmTu> getSegmentsById(Tm tm, List<Long> tuIds)
+            throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
-            Tm3SegmentResultSet result = new Tm3SegmentResultSet(session, tm,
-                    tm3tm, tm3tm.getDataById(tuIds).iterator());
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
+            Tm3SegmentResultSet result = new Tm3SegmentResultSet(tm, tm3tm,
+                    tm3tm.getDataById(tuIds).iterator());
             List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
             while (result.hasNext())
             {
@@ -395,20 +391,19 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getAllSegments(Session session, Tm tm,
-            String createdBefore, String createdAfter)
-            throws LingManagerException
+    public SegmentResultSet getAllSegments(Tm tm, String createdBefore,
+            String createdAfter) throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
                     + " createdBefore " + createdBefore + " createdAfter "
                     + createdAfter);
 
-            return new Tm3SegmentResultSet(session, tm, tm3tm, tm3tm
-                    .getAllData(parseDate(createdAfter),
-                            parseDate(createdBefore)).iterator());
+            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getAllData(
+                    parseDate(createdAfter), parseDate(createdBefore))
+                    .iterator());
         }
         catch (TM3Exception e)
         {
@@ -417,13 +412,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getAllSegmentsCount(Session session, Tm tm,
-            String createdBefore, String createdAfter)
-            throws LingManagerException
+    public int getAllSegmentsCount(Tm tm, String createdBefore,
+            String createdAfter) throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.info("getAllSgments: " + describeTm(tm, tm3tm)
                     + " createdBefore " + createdBefore + " createdAfter "
                     + createdAfter);
@@ -439,21 +433,20 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getSegmentsByLocale(Session session, Tm tm,
-            String localeCode, String createdBefore, String createdAfter)
+    public SegmentResultSet getSegmentsByLocale(Tm tm, String localeCode,
+            String createdBefore, String createdAfter)
             throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.info("getSegmentsByLocale(" + localeCode + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(session,
-                    localeCode);
-            return new Tm3SegmentResultSet(session, tm, tm3tm, tm3tm
-                    .getDataByLocale(locale, parseDate(createdAfter),
-                            parseDate(createdBefore)).iterator());
+            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
+            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocale(
+                    locale, parseDate(createdAfter), parseDate(createdBefore))
+                    .iterator());
         }
         catch (TM3Exception e)
         {
@@ -462,18 +455,17 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getSegmentsCountByLocale(Session session, Tm tm,
-            String localeCode, String createdBefore, String createdAfter)
+    public int getSegmentsCountByLocale(Tm tm, String localeCode,
+            String createdBefore, String createdAfter)
             throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.info("getSegmentsByLocale(" + localeCode + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(session,
-                    localeCode);
+            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
             return Long.valueOf(
                     tm3tm.getDataByLocale(locale, parseDate(createdAfter),
                             parseDate(createdBefore)).getCount()).intValue();
@@ -485,19 +477,19 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getSegmentsByProjectName(Session session, Tm tm,
-            String projectName, String createdBefore, String createdAfter)
+    public SegmentResultSet getSegmentsByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter)
             throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.info("getSegmentsByProjectName(" + projectName + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
             TM3Attribute projectAttr = TM3Util.getAttr(tm3tm,
                     UPDATED_BY_PROJECT);
-            return new Tm3SegmentResultSet(session, tm, tm3tm, tm3tm
+            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm
                     .getDataByAttributes(
                             TM3Attributes.one(projectAttr, projectName),
                             parseDate(createdAfter), parseDate(createdBefore))
@@ -510,13 +502,13 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getSegmentsCountByProjectName(Session session, Tm tm,
-            String projectName, String createdBefore, String createdAfter)
+    public int getSegmentsCountByProjectName(Tm tm, String projectName,
+            String createdBefore, String createdAfter)
             throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getSegmentsCountByProjectName(" + projectName + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
@@ -535,12 +527,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public String getSidByTuvId(Session session, Tm tm, long tuvId)
+    public String getSidByTuvId(Tm tm, long tuvId)
     {
         try
         {
             String sid = null;
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getSidByTuvId(" + tuvId + "): "
                     + describeTm(tm, tm3tm));
             TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
@@ -558,17 +550,16 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public String getSourceTextByTuvId(Session session, Tm tm, long tuvId,
-            long srcLocaleId)
+    public String getSourceTextByTuvId(Tm tm, long tuvId, long srcLocaleId)
     {
         try
         {
             String sourceText = null;
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getSourceTextByTuvId(" + tuvId + ", locale="
                     + srcLocaleId + "): " + describeTm(tm, tm3tm));
-            GlobalSightLocale srcLocale = (GlobalSightLocale) session.get(
-                    GlobalSightLocale.class, srcLocaleId);
+            GlobalSightLocale srcLocale = (GlobalSightLocale) HibernateUtil
+                    .get(GlobalSightLocale.class, srcLocaleId);
             TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
 
             if (tuv != null)
@@ -598,13 +589,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public StatisticsInfo getStatistics(Session session, Tm pTm,
-            Locale pUILocale, boolean pIncludeProjects)
-            throws LingManagerException
+    public StatisticsInfo getStatistics(Tm pTm, Locale pUILocale,
+            boolean pIncludeProjects) throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, pTm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(pTm);
             LOGGER.debug("getStatistics: " + describeTm(pTm, tm3tm)
                     + " includeProjects=" + pIncludeProjects);
 
@@ -639,10 +629,11 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 {
                     TM3Handle<GSTuvData> handle = tm3tm.getDataByAttributes(
                             TM3Attributes.one(projectAttr, pv), null, null);
-                    //stats.addUpdateProjectInfo((String) pv,
-                    //        (int) handle.getCount(), (int) handle.getTuvCount());
-                    //To set tu and tuv count as 0 is because that in statistics
-                    //it does not need to show the count info in page
+                    // stats.addUpdateProjectInfo((String) pv,
+                    // (int) handle.getCount(), (int) handle.getTuvCount());
+                    // To set tu and tuv count as 0 is because that in
+                    // statistics
+                    // it does not need to show the count info in page
                     stats.addUpdateProjectInfo((String) pv, 0, 0);
                 }
             }
@@ -658,19 +649,18 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
      * Delete all TM data.
      */
     @Override
-    public boolean removeTmData(Session pSession, Tm pTm,
-            ProgressReporter pReporter, InterruptMonitor pMonitor)
-            throws LingManagerException
+    public boolean removeTmData(Tm pTm, ProgressReporter pReporter,
+            InterruptMonitor pMonitor) throws LingManagerException
     {
         try
         {
             String tmName = pTm.getName();
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(pSession, pTm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(pTm);
             LOGGER.info("Removing data for " + describeTm(pTm, tm3tm));
             // pReporter.setMessageKey("lb_tm_remove_removing_tm",
             // "Removing TM data ...");
             // pReporter.setPercentage(35);
-            manager.removeTm(pSession, tm3tm);
+            manager.removeTm(tm3tm);
             // Remove the dependency on the deleted TM
             pTm.setTm3Id(null);
             // pReporter.setPercentage(90);
@@ -687,14 +677,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public boolean removeTmData(Session pSession, Tm pTm,
-            GlobalSightLocale pLocale, ProgressReporter pReporter,
-            InterruptMonitor pMonitor) throws LingManagerException
+    public boolean removeTmData(Tm pTm, GlobalSightLocale pLocale,
+            ProgressReporter pReporter, InterruptMonitor pMonitor)
+            throws LingManagerException
     {
         try
         {
             String tmName = pTm.getName();
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(pSession, pTm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(pTm);
             LOGGER.info("Removing data for " + describeTm(pTm, tm3tm)
                     + " locale " + pLocale);
             // pReporter.setMessageKey("lb_tm_remove_removing_tm",
@@ -730,7 +720,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public LeverageMatchResults leverage(Session pSession, List<Tm> pTms,
+    public LeverageMatchResults leverage(List<Tm> pTms,
             LeverageDataCenter pLDC, String companyId) throws Exception
     {
         try
@@ -747,7 +737,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // Leverage each TM separately and build a composite list.
             for (Tm projectTm : pTms)
             {
-                TM3Tm<GSTuvData> tm = getTM3Tm(pSession, projectTm);
+                TM3Tm<GSTuvData> tm = getTM3Tm(projectTm);
                 if (tm == null)
                 {
                     LOGGER.warn("TM " + projectTm.getId()
@@ -784,9 +774,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public LeverageMatches leverageSegment(Session pSession,
-            BaseTmTuv pSourceTuv, LeverageOptions pLeverageOptions,
-            List<Tm> pTms) throws Exception
+    public LeverageMatches leverageSegment(BaseTmTuv pSourceTuv,
+            LeverageOptions pLeverageOptions, List<Tm> pTms) throws Exception
     {
         if (LOGGER.isInfoEnabled())
         {
@@ -802,7 +791,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // Leverage each TM separately and build a composite list.
             for (Tm projectTm : pTms)
             {
-                TM3Tm<GSTuvData> tm = getTM3Tm(pSession, projectTm);
+                TM3Tm<GSTuvData> tm = getTM3Tm(projectTm);
                 if (tm == null)
                 {
                     LOGGER.warn("TM " + projectTm.getId()
@@ -839,19 +828,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
      * 
      * Currently, this routine will generate a separate event every time it is
      * called. This is bad behavior for TM import.
-     * 
-     * Note that this routine is currently expected to handle its own
-     * transaction :(
      */
     @Override
-    public TuvMappingHolder saveToSegmentTm(Session pSession,
+    public TuvMappingHolder saveToSegmentTm(
             Collection<? extends BaseTmTu> pSegmentsToSave,
             GlobalSightLocale pSourceLocale, Tm pTm,
             Set<GlobalSightLocale> pTargetLocales, int pMode,
-            boolean pFromTmImport) throws LingManagerException
+            boolean pFromTmImport) 
     {
-
-        Transaction tx = null;
 
         LOGGER.info("saveToSegmentTm: " + pSegmentsToSave.size()
                 + " segs, srcLocale=" + pSourceLocale + ", pMode=" + pMode
@@ -863,11 +847,15 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             return new TuvMappingHolder();
         }
 
+        Connection connection = null;
         try
         {
-            tx = getTransaction();
-
-            TM3Tm<GSTuvData> tm = getTM3Tm(pSession, pTm);
+            connection = DbUtil.getConnection();
+            connection.setAutoCommit(false);
+            
+            TM3Tm<GSTuvData> tm = getTM3Tm(pTm);
+            tm.setConnection(connection);
+            tm.setFirstImporting(pTm.isFirstImporting());
 
             UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(
                     pSourceLocale, pSegmentsToSave);
@@ -914,11 +902,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             Map<String, String> attValues = TMAttributeManager
                     .getTUAttributesForPopulator(projectTM, m_job);
 
-            List<TM3Tu<GSTuvData>> newTus = new ArrayList<TM3Tu<GSTuvData>>();
+            TM3Saver<GSTuvData> saver = tm.createSaver();
             for (BaseTmTu base : usr.getAllTus())
             {
                 SegmentTmTu srcTu = (SegmentTmTu) base;
-                TM3Saver<GSTuvData> saver = tm.createSaver();
 
                 // NB SegmentTmTu's idea of source tuv is the first tuv with
                 // the source locale
@@ -1019,47 +1006,56 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 {
                     tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
                 }
-                List<TM3Tu<GSTuvData>> savedTus = saver
-                        .save(convertSaveMode(pMode));
-                if (savedTus.size() > 0)
-                {
-                    TM3Tu<GSTuvData> saved = savedTus.get(0);
-                    for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv))
-                    {
-                        // Note that this uses the PROJECT TM ID, not the tm3 tm
-                        // id.
-                        holder.addMapping(pSourceLocale, stuv.getId(), stuv
-                                .getTu().getId(), pTm.getId(), saved.getId(),
-                                saved.getSourceTuv().getId());
-                    }
-                    newTus.add(saved);
-                }
+//                if (savedTus.size() > 0)
+//                {
+//                    TM3Tu<GSTuvData> saved = savedTus.get(0);
+//                    for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv))
+//                    {
+//                        // Note that this uses the PROJECT TM ID, not the tm3 tm
+//                        // id.
+//                        holder.addMapping(pSourceLocale, stuv.getId(), stuv
+//                                .getTu().getId(), pTm.getId(), saved.getId(),
+//                                saved.getSourceTuv().getId());
+//                    }
+//                    newTus.add(saved);
+//                }
             }
-            tx.commit();
+            saver.setFromTmImport(pFromTmImport);
+            List<TM3Tu<GSTuvData>> savedTus = saver
+                    .save(convertSaveMode(pMode));
 
             // build the Lucene index.
             // XXX if tm.save overwrote some old data, we should re-index it
-            luceneIndexTus(pTm.getId(), newTus);
+            luceneIndexTus(pTm.getId(), savedTus);
             if (tusRemove.size() != 0)
             {
                 luceneRemoveTM3Tus(pTm.getId(), tusRemove);
                 tusRemove.clear();
+            }
+            
+            synchronized (this)
+            {
+                connection.commit();
             }
 
             return holder;
         }
         catch (Exception e)
         {
+            try
+            {
+                connection.rollback();
+            }
+            catch (Exception e2)
+            {
+            }
             throw new LingManagerException(e);
         }
         finally
         {
-            if (tx != null && tx.isActive())
-            {
-                tx.rollback();
-            }
             LOGGER.debug("tm3save: " + pSegmentsToSave.size() + " took "
                     + (System.currentTimeMillis() - start) + "ms");
+            DbUtil.silentReturnConnection(connection);
         }
     }
 
@@ -1085,11 +1081,11 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public String getCreatingUserByTuvId(Session session, Tm tm, long tuvId)
+    public String getCreatingUserByTuvId(Tm tm, long tuvId)
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getCreatingUserByTuvId(" + tuvId + "): "
                     + describeTm(tm, tm3tm));
             TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
@@ -1108,12 +1104,12 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
     @SuppressWarnings("unchecked")
     @Override
-    public Set<GlobalSightLocale> getLocalesForTm(Session session, Tm tm)
+    public Set<GlobalSightLocale> getLocalesForTm(Tm tm)
             throws LingManagerException
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getLocalesForTm: " + describeTm(tm, tm3tm));
             Set s = tm3tm.getTuvLocales();
             return (Set<GlobalSightLocale>) s;
@@ -1125,11 +1121,11 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public Date getModifyDateByTuvId(Session session, Tm tm, long tuvId)
+    public Date getModifyDateByTuvId(Tm tm, long tuvId)
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getModifyDateByTuvId(" + tuvId + "): "
                     + describeTm(tm, tm3tm));
             TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
@@ -1147,18 +1143,18 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getSegmentCountForReindex(Session session, Tm tm)
+    public int getSegmentCountForReindex(Tm tm)
     {
-        return getAllSegmentsCount(session, tm, null, null);
+        return getAllSegmentsCount(tm, null, null);
     }
 
     /**
      * TM3 reindexing doesn't currently do anything.
      */
     @Override
-    public boolean reindexTm(Session session, Tm tm, Reindexer reindexer)
+    public boolean reindexTm(Tm tm, Reindexer reindexer)
     {
-        reindexer.incrementCounter(getSegmentCountForReindex(session, tm));
+        reindexer.incrementCounter(getSegmentCountForReindex(tm));
         return true;
     }
 
@@ -1230,18 +1226,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
     private Date parseDate(String s) throws LingManagerException
     {
-        if (s == null || "".equals(s))
-        {
-            return null;
-        }
-        try
-        {
-            return DateFormat.getInstance().parse(s);
-        }
-        catch (ParseException e)
-        {
-            throw new LingManagerException(e);
-        }
+        return StringUtil.isEmpty(s) ? null : new Date(s);
     }
 
     /**
@@ -1460,25 +1445,18 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             {
                 return map.get(user);
             }
-            TM3Event event = tm.addEvent(eventType, user, attr);
+            TM3Event event = TM3ImportHelper.createTM3Event(tm, user, eventType, attr);
             map.put(user, event);
             return event;
         }
     }
 
-    // Split this out so test classes can override it
-    protected Transaction getTransaction()
-    {
-        return HibernateUtil.getTransaction();
-    }
-
     @Override
-    public TuvBasicInfo getTuvBasicInfoByTuvId(Session session, Tm tm,
-            long tuvId)
+    public TuvBasicInfo getTuvBasicInfoByTuvId(Tm tm, long tuvId)
     {
         try
         {
-            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
             LOGGER.debug("getModifyDateByTuvId(" + tuvId + "): "
                     + describeTm(tm, tm3tm));
             TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
@@ -1522,16 +1500,16 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getAllSegments(Session session, Tm tm,
-            long startTUId) throws LingManagerException
+    public SegmentResultSet getAllSegments(Tm tm, long startTUId)
+            throws LingManagerException
     {
-        return getAllSegments(session, tm, null, null);
+        return getAllSegments(tm, null, null);
     }
 
     @Override
-    public int getAllSegmentsCount(Session session, Tm tm, long startTUId)
+    public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException
     {
-        return getAllSegmentsCount(session, tm, null, null);
+        return getAllSegmentsCount(tm, null, null);
     }
 }

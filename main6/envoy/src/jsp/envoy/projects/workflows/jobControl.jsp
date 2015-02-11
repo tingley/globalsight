@@ -23,8 +23,9 @@ PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMI
 String type = (String)sessionMgr.getAttribute("destinationPage");
 String searchType = (String)request.getAttribute("searchType");
 String scriptlet = (String)request.getAttribute(JobManagementHandler.JOB_SCRIPTLET);
+Integer num = (Integer)request.getAttribute(JobManagementHandler.NUM_OF_JOBS);
 
-if (scriptlet.startsWith("<tr><td><div id='restofjobs'") || scriptlet.equals(""))
+if (0 == num)
 {    
     if (searchType != null && searchType.equals(JobSearchConstants.MINI_JOB_SEARCH_COOKIE))
     {

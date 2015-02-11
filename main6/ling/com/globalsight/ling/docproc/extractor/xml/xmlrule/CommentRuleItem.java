@@ -103,6 +103,7 @@ public class CommentRuleItem extends XmlRuleItem
         }
 
         Node nextNode = node.getNextSibling();
+        boolean elementProcessed = false;
 
         while (nextNode != null)
         {
@@ -118,6 +119,12 @@ public class CommentRuleItem extends XmlRuleItem
             else if (nextNode.getNodeType() == Node.ELEMENT_NODE)
             {
                 updateCommendForChildTextNode(ruleMap, nextNode, comment);
+                elementProcessed = true;
+            }
+            
+            if (elementProcessed)
+            {
+                break;
             }
 
             nextNode = nextNode.getNextSibling();

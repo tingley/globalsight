@@ -28,18 +28,14 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.util.system.SystemConfiguration;
-
 /**
- * Dynamic extraction rules that overwrite static rules loaded from
- * property files (Tags, Styles).  The MS-Office Extractors subclass
- * this class and initialize it with appropriate defaults for Office
- * files converted to HTML.
+ * Dynamic extraction rules that overwrite static rules loaded from property
+ * files (Tags, Styles). The MS-Office Extractors subclass this class and
+ * initialize it with appropriate defaults for Office files converted to HTML.
  */
 public class DynamicRules
 {
-	private static final Logger CATEGORY = Logger
-			.getLogger(DynamicRules.class);
+    private static final Logger CATEGORY = Logger.getLogger(DynamicRules.class);
     //
     // Protected Members - overwritten in subclasses. Since an
     // instance of this class is always used by ExtractionRules, all
@@ -75,20 +71,18 @@ public class DynamicRules
 
     /** Word: marks character style names as unextractable. */
     protected final HashMap m_unextractableWordCharStyles = new HashMap();
-    
+
     /** Word: marks character style names as internal text. */
     protected final HashMap m_selectedInternalTextStyles = new HashMap();
-    
+
     /** Excel: marks cell style names as unextractable. */
     protected final HashMap m_unextractableExcelCellStyles = new HashMap();
-
- 
 
     //
     // Constructor
     //
 
-    public DynamicRules ()
+    public DynamicRules()
     {
     }
 
@@ -116,7 +110,7 @@ public class DynamicRules
     {
         return m_extractCharset;
     }
-    
+
     public boolean isExtractCharset()
     {
         return m_extractCharset;
@@ -132,7 +126,7 @@ public class DynamicRules
         String key = p_tag + "." + p_attr;
         key = key.toLowerCase();
 
-        Boolean b = (Boolean)m_localizableAttributes.get(key);
+        Boolean b = (Boolean) m_localizableAttributes.get(key);
 
         if (b != null)
         {
@@ -162,7 +156,7 @@ public class DynamicRules
     {
         String key = p_style.toLowerCase();
 
-        Boolean b = (Boolean)m_extractableStyles.get(key);
+        Boolean b = (Boolean) m_extractableStyles.get(key);
 
         if (b != null)
         {
@@ -172,15 +166,15 @@ public class DynamicRules
         // Check the prefix defaults
         if (!m_extractableStylePrefixes.isEmpty())
         {
-            for (Iterator it = m_extractableStylePrefixes.keySet().iterator();
-                 it.hasNext(); )
+            for (Iterator it = m_extractableStylePrefixes.keySet().iterator(); it
+                    .hasNext();)
             {
-                String prefix = (String)it.next();
+                String prefix = (String) it.next();
 
                 if (key.startsWith(prefix))
                 {
-                    return ((Boolean)m_extractableStylePrefixes.get(
-                        prefix)).booleanValue();
+                    return ((Boolean) m_extractableStylePrefixes.get(prefix))
+                            .booleanValue();
                 }
             }
         }
@@ -192,7 +186,7 @@ public class DynamicRules
     {
         String key = normalizeWordStyle(p_style);
 
-        Boolean b = (Boolean)m_unextractableWordParaStyles.get(key);
+        Boolean b = (Boolean) m_unextractableWordParaStyles.get(key);
 
         if (b != null)
         {
@@ -206,7 +200,7 @@ public class DynamicRules
     {
         String key = normalizeWordStyle(p_style);
 
-        Boolean b = (Boolean)m_unextractableWordCharStyles.get(key);
+        Boolean b = (Boolean) m_unextractableWordCharStyles.get(key);
 
         if (b != null)
         {
@@ -215,13 +209,12 @@ public class DynamicRules
 
         return true;
     }
-    
-    
+
     public final boolean isInternalTextCharStyle(String p_style)
     {
         String key = normalizeWordStyle(p_style);
 
-        Boolean b = (Boolean)m_selectedInternalTextStyles.get(key);
+        Boolean b = (Boolean) m_selectedInternalTextStyles.get(key);
 
         if (b != null)
         {
@@ -230,10 +223,10 @@ public class DynamicRules
 
         return false;
     }
-    
+
     public final boolean canExtractExcelCellStyle(String p_style)
     {
-        Boolean b = (Boolean)m_unextractableExcelCellStyles.get(p_style);
+        Boolean b = (Boolean) m_unextractableExcelCellStyles.get(p_style);
 
         if (b != null)
         {
@@ -275,36 +268,38 @@ public class DynamicRules
     // Support routines for loading from property files.
     //
 
-	static protected final void fillBooleanMap(Properties props, String key,
-			HashMap map) 
-	{
-		String value = props.getProperty(key);
+    static protected final void fillBooleanMap(Properties props, String key,
+            HashMap map)
+    {
+        String value = props.getProperty(key);
 
-		StringTokenizer tok = new StringTokenizer(value, ",");
-		while (tok.hasMoreTokens()) {
-			String tag = tok.nextToken().trim().toLowerCase();
-			map.put(tag, Boolean.FALSE);
-		}
-	}
-	
-	static protected final void fillExcelCellMap(Properties props, String key,
-			HashMap map) 
-	{
-		String value = props.getProperty(key);
+        StringTokenizer tok = new StringTokenizer(value, ",");
+        while (tok.hasMoreTokens())
+        {
+            String tag = tok.nextToken().trim().toLowerCase();
+            map.put(tag, Boolean.FALSE);
+        }
+    }
 
-		StringTokenizer tok = new StringTokenizer(value, ",");
-		while (tok.hasMoreTokens()) {
-			String style = tok.nextToken().trim();
-			map.put(style, Boolean.FALSE);
-		}
-	}
-    
-    static protected final void fillBooleanMap(ResourceBundle res,
-        String key, HashMap map)
+    static protected final void fillExcelCellMap(Properties props, String key,
+            HashMap map)
+    {
+        String value = props.getProperty(key);
+
+        StringTokenizer tok = new StringTokenizer(value, ",");
+        while (tok.hasMoreTokens())
+        {
+            String style = tok.nextToken().trim();
+            map.put(style, Boolean.FALSE);
+        }
+    }
+
+    static protected final void fillBooleanMap(ResourceBundle res, String key,
+            HashMap map)
     {
         String value = res.getString(key);
 
-        StringTokenizer tok = new StringTokenizer (value, ",");
+        StringTokenizer tok = new StringTokenizer(value, ",");
         while (tok.hasMoreTokens())
         {
             String tag = tok.nextToken().trim().toLowerCase();
@@ -313,11 +308,11 @@ public class DynamicRules
     }
 
     static protected final void fillWordStyleMap(ResourceBundle res,
-        String key, HashMap map)
+            String key, HashMap map)
     {
         String value = res.getString(key);
 
-        StringTokenizer tok = new StringTokenizer (value, ",");
+        StringTokenizer tok = new StringTokenizer(value, ",");
         while (tok.hasMoreTokens())
         {
             String style = tok.nextToken().trim();
@@ -327,29 +322,33 @@ public class DynamicRules
             map.put(style, Boolean.FALSE);
         }
     }
-    
+
     static protected final void fillExcelCellMap(ResourceBundle res,
             String key, HashMap map)
-        {
-            String value = res.getString(key);
+    {
+        String value = res.getString(key);
 
-            StringTokenizer tok = new StringTokenizer (value, ",");
-            while (tok.hasMoreTokens())
-            {
-                String style = tok.nextToken().trim();
-                map.put(style, Boolean.FALSE);
-            }
+        StringTokenizer tok = new StringTokenizer(value, ",");
+        while (tok.hasMoreTokens())
+        {
+            String style = tok.nextToken().trim();
+            map.put(style, Boolean.FALSE);
         }
+    }
 
     /**
-     * <p>Word renames styles when saving to HTML to conform with HTML
-     * and CSS syntax. Whitespace and special chars are stripped.</p>
-     *
+     * <p>
+     * Word renames styles when saving to HTML to conform with HTML and CSS
+     * syntax. Whitespace and special chars are stripped.
+     * </p>
+     * 
      * Example: PARA_DO_NOT_TRANSLATE -> PARADONOTTRANSLATE <br>
      * Example: PARA DO_NOT TRANSLATE -> PARADONOTTRANSLATE
-     *
-     * <p>Multiple styles mapping to the same normalized name get
-     * distinguished by a number suffix, e.g. PARADONOTTRANSLATE0.</p>
+     * 
+     * <p>
+     * Multiple styles mapping to the same normalized name get distinguished by
+     * a number suffix, e.g. PARADONOTTRANSLATE0.
+     * </p>
      */
     public static String normalizeWordStyle(String p_style)
     {
@@ -372,57 +371,56 @@ public class DynamicRules
     {
         try
         {
-        	String filename = SystemConfiguration.getCompanyBundlePath(p_filename);
-        	String prefix = "/";
-        	String suffix = ".properties";
-        	StringBuilder sb = new StringBuilder();
-        	sb.append(prefix).append(filename).append(suffix);
-//            ResourceBundle res =
-//                ResourceBundle.getBundle(filename, Locale.US);
-			// ResourceBundle reports error when finding property file with
-			// space in the path. Use Properties instead.
-			URL url = DynamicRules.class.getResource(sb.toString());
-			if (url == null) 
-			{
-				CATEGORY.warn("Property file " + filename
-						+ " not found. Using property file " + p_filename);
-				sb = new StringBuilder();
-				sb.append(prefix).append(p_filename).append(suffix);
-				url = DynamicRules.class.getResource(sb.toString());
-			}
-			Properties props = new Properties();
-			props.load(new FileInputStream(url.toURI().getPath()));
+            String prefix = "/";
+            String suffix = ".properties";
+            StringBuilder sb = new StringBuilder();
+            sb.append(prefix).append(p_filename).append(suffix);
+            // ResourceBundle res =
+            // ResourceBundle.getBundle(filename, Locale.US);
+            // ResourceBundle reports error when finding property file with
+            // space in the path. Use Properties instead.
+            URL url = DynamicRules.class.getResource(sb.toString());
+            if (url == null)
+            {
+                CATEGORY.warn("Property file " + p_filename
+                        + " not found. Using property file " + p_filename);
+                sb = new StringBuilder();
+                sb.append(prefix).append(p_filename).append(suffix);
+                url = DynamicRules.class.getResource(sb.toString());
+            }
+            Properties props = new Properties();
+            props.load(new FileInputStream(url.toURI().getPath()));
 
             Enumeration<Object> keys = props.keys();
             while (keys.hasMoreElements())
             {
-                String key = (String)keys.nextElement();
+                String key = (String) keys.nextElement();
                 String tmp = key.toLowerCase();
 
                 if (tmp.equals("extractscripts"))
                 {
-                    m_extractScripts =
-                        !(props.getProperty(key).equalsIgnoreCase("false"));
+                    m_extractScripts = !(props.getProperty(key)
+                            .equalsIgnoreCase("false"));
                 }
                 else if (tmp.equals("extractstylesheets"))
                 {
-                    m_extractStylesheets =
-                        !(props.getProperty(key).equalsIgnoreCase("false"));
+                    m_extractStylesheets = !(props.getProperty(key)
+                            .equalsIgnoreCase("false"));
                 }
                 else if (tmp.equals("extractxml"))
                 {
-                    m_extractXml =
-                        !(props.getProperty(key).equalsIgnoreCase("false"));
+                    m_extractXml = !(props.getProperty(key)
+                            .equalsIgnoreCase("false"));
                 }
                 else if (tmp.equals("extractcharset"))
                 {
-                    m_extractCharset =
-                        !(props.getProperty(key).equalsIgnoreCase("false"));
+                    m_extractCharset = !(props.getProperty(key)
+                            .equalsIgnoreCase("false"));
                 }
                 else if (tmp.equals("extractnumbers"))
                 {
-                    m_extractNumbers =
-                        !(props.getProperty(key).equalsIgnoreCase("false"));
+                    m_extractNumbers = !(props.getProperty(key)
+                            .equalsIgnoreCase("false"));
                 }
                 else if (tmp.startsWith("dontextractlocalizableattributes"))
                 {
@@ -435,15 +433,13 @@ public class DynamicRules
                 else if (tmp.startsWith("dontextractstyleprefixes"))
                 {
                     fillBooleanMap(props, key, m_extractableStylePrefixes);
-                }/* read these properties from filter
-                else if (tmp.equals("unextractablewordparagraphstyles"))
-                {
-                    fillWordStyleMap(res, key, m_unextractableWordParaStyles);
-                }
-                else if (tmp.equals("unextractablewordcharacterstyles"))
-                {
-                    fillWordStyleMap(res, key, m_unextractableWordCharStyles);
-                }*/
+                }/*
+                  * read these properties from filter else if
+                  * (tmp.equals("unextractablewordparagraphstyles")) {
+                  * fillWordStyleMap(res, key, m_unextractableWordParaStyles); }
+                  * else if (tmp.equals("unextractablewordcharacterstyles")) {
+                  * fillWordStyleMap(res, key, m_unextractableWordCharStyles); }
+                  */
                 else if (tmp.equals("unextractableexcelcellstyles"))
                 {
                     fillExcelCellMap(props, key, m_unextractableExcelCellStyles);

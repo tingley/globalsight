@@ -65,6 +65,10 @@ public interface PseudoConstants
     public static final int ADDABLES_AS_RTF = 1;
     /** ID to enable RTF addables*/
     public static final int ADDABLES_AS_XLF = 2;
+    /** ID to enable office 2010*/
+    public static final int ADDABLES_AS_OFFICE_2010 = 3;
+    /** ID to enable mif*/
+    public static final int ADDABLES_AS_MIF = 4;
     
 
     // ADDABLES

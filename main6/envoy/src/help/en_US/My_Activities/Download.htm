@@ -195,11 +195,6 @@ kadovFilePopupInit('a4');
 <p class="whs7">Bilingual TRADOS&#174; 
  RTF<span style="font-weight: normal;"> - This option exports the content
  as a list of bilingual Trados segments.</span></p>
-<p class="whs7">Text<span style="font-weight: normal;"> - 
- This option exports the content in plain text format.</span></p>
- <p class="whs7">RTF (paragraph view)<span style="font-weight: normal;"> 
- - This option exports the content in the original paragraph structure and utilizes a traditional 
- translation interface common to many translation tools.</span></p>
 <p class="whs7">RTF (list view)<span style="font-weight: normal;"> 
  - This option exports the content as a list of individual segments. &nbsp;This 
  format is somewhat smaller and simpler than paragraph view, but lacks 
@@ -208,24 +203,9 @@ kadovFilePopupInit('a4');
  - This option exports the content in XLIFF format. This is the recommended format
  for SDL Trados (Tag Editor) as well as other XLIFF-capable
  translation tools.</span></p>
+ <p class="whs7">OmegaT<span style="font-weight: normal;"> 
+ - This option exports the content in OmegaT format (XLIFF-capable) for OmegaT Editor.</span></p>
 </td></tr>
-
-<tr valign="top" class="whs5">
-<td colspan="1" rowspan="1" width="25.654%" class="whs11">
-<p class="whs7">Editor</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs12">
-<p>For non-XLIFF formats, select the version of Microsoft Word you will be using to edit the downloaded 
- file. When exporting to XLIFF format, this option has no effect.</td></tr>
-
-<tr valign="top" class="whs5">
-<td colspan="1" rowspan="1" width="25.654%" class="whs11">
-<p class="whs7">Character Encoding</td>
-<td colspan="1" rowspan="1" width="74.346%" class="whs12">
-<p><span style="font-weight: bold;"><B>Default Encoding</B></span> is the correct 
- option and usually the only one in the drop down.</p>
-<p class="whs15">If 
- you have selected Text and Other for format and editor, you will need 
- to select an encoding that your text editor can read and save in for upload.</td></tr>
 
 <tr valign="top" class="whs5">
 <td colspan="1" rowspan="1" width="25.654%" class="whs11">
@@ -241,8 +221,7 @@ kadovFilePopupInit('a1');
 <td colspan="1" rowspan="1" width="25.654%" class="whs11">
 <p class="whs7">Insert Resources As</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs12">
-<p>For XLIFF format, select <b><i>TMX file 1.4b</i></b> for a TMX 1.4b file, or <b><i>TMX Plain Text</i></b>
-for a TMX 1.1 file, or <b><i>Annotations</i></b> to have TM matches inserted into the XLIFF file as alternate
+<p>For XLIFF format, select <b><i>TMX file 1.4b</i></b> for a TMX 1.4b file, or <i>Annotations</i></b> to have TM matches inserted into the XLIFF file as alternate
 translations.
 <p>For RTF formats, select the method by which the downloaded RTF file displays links to Source 
  segments, TM matches, and Terminology matches.</p> </p>
@@ -257,9 +236,7 @@ translations.
  the text.</p>
 <ul type="disc" class="whs16">
 	
-	<li class=kadov-p><p><span style="font-weight: bold; font-style: italic;"><I><B>Links</B></I></span> 
- will insert the Resource links as hyperlinks to the HTML resources pages 
- in the download directory.</p></li>
+	
 	
 	<li class=kadov-p><p><span style="font-weight: bold; font-style: italic;"><I><B>None</B></I></span> 
  will not insert any Resource links. You will have to manually go to the 
@@ -287,6 +264,20 @@ kadovFilePopupInit('a2');
 <td colspan="1" rowspan="1" width="74.346%" class="whs12">
 <p>Checked (Default): 100% matched target segments will be populated into offline downloaded files such as Xliff, TTX files.<br/>
 UnChecked: Source segments will be populated into offline downloaded files instead of matched target segments.
+</p></td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="25.654%" class="whs11">
+<p class="whs7">Consolidate Output File</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs12">
+<p>Checked to consolidate all segments from different pages into one offline downloaded file, such as RTF, Xliff file.
+</p></td></tr>
+
+<tr valign="top" class="whs5">
+<td colspan="1" rowspan="1" width="25.654%" class="whs11">
+<p class="whs7">Include Repeated Segments as Separate File</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs12">
+<p>Allows you to decide including one separate file which contains repeated segments into offline kit or not.
 </p></td></tr>
 
 <tr valign="top" class="whs5">

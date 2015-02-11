@@ -149,7 +149,11 @@ public class DownloadAction extends Action {
 	    
 	    private String getReplacedPath(String jobName, String path)
 	    {
-	        return path.substring(path.indexOf(jobName) + jobName.length() + 1);
+	        String webservice = "webservice";
+	        String tmp = "";
+	        tmp = path.substring(path.indexOf(webservice) + webservice.length() + 1);
+	        tmp = tmp.substring(tmp.indexOf("/") + 1);
+	        return tmp;
 	    }
 	    
 	    private int getFileIndex(Job p_job, String path)

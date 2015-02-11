@@ -3,6 +3,8 @@
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
+            com.globalsight.ling.common.URLDecoder,
+            com.globalsight.util.Base64,
             java.util.HashMap,
             com.globalsight.everest.webapp.WebAppConstants" session="false" %>
 
@@ -17,6 +19,7 @@
       failed = null;
   }
 
+  String autoLoginCookie = "";
   String[] supportedLocales = (String[])
       request.getAttribute(SystemConfigParamNames.UI_LOCALES);
   String defaultLocale = (String)
@@ -29,8 +32,11 @@
 	  for(int i=0; i<cookies.length; i++)
 	  {
 	      Cookie cookie = cookies[i];
-	      if ("localelang".equals(cookie.getName()))
+	      String cookieName = cookie.getName();
+	      if ("localelang".equals(cookieName))
 	          cookieUiLocale = cookie.getValue();
+	      if("autoLogin".equals(cookieName))
+	          autoLoginCookie = cookie.getValue();
 	  }
   }
   if (!Arrays.asList(supportedLocales).contains(cookieUiLocale))
@@ -39,21 +45,10 @@
       cookieUiLocale = defaultLocale;
   
   ResourceBundle bundle = PageHandler.getBundleByLocale(cookieUiLocale);
-  // For "login directly" issue
-  String userId = "";
+  
+  String userName = "";
+  String passWord = "";
   boolean isSSO = false;
-  String forwardUrl = "";
-  String from = request.getParameter(WebAppConstants.LOGIN_FROM) != null ? request.getParameter(WebAppConstants.LOGIN_FROM) : "";
-  if(from != null && from.length() > 0)
-  {
-     userId = request.getParameter("nameField") != null ? request.getParameter("nameField") : "";
-     forwardUrl = request.getParameter("forwardUrl") != null ? request.getParameter("forwardUrl") : "";
-     String enableSso = request.getParameter("isSSO");
-     if (enableSso != null && enableSso.equalsIgnoreCase("on"))
-     {
-         isSSO = true;
-     }
-  }
   
   HashMap<String,String> map = new HashMap<String,String>(5);
   int numOfLocales = supportedLocales == null ? 0 : supportedLocales.length;
@@ -150,19 +145,42 @@ String logoBackgroundImage = skin.getProperty("skin.banner.logoBackgroundImage")
 boolean useOneLogoImage = false;
 if (logoImage.equals(logoBackgroundImage))
     useOneLogoImage = true;
+
+if(autoLoginCookie != null && autoLoginCookie.trim().length() > 0)
+{
+    int index = autoLoginCookie.indexOf("|");
+    if(index > 0)
+    {
+    	userName = autoLoginCookie.substring(0, index);
+    	passWord = autoLoginCookie.substring(index+1);
+    	passWord = URLDecoder.decode(passWord);
+    	passWord = Base64.decodeToString(passWord);
+    }
+}
+
+String forwardUrl = "";
+String from = request.getParameter(WebAppConstants.LOGIN_FROM) != null ? request.getParameter(WebAppConstants.LOGIN_FROM) : "";
+if(from != null && from.length() > 0)
+{
+   userName = request.getParameter("nameField") != null ? request.getParameter("nameField") : "";
+   forwardUrl = request.getParameter("forwardUrl") != null ? request.getParameter("forwardUrl") : "";
+   String enableSso = request.getParameter("isSSO");
+   if (enableSso != null && enableSso.equalsIgnoreCase("on"))
+   {
+       isSSO = true;
+   }
+}
 %>
                 
 <HTML>
 <HEAD>
-
-    <style> body { background: url(images/page_bg.png) no-repeat; }</style>
-
-    <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
-    <TITLE><%=title %></TITLE>
-    <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-    <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-    <script type="text/javascript" src="/globalsight/includes/jquery/jquery-latest.min.js"></script>
-<SCRIPT type="text/javascript">
+<style> body { background: url(images/page_bg.png) no-repeat; }</style>
+<META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
+<TITLE><%=title %></TITLE>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript">
     function getLangCookie() 
     {
        if (document.cookie.length > 0)
@@ -260,13 +278,11 @@ if (logoImage.equals(logoBackgroundImage))
   }
 
   $(document).ready(function(){
-	var width;
-	width = $(window).width();
+	var width = $(window).width();
+	
 	$("#logoTable").css("width",width);
 	$("#navigationTable").css("width",width);
 	$("#loginTable").css("width",width);
-	
-
 	$(window).resize(function(e){
 		width = $(window).width();
 		$("#logoTable").css("width",width);
@@ -276,11 +292,8 @@ if (logoImage.equals(logoBackgroundImage))
 	
   });
 </SCRIPT>
-
-
 </HEAD>
-
-    <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
+<BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
         onLoad="init();">
 
     <!-- Header info -->
@@ -294,13 +307,16 @@ if (logoImage.equals(logoBackgroundImage))
             <TD><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
             <%}%>  
         </TR>
-        </TABLE>
+    </TABLE>
     </DIV>
     <DIV ID="" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 68px; LEFT: 0px;">
     <TABLE id="navigationTable" WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
         <TR>
-            <TD CLASS="header2" HEIGHT="20" ALIGN="RIGHT"><A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">
-                <%= res_aboutUrl %></A>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+            <TD CLASS="header2" HEIGHT="20" ALIGN="RIGHT">
+            <A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">
+                <%= res_aboutUrl %>
+            </A>&nbsp;&nbsp;&nbsp;&nbsp;
+            </TD>
         </TR>
     </TABLE>
     </DIV>
@@ -328,7 +344,7 @@ if (logoImage.equals(logoBackgroundImage))
             </TD>
             <TD>
                 <SPAN CLASS="standardText">
-                <input type="text" name="nameField" size="18" tabIndex="1" style="width:145px" value="<%=userId%>" onBlur="if(this.value!='<%=userId%>'){document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value=''}else{document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value='<%=from%>'}" />
+                <input type="text" name="nameField" size="18" tabIndex="1" style="width:145px" value="<%=userName%>" onBlur="if(this.value!='<%=userName%>'){document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value=''}else{document.getElementById('<%=WebAppConstants.LOGIN_FROM%>').value='<%=from%>'}" />
                 </SPAN>
                 <input type="hidden" name="uiLocale" value="<%=cookieUiLocale %>" />
                 <input type="hidden" name="isJustChangeUILocale" value="False" />
@@ -342,7 +358,7 @@ if (logoImage.equals(logoBackgroundImage))
             </TD>
             <TD>
                 <SPAN CLASS="standardText">
-                <input type="password" name="passwordField" size="18" tabIndex="2" style="width:145px" />
+                <input type="password" name="passwordField" size="18" tabIndex="2" style="width:145px" value="<%=passWord%>"/>
                 </SPAN>
             </TD>
         </TR>
@@ -354,7 +370,7 @@ if (logoImage.equals(logoBackgroundImage))
             </TD>
             <TD>
                 <SPAN CLASS="standardText">
-                <input type="text" name="ssoIdpUrlField" size="18" tabIndex="2" style="width:145px" />
+                <input type="text" name="ssoIdpUrlField" size="18" tabIndex="2" style="width:145px"  value="<%=passWord%>"/>
                 </SPAN>
             </TD>
         </TR>
@@ -365,8 +381,7 @@ if (logoImage.equals(logoBackgroundImage))
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <SPAN CLASS="standardText">
         <INPUT type="SUBMIT" VALUE="<%=res_login%>" tabIndex="3" NAME="login0" />
-        </SPAN>
-        &nbsp;
+        </SPAN> &nbsp;
         
         <%if(Boolean.valueOf(request.getAttribute(SystemConfigParamNames.ENABLE_SSO).toString())){ %>
         <SPAN CLASS="standardText">
@@ -379,39 +394,19 @@ if (logoImage.equals(logoBackgroundImage))
         
         <P></P>
         <input type="hidden" id="retrieveType">
-        <a href="/globalsight/ControlServlet?linkName=resetPass&pageName=LOG1" tabIndex="4" class="standardHref"><%=res_forgPass%></a>
-        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="/globalsight/ControlServlet?linkName=resetPass&pageName=LOG1" tabIndex="4" class="standardHref"><%=res_forgPass%></a> &nbsp;&nbsp;&nbsp;&nbsp;
         <a href="/globalsight/ControlServlet?linkName=retrieveUsername&pageName=LOG1" tabIndex="5" class="standardHref"><%=res_forgUser%></a>
         <P></P>
         
         <%=uiLinks%>
         </TD>
-       </TR>
-        
+       </TR>        
       </TABLE>
       </FORM>
     </DIV>
-
-    <SCRIPT LANGUAGE="JavaScript">
-    /*var logoTables = document.getElementsByName("logoTable");
-    if(moz && logoTables)
-    {
-      for (var i = 0;i < logoTables.length; i++) {
-      	logoTables[i].setAttribute("width", screen.width);
-      } 
-    }
-    var tables = document.getElementsByName("loginTable");
-    if(moz && tables)
-    {
-      for (var i = 0;i < tables.length; i++) {
-      	tables[i].setAttribute("width", screen.width);
-      } 
-    }*/
-    </SCRIPT>
-    
-    <DIV ID="shutdown" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
+<DIV ID="shutdown" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
 <%@ include file="/envoy/common/shutdownBanner.jspIncl" %>    
-    </DIV>   
-    <link rel="shortcut icon" href="/globalsight/images/GlobalSight_Icon.ico" >     
-    </BODY>
+</DIV>   
+<link rel="shortcut icon" href="/globalsight/images/GlobalSight_Icon.ico" >     
+</BODY>
 </HTML>

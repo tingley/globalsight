@@ -17,14 +17,6 @@
 
 package com.globalsight.everest.util.system;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Properties;
 
 import com.globalsight.util.system.ConfigException;
@@ -36,26 +28,24 @@ import com.globalsight.util.system.ConfigException;
  */
 public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
 {
-    private File m_propertyFile;
+    private Properties m_properties = new Properties();
 
-    private Properties m_properties = null;
+    private String m_propertyFileName = null;
 
-    private long m_lastModTime = -1;
-    
-    private static String LIB_DIR = "/lib/classes";
-    
     DynamicPropertiesSystemConfiguration(String p_propertyFileName)
             throws ConfigException
     {
         super();
-        m_propertyFile = new File(getPropertyFilePath(p_propertyFileName));
+        m_propertyFileName = p_propertyFileName;
         loadProperties();
     }
-    
+
     /**
      * Constructor for unit test only!
      */
-    DynamicPropertiesSystemConfiguration() {}
+    DynamicPropertiesSystemConfiguration()
+    {
+    }
 
     /**
      * Get the specified parameter and return it as a String.
@@ -67,9 +57,7 @@ public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
      */
     public String getStringParameter(String p_paramName) throws ConfigException
     {
-        checkProperties();
-        String s = (String) m_properties.get(p_paramName);
-        return s;
+        return (String) m_properties.get(p_paramName);
     }
 
     /**
@@ -82,84 +70,20 @@ public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
     }
 
     /**
-     * Gets the Property file path name as a System Resource
-     * 
-     * @param propertyFile
-     *            basename of the property file
-     * @throws ConfigException
-     * @return String -- propety file path name
-     */
-    private static String getPropertyFilePath(String p_propertyFile)
-            throws ConfigException
-    {
-        URL url = DynamicPropertiesSystemConfiguration.class
-                .getResource(p_propertyFile);
-
-        if (url == null)
-        {
-            p_propertyFile = LIB_DIR + p_propertyFile;
-            url = DynamicPropertiesSystemConfiguration.class
-                    .getResource(p_propertyFile);
-        }
-        
-        if (url == null)
-        {
-            throw new ConfigException(
-                    ConfigException.EX_MISSING_RESOURCE_EXCEPTION,
-                    new FileNotFoundException("Property file " + p_propertyFile
-                            + " not found"));
-        }
-        String path = null;
-        try
-        {
-            path = url.toURI().getPath();
-        }
-        catch (URISyntaxException e)
-        {
-            e.printStackTrace();
-        }
-        
-        return path;
-    }
-
-    /**
-     * Checks to see if the property file has changed and if it has, re-reads
-     * the property file
-     * 
-     * @exception ConfigException
-     */
-    private void checkProperties() throws ConfigException
-    {
-        if (m_propertyFile.lastModified() > m_lastModTime
-                || m_properties == null)
-        {
-            loadProperties();
-        }
-    }
-
-    /**
      * Loads the properties from the named file
      * 
      * @exception ConfigException
      */
     private synchronized void loadProperties() throws ConfigException
     {
-        // check again to prevent accidentally loading twice
-        // now that we're actually in a synchronized block
-        if (m_propertyFile.lastModified() > m_lastModTime)
+        try
         {
-            try
-            {
-                FileInputStream fis = new FileInputStream(m_propertyFile);
-                m_properties = new Properties();
-                m_properties.load(fis);
-                fis.close();
-                m_lastModTime = m_propertyFile.lastModified();
-            }
-            catch (Exception e)
-            {
-                throw new ConfigException(ConfigException.EX_PROPERTIES, e);
-            }
+            m_properties.load(getClass()
+                    .getResourceAsStream(m_propertyFileName));
+        }
+        catch (Exception e)
+        {
+            throw new ConfigException(ConfigException.EX_PROPERTIES, e);
         }
     }
 
@@ -180,65 +104,6 @@ public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
      */
     public Properties getProperties() throws ConfigException
     {
-        checkProperties();
         return m_properties;
-    }
-
-    public String getPlaceHolders()
-    {
-        StringBuffer result =  new StringBuffer();
-        if (m_propertyFile.lastModified() >= m_lastModTime)
-        {
-            BufferedReader br = null;
-            try
-            {
-                br = new BufferedReader(new InputStreamReader(new FileInputStream(m_propertyFile)));
-                String s = null;
-                boolean isExtracted = false;
-                
-                while(( s = br.readLine()) != null){
-                    if(isExtracted)
-                    {
-                        if(!s.trim().startsWith("#")){
-                            result.append(s);
-                            result.append("\n");
-                            continue;
-                        }else{
-                            isExtracted = false;
-                        }
-                    }
-                    if(!s.trim().startsWith("#"))
-                    {
-                        if(s.indexOf("wordcounter_count_placeholders") != -1){
-                            isExtracted = true;
-                            String re = s.substring(s.indexOf("wordcounter_count_placeholders") + "wordcounter_count_placeholders=".length());
-                            result.append(re);
-                            result.append("\n");
-                        }
-                    }else{
-                        isExtracted = false;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw new ConfigException(ConfigException.EX_PROPERTIES, e);
-            }
-            finally
-            {
-                if(br != null)
-                {
-                    try
-                    {
-                        br.close();
-                    }
-                    catch (IOException e)
-                    {
-                        throw new ConfigException(ConfigException.EX_PROPERTIES, e);
-                    }
-                }
-            }
-        }
-        return result.toString();
     }
 }

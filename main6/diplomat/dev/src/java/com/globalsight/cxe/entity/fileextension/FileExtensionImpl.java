@@ -16,20 +16,6 @@
  */
 package com.globalsight.cxe.entity.fileextension;
 
-/*
- * Copyright (c) 2001 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
 import com.globalsight.everest.persistence.PersistentObject;
 
 /** Implements an FileExtension */
@@ -37,7 +23,7 @@ public class FileExtensionImpl extends PersistentObject implements
         FileExtension
 {
     private static final long serialVersionUID = 499331744284465857L;
-    
+
     public boolean useActive = true;
 
     public FileExtensionImpl()
@@ -48,6 +34,12 @@ public class FileExtensionImpl extends PersistentObject implements
     /** Constructs an FileExtensionImpl with id, name* */
     // public FileExtensionImpl(long p_id, String p_name)
     public FileExtensionImpl(String p_name, String p_companyId)
+    {
+        m_name = p_name;
+        m_companyId = Long.parseLong(p_companyId);
+    }
+
+    public FileExtensionImpl(String p_name, long p_companyId)
     {
         m_name = p_name;
         m_companyId = p_companyId;
@@ -64,7 +56,7 @@ public class FileExtensionImpl extends PersistentObject implements
      * 
      * @return The company name.
      */
-    public String getCompanyId()
+    public long getCompanyId()
     {
         return this.m_companyId;
     }
@@ -74,7 +66,7 @@ public class FileExtensionImpl extends PersistentObject implements
      * 
      * @return The company name.
      */
-    public void setCompanyId(String p_companyId)
+    public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
     }
@@ -121,12 +113,14 @@ public class FileExtensionImpl extends PersistentObject implements
      */
     public boolean equals(Object p_obj)
     {
-        if (p_obj instanceof FileExtensionImpl) { return (getName()
-                .equals(((FileExtensionImpl) p_obj).getName())); }
+        if (p_obj instanceof FileExtensionImpl)
+        {
+            return (getName().equals(((FileExtensionImpl) p_obj).getName()));
+        }
         return false;
     }
 
     // PRIVATE MEMBERS
     private String m_name;
-    private String m_companyId;
+    private long m_companyId;
 }

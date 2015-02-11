@@ -30,59 +30,52 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
-
 /**
- * This abstract class defines the methods necessary for importing a
- * page into System4.  These are the common method needed for
- * importing any page whether extracted or not.
+ * This abstract class defines the methods necessary for importing a page into
+ * System4. These are the common method needed for importing any page whether
+ * extracted or not.
  */
 public abstract class FileImporter
 {
-    static protected final Logger c_logger =
-        Logger.getLogger("IMPORT");
+    static protected final Logger c_logger = Logger
+            .getLogger(FileImporter.class);
 
     // Holds on to a copy of each of the importers.
-    static private final ExtractedFileImporter s_extractedImporter =
-        new ExtractedFileImporter();
-    static private final UnextractedFileImporter s_unextractedImporter =
-        new UnextractedFileImporter();
-
+    static private final ExtractedFileImporter s_extractedImporter = new ExtractedFileImporter();
+    static private final UnextractedFileImporter s_unextractedImporter = new UnextractedFileImporter();
 
     /**
      * This method finds the appropriate importer and performs the import.
      */
     public static HashMap importPrimaryFile(Request p_request)
-        throws FileImportException
+            throws FileImportException
     {
         HashMap pages = null;
 
         switch (p_request.getType())
         {
-        case Request.EXTRACTED_LOCALIZATION_REQUEST:
-            pages = s_extractedImporter.importFile(p_request);
-            break;
-        case Request.UNEXTRACTED_LOCALIZATION_REQUEST:
-            pages = s_unextractedImporter.importFile(p_request);
-            break;
-        default:
-            // throw a page importing exception - invalid type
+            case Request.EXTRACTED_LOCALIZATION_REQUEST:
+                pages = s_extractedImporter.importFile(p_request);
+                break;
+            case Request.UNEXTRACTED_LOCALIZATION_REQUEST:
+                pages = s_unextractedImporter.importFile(p_request);
+                break;
+            default:
+                // throw a page importing exception - invalid type
         }
 
         return pages;
     }
 
-
     /**
-     * Imports the request and create Source and Target Pages from the
-     * request information.
-     *
-     * @return A hash map of all the pages (Source and Target) that
-     * were created.  The key for the hash map is the id of the page's
-     * GlobalSightLocale.
+     * Imports the request and create Source and Target Pages from the request
+     * information.
+     * 
+     * @return A hash map of all the pages (Source and Target) that were
+     *         created. The key for the hash map is the id of the page's
+     *         GlobalSightLocale.
      */
-    abstract HashMap importFile(Request p_request)
-        throws FileImportException;
-
+    abstract HashMap importFile(Request p_request) throws FileImportException;
 
     protected GlobalSightLocale getSourceLocale(Request p_request)
     {
@@ -90,12 +83,11 @@ public abstract class FileImporter
     }
 
     /**
-     * Wraps the code for setting an exception in a request and
-     * catching the appropriate exception.
+     * Wraps the code for setting an exception in a request and catching the
+     * appropriate exception.
      */
     protected void setExceptionInRequest(Request p_request,
-        GeneralException p_exception)
-        throws FileImportException
+            GeneralException p_exception) throws FileImportException
     {
         try
         {
@@ -106,17 +98,17 @@ public abstract class FileImporter
             String[] args = new String[1];
             args[0] = Long.toString(p_request.getId());
             throw new FileImportException(
-                FileImportException.MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST,
-                args, ex);
+                    FileImportException.MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST,
+                    args, ex);
         }
     }
 
     /**
-     * Wraps the code for getting the page event observer and handling
-     * any exceptions.
+     * Wraps the code for getting the page event observer and handling any
+     * exceptions.
      */
     protected PageEventObserver getPageEventObserver()
-        throws FileImportException
+            throws FileImportException
     {
         PageEventObserver result = null;
 
@@ -128,19 +120,17 @@ public abstract class FileImporter
         {
             c_logger.error("Couldn't find the PageEventObserver", ex);
             throw new FileImportException(
-                FileImportException.MSG_FAILED_TO_FIND_PAGE_EVENT_OBSERVER,
-                null, ex);
+                    FileImportException.MSG_FAILED_TO_FIND_PAGE_EVENT_OBSERVER,
+                    null, ex);
         }
 
         return result;
     }
 
     /**
-     * Wraps the code for getting the page manager and handling any
-     * exceptions.
+     * Wraps the code for getting the page manager and handling any exceptions.
      */
-    protected PageManager getPageManager()
-        throws FileImportException
+    protected PageManager getPageManager() throws FileImportException
     {
         PageManager result = null;
 
@@ -152,8 +142,8 @@ public abstract class FileImporter
         {
             c_logger.error("Couldn't find the PageManager", ex);
             throw new FileImportException(
-                FileImportException.MSG_FAILED_TO_FIND_PAGE_MANAGER,
-                null, ex);
+                    FileImportException.MSG_FAILED_TO_FIND_PAGE_MANAGER, null,
+                    ex);
         }
 
         return result;
@@ -163,8 +153,7 @@ public abstract class FileImporter
      * Wraps the code for getting the request handler and handling any
      * exceptions.
      */
-    protected RequestHandler getRequestHandler()
-        throws FileImportException
+    protected RequestHandler getRequestHandler() throws FileImportException
     {
         RequestHandler result = null;
 
@@ -176,8 +165,8 @@ public abstract class FileImporter
         {
             c_logger.debug("Couldn't find the RequestHandler.", ex);
             throw new FileImportException(
-                FileImportException.MSG_FAILED_TO_FIND_REQUEST_HANDLER,
-                null, ex);
+                    FileImportException.MSG_FAILED_TO_FIND_REQUEST_HANDLER,
+                    null, ex);
         }
 
         return result;

@@ -141,7 +141,7 @@ function enableButtons()
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=UserCalendarComparator.ASC_COMPANY%>">
                 <%
-		          	  String companyId = ServerProxy.getCalendarManager().findCalendarById(cal.getParentCalendarId()).getCompanyId();
+		          	  long companyId = ServerProxy.getCalendarManager().findCalendarById(cal.getParentCalendarId()).getCompanyId();
 		          	  String companyName = CompanyWrapper.getCompanyNameById(companyId);
                 	  out.print(companyName);
                 %>

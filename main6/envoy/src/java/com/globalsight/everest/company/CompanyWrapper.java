@@ -52,7 +52,7 @@ public class CompanyWrapper
     public static final String CURRENT_COMPANY_ID = "currentCompanyId";
 
     private static Company superCompany;
-	private static HashMap<String, String> idViewName = new HashMap<String, String>();
+    private static HashMap<String, String> idViewName = new HashMap<String, String>();
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -92,9 +92,9 @@ public class CompanyWrapper
 
         return strCompanyNames;
     }
-    
-	public static HashMap<String, String> getAllCompanyRefer()
-			throws PersistenceException
+
+    public static HashMap<String, String> getAllCompanyRefer()
+            throws PersistenceException
     {
         String hql = "from Company c where c.isActive = 'Y'";
         idViewName = new HashMap<String, String>();
@@ -103,8 +103,9 @@ public class CompanyWrapper
         for (Iterator<?> iter = col.iterator(); iter.hasNext();)
         {
             Company company = (Company) iter.next();
-        
-            idViewName.put(Long.toString(company.getId()), company.getCompanyName());
+
+            idViewName.put(Long.toString(company.getId()),
+                    company.getCompanyName());
         }
 
         return idViewName;
@@ -161,19 +162,28 @@ public class CompanyWrapper
         return bounds;
     }
 
+    public static String getCompanyNameById(long id)
+    {
+        return getCompanyNameById(String.valueOf(id));
+    }
+
     public static String getCompanyNameById(String id)
     {
-		String name = idViewName.get(id);
-		if (name == null) {
-			getAllCompanyRefer();
-		}
+        String name = idViewName.get(id);
+        if (name == null)
+        {
+            getAllCompanyRefer();
+        }
 
-		name = idViewName.get(id);
-		if (name == null) {
-			return "Null Company";
-		} else {
-			return name;
-		}
+        name = idViewName.get(id);
+        if (name == null)
+        {
+            return "Null Company";
+        }
+        else
+        {
+            return name;
+        }
     }
 
     public static String getCompanyIdByName(String strName)
@@ -204,6 +214,11 @@ public class CompanyWrapper
         {
             throw new PersistenceException(e);
         }
+    }
+    
+    public static Company getCompanyById(long id)
+    {
+        return getCompanyById(String.valueOf(id));
     }
 
     public static Company getCompanyById(String id) throws PersistenceException

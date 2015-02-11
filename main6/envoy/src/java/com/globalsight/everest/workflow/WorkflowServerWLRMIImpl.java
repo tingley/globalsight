@@ -588,4 +588,18 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
         return m_localInstance.nextNodeInstances(p_task, p_arrowLabel,
                 p_skipToAcitivity);
     }
+
+    public void advanceWorkFlowNotification(String key, String state)
+    {
+        m_localInstance.advanceWorkFlowNotification(key, state);
+
+    }
+
+    public void sendJobActionEmailToUser(String p_fromUserId,
+            TaskEmailInfo p_emailInfo, int p_taskActionType)
+    {
+        m_localInstance.sendJobActionEmailToUser(p_fromUserId, p_emailInfo,
+                p_taskActionType);
+
+    }
 }

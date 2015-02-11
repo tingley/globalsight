@@ -16,6 +16,7 @@
  */
 package com.globalsight.smartbox.bo;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -27,12 +28,14 @@ import java.util.Vector;
  */
 public class JobInfo
 {
-    // File in JobCreating Directory that copied from inbox
+    // File in JobCreating Directory that copied from Inbox
     private String originFile = "";
     private String id = "";
     private String jobName = "";
     // source files path
     private Vector<String> sourceFiles = new Vector<String>();
+
+    private HashMap<String, String> sourceMap = new HashMap<String, String>();
     // Temp directory or file, used to save converted files and unused files.
     // System will delete it when it is no used.
     private String tempFile;
@@ -40,9 +43,9 @@ public class JobInfo
     private String targetFiles = "";
     // final result file to outbox
     private String finalResultFile = "";
-    private Vector<String> fileProfileIds = new Vector<String>();;
+    private Vector<String> fileProfileIds = new Vector<String>();
     // targetLocales
-    private Vector<String> targetLocales = new Vector<String>();;
+    private Vector<String> targetLocales = new Vector<String>();
     private String status = "creating";
     // failed flag
     private boolean failedFlag = false;
@@ -166,5 +169,15 @@ public class JobInfo
     public void setFinalResultFile(String finalResultFile)
     {
         this.finalResultFile = finalResultFile;
+    }
+    
+    public HashMap<String, String> getSourceMap()
+    {
+        return sourceMap;
+    }
+
+    public void setSourceMap(HashMap<String, String> sourceMap)
+    {
+        this.sourceMap = sourceMap;
     }
 }

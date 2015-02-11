@@ -40,6 +40,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.login.LoginMainHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ServerUtil;
 import com.globalsight.util.modules.Modules;
 
 public class ConfigMainHandler extends PageHandler {
@@ -104,7 +105,8 @@ public class ConfigMainHandler extends PageHandler {
             SystemConfigParamNames.PER_JOB_CHARGE_KEY,
             SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
             SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME,
-            SystemConfigParamNames.ENABLE_SSO
+            SystemConfigParamNames.ENABLE_SSO,
+            SystemConfigParamNames.SERVER_INSTANCE_ID
             };  
     
     //registry key sensitive params
@@ -151,6 +153,10 @@ public class ConfigMainHandler extends PageHandler {
 			p_response.sendRedirect(p_request.getContextPath());
 			return;
 		}
+		
+		// Reset Server Instance ID value if match the condition.
+		ServerUtil.getServerInstanceID();
+		
         //save system parameters first into db
         if (p_request.getParameter(companyParams[0]) != null) {
             setSystemParameters(p_request);

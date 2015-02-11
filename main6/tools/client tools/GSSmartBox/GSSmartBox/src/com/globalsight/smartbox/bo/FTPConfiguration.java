@@ -12,13 +12,14 @@ public class FTPConfiguration
     private String ftpHost;
     private String ftpUsername;
     private String ftpPassword;
+    private int ftpPort;
     private String ftpInbox;
     private String ftpOutbox;
     private String ftpFailedbox;
 
-    public FTPConfiguration(boolean useFTP, String ftpHost, String ftpUsername,
-            String ftpPassword, String ftpInbox, String ftpOutbox,
-            String ftpFailedbox)
+    public FTPConfiguration(boolean useFTP, String ftpHost, int ftpPort,
+            String ftpUsername, String ftpPassword, String ftpInbox,
+            String ftpOutbox, String ftpFailedbox)
     {
         this.useFTP = useFTP;
         this.ftpHost = ftpHost;
@@ -27,6 +28,7 @@ public class FTPConfiguration
         this.ftpInbox = ftpInbox;
         this.ftpOutbox = ftpOutbox;
         this.ftpFailedbox = ftpFailedbox;
+        this.setFtpPort(ftpPort);
     }
 
     public boolean getUseFTP()
@@ -97,5 +99,18 @@ public class FTPConfiguration
     public void setFtpFailedbox(String ftpFailedbox)
     {
         this.ftpFailedbox = ftpFailedbox;
+    }
+
+    public int getFtpPort()
+    {
+        return ftpPort;
+    }
+
+    public void setFtpPort(int ftpPort)
+    {
+        if (ftpPort > 0)
+        {
+            this.ftpPort = ftpPort;
+        }
     }
 }

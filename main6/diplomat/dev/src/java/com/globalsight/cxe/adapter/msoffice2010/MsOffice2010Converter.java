@@ -214,6 +214,29 @@ public class MsOffice2010Converter
         
         if (toPdf)
         {
+            // remove PicExportError
+            String content = FileUtils.read(expectedHtmlFile, "UTF-8");
+            int startIndex = content.indexOf("<head>");
+            int endIndex = content.indexOf("</head>");
+            
+            if (startIndex != -1 && endIndex != -1)
+            {
+                String headString = content.substring(startIndex, endIndex);
+
+                if (headString.contains("list-style-image:url(\"PicExportError\");"))
+                {
+                    String before = content.substring(0, startIndex);
+                    String end = content.substring(endIndex);
+                    headString = headString.replace(
+                            "list-style-image:url(\"PicExportError\");",
+                            "list-style-image:url(\"\");");
+                    content = before + headString + end;
+                    
+                    FileUtils.write(expectedHtmlFile, content, "UTF-8");
+                }
+            }
+            
+            // start convert
             String expectedPdfFileName = path + ".pdf";
             File expectedPdfFile = new File(expectedPdfFileName);
             String expectedPdfStatus = path + ".pdf.status";

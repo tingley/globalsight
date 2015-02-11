@@ -1020,10 +1020,11 @@ public class EditorState extends PersistentObject implements EditorConstants
             Vector<GlobalSightLocale> locales = new Vector<GlobalSightLocale>();
             for (TargetPage t : sourcePage.getTargetPages())
             {
-                String wfState = t.getWorkflowInstance().getState();
+                String wfState = (t.getWorkflowInstance() == null ? null : t
+                        .getWorkflowInstance().getState());
                 // Skip workflows that have failed or been canceled.
                 // See "EditorHelper.setJobTargetLocales(...)".
-                if (Workflow.CANCELLED.equals(wfState)
+                if (wfState == null || Workflow.CANCELLED.equals(wfState)
                         || Workflow.IMPORT_FAILED.equals(wfState))
                 {
                     continue;

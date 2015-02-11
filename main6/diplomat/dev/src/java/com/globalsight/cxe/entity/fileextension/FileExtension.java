@@ -15,34 +15,22 @@
  *  
  */
 package com.globalsight.cxe.entity.fileextension;
-/*
- * Copyright (c) 2001 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
 
 /** Represents a CXE File Extension entity object. */
 
 public interface FileExtension
 {
     /**
-    ** Return the id of the File Extension (cannot be set)
-    ** @return id as a long
-    **/
+     ** Return the id of the File Extension (cannot be set)
+     ** 
+     * @return id as a long
+     **/
     public long getId();
 
     /**
      ** Return the name of the File Extension
-     ** @return File Extension name
+     ** 
+     * @return File Extension name
      **/
     public String getName();
 
@@ -50,19 +38,19 @@ public interface FileExtension
      ** Sets the name of the File Extension
      **/
     public void setName(String p_name);
-    
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public String getCompanyId();
+    public long getCompanyId();
 
     /**
      * Get name of the company this activity belong to.
-     * @return The company name. 
+     * 
+     * @return The company name.
      */
-    public void setCompanyId(String p_companyId);
+    public void setCompanyId(long p_companyId);
 
 }
-

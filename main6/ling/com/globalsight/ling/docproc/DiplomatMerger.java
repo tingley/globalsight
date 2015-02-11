@@ -26,6 +26,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -320,7 +321,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             targetSeg = targetSeg.replaceAll("&apos;", "\'");
         }
 
-        //Judge to set value for "m_isCDATA".
+        // Judge to set value for "m_isCDATA".
         isInCDATA(targetSeg);
 
         return targetSeg;
@@ -330,17 +331,20 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     {
         return entityEncodeForSkeleton(sourceSeg, false);
     }
-    
-    private void isInCDATA(String documentText) {
+
+    private void isInCDATA(String documentText)
+    {
         int beginIndex = documentText.lastIndexOf("<![CDATA[");
         int endIndex = documentText.lastIndexOf("]]>");
 
-        if (m_isCDATA && endIndex >= 0 && beginIndex < endIndex) {
+        if (m_isCDATA && endIndex >= 0 && beginIndex < endIndex)
+        {
             m_isCDATA = false;
         }
 
         // Mark the CDATA element for "entityEncode(String sourceSeg)"
-        if (beginIndex >= 0 && beginIndex > endIndex) {
+        if (beginIndex >= 0 && beginIndex > endIndex)
+        {
             m_isCDATA = true;
         }
     }
@@ -667,7 +671,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     tmp = entityDecodeForXliff(tmp);
                 }
             }
-            else if (ExtractorRegistry.FORMAT_OFFICE_XML.equalsIgnoreCase(format))
+            else if (ExtractorRegistry.FORMAT_OFFICE_XML
+                    .equalsIgnoreCase(format))
             {
                 if (!isContent())
                 {
@@ -694,25 +699,26 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             m_error = e;
         }
     }
-    
-    //For GBS-2521.
-	private String repair(String s)
-	{
-		Pattern p = Pattern.compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
-		Matcher m = p.matcher(s);
-		
-		while (m.find())
-		{
-			String content = m.group(2);
-			
-			content = decode(content);
-			content = encode(content);
-			
-			s = s.replace(m.group(), m.group(1) + content + m.group(3));
-		}
-		
-		return s;
-	}
+
+    // For GBS-2521.
+    private String repair(String s)
+    {
+        Pattern p = Pattern
+                .compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
+        Matcher m = p.matcher(s);
+
+        while (m.find())
+        {
+            String content = m.group(2);
+
+            content = decode(content);
+            content = encode(content);
+
+            s = s.replace(m.group(), m.group(1) + content + m.group(3));
+        }
+
+        return s;
+    }
 
     private boolean isKeepGsa()
     {
@@ -821,8 +827,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     }
                     tmp = applyNativeEncodingForSkeleton(tmp,
                             encoderForSkeleton);
-                    if (srcDataType.equals("xlf")
-                            || srcDataType.equals("xliff"))
+                    if (IFormatNames.FORMAT_XLIFF.equals(srcDataType)
+                            || IFormatNames.FORMAT_XLIFF_NAME
+                                    .equals(srcDataType))
                     {
                         tmp = entityEncodeForSkeleton(tmp, true);
                     }
@@ -840,13 +847,20 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         tmp = sd.dealSkeleton(tmp, localizedBy);
                     }
 
-                    // if (srcDataType.equals("excel-html")
-                    // && !tmp.contains("mso-spacerun:yes"))
-                    // tmp = fixXmlForExcel(tmp);
-
-                    if ("passolo".equals(srcDataType))
+                    if (IFormatNames.FORMAT_PASSOLO.equals(srcDataType))
                     {
                         tmp = entityEncodeForPassolo(tmp);
+                    }
+
+                    // For GBS-2955, idml/indd is actually xml format
+                    if (IFormatNames.FORMAT_XML.equals(srcDataType))
+                    {
+                        if (IdmlHelper.MARK_LF_IDML.equals(tmp))
+                        {
+                            // change MARK_LF_IDML back to LINE_BREAK during
+                            // export
+                            tmp = IdmlHelper.LINE_BREAK;
+                        }
                     }
 
                     m_l10nContent.addContent(tmp);

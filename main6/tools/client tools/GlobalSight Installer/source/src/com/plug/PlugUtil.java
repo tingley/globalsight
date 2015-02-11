@@ -34,8 +34,7 @@ public class PlugUtil
 {
     private static Logger log = Logger.getLogger(PlugUtil.class);
     
-    private static final String DEPLOY_PATH = "/jboss/jboss_server/server/"
-        + "default/deploy";
+    private static final String DEPLOY_PATH = "/jboss/server/standalone/deployments";
     private static final String PROPERTIES_PATH = DEPLOY_PATH
         + "/globalsight.ear/lib/classes/properties/";
 

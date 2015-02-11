@@ -68,38 +68,7 @@ public class StatisticsServiceTest
         p_segmentRepetition = initSegmentRepetition();
         statisticsService = new StatisticsService();
     }
-    
-    @Test
-    public void testGetMatchTypeStatistics() throws Exception
-    {
-        PageWordCounts pwc = (PageWordCounts) ClassUtil.testMethod(
-                statisticsService, "calculateWorkflowWordCounts",
-                p_segmentRepetition, p_matches, null);
         
-        Assert.assertEquals(pwc.getSegmentTmWordCount(), exactWordCount);
-        Assert.assertEquals(pwc.getHiFuzzyWordCount(), hiFuzzyWordCount);
-        Assert.assertEquals(pwc.getMedHiFuzzyWordCount(), medHiFuzzyWordCount);
-        Assert.assertEquals(pwc.getMedFuzzyWordCount(), medFuzzyWordCount);
-        Assert.assertEquals(pwc.getSubLevMatchWordCount(), lowFuzzyWordCount);
-        Assert.assertEquals(pwc.getUnmatchedWordCount(), noMatchWordCount);
-        Assert.assertEquals(pwc.getRepetitionWordCount()
-                + pwc.getHiFuzzyRepetitionWordCount()
-                + pwc.getMedHighFuzzyRepetitionWordCount()
-                + pwc.getMedFuzzyRepetitionWordCount()
-                + pwc.getSubLevRepetitionWordCount(), repetitionWordCount);
-        Assert.assertEquals(pwc.getTotalWordCount(), totalWordCount);
-        Assert.assertEquals(pwc.getThresholdHiFuzzyWordCount().intValue(),
-                thresholdHiFuzzyWordCount);
-        Assert.assertEquals(pwc.getThresholdMedHiFuzzyWordCount().intValue(),
-                thresholdMedHiFuzzyWordCount);
-        Assert.assertEquals(pwc.getThresholdMedFuzzyWordCount().intValue(),
-                thresholdMedFuzzyWordCount);
-        Assert.assertEquals(pwc.getThresholdLowFuzzyWordCount().intValue(),
-                thresholdLowFuzzyWordCount);
-        Assert.assertEquals(pwc.getThresholdNoMatchWordCount().intValue(),
-                thresholdNoMatchWordCount);
-    }
-    
     @Test
     public void testCalculateTargetPageWordCounts() throws Exception
     {
@@ -303,55 +272,55 @@ public class StatisticsServiceTest
         
         for (int i = 0; i < TIMES; i++)
         {
-            Types exactType = new Types(false,
+            Types exactType = new Types(
                     MatchTypeStatistics.SEGMENT_TM_EXACT,
                     MatchTypeStatistics.SEGMENT_TM_EXACT,
                     LeverageMatchLingManager.EXACT,
-                    MatchState.SEGMENT_TM_EXACT_MATCH);
+                    MatchState.SEGMENT_TM_EXACT_MATCH, false);
             map.put(i + "-null", exactType);
         }
         for (int i = 0; i < TIMES; i++)
         {
-            Types hiFuzzyType = new Types(false, MatchTypeStatistics.HI_FUZZY,
+            Types hiFuzzyType = new Types(MatchTypeStatistics.HI_FUZZY,
                     getThresholdMatchType(hiFuzzySegment.getMatchScore(),
                             THRESHOLD, hiFuzzySegment.getWordcount(), i),
-                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH);
+                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH ,false);
             map.put((i + TIMES) + "-null", hiFuzzyType);
         }
         for (int i = 0; i < TIMES; i++)
         {
-            Types medHiFuzzyType = new Types(false,
+            Types medHiFuzzyType = new Types(
                     MatchTypeStatistics.MED_HI_FUZZY, getThresholdMatchType(
                             medHiFuzzySegment.getMatchScore(), THRESHOLD,
                             medHiFuzzySegment.getWordcount(), i),
-                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH);
+                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH, false);
             map.put((i + TIMES * 2) + "-null", medHiFuzzyType);
         }
         for (int i = 0; i < TIMES; i++)
         {
-            Types medFuzzyType = new Types(false,
+            Types medFuzzyType = new Types(
                     MatchTypeStatistics.MED_FUZZY, getThresholdMatchType(
                             medFuzzySegment.getMatchScore(), THRESHOLD,
                             medFuzzySegment.getWordcount(), i),
-                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH);
+                    LeverageMatchLingManager.FUZZY, MatchState.FUZZY_MATCH, false);
             map.put((i + TIMES * 3) + "-null", medFuzzyType);
         }
         for (int i = 0; i < TIMES; i++)
         {
-            Types lowFuzzyType = new Types(false,
+            Types lowFuzzyType = new Types(
                     MatchTypeStatistics.LOW_FUZZY, getThresholdMatchType(
                             lowFuzzySegment.getMatchScore(), THRESHOLD,
                             lowFuzzySegment.getWordcount(), i),
-                    LeverageMatchLingManager.STATISTICS, MatchState.FUZZY_MATCH);
+                    LeverageMatchLingManager.STATISTICS, MatchState.FUZZY_MATCH, false);
             map.put((i + TIMES * 4) + "-null", lowFuzzyType);
         }
         for (int i = 0; i < TIMES; i++)
         {
-            Types noMatchType = new Types(true, MatchTypeStatistics.NO_MATCH,
+            Types noMatchType = new Types(MatchTypeStatistics.NO_MATCH,
                     getThresholdMatchType(noMatchSegment.getMatchScore(),
                             THRESHOLD, noMatchSegment.getWordcount(), i),
                     LeverageMatchLingManager.NO_MATCH,
-                    MatchState.STATISTICS_MATCH);
+                    MatchState.STATISTICS_MATCH, false);
             map.put((i + TIMES * 5) + "-null", noMatchType);
         }
         

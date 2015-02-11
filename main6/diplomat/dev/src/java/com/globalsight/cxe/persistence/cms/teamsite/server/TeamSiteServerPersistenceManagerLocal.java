@@ -64,7 +64,8 @@ public class TeamSiteServerPersistenceManagerLocal implements
             }
 
             // it is a duplicate
-            String errorArgs[] = { p_teamSiteServer.getName() };
+            String errorArgs[] =
+            { p_teamSiteServer.getName() };
             throw new TeamSiteServerEntityException(
                     TeamSiteServerEntityException.MSG_TEAMSITE_SERVER_ALREADY_EXISTS,
                     errorArgs, null);
@@ -153,7 +154,7 @@ public class TeamSiteServerPersistenceManagerLocal implements
         {
             hql += "where t.companyId = :companyId ";
             map = new HashMap();
-            map.put("companyId", currentCompanyId);
+            map.put("companyId", Long.parseLong(currentCompanyId));
         }
 
         return HibernateUtil.search(hql, map);
@@ -163,8 +164,8 @@ public class TeamSiteServerPersistenceManagerLocal implements
      * Return the TeamSite Server id for the given name from the database The
      * returned object is in a state that does not allow editing.
      * 
-     * @param p_name -
-     *            The name of the TeamSite Server.
+     * @param p_name
+     *            - The name of the TeamSite Server.
      * @return the TeamSite Server id for the given name.
      */
     public long getTeamSiteServerIdByName(String p_name)
@@ -191,7 +192,7 @@ public class TeamSiteServerPersistenceManagerLocal implements
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
         {
             hql += "and t.companyId = :companyId ";
-            map.put("companyId", currentCompanyId);
+            map.put("companyId", Long.parseLong(currentCompanyId));
         }
 
         List result = HibernateUtil.search(hql, map);
@@ -304,7 +305,7 @@ public class TeamSiteServerPersistenceManagerLocal implements
         {
             hql += " where b.companyId = :companyId ";
             map = new HashMap();
-            map.put("companyId", currentCompanyId);
+            map.put("companyId", Long.parseLong(currentCompanyId));
         }
 
         hql += "order by b.name";

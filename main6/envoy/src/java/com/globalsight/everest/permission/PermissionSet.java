@@ -54,15 +54,19 @@ public class PermissionSet extends java.util.BitSet
 
         try
         {
-            String s = p_permissionSetString.substring(1, p_permissionSetString
-                    .length() - 1);
-
-            String ids[] = s.split("\\|");
+            String ids[] = p_permissionSetString.split("\\|");
 
             for (int i = 0; i < ids.length; i++)
             {
-                int bit = Integer.parseInt(ids[i]);
-                this.set(bit);
+                try
+                {
+                    int bit = Integer.parseInt(ids[i]);
+                    this.set(bit);                    
+                }
+                catch (Exception ignore)
+                {
+                    
+                }
             }
         }
         catch (Exception ex)

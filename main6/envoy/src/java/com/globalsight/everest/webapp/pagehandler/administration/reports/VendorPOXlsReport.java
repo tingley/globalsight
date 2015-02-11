@@ -29,8 +29,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,7 +67,9 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -74,7 +79,9 @@ public class VendorPOXlsReport extends XlsReports
 {
     private static Logger s_logger = Logger
             .getLogger("Reports");
-
+    private static Map<String, ReportsData> m_reportsDataMap = 
+            new ConcurrentHashMap<String, ReportsData>();
+    
     // defines a 0 format for a 3 decimal precision point BigDecimal
     private static final String BIG_DECIMAL_ZERO_STRING = "0.000";
 
@@ -142,6 +149,8 @@ public class VendorPOXlsReport extends XlsReports
     private void generateReport(HttpServletRequest p_request,
             HttpServletResponse p_response, MyData p_data) throws Exception
     {
+        String userId = (String) p_request.getSession().getAttribute(
+                WebAppConstants.USER_NAME);
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         String EMEA = CompanyWrapper.getCurrentCompanyName();
         s_logger.debug("generateReport---, company name: " + EMEA);
@@ -166,6 +175,18 @@ public class VendorPOXlsReport extends XlsReports
                 + bundle.getString("lb_matches"), 0);
         p_data.tradosSheet = m_workbook.createSheet(bundle
                 .getString("jobinfo.tradosmatches"), 1);
+        List<Long> reportJobIDS = null;
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
+                reportJobIDS, null))
+        {
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                null, 0, ReportsData.STATUS_INPROGRESS);
+        
         addHeaderForDellMatches(p_data, bundle);
         addHeaderForTradosMatches(p_data, bundle);
         IntHolder row = new IntHolder(4);
@@ -260,6 +281,10 @@ public class VendorPOXlsReport extends XlsReports
 
         m_workbook.write();
         m_workbook.close();
+        
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
+                        null, 100, ReportsData.STATUS_FINISHED);
     }
 
     private String getDateCritieraConditionValue(HttpServletRequest p_request,
@@ -407,20 +432,8 @@ public class VendorPOXlsReport extends XlsReports
                 if (j.getCreateDate().before(data.creationDate))
                     data.creationDate = j.getCreateDate();
 
-                // get the word count used for costing which incorporates the
-                // LMT
-//                WordcountForCosting wfc = new WordcountForCosting(w);
-                // add the sublev rep count to the total rep count
-                data.repetitionWordCount += w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount()
-                        + w.getHiFuzzyRepetitionWordCount()
-                        + w.getMedHiFuzzyRepetitionWordCount()
-                        + w.getMedFuzzyRepetitionWordCount();
-                data.dellInternalRepsWordCount += w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount()
-                        + w.getHiFuzzyRepetitionWordCount()
-                        + w.getMedHiFuzzyRepetitionWordCount()
-                        + w.getMedFuzzyRepetitionWordCount();
+                data.repetitionWordCount += w.getRepetitionWordCount();
+                data.dellInternalRepsWordCount += w.getRepetitionWordCount();
                 data.tradosRepsWordCount = data.dellInternalRepsWordCount;
 
                 data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
@@ -441,7 +454,7 @@ public class VendorPOXlsReport extends XlsReports
 
                 // add the lowest fuzzies and sublev match to nomatch
                 data.dellNewWordsWordCount = w.getNoMatchWordCount()
-                        + w.getSubLevMatchWordCount();
+                        + w.getLowFuzzyMatchWordCount();
                 data.tradosNoMatchWordCount += w.getThresholdNoMatchWordCount();
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {

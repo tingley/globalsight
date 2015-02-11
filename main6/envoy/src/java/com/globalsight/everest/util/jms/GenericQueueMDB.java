@@ -33,10 +33,11 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
 /**
  * Abstract base class for queue based Message Driven Beans
  */
-public abstract class GenericQueueMDB implements MessageDrivenBean, MessageListener
+public abstract class GenericQueueMDB implements MessageDrivenBean,
+        MessageListener
 {
-    protected static AppServerWrapper s_appServerWrapper =
-        AppServerWrapperFactory.getAppServerWrapper();
+    protected static AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
+            .getAppServerWrapper();
 
     protected Logger m_logger;
     protected MessageDrivenContext m_messageDrivenContext;
@@ -47,8 +48,9 @@ public abstract class GenericQueueMDB implements MessageDrivenBean, MessageListe
     /**
      * Protected constructor allows base classes to create an MDB using their
      * own logging object.
-     *
-     * @param p_logger -- the logger to use
+     * 
+     * @param p_logger
+     *            -- the logger to use
      */
     protected GenericQueueMDB(Logger p_logger)
     {
@@ -58,73 +60,82 @@ public abstract class GenericQueueMDB implements MessageDrivenBean, MessageListe
     /**
      * Activates the EJB
      */
-    public void ejbActivate() {
-        try {
-            m_queueConnection = m_queueConnectionFactory.createQueueConnection();
+    public void ejbActivate()
+    {
+        try
+        {
+            m_queueConnection = m_queueConnectionFactory
+                    .createQueueConnection();
             m_queueConnection.start();
         }
         catch (Exception e)
         {
-            m_logger.error("Could not establish JMS queue connection.",e);
+            m_logger.error("Could not establish JMS queue connection.", e);
         }
     }
 
     /**
      * Called when the EJB is removed.
-     *
+     * 
      */
-    public void ejbRemove() {}
+    public void ejbRemove()
+    {
+    }
 
     /**
      * Called when the EJB is made passive.
-     *
+     * 
      */
-    public void ejbPassivate() {
-        try {
+    public void ejbPassivate()
+    {
+        try
+        {
             m_queueConnection.close();
         }
         catch (Exception e)
         {
-            m_logger.error("Problem closing JMS queue connection.",e);
+            m_logger.error("Problem closing JMS queue connection.", e);
         }
     }
 
     /**
      * Sets the session context.
-     *
-     * @param ctx               MessageDrivenContext Context for session
+     * 
+     * @param ctx
+     *            MessageDrivenContext Context for session
      */
-    public void setMessageDrivenContext(MessageDrivenContext ctx) {
-      m_messageDrivenContext = ctx;
+    public void setMessageDrivenContext(MessageDrivenContext ctx)
+    {
+        m_messageDrivenContext = ctx;
     }
-
 
     /**
      * Creates the EJB
      */
-    public void ejbCreate () {
-        try{
+    public void ejbCreate()
+    {
+        try
+        {
             m_initialContext = s_appServerWrapper.getNamingContext();
-            m_queueConnectionFactory =
-                (QueueConnectionFactory) m_initialContext.lookup(
-                    JmsHelper.JMS_QUEUE_FACTORY_NAME);
+            m_queueConnectionFactory = (QueueConnectionFactory) m_initialContext
+                    .lookup(JmsHelper.JMS_QUEUE_FACTORY_NAME);
         }
         catch (Exception e)
         {
             String msg = "Could not create MDB: " + e.getMessage();
-            m_logger.error(msg,e);
+            m_logger.error(msg, e);
             throw new EJBException(msg);
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: MessageListener implementation
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: MessageListener implementation
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Does whatever the MDB should do when receiving a message from JMS.
-     *
-     * @param p_message - JMS Message
+     * 
+     * @param p_message
+     *            - JMS Message
      */
     public abstract void onMessage(Message p_message);
 }
-

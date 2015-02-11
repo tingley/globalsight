@@ -79,7 +79,7 @@ public interface Tu /** extends TuLing */
      *            - The locale id used for getting a tuv.
      * @return A Tuv based on a locale id.
      */
-    public Tuv getTuv(long p_localeId, String companyId);
+    public Tuv getTuv(long p_localeId, long companyId);
 
     /**
      * Get a collection of all Tuvs. This is a combination of tuvs that belong
@@ -159,14 +159,6 @@ public interface Tu /** extends TuLing */
     public String getSourceContent();
 
     public void setSourceContent(String p_sourceContent);
-
-    public boolean isRepeated();
-
-    public void setRepeated(boolean repeated);
-
-    public long getRepetitionOfId();
-
-    public void setRepetitionOfId(long repetitionOfId);
 
     public String getTranslate();
 

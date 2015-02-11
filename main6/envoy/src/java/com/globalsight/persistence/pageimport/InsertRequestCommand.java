@@ -53,12 +53,13 @@ public class InsertRequestCommand extends PersistenceCommand
     private PreparedStatement m_ps;
     private PreparedStatement m_ps2;
     private RequestImpl m_request;
-//    private SequenceStore m_seqStore;
+
+    // private SequenceStore m_seqStore;
 
     public InsertRequestCommand(RequestImpl p_request, SequenceStore p_seqStore)
     {
         m_request = p_request;
-//        m_seqStore = p_seqStore;
+        // m_seqStore = p_seqStore;
     }
 
     public void persistObjects(Connection p_connection)
@@ -98,11 +99,11 @@ public class InsertRequestCommand extends PersistenceCommand
 
     public void setData() throws Exception
     {
-//        long primaryKey = allocateSequenceNumberRange(m_seqStore);
+        // long primaryKey = allocateSequenceNumberRange(m_seqStore);
 
         // s_logger.debug("The value of primaryKey is " + primaryKey);
 
-//        m_ps.setLong(1, primaryKey);
+        // m_ps.setLong(1, primaryKey);
         m_ps.setLong(1, m_request.getL10nProfile().getId());
 
         int type = m_request.getType();
@@ -199,9 +200,9 @@ public class InsertRequestCommand extends PersistenceCommand
 
         m_ps.setDate(14, new Date(System.currentTimeMillis()));
 
-        m_ps.setLong(15, new Long(m_request.getCompanyId()).longValue());
+        m_ps.setLong(15, m_request.getCompanyId());
 
-//        m_request.setId(primaryKey);
+        // m_request.setId(primaryKey);
     }
 
     public void batchStatements() throws Exception

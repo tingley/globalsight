@@ -36,8 +36,8 @@ public class SpellIndexList
     {
         try
         {
-            java.io.InputStream stream = SpellIndexList.class.getClassLoader().
-                getResourceAsStream("spell/spell.properties");
+            java.io.InputStream stream = SpellIndexList.class.getClassLoader()
+                    .getResourceAsStream("spell/spell.properties");
 
             Properties props = new Properties();
             props.load(stream);
@@ -53,22 +53,18 @@ public class SpellIndexList
         catch (Throwable ex)
         {
         }
-
-        System.out.println("SpellChecker: dictionary base directory = " +
-            s_baseDirectory);
     }
 
     //
     // Methods
     //
-    static public SpellIndex getSpellIndex(String p_name)
-        throws IOException
+    static public SpellIndex getSpellIndex(String p_name) throws IOException
     {
         SpellIndex result = null;
 
         synchronized (s_registry)
         {
-            result = (SpellIndex)s_registry.get(p_name);
+            result = (SpellIndex) s_registry.get(p_name);
 
             if (result == null)
             {
@@ -85,18 +81,17 @@ public class SpellIndexList
 
     /**
      * Deletes a SpellIndex on disk.
-     *
-     * It involves a reaper thread that should try and delete the
-     * directory files.
+     * 
+     * It involves a reaper thread that should try and delete the directory
+     * files.
      */
-    static public void deleteSpellIndex(String p_name)
-        throws IOException
+    static public void deleteSpellIndex(String p_name) throws IOException
     {
         SpellIndex result = null;
 
         synchronized (s_registry)
         {
-            result = (SpellIndex)s_registry.remove(p_name);
+            result = (SpellIndex) s_registry.remove(p_name);
         }
 
         deleteDirectory(s_baseDirectory + "/" + p_name);
@@ -111,17 +106,17 @@ public class SpellIndexList
 
         File base = new File(s_baseDirectory);
         File[] files = base.listFiles(new FileFilter()
+        {
+            public boolean accept(File p_file)
             {
-                public boolean accept(File p_file)
+                if (p_file.isDirectory())
                 {
-                    if (p_file.isDirectory())
-                    {
-                        return true;
-                    }
-
-                    return false;
+                    return true;
                 }
-            });
+
+                return false;
+            }
+        });
 
         for (int i = 0, max = files.length; i < max; i++)
         {
@@ -132,9 +127,8 @@ public class SpellIndexList
     }
 
     /**
-     * This should start a background thread to delete this lucene
-     * directory or otherwise make sure that no reader has opened any
-     * files.
+     * This should start a background thread to delete this lucene directory or
+     * otherwise make sure that no reader has opened any files.
      */
     static public void deleteDirectory(String p_directory)
     {
@@ -152,14 +146,12 @@ public class SpellIndexList
         }
         catch (Throwable ignore)
         {
-            System.out.println("Could not delete index directory " +
-                p_directory);
             ignore.printStackTrace();
         }
     }
 
     static protected SpellIndex createOrOpenIndex(String p_name)
-        throws IOException
+            throws IOException
     {
         if (!IndexReader.indexExists(p_name))
         {

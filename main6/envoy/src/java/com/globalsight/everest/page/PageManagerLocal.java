@@ -23,13 +23,10 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -79,8 +76,6 @@ public final class PageManagerLocal implements PageManager
 {
     static private final Logger s_category = Logger
             .getLogger(PageManagerLocal.class);
-    public static Set<Long> EXPORTING_TARGET_PAGE = Collections
-            .synchronizedSet(new HashSet<Long>());
 
     private static final String GET_SOURCE_PAGE_BY_LG_ID_SQL = "SELECT sp.* from source_page sp, source_page_leverage_group splg "
             + "WHERE sp.id = splg.sp_id " + "AND splg.lg_id = ?";
@@ -648,35 +643,6 @@ public final class PageManagerLocal implements PageManager
             boolean p_isTargetPage, long p_exportBatchId) throws PageException,
             RemoteException
     {
-        if (p_isTargetPage)
-        {
-            if (ExportConstants.MANUAL_EXPORT == p_exportParameters
-                    .getExportType())
-            {
-                for (int i = p_pageIds.size() - 1; i >= 0; i--)
-                {
-                    if (!EXPORTING_TARGET_PAGE.add((Long) p_pageIds.get(i)))
-                    {
-                        s_category
-                                .info("Ignored exporting request from target page(id="
-                                        + p_pageIds.get(i)
-                                        + ") as it is already being exported.");
-                        p_pageIds.remove(i);
-                    }
-                }
-            }
-
-            // Update TargetPage to set the localeSubDir value
-            for (int i = 0; i < p_pageIds.size(); i++)
-            {
-                TargetPage targetPage = this.getTargetPage(((Long) p_pageIds
-                        .get(i)).longValue());
-                targetPage
-                        .setExportSubDir(p_exportParameters.getLocaleSubDir());
-                PagePersistenceAccessor.updateTargetPage(targetPage);
-            }
-        }
-
         performExport(p_exportParameters, new Integer(
                 p_isTargetPage ? TARGET_PAGE : SOURCE_PAGE), p_pageIds,
                 p_exportBatchId);
@@ -1110,6 +1076,8 @@ public final class PageManagerLocal implements PageManager
                 {
                     TargetPage tpage = HibernateUtil.get(TargetPage.class,
                             pageId);
+                    tpage.setExportSubDir(p_exportParameters.getLocaleSubDir());
+                    PagePersistenceAccessor.updateTargetPage(tpage);
                     page = tpage.getSourcePage();
                 }
 

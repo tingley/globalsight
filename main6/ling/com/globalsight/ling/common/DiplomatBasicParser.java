@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.Stack;
 
 import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.everest.page.pageexport.style.mif.TagUtil;
 import com.globalsight.ling.tw.Tmx2PseudoHandler;
 
 /**
@@ -34,6 +35,7 @@ public class DiplomatBasicParser
     int m_end;
 
     StringBuffer m_tagName;
+    boolean m_inSub = false;
     StringBuffer m_attrName;
     StringBuffer m_attrValue;
     Properties m_attributes;
@@ -81,6 +83,8 @@ public class DiplomatBasicParser
         m_start = m_end = 0;
 
         m_maxLen = p_tmx.length();
+        
+        m_inSub = false;
     }
 
     /**
@@ -104,10 +108,18 @@ public class DiplomatBasicParser
      */
     public void parse(String p_tmx) throws DiplomatBasicParserException
     {
-        init(p_tmx);
+    	if (cxeMessage != null
+				&& cxeMessage.getMessageType().getName()
+						.equals("MIF_LOCALIZED_EVENT")) 
+		{
+			TagUtil u = new TagUtil();
+			p_tmx = u.handleString(p_tmx);
+		}
+    	
+    	init(p_tmx);
 
         m_handler.handleStart();
-
+        
         int i;
 
         try
@@ -187,6 +199,11 @@ public class DiplomatBasicParser
                                 {
                                     tagStack.push("end");
                                 }
+                                
+                                if (subStr.indexOf("</ept") != -1)
+                                {
+                                    extractedStack.pop();
+                                }
                             }
                             if (tagStack.size() > 0
                                     && subStr.indexOf("<ept") != -1)
@@ -218,6 +235,21 @@ public class DiplomatBasicParser
                         String subString = p_tmx.substring(m_start, m_end);
                         if (isInPh)
                         {
+                            if (m_inSub && cxeMessage != null
+                                    && cxeMessage.getMessageType().getName()
+                                            .equals("MIF_LOCALIZED_EVENT")
+                                    && !isMifPlaceholder(subString))
+                            {
+                                subString = subString.replace("&apos;", "\\q");
+                                subString = subString.replace("'", "\\q");
+                                subString = subString.replace("`", "\\Q");
+                                if (subString.contains("&gt;")
+                                        && !subString.contains("\\&gt;"))
+                                {
+                                    subString = subString
+                                            .replace("&gt;", "\\>");
+                                }
+                            }
                             m_handler.handleText(subString);
                         }
                         else
@@ -229,6 +261,7 @@ public class DiplomatBasicParser
                             {
                                 subString = subString.replace("\\", "\\\\");
                                 subString = subString.replace("&apos;", "\\q");
+                                subString = subString.replace("'", "\\q");
                                 subString = subString.replace("`", "\\Q");
                                 subString = subString
                                         .replace("&amp;gt;", "\\>");
@@ -250,7 +283,7 @@ public class DiplomatBasicParser
                                 ((Tmx2PseudoHandler) m_handler)
                                         .handleIsExtractedText(subString);
                             }
-                            else
+                            else 
                             {
                                 m_handler.handleText(subString);
                             }
@@ -279,6 +312,7 @@ public class DiplomatBasicParser
                     {
                         p_tmx = p_tmx.replace("\\", "\\\\");
                         p_tmx = p_tmx.replace("&apos;", "\\q");
+                        p_tmx = p_tmx.replace("'", "\\q");
                         p_tmx = p_tmx.replace("`", "\\Q");
                         p_tmx = p_tmx.replace("&amp;gt;", "\\>");
                         p_tmx = p_tmx.replace("&gt;", "\\>");
@@ -425,6 +459,11 @@ public class DiplomatBasicParser
         if (bEndTag)
         {
             m_handler.handleEndTag(tag, p_tmx.substring(p_min, p_max));
+            
+            if (m_inSub && "sub".equals(tag))
+            {
+                m_inSub = false;
+            }
         }
         else if (bEmptyTag)
         {
@@ -438,6 +477,11 @@ public class DiplomatBasicParser
         {
             m_handler.handleStartTag(tag, m_attributes,
                     p_tmx.substring(p_min, p_max));
+            
+            if ("sub".equals(tag))
+            {
+                m_inSub = true;
+            }
         }
     }
 }

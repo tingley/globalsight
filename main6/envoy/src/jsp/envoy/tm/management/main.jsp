@@ -517,7 +517,7 @@ function filterItems(e) {
 		          </span>
 		          <span id="tmversion<%=tm.getId()%>" style="display:none;">
 		          <%
-		          String companyId = tm.getCompanyId();
+		          long companyId = tm.getCompanyId();
 		          company = CompanyWrapper.getCompanyById(companyId);
 		          out.print(company.getTmVersion().getValue());
 		          %>

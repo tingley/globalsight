@@ -43,6 +43,7 @@ import com.globalsight.calendar.ReservedTime;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentImpl;
+import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
@@ -308,6 +309,11 @@ public class TaskManagerLocal implements TaskManager
         {
             throw new TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK,
                     null, e);
+        }
+        
+        OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
+        if (status.getFileStates(p_task.getId()) != null) {
+            status.clearTaskFileState(p_task.getId());
         }
     }
 
@@ -1184,7 +1190,7 @@ public class TaskManagerLocal implements TaskManager
         {
             GlobalSightLocale targetLocale = p_task.getTargetLocale();
             Job job = p_task.getWorkflow().getJob();
-            String companyIdStr = job.getCompanyId();
+            String companyIdStr = String.valueOf(job.getCompanyId());
 
             WorkflowTemplateInfo wfti = job.getL10nProfile()
                     .getWorkflowTemplateInfo(targetLocale);
@@ -1555,7 +1561,7 @@ public class TaskManagerLocal implements TaskManager
                 p_completedby = ServerProxy.getEventScheduler().determineDate(
                         task_temp.getEstimatedAcceptanceDate(),
                         ServerProxy.getCalendarManager().findDefaultCalendar(
-                                task_temp.getCompanyId()),
+                                String.valueOf(task_temp.getCompanyId())),
                         task_temp.getTaskDuration());
             }
             task_temp.setEstimatedCompletionDate(p_completedby);
@@ -1656,8 +1662,8 @@ public class TaskManagerLocal implements TaskManager
             ctx = WorkflowConfiguration.getInstance().getJbpmContext();
             TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
                     .getTaskInstance(p_clonedTask.getId(), ctx);
-            String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
-                    .getTaskNode());
+            String config = WorkflowJbpmUtil.getConfigure(taskInstance
+                    .getTask().getTaskNode());
             WorkflowNodeParameter param = WorkflowNodeParameter
                     .createInstance(config);
             long overdueToPM = param.getLongAttribute(
@@ -1666,7 +1672,7 @@ public class TaskManagerLocal implements TaskManager
             long overdueToUser = param.getLongAttribute(
                     WorkflowConstants.FIELD_OVERDUE_USER_TIME,
                     WorkflowTaskInstance.NO_RATE);
-            
+
             Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
                     p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
                     p_userId, p_session);
@@ -1707,7 +1713,7 @@ public class TaskManagerLocal implements TaskManager
         int size = p_wfTaskInfos.size();
         Hashtable ht = p_wfClone.getTasks();
         FluxCalendar calendar = ServerProxy.getCalendarManager()
-                .findDefaultCalendar(p_wfClone.getCompanyId());
+                .findDefaultCalendar(String.valueOf(p_wfClone.getCompanyId()));
         Date estimatedDate = p_baseDate;
         boolean found = false;
         // loop thru the tasks following the given start task for updating

@@ -17,11 +17,13 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online2;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
@@ -33,24 +35,39 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParamNames;
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.edit.CommentHelper;
+import com.globalsight.everest.edit.online.CommentThreadView;
+import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tuv.TuImpl;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
@@ -163,12 +180,37 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         state.setTmProfile(tmProfile);
 
+        if ((p_request.getParameter(WebAppConstants.REVIEW_MODE)) != null)
+        {
+            state.setTargetPageHtml(null);
+
+            if ("true".equals(p_request.getParameter(WebAppConstants.REVIEW_MODE)))
+            {
+                state.setReviewMode();
+            }
+            else if (state.getUserIsPm())
+            {
+                state.setViewerMode();
+            }
+            else
+            {
+                state.setEditorMode();
+            }
+        }
+        
         String trgViewLocale = (String) p_request
                 .getParameter(WebAppConstants.TARGETVIEW_LOCALE);
 
         if (trgViewLocale != null)
         {
             state.setTargetViewLocale(EditorHelper.getLocale(trgViewLocale));
+        }
+        
+        CommentView commentView = (CommentView) sessionMgr
+                .getAttribute(WebAppConstants.COMMENTVIEW);
+        if ((p_request.getParameter("cmtAction")) != null)
+        {
+            executeCommentCommand(state, commentView, p_request, user);
         }
 
         dispatchJSP(p_pageDescriptor, p_request, p_response, p_context, state,
@@ -192,6 +234,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             SessionManager p_sessionMgr) throws ServletException, IOException,
             EnvoyServletException
     {
+        if (p_request.getParameter("segmentFilter") != null)
+        {
+            p_state.setSegmentFilter(p_request.getParameter("segmentFilter"));
+        }
+        p_request.setAttribute("segmentFilter", p_state.getSegmentFilter());
+        
         if ((p_request.getParameter("search")) != null)
         {
             p_sessionMgr.setAttribute("userNameList", p_state
@@ -210,14 +258,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             String tuv2 = (String) p_request.getParameter("tuv2");
             String location = (String) p_request.getParameter("location");
             String companyId = (String) p_request.getParameter(COMPANY_ID);
+            long longCompanyId = Long.parseLong(companyId);
 
             if (action.equals("split"))
             {
-                splitSegments(p_state, tuv1, tuv2, location, companyId);
+                splitSegments(p_state, tuv1, tuv2, location, longCompanyId);
             }
             else if (action.equals("merge"))
             {
-                mergeSegments(p_state, tuv1, tuv2, companyId);
+                mergeSegments(p_state, tuv1, tuv2, longCompanyId);
             }
 
             p_request.setAttribute("currenttuv", tuv1);
@@ -770,7 +819,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     }
 
     public void splitSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String p_location, String companyId)
+            String p_tuv2, String p_location, long companyId)
     {
         try
         {
@@ -786,7 +835,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     }
 
     public void mergeSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String companyId)
+            String p_tuv2, long companyId)
     {
         try
         {
@@ -799,5 +848,245 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
             // Maybe forward exception to editor.
         }
+    }
+    
+    private void executeCommentCommand(EditorState p_state, CommentView p_view,
+            HttpServletRequest p_request, User p_user)
+            throws EnvoyServletException
+    {
+        String action = p_request.getParameter("cmtAction");
+        String title = p_request.getParameter("cmtTitle");
+        String comment = p_request.getParameter("cmtComment");
+        String priority = p_request.getParameter("cmtPriority");
+        String status = p_request.getParameter("cmtStatus");
+        String category = p_request.getParameter("cmtCategory");
+
+        title = EditUtil.utf8ToUnicode(title);
+        comment = EditUtil.utf8ToUnicode(comment);
+
+        String tuId = p_request.getParameter("tuId");
+        String tuvId = p_request.getParameter("tuvId");
+        String subId = p_request.getParameter("subId");
+        String shareComment = p_request.getParameter("cmtShare");
+        String overwriteComment = p_request.getParameter("cmtOverwrite");
+
+        boolean update = false;
+        boolean share = "true".equalsIgnoreCase(shareComment);
+        boolean overwrite = "true".equalsIgnoreCase(overwriteComment);
+
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("Comment " + action + " id " + tuId + "_" + tuvId
+                    + "_" + subId + " status=" + status);
+        }
+
+        if (action.equals("create"))
+        {
+            EditorHelper.createComment(p_state, p_view, title, comment,
+                    priority, status, category, p_user.getUserId(), share,
+                    overwrite);
+
+            // Recompute target page view (new icon)
+            p_state.setTargetPageHtml(null);
+            update = true;
+        }
+        else if (action.equals("edit"))
+        {
+            EditorHelper.editComment(p_state, p_view, title, comment, priority,
+                    status, category, p_user.getUserId(), share, overwrite);
+            update = true;
+        }
+        else if (action.equals("add"))
+        {
+            EditorHelper.addComment(p_state, p_view, title, comment, priority,
+                    status, category, p_user.getUserId(), share, overwrite);
+            update = true;
+        }
+        else if (action.equals("closeAllComments"))
+        {
+            ArrayList currentIssues = (ArrayList) (p_request.getSession()
+                    .getAttribute("currentIssues"));
+            EditorHelper.closeAllComment(p_state, currentIssues,
+                    p_user.getUserId());
+        }
+
+        if (share && update)
+        {
+            SourcePage sp = null;
+            try
+            {
+                sp = ServerProxy.getPageManager().getSourcePage(
+                        p_state.getSourcePageId());
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error("Problem getting source page", e);
+                throw new EnvoyServletException(e);
+            }
+            long companyId = sp.getCompanyId();
+            shareImg(Long.parseLong(tuId), Long.parseLong(tuvId), overwrite,
+                    companyId);
+
+            TuImpl tu = null;
+            try
+            {
+                tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), companyId);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
+
+            if (tu == null)
+            {
+                CATEGORY.error("Can not find tu with id: " + tuId);
+            }
+            else
+            {
+                @SuppressWarnings("unchecked")
+                Map<Long, Tuv> tuvs = tu.getTuvAsSet(true, companyId);
+                for (Iterator iter = tuvs.entrySet().iterator(); iter.hasNext();)
+                {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    Long localeId = (Long) entry.getKey();
+                    TuvImpl tuv = (TuvImpl) entry.getValue();
+
+                    if (tuv.getId() == Long.parseLong(tuvId))
+                    {
+                        continue;
+                    }
+                    TargetPage tp = sp.getTargetPageByLocaleId(localeId);
+                    if (tp == null)
+                    {
+                        continue;
+                    }
+
+                    String hql = "from IssueImpl i where "
+                            + "i.levelObjectTypeAsString = :type "
+                            + "and i.levelObjectId = :oId";
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("type", "S");
+                    map.put("oId", tuv.getId());
+
+                    IssueImpl issue = (IssueImpl) HibernateUtil.getFirst(hql,
+                            map);
+                    if (issue == null)
+                    {
+                        String key = CommentHelper.makeLogicalKey(tp.getId(),
+                                tu.getId(), tuv.getId(), 0);
+                        issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(),
+                                title, priority, status, category,
+                                p_user.getUserId(), comment, key);
+                        issue.setShare(share);
+                        issue.setOverwrite(overwrite);
+
+                        HibernateUtil.saveOrUpdate(issue);
+                    }
+                    else if (overwrite)
+                    {
+                        issue.setTitle(title);
+                        issue.setPriority(priority);
+                        issue.setStatus(status);
+                        issue.setCategory(category);
+                        issue.addHistory(p_user.getUserId(), comment);
+                        issue.setShare(share);
+                        issue.setOverwrite(overwrite);
+
+                        HibernateUtil.saveOrUpdate(issue);
+                    }
+                }
+            }
+        }
+
+        // Refresh and re-sort comments - if they were shown.
+        CommentThreadView view = p_state.getCommentThreads();
+        if (view != null)
+        {
+            String sortedBy = view.getSortedBy();
+            view = EditorHelper.getCommentThreads(p_state);
+            view.sort(sortedBy);
+            p_state.setCommentThreads(view);
+        }
+
+        p_request.setAttribute("cmtRefreshOtherPane", Boolean.TRUE);
+    }
+    
+    private void shareImg(long tuId, long tuvId, boolean overwrite,
+            long companyId)
+    {
+        File img = getTuvCommentImg(tuvId);
+
+        if (img != null)
+        {
+            String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg/";
+            String name = img.getName();
+            String type = name.substring(name.indexOf("."));
+
+            TuImpl tu = null;
+            try
+            {
+                tu = SegmentTuUtil.getTuById(tuId, companyId);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
+            for (Object obj : tu.getTuvs(true, companyId))
+            {
+                TuvImpl tuv = (TuvImpl) obj;
+                if (tuvId != tuv.getId())
+                {
+                    if (!overwrite)
+                    {
+                        File img2 = getTuvCommentImg(tuv.getId());
+                        if (img2 != null)
+                        {
+                            continue;
+                        }
+                    }
+
+                    File trg = new File(termImgPath + "tuv_"
+                            + Long.toString(tuv.getId()) + type);
+                    try
+                    {
+                        FileUtil.copyFile(img, trg);
+                    }
+                    catch (IOException e)
+                    {
+                        CATEGORY.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+    }
+    
+    public static File getTuvCommentImg(long tuvId)
+    {
+        String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg";
+        File parentFilePath = new File(termImgPath.toString());
+        File[] files = parentFilePath.listFiles();
+
+        if (files != null && files.length > 0)
+        {
+            for (int j = 0; j < files.length; j++)
+            {
+                File file = files[j];
+                String fileName = file.getName();
+
+                if (fileName.lastIndexOf(".") > 0)
+                {
+                    String tempName = fileName.substring(0,
+                            fileName.lastIndexOf("."));
+                    String nowImgName = "tuv_" + Long.toString(tuvId);
+
+                    if (tempName.equals(nowImgName))
+                    {
+                        return file;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

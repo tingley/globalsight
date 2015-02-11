@@ -53,7 +53,7 @@ public class ActivityPageDataQuery
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
 
-		String orderingClause = " order by jnode.name_, l1.iso_lang_code || '_' || l1.iso_country_code, sp.external_page_id";
+		String orderingClause = " order by jnode.name_, concat(l1.iso_lang_code,'_',l1.iso_country_code), sp.external_page_id";
 
 		try
 		{
@@ -65,9 +65,13 @@ public class ActivityPageDataQuery
 			Iterator jobIdIt = p_jobIds.iterator();
 			if (jobIdIt.hasNext()){
 			    String jobId = (String) jobIdIt.next();
-			    Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
-			    tuTableName = SegmentTuTuvCacheManager.getTuTableName(job.getCompanyId());
-			    tuvTableName = SegmentTuTuvCacheManager.getTuvTableName(job.getCompanyId());
+                Job job = ServerProxy.getJobHandler().getJobById(
+                        Long.parseLong(jobId));
+                tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(
+                        job.getCompanyId(), job.isMigrated());
+                tuvTableName = SegmentTuTuvCacheManager
+                        .getTuvTableNameJobDataIn(job.getCompanyId(),
+                                job.isMigrated());
 			}
 			String inTUVClauseHolder = addTUVLocaleClause(p_targetLocales);
 
@@ -339,7 +343,7 @@ public class ActivityPageDataQuery
 			sb.append(" j.name, ");
 			sb.append(" jnode.name_,");
 			sb.append(" wf.target_locale_id,");
-			sb.append(" l1.iso_lang_code || '_' || l1.iso_country_code,");
+			sb.append(" concat(l1.iso_lang_code,'_',l1.iso_country_code),");
 			sb.append(" tp.id,");
 			sb.append(" sp.external_page_id,");
 			sb.append(" tu.data_type,");

@@ -74,7 +74,7 @@ import com.globalsight.util.date.DateHelper;
  */
 public class CostingReportHandler extends BasicReportHandler
 {
-    private static final String MY_MESSAGES = "messages/costing";
+    private static final String MY_MESSAGES = BUNDLE_LOCATION + "costing";
 
     private static final String JOBS_STATUS_MSG = "jobstatus";
 

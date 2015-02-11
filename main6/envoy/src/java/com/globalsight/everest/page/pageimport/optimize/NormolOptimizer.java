@@ -29,7 +29,7 @@ public class NormolOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, String companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
 	{
 		tuv.setGxml(gxml);
 	}

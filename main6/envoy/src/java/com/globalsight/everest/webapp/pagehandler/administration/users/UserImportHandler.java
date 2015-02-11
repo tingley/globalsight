@@ -591,7 +591,8 @@ public class UserImportHandler extends PageHandler
                                 .hasNext();)
                         {
                             project = (Project) iter.next();
-                            if (!project.getCompanyId().equals(companyId))
+                            if (!String.valueOf(project.getCompanyId()).equals(
+                                    companyId))
                             {
                                 iter.remove();
                             }
@@ -633,8 +634,7 @@ public class UserImportHandler extends PageHandler
                             .getProjectByNameAndCompanyId(projectName,
                                     company.getId());
                     if (project == null
-                            || Long.parseLong(project.getCompanyId()) != company
-                                    .getId())
+                            || project.getCompanyId() != company.getId())
                     {
                         this.addToError("Cannot find project: <b>"
                                 + projectName + "</b> in Company: <b>"
@@ -792,14 +792,10 @@ public class UserImportHandler extends PageHandler
             // contact info node
             Element contactInfoNode = userNode.element("ContactInfo");
             user.setAddress(contactInfoNode.element("Address").getText());
-            user.setPhoneNumber(PhoneType.HOME,
-                    contactInfoNode.element("HomePhone").getText());
-            user.setPhoneNumber(PhoneType.OFFICE,
-                    contactInfoNode.element("WorkPhone").getText());
-            user.setPhoneNumber(PhoneType.CELL,
-                    contactInfoNode.element("CellPhone").getText());
-            user.setPhoneNumber(PhoneType.FAX, contactInfoNode.element("Fax")
-                    .getText());
+            user.setHomePhoneNumber(contactInfoNode.element("HomePhone").getText());
+            user.setOfficePhoneNumber(contactInfoNode.element("WorkPhone").getText());
+            user.setCellPhoneNumber(contactInfoNode.element("CellPhone").getText());
+			user.setFaxPhoneNumber(contactInfoNode.element("Fax").getText());
             user.setEmail(contactInfoNode.element("EmailAddress").getText());
             user.setCCEmail(contactInfoNode.element("CCEmailAddress").getText());
             user.setBCCEmail(contactInfoNode.element("BCCEmailAddress")
@@ -816,6 +812,7 @@ public class UserImportHandler extends PageHandler
             try
             {
                 c = ConnectionPool.getConnection();
+                c.setAutoCommit(false);
                 stmt = c.prepareStatement(SQL_INSERT_PERMISSIONGROUP_USER);
                 for (String id : permissionGroupIds)
                 {
@@ -824,6 +821,7 @@ public class UserImportHandler extends PageHandler
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
+                c.commit();
             }
             catch (Exception e)
             {

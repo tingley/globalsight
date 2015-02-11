@@ -17,29 +17,29 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 // javax
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession; // java
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import java.rmi.RemoteException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-// com.globalsight
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoPendingSearcher;
 import com.globalsight.everest.workflowmanager.Workflow;
 
 public class JobControlPendingHandler extends JobManagementHandler
@@ -76,20 +76,11 @@ public class JobControlPendingHandler extends JobManagementHandler
                 p_request.getParameter("searchType"));
         performAppropriateOperation(p_request);
         Vector jobStates = new Vector();
-        jobStates.add(Job.PENDING);
-        jobStates.add(Job.BATCHRESERVED);
-        jobStates.add(Job.IMPORTFAILED);
-        jobStates.add(Job.ADD_FILE);
-
-        p_request.setAttribute(
-                JOB_SCRIPTLET,
-                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
-                        .getPageURL(), null, ((NavigationBean) beanMap
-                        .get(DETAILS_BEAN)).getPageURL(),
-                        ((NavigationBean) beanMap
-                                .get(PLANNED_COMPLETION_DATE_BEAN))
-                                .getPageURL(), getExpJobListing(p_request),
-                        jobStates, false));
+        jobStates.addAll(Job.PENDING_STATUS_LIST);
+        
+        JobVoPendingSearcher searcher = new JobVoPendingSearcher();
+        searcher.setJobVos(p_request);
+        
         p_request.setAttribute(ERROR_URL_PARAM, m_importErrorBean.getPageURL());
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(DISCARD_JOB_PARAM, DISCARD_JOB_PARAM);

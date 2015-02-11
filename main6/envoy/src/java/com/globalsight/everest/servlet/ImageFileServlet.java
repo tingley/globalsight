@@ -22,7 +22,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -30,46 +29,47 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 
 /**
- * The ImageServlet can be used to view images contained in imported
- * documents, i.e. images that are stored in the CXEDOCS directory.
+ * The ImageServlet can be used to view images contained in imported documents,
+ * i.e. images that are stored in the CXEDOCS directory.
  */
-public class ImageFileServlet
-    extends UncacheableFileServlet
+public class ImageFileServlet extends UncacheableFileServlet
 {
-    public Logger CATEGORY =
-        Logger.getLogger("Images");
+    public Logger CATEGORY = Logger.getLogger(ImageFileServlet.class);
 
     /**
      * Write out the image to the response's buffered stream.
-     *
-     * @param p_request -- the request
-     * @param p_response -- the response
+     * 
+     * @param p_request
+     *            -- the request
+     * @param p_response
+     *            -- the response
      * @throws ServletException
      * @throws IOException
      */
     public void service(HttpServletRequest p_request,
-        HttpServletResponse p_response)
-        throws ServletException, IOException
+            HttpServletResponse p_response) throws ServletException,
+            IOException
     {
         String docHome = getInitParameter("docHome");
 
         // strip off the first CXEDOCS part of the url since it is not
         // part of the directory structure
         String url = p_request.getRequestURI().toString();
-        String decodedUrl = com.globalsight.ling.common.URLDecoder.decode(url, "UTF-8");
+        String decodedUrl = com.globalsight.ling.common.URLDecoder.decode(url,
+                "UTF-8");
         String fileName = decodedUrl;
 
         int index = decodedUrl.indexOf(WebAppConstants.VIRTUALDIR_CXEDOCS);
         if (index >= 0)
         {
-            fileName = decodedUrl.substring(
-                index + WebAppConstants.VIRTUALDIR_CXEDOCS.length());
+            fileName = decodedUrl.substring(index
+                    + WebAppConstants.VIRTUALDIR_CXEDOCS.length());
         }
         else
         {
             // invalid or incorrect use of this servlet
-            CATEGORY.warn("Invalid request for " + fileName +
-                ", not under " + WebAppConstants.VIRTUALDIR_CXEDOCS);
+            CATEGORY.warn("Invalid request for " + fileName + ", not under "
+                    + WebAppConstants.VIRTUALDIR_CXEDOCS);
             p_response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -79,8 +79,8 @@ public class ImageFileServlet
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Requested image `" + fileName +
-                    "' does not exist.");
+                CATEGORY.debug("Requested image `" + fileName
+                        + "' does not exist.");
             }
             p_response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -92,10 +92,10 @@ public class ImageFileServlet
             {
                 CATEGORY.debug("Sending image " + fileName);
             }
-            
-            //set the content type appropriately
+
+            // set the content type appropriately
             p_response.setContentType("application/octet-stream");
-            
+
             if (p_request.isSecure())
             {
                 PageHandler.setHeaderForHTTPSDownload(p_response);
@@ -109,4 +109,3 @@ public class ImageFileServlet
         }
     }
 }
-

@@ -61,22 +61,6 @@ public class VendorManagementLocal implements VendorManagement
             .getLogger(VendorManagementLocal.class.getName());
 
     private static boolean c_isInstalled = false;
-    static
-    {
-        try
-        {
-            String expectedKey = "VM-" + "GS".hashCode() + "-"
-                    + "VENDORS".hashCode();
-            c_isInstalled = SystemConfiguration
-                    .isKeyValid(SystemConfigParamNames.VENDOR_MANAGEMENT_INSTALL_KEY);
-        }
-        catch (Throwable t)
-        {
-            String msg = "Could not determine if VendorManagement is installed:";
-            c_logger.error(msg, t);
-            throw new IllegalStateException(msg);
-        }
-    }
 
     private VendorManagementEventHandler m_eventHandler = null;
 
@@ -590,13 +574,13 @@ public class VendorManagementLocal implements VendorManagement
                 v.setDefaultUILocale(p_modUser.getDefaultUILocale());
 
                 v.setPhoneNumber(CommunicationInfo.CommunicationType.WORK,
-                        p_modUser.getPhoneNumber(User.PhoneType.OFFICE));
+                        p_modUser.getOfficePhoneNumber());
                 v.setPhoneNumber(CommunicationInfo.CommunicationType.HOME,
-                        p_modUser.getPhoneNumber(User.PhoneType.HOME));
+                        p_modUser.getHomePhoneNumber());
                 v.setPhoneNumber(CommunicationInfo.CommunicationType.CELL,
-                        p_modUser.getPhoneNumber(User.PhoneType.CELL));
+                        p_modUser.getCellPhoneNumber());
                 v.setPhoneNumber(CommunicationInfo.CommunicationType.FAX,
-                        p_modUser.getPhoneNumber(User.PhoneType.FAX));
+                        p_modUser.getFaxPhoneNumber());
 
                 v.isInAllProjects(p_modUser.isInAllProjects());
 

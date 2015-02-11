@@ -34,14 +34,13 @@ import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.TextNode;
 
 /**
- * This class modifies font face name so CJK text is displayed
- * correctly in Netscape 4.x
+ * This class modifies font face name so CJK text is displayed correctly in
+ * Netscape 4.x
  */
 public class FontFaceModifier
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            FontFaceModifier.class.getName());
+    private static final Logger CATEGORY = Logger
+            .getLogger(FontFaceModifier.class.getName());
 
     static private REProgram font_names;
     static
@@ -59,17 +58,17 @@ public class FontFaceModifier
 
     static private String DOUBLE_QUOTE = "&quot;";
     static private String SINGLE_QUOTE = "&apos;";
-    
+
     /**
-     * This method look for a subflow or the segment itself whose type
-     * is css-font-family, which is a comma delimited font face name
-     * list. "WAS" is added to each font name and storeed back into
-     * Tuv object
+     * This method look for a subflow or the segment itself whose type is
+     * css-font-family, which is a comma delimited font face name list. "WAS" is
+     * added to each font name and storeed back into Tuv object
      */
-    public static void addWasToFontFace(Tuv p_tuv, String companyId)
+    public static void addWasToFontFace(Tuv p_tuv, long companyId)
     {
         // check if Tuv type is css-font-family
-        if(p_tuv.getTu(companyId).getTuType().equals(TuType.CSS_FONT_FAMILY.getName()))
+        if (p_tuv.getTu(companyId).getTuType()
+                .equals(TuType.CSS_FONT_FAMILY.getName()))
         {
             String newFonts = modifyFonts(p_tuv.getGxmlExcludeTopTags());
             p_tuv.setGxmlExcludeTopTags(newFonts, companyId);
@@ -80,33 +79,32 @@ public class FontFaceModifier
             // get all the subflows of the TUV
             List subs = p_tuv.getSubflowsAsGxmlElements();
             Iterator it = subs.iterator();
-            while(it.hasNext())
+            while (it.hasNext())
             {
-                GxmlElement sub = (GxmlElement)it.next();
+                GxmlElement sub = (GxmlElement) it.next();
                 String type = sub.getAttribute(GxmlNames.SUB_TYPE);
                 if (type == null)
-                	continue;
+                    continue;
                 // check if the type of subflow is css-font-family
-                if ((type != null) && type.equals(TuType.CSS_FONT_FAMILY.getName()))
+                if ((type != null)
+                        && type.equals(TuType.CSS_FONT_FAMILY.getName()))
                 {
-                    List children
-                        = sub.getChildElements(GxmlElement.TEXT_NODE);
+                    List children = sub.getChildElements(GxmlElement.TEXT_NODE);
                     // we assume there is only one text node under sub element
-                    TextNode textNode = (TextNode)children.get(0);
+                    TextNode textNode = (TextNode) children.get(0);
                     // add WAS to font faces
                     String newFonts = modifyFonts(textNode.getTextValue());
 
                     // save it in a Map for storing it in TUV later
                     modifiedSubs.put(sub.getAttribute(GxmlNames.SUB_ID),
-                                     newFonts);
+                            newFonts);
                 }
             }
             // set the subs in TUV
             p_tuv.setSubflowsGxml(modifiedSubs);
         }
-            
-    }
 
+    }
 
     // font face string is a comma delimited face name list. It may be
     // enclosed by quotations
@@ -116,50 +114,49 @@ public class FontFaceModifier
         String[] faces = re.split(p_fontFace);
 
         String quote = null;
-        if(faces[0].startsWith(DOUBLE_QUOTE))
+        if (faces[0].startsWith(DOUBLE_QUOTE))
         {
             quote = DOUBLE_QUOTE;
         }
-        else if(faces[0].startsWith(SINGLE_QUOTE))
+        else if (faces[0].startsWith(SINGLE_QUOTE))
         {
             quote = SINGLE_QUOTE;
         }
 
-        if(quote != null)
+        if (quote != null)
         {
             // delete the first quote
             faces[0] = faces[0].substring(quote.length());
             // delete the last quote
             String lastString = faces[faces.length - 1];
-            faces[faces.length - 1]
-                = lastString.substring(0, lastString.length()
-                                       - quote.length());
+            faces[faces.length - 1] = lastString.substring(0,
+                    lastString.length() - quote.length());
         }
-        
+
         StringBuffer modified = new StringBuffer();
         // add the opening quote
-        if(quote != null)
+        if (quote != null)
         {
             modified.append(quote);
         }
-        
+
         // add WAS
-        for(int i = 0; i < faces.length; i++)
+        for (int i = 0; i < faces.length; i++)
         {
             modified.append("WAS");
             modified.append(faces[i]);
-            if(i + 1 < faces.length)
+            if (i + 1 < faces.length)
             {
                 modified.append(", ");
             }
         }
-        
+
         // add the closing quote
-        if(quote != null)
+        if (quote != null)
         {
             modified.append(quote);
         }
         return modified.toString();
     }
-    
+
 }

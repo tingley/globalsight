@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Job Details</title>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	</head>
+
+	<body>
+		<div data-role="page" id="detailJob" >
+			<!-- top line -->
+			<div data-role="header" data-theme="b" data-dom-cache="true">
+				<table width="100%">
+					<tr>
+						<td width="20%"><a data-role="button" class="rewriteBack" data-icon="arrow-l">Back</a></td>
+						<td width="80%">
+							<a data-role="button" class="toolsContainer" style="display:none;float:right;"></a>
+							<a data-role="button" class="toolsContainer" style="display:none;float:right;"></a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="LM-wrapper" style="top:55px;bottom:38px;">
+				<div id="scroller" class="LM-scroller" style="background:#FFFFFF;">
+					<!-- content -->
+					<div data-role="content">
+						<!-- Job Summary -->
+						<h3>Job Detail</h3>
+						<ul name="summery" data-role="listview" data-inset="true"  data-theme='c' data-dividertheme='b'>
+						<div class="ui-grid-d">
+							<div class="ui-block-a">
+								<div class="ui-bar">Job Name:</div>
+							</div>
+							<div class="ui-block-b">
+								<div class="ui-bar jobName"></div>
+							</div>
+							<div class="ui-block-a">
+								<div class="ui-bar">Job ID:</div>
+							</div>
+							<div class="ui-block-b">
+								<div class="ui-bar jobId"></div>
+							</div>
+							<div class="ui-block-a">
+								<div class="ui-bar">Word Counts:</div>
+							</div>
+							<div class="ui-block-b">
+								<div class="ui-bar jobWC"> </div>
+							</div>
+							<div class="ui-block-a">
+								<div class="ui-bar ">Date Created:</div>
+							</div>
+							<div class="ui-block-b">
+								<div class="ui-bar dateCreated"> </div>
+							</div>
+						</div>
+						</ul>
+
+						<!-- Workflows and Source Files Start -->
+						<div data-role="collapsible-set" data-content-theme="d"  data-theme='b'>
+							<!-- Workflows Start -->
+							<div id="workflows" data-role="collapsible"  data-content-theme="b" data-collapsed="false"  data-theme='b'>
+								<h3>Workflows</h3>
+								<div class="ui-grid-l" id="selectable"> 
+									<table class="zebra" name="WorkflowsTable">
+										<thead>
+										<tr>
+											<th>#</th>
+											<th>Target Locale</th>
+											<th>State</th>
+											<th>Current Activity</th>
+										</tr>
+										</thead>
+										<tr name="WorkflowsTr">
+											<td align="left" class="imgContainer" >		
+												<span class="wfId" style="display:none"></span>								
+												<img class="unselected" src="img/unselected.png" />
+												<img class="selected" style="display: none" src="img/selected.png" />
+											</td>
+											<td class="targetLocale"></td>
+											<td class="state"></td>
+											<td class="CurrentAc"></td>
+										</tr>
+									</table> 
+								</div>
+							</div>
+							<!-- Workflows End -->
+							<!-- Source Files Start -->
+							<div id="sourceFiles" data-role="collapsible" data-content-theme="b"  data-theme='b'>
+								<h3>Source Files</h3>
+								<div class="ui-grid-l"  data-mini="true">
+									<div>
+										<table class="zebra" name="SourceFilesTable">
+											<thead>
+											<tr>
+												<th>Primary Source Files</th>
+												<th>File Profile</th>
+												<th>Word Counts</th>
+											</tr>
+											</thead>
+											<tr name="SourceFilesTr">
+												<td class="fileName" style="word-wrap:break-word;word-break:break-all;"></td>
+												<td class="fileProfile"> </td>
+												<td class="jobFileWC"></td>
+											</tr>
+										</table> 
+									</div>	
+								</div>
+							</div>
+							<!-- Source Files End -->
+						</div>
+						<!-- Workflows and Source Files End -->
+
+						<div data-role="collapsible-set" data-content-theme="d"  data-theme='b' style="list-style-type:none" ></div>
+					</div>
+				</div>
+			</div>
+
+			<div id="footer" class="LM-footer" data-theme="a" data-role="footer" data-id="main-tabbar" data-position="fixed">
+				<div data-role="navbar">
+					<ul>
+						<li><a class="ui-btn-active buttomTools" name="jobs">My Jobs</a></li>
+						<li><a class="buttomTools" name="activities">My Activities</a></li>
+						<li><a class="buttomTools" name="logout" data-transition="flip" data-role="button">Logoff</a> </li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
